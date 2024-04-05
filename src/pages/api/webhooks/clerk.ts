@@ -55,21 +55,21 @@ export default async function handler(
 
   switch (eventType) {
     case "user.created": {
-      const { id, primary_email_address_id, email_addresses, primary_phone_number_id, first_name, last_name, phone_numbers } = evt.data as UserJSON;
+      const { id, primary_email_address_id, email_addresses, primary_phone_number_id, first_name, last_name, phone_numbers } = evt.data;
 
       const email = email_addresses.find((e) => e.id === primary_email_address_id)?.email_address;
       const phonenumber = primary_phone_number_id ? phone_numbers.find((p) => p.id === primary_phone_number_id)?.phone_number : '';
 
       const count = await db.profile.count({
         where: {
-          userId: id!,
+          userId: id,
         },
       });
 
       if (!count) {
         await db.profile.create({
           data: {
-            userId: id!,
+            userId: id,
             email: email!,
             firstname: first_name,
             lastname: last_name,
