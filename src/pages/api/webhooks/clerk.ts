@@ -3,8 +3,9 @@ import { buffer } from "micro";
 import { env } from "@/env";
 import { db } from "@/server/db";
 
-import type { UserJSON, WebhookEvent } from "@clerk/nextjs/server";
+import type { WebhookEvent } from "@clerk/nextjs/server";
 import type { NextApiRequest, NextApiResponse } from "next";
+import { getBaseUrl } from "@/utils/api";
 
 export const config = {
   api: {
@@ -66,16 +67,34 @@ export default async function handler(
         },
       });
 
+      const HSUserData = {
+        email: email!,
+        properties: [
+          { property: `userId`, value: id  },
+          { property: `firstname`, value: first_name  },
+          { property: `lastname`, value: last_name  },
+          { property: `phone`, value: phonenumber  },
+        ]
+      } as HubspotContact
+
+      const DBUserData = {
+        userId: id,
+        email: email!,
+        firstname: first_name,
+        lastname: last_name,
+        phone: phonenumber
+      } as UserProfile
+
       if (!count) {
         await db.profile.create({
-          data: {
-            userId: id,
-            email: email!,
-            firstname: first_name,
-            lastname: last_name,
-            phone: phonenumber
-          },
+          data: DBUserData,
         });
+        
+        await fetch(`${getBaseUrl()}/api/hubspot/contacts`, {
+          method: 'POST', 
+          headers: {'Content-Type': 'application/ json'}, 
+          body: JSON.stringify(HSUserData)
+        })
       }
       break;
     }

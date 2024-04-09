@@ -18,6 +18,7 @@ export const env = createEnv({
       .default("development"),
     CLERK_SECRET_KEY: z.string(),
     CLERK_WEBHOOK_SECRET: z.string(),
+    HUBSPOT_ACCESS_TOKEN: z.string(),
   },
 
   /**
@@ -37,10 +38,10 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
-      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
+    HUBSPOT_ACCESS_TOKEN: process.env.HUBSPOT_ACCESS_TOKEN,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },
   /**
