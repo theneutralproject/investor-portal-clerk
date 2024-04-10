@@ -70,10 +70,10 @@ export default async function handler(
       const HSUserData = {
         email: email!,
         properties: [
-          { property: `userId`, value: id  },
-          { property: `firstname`, value: first_name  },
-          { property: `lastname`, value: last_name  },
-          { property: `phone`, value: phonenumber  },
+          { property: `userId`, value: id },
+          { property: `firstname`, value: first_name },
+          { property: `lastname`, value: last_name },
+          { property: `phone`, value: phonenumber },
         ]
       } as HubspotContact
 
@@ -89,11 +89,15 @@ export default async function handler(
         await db.profile.create({
           data: DBUserData,
         });
-        
+        console.log("calling hubspot/contacts")
         await fetch(`${getBaseUrl()}/api/hubspot/contacts`, {
-          method: 'POST', 
-          headers: {'Content-Type': 'application/ json'}, 
+          method: 'POST',
+          headers: { 'Content-Type': 'application/ json' },
           body: JSON.stringify(HSUserData)
+        }).catch((err) => {
+          console.log("Clerki cound not call HS")
+          console.log(err);
+
         })
       }
       break;

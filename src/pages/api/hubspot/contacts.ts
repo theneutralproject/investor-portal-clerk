@@ -1,11 +1,8 @@
-import { error } from "console";
-import { NextApiRequest, NextApiResponse } from "next";
-
-
+import type { NextApiRequest, NextApiResponse } from "next";
 
 /**
  * Use a POST request with a req.body HubspotContact Interface to create or edit a hubspot contact
- * @param req re.body must be of type hubspotcontact
+ * @param req req.body must be of type HubspotContact
  * @param res 
  * @returns 
  */
@@ -13,30 +10,31 @@ export default async function handler(
     req: NextApiRequest,
     res: NextApiResponse,
 ) {
-
     if (req.method !== "POST") {
         return res.status(405);
       }
 
     if (req.method === `POST`) {
+        let hubspotContact:HubspotContact;
+        try {
+            // eslint-disable-next-line
+            hubspotContact = JSON.parse(req.body) as HubspotContact;  
+        } catch ( err ) {
+            return res.status(400).json({error: err});
+        }
+        const { properties } = hubspotContact;
 
-        if(!req.body.email) return res.status(400).json({error: 'email is required in the request body'});
-        const properties = req.body.properties
-        if(properties && Array.isArray(properties) && properties.length > 0 ) {
-            let propertiesInputIsValid = true;
-            properties.forEach((p) => {
-                if (!p.property || !p.value) propertiesInputIsValid = false;
-            })
-            if (!propertiesInputIsValid) return res.status(400).json({error: 'req.body.properties array is malformatted'});
+        if (properties && !Array.isArray(properties)) {
+            return res.status(400).json({error: 'req.body.properties must be of type array'});
         }
 
-        const hubspotContact = JSON.parse(req.body) as HubspotContact;  // we verified above that this cast will work
+        if(!hubspotContact.properties || !Array.isArray(hubspotContact.properties)){
+            hubspotContact.properties = [];
+        }
+
         const signupDate = new Date(new Date().setUTCHours( 0,0, 0, 0)).getTime().toString();
         hubspotContact.properties.push({"property": "date_signed_up", "value": signupDate})
-
-        
-        console.log(`${JSON.stringify(hubspotContact)}`)
-        const hubspotRes = await fetch(`https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hsContact.email}`, {
+        await fetch(`https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -48,7 +46,6 @@ export default async function handler(
             return res.status(400).send(err)
         });
 
-        console.log("hubspotRes", hubspotRes);
         return res.status(201).send("success")
     }
 }

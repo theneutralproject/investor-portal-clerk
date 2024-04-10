@@ -1,7 +1,6 @@
 import { createTRPCRouter } from "@/server/api/trpc";
 import { profileRouter as profileRouter } from "./routers/profile";
 import { projectRouter } from "./routers/project";
-import { hubspotRouter } from "./routers/hubspot";
 
 /**
  * This is the primary router for your server.
@@ -11,7 +10,6 @@ import { hubspotRouter } from "./routers/hubspot";
 export const appRouter = createTRPCRouter({
   profile: profileRouter,
   project: projectRouter,
-  hubspot: hubspotRouter,
 });
 
 // export type definition of API

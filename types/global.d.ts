@@ -1,3 +1,5 @@
+import { NextApiRequest } from "next"
+
 export {}
 
 declare global {
@@ -15,6 +17,10 @@ declare global {
 
     interface HubspotContact {
         email: string,
-        properties: Array<HubspotContactProperty>
+        properties: Array<HubspotContactProperty>?
     };
+
+    interface HubspotContactNextApiRequest extends NextApiRequest {
+        body: HubspotContact
+      }
 }

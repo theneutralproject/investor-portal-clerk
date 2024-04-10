@@ -1,4 +1,4 @@
-import { RouterOutputs, api } from "@/utils/api";
+import { type RouterOutputs, api } from "@/utils/api";
 import {
   SignInButton,
   SignUpButton,
