@@ -89,8 +89,10 @@ export default async function handler(
         await db.profile.create({
           data: DBUserData,
         });
+        console.log("clerk calling hubspot");
+        console.log(`${getBaseUrl()}`)
         console.log(`clerk calling ${getBaseUrl()}/api/hubspot/contacts for user ${DBUserData.userId}`)
-        await fetch(`${getBaseUrl()}/api/hubspot/contacts`, {
+        return await fetch(`${getBaseUrl()}/api/hubspot/contacts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/ json' },
           body: JSON.stringify(HSUserData)
