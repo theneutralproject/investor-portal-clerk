@@ -15,6 +15,7 @@ export default async function handler(
       }
 
     if (req.method === `POST`) {
+        console.log("Hubspot1");
         let hubspotContact:HubspotContact;
         try {
             // eslint-disable-next-line
@@ -22,18 +23,23 @@ export default async function handler(
         } catch ( err ) {
             return res.status(400).json({error: err});
         }
+        console.log("Hubspot2");
         const { properties } = hubspotContact;
 
         if (properties && !Array.isArray(properties)) {
             return res.status(400).json({error: 'req.body.properties must be of type array'});
         }
 
+        console.log("Hubspot3");
         if(!hubspotContact.properties || !Array.isArray(hubspotContact.properties)){
             hubspotContact.properties = [];
         }
+        console.log("Hubspot4", hubspotContact);
 
         const signupDate = new Date(new Date().setUTCHours( 0,0, 0, 0)).getTime().toString();
         hubspotContact.properties.push({"property": "date_signed_up", "value": signupDate})
+        
+        console.log("Hubspot5");
         await fetch(`https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`, {
             method: 'POST',
             headers: {
@@ -45,7 +51,7 @@ export default async function handler(
             console.log("hubspot post error", err);
             return res.status(400).send(err)
         });
-
+        console.log("hubspot success")
         return res.status(201).send("success")
     }
 }

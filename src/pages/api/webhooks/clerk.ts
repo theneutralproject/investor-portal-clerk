@@ -89,13 +89,13 @@ export default async function handler(
         await db.profile.create({
           data: DBUserData,
         });
-        console.log("calling hubspot/contacts")
+        console.log("Clerk calling hubspot/contacts")
         await fetch(`${getBaseUrl()}/api/hubspot/contacts`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/ json' },
           body: JSON.stringify(HSUserData)
         }).catch((err) => {
-          console.log("Clerki cound not call HS")
+          console.log("Clerk could not call HS")
           console.log(err);
 
         })
