@@ -3,6 +3,8 @@ import "@/styles/globals.css";
 import { Inter } from "next/font/google";
 
 import { TRPCReactProvider } from "@/trpc/react";
+import NeutralThemeProvider from "@/components/Shell/NeutralThemeProvider";
+import Sidebar from "@/components/Shell/Sidebar";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,7 +24,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <TRPCReactProvider>{children}</TRPCReactProvider>
+        <TRPCReactProvider>
+          <NeutralThemeProvider>
+            <Sidebar>{children}</Sidebar>
+          </NeutralThemeProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );
