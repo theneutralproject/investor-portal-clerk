@@ -1,45 +1,29 @@
-# Investor Portal with Clerk Auth
+# Create T3 App
 
-This is an alternative approach that uses Clerk Auth
+This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
 
-## Project Scope: 
-* Investor can sign up/ sign in using 2FA or a magic link
-* Admin can invite an investor to use the app
-* Port all existing investors and deals from Hubspot into the portal
-* Investor can see current opportunities
-* Investor can see their deal flow for each project
-* Investor can schedule a meeting
-* Basic Chat functionality for help/ questions
-* User can download project documents (PDFs) with hubspot tracking
+## What's next? How do I make an app with this?
 
+We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
 
-## Stack
-![alt text](image.png)
+If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+
 - [Next.js](https://nextjs.org)
-- [Clerk](https://clerki.io/) for auth and user management
-- [Prisma](https://prisma.io) as ORM
+- [NextAuth.js](https://next-auth.js.org)
+- [Prisma](https://prisma.io)
+- [Drizzle](https://orm.drizzle.team)
 - [Tailwind CSS](https://tailwindcss.com)
 - [tRPC](https://trpc.io)
-- [Supabase](https://supabase.com/) to host our postgres DBs, and for file storage
-- [MUI](https://mui.com/material-ui/)
 
 ## Learn More
+
 To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
 
 - [Documentation](https://create.t3.gg/)
 - [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
-- [Great Youtube Tutorial by T3 Theo](https://www.youtube.com/watch?v=YkOSUVzOAA4)
+
+You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
 
 ## How do I deploy this?
-This app is automatically deployed to Vercel: https://vercel.com/the-neutral-project/investor-portal
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), 
 
-## Testing/ CI CD
-TBD
-
-## Getting started
-Ask Jonatan for the .env file
-`npm i`
-`npm run dev`
-`npx prisma migrate dev --name [description]` to run a schema mirgation
-make sure to `npm run lint` before committing
+Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.

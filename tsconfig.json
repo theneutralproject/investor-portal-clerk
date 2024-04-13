@@ -8,7 +8,6 @@
     "resolveJsonModule": true,
     "moduleDetection": "force",
     "isolatedModules": true,
-    "typeRoots": ["./types", "./node_modules/@types"],
 
     /* Strictness */
     "strict": true,
