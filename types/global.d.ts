@@ -1,26 +1,20 @@
-import { NextApiRequest } from "next"
+import { Role } from "@prisma/client";
+import { NextApiRequest } from "next";
 
-export {}
+export {};
 
 declare global {
-    interface UserProfile {
-        userId: string,
-        email: string,
-        firstname?: string,
-        lastname?: string,
-        phone?: string
-    };
+  interface HubspotContactProperty {
+    property: string;
+    value: string | number | boolean;
+  }
 
-    interface HubspotContactProperty {
-        property: string, value: string | number | boolean
-    };
+  interface HubspotContact {
+    email: string;
+    properties: Array<HubspotContactProperty>?;
+  }
 
-    interface HubspotContact {
-        email: string,
-        properties: Array<HubspotContactProperty>?
-    };
-
-    interface HubspotContactNextApiRequest extends NextApiRequest {
-        body: HubspotContact
-      }
+  interface HubspotContactNextApiRequest extends NextApiRequest {
+    body: HubspotContact;
+  }
 }

@@ -6,6 +6,7 @@ import { db } from "@/server/db";
 import type { WebhookEvent } from "@clerk/nextjs/server";
 import type { NextApiRequest, NextApiResponse } from "next";
 import { getBaseUrl } from "@/utils/api";
+import { Role, User } from "@prisma/client";
 
 export const config = {
   api: {
@@ -56,49 +57,64 @@ export default async function handler(
 
   switch (eventType) {
     case "user.created": {
-      const { id, primary_email_address_id, email_addresses, primary_phone_number_id, first_name, last_name, phone_numbers } = evt.data;
+      const {
+        id,
+        primary_email_address_id,
+        email_addresses,
+        primary_phone_number_id,
+        first_name,
+        last_name,
+        phone_numbers,
+      } = evt.data;
 
-      const email = email_addresses.find((e) => e.id === primary_email_address_id)?.email_address;
-      const phonenumber = primary_phone_number_id ? phone_numbers.find((p) => p.id === primary_phone_number_id)?.phone_number : '';
+      const email = email_addresses.find(
+        (e) => e.id === primary_email_address_id,
+      )?.email_address;
+      const phonenumber = primary_phone_number_id
+        ? phone_numbers.find((p) => p.id === primary_phone_number_id)
+            ?.phone_number
+        : "";
 
-      const count = await db.profile.count({
+      const count = await db.user.count({
         where: {
-          userId: id,
+          clerkId: id,
         },
       });
 
       const HSUserData = {
         email: email!,
         properties: [
-          { property: `userId`, value: id },
+          { property: `clerkId`, value: id },
           { property: `firstname`, value: first_name },
           { property: `lastname`, value: last_name },
           { property: `phone`, value: phonenumber },
-        ]
-      } as HubspotContact
+        ],
+      } as HubspotContact;
 
       const DBUserData = {
-        userId: id,
+        clerkId: id,
         email: email!,
-        firstname: first_name,
-        lastname: last_name,
-        phone: phonenumber
-      } as UserProfile
+        role: Role.USER,
+        firstName: first_name,
+        lastName: last_name,
+        phoneNumber: phonenumber,
+      } as User;
 
       if (!count) {
-        await db.profile.create({
+        await db.user.create({
           data: DBUserData,
         });
-        console.log(`clerk calling ${getBaseUrl()}/api/hubspot/contacts for user ${DBUserData.userId}`)
+        console.log(
+          `clerk calling ${getBaseUrl()}/api/hubspot/contacts for user ${DBUserData.clerkId}`,
+        );
         await fetch(`${getBaseUrl()}/api/hubspot/contacts`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/ json' },
-          body: JSON.stringify(HSUserData)
+          method: "POST",
+          headers: { "Content-Type": "application/ json" },
+          body: JSON.stringify(HSUserData),
         }).catch((err) => {
-          console.log("Clerk could not call Hubspot:")
+          console.log("Clerk could not call Hubspot:");
           console.log(err);
-
-        })
+        });
       }
       break;
     }
