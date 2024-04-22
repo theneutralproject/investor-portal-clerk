@@ -1,0 +1,17 @@
+/* dealPage.css */
+
+.app-image-gallery .image-gallery-image {
+  border-radius: 4px;
+}
+.app-image-gallery .image-gallery-slide-wrapper {
+  border-radius: 4px;
+}
+
+.app-image-gallery .image-gallery-slide {
+  border-radius: 4px;
+}
+
+/* Ensure fullscreen mode uses the entire screen and is not restricted by max-height */
+.image-gallery-fullscreen-button {
+  /* Fullscreen specific styles, if necessary */
+}

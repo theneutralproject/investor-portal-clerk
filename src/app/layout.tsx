@@ -2,9 +2,13 @@ import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
 
-import { TRPCReactProvider } from "@/trpc/react";
 import NeutralThemeProvider from "@/components/Shell/NeutralThemeProvider";
 import Sidebar from "@/components/Shell/Sidebar";
+import NeutralQueryProvider from "@/components/QueryClientProvider";
+import { ClerkProvider } from "@clerk/nextjs";
+import "react-toastify/dist/ReactToastify.css";
+
+import { ToastContainer } from "react-toastify";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -22,14 +26,26 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>
-        <TRPCReactProvider>
-          <NeutralThemeProvider>
-            <Sidebar>{children}</Sidebar>
-          </NeutralThemeProvider>
-        </TRPCReactProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body className={inter.className}>
+          <NeutralQueryProvider>
+            <NeutralThemeProvider>
+              <Sidebar>{children}</Sidebar>
+              <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                theme="light"
+              />
+            </NeutralThemeProvider>
+          </NeutralQueryProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable */
+
 import CopyrightIcon from "@mui/icons-material/Copyright";
 import HomeIcon from "@mui/icons-material/Home";
 import MessageIcon from "@mui/icons-material/Message";
@@ -24,6 +26,7 @@ import { usePathname, useRouter } from "next/navigation";
 import * as React from "react";
 
 import { theme } from "./NeutralThemeProvider";
+import UserAvatar from "./UserAvatar";
 
 export const ROUTES = [
   {
@@ -38,10 +41,14 @@ export const ROUTES = [
   },
 ];
 
-const getPageTitle = (pathName: string) => {
-  const route = ROUTES.find((perRoute) => pathName.includes(perRoute.path));
-  return route ? route.name : "Neutral Project";
-};
+const ListItem = ({ item }) => (
+  <ListItemButton key={item.key} onClick={item.onClick}>
+    <ListItemIcon sx={{ color: "#e2e4e4", minWidth: "40px" }}>
+      {item.icon}
+    </ListItemIcon>
+    <ListItemText primary={item.label} sx={{ color: "#e2e4e4" }} />
+  </ListItemButton>
+);
 
 const drawerWidth = 240;
 const mobileDrawerWidth = 56;
@@ -99,13 +106,39 @@ const Drawer = styled(MuiDrawer, {
   },
 }));
 
+const capitalize = (s: string) => s && s[0].toUpperCase() + s.slice(1);
+
 export default function Sidebar(props: { children: React.ReactNode }) {
   const router = useRouter();
   const pathName = usePathname();
 
-  const isActiveRoute = (routePath) => {
+  // Define an array for button items
+  const buttonItems = [
+    {
+      key: "support",
+      label: "Support",
+      icon: <HelpIcon />,
+      onClick: () => router.push("/support"),
+    },
+    {
+      key: "terms",
+      label: "Terms of Service",
+      icon: <DescriptionIcon />,
+      onClick: () => router.push("/terms"),
+    },
+    {
+      key: "copyright",
+      label: "2024 Neutral Project",
+      icon: <CopyrightIcon />,
+      onClick: null, // No action defined
+    },
+  ];
+
+  const isActiveRoute = (routePath: string) => {
     return pathName.includes(routePath);
   };
+
+  const breadcrumbs = pathName.split("/").filter(Boolean);
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -113,15 +146,40 @@ export default function Sidebar(props: { children: React.ReactNode }) {
         <Toolbar
           sx={{
             pr: "24px",
+            boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
             border: "none !important",
             [theme.breakpoints.down("md")]: {
               display: "none",
             },
           }}
         >
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-            {getPageTitle(pathName)}
-          </Typography>
+          {breadcrumbs.map((part, index) => (
+            <React.Fragment key={index}>
+              {index > 0 && (
+                <Typography
+                  variant="body2"
+                  sx={{ fontSize: "18px", mr: "8px" }}
+                >
+                  /
+                </Typography>
+              )}
+              <Typography
+                variant="body2"
+                sx={{
+                  mr: "8px",
+                  fontSize: "18px",
+                  color:
+                    index === breadcrumbs.length - 1 ? "#000000DE" : undefined, // Last part is always black
+                }}
+              >
+                {capitalize(part)}
+              </Typography>
+            </React.Fragment>
+          ))}
+
+          <Box sx={{ alignSelf: "flex-end", ml: "auto", display: "flex" }}>
+            <UserAvatar />
+          </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -184,76 +242,17 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             </ListItemButton>
           ))}
         </List>
-
-        <List
-          sx={{
-            marginTop: "auto",
-          }}
-        >
-          <ListItemButton
-            key="support"
-            onClick={() => {
-              router.push("/support");
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                color: "#e2e4e4",
-                minWidth: "40px",
-              }}
-            >
-              <HelpIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Support"
-              sx={{
-                color: "#e2e4e4",
-              }}
-            />
-          </ListItemButton>
-          <ListItemButton
-            key="copyright"
-            onClick={() => {
-              router.push("/terms");
-            }}
-          >
-            <ListItemIcon
-              sx={{
-                color: "#e2e4e4",
-                minWidth: "40px",
-              }}
-            >
-              <DescriptionIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Terms of Service"
-              sx={{
-                color: "#e2e4e4",
-              }}
-            />
-          </ListItemButton>
-          <ListItemButton key="copyright">
-            <ListItemIcon
-              sx={{
-                color: "#e2e4e4",
-                minWidth: "40px",
-              }}
-            >
-              <CopyrightIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="2024 Neutral Project"
-              sx={{
-                color: "#e2e4e4",
-              }}
-            />
-          </ListItemButton>
+        <List sx={{ marginTop: "auto" }}>
+          {buttonItems.map((item) => (
+            <ListItem key={item.key} item={item} />
+          ))}
         </List>
       </Drawer>
       <Box
         component="main"
         sx={{
-          backgroundColor: "#fbfcfe",
+          backgroundColor: "#fcfaf9",
+
           flexGrow: 1,
           height: "100vh",
           overflow: "auto",

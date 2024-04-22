@@ -4,6 +4,7 @@ import { CssBaseline } from "@mui/material";
 import { red } from "@mui/material/colors";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { Inter } from "next/font/google";
+import { Roboto } from "next/font/google";
 
 declare module "@mui/material/styles" {
   interface Palette {
@@ -21,6 +22,7 @@ declare module "@mui/material/styles" {
 declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     snowdayBlue: true;
+    neutralBlack: true;
   }
 }
 
@@ -53,6 +55,11 @@ export const inter = Inter({
   subsets: ["latin"],
 });
 
+export const roboto = Roboto({
+  subsets: ["latin"],
+  weight: "400",
+});
+
 export const theme = createTheme({
   palette,
   typography: {
@@ -60,11 +67,32 @@ export const theme = createTheme({
       fontFamily: inter.style.fontFamily,
     },
     h6: {
-      fontSize: "21px",
-      letterSpacing: "-0.2px",
-      color: "#212830",
+      color: `rgba(0, 0, 0, 0.87))`,
+      fontFamily: roboto.style.fontFamily,
+      fontSize: "20px",
       fontWeight: 500,
-      lineHeight: "1.2",
+    },
+    h3: {
+      fontWeight: 400,
+      color: `rgba(0, 0, 0, 0.87)`,
+    },
+    body2: {
+      color: `rgba(0, 0, 0, 0.60)`,
+      fontFamily: roboto.style.fontFamily,
+      fontSize: "14px",
+      fontWeight: 400,
+    },
+    subtitle2: {
+      color: "#000000DE",
+      fontFamily: roboto.style.fontFamily,
+      fontSize: "16px",
+      fontWeight: 500,
+    },
+    caption: {
+      color: `rgba(0, 0, 0, 0.60)`,
+      fontFamily: roboto.style.fontFamily,
+      fontSize: "12px",
+      fontWeight: 400,
     },
   },
   components: {
@@ -80,13 +108,23 @@ export const theme = createTheme({
             },
           },
         },
+        {
+          props: { variant: "neutralBlack" },
+          style: {
+            color: "#fff",
+            backgroundColor: "#1E2B31",
+            "&:hover": {
+              backgroundColor: "#6e7985",
+            },
+          },
+        },
       ],
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "6px",
-          borderColor: "#e2e5ec",
+          borderRadius: "4px",
+          border: `1px solid rgba(0, 0, 0, 0.12)`,
           boxShadow:
             "0 1px 2px rgba(204,210,218,.07), 0 2px 4px rgba(204,210,218,.07), 0 4px 8px rgba(204,210,218,.07), 0 8px 16px rgba(204,210,218,.07), 0 16px 32px rgba(204,210,218,.07), 0 32px 64px rgba(204,210,218,.07)",
         },
