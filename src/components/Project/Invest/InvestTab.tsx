@@ -6,6 +6,7 @@ import { type Project } from "@prisma/client";
 import DocumentCard from "../ProjectDocs/DocumentCard";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 import { Key } from "react";
+import LockIcon from "@mui/icons-material/Lock";
 
 export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
   project,
@@ -63,7 +64,9 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
               <Button
                 variant="neutralBlack"
                 fullWidth
-                sx={{ width: "200px" }}
+                sx={{ width: "200px", color: "white" }}
+                disabled={dealStage !== 3}
+                startIcon={dealStage !== 3 ? <LockIcon /> : null}
                 onClick={() => mutateDeal("increment")}
               >
                 Continue

@@ -99,22 +99,17 @@ export const theme = createTheme({
     MuiButton: {
       variants: [
         {
-          props: { variant: "snowdayBlue" },
-          style: {
-            color: "#fff",
-            backgroundColor: "#506fd9",
-            "&:hover": {
-              backgroundColor: "#6e7985",
-            },
-          },
-        },
-        {
           props: { variant: "neutralBlack" },
           style: {
             color: "#fff",
             backgroundColor: "#1E2B31",
             "&:hover": {
               backgroundColor: "#6e7985",
+            },
+            "&:disabled": {
+              color: "#fff",
+              backgroundColor: "#1E2B31",
+              opacity: 0.5,
             },
           },
         },
