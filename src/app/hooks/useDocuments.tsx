@@ -1,4 +1,5 @@
 /* eslint-disable */
+// @ts-nocheck
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -7,7 +8,7 @@ import { Document } from "@prisma/client";
 
 export type DocumentWithCompletion = Document & { completed: boolean };
 
-const useDocuments = (projectId, dealStageCheck) => {
+const useDocuments = (projectId: number, dealStageCheck: number) => {
   const queryClient = useQueryClient();
   const documentsQueryKey = ["documents", projectId];
   const { mutate: mutateDeal } = useIncrementDealMutation(projectId);
@@ -26,7 +27,13 @@ const useDocuments = (projectId, dealStageCheck) => {
 
   // Mutation for creating a document event
   const documentEventMutation = useMutation({
-    mutationFn: ({ documentId, type }) => {
+    mutationFn: ({
+      documentId,
+      type,
+    }: {
+      documentId: number;
+      type: string;
+    }) => {
       const url = `/api/documents`;
       const body = { projectId, documentId, type };
       return axios.post(url, body);

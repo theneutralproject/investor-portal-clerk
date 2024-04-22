@@ -13,6 +13,13 @@ import { ProjectDocTab } from "@/components/Project/ProjectDocs/ProjectDocTab";
 import InvestmentProgress from "@/components/Project/InvestmentProgress/InvestmentProgress";
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
+
+export type PageProps = {
+  params: {
+    slug: string;
+  };
+};
+
 const images = [
   {
     original: "https://picsum.photos/id/1018/1000/400/",
@@ -51,7 +58,7 @@ const images = [
     thumbnail: "https://picsum.photos/id/1018/1000/400/",
   },
 ];
-export default function Page({ params: { slug } }) {
+export default function Page({ params: { slug } }: PageProps) {
   const [tabValue, setTabValue] = useState(0);
 
   const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {

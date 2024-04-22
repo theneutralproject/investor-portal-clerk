@@ -7,6 +7,11 @@ import type { NextApiRequest, NextApiResponse } from "next";
  * @param res
  * @returns
  */
+
+type HubspotContact = {
+  properties: { property: string; value: string }[];
+  email: string;
+};
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse

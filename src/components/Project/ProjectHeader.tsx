@@ -22,7 +22,7 @@ function ProjectHeader({
   data: Project;
   percentRaised: number;
   tabValue: number;
-  onTabChange: (value: number) => void;
+  onTabChange: (event: React.ChangeEvent<object>, newValue: number) => void;
   dealStage: number;
 }) {
   return (

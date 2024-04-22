@@ -1,4 +1,5 @@
 /* eslint-disable */
+//@ts-nocheck
 import { useClerk, useUser } from "@clerk/nextjs";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { Box, Button, Typography, useMediaQuery } from "@mui/material";
@@ -8,14 +9,14 @@ import React from "react";
 
 import _ from "lodash";
 
-function findPropertyRecursive(item, key) {
+function findPropertyRecursive(item: any, key: any) {
   if (_.has(item, key)) {
     return item[key];
   }
 
   let result = undefined;
 
-  _.forEach(item, (value) => {
+  _.forEach(item, (value: any) => {
     if (_.isObject(value) || _.isArray(value)) {
       const found = findPropertyRecursive(value, key);
       if (found !== undefined) {

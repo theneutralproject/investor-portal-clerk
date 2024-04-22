@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
 
-function ProgressBar({ dealStage }) {
+function ProgressBar({ dealStage }: { dealStage: number }) {
   const value = ((dealStage + 1) / 4) * 100;
 
   return (

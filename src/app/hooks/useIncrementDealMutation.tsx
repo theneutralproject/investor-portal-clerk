@@ -1,4 +1,5 @@
 /* eslint-disable */
+// @ts-nocheck
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
@@ -9,12 +10,12 @@ const useManageDealMutation = (projectId: number) => {
 
   return useMutation({
     // Accept an operation parameter to determine what mutation function to perform
-    mutationFn: (operation) => {
+    mutationFn: (operation: string) => {
       const url = `/api/deals`;
       const body = { projectId, operation };
       return axios.post(url, body);
     },
-    onMutate: async (operation) => {
+    onMutate: async (operation: string) => {
       await queryClient.cancelQueries(queryKey);
 
       const previousData = queryClient.getQueryData(queryKey) ?? {

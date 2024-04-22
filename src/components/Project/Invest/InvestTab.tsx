@@ -1,10 +1,11 @@
 /* eslint-disable */
-import useDocuments from "@/app/hooks/useDocuments";
+import useDocuments, { DocumentWithCompletion } from "@/app/hooks/useDocuments";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import { type Project } from "@prisma/client";
 import DocumentCard from "../ProjectDocs/DocumentCard";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
+import { Key } from "react";
 
 export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
   project,
@@ -14,14 +15,13 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
     useDocuments(project.id, 3);
 
   if (isLoading) return <div>Loading documents...</div>;
-  if (isError) return <div>Error fetching documents: {error.message}</div>;
+  if (isError) return <div>Error fetching documents: {error?.message}</div>;
 
   const handleViewDocument = (documentId: number) => {
     documentEventMutation.mutate({ documentId, type: "VIEW" });
   };
 
-  const { mutate: mutateDeal, isLoading: isIncrementing } =
-    useIncrementDealMutation(project.id);
+  const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent>
@@ -35,14 +35,19 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
               works.
             </Typography>
 
-            {data.map((document, index) => (
-              <DocumentCard
-                key={index}
-                document={document}
-                dealStage={dealStage}
-                handleViewDocument={handleViewDocument}
-              />
-            ))}
+            {data.map(
+              (
+                document: DocumentWithCompletion,
+                index: Key | null | undefined
+              ) => (
+                <DocumentCard
+                  key={index}
+                  document={document}
+                  dealStage={dealStage}
+                  handleViewDocument={handleViewDocument}
+                />
+              )
+            )}
           </CardContent>
         </Card>
 
