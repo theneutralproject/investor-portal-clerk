@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server";
 import process from "process";
 
 export default authMiddleware({
-  ignoredRoutes: ["/api/webhooks(.*)", "/api/hubspot(.*)"],
+  // ignoredRoutes: ["/api/hubspot(.*)"],
   publicRoutes: (req: NextRequest) => {
     const publicRoutes = ["/terms", "/support", "/api/clerk"];
 
@@ -22,3 +22,5 @@ export default authMiddleware({
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/"],
 };
+
+
