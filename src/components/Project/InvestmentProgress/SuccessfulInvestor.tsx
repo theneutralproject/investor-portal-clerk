@@ -27,7 +27,10 @@ const SuccessfulInvestor: React.FC<{ project: Project }> = ({ project }) => {
             }}
           >
             <StepAvatar isComplete stepNumber={3} />
-            <Typography variant="h6">{`You're an Investor`}</Typography>
+            <Typography
+              variant="h6"
+              sx={{ ml: "10px" }}
+            >{`You're an Investor`}</Typography>
           </Box>
           <Typography variant="caption">Completed</Typography>
           <ProgressBar dealStage={3} />

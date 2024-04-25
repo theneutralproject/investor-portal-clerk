@@ -6,6 +6,7 @@
 import CopyrightIcon from "@mui/icons-material/Copyright";
 import HomeIcon from "@mui/icons-material/Home";
 import MessageIcon from "@mui/icons-material/Message";
+import InfoIcon from "@mui/icons-material/Info";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HelpIcon from "@mui/icons-material/Help";
 import {
@@ -39,6 +40,11 @@ export const ROUTES = [
     name: "Contact",
     path: "/contact",
     icon: MessageIcon,
+  },
+  {
+    name: "Learn",
+    path: "/learn",
+    icon: InfoIcon,
   },
 ];
 
@@ -107,7 +113,7 @@ const Drawer = styled(MuiDrawer, {
   },
 }));
 
-const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
+export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
 
 export default function Sidebar(props: { children: React.ReactNode }) {
   const router = useRouter();
