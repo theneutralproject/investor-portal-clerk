@@ -1,6 +1,5 @@
 "use client";
 
-import ProjectCard from "@/components/Project/ProjectCard";
 import {
   Box,
   Button,
@@ -9,32 +8,14 @@ import {
   Grid,
   Typography,
 } from "@mui/material";
-import { type Project } from "@prisma/client";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+
 import Link from "next/link";
 import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
-import { useUser } from "@clerk/nextjs";
 import FAQAccordions from "@/components/Learn/FAQAccordion";
 import faqData from "./faq";
 import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 
 const LearnPage = () => {
-  const { user } = useUser();
-  const { isLoading, data } = useQuery<Project[], Error>({
-    queryKey: ["project", "all"],
-    queryFn: () =>
-      axios.get<Project[]>("/api/projects").then((res) => res.data),
-  });
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!data || !Array.isArray(data)) {
-    return <div>No data available</div>;
-  }
-
   return (
     <Box>
       <ProjectPageBanner

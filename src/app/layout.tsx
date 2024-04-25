@@ -9,9 +9,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import "react-toastify/dist/ReactToastify.css";
 
 import { ToastContainer } from "react-toastify";
-import { useState } from "react";
-import ChatBubble from "@/components/ChatBubble";
-import ChatModal from "@/components/ChatModal";
+
 import ChatInterface from "@/components/ChatInterface";
 
 const inter = Inter({

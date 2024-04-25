@@ -5,9 +5,16 @@ import AccordionDetails from "@mui/material/AccordionDetails";
 import Typography from "@mui/material/Typography";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ReactMarkdown from "react-markdown";
-import { Box, Card, CardContent } from "@mui/material";
 
-export default function FAQAccordion({ question, answer, isMarkdown = false }) {
+export default function FAQAccordion({
+  question,
+  answer,
+  isMarkdown = false,
+}: {
+  question: string;
+  answer: string;
+  isMarkdown?: boolean;
+}) {
   return (
     <Accordion
       sx={{

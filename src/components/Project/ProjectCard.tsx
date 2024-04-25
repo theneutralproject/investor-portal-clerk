@@ -6,7 +6,6 @@ import {
   Button,
   Divider,
   Box,
-  Grid,
 } from "@mui/material";
 import { type Project } from "@prisma/client";
 import { capitalize } from "lodash";

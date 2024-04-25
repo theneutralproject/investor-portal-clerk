@@ -2,12 +2,10 @@ import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { Avatar, Menu, MenuItem, IconButton } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
-import { useRouter } from "next/navigation";
 
 const UserAvatar = () => {
   const { user } = useUser();
   const { signOut } = useClerk();
-  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<EventTarget | null>(null);
 
   const handleClick = (event: React.MouseEvent<EventTarget>) => {

@@ -1,6 +1,14 @@
 import { Box, Typography } from "@mui/material";
 
-const ProjectPageBanner = ({ headline, description, background }) => {
+const ProjectPageBanner = ({
+  headline,
+  description,
+  background,
+}: {
+  headline: string;
+  description: string;
+  background: string;
+}) => {
   return (
     <Box
       sx={{

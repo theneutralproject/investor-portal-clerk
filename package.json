@@ -10,6 +10,7 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "next lint",
+    "prebuild": "tsc --noEmit && eslint",
     "start": "next start"
   },
   "dependencies": {
