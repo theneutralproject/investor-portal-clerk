@@ -20,6 +20,7 @@ model User {
   firstName      String
   lastName       String
   phoneNumber    String
+  hubspotId      String
   meetings       Meeting[]
   deals          Deal[]
   documentEvents DocumentEvent[]
@@ -44,13 +45,14 @@ model Project {
   id               Int        @id @default(autoincrement())
   status           Status     @default(ACTIVE)
   name             String
+  description      String
   location         String
   tags             String     @default("")
   pictures         Pictures[]
-  investmentRaised Int        @default(0)
-  investmentGoal   Int        @default(0)
+  investmentRaised Float    @default(0.0)
+  investmentGoal   Float    @default(0.0)
   numUnits         Int        @default(0)
-  projectIrr       Decimal    @default(0.0)
+  projectIrr       Float    @default(0.0)
   meetings         Meeting[]
   documents        Document[]
   deals            Deal[]
@@ -102,8 +104,16 @@ model Deal {
   id        Int     @id @default(autoincrement())
   projectId Int
   project   Project @relation(fields: [projectId], references: [id])
-  userId    Int?
-  user      User?   @relation(fields: [userId], references: [id])
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id])
   dealStage Int
   amount    Int
+  hubspotId String @unique
+  financingType DealFinancingType?
+}
+
+enum DealFinancingType {
+  equity
+  promissory_note_now
+  promissory_to_equity
 }

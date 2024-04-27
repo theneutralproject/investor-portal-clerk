@@ -2,6 +2,11 @@
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
+import { createDealForContact, initDealPropsForProject, zHsDealSchema } from "../utils-module/hubspotUtils";
+import { z } from "zod";
+import { getErrorMessage } from "../utils-module/helpers";
+import { isError } from "lodash";
+
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
@@ -27,13 +32,18 @@ export async function GET(request: NextRequest) {
 
     const projectId = queryParams.get("projectId");
 
-    let parsedId = undefined;
+    let projectIdAsInt = -1;
     if (projectId) {
-      parsedId = parseInt(projectId, 10);
+      projectIdAsInt = parseInt(projectId, 10);
+    } else {
+      return new Response(JSON.stringify({ error: "Project ID is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const deals = await prisma.deal.findFirst({
-      where: { userId: neutralUser?.id, projectId: parsedId },
+      where: { userId: neutralUser?.id, projectId: projectIdAsInt },
     });
 
     return new Response(JSON.stringify(deals), {
@@ -48,29 +58,29 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const user = await currentUser();
+  const user = await currentUser();
 
-    if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const { id } = user;
-
-    const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: id },
+  if (!user) {
+    return new Response(JSON.stringify({ error: "User not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
     });
+  }
 
-    if (!neutralUser) {
-      return new Response(JSON.stringify({ error: "User record not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+  const { id } = user;
 
+  const neutralUser = await prisma.user.findUnique({
+    where: { clerkId: id },
+  });
+
+  if (!neutralUser) {
+    return new Response(JSON.stringify({ error: "User record not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  try {
     // Extract projectId and operation from request body
     const requestBody = await request.json();
     const { projectId, operation } = requestBody;
@@ -82,29 +92,73 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const parsedId = parseInt(projectId as string, 10);
-    if (isNaN(parsedId)) {
+    const projectIdAsInt = parseInt(projectId as string, 10);
+    if (isNaN(projectIdAsInt)) {
       return new Response(JSON.stringify({ error: "Invalid Project ID" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    const project = await prisma.project.findUnique({ where: { id: projectIdAsInt } });
+    if (!project) {
+      return new Response(JSON.stringify({ error: `Project with id ${projectId} not found in DB` }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+
     // Retrieve or create the deal
     let deal = await prisma.deal.findFirst({
-      where: { userId: neutralUser.id, projectId: parsedId },
+      where: { userId: neutralUser.id, projectId: projectIdAsInt },
     });
 
     // Create a new deal if not found
     if (!deal) {
-      deal = await prisma.deal.create({
-        data: {
-          userId: neutralUser.id,
-          projectId: parsedId,
-          dealStage: 0, // Initialize dealStage
-          amount: 0, // Initialize any other necessary fields
-        },
-      });
+      //TODO: Create Deal in Hubspot. Then get the ID. Then create deal in prisma DB
+      const hsDeal = initDealPropsForProject(project.name, neutralUser);
+      if (!hsDeal) {
+        return new Response(
+          JSON.stringify({ error: "Deal cannot be created. Project not yet suported in Hubspot" }),
+          {
+            status: 400,
+            headers: { "Content-Type": "application/json" },
+          }
+        );
+      }
+
+      try {
+        try {
+          // const { dealId } = zHsDealSchema.parse(await createDealForContact(hsDeal, neutralUser.hubspotId))
+          const dealId = await createDealForContact(hsDeal, neutralUser.hubspotId)
+
+          if(isError(dealId)) {
+            return new Response(
+              JSON.stringify({ error: "HS Deal cannot be created." }),
+              {
+                status: 400,
+                headers: { "Content-Type": "application/json" },
+              }
+            );
+          }
+
+          deal =  await prisma.deal.create({
+            data: {
+              userId: neutralUser.id,
+              projectId: projectIdAsInt,
+              dealStage: 0, // Initialize dealStage
+              amount: 0, // Initialize any other necessary fields
+              hubspotId: dealId.toString()
+            },
+          });
+        } catch (err) {
+          return new Error(getErrorMessage(err));
+        }
+
+      } catch (err) {
+        return new Error(getErrorMessage(err))
+      }
     }
 
     // Determine operation and apply it to the dealStage
@@ -132,6 +186,10 @@ export async function POST(request: NextRequest) {
         );
     }
 
+
+    // TODO: update Hubspot dealstage
+
+
     // Update the deal in the database
     const updatedDeal = await prisma.deal.update({
       where: { id: deal.id },
@@ -148,4 +206,47 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
+}
+
+export const zDealUpdateSchema = z.object({
+  hubspotId: z.string(),
+  dealStage: z.number().optional(),
+  amount: z.number().optional(),
+  financingType: z.string().optional()
+});
+export async function PUT(request: NextRequest) {
+  const { hubspotId, dealStage, amount, financingType } = zDealUpdateSchema.parse(await request.json());
+
+  /* eslint-disable */
+  interface PartialDeal {
+    [key: string]: any
+  }
+  /* eslint-enable */
+
+  const data: PartialDeal = {}
+  if (dealStage) {
+    data.dealStage = dealStage
+  }
+
+  if (amount) {
+    data.amount = amount
+  }
+
+  if (financingType) {
+    data.financingType = financingType
+  }
+  const updatedDeal = await prisma.deal.update({
+    where: { hubspotId: hubspotId },
+    data: data
+  }).catch((err) => {
+    console.error(err);
+    return new Response(JSON.stringify({ error: getErrorMessage(err) }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  });
+
+  return new Response(JSON.stringify(updatedDeal), {
+    headers: { "Content-Type": "application/json" },
+  });
 }
