@@ -8,7 +8,7 @@ export const LineDisplay = ({
   value,
 }: {
   name: string;
-  value: string | number | Decimal;
+  value: string | number | Decimal | React.ReactNode;
 }) => (
   <Box
     display="flex"
@@ -17,9 +17,13 @@ export const LineDisplay = ({
     marginTop={2}
   >
     <Typography variant="body2">{name}:</Typography>
-    <Typography variant="body2" sx={{ color: "#000000DE" }}>
-      {String(value)}
-    </Typography>
+    {typeof value === "string" || typeof value === "number" ? (
+      <Typography variant="body2" sx={{ color: "#000000DE" }}>
+        {value}
+      </Typography>
+    ) : (
+      <>{value}</>
+    )}
   </Box>
 );
 

@@ -26,54 +26,26 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent>
-        <Card>
-          <CardContent>
-            <Typography variant="h6">
-              Step 3: Sign Investment Agreements
-            </Typography>
-            <Typography variant="caption">
-              Placeholder description about what this process is and how it
-              works.
-            </Typography>
+        <CardContent>
+          <Typography variant="h6">Sign Investment Agreements</Typography>
+          <Typography variant="caption">
+            Placeholder description about what this process is and how it works.
+          </Typography>
 
-            {data.map(
-              (
-                document: DocumentWithCompletion,
-                index: Key | null | undefined
-              ) => (
-                <DocumentCard
-                  key={index}
-                  document={document}
-                  dealStage={dealStage}
-                  handleViewDocument={handleViewDocument}
-                />
-              )
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardContent>
-            <Typography variant="h6">Step 4: Fund Your Investment</Typography>
-            <Typography variant="caption">
-              Placeholder description about what this process is and how it
-              works.
-            </Typography>
-
-            <Box sx={{ display: "flex" }}>
-              <Button
-                variant="neutralBlack"
-                fullWidth
-                sx={{ width: "200px", color: "white" }}
-                disabled={dealStage !== 3}
-                startIcon={dealStage !== 3 ? <LockIcon /> : null}
-                onClick={() => mutateDeal("increment")}
-              >
-                Continue
-              </Button>
-            </Box>
-          </CardContent>
-        </Card>
+          {data.map(
+            (
+              document: DocumentWithCompletion,
+              index: Key | null | undefined
+            ) => (
+              <DocumentCard
+                key={index}
+                document={document}
+                dealStage={dealStage}
+                handleViewDocument={handleViewDocument}
+              />
+            )
+          )}
+        </CardContent>
       </CardContent>
     </Card>
   );

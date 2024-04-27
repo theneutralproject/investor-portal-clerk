@@ -1,12 +1,16 @@
 "use client";
 
 import ProjectCard from "@/components/Project/ProjectCard";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { type Project } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
+import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
+import { useUser } from "@clerk/nextjs";
+
 const Dashboard = () => {
+  const { user } = useUser();
   const { isLoading, data } = useQuery<Project[], Error>({
     queryKey: ["project", "all"],
     queryFn: () =>
@@ -23,6 +27,15 @@ const Dashboard = () => {
 
   return (
     <Box>
+      <ProjectPageBanner
+        background="/projectBanner.png"
+        headline={`Welcome, ${user?.firstName ?? "User"}`}
+        description="Diversify your portfolio with direct investments in local, sustainable real estate properties. Discover active projects below and take your next step to coming an investor."
+      />
+
+      <Typography variant="h5" sx={{ mt: 4 }}>
+        All Projects
+      </Typography>
       {data.map((project) => (
         <ProjectCard key={project.id} project={project} />
       ))}

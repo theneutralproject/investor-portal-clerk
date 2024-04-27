@@ -12,6 +12,31 @@ import {
 import LockIcon from "@mui/icons-material/Lock";
 import { type Project } from "@prisma/client";
 
+function CustomTab({
+  label,
+  stageRequired,
+  currentStage,
+  ...props // Spread additional props
+}: {
+  label: string;
+  stageRequired: number;
+  currentStage: number;
+  [x: string]: unknown; // Allow any other prop
+}) {
+  const isEnabled = currentStage >= stageRequired;
+  const tabProps = {
+    label,
+    icon: !isEnabled ? <LockIcon /> : null,
+    iconPosition: "start",
+    disabled: !isEnabled,
+    sx: { opacity: isEnabled ? "1" : "0.5" },
+    ...props,
+  };
+
+  // @ts-expect-error - Allow any other prop
+  return <Tab {...tabProps} />;
+}
+
 function ProjectHeader({
   data,
   percentRaised,
@@ -79,18 +104,17 @@ function ProjectHeader({
           sx={{ m: "0" }}
         >
           <Tab label="Overview" />
-          <Tab label="Project Docs" />
-          {dealStage >= 2 ? (
-            <Tab label="Invest" />
-          ) : (
-            <Tab
-              icon={<LockIcon />}
-              iconPosition="start"
-              label="Invest"
-              disabled
-              sx={{ opacity: "0.5" }}
-            />
-          )}
+          <CustomTab
+            label="Project Docs"
+            stageRequired={1}
+            currentStage={dealStage}
+          />
+          <CustomTab
+            label="Invest"
+            stageRequired={2}
+            currentStage={dealStage}
+          />
+          <CustomTab label="Fund" stageRequired={3} currentStage={dealStage} />
         </Tabs>
       </CardContent>
     </Card>

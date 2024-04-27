@@ -12,6 +12,7 @@ import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 
 import StepAvatar from "@/components/StepAvatar";
 import { type Project } from "@prisma/client";
+import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 
 const SuccessfulInvestor: React.FC<{ project: Project }> = ({ project }) => {
   const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
@@ -27,7 +28,10 @@ const SuccessfulInvestor: React.FC<{ project: Project }> = ({ project }) => {
             }}
           >
             <StepAvatar isComplete stepNumber={3} />
-            <Typography variant="h6">{`You're an Investor`}</Typography>
+            <Typography
+              variant="h6"
+              sx={{ ml: "10px" }}
+            >{`You're an Investor`}</Typography>
           </Box>
           <Typography variant="caption">Completed</Typography>
           <ProgressBar dealStage={3} />
@@ -43,9 +47,7 @@ const SuccessfulInvestor: React.FC<{ project: Project }> = ({ project }) => {
 
           <Divider sx={{ mt: 2, mb: 2 }} />
 
-          <Button variant="neutralBlack" fullWidth>
-            Contact Us
-          </Button>
+          <HubspotScheduleCall />
         </CardContent>
       </Card>
 

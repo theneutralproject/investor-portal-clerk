@@ -81,6 +81,8 @@ export const theme = createTheme({
       fontFamily: roboto.style.fontFamily,
       fontSize: "14px",
       fontWeight: 400,
+      lineHeight: "143%",
+      letterSpacing: "0.17px",
     },
     subtitle2: {
       color: "#000000DE",

@@ -6,6 +6,7 @@ import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import BuildingDetails from "./BuildingDetails";
 import BasicTitleDescriptionCard from "../BasicTitleDescriptionCard";
 import { type Project } from "@prisma/client";
+import ProjectCalculator from "./ProjectCalculator";
 
 export const OverviewTab = ({ data }: { data: Project }) => {
   return (
@@ -48,6 +49,7 @@ export const OverviewTab = ({ data }: { data: Project }) => {
         </Card>
 
         <BuildingDetails data={data} />
+        <ProjectCalculator data={data} />
 
         <BasicTitleDescriptionCard
           title="Market Highlights"
