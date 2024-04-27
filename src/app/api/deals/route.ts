@@ -5,7 +5,7 @@ import { type NextRequest } from "next/server";
 import { createDealForContact, initDealPropsForProject } from "../utils-module/hubspotUtils";
 import { getErrorMessage } from "../utils-module/helpers";
 import { isError } from "lodash";
-import type { zDealUpdateSchema } from "../utils-module/_globals";
+import  { zDealUpdateSchema } from "../utils-module/_globals";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

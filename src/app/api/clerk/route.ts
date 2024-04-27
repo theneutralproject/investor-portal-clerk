@@ -78,20 +78,6 @@ export async function POST(request: Request) {
           console.log(`DB user create error: ${err}`);
         });
 
-      /* Store/ update user in Hubspot**/
-      const HSUserData = {
-        email: email!,
-        properties: [
-          { property: `userid`, value: id },
-          { property: `firstname`, value: first_name },
-          { property: `lastname`, value: last_name },
-          { property: `phone`, value: phonenumber },
-        ],
-      } as HubspotContact;
-      await createOrUpdateContact(HSUserData).catch((err) => {
-        console.log(`hubspot user create error: ${err}`);
-      });
-
       break;
     }
 
