@@ -2,10 +2,10 @@
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
-import { createDealForContact, initDealPropsForProject, zHsDealSchema } from "../utils-module/hubspotUtils";
-import { z } from "zod";
+import { createDealForContact, initDealPropsForProject } from "../utils-module/hubspotUtils";
 import { getErrorMessage } from "../utils-module/helpers";
 import { isError } from "lodash";
+import type { zDealUpdateSchema } from "../utils-module/_globals";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -208,12 +208,6 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export const zDealUpdateSchema = z.object({
-  hubspotId: z.string(),
-  dealStage: z.number().optional(),
-  amount: z.number().optional(),
-  financingType: z.string().optional()
-});
 export async function PUT(request: NextRequest) {
   const { hubspotId, dealStage, amount, financingType } = zDealUpdateSchema.parse(await request.json());
 

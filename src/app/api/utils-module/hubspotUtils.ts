@@ -2,7 +2,6 @@ import type { User } from "@prisma/client";
 import { z } from "zod";
 import { ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
-import { isError } from "lodash";
 
 export type HubspotContact = {
   properties: { property: string; value: string }[];
@@ -18,8 +17,6 @@ export type HubspotDeal = {
   dealId?: number, //maybe hs_object_id instead of dealId
   properties: { name: string; value: string }[];
 };
-
-
 
 export const hubspotContactRes = z.object({
   vid: z.number(),

@@ -1,4 +1,4 @@
-import type { zDealUpdateSchema } from "@/app/api/deals/route";
+import type { zDealUpdateSchema } from "@/app/api/utils-module/_globals";
 import { getDealStageInt } from "@/app/api/utils-module/hubspotUtils";
 import axios from "axios";
 import { z } from "zod";
