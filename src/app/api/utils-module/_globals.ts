@@ -15,3 +15,5 @@ export enum ProjectName {
     amount: z.number().optional(),
     financingType: z.string().optional()
   });
+
+  export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>

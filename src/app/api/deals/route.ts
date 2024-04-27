@@ -5,7 +5,6 @@ import { type NextRequest } from "next/server";
 import { createDealForContact, initDealPropsForProject } from "../utils-module/hubspotUtils";
 import { getErrorMessage } from "../utils-module/helpers";
 import { isError } from "lodash";
-import  { zDealUpdateSchema } from "../utils-module/_globals";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -58,6 +57,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log("HITTING!!!\n\n\n")
   const user = await currentUser();
 
   if (!user) {
@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
           // const { dealId } = zHsDealSchema.parse(await createDealForContact(hsDeal, neutralUser.hubspotId))
           const dealId = await createDealForContact(hsDeal, neutralUser.hubspotId)
 
-          if(isError(dealId)) {
+          if (isError(dealId)) {
             return new Response(
               JSON.stringify({ error: "HS Deal cannot be created." }),
               {
@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
             );
           }
 
-          deal =  await prisma.deal.create({
+          deal = await prisma.deal.create({
             data: {
               userId: neutralUser.id,
               projectId: projectIdAsInt,
@@ -206,41 +206,4 @@ export async function POST(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
-}
-
-export async function PUT(request: NextRequest) {
-  const { hubspotId, dealStage, amount, financingType } = zDealUpdateSchema.parse(await request.json());
-
-  /* eslint-disable */
-  interface PartialDeal {
-    [key: string]: any
-  }
-  /* eslint-enable */
-
-  const data: PartialDeal = {}
-  if (dealStage) {
-    data.dealStage = dealStage
-  }
-
-  if (amount) {
-    data.amount = amount
-  }
-
-  if (financingType) {
-    data.financingType = financingType
-  }
-  const updatedDeal = await prisma.deal.update({
-    where: { hubspotId: hubspotId },
-    data: data
-  }).catch((err) => {
-    console.error(err);
-    return new Response(JSON.stringify({ error: getErrorMessage(err) }), {
-      status: 400,
-      headers: { "Content-Type": "application/json" },
-    });
-  });
-
-  return new Response(JSON.stringify(updatedDeal), {
-    headers: { "Content-Type": "application/json" },
-  });
 }
