@@ -3,11 +3,9 @@ import { type UserJSON, type WebhookEvent } from "@clerk/nextjs/server";
 import { Role, type User } from "@prisma/client";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
+import { isError } from "lodash";
 
-import {
-  type HubspotContact,
-  createOrUpdateContact,
-} from "../utils-module/hubspotUtils";
+import { type HubspotContact, createOrUpdateContact } from '../utils-module/hubspotUtils';
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -47,24 +45,6 @@ export async function POST(request: Request) {
             ?.phone_number
         : "";
 
-      /* Store user in Prisma**/
-      const DBUserData = {
-        clerkId: id,
-        email: email!,
-        role: Role.USER,
-        firstName: first_name,
-        lastName: last_name,
-        phoneNumber: phonenumber,
-      } as User;
-
-      await prisma.user
-        .create({
-          data: DBUserData,
-        })
-        .catch((err) => {
-          console.log(`DB user create error: ${err}`);
-        });
-
       /* Store/ update user in Hubspot**/
       const HSUserData = {
         email: email!,
@@ -75,9 +55,28 @@ export async function POST(request: Request) {
           { property: `phone`, value: phonenumber },
         ],
       } as HubspotContact;
-      await createOrUpdateContact(HSUserData).catch((err) => {
-        console.log(`hubspot user create error: ${err}`);
-      });
+
+      const hsUpdate = await createOrUpdateContact(HSUserData);
+      const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString();
+
+      /* Store user in DB**/
+      const DBUserData = {
+        clerkId: id,
+        email: email!,
+        role: Role.USER,
+        firstName: first_name,
+        lastName: last_name,
+        phoneNumber: phonenumber,
+        hubspotId: hubspotUserId
+      } as User;
+
+      await prisma.user
+        .create({
+          data: DBUserData,
+        })
+        .catch((err) => {
+          console.log(`DB user create error: ${err}`);
+        });
 
       break;
     }
