@@ -11,6 +11,7 @@ import { type Project } from "@prisma/client";
 import ProgressBar from "./ProgressBar";
 import StepIndicator from "./StepIndicator";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
+import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 
 const INVESTMENT_STEPS = [
   "Schedule a Call with an Advisor",
@@ -29,15 +30,7 @@ const InvestmentProgress: React.FC<{
 
   const generateCTAButton = () => {
     if (dealStage === 0) {
-      return (
-        <Button
-          variant="neutralBlack"
-          fullWidth
-          onClick={() => mutateDeal("increment")}
-        >
-          Schedule a Call
-        </Button>
-      );
+      return <HubspotScheduleCall />;
     }
 
     if (dealStage === 1) {
@@ -71,7 +64,7 @@ const InvestmentProgress: React.FC<{
         return (
           <Box>
             <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
-              Review Project Documents
+              Review Invest Documents
             </Typography>
             <Typography variant="caption">
               Watch the video or download each of the documents to continue to
@@ -93,7 +86,7 @@ const InvestmentProgress: React.FC<{
     }
 
     if (dealStage === 3) {
-      if (currentTab === 2) {
+      if (currentTab === 3) {
         return (
           <Box>
             <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
@@ -109,7 +102,7 @@ const InvestmentProgress: React.FC<{
           <Button
             variant="neutralBlack"
             fullWidth
-            onClick={() => setTabValue(2)}
+            onClick={() => setTabValue(3)}
           >
             Fund Investment
           </Button>

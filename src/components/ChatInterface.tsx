@@ -1,0 +1,60 @@
+"use client";
+import React, { useState } from "react";
+import { Fab, Modal, Box, useTheme } from "@mui/material";
+import ChatIcon from "@mui/icons-material/Chat";
+
+const ChatInterface = () => {
+  const [open, setOpen] = useState(false);
+  const theme = useTheme();
+
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  return (
+    <>
+      <Fab
+        color="primary"
+        onClick={handleOpen}
+        sx={{
+          position: "fixed",
+          bottom: theme.spacing(2),
+          right: theme.spacing(2),
+          zIndex: 1200, // Higher than most elements
+        }}
+      >
+        <ChatIcon />
+      </Fab>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Box
+          sx={{
+            width: 800,
+            height: 600,
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+            overflow: "hidden", // Ensures no scroll bars are visible inside the modal
+          }}
+        >
+          <iframe
+            src="https://www.chatbase.co/chatbot-iframe/g9lmo4egbpiJsKnInQrSC"
+            title="Spruce - The Neutral Project Advisor"
+            width="100%"
+            height="100%"
+            style={{ border: "none" }}
+          />
+        </Box>
+      </Modal>
+    </>
+  );
+};
+
+export default ChatInterface;

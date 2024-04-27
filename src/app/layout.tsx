@@ -10,6 +10,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 import { ToastContainer } from "react-toastify";
 
+import ChatInterface from "@/components/ChatInterface";
+
 const inter = Inter({
   subsets: ["latin"],
 });
@@ -44,6 +46,8 @@ export default function RootLayout({
               />
             </NeutralThemeProvider>
           </NeutralQueryProvider>
+
+          <ChatInterface />
         </body>
       </html>
     </ClerkProvider>

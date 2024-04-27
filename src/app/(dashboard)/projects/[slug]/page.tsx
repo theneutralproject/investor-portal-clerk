@@ -13,6 +13,7 @@ import { ProjectDocTab } from "@/components/Project/ProjectDocs/ProjectDocTab";
 import InvestmentProgress from "@/components/Project/InvestmentProgress/InvestmentProgress";
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
+import { FundTab } from "@/components/Project/Fund/FundTab";
 
 export type PageProps = {
   params: {
@@ -126,6 +127,9 @@ export default function Page({ params: { slug } }: PageProps) {
             )}
             {tabValue === 2 && (
               <InvestTab project={project} dealStage={dealStage} />
+            )}
+            {tabValue === 3 && (
+              <FundTab project={project} dealStage={dealStage} />
             )}
           </Container>
         </Grid>
