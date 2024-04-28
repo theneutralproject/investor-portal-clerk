@@ -1,5 +1,4 @@
 import { Avatar } from "@mui/material";
-import CheckFilled from "../../public/CheckFilled.png";
 import Image from "next/image";
 
 const StepAvatar = ({
@@ -19,7 +18,12 @@ const StepAvatar = ({
       }}
     >
       {isComplete ? (
-        <Image src={CheckFilled} alt="Completed Step" width={24} height={24} />
+        <Image
+          src={"/CheckFilled.png"}
+          alt="Completed Step"
+          width={24}
+          height={24}
+        />
       ) : (
         stepNumber + 1
       )}

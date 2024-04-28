@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
-import { createDealForContact, initDealPropsForProject } from "../utils-module/hubspotUtils";
+import {
+  createDealForContact,
+  initDealPropsForProject,
+} from "../utils-module/hubspotUtils";
 import { getErrorMessage } from "../utils-module/helpers";
 import { isError } from "lodash";
 
@@ -57,7 +59,7 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  console.log("HITTING!!!\n\n\n")
+  console.log("HITTING!!!\n\n\n");
   const user = await currentUser();
 
   if (!user) {
@@ -82,7 +84,9 @@ export async function POST(request: NextRequest) {
 
   try {
     // Extract projectId and operation from request body
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestBody = await request.json();
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { projectId, operation } = requestBody;
 
     if (!projectId) {
@@ -100,14 +104,20 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const project = await prisma.project.findUnique({ where: { id: projectIdAsInt } });
+    const project = await prisma.project.findUnique({
+      where: { id: projectIdAsInt },
+    });
     if (!project) {
-      return new Response(JSON.stringify({ error: `Project with id ${projectId} not found in DB` }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return new Response(
+        JSON.stringify({
+          error: `Project with id ${projectId} not found in DB`,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
-
 
     // Retrieve or create the deal
     let deal = await prisma.deal.findFirst({
@@ -120,7 +130,10 @@ export async function POST(request: NextRequest) {
       const hsDeal = initDealPropsForProject(project.name, neutralUser);
       if (!hsDeal) {
         return new Response(
-          JSON.stringify({ error: "Deal cannot be created. Project not yet suported in Hubspot" }),
+          JSON.stringify({
+            error:
+              "Deal cannot be created. Project not yet suported in Hubspot",
+          }),
           {
             status: 400,
             headers: { "Content-Type": "application/json" },
@@ -131,7 +144,11 @@ export async function POST(request: NextRequest) {
       try {
         try {
           // const { dealId } = zHsDealSchema.parse(await createDealForContact(hsDeal, neutralUser.hubspotId))
-          const dealId = await createDealForContact(hsDeal, neutralUser.hubspotId)
+          const dealId = await createDealForContact(
+            hsDeal,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            neutralUser.hubspotId
+          );
 
           if (isError(dealId)) {
             return new Response(
@@ -149,15 +166,20 @@ export async function POST(request: NextRequest) {
               projectId: projectIdAsInt,
               dealStage: 0, // Initialize dealStage
               amount: 0, // Initialize any other necessary fields
-              hubspotId: dealId.toString()
+              hubspotId: dealId.toString(),
             },
           });
         } catch (err) {
-          return new Error(getErrorMessage(err));
+          return new Response(JSON.stringify({ error: getErrorMessage(err) }), {
+            status: 500,
+            headers: { "Content-Type": "application/json" },
+          });
         }
-
       } catch (err) {
-        return new Error(getErrorMessage(err))
+        return new Response(JSON.stringify({ error: getErrorMessage(err) }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
       }
     }
 
@@ -186,9 +208,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-
     // TODO: update Hubspot dealstage
-
 
     // Update the deal in the database
     const updatedDeal = await prisma.deal.update({
