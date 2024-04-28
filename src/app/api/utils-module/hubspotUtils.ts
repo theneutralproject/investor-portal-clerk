@@ -89,9 +89,7 @@ export async function createDealForContact(deal: HubspotDeal, contactHubspotId: 
   }
 }
 
-// export async function updateDealStage(dealId: string, stage: number, project: ProjectName) {
 
-// }
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User) {

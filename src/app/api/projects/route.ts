@@ -6,8 +6,6 @@ export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   try {
-    // const { orgId } = await getUserInfo();
-
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
 

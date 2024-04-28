@@ -5,7 +5,10 @@ import { headers } from "next/headers";
 import { Webhook } from "svix";
 import { isError } from "lodash";
 
-import { type HubspotContact, createOrUpdateContact } from '../utils-module/hubspotUtils';
+import {
+  type HubspotContact,
+  createOrUpdateContact,
+} from "../utils-module/hubspotUtils";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -22,8 +25,7 @@ async function validateRequest(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const payload = await validateRequest(request);
-  const { type, data } = payload;
+  const { type, data } = await validateRequest(request);
 
   const {
     id,
@@ -37,17 +39,16 @@ export async function POST(request: Request) {
 
   switch (type) {
     case "user.created": {
-      const email = email_addresses.find(
-        (e) => e.id === primary_email_address_id
-      )?.email_address;
-      const phonenumber = primary_phone_number_id
-        ? phone_numbers.find((p) => p.id === primary_phone_number_id)
-            ?.phone_number
-        : "";
+      const email =
+        email_addresses.find(({ id }) => id === primary_email_address_id)
+          ?.email_address ?? "";
+      const phonenumber =
+        phone_numbers.find(({ id }) => id === primary_phone_number_id)
+          ?.phone_number ?? "";
 
       /* Store/ update user in Hubspot**/
       const HSUserData = {
-        email: email!,
+        email: email,
         properties: [
           { property: `userid`, value: id },
           { property: `firstname`, value: first_name },
@@ -62,21 +63,20 @@ export async function POST(request: Request) {
       /* Store user in DB**/
       const DBUserData = {
         clerkId: id,
-        email: email!,
+        email: email,
         role: Role.USER,
         firstName: first_name,
         lastName: last_name,
         phoneNumber: phonenumber,
-        hubspotId: hubspotUserId
+        hubspotId: hubspotUserId,
       } as User;
 
-      await prisma.user
-        .create({
-          data: DBUserData,
-        })
-        .catch((err) => {
-          console.log(`DB user create error: ${err}`);
-        });
+      try {
+        await prisma.user.create({ data: DBUserData });
+      } catch (err) {
+        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+        console.error(`DB user create error: ${err}`);
+      }
 
       break;
     }
@@ -87,6 +87,7 @@ export async function POST(request: Request) {
   }
 
   return new Response(JSON.stringify({ message: "success" }), {
+    status: 200,
     headers: { "Content-Type": "application/json" },
   });
 }

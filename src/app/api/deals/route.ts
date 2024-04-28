@@ -5,16 +5,32 @@ import {
   createDealForContact,
   initDealPropsForProject,
 } from "../utils-module/hubspotUtils";
-import { getErrorMessage } from "../utils-module/helpers";
 import { isError } from "lodash";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
+  const url = new URL(request.url);
+  const projectId = new URLSearchParams(url.search).get("projectId");
+
+  if (!projectId) {
+    return new Response(JSON.stringify({ error: "Project ID is required" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
+  const projectIdAsInt = parseInt(projectId, 10);
+  if (isNaN(projectIdAsInt)) {
+    return new Response(JSON.stringify({ error: "Invalid Project ID" }), {
+      status: 400,
+      headers: { "Content-Type": "application/json" },
+    });
+  }
+
   try {
     const user = await currentUser();
-
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
@@ -22,208 +38,146 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const { id } = user;
-
     const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: id },
+      where: { clerkId: user.id },
     });
-
-    const url = new URL(request.url);
-    const queryParams = new URLSearchParams(url.search);
-
-    const projectId = queryParams.get("projectId");
-
-    let projectIdAsInt = -1;
-    if (projectId) {
-      projectIdAsInt = parseInt(projectId, 10);
-    } else {
-      return new Response(JSON.stringify({ error: "Project ID is required" }), {
-        status: 400,
+    if (!neutralUser) {
+      return new Response(JSON.stringify({ error: "User record not found" }), {
+        status: 404,
         headers: { "Content-Type": "application/json" },
       });
     }
 
     const deals = await prisma.deal.findFirst({
-      where: { userId: neutralUser?.id, projectId: projectIdAsInt },
+      where: { userId: neutralUser.id, projectId: projectIdAsInt },
     });
+
+    if (!deals) {
+      return new Response(
+        JSON.stringify({ error: "No deals found for this project" }),
+        {
+          status: 404,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     return new Response(JSON.stringify(deals), {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Error fetching data" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    const errorMessage = (error as Error).message;
+    return new Response(
+      JSON.stringify({ error: "Error fetching data: " + errorMessage }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 }
-
 export async function POST(request: NextRequest) {
-  console.log("HITTING!!!\n\n\n");
-  const user = await currentUser();
-
-  if (!user) {
-    return new Response(JSON.stringify({ error: "User not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
-  const { id } = user;
-
-  const neutralUser = await prisma.user.findUnique({
-    where: { clerkId: id },
-  });
-
-  if (!neutralUser) {
-    return new Response(JSON.stringify({ error: "User record not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json" },
-    });
-  }
-
   try {
-    // Extract projectId and operation from request body
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { projectId, operation } = requestBody;
-
-    if (!projectId) {
-      return new Response(JSON.stringify({ error: "Project ID is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+    const user = await currentUser();
+    if (!user) {
+      return jsonResponse({ error: "User not found" }, 404);
     }
 
-    const projectIdAsInt = parseInt(projectId as string, 10);
+    const neutralUser = await prisma.user.findUnique({
+      where: { clerkId: user.id },
+    });
+    if (!neutralUser) {
+      return jsonResponse({ error: "User record not found" }, 404);
+    }
+
+    const requestBody = (await (request as Request).json()) as {
+      projectId: string;
+      operation: string;
+    };
+    const { projectId, operation } = requestBody;
+    if (!projectId) {
+      return jsonResponse({ error: "Project ID is required" }, 400);
+    }
+
+    const projectIdAsInt = parseInt(projectId, 10);
     if (isNaN(projectIdAsInt)) {
-      return new Response(JSON.stringify({ error: "Invalid Project ID" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return jsonResponse({ error: "Invalid Project ID" }, 400);
     }
 
     const project = await prisma.project.findUnique({
       where: { id: projectIdAsInt },
     });
     if (!project) {
-      return new Response(
-        JSON.stringify({
-          error: `Project with id ${projectId} not found in DB`,
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
+      return jsonResponse(
+        { error: `Project with id ${projectId} not found in DB` },
+        400
       );
     }
 
-    // Retrieve or create the deal
     let deal = await prisma.deal.findFirst({
       where: { userId: neutralUser.id, projectId: projectIdAsInt },
     });
 
-    // Create a new deal if not found
     if (!deal) {
-      //TODO: Create Deal in Hubspot. Then get the ID. Then create deal in prisma DB
       const hsDeal = initDealPropsForProject(project.name, neutralUser);
       if (!hsDeal) {
-        return new Response(
-          JSON.stringify({
+        return jsonResponse(
+          {
             error:
-              "Deal cannot be created. Project not yet suported in Hubspot",
-          }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          }
-        );
-      }
-
-      try {
-        try {
-          // const { dealId } = zHsDealSchema.parse(await createDealForContact(hsDeal, neutralUser.hubspotId))
-          const dealId = await createDealForContact(
-            hsDeal,
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-            neutralUser.hubspotId
-          );
-
-          if (isError(dealId)) {
-            return new Response(
-              JSON.stringify({ error: "HS Deal cannot be created." }),
-              {
-                status: 400,
-                headers: { "Content-Type": "application/json" },
-              }
-            );
-          }
-
-          deal = await prisma.deal.create({
-            data: {
-              userId: neutralUser.id,
-              projectId: projectIdAsInt,
-              dealStage: 0, // Initialize dealStage
-              amount: 0, // Initialize any other necessary fields
-              hubspotId: dealId.toString(),
-            },
-          });
-        } catch (err) {
-          return new Response(JSON.stringify({ error: getErrorMessage(err) }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-          });
-        }
-      } catch (err) {
-        return new Response(JSON.stringify({ error: getErrorMessage(err) }), {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-    }
-
-    // Determine operation and apply it to the dealStage
-    switch (operation) {
-      case "increment":
-        deal.dealStage++;
-        break;
-      case "reset":
-        //For this user, delete all DocumentEvent
-        await prisma.documentEvent.deleteMany({
-          where: {
-            userId: neutralUser.id,
+              "Deal cannot be created. Project not yet supported in Hubspot",
           },
-        });
-
-        deal.dealStage = 0;
-        break;
-      default:
-        return new Response(
-          JSON.stringify({ error: "Invalid operation specified" }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json" },
-          }
+          400
         );
+      }
+
+      const dealId = await createDealForContact(
+        hsDeal,
+        String(neutralUser.hubspotId)
+      );
+      if (isError(dealId)) {
+        return jsonResponse({ error: "HS Deal cannot be created." }, 400);
+      }
+
+      deal = await prisma.deal.create({
+        data: {
+          userId: neutralUser.id,
+          projectId: projectIdAsInt,
+          dealStage: 0,
+          amount: 0,
+          hubspotId: dealId.toString(),
+        },
+      });
     }
 
-    // TODO: update Hubspot dealstage
+    if (!["increment", "reset"].includes(operation)) {
+      return jsonResponse({ error: "Invalid operation specified" }, 400);
+    }
 
-    // Update the deal in the database
+    if (operation === "reset") {
+      await prisma.documentEvent.deleteMany({
+        where: { userId: neutralUser.id },
+      });
+      deal.dealStage = 0;
+    } else if (operation === "increment") {
+      deal.dealStage++;
+    }
+
     const updatedDeal = await prisma.deal.update({
       where: { id: deal.id },
       data: { dealStage: deal.dealStage },
     });
 
-    return new Response(JSON.stringify(updatedDeal), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse(updatedDeal);
   } catch (error) {
     console.error(error);
-    return new Response(JSON.stringify({ error: "Error processing request" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse({ error: "Error processing request" }, 500);
   }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function jsonResponse(data: any, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: { "Content-Type": "application/json" },
+  });
 }
