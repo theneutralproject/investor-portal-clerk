@@ -3,34 +3,21 @@
 import { Box, Card, CardContent, Grid, Typography } from "@mui/material";
 
 import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
-import FAQAccordions from "@/components/Learn/FAQAccordion";
-import faqData from "./faq";
 import InfoSidebar from "@/components/InfoSidebar";
 
-const LearnPage = () => {
+const ContactPage = () => {
   return (
     <Box>
       <ProjectPageBanner
         background="/learnBanner.png"
-        headline={`Learn`}
+        headline={`Contact Us`}
         description="Learn about how to invest in a project, what the process is like, and what to expect as an investor."
       />
       <Grid container spacing={2} sx={{ mt: 1 }}>
         <Grid item xs={8} sx={{ height: "1000px" }}>
           <Card>
             <CardContent>
-              <Typography variant="h5">FAQs</Typography>
-
-              {faqData.map((faq) => {
-                return (
-                  <FAQAccordions
-                    key={faq.id}
-                    question={faq.question}
-                    answer={faq.answer}
-                    isMarkdown
-                  />
-                );
-              })}
+              <Typography variant="h5">Contact Us</Typography>
             </CardContent>
           </Card>
         </Grid>
@@ -41,4 +28,4 @@ const LearnPage = () => {
   );
 };
 
-export default LearnPage;
+export default ContactPage;
