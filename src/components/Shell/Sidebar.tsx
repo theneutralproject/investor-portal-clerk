@@ -125,13 +125,13 @@ export default function Sidebar(props: { children: React.ReactNode }) {
       key: "support",
       label: "Support",
       icon: <HelpIcon />,
-      onClick: () => router.push("/support"),
+      // onClick: () => router.push("/support"),
     },
     {
       key: "terms",
       label: "Terms of Service",
       icon: <DescriptionIcon />,
-      onClick: () => router.push("/terms"),
+      // onClick: () => router.push("/terms"),
     },
     {
       key: "copyright",

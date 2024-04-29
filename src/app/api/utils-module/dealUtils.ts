@@ -2,40 +2,55 @@ import prisma from "@/libs/prisma";
 import type { DealUpdateSchema } from "./_globals";
 import { type Deal } from "@prisma/client";
 
+type PartialDeal = Record<string, unknown>;
+
+/**
+ * Updates a deal in the database
+ * @param {DealUpdateSchema} dealData - The data of the deal to update
+ * @param {PartialDeal} data - The partial data to update the deal with
+ * @returns {Promise<Deal | Error>} The updated deal or an error
+ */
 export async function updateDeal(
-  dealData: DealUpdateSchema
+  dealData: DealUpdateSchema,
+  data: PartialDeal
 ): Promise<Deal | Error> {
   const { hubspotId, dealStage, amount, financingType } = dealData;
-  /* eslint-disable */
-  interface PartialDeal {
-    [key: string]: any;
-  }
-  /* eslint-enable */
 
-  const data: PartialDeal = {};
-  if (dealStage) {
-    data.dealStage = dealStage;
+  if (typeof hubspotId !== "string" || !hubspotId) {
+    console.error("Invalid input: hubspotId must be a non-empty string");
+    return Error("Invalid input: hubspotId must be a non-empty string");
   }
 
-  if (amount) {
-    data.amount = amount;
+  if (typeof dealStage !== "string" || !dealStage) {
+    console.error("Invalid input: dealStage must be a non-empty string");
+    return Error("Invalid input: dealStage must be a non-empty string");
   }
 
-  if (financingType) {
-    data.financingType = financingType;
+  if (typeof amount !== "number" || isNaN(amount)) {
+    console.error("Invalid input: amount must be a number");
+    return Error("Invalid input: amount must be a number");
   }
 
-  /* eslint-disable */
-  const updatedDeal = await prisma.deal
-    .update({
-      where: { hubspotId: hubspotId },
-      data: data,
-    })
-    .catch((err) => {
-      console.error(err);
-      return err;
+  if (typeof financingType !== "string" || !financingType) {
+    console.error("Invalid input: financingType must be a non-empty string");
+    return Error("Invalid input: financingType must be a non-empty string");
+  }
+
+  data = {
+    ...data,
+    ...(dealStage ? { dealStage } : {}),
+    ...(amount && { amount }),
+    ...(financingType && { financingType }),
+  };
+
+  try {
+    const updatedDeal = await prisma.deal.update({
+      where: { hubspotId },
+      data,
     });
-
-  return updatedDeal;
-  /* eslint-enable */
+    return updatedDeal;
+  } catch (error) {
+    console.error(error);
+    return Error("Failed to update deal");
+  }
 }
