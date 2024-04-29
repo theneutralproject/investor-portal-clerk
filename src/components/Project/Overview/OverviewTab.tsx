@@ -43,7 +43,7 @@ export const OverviewTab = ({ data }: { data: Project }) => {
 
         <Card sx={{ mt: theme.spacing(2) }}>
           <LiteYouTubeEmbed
-            id="L2vS_050c-M"
+            id="ocvR5xUWLP4"
             title="What’s new in Material Design for the web (Chrome Dev Summit 2019)"
           />
         </Card>

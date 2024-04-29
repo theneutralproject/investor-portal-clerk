@@ -9,7 +9,6 @@ export const revalidate = 0;
 export async function GET(request: NextRequest) {
   try {
     const user = await currentUser();
-
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
@@ -25,6 +24,7 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
     const projectId = parseInt(queryParams.get("projectId") ?? "", 10);
+    const dealStage = parseInt(queryParams.get("dealStage") ?? "", 10);
 
     if (isNaN(projectId)) {
       return new Response(JSON.stringify({ error: "Invalid Project ID" }), {
@@ -34,7 +34,10 @@ export async function GET(request: NextRequest) {
     }
 
     const documents = await prisma.document.findMany({
-      where: { projectId: projectId },
+      where: {
+        projectId: projectId,
+        ...(dealStage ? { dealStage: dealStage } : {}),
+      },
       include: {
         documentEvents: {
           where: { userId: neutralUser?.id },
@@ -53,6 +56,7 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ error: "Error fetching data" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

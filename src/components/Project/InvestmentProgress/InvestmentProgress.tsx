@@ -30,7 +30,7 @@ const InvestmentProgress: React.FC<{
 
   const generateCTAButton = () => {
     if (dealStage === 0) {
-      return <HubspotScheduleCall />;
+      return <HubspotScheduleCall onExit={() => mutateDeal("increment")} />;
     }
 
     if (dealStage === 1) {

@@ -7,6 +7,7 @@ import DocumentCard from "./DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
+import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 export const ProjectDocTab: React.FC<{
   project: Project;
   dealStage: number;
@@ -24,12 +25,18 @@ export const ProjectDocTab: React.FC<{
     error: any;
     documentEventMutation: any;
   } = useDocuments(project.id, 1);
+  const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
 
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error.message}</div>;
 
   const handleViewDocument = (documentId: number) => {
     documentEventMutation.mutate({ documentId, type: "VIEW" });
+
+    // Check if all documents are viewed
+    if (data.every((doc) => doc.completed || doc.id === documentId)) {
+      mutateDeal("increment");
+    }
   };
 
   return (

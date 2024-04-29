@@ -2,17 +2,13 @@ import prisma from "@/libs/prisma";
 import type { DealUpdateSchema } from "./_globals";
 import { type Deal } from "@prisma/client";
 
-type PartialDeal = Record<string, unknown>;
-
 /**
  * Updates a deal in the database
  * @param {DealUpdateSchema} dealData - The data of the deal to update
- * @param {PartialDeal} data - The partial data to update the deal with
  * @returns {Promise<Deal | Error>} The updated deal or an error
  */
 export async function updateDeal(
-  dealData: DealUpdateSchema,
-  data: PartialDeal
+  dealData: DealUpdateSchema
 ): Promise<Deal | Error> {
   const { hubspotId, dealStage, amount, financingType } = dealData;
 
@@ -36,8 +32,8 @@ export async function updateDeal(
     return Error("Invalid input: financingType must be a non-empty string");
   }
 
-  data = {
-    ...data,
+  const data = {
+    ...dealData,
     ...(dealStage ? { dealStage } : {}),
     ...(amount && { amount }),
     ...(financingType && { financingType }),
@@ -46,6 +42,7 @@ export async function updateDeal(
   try {
     const updatedDeal = await prisma.deal.update({
       where: { hubspotId },
+      // @ts-expect-error - TS doesn't know about the optional properties
       data,
     });
     return updatedDeal;

@@ -12,7 +12,17 @@ import ChatIcon from "@mui/icons-material/Chat";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import QuestionIcon from "@mui/icons-material/QuestionAnswer";
 
-const ContactMethod = ({ Icon, title, description, buttonText }) => {
+const ContactMethod = ({
+  Icon,
+  title,
+  description,
+  buttonText,
+}: {
+  Icon: React.ElementType;
+  title: string;
+  description: string;
+  buttonText: string;
+}) => {
   return (
     <Grid item xs={12} sm={4}>
       <Card sx={{ textAlign: "center", padding: 2 }}>

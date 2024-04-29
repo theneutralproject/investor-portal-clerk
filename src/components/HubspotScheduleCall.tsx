@@ -1,10 +1,16 @@
 import React, { useState } from "react";
 import { Button, Modal, Box } from "@mui/material";
 
-function HubspotScheduleCall() {
+function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+
+    if (onExit) {
+      onExit();
+    }
+  };
 
   // Styles for the modal to center it
   const style = {
@@ -24,7 +30,9 @@ function HubspotScheduleCall() {
         variant="neutralBlack"
         sx={{ mt: 2, height: "42px" }}
         fullWidth
-        onClick={handleOpen}
+        onClick={() => {
+          handleOpen();
+        }}
       >
         Schedule a Call
       </Button>

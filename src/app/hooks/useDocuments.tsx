@@ -3,20 +3,19 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
-import useIncrementDealMutation from "./useIncrementDealMutation";
 import { Document } from "@prisma/client";
 
 export type DocumentWithCompletion = Document & { completed: boolean };
 
 const useDocuments = (projectId: number, dealStageCheck: number) => {
   const queryClient = useQueryClient();
-  const documentsQueryKey = ["documents", projectId];
-  const { mutate: mutateDeal } = useIncrementDealMutation(projectId);
+  const documentsQueryKey = ["documents", projectId, dealStageCheck];
 
   // Query function for fetching all documents within a project
-  const fetchDocuments = () => {
-    const url = `/api/documents?projectId=${projectId}`;
-    return axios.get(url).then((response) => response.data);
+  const fetchDocuments = async () => {
+    const url = `/api/documents?projectId=${projectId}&dealStage=${dealStageCheck}`;
+    const response = await axios.get(url);
+    return response.data;
   };
 
   // Using useQuery to manage the fetching of documents
@@ -62,12 +61,6 @@ const useDocuments = (projectId: number, dealStageCheck: number) => {
     },
     onSuccess: (_, { documentId, type }) => {
       toast.success(`Document ${type.toLowerCase()} successfully!`);
-      const allCompleted = queryClient
-        .getQueryData(documentsQueryKey)
-        ?.every((doc) => doc.completed || doc.dealStage > dealStageCheck);
-      if (allCompleted) {
-        mutateDeal("increment"); // Increment the deal stage if all documents are completed
-      }
     },
     onSettled: () => {
       // Always refetch after error or success to ensure data consistency
