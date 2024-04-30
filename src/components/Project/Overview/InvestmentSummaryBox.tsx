@@ -32,19 +32,26 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
     <Grid container spacing={2} sx={{ alignItems: "stretch", height: "100%" }}>
       <Grid item xs={5.5}>
         <Typography variant="body1">Equity Returns</Typography>
-        <LineDisplay name="IRR" value={data.projectIrr} />
-        <LineDisplay name="Min. Investment" value="--" />
-        <LineDisplay name="Term" value="--" />
+        <LineDisplay name="IRR" value={`${data.equityIRR}%`} />
+        <LineDisplay
+          name="Min. Investment"
+          value={`$${data.equityMinInvestment}`}
+        />
+        <LineDisplay name="Term" value={`${data.equityTermMonths} months`} />
+        <LineDisplay name="Distribution" value={`${data.equityPaymentFreq}`} />
       </Grid>
       <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
         <Divider orientation="vertical" flexItem sx={{ height: "100%" }} />
       </Grid>
       <Grid item xs={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
-        <LineDisplay name="Interest" value="--" />
-        <LineDisplay name="Min. Investment" value="--" />
-        <LineDisplay name="Term" value="--" />
-        <LineDisplay name="Payment" value="--" />
+        <LineDisplay name="Interest" value={`${data.debtInterestRate}%`} />
+        <LineDisplay
+          name="Min. Investment"
+          value={`$${data.debtMinInvestment}`}
+        />
+        <LineDisplay name="Term" value={`${data.debtTermMonths} months`} />
+        <LineDisplay name="Payment" value={`${data.debtPaymentFreq}`} />
       </Grid>
     </Grid>
   );

@@ -2,6 +2,7 @@
 
 .app-image-gallery .image-gallery-image {
   border-radius: 4px;
+  height: 600px;
 }
 .app-image-gallery .image-gallery-slide-wrapper {
   border-radius: 4px;

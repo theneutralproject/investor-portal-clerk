@@ -12,23 +12,26 @@ import { type Project } from "@prisma/client";
 
 const ProjectCalculator = ({ data }: { data: Project }) => {
   const [investment, setInvestment] = useState(100000);
-  const targetEquityMultiple = 2.4;
-  const targetTermLength = 60;
-  console.log(data);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInvestment(Number(event.target.value));
   };
 
-  const totalTargetedReturn = investment * targetEquityMultiple;
+  const targetTermLength = data.equityTermMonths;
 
   const sp_annual_rate = 12.2;
   const reit_annual_rate = 11.3;
+  const project_annual_rate = data.equityIRR;
+
   const sp500return = Math.round(
     investment * (1 + (sp_annual_rate / 100) * (targetTermLength / 12))
   );
   const reitReturn = Math.round(
     investment * (1 + (reit_annual_rate / 100) * (targetTermLength / 12))
+  );
+
+  const totalTargetedReturn = Math.round(
+    investment * (1 + (project_annual_rate / 100) * (targetTermLength / 12))
   );
 
   return (
@@ -51,8 +54,8 @@ const ProjectCalculator = ({ data }: { data: Project }) => {
         />
 
         <LineDisplay
-          name="Target Equity Multiple"
-          value={targetEquityMultiple + "x"}
+          name="Target Equity Multiple?"
+          value={project_annual_rate + "%"}
         />
         <LineDisplay
           name="Target Term Length (Months)"

@@ -18,6 +18,9 @@ export async function GET(request: NextRequest) {
 
     const projects = await prisma.project.findMany({
       where: { id: parsedId },
+      include: {
+        pictures: true,
+      },
     });
 
     if (!projects) {

@@ -7,12 +7,16 @@ import {
   Divider,
   Box,
 } from "@mui/material";
-import { type Project } from "@prisma/client";
 import { capitalize } from "lodash";
 import Link from "next/link";
 import ProjectMetrics from "./ProjectMetrics";
+import { type ProjectWithPictures } from "@/libs/prisma";
 
-const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
+const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({ project }) => {
+  const headerPicture = project?.pictures?.find(
+    (picture) => picture.type === "HEADER"
+  );
+
   return (
     <Card
       sx={{
@@ -25,7 +29,7 @@ const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
       <CardMedia
         component="img"
         height="200"
-        image="https://via.placeholder.com/330x200.png?text=Project+Image"
+        image={headerPicture?.url}
         alt="Project image"
       />
 

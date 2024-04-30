@@ -1,5 +1,5 @@
 /* eslint-disable import/no-mutable-exports */
-import { PrismaClient } from "@prisma/client";
+import { type Pictures, PrismaClient, type Project } from "@prisma/client";
 
 let prisma: PrismaClient;
 
@@ -16,3 +16,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 export default prisma;
+
+export type ProjectWithPictures = Project & {
+  pictures: Pictures[];
+};

@@ -2,19 +2,20 @@
 
 import ProjectCard from "@/components/Project/ProjectCard";
 import { Box, Typography } from "@mui/material";
-import { type Project } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
 import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
 import { useUser } from "@clerk/nextjs";
 
+import { type ProjectWithPictures } from "@/libs/prisma";
+
 const Dashboard = () => {
   const { user } = useUser();
-  const { isLoading, data } = useQuery<Project[], Error>({
+  const { isLoading, data } = useQuery<ProjectWithPictures[], Error>({
     queryKey: ["project", "all"],
     queryFn: () =>
-      axios.get<Project[]>("/api/projects").then((res) => res.data),
+      axios.get<ProjectWithPictures[]>("/api/projects").then((res) => res.data),
   });
 
   if (isLoading) {

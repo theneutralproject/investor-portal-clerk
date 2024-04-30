@@ -14,11 +14,19 @@ const BuildingDetails = ({ data }: { data: Project }) => {
 
         <Divider sx={{ mt: 2, mb: 2 }} />
 
-        <LineDisplay name="Total Units" value={"-"} />
-        <LineDisplay name="Avg. Unit Size" value={"-"} />
-        <LineDisplay name="Avg. Gross Rent" value={"-"} />
-        <LineDisplay name="Residential Units" value={data?.numUnits} />
-        <LineDisplay name="Commercial Sq. Ft." value={"-"} />
+        <LineDisplay name="Total Units" value={`${data.buildingUnits}`} />
+        <LineDisplay
+          name="Avg. Unit Size"
+          value={`${data.buildingAvgUnitSize} SF`}
+        />
+        <LineDisplay
+          name="Avg. Gross Rent"
+          value={`$${data.buildingAvgRent}`}
+        />
+        <LineDisplay
+          name="Commercial Sq. Ft."
+          value={`${data.buildingCommSqFt} SF`}
+        />
       </CardContent>
     </Card>
   );

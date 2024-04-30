@@ -42,20 +42,31 @@ enum Status {
 }
 
 model Project {
-  id               Int        @id @default(autoincrement())
-  status           Status     @default(ACTIVE)
-  name             String
-  description      String
-  location         String
-  tags             String     @default("")
-  pictures         Pictures[]
-  investmentRaised Float    @default(0.0)
-  investmentGoal   Float    @default(0.0)
-  numUnits         Int        @default(0)
-  projectIrr       Float    @default(0.0)
-  meetings         Meeting[]
-  documents        Document[]
-  deals            Deal[]
+  id                  Int        @id @default(autoincrement())
+  status              Status     @default(ACTIVE)
+  name                String
+  description         String
+  marketHighlights    String     @default("")
+  location            String
+  tags                String     @default("")
+  investmentRaised    Float      @default(0.0)
+  investmentGoal      Float      @default(0.0)
+  equityIRR           Float      @default(0.0)
+  equityMinInvestment Int        @default(250000)
+  equityTermMonths    Int        @default(60)
+  equityPaymentFreq   String     @default("quarterly")
+  debtInterestRate    Float      @default(0.0)
+  debtMinInvestment   Int        @default(25000)
+  debtTermMonths      Int        @default(60)
+  debtPaymentFreq     String     @default("quarterly")
+  buildingUnits       Int        @default(0)
+  buildingAvgUnitSize Int        @default(0)
+  buildingAvgRent     Int        @default(0)
+  buildingCommSqFt    Int        @default(0)
+  pictures            Pictures[]
+  meetings            Meeting[]
+  documents           Document[]
+  deals               Deal[]
 }
 
 enum PictureType {
@@ -101,14 +112,14 @@ model DocumentEvent {
 }
 
 model Deal {
-  id        Int     @id @default(autoincrement())
-  projectId Int
-  project   Project @relation(fields: [projectId], references: [id])
-  userId    Int
-  user      User   @relation(fields: [userId], references: [id])
-  dealStage Int
-  amount    Int
-  hubspotId String @unique
+  id            Int                @id @default(autoincrement())
+  projectId     Int
+  project       Project            @relation(fields: [projectId], references: [id])
+  userId        Int
+  user          User               @relation(fields: [userId], references: [id])
+  dealStage     Int
+  amount        Int
+  hubspotId     String             @unique
   financingType DealFinancingType?
 }
 

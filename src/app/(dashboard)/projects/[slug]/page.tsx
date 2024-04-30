@@ -6,7 +6,7 @@ import "./dealPage.css";
 import { useState } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { type Deal, type Project } from "@prisma/client";
+import { type Deal } from "@prisma/client";
 import ProjectHeader from "@/components/Project/ProjectHeader";
 import { InvestTab } from "@/components/Project/Invest/InvestTab";
 import { ProjectDocTab } from "@/components/Project/ProjectDocs/ProjectDocTab";
@@ -14,6 +14,7 @@ import InvestmentProgress from "@/components/Project/InvestmentProgress/Investme
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
 import { FundTab } from "@/components/Project/Fund/FundTab";
+import { type ProjectWithPictures } from "@/libs/prisma";
 
 export type PageProps = {
   params: {
@@ -21,44 +22,6 @@ export type PageProps = {
   };
 };
 
-const images = [
-  {
-    original: "https://picsum.photos/id/1018/1000/400/",
-    thumbnail: "https://picsum.photos/id/1018/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1011/1000/400/",
-    thumbnail: "https://picsum.photos/id/1011/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1018/1000/400/",
-    thumbnail: "https://picsum.photos/id/1018/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1018/1000/400/",
-    thumbnail: "https://picsum.photos/id/1018/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1011/1000/400/",
-    thumbnail: "https://picsum.photos/id/1011/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1018/1000/400/",
-    thumbnail: "https://picsum.photos/id/1018/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1018/1000/400/",
-    thumbnail: "https://picsum.photos/id/1018/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1011/1000/400/",
-    thumbnail: "https://picsum.photos/id/1011/1000/400/",
-  },
-  {
-    original: "https://picsum.photos/id/1018/1000/400/",
-    thumbnail: "https://picsum.photos/id/1018/1000/400/",
-  },
-];
 export default function Page({ params: { slug } }: PageProps) {
   const [tabValue, setTabValue] = useState(0);
 
@@ -66,10 +29,12 @@ export default function Page({ params: { slug } }: PageProps) {
     setTabValue(newValue);
   };
 
-  const { isLoading, data } = useQuery<Project[], Error>({
+  const { isLoading, data } = useQuery<ProjectWithPictures[], Error>({
     queryKey: ["project", slug],
     queryFn: () =>
-      axios.get<Project[]>(`/api/projects?id=${slug}`).then((res) => res.data),
+      axios
+        .get<ProjectWithPictures[]>(`/api/projects?id=${slug}`)
+        .then((res) => res.data),
   });
 
   const { isLoading: dealLoading, data: dealData } = useQuery<
@@ -99,12 +64,20 @@ export default function Page({ params: { slug } }: PageProps) {
   const percentRaised = Math.round(
     (project.investmentRaised / project.investmentGoal) * 100
   );
+
+  const images = project.pictures
+    .map((picture) => ({
+      original: picture.url,
+      thumbnail: picture.url,
+      type: picture.type, // Add the type to the mapped object
+    }))
+    .sort((a) => (a.type === "HEADER" ? -1 : 1));
+
   return (
     <Container>
       <ImageGallery
         items={images}
         showNav={false}
-        thumbnailPosition={"right"}
         showPlayButton={false}
         additionalClass="app-image-gallery"
       />
