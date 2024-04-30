@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 export default authMiddleware({
   ignoredRoutes: ["/api/webhooks(.*)"],
   publicRoutes: (req: NextRequest) => {
-    const publicRoutes = ["/terms", "/support", "/api/clerk", "/sign-up", "sign-in"];
+    const publicRoutes = ["/terms", "/support", "/api/clerk", "/sign-up", "/sign-in"];
     return publicRoutes.some((route) => req.nextUrl.pathname.includes(route));
   },
 
@@ -16,9 +16,9 @@ export default authMiddleware({
       return redirectToSignIn({ returnBackUrl: process.env.NEXTAUTH_URL });
     }
   },
-  beforeAuth(_req, ) {
-    console.log("before auth", _req.url, _req.nextUrl.href)
-  }
+  // beforeAuth(_req, ) {
+  //   console.log("before auth", _req.url, _req.nextUrl.href)
+  // }
 });
 
 export const config = {
