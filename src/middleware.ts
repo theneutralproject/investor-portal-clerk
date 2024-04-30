@@ -5,8 +5,7 @@ import process from "process";
 export default authMiddleware({
   ignoredRoutes: ["/api/webhooks(.*)"],
   publicRoutes: (req: NextRequest) => {
-    const publicRoutes = ["/terms", "/support", "/api/clerk"];
-
+    const publicRoutes = ["/terms", "/support", "/api/clerk", "/sign-up", "sign-in"];
     return publicRoutes.some((route) => req.nextUrl.pathname.includes(route));
   },
 
