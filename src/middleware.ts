@@ -1,6 +1,5 @@
 import { authMiddleware, redirectToSignIn } from "@clerk/nextjs";
 import type { NextRequest } from "next/server";
-import process from "process";
 
 export default authMiddleware({
   ignoredRoutes: ["/api/webhooks(.*)"],
