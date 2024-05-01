@@ -1,4 +1,4 @@
-import type { DealUpdateSchema } from "@/app/api/utils-module/_globals";
+import type { HubspotDealUpdateSchema } from "@/app/api/utils-module/_globals";
 import { updateDeal } from "@/app/api/utils-module/dealUtils";
 import { getErrorMessage } from "@/app/api/utils-module/helpers";
 import { getDealStageInt } from "@/app/api/utils-module/hubspotUtils";
@@ -39,7 +39,7 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    const dealBody: DealUpdateSchema = {
+    const dealBody: HubspotDealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
 

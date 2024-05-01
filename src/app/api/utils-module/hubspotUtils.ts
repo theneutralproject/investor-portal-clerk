@@ -65,6 +65,7 @@ export const zHsDealSchema = z.object({
 export async function createDealForContact(deal: HubspotDeal, contactHubspotId: string) {
   // first create a deal
   const { properties } = deal;
+  console.log("posting", deal)
 
   const body = JSON.stringify({
     associations: {
@@ -85,9 +86,10 @@ export async function createDealForContact(deal: HubspotDeal, contactHubspotId: 
       body,
     }
   )
-
+const hsDealCreateRespBody = await resBody.json();
+console.log(hsDealCreateRespBody)
   try {
-    const { dealId } = zHsDealSchema.parse(await resBody.json());
+    const { dealId } = zHsDealSchema.parse(hsDealCreateRespBody);
     return dealId;
   } catch (error) {
     console.error("No good hs deal making:\n", error);
@@ -105,6 +107,18 @@ export function initDealPropsForProject(projectName: string, user: User) {
         properties: [
           { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
           { name: "dealstage", value: EdisonDealStages[1]?.value ?? "" },
+          { name: "investment_entity", value: InvestmentEntity[projectName].equity },
+          { name: "project_name", value: projectName },
+          { name: "amount", value: "0" },
+          { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
+        ]
+      } as HubspotDeal
+    }
+    case ProjectName["519-521 W Main St"]: {
+      return {
+        properties: [
+          { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
+          { name: "dealstage", value: _519WMainDealStages[1]?.value ?? "" },
           { name: "investment_entity", value: InvestmentEntity[projectName].equity },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
@@ -135,6 +149,10 @@ const InvestmentEntity = {
   "The Edison": {
     equity: "North Edison LLC",
     debt: "Edison Project LLC",
+  },
+  "519-521 W Main St": {
+    equity: "Vanilla 301 LLC",
+    debt: "Vanilla 301 LLC",
   }
 }
 
