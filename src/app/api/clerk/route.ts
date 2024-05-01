@@ -9,7 +9,6 @@ import {
   type HubspotContact,
   createOrUpdateContact,
 } from "../utils-module/hubspotUtils";
-import { getErrorMessage } from "../utils-module/helpers";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -64,8 +63,11 @@ export async function POST(request: Request) {
        try{
         hsUpdate = await createOrUpdateContact(hsUserData);
       } catch (error) {
-        console.error("No good hs deal making:\n", error);
-        return new Error(getErrorMessage(error));
+        console.error("Unable to create user in hubspot:\n", error);
+        return new Response(JSON.stringify({ error: "Unable to create user in hubspot" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
        }
       const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString();
 
@@ -86,9 +88,11 @@ export async function POST(request: Request) {
         await prisma.user.create({ data: DBUserData });
       } catch (error) {
         console.error("ERROR: Cannot create User in DB:\n", error);
-        return new Error(getErrorMessage(error));
+        return new Response(JSON.stringify({ error: "Unable to create user in DB" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
        }
-
       break;
     }
 

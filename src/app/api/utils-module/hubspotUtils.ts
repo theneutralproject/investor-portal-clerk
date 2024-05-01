@@ -43,7 +43,7 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
         body: JSON.stringify(hubspotContact),
       }
     )
-
+    console.log(response.json())
     const hsRes = hubspotContactRes.parse(response.json())
     return hsRes;
   } catch (err) {
