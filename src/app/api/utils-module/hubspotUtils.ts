@@ -115,7 +115,7 @@ export function initDealPropsForProject(projectName: string, user: User) {
         ]
       } as HubspotDeal
     }
-    case ProjectName["519-521 W Main St"]: {
+    case ProjectName["519 W Main"]: {
       return {
         properties: [
           { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
@@ -151,7 +151,7 @@ const InvestmentEntity = {
     equity: "North Edison LLC",
     debt: "Edison Project LLC",
   },
-  "519-521 W Main St": {
+  "519 W Main": {
     equity: "Vanilla 301 LLC",
     debt: "Vanilla 301 LLC",
   }

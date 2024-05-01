@@ -6,7 +6,7 @@ export enum ProjectName {
     "The Edison" = "The Edison",
     "Bakers Place" = "Bakers Place",
     "The Bloom" = "The Bloom",
-    "519-521 W Main St" = "519-521 W Main St"
+    "519 W Main" = "519 W Main"
   }
 
   export const zHubspotDealUpdateSchema = z.object({
