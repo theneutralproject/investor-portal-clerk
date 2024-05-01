@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       return new Response(
         JSON.stringify({ error: "No deals found for this project" }),
         {
-          status: 404,
+          status: 200, //Valid return
           headers: { "Content-Type": "application/json" },
         }
       );

@@ -12,7 +12,9 @@ import Link from "next/link";
 import ProjectMetrics from "./ProjectMetrics";
 import { type ProjectWithPictures } from "@/libs/prisma";
 
-const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({ project }) => {
+const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
+  project,
+}) => {
   const headerPicture = project?.pictures?.find(
     (picture) => picture.type === "HEADER"
   );
@@ -24,6 +26,7 @@ const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({ project }) =>
         flexDirection: "column",
         margin: 2,
         maxWidth: 345,
+        minWidth: 345,
       }}
     >
       <CardMedia

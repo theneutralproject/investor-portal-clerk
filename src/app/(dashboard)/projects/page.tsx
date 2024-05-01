@@ -1,7 +1,7 @@
 "use client";
 
 import ProjectCard from "@/components/Project/ProjectCard";
-import { Box, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
 
@@ -37,9 +37,11 @@ const Dashboard = () => {
       <Typography variant="h5" sx={{ mt: 4 }}>
         All Projects
       </Typography>
-      {data.map((project) => (
-        <ProjectCard key={project.id} project={project} />
-      ))}
+      <Grid sx={{ display: "flex", flexWrap: "wrap" }}>
+        {data.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
+      </Grid>
     </Box>
   );
 };
