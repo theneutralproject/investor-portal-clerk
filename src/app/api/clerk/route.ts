@@ -58,7 +58,7 @@ export async function POST(request: Request) {
         ],
       } as HubspotContact;
 
-      console.log("clerk WH2", hsUserData);
+      console.log("clerk WH2 - posting hsUserData", hsUserData);
       let hsUpdate;
        try{
         hsUpdate = await createOrUpdateContact(hsUserData);

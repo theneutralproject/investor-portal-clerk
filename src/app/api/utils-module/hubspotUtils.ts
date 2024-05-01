@@ -31,25 +31,31 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
     value: signupDate,
   });
 
-  try {
-    const response = await fetch(
-      `https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-        },
-        body: JSON.stringify(hubspotContact),
-      }
-    )
-    console.log(response.json())
-    const hsRes = hubspotContactRes.parse(response.json())
-    return hsRes;
-  } catch (err) {
-    console.error("ERROR: unable to parse HS response:\n", err);
-    return new Error("unable to parse HS response")
-  }
+  return await fetch(
+    `https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(hubspotContact),
+    }
+  ).then(async (response) => {
+    try {
+       // eslint-disable-next
+      const resJson = await response.json();
+      const hsRes = hubspotContactRes.parse(resJson)
+      return hsRes;
+    } catch (parseError) {
+      console.error("ERROR: unable to parse HS response:\n", parseError);
+      return new Error("unable to parse HS response")
+    }
+
+  }).catch((fetchError) => {
+    console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
+    return new Error("unable to update hubspot contact")
+  })
 }
 
 export const zHsDealSchema = z.object({
