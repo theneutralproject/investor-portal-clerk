@@ -17,9 +17,9 @@ export async function updateDeal(
     return Error("Invalid input: hubspotId must be a non-empty string");
   }
 
-  if (typeof dealStage !== "string" || !dealStage) {
-    console.error("Invalid input: dealStage must be a non-empty string");
-    return Error("Invalid input: dealStage must be a non-empty string");
+  if (typeof dealStage !== "number" || !dealStage) {
+    console.error("Invalid input: dealStage must be an integer");
+    return Error("Invalid input: dealStage must be an integer");
   }
 
   if (typeof amount !== "number" || isNaN(amount)) {
