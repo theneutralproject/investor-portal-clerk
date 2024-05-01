@@ -31,23 +31,23 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
     value: signupDate,
   });
 
-  const response = await fetch(
-    `https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(hubspotContact),
-    }
-  )
-
   try {
+    const response = await fetch(
+      `https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify(hubspotContact),
+      }
+    )
+
     const hsRes = hubspotContactRes.parse(response.json())
     return hsRes;
   } catch (err) {
-    console.log(err);
+    console.error("ERROR: unable to parse HS response:\n", err);
     return new Error("unable to parse HS response")
   }
 }
@@ -67,7 +67,7 @@ export async function createDealForContact(deal: HubspotDeal, contactHubspotId: 
       ]
     }, properties: properties
   });
-  
+
   const resBody = await fetch(
     `https://api.hubapi.com/deals/v1/deal`,
     {
@@ -83,9 +83,9 @@ export async function createDealForContact(deal: HubspotDeal, contactHubspotId: 
   try {
     const { dealId } = zHsDealSchema.parse(await resBody.json());
     return dealId;
-  } catch (err) {
-    console.error("No good hs deal making:\n", err);
-    return new Error(getErrorMessage(err));
+  } catch (error) {
+    console.error("No good hs deal making:\n", error);
+    return new Error(getErrorMessage(error));
   }
 }
 

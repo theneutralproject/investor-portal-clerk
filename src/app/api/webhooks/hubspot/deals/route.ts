@@ -70,8 +70,8 @@ export async function POST(req: Request): Promise<Response> {
     return new Response(JSON.stringify(updatedDeal), {
       headers: { "Content-Type": "application/json" },
     });
-  } catch (err) {
-    console.log("Error parsing HubSpot webhook: ", err);
+  } catch (error) {
+    console.error("Error parsing HubSpot webhook: ", error);
     return new Response(
       JSON.stringify({ error: "Unable to parse HubSpot webhook" }),
       {

@@ -9,6 +9,7 @@ import {
   type HubspotContact,
   createOrUpdateContact,
 } from "../utils-module/hubspotUtils";
+import { getErrorMessage } from "../utils-module/helpers";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -39,6 +40,7 @@ export async function POST(request: Request) {
 
   switch (type) {
     case "user.created": {
+      console.log("clerk WH1 - user created");
       const email =
         email_addresses.find(({ id }) => id === primary_email_address_id)
           ?.email_address ?? "";
@@ -47,7 +49,7 @@ export async function POST(request: Request) {
           ?.phone_number ?? "";
 
       /* Store/ update user in Hubspot**/
-      const HSUserData = {
+      const hsUserData = {
         email: email,
         properties: [
           { property: `userid`, value: id },
@@ -57,9 +59,17 @@ export async function POST(request: Request) {
         ],
       } as HubspotContact;
 
-      const hsUpdate = await createOrUpdateContact(HSUserData);
+      console.log("clerk WH2", hsUserData);
+      let hsUpdate;
+       try{
+        hsUpdate = await createOrUpdateContact(hsUserData);
+      } catch (error) {
+        console.error("No good hs deal making:\n", error);
+        return new Error(getErrorMessage(error));
+       }
       const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString();
 
+      console.log("clerk WH3");
       /* Store user in DB**/
       const DBUserData = {
         clerkId: id,
@@ -71,12 +81,13 @@ export async function POST(request: Request) {
         hubspotId: hubspotUserId,
       } as User;
 
+      console.log("clerk WH4", DBUserData);
       try {
         await prisma.user.create({ data: DBUserData });
-      } catch (err) {
-        // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-        console.error(`DB user create error: ${err}`);
-      }
+      } catch (error) {
+        console.error("ERROR: Cannot create User in DB:\n", error);
+        return new Error(getErrorMessage(error));
+       }
 
       break;
     }
