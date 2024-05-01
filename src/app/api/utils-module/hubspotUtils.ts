@@ -43,7 +43,7 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
     }
   ).then(async (response) => {
     try {
-       // eslint-disable-next
+       // eslint-disable-next-line
       const resJson = await response.json();
       const hsRes = hubspotContactRes.parse(resJson)
       return hsRes;
