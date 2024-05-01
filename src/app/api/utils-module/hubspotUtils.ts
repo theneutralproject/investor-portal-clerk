@@ -86,6 +86,7 @@ export async function createDealForContact(deal: HubspotDeal, contactHubspotId: 
       body,
     }
   )
+/* eslint-disable-next-line */
 const hsDealCreateRespBody = await resBody.json();
 console.log(hsDealCreateRespBody)
   try {
