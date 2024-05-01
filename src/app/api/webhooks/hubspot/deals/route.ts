@@ -28,12 +28,12 @@ export async function POST(req: Request): Promise<Response> {
       !(payload?.changeSource === "CRM_UI" || payload?.changeSource === "CRM")
     ) {
       console.log(
-        "Ignoring HubSpot webhook: change source is invalid or property value is missing."
+        `Ignoring HubSpot webhook: change source ${payload?.changeSource} is not the HS UI, or property value is missing.`
       );
       return new Response(
-        JSON.stringify({ error: "Ignoring HubSpot webhook" }),
+        JSON.stringify({ message: "Ignoring HubSpot webhook" }),
         {
-          status: 401,
+          status: 200,
           headers: { "Content-Type": "application/json" },
         }
       );

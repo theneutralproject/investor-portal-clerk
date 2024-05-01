@@ -142,7 +142,12 @@ export function initDealPropsForProject(projectName: string, user: User) {
  * @returns dealstage integer of corresponding dealstage for any of our projects
  */
 export function getDealStageInt(dealstage: string) {
-  const pos = [...EdisonDealStages, ..._519WMainDealStages].map(e => e.value).indexOf(dealstage)
+  let pos = EdisonDealStages.map(e => e.value).indexOf(dealstage);
+
+  if (pos === -1) {
+    pos = _519WMainDealStages.map(e => e.value).indexOf(dealstage);
+  }
+
   return pos;
 }
 
