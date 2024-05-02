@@ -16,7 +16,8 @@ export const ProjectDocTab: React.FC<{
   dealStage: number;
 }> = ({ project, dealStage }) => {
   const [openModal, setOpenModal] = useState(false);
-  const [currentFileUrl, setCurrentFileUrl] = useState("");
+  const [currentDocument, setCurrentDocument] =
+    useState<DocumentWithCompletion>();
 
   const {
     isLoading,
@@ -31,18 +32,24 @@ export const ProjectDocTab: React.FC<{
     error: any;
     documentEventMutation: any;
   } = useDocuments(project.id, 1);
-  const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
 
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error.message}</div>;
 
-  const handleViewDocument = (fileUrl: string) => {
-    setCurrentFileUrl(fileUrl);
+  const handleViewDocument = (document: DocumentWithCompletion) => {
+    setCurrentDocument(document);
     setOpenModal(true);
   };
 
   const handleCloseModal = () => {
     setOpenModal(false);
+
+    if (!currentDocument?.completed) {
+      documentEventMutation.mutate({
+        documentId: currentDocument?.id,
+        type: "VIEW",
+      });
+    }
   };
 
   return (
@@ -53,13 +60,13 @@ export const ProjectDocTab: React.FC<{
             key={index}
             document={document}
             dealStage={dealStage}
-            handleViewDocument={() => handleViewDocument(document.link)}
+            handleViewDocument={() => handleViewDocument(document)}
           />
         ))}
         <DocumentViewerModal
           open={openModal}
           onClose={handleCloseModal}
-          fileUrl={currentFileUrl}
+          fileUrl={currentDocument?.link ?? ""}
         />
       </CardContent>
     </Card>
