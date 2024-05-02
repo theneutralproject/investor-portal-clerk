@@ -13,16 +13,16 @@ const ChatInterface = () => {
   return (
     <>
       <Fab
-        color="primary"
         onClick={handleOpen}
         sx={{
+          backgroundColor: "#626f52",
           position: "fixed",
           bottom: theme.spacing(2),
           right: theme.spacing(2),
           zIndex: 1200, // Higher than most elements
         }}
       >
-        <ChatIcon />
+        <ChatIcon sx={{ color: "white" }} />
       </Fab>
       <Modal
         open={open}

@@ -45,11 +45,6 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
         documentId: selectedDocumentId,
         type: "VIEW",
       });
-
-      // Check if all documents are viewed
-      if (data.every((doc) => doc.completed || doc.id === selectedDocumentId)) {
-        mutateDeal("increment");
-      }
     }
   };
 

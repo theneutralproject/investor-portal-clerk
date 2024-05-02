@@ -8,10 +8,16 @@ import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
+import DocumentViewerModal from "./DocumentViewerModal";
+import { useState } from "react";
+
 export const ProjectDocTab: React.FC<{
   project: Project;
   dealStage: number;
 }> = ({ project, dealStage }) => {
+  const [openModal, setOpenModal] = useState(false);
+  const [currentFileUrl, setCurrentFileUrl] = useState("");
+
   const {
     isLoading,
     isError,
@@ -30,13 +36,13 @@ export const ProjectDocTab: React.FC<{
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error.message}</div>;
 
-  const handleViewDocument = (documentId: number) => {
-    documentEventMutation.mutate({ documentId, type: "VIEW" });
+  const handleViewDocument = (fileUrl: string) => {
+    setCurrentFileUrl(fileUrl);
+    setOpenModal(true);
+  };
 
-    // Check if all documents are viewed
-    if (data.every((doc) => doc.completed || doc.id === documentId)) {
-      mutateDeal("increment");
-    }
+  const handleCloseModal = () => {
+    setOpenModal(false);
   };
 
   return (
@@ -47,9 +53,14 @@ export const ProjectDocTab: React.FC<{
             key={index}
             document={document}
             dealStage={dealStage}
-            handleViewDocument={handleViewDocument}
+            handleViewDocument={() => handleViewDocument(document.link)}
           />
         ))}
+        <DocumentViewerModal
+          open={openModal}
+          onClose={handleCloseModal}
+          fileUrl={currentFileUrl}
+        />
       </CardContent>
     </Card>
   );

@@ -29,6 +29,7 @@ import * as React from "react";
 
 import { theme } from "./NeutralThemeProvider";
 import UserAvatar from "./UserAvatar";
+import NeutralBreadcrumbs from "./NeutralBreadcrumbs";
 
 export const ROUTES = [
   {
@@ -121,12 +122,12 @@ export default function Sidebar(props: { children: React.ReactNode }) {
 
   // Define an array for button items
   const buttonItems = [
-    {
-      key: "support",
-      label: "Support",
-      icon: <HelpIcon />,
-      // onClick: () => router.push("/support"),
-    },
+    // {
+    //   key: "support",
+    //   label: "Support",
+    //   icon: <HelpIcon />,
+    //   // onClick: () => router.push("/support"),
+    // },
     {
       key: "terms",
       label: "Terms of Service",
@@ -145,8 +146,6 @@ export default function Sidebar(props: { children: React.ReactNode }) {
     return pathName.includes(routePath);
   };
 
-  const breadcrumbs = pathName.split("/").filter(Boolean);
-
   return (
     <Box sx={{ display: "flex" }}>
       <AppBar position="absolute" open sx={{ backgroundColor: "white" }}>
@@ -160,29 +159,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             },
           }}
         >
-          {breadcrumbs.map((part, index) => (
-            <React.Fragment key={index}>
-              {index > 0 && (
-                <Typography
-                  variant="body2"
-                  sx={{ fontSize: "18px", mr: "8px" }}
-                >
-                  /
-                </Typography>
-              )}
-              <Typography
-                variant="body2"
-                sx={{
-                  mr: "8px",
-                  fontSize: "18px",
-                  color:
-                    index === breadcrumbs.length - 1 ? "#000000DE" : undefined, // Last part is always black
-                }}
-              >
-                {capitalize(part)}
-              </Typography>
-            </React.Fragment>
-          ))}
+          <NeutralBreadcrumbs />
 
           <Box sx={{ alignSelf: "flex-end", ml: "auto", display: "flex" }}>
             <UserAvatar />
@@ -208,7 +185,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             border: "none !important",
           }}
         >
-          <Image width="210" height="65" src="/logo.png" alt={""} />
+          <Image width="210" height="65" src="/NeutralWhiteLogo.svg" alt={""} />
         </Toolbar>
 
         <List component="nav">

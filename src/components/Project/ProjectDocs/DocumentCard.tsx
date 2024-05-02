@@ -62,38 +62,15 @@ const DocumentCard = ({
           p: theme.spacing(1),
         }}
       >
-        {document.link.includes("docusign") ? (
-          <IconButton
-            aria-label="download"
-            size="large"
-            onClick={() => {
-              if (!document.completed) {
-                handleViewDocument(document.id);
-              }
-            }}
-          >
-            <DownloadIcon />
-          </IconButton>
-        ) : (
-          <a
-            href={document.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ textDecoration: "none" }}
-          >
-            <IconButton
-              aria-label="download"
-              size="large"
-              onClick={() => {
-                if (!document.completed) {
-                  handleViewDocument(document.id);
-                }
-              }}
-            >
-              <DownloadIcon />
-            </IconButton>
-          </a>
-        )}
+        <IconButton
+          aria-label="download"
+          size="large"
+          onClick={() => {
+            handleViewDocument(document.id);
+          }}
+        >
+          <DownloadIcon />
+        </IconButton>
       </Box>
     </Card>
   );

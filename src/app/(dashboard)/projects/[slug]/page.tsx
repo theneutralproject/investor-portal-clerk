@@ -79,6 +79,7 @@ export default function Page({ params: { slug } }: PageProps) {
         items={images}
         showNav={false}
         showPlayButton={false}
+        showFullscreenButton={false}
         additionalClass="app-image-gallery"
       />
 
