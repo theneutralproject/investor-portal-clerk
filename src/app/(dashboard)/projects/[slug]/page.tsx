@@ -71,6 +71,7 @@ export default function Page({ params: { slug } }: PageProps) {
       thumbnail: picture.url,
       type: picture.type, // Add the type to the mapped object
     }))
+    .filter((picture) => picture.type!=="CARD")
     .sort((a) => (a.type === "HEADER" ? -1 : 1));
 
   return (
