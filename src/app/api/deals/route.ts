@@ -2,7 +2,7 @@ import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
 import {
-  createDealForContact,
+  createHubspotDealForContact,
   initDealPropsForProject,
 } from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
 
     const deals = await prisma.deal.findFirst({
       where: { userId: neutralUser.id, projectId: projectIdAsInt },
+      // include: { project: true },
     });
 
     if (!deals) {
@@ -119,7 +120,10 @@ export async function POST(request: NextRequest) {
     });
 
     if (!deal) {
-      const hsDeal = initDealPropsForProject(project.name, neutralUser);
+      console.log("no deal yet");
+      const transactionId = `${project.name}-${neutralUser.lastName}-${Math.floor(Math.random() * (999 - 100 + 1) + 100)}`.replace(/\s/g, '').toUpperCase();
+
+      const hsDeal = initDealPropsForProject(project.name, neutralUser, transactionId);
       if (!hsDeal) {
         return jsonResponse(
           {
@@ -130,11 +134,11 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      const dealId = await createDealForContact(
+      const hsDealId = await createHubspotDealForContact(
         hsDeal,
         String(neutralUser.hubspotId)
       );
-      if (isError(dealId)) {
+      if (isError(hsDealId)) {
         return jsonResponse({ error: "HS Deal cannot be created." }, 400);
       }
 
@@ -144,7 +148,9 @@ export async function POST(request: NextRequest) {
           projectId: projectIdAsInt,
           dealStage: 0,
           amount: 0,
-          hubspotId: dealId.toString(),
+          hubspotId: hsDealId.toString(),
+          financingType: 'equity',
+          transactionId: transactionId,
         },
       });
     }

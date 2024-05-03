@@ -43,7 +43,7 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
     }
   ).then(async (response) => {
     try {
-       // eslint-disable-next-line
+      // eslint-disable-next-line
       const resJson = await response.json();
       const hsRes = hubspotContactRes.parse(resJson)
       return hsRes;
@@ -62,7 +62,7 @@ export const zHsDealSchema = z.object({
   dealId: z.number()
 });
 
-export async function createDealForContact(deal: HubspotDeal, contactHubspotId: string) {
+export async function createHubspotDealForContact(deal: HubspotDeal, contactHubspotId: string) {
   // first create a deal
   const { properties } = deal;
   console.log("posting", deal)
@@ -86,9 +86,9 @@ export async function createDealForContact(deal: HubspotDeal, contactHubspotId: 
       body,
     }
   )
-/* eslint-disable-next-line */
-const hsDealCreateRespBody = await resBody.json();
-console.log(hsDealCreateRespBody)
+  /* eslint-disable-next-line */
+  const hsDealCreateRespBody = await resBody.json();
+  console.log(hsDealCreateRespBody)
   try {
     const { dealId } = zHsDealSchema.parse(hsDealCreateRespBody);
     return dealId;
@@ -101,7 +101,7 @@ console.log(hsDealCreateRespBody)
 
 
 /* eslint-disable */
-export function initDealPropsForProject(projectName: string, user: User) {
+export function initDealPropsForProject(projectName: string, user: User, transactionId: string) {
   switch (projectName) {
     case ProjectName["The Edison"]: {
       return {
@@ -111,6 +111,8 @@ export function initDealPropsForProject(projectName: string, user: User) {
           { name: "investment_entity", value: InvestmentEntity[projectName].equity },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
+          { name: "financing_type", value: "equity" },
+          { name: "transaction_id", value: transactionId },
           { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
         ]
       } as HubspotDeal
@@ -123,6 +125,8 @@ export function initDealPropsForProject(projectName: string, user: User) {
           { name: "investment_entity", value: InvestmentEntity[projectName].equity },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
+          { name: "financing_type", value: "equity" },
+          { name: "transaction_id", value: transactionId },
           { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
         ]
       } as HubspotDeal
@@ -164,22 +168,20 @@ const InvestmentEntity = {
 
 export const EdisonDealStages = [
   { key: "aQualified", value: "appointmentscheduled" },
-  { key: "bRapport", value: "qualifiedtobuy" },
-  { key: "cAwareness", value: "165518133" },
-  { key: "dContractShared", value: "presentationscheduled" },
-  { key: "eContractSigned", value: "decisionmakerboughtin" },
-  { key: "fFunded", value: "contractsent" },
-  { key: "gClosedLost", value: "closedlost" }
+  { key: "bAwareness", value: "165518133" },
+  { key: "cContractShared", value: "presentationscheduled" },
+  { key: "dContractSigned", value: "decisionmakerboughtin" },
+  { key: "eFunded", value: "contractsent" },
+  { key: "fClosedLost", value: "closedlost" }
 ]
 
 export const _519WMainDealStages = [
   { key: "aQualified", value: "146586769" },
-  { key: "bRapport", value: "146586770" },
-  { key: "cAwareness", value: "165498481" },
-  { key: "dContractShared", value: "146586771" },
-  { key: "eContractSigned", value: "146586772" },
-  { key: "fFunded", value: "146586773" },
-  { key: "gClosedLost", value: "146586774" }
+  { key: "bAwareness", value: "165498481" },
+  { key: "cContractShared", value: "146586771" },
+  { key: "dContractSigned", value: "146586772" },
+  { key: "eFunded", value: "146586773" },
+  { key: "fClosedLost", value: "146586774" }
 ]
 
 
