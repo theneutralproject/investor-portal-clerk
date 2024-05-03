@@ -15,8 +15,8 @@ import { type ProjectWithPictures } from "@/libs/prisma";
 const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
   project,
 }) => {
-  const headerPicture = project?.pictures?.find(
-    (picture) => picture.type === "HEADER"
+  const cardPicture = project?.pictures?.find(
+    (picture) => picture.type === "CARD"
   );
 
   return (
@@ -32,7 +32,7 @@ const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
       <CardMedia
         component="img"
         height="200"
-        image={headerPicture?.url}
+        image={cardPicture?.url}
         alt="Project image"
       />
 

@@ -72,6 +72,7 @@ model Project {
 enum PictureType {
   HEADER
   GALLERY
+  CARD
   OTHER
 }
 
