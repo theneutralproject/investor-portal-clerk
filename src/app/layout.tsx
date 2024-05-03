@@ -47,7 +47,7 @@ export default function RootLayout({
             </NeutralThemeProvider>
           </NeutralQueryProvider>
 
-          <ChatInterface />
+          <ChatInterface type="FAB" />
         </body>
       </html>
     </ClerkProvider>

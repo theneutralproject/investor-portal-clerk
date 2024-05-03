@@ -131,9 +131,7 @@ export default function Page({ params: { slug } }: PageProps) {
             {tabValue === 2 && (
               <InvestTab project={project} dealStage={dealStage} />
             )}
-            {tabValue === 3 && (
-              <FundTab project={project} dealStage={dealStage} />
-            )}
+            {tabValue === 3 && <FundTab project={project} deal={dealData!} />}
           </Container>
         </Grid>
 

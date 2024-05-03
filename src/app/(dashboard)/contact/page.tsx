@@ -11,6 +11,10 @@ import EmailIcon from "@mui/icons-material/Email";
 import ChatIcon from "@mui/icons-material/Chat";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import QuestionIcon from "@mui/icons-material/QuestionAnswer";
+import HubspotScheduleCall from "@/components/HubspotScheduleCall";
+import ChatInterface from "@/components/ChatInterface";
+import HubspotContactForm from "@/components/HubspotContactForm";
+import { useRouter } from "next/navigation";
 
 const ContactMethod = ({
   Icon,
@@ -23,6 +27,78 @@ const ContactMethod = ({
   description: string;
   buttonText: string;
 }) => {
+  const router = useRouter();
+  const renderCTA = () => {
+    if (buttonText === "Schedule Now") {
+      return (
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ width: "180px" }}>
+            <HubspotScheduleCall onExit={() => null} />
+          </Box>
+        </Box>
+      );
+    }
+
+    if (buttonText === "Start Chat") {
+      return (
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ width: "180px" }}>
+            <ChatInterface type="BUTTON" />
+          </Box>
+        </Box>
+      );
+    }
+
+    if (buttonText === "Email Us") {
+      return (
+        <Box
+          sx={{
+            mt: 2,
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <Box sx={{ width: "180px" }}>
+            <HubspotContactForm onExit={() => null} />
+          </Box>
+        </Box>
+      );
+    }
+
+    if (buttonText === "Visit Learn Page") {
+      return (
+        <Button
+          variant="neutralBlack"
+          color="primary"
+          sx={{ marginTop: 2 }}
+          onClick={() => router.push("/learn")}
+        >
+          {buttonText}
+        </Button>
+      );
+    }
+
+    return (
+      <Button variant="neutralBlack" color="primary" sx={{ marginTop: 2 }}>
+        {buttonText}
+      </Button>
+    );
+  };
   return (
     <Grid item xs={12} sm={4}>
       <Card sx={{ textAlign: "center", padding: 2 }}>
@@ -32,9 +108,7 @@ const ContactMethod = ({
             {title}
           </Typography>
           <Typography variant="body2">{description}</Typography>
-          <Button variant="neutralBlack" color="primary" sx={{ marginTop: 2 }}>
-            {buttonText}
-          </Button>
+          {renderCTA()}
         </CardContent>
       </Card>
     </Grid>

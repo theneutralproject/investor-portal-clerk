@@ -9,18 +9,19 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { type Project } from "@prisma/client";
+import { Deal, type Project } from "@prisma/client";
 import DocumentCard from "../ProjectDocs/DocumentCard";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 import { Key } from "react";
 import { LineDisplay } from "../Overview/InvestmentSummaryBox";
 
-export const FundTab: React.FC<{ project: Project; dealStage: number }> = ({
+export const FundTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,
-  dealStage,
+  deal,
 }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
+  if (!deal) return null;
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent sx={{ p: isMobile ? 0 : "16px" }}>
@@ -36,8 +37,11 @@ export const FundTab: React.FC<{ project: Project; dealStage: number }> = ({
               <Divider sx={{ mt: 2 }} />
 
               <LineDisplay name="Payable To" value="The Neutral Project" />
-              <LineDisplay name="Amount" value="(Your funding amount)" />
-              <LineDisplay name="Memo" value="(Your name / Project)" />
+              <LineDisplay name="Amount" value={`$${deal.amount}`} />
+              <LineDisplay
+                name="Memo"
+                value={`(Your name) / ${project.name} / ID: ${deal.transactionId}`}
+              />
               <LineDisplay
                 name="Mail to"
                 value={
@@ -65,7 +69,7 @@ export const FundTab: React.FC<{ project: Project; dealStage: number }> = ({
               <Typography variant="body1">Pay by Wire Transfer</Typography>
               <Divider sx={{ mt: 2 }} />
 
-              <LineDisplay name="Amount" value="(Your funding amount)" />
+              <LineDisplay name="Amount" value={`$${deal.amount}`} />
               <LineDisplay name="Account Number" value="#####" />
               <LineDisplay name="Routing Number" value="#####" />
             </CardContent>

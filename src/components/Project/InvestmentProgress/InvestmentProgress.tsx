@@ -12,6 +12,8 @@ import ProgressBar from "./ProgressBar";
 import StepIndicator from "./StepIndicator";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 import HubspotScheduleCall from "@/components/HubspotScheduleCall";
+import StepAvatar from "@/components/StepAvatar";
+import { useRouter } from "next/navigation";
 
 const INVESTMENT_STEPS = [
   "Schedule a Call with an Advisor",
@@ -27,8 +29,17 @@ const InvestmentProgress: React.FC<{
   setTabValue: (number: number) => void;
 }> = ({ project, dealStage, currentTab, setTabValue }) => {
   const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
+  const router = useRouter();
 
   const generateCTAButton = () => {
+    if (project.status === "INACTIVE") {
+      return (
+        <Typography variant="caption">
+          This project is fully funded. Feel free to explore other investment
+          opportunities.
+        </Typography>
+      );
+    }
     if (dealStage === 0) {
       return <HubspotScheduleCall onExit={() => mutateDeal("increment")} />;
     }
@@ -111,6 +122,35 @@ const InvestmentProgress: React.FC<{
       }
     }
   };
+
+  //Funded
+  if (project.status === "INACTIVE") {
+    return (
+      <Card>
+        <CardContent>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <StepAvatar isComplete stepNumber={3} />
+            <Typography variant="h6" sx={{ ml: "10px" }}>{`Funded`}</Typography>
+          </Box>
+
+          <Divider sx={{ mt: 2, mb: 2 }} />
+
+          <Button
+            variant="neutralBlack"
+            sx={{ width: "100%" }}
+            onClick={() => router.push("/projects")}
+          >
+            Browse Projects
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>

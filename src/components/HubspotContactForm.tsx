@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Button, Modal, Box } from "@mui/material";
 
-function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
+function HubspotContactForm({ onExit }: { onExit?: () => void }) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -34,7 +34,7 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
           handleOpen();
         }}
       >
-        Schedule a Call
+        Send an Email
       </Button>
       <Modal
         open={open}
@@ -54,4 +54,4 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   );
 }
 
-export default HubspotScheduleCall;
+export default HubspotContactForm;

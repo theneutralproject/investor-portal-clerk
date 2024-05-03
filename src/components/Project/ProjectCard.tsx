@@ -7,10 +7,10 @@ import {
   Divider,
   Box,
 } from "@mui/material";
-import { capitalize } from "lodash";
 import Link from "next/link";
 import ProjectMetrics from "./ProjectMetrics";
 import { type ProjectWithPictures } from "@/libs/prisma";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
   project,
@@ -18,6 +18,15 @@ const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
   const cardPicture = project?.pictures?.find(
     (picture) => picture.type === "CARD"
   );
+
+  const convertedStatus = () => {
+    if (project.status === "ACTIVE") return "Funding";
+    if (project.status === "INACTIVE") return "Funded";
+
+    return project.status;
+  };
+
+  const status = convertedStatus();
 
   return (
     <Card
@@ -51,11 +60,18 @@ const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
             style={{
               backgroundColor: "#626F52",
               borderRadius: "100px",
-              padding: "4px 8px",
+              padding: "6px 10px",
               textTransform: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              fontSize: "12px",
             }}
           >
-            {capitalize(project.status)}
+            {status}
+            {status === "Funded" && (
+              <CheckCircleIcon style={{ color: "white", fontSize: "16px" }} />
+            )}
           </Button>
         </Box>
       </CardContent>

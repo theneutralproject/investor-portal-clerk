@@ -1,29 +1,44 @@
 "use client";
 import React, { useState } from "react";
-import { Fab, Modal, Box, useTheme } from "@mui/material";
+import { Fab, Button, Modal, Box, useTheme } from "@mui/material";
 import ChatIcon from "@mui/icons-material/Chat";
 
-const ChatInterface = () => {
+const ChatInterface = ({ type }: { type: string }) => {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  // Determine whether to render FAB or Button based on the type prop
+  const renderChatTrigger = () => {
+    if (type === "FAB") {
+      return (
+        <Fab
+          onClick={handleOpen}
+          sx={{
+            backgroundColor: "#626f52",
+            position: "fixed",
+            bottom: theme.spacing(2),
+            right: theme.spacing(2),
+            zIndex: 1200, // Higher than most elements
+          }}
+        >
+          <ChatIcon sx={{ color: "white" }} />
+        </Fab>
+      );
+    } else {
+      return (
+        <Button variant="neutralBlack" onClick={handleOpen}>
+          Start a Chat
+        </Button>
+      );
+    }
+  };
+
   return (
     <>
-      <Fab
-        onClick={handleOpen}
-        sx={{
-          backgroundColor: "#626f52",
-          position: "fixed",
-          bottom: theme.spacing(2),
-          right: theme.spacing(2),
-          zIndex: 1200, // Higher than most elements
-        }}
-      >
-        <ChatIcon sx={{ color: "white" }} />
-      </Fab>
+      {renderChatTrigger()}
       <Modal
         open={open}
         onClose={handleClose}

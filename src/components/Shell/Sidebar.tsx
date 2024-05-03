@@ -32,6 +32,7 @@ import { theme } from "./NeutralThemeProvider";
 import UserAvatar from "./UserAvatar";
 import NeutralBreadcrumbs from "./NeutralBreadcrumbs";
 import MobileSidebar from "./MobileSidebar";
+import router from "next/router";
 
 export const ROUTES = [
   {
@@ -52,23 +53,16 @@ export const ROUTES = [
 ];
 
 export const buttonItems = [
-  // {
-  //   key: "support",
-  //   label: "Support",
-  //   icon: <HelpIcon />,
-  //   // onClick: () => router.push("/support"),
-  // },
   {
     key: "terms",
     label: "Terms of Service",
     icon: <DescriptionIcon />,
-    // onClick: () => router.push("/terms"),
+    path: "/terms",
   },
   {
     key: "copyright",
     label: "2024 Neutral Project",
     icon: <CopyrightIcon />,
-    onClick: null, // No action defined
   },
 ];
 
@@ -234,7 +228,19 @@ export default function Sidebar(props: { children: React.ReactNode }) {
         </List>
         <List sx={{ marginTop: "auto" }}>
           {buttonItems.map((item) => (
-            <ListItem key={item.key} item={item} />
+            <ListItemButton
+              key={item.key}
+              onClick={() => {
+                if (item.path) {
+                  router.push(item.path);
+                }
+              }}
+            >
+              <ListItemIcon sx={{ color: "#e2e4e4", minWidth: "40px" }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.label} sx={{ color: "#e2e4e4" }} />
+            </ListItemButton>
           ))}
         </List>
       </Drawer>

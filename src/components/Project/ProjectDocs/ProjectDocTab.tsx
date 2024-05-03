@@ -52,6 +52,17 @@ export const ProjectDocTab: React.FC<{
     }
   };
 
+  //Sort documents by link contains "youtube" first
+  data.sort((a, b) => {
+    if (a.link.includes("youtube") && !b.link.includes("youtube")) {
+      return -1;
+    }
+    if (!a.link.includes("youtube") && b.link.includes("youtube")) {
+      return 1;
+    }
+    return 0;
+  });
+
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent>
