@@ -63,6 +63,7 @@ model Project {
   buildingAvgUnitSize Int        @default(0)
   buildingAvgRent     Int        @default(0)
   buildingCommSqFt    Int        @default(0)
+  youtubeUrl          String     @default("")
   pictures            Pictures[]
   meetings            Meeting[]
   documents           Document[]

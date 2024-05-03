@@ -1,6 +1,6 @@
 "use client";
 import ImageGallery from "react-image-gallery";
-import { Box, Container, Grid } from "@mui/material";
+import { Box, Container, Grid, Hidden } from "@mui/material";
 import "react-image-gallery/styles/css/image-gallery.css";
 import "./dealPage.css";
 import { useState } from "react";
@@ -15,6 +15,8 @@ import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
 import { FundTab } from "@/components/Project/Fund/FundTab";
 import { type ProjectWithPictures } from "@/libs/prisma";
+import useMediaQuery from "@mui/material/useMediaQuery";
+import { theme } from "@/components/Shell/NeutralThemeProvider";
 
 export type PageProps = {
   params: {
@@ -24,6 +26,7 @@ export type PageProps = {
 
 export default function Page({ params: { slug } }: PageProps) {
   const [tabValue, setTabValue] = useState(0);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {
     setTabValue(newValue);
@@ -71,21 +74,45 @@ export default function Page({ params: { slug } }: PageProps) {
       thumbnail: picture.url,
       type: picture.type, // Add the type to the mapped object
     }))
-    .filter((picture) => picture.type!=="CARD")
+    .filter((picture) => picture.type !== "CARD")
     .sort((a) => (a.type === "HEADER" ? -1 : 1));
 
-  return (
-    <Container>
-      <ImageGallery
-        items={images}
-        showNav={false}
-        showPlayButton={false}
-        showFullscreenButton={false}
-        additionalClass="app-image-gallery"
-      />
+  const investorStatusBox = () => {
+    return (
+      <Box
+        sx={{
+          position: isMobile ? "relative" : "sticky", // Sticky positioning only if not mobile
+          top: isMobile ? 0 : "60px", // Adjust top position based on mobile or not
+          mt: isMobile ? 2 : 0, // Adjust margin top based on mobile or not
+        }}
+      >
+        {dealStage > 3 ? (
+          <SuccessfulInvestor project={project} />
+        ) : (
+          <InvestmentProgress
+            project={project}
+            dealStage={dealStage}
+            currentTab={tabValue}
+            setTabValue={setTabValue}
+          />
+        )}
+      </Box>
+    );
+  };
 
+  return (
+    <Container maxWidth="lg" sx={{ p: isMobile ? 1 : 0 }}>
+      <Hidden smDown>
+        <ImageGallery
+          items={images}
+          showNav={false}
+          showPlayButton={false}
+          showFullscreenButton={false}
+          additionalClass="app-image-gallery"
+        />
+      </Hidden>
       <Grid container spacing={2} sx={{ mt: 1 }}>
-        <Grid item xs={8}>
+        <Grid item xs={12} md={8}>
           <Box sx={{ position: "sticky", top: "60px", zIndex: 1100 }}>
             <ProjectHeader
               data={project}
@@ -95,6 +122,7 @@ export default function Page({ params: { slug } }: PageProps) {
               dealStage={dealStage}
             />
           </Box>
+          {isMobile && investorStatusBox()}
           <Container disableGutters>
             {tabValue === 0 && <OverviewTab data={project} />}
             {tabValue === 1 && (
@@ -109,20 +137,11 @@ export default function Page({ params: { slug } }: PageProps) {
           </Container>
         </Grid>
 
-        <Grid item xs={4}>
-          <Box sx={{ position: "sticky", top: "60px", zIndex: 1100 }}>
-            {dealStage > 3 ? (
-              <SuccessfulInvestor project={project} />
-            ) : (
-              <InvestmentProgress
-                project={project}
-                dealStage={dealStage}
-                currentTab={tabValue}
-                setTabValue={setTabValue}
-              />
-            )}
-          </Box>
-        </Grid>
+        {!isMobile && (
+          <Grid item xs={12} md={4}>
+            {investorStatusBox()}
+          </Grid>
+        )}
       </Grid>
     </Container>
   );

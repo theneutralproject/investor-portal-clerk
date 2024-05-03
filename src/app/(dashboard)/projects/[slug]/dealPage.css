@@ -2,8 +2,16 @@
 
 .app-image-gallery .image-gallery-image {
   border-radius: 4px;
-  height: 600px;
+  height: 600px; /* default to 600px for non-mobile (larger screens) */
 }
+
+@media (max-width: 600px) {
+  /* Adjust the breakpoint as needed */
+  .app-image-gallery .image-gallery-image {
+    height: 400px; /* 400px height for mobile screens */
+  }
+}
+
 .app-image-gallery .image-gallery-slide-wrapper {
   border-radius: 4px;
 }

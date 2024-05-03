@@ -61,6 +61,15 @@ export const roboto = Roboto({
 });
 
 export const theme = createTheme({
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 1200,
+      md: 1200,
+      lg: 1200,
+      xl: 1536,
+    },
+  },
   palette,
   typography: {
     allVariants: {
@@ -127,6 +136,22 @@ export const theme = createTheme({
         },
       },
     },
+    // MuiCardContent: {
+    //   styleOverrides: {
+    //     root: {
+    //       padding: 16, // default padding for large screens and above
+    //       "@media (max-width: 1535px)": {
+    //         padding: "16px", // padding for large screens up to 1535px
+    //       },
+    //       "@media (max-width: 120px)": {
+    //         padding: "10px", // padding for medium screens down to 1199px
+    //       },
+    //       "@media (max-width: 600px)": {
+    //         padding: "0px", // padding for small screens and below 1199px
+    //       },
+    //     },
+    //   },
+    // },
 
     MuiPaper: {
       styleOverrides: {

@@ -41,8 +41,9 @@ const InvestmentProgress: React.FC<{
               Review Project Documents
             </Typography>
             <Typography variant="caption">
-              Watch the video or download each of the documents to continue to
-              the next step.
+              Understand all details of the performance of an investment into
+              The Edison from the financial model and market study to the legal
+              documents.
             </Typography>
           </Box>
         );
@@ -64,11 +65,11 @@ const InvestmentProgress: React.FC<{
         return (
           <Box>
             <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
-              Review Invest Documents
+              Sign Invest Agreements
             </Typography>
             <Typography variant="caption">
-              Watch the video or download each of the documents to continue to
-              the next step.
+              Review, fill, and execute the Subscription Agreement to your
+              respective investment.
             </Typography>
           </Box>
         );
@@ -90,10 +91,10 @@ const InvestmentProgress: React.FC<{
         return (
           <Box>
             <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
-              Decide how to Fund Your Investment
+              Fund Your Investment
             </Typography>
             <Typography variant="caption">
-              Follow the steps to decide when and how to fund your investment.
+              Complete your investment by sending a check or wiring funds.
             </Typography>
           </Box>
         );

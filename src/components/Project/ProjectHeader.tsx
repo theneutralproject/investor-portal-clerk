@@ -5,6 +5,7 @@ import {
   CardContent,
   CircularProgress,
   Grid,
+  Hidden,
   Tab,
   Tabs,
   Typography,
@@ -54,7 +55,7 @@ function ProjectHeader({
     <Card>
       <CardContent sx={{ paddingBottom: "0 !important" }}>
         <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={10} md={6}>
             <Typography variant="h3" gutterBottom>
               {data?.name}
             </Typography>
@@ -64,7 +65,7 @@ function ProjectHeader({
           </Grid>
           <Grid
             item
-            xs={12}
+            xs={2}
             md={6}
             sx={{
               justifyContent: "flex-end",
@@ -72,9 +73,12 @@ function ProjectHeader({
               display: "flex",
             }}
           >
-            <Typography variant="caption" sx={{ mr: 2 }}>
-              Fund Tracker:
-            </Typography>
+            <Hidden smDown>
+              <Typography variant="caption" sx={{ mr: 2 }}>
+                Fund Tracker:
+              </Typography>
+            </Hidden>
+
             <Box position="relative" display="inline-flex">
               <CircularProgress
                 variant="determinate"
@@ -100,6 +104,8 @@ function ProjectHeader({
         <Tabs
           value={tabValue}
           onChange={onTabChange}
+          variant="scrollable"
+          allowScrollButtonsMobile
           aria-label="Deal Tabs"
           sx={{ m: "0" }}
         >

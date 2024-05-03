@@ -1,7 +1,14 @@
 /* eslint-disable */
 import useDocuments, { DocumentWithCompletion } from "@/app/hooks/useDocuments";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
-import { Box, Card, CardContent, Divider, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { type Project } from "@prisma/client";
 import DocumentCard from "../ProjectDocs/DocumentCard";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
@@ -12,10 +19,11 @@ export const FundTab: React.FC<{ project: Project; dealStage: number }> = ({
   project,
   dealStage,
 }) => {
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
-      <CardContent>
+      <CardContent sx={{ p: isMobile ? 0 : "16px" }}>
         <CardContent>
           <Typography variant="h6">Fund Your Investment</Typography>
           <Typography variant="caption">

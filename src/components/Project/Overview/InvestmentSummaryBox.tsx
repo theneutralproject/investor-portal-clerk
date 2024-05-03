@@ -30,7 +30,7 @@ export const LineDisplay = ({
 const InvestmentSummaryBox = ({ data }: { data: Project }) => {
   return (
     <Grid container spacing={2} sx={{ alignItems: "stretch", height: "100%" }}>
-      <Grid item xs={5.5}>
+      <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Equity Returns</Typography>
         <LineDisplay name="IRR" value={`${data.equityIRR}%`} />
         <LineDisplay
@@ -40,10 +40,15 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
         <LineDisplay name="Term" value={`${data.equityTermMonths} months`} />
         <LineDisplay name="Distribution" value={`${data.equityPaymentFreq}`} />
       </Grid>
-      <Grid item xs={1} sx={{ display: "flex", justifyContent: "center" }}>
+      <Grid
+        item
+        xs={12}
+        sm={1}
+        sx={{ display: { xs: "none", sm: "flex" }, justifyContent: "center" }}
+      >
         <Divider orientation="vertical" flexItem sx={{ height: "100%" }} />
       </Grid>
-      <Grid item xs={5.5}>
+      <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
         <LineDisplay name="Interest" value={`${data.debtInterestRate}%`} />
         <LineDisplay

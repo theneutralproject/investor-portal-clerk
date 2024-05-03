@@ -14,6 +14,7 @@ import {
   ListItemIcon,
   ListItemText,
   Typography,
+  useMediaQuery,
 } from "@mui/material";
 import type { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import MuiAppBar from "@mui/material/AppBar";
@@ -30,6 +31,7 @@ import * as React from "react";
 import { theme } from "./NeutralThemeProvider";
 import UserAvatar from "./UserAvatar";
 import NeutralBreadcrumbs from "./NeutralBreadcrumbs";
+import MobileSidebar from "./MobileSidebar";
 
 export const ROUTES = [
   {
@@ -49,7 +51,28 @@ export const ROUTES = [
   },
 ];
 
-const ListItem = ({ item }: { item: any }) => (
+export const buttonItems = [
+  // {
+  //   key: "support",
+  //   label: "Support",
+  //   icon: <HelpIcon />,
+  //   // onClick: () => router.push("/support"),
+  // },
+  {
+    key: "terms",
+    label: "Terms of Service",
+    icon: <DescriptionIcon />,
+    // onClick: () => router.push("/terms"),
+  },
+  {
+    key: "copyright",
+    label: "2024 Neutral Project",
+    icon: <CopyrightIcon />,
+    onClick: null, // No action defined
+  },
+];
+
+export const ListItem = ({ item }: { item: any }) => (
   <ListItemButton key={item.key} onClick={item.onClick}>
     <ListItemIcon sx={{ color: "#e2e4e4", minWidth: "40px" }}>
       {item.icon}
@@ -119,32 +142,15 @@ export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
 export default function Sidebar(props: { children: React.ReactNode }) {
   const router = useRouter();
   const pathName = usePathname();
-
-  // Define an array for button items
-  const buttonItems = [
-    // {
-    //   key: "support",
-    //   label: "Support",
-    //   icon: <HelpIcon />,
-    //   // onClick: () => router.push("/support"),
-    // },
-    {
-      key: "terms",
-      label: "Terms of Service",
-      icon: <DescriptionIcon />,
-      // onClick: () => router.push("/terms"),
-    },
-    {
-      key: "copyright",
-      label: "2024 Neutral Project",
-      icon: <CopyrightIcon />,
-      onClick: null, // No action defined
-    },
-  ];
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const isActiveRoute = (routePath: string) => {
     return pathName.includes(routePath);
   };
+
+  if (isMobile) {
+    return <MobileSidebar>{props.children}</MobileSidebar>;
+  }
 
   return (
     <Box sx={{ display: "flex" }}>
@@ -243,7 +249,13 @@ export default function Sidebar(props: { children: React.ReactNode }) {
         }}
       >
         <Toolbar />
-        <Container maxWidth="xl" sx={{ mt: 4, mb: 4 }}>
+        <Container
+          maxWidth="xl"
+          sx={{
+            mt: 4,
+            mb: 4,
+          }}
+        >
           {props.children}
         </Container>
       </Box>
