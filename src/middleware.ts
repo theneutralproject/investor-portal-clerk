@@ -1,4 +1,4 @@
-import { authMiddleware, redirectToSignIn } from "@clerk/nextjs";
+import { authMiddleware, redirectToSignUp } from "@clerk/nextjs";
 import type { NextRequest } from "next/server";
 
 export default authMiddleware({
@@ -14,7 +14,7 @@ export default authMiddleware({
     if (!auth.userId && !auth.isPublicRoute) {
       console.log("IF YOU SEE THIS, AUTH FAILED", auth.userId, auth.isPublicRoute)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return redirectToSignIn({ returnBackUrl: process.env.NEXTAUTH_URL });
+      return redirectToSignUp({ returnBackUrl: process.env.NEXTAUTH_URL });
     }
   },
   // beforeAuth(_req, ) {
