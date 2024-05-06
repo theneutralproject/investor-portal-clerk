@@ -3,17 +3,26 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { Document } from "@prisma/client";
+import { DealFinancingType, Document } from "@prisma/client";
 
 export type DocumentWithCompletion = Document & { completed: boolean };
 
-const useDocuments = (projectId: number, dealStageCheck: number) => {
+const useDocuments = (
+  projectId: number,
+  dealStageCheck: number,
+  financingType: DealFinancingType
+) => {
   const queryClient = useQueryClient();
-  const documentsQueryKey = ["documents", projectId, dealStageCheck];
+  const documentsQueryKey = [
+    "documents",
+    projectId,
+    dealStageCheck,
+    financingType,
+  ];
 
   // Query function for fetching all documents within a project
   const fetchDocuments = async () => {
-    const url = `/api/documents?projectId=${projectId}&dealStage=${dealStageCheck}`;
+    const url = `/api/documents?projectId=${projectId}&dealStage=${dealStageCheck}&financingType=${financingType}`;
     const response = await axios.get(url);
     return response.data;
   };

@@ -126,11 +126,9 @@ export default function Page({ params: { slug } }: PageProps) {
           <Container disableGutters>
             {tabValue === 0 && <OverviewTab data={project} />}
             {tabValue === 1 && (
-              <ProjectDocTab project={project} dealStage={dealStage} />
+              <ProjectDocTab project={project} deal={dealData!} />
             )}
-            {tabValue === 2 && (
-              <InvestTab project={project} dealStage={dealStage} />
-            )}
+            {tabValue === 2 && <InvestTab project={project} deal={dealData!} />}
             {tabValue === 3 && <FundTab project={project} deal={dealData!} />}
           </Container>
         </Grid>

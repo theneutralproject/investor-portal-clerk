@@ -149,12 +149,6 @@ const ContactPage = () => {
           buttonText="Email Us"
         />
         <ContactMethod
-          Icon={ChatIcon}
-          title="Live Chat"
-          description="Need quick answers? Chat with us directly on our website."
-          buttonText="Start Chat"
-        />
-        <ContactMethod
           Icon={PhoneInTalkIcon}
           title="Schedule a Call"
           description="Want to discuss your needs in detail? Schedule a call with us."

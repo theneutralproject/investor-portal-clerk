@@ -87,15 +87,16 @@ model Pictures {
 }
 
 model Document {
-  id             Int             @id @default(autoincrement())
+  id             Int                 @id @default(autoincrement())
   name           String
   fileName       String
   description    String
   link           String
   projectId      Int
-  project        Project         @relation(fields: [projectId], references: [id])
+  project        Project             @relation(fields: [projectId], references: [id])
   dealStage      Int
   documentEvents DocumentEvent[]
+  financingTypes DealFinancingType[] @default([])
 }
 
 enum DocumentEventType {

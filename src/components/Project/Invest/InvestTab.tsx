@@ -6,12 +6,13 @@ import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
 import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
-import { type Project } from "@prisma/client";
+import { Deal, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
+import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
 
-export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
+export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,
-  dealStage,
+  deal,
 }) => {
   const {
     isLoading,
@@ -25,24 +26,28 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
     data: DocumentWithCompletion[];
     error: any;
     documentEventMutation: any;
-  } = useDocuments(project.id, 2);
+  } = useDocuments(project.id, 2, deal.financingType!);
 
-  const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedDocumentId, setSelectedDocumentId] = useState<number | null>(
-    null
-  );
+  const [modelOpenType, setModelOpenType] = useState("");
+  const [selectedDocument, setSelectedDocument] =
+    useState<DocumentWithCompletion | null>(null);
 
   const handleViewDocument = (documentId: number) => {
-    setSelectedDocumentId(documentId);
-    setModalOpen(true);
+    const currentDocument = data.find((doc) => doc.id === documentId);
+    setSelectedDocument(currentDocument!);
+
+    if (currentDocument?.link.includes("docusign")) {
+      setModelOpenType("DOCUSIGN");
+    } else {
+      setModelOpenType("DOCUMENT");
+    }
   };
 
   const handleCloseModal = () => {
-    setModalOpen(false);
-    if (selectedDocumentId != null) {
+    setModelOpenType("");
+    if (selectedDocument != null) {
       documentEventMutation.mutate({
-        documentId: selectedDocumentId,
+        documentId: selectedDocument.id,
         type: "VIEW",
       });
     }
@@ -63,13 +68,18 @@ export const InvestTab: React.FC<{ project: Project; dealStage: number }> = ({
           <DocumentCard
             key={index}
             document={document}
-            dealStage={dealStage}
+            dealStage={deal.dealStage}
             handleViewDocument={handleViewDocument}
           />
         ))}
 
+        <DocumentViewerModal
+          open={modelOpenType === "DOCUMENT"}
+          onClose={handleCloseModal}
+          fileUrl={selectedDocument?.link ?? ""}
+        />
         <Modal
-          open={modalOpen}
+          open={modelOpenType === "DOCUSIGN"}
           onClose={handleCloseModal}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"

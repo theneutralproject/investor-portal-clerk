@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
+import { DealFinancingType, type DocumentEvent } from "@prisma/client";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -25,6 +28,7 @@ export async function GET(request: NextRequest) {
     const queryParams = new URLSearchParams(url.search);
     const projectId = parseInt(queryParams.get("projectId") ?? "", 10);
     const dealStage = parseInt(queryParams.get("dealStage") ?? "", 10);
+    const financingType = queryParams.get("financingType") ?? "";
 
     if (isNaN(projectId)) {
       return new Response(JSON.stringify({ error: "Invalid Project ID" }), {
@@ -33,10 +37,22 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const isDealFinancingType = Object.values(DealFinancingType).includes(
+      financingType as DealFinancingType
+    );
+
     const documents = await prisma.document.findMany({
       where: {
         projectId: projectId,
         ...(dealStage ? { dealStage: dealStage } : {}),
+        ...(isDealFinancingType
+          ? {
+              OR: [
+                { financingTypes: { has: financingType as DealFinancingType } },
+                { financingTypes: { equals: [] } },
+              ],
+            }
+          : { financingTypes: { equals: [] } }),
       },
       include: {
         documentEvents: {
@@ -48,9 +64,26 @@ export async function GET(request: NextRequest) {
     const results = documents.map((doc) => ({
       ...doc,
       completed: doc.documentEvents.some(
-        (event) => event.documentId === doc.id
+        (event: DocumentEvent) => event.documentId === doc.id
       ),
     }));
+
+    //Sort documents by link contains "youtube" first, and sort by making link contains "docusign" last
+    results.sort((a, b) => {
+      if (a.link.includes("youtube") && !b.link.includes("youtube")) {
+        return -1;
+      }
+      if (!a.link.includes("youtube") && b.link.includes("youtube")) {
+        return 1;
+      }
+      if (a.link.includes("docusign") && !b.link.includes("docusign")) {
+        return 1;
+      }
+      if (!a.link.includes("docusign") && b.link.includes("docusign")) {
+        return -1;
+      }
+      return 0;
+    });
 
     return new Response(JSON.stringify(results), {
       headers: { "Content-Type": "application/json" },

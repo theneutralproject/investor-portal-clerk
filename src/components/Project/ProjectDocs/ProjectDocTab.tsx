@@ -2,19 +2,18 @@
 import { CardContent, Card } from "@mui/material";
 import { theme } from "../../Shell/NeutralThemeProvider";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import { type Project } from "@prisma/client";
+import { Deal, type Project } from "@prisma/client";
 import DocumentCard from "./DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
-import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 import DocumentViewerModal from "./DocumentViewerModal";
 import { useState } from "react";
 
 export const ProjectDocTab: React.FC<{
   project: Project;
-  dealStage: number;
-}> = ({ project, dealStage }) => {
+  deal: Deal;
+}> = ({ project, deal }) => {
   const [openModal, setOpenModal] = useState(false);
   const [currentDocument, setCurrentDocument] =
     useState<DocumentWithCompletion>();
@@ -31,7 +30,7 @@ export const ProjectDocTab: React.FC<{
     data: DocumentWithCompletion[];
     error: any;
     documentEventMutation: any;
-  } = useDocuments(project.id, 1);
+  } = useDocuments(project.id, 1, deal.financingType!);
 
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error.message}</div>;
@@ -52,17 +51,6 @@ export const ProjectDocTab: React.FC<{
     }
   };
 
-  //Sort documents by link contains "youtube" first
-  data.sort((a, b) => {
-    if (a.link.includes("youtube") && !b.link.includes("youtube")) {
-      return -1;
-    }
-    if (!a.link.includes("youtube") && b.link.includes("youtube")) {
-      return 1;
-    }
-    return 0;
-  });
-
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent>
@@ -70,7 +58,7 @@ export const ProjectDocTab: React.FC<{
           <DocumentCard
             key={index}
             document={document}
-            dealStage={dealStage}
+            dealStage={deal.dealStage}
             handleViewDocument={() => handleViewDocument(document)}
           />
         ))}
