@@ -31,6 +31,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const user = await currentUser();
+    console.log(`clerk id: ${user?.id}`)
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
@@ -42,12 +43,12 @@ export async function GET(request: NextRequest) {
       where: { clerkId: user.id },
     });
     if (!neutralUser) {
+      console.log("neutral user not found in api/deals")
       return new Response(JSON.stringify({ error: "User record not found" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
       });
     }
-
     const deals = await prisma.deal.findFirst({
       where: { userId: neutralUser.id, projectId: projectIdAsInt },
       // include: { project: true },
@@ -55,7 +56,8 @@ export async function GET(request: NextRequest) {
 
     if (!deals) {
       return new Response(
-        JSON.stringify({ error: "No deals found for this project" }),
+        // JSON.stringify({ error: "No deals found for this project" }),
+        JSON.stringify([]),
         {
           status: 200, //Valid return
           headers: { "Content-Type": "application/json" },

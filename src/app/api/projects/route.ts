@@ -5,7 +5,6 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  console.log("1 - IN GET PROJECT", request.url)
   let parsedId = undefined;
   try {
     const url = new URL(request.url);
@@ -23,7 +22,6 @@ export async function GET(request: NextRequest) {
     });
   }
 
-  console.log("2 - IN GET PROJECT - ID:", parsedId)
   const projects = await prisma.project.findMany({
     where: { id: parsedId },
     include: {
