@@ -62,10 +62,19 @@ export const zHsDealSchema = z.object({
   dealId: z.number()
 });
 
+const zHsDealSearchObjectSchema = z.object({
+  properties: z.object({
+    amount: z.number()
+  })
+})
+
+export const zHsDealSearchResultsSchema = z.object({
+  results: z.array(zHsDealSearchObjectSchema)
+})
+
 export async function createHubspotDealForContact(deal: HubspotDeal, contactHubspotId: string) {
   // first create a deal
   const { properties } = deal;
-  console.log("posting", deal)
 
   const body = JSON.stringify({
     associations: {
@@ -88,7 +97,6 @@ export async function createHubspotDealForContact(deal: HubspotDeal, contactHubs
   )
   /* eslint-disable-next-line */
   const hsDealCreateRespBody = await resBody.json();
-  console.log(hsDealCreateRespBody)
   try {
     const { dealId } = zHsDealSchema.parse(hsDealCreateRespBody);
     return dealId;
@@ -140,6 +148,69 @@ export function initDealPropsForProject(projectName: string, user: User, transac
 /* eslint-enable */
 
 
+export async function getFundingAmount(projectName: ProjectName) {
+  function getPayload(project: ProjectName) {
+    switch (project) {
+      case ProjectName["The Edison"]: {
+        return {
+          filterGroups: [
+            {
+              filters: [
+                {
+                  propertyName: "dealstage",
+                  operator: "EQ",
+                  value: "contractsent" //146586773
+                }
+              ]
+            }
+          ]
+        };
+      }
+      case ProjectName["519 W Main"]: {
+        return {
+          filterGroups: [
+            {
+              filters: [
+                {
+                  propertyName: "dealstage",
+                  operator: "EQ",
+                  value: "146586773"
+                }
+              ]
+            }
+          ]
+        };
+
+      }
+      default: {
+          console.error(`The project with name ${project} is not yet supported in getDealPropsForProject()`)
+          return new Error(`The project with name ${project} is not yet supported in getDealPropsForProject()`);
+      }
+    }
+  }
+
+  const resBody = await fetch(
+    `https://api.hubapi.com/crm/v3/objects/deals/search`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(getPayload(projectName)),
+    }
+  )
+  /* eslint-disable-next-line */
+  const hsDealCreateRespBody = await resBody.json();
+  try {
+    const { results } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
+    return results.map(r => r.properties.amount).reduce((acc,cur) => acc + cur, 0)
+  } catch (error) {
+    console.error("No good hs deal making:\n", error);
+    return new Error(getErrorMessage(error));
+  }
+}
+
 /**
  * 
  * @param dealstage 
@@ -154,6 +225,12 @@ export function getDealStageInt(dealstage: string) {
 
   return pos;
 }
+
+export function getProjectNameFromDealStage(dealstage: string) {
+  if(EdisonDealStages.map(e => e.value).indexOf(dealstage) >-1) return ProjectName["The Edison"];
+  if(_519WMainDealStages.map(e => e.value).indexOf(dealstage) >-1) return ProjectName["519 W Main"];
+  return new Error("project not yet supported");
+};
 
 const InvestmentEntity = {
   "The Edison": {

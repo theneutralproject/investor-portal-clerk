@@ -17,7 +17,7 @@ const InfoSidebar = () => {
               fullWidth
               sx={{ mt: 2, height: "42px" }}
             >
-              CHAT
+              GET IN TOUCH
             </Button>
           </Link>
         </CardContent>

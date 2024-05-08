@@ -1,7 +1,8 @@
 import type { HubspotDealUpdateSchema } from "@/app/api/utils-module/_globals";
 import { updateDeal } from "@/app/api/utils-module/dealUtils";
 import { getErrorMessage } from "@/app/api/utils-module/helpers";
-import { getDealStageInt } from "@/app/api/utils-module/hubspotUtils";
+import { getDealStageInt, getFundingAmount, getProjectNameFromDealStage } from "@/app/api/utils-module/hubspotUtils";
+import prisma from "@/libs/prisma";
 import { type Deal } from "@prisma/client";
 import { isError } from "lodash";
 import { z } from "zod";
@@ -21,7 +22,6 @@ const arrHubspotWHRes = z.array(hubspotWHDealRes);
 export async function POST(req: Request): Promise<Response> {
   try {
     const payload = arrHubspotWHRes.parse(await req.json())[0];
-    console.log(`HS webhook 1`, payload);
 
     if (
       !payload?.propertyValue ||
@@ -42,10 +42,13 @@ export async function POST(req: Request): Promise<Response> {
     const dealBody: HubspotDealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
-
+    let updateProjectFunding = false;
     switch (payload.propertyName) {
       case "dealstage":
         dealBody.dealStage = getDealStageInt(payload.propertyValue);
+        if(dealBody.dealStage === 4) {
+          updateProjectFunding = true;
+        }
         break;
       case "amount":
         dealBody.amount = parseFloat(payload.propertyValue);
@@ -55,8 +58,29 @@ export async function POST(req: Request): Promise<Response> {
         break;
     }
 
-    const updatedDeal: Deal | Error = await updateDeal(dealBody);
+    if(updateProjectFunding) {
+      const projectToUpdate = getProjectNameFromDealStage(payload.propertyValue);
+      if(!isError(projectToUpdate)) {
+        const amountRaised = await getFundingAmount(projectToUpdate)
+        if(isError(amountRaised)) {
+          console.error(`unable to fetch deal amnount raised for project ${projectToUpdate}: ${amountRaised.message}`);
+        } else {
+          console.log(`\nupdating project funding for ${projectToUpdate} to ${amountRaised}`)
+          await prisma.project
+          .update({
+            where: { name: projectToUpdate },
+            data: {investmentRaised: amountRaised},
+          })
+          .catch((error) => {
+            console.error(error);
+            // return Error("Failed to update deal with hubspot data");
+          });
+        }
 
+      }
+    }
+
+    const updatedDeal: Deal | Error = await updateDeal(dealBody);
     if (isError(updatedDeal)) {
       return new Response(
         JSON.stringify({ error: getErrorMessage(updatedDeal) }),
