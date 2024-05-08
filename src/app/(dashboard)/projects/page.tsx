@@ -33,7 +33,7 @@ const Dashboard = () => {
       <ProjectPageBanner
         background="/projectBanner.png"
         headline={`Welcome, ${user?.firstName ?? "User"}`}
-        description="Diversify your portfolio with direct investments in local, sustainable real estate properties. Discover active projects below and take your next step to coming an investor."
+        description="And welcome to a more sustainable tomorrow. Thank you for your interest in investing with Neutral. We believe in the power of thoughtful investment to positively impact your portfolio and the planet. Exploring the projects below allows you to discover innovative, sustainable, and regenerative development solutions."
       />
 
       <Typography
