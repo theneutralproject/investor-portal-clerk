@@ -180,13 +180,13 @@ const InvestmentProgress: React.FC<{
         </CardContent>
       </Card>
 
-      <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("reset")}>
+      {/* <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("reset")}>
         Reset
       </Button>
 
       <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("increment")}>
         Increment
-      </Button>
+      </Button> */}
     </>
   );
 };
