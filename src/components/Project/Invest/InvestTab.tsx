@@ -59,7 +59,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent>
-        <Typography variant="h6">Sign Investment Agreements</Typography>
+        <Typography variant="h6">Review and Sign Investment Agreements</Typography>
         <Typography variant="caption">
           Placeholder description about what this process is and how it works.
         </Typography>

@@ -76,7 +76,7 @@ const InvestmentProgress: React.FC<{
         return (
           <Box>
             <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
-              Sign Invest Agreements
+            Review Invest Agreements
             </Typography>
             <Typography variant="caption">
               Review, fill, and execute the Subscription Agreement to your
