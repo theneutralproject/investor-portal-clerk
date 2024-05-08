@@ -64,7 +64,7 @@ export const zHsDealSchema = z.object({
 
 const zHsDealSearchObjectSchema = z.object({
   properties: z.object({
-    amount: z.number()
+    amount: z.string()
   })
 })
 
@@ -204,9 +204,9 @@ export async function getFundingAmount(projectName: ProjectName) {
   const hsDealCreateRespBody = await resBody.json();
   try {
     const { results } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
-    return results.map(r => r.properties.amount).reduce((acc,cur) => acc + cur, 0)
+    return results.map(r => parseFloat(r.properties.amount)).reduce((acc,cur) => acc + cur, 0)
   } catch (error) {
-    console.error("No good hs deal making:\n", error);
+    console.error("could not compute updated deal closed amount:\n", error);
     return new Error(getErrorMessage(error));
   }
 }
