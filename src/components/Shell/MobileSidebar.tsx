@@ -17,8 +17,11 @@ import MenuIcon from "@mui/icons-material/Menu";
 import Image from "next/image";
 import { ListItem, ROUTES, buttonItems } from "./Sidebar";
 import { useRouter, usePathname } from "next/navigation";
+import LogoutIcon from "@mui/icons-material/Logout";
+import { useClerk } from "@clerk/nextjs";
 
 const MobileSidebar = (props) => {
+  const { signOut } = useClerk();
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -129,6 +132,17 @@ const MobileSidebar = (props) => {
           {buttonItems.map((item) => (
             <ListItem key={item.key} item={item} />
           ))}
+
+          <ListItem
+            key={"signout"}
+            item={{
+              key: "signout",
+              label: "Sign Out",
+              icon: <LogoutIcon />,
+              path: "/signout",
+              onClick: () => signOut(),
+            }}
+          />
         </List>
       </Drawer>
       <Toolbar />

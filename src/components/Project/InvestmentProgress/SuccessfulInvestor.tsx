@@ -1,22 +1,12 @@
-import {
-  Card,
-  CardContent,
-  Typography,
-  Divider,
-  Button,
-  Box,
-} from "@mui/material";
+import { Card, CardContent, Typography, Divider, Box } from "@mui/material";
 
 import ProgressBar from "./ProgressBar";
-import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 
 import StepAvatar from "@/components/StepAvatar";
 import { type Project } from "@prisma/client";
 import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 
-const SuccessfulInvestor: React.FC<{ project: Project }> = ({ project }) => {
-  const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
-
+const SuccessfulInvestor: React.FC<{ project: Project }> = ({}) => {
   return (
     <>
       <Card>
@@ -50,14 +40,6 @@ const SuccessfulInvestor: React.FC<{ project: Project }> = ({ project }) => {
           <HubspotScheduleCall />
         </CardContent>
       </Card>
-
-      <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("reset")}>
-        Reset
-      </Button>
-
-      <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("increment")}>
-        Increment
-      </Button>
     </>
   );
 };

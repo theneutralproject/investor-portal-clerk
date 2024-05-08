@@ -8,7 +8,6 @@ import {
   Button,
 } from "@mui/material";
 import EmailIcon from "@mui/icons-material/Email";
-import ChatIcon from "@mui/icons-material/Chat";
 import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
 import QuestionIcon from "@mui/icons-material/QuestionAnswer";
 import HubspotScheduleCall from "@/components/HubspotScheduleCall";

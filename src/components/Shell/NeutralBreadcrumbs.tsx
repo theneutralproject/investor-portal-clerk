@@ -15,15 +15,14 @@ const NeutralBreadcrumbs = () => {
         const to = `/${pathnames.slice(0, index + 1).join("/")}`;
 
         return (
-          <React.Fragment key={to}>
-            <Typography
-              color={last ? "text.primary" : "text.secondary"}
-              sx={{ cursor: last ? "default" : "pointer", fontSize: "18px" }}
-              onClick={() => !last && router.push(to)}
-            >
-              {capitalize(value)}
-            </Typography>
-          </React.Fragment>
+          <Typography
+            key={to}
+            color={last ? "text.primary" : "text.secondary"}
+            sx={{ cursor: last ? "default" : "pointer", fontSize: "18px" }}
+            onClick={() => !last && router.push(to)}
+          >
+            {capitalize(value)}
+          </Typography>
         );
       })}
     </MUIBreadcrumbs>
