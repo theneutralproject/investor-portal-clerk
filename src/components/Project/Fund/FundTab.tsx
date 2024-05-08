@@ -66,8 +66,8 @@ export const FundTab: React.FC<{ project: Project; deal: Deal }> = ({
               <LineDisplay name="Payable To" value="The Neutral Project" />
               <LineDisplay name="Amount" value={`$${deal.amount}`} />
               <LineDisplay
-                name="Memo"
-                value={`(Your name) / ${project.name} / ID: ${deal.transactionId}`}
+                name="Ref Number"
+                value={`${deal.transactionId}`}
               />
               <LineDisplay
                 name="Mail to"
