@@ -69,6 +69,7 @@ const zHsDealSearchObjectSchema = z.object({
 })
 
 export const zHsDealSearchResultsSchema = z.object({
+  total: z.number(),
   results: z.array(zHsDealSearchObjectSchema)
 })
 
@@ -153,6 +154,7 @@ export async function getFundingAmount(projectName: ProjectName) {
     switch (project) {
       case ProjectName["The Edison"]: {
         return {
+          limit: 100, /**pagination - max=100 */
           filterGroups: [
             {
               filters: [
@@ -168,6 +170,7 @@ export async function getFundingAmount(projectName: ProjectName) {
       }
       case ProjectName["519 W Main"]: {
         return {
+          limit: 100, /**pagination - max=100 */
           filterGroups: [
             {
               filters: [
@@ -201,14 +204,22 @@ export async function getFundingAmount(projectName: ProjectName) {
     }
   )
   /* eslint-disable-next-line */
-  const hsDealCreateRespBody = await resBody.json();
-  try {
-    const { results } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
-    return results.map(r => parseFloat(r.properties.amount)).reduce((acc,cur) => acc + cur, 0)
-  } catch (error) {
-    console.error("could not compute updated deal closed amount:\n", error);
-    return new Error(getErrorMessage(error));
+  let totalAmountRaised = 0;
+  let dealsFetched = 0;
+  let totalDeals = 100;
+  let fetchMore = true;
+  while (dealsFetched<totalDeals) {
+    const hsDealCreateRespBody = await resBody.json();
+    try {
+      const { results, total } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
+      dealsFetched += results.length
+      totalAmountRaised+= results.map(r => parseFloat(r.properties.amount)).reduce((acc,cur) => acc + cur, 0)
+    } catch (error) {
+      console.error("could not compute updated deal closed amount:\n", error);
+      return new Error(getErrorMessage(error));
+    }
   }
+  return totalAmountRaised;
 }
 
 /**
