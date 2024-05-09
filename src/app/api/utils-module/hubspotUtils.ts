@@ -2,6 +2,7 @@ import type { User } from "@prisma/client";
 import { z } from "zod";
 import { ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
+import { isError } from "lodash";
 
 export type HubspotContact = {
   properties: { property: string; value: string }[];
@@ -155,6 +156,7 @@ export async function getFundingAmount(projectName: ProjectName) {
       case ProjectName["The Edison"]: {
         return {
           limit: 100, /**pagination - max=100 */
+          after:0,
           filterGroups: [
             {
               filters: [
@@ -171,6 +173,7 @@ export async function getFundingAmount(projectName: ProjectName) {
       case ProjectName["519 W Main"]: {
         return {
           limit: 100, /**pagination - max=100 */
+          after:0,
           filterGroups: [
             {
               filters: [
@@ -192,23 +195,28 @@ export async function getFundingAmount(projectName: ProjectName) {
     }
   }
 
-  const resBody = await fetch(
-    `https://api.hubapi.com/crm/v3/objects/deals/search`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(getPayload(projectName)),
-    }
-  )
+
   /* eslint-disable-next-line */
   let totalAmountRaised = 0;
   let dealsFetched = 0;
   let totalDeals = 100;
-  let fetchMore = true;
   while (dealsFetched<totalDeals) {
+    let payload = getPayload(projectName)
+    if(isError(payload)) {
+      return 25000000;
+    }
+    payload.after = dealsFetched;
+    const resBody = await fetch(
+      `https://api.hubapi.com/crm/v3/objects/deals/search`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+        },
+        body: JSON.stringify(payload),
+      }
+    )
     const hsDealCreateRespBody = await resBody.json();
     try {
       const { results, total } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
