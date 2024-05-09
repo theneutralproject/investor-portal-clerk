@@ -201,7 +201,7 @@ export async function getFundingAmount(projectName: ProjectName) {
   let dealsFetched = 0;
   let totalDeals = 100;
   while (dealsFetched<totalDeals) {
-    let payload = getPayload(projectName)
+    const payload = getPayload(projectName)
     if(isError(payload)) {
       return 25000000;
     }
@@ -217,9 +217,12 @@ export async function getFundingAmount(projectName: ProjectName) {
         body: JSON.stringify(payload),
       }
     )
+    
+    /* eslint-disable-next-line */
     const hsDealCreateRespBody = await resBody.json();
     try {
       const { results, total } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
+      totalDeals = total;
       dealsFetched += results.length
       totalAmountRaised+= results.map(r => parseFloat(r.properties.amount)).reduce((acc,cur) => acc + cur, 0)
     } catch (error) {
