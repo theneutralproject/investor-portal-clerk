@@ -106,7 +106,7 @@ export const FundTab: React.FC<{ project: Project; deal: Deal }> = ({
               <Divider sx={{ mt: 2 }} />
 
               <LineDisplay name="Amount" value={`$${deal.amount}`} />
-              <LineDisplay name="Account Number" value={lookupAccountNumber(deal.investmentEntity)} />  /**edison project LLC */
+              <LineDisplay name="Account Number" value={lookupAccountNumber(deal.investmentEntity)} />
 
               <FormControl fullWidth sx={{ mt: 2 }}>
                 <InputLabel id="method-label">Select Routing</InputLabel>
