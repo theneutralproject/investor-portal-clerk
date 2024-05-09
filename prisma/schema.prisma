@@ -90,7 +90,7 @@ model Document {
   id             Int                 @id @default(autoincrement())
   name           String
   fileName       String
-  description    String
+  description    String?
   link           String
   projectId      Int
   project        Project             @relation(fields: [projectId], references: [id])
