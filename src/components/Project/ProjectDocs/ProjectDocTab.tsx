@@ -40,6 +40,16 @@ export const ProjectDocTab: React.FC<{
     setOpenModal(true);
   };
 
+  const handleDownloadDocument = (document: DocumentWithCompletion) => {
+    if (!document?.completed) {
+      documentEventMutation.mutate({
+        documentId: document?.id,
+        type: "VIEW",
+      });
+    }
+    window.open(document.link, "_blank");
+  };
+
   const handleCloseModal = () => {
     setOpenModal(false);
 
@@ -59,7 +69,8 @@ export const ProjectDocTab: React.FC<{
             key={index}
             document={document}
             dealStage={deal.dealStage}
-            handleViewDocument={() => handleViewDocument(document)}
+            handleViewDocument={handleViewDocument}
+            handleDownloadDocument={handleDownloadDocument}
           />
         ))}
         <DocumentViewerModal

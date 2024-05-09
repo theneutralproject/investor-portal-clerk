@@ -3,35 +3,38 @@ import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import LockedIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import StepAvatar from "@/components/StepAvatar";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { type DocumentWithCompletion } from "@/app/hooks/useDocuments";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
 
 const DocumentCard = ({
   document,
   dealStage,
   handleViewDocument,
+  handleDownloadDocument,
 }: {
   document: DocumentWithCompletion;
   dealStage: number;
-  handleViewDocument: (documentId: number) => void;
+  handleViewDocument: (document: DocumentWithCompletion) => void;
+  handleDownloadDocument: (document: DocumentWithCompletion) => void;
 }) => {
   const documentLocked = dealStage < document.dealStage;
 
   const renderIcon = () => {
     if (document.completed) {
-      return <StepAvatar isComplete={true} stepNumber={dealStage} />;
+      return <CheckBoxIcon sx={{ color: "#626f52" }} />;
     } else if (documentLocked) {
       return <LockedIcon />;
     } else {
-      return <VisibilityIcon />;
+      return <CheckBoxOutlineBlankIcon />;
     }
   };
 
   if (document.link.includes("youtube")) {
-    const id = document.link.split("v=")[1]!;
+    const id = document.link.split("v=")[1];
 
     return (
       <Card sx={{ mb: 2 }}>
@@ -75,22 +78,33 @@ const DocumentCard = ({
       </Box>
       <Box
         sx={{
+          ml: "auto", // Moves the icons to the right
           display: documentLocked ? "none" : "flex",
-          flexDirection: "column",
-          flexGrow: 1,
+          flexDirection: "row",
           alignItems: "flex-end",
           p: theme.spacing(1),
         }}
       >
         <IconButton
-          aria-label="download"
+          aria-label="view document"
           size="large"
           onClick={() => {
-            handleViewDocument(document.id);
+            handleViewDocument(document);
           }}
         >
-          <DownloadIcon />
+          <VisibilityIcon />
         </IconButton>
+        {!document?.link?.toUpperCase().includes("DOCUSIGN") && (
+          <IconButton
+            aria-label="download document"
+            size="large"
+            onClick={() => {
+              handleDownloadDocument(document);
+            }}
+          >
+            <DownloadIcon />
+          </IconButton>
+        )}
       </Box>
     </Card>
   );

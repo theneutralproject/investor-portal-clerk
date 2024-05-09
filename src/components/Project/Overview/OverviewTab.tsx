@@ -34,15 +34,16 @@ export const OverviewTab = ({ data }: { data: Project }) => {
             <InvestmentSummaryBox data={data} />
           </CardContent>
         </Card>
-        <BasicTitleDescriptionCard
-          title="Project Description"
-          description={data.description}
-        />
         {youtubeID.length > 5 && (
           <Card sx={{ mt: theme.spacing(2) }}>
             <LiteYouTubeEmbed id={youtubeID} title={data.name} />
           </Card>
         )}
+        <BasicTitleDescriptionCard
+          title="Project Description"
+          description={data.description}
+        />
+
         <BuildingDetails data={data} />
         <ProjectCalculator data={data} />
         <BasicTitleDescriptionCard

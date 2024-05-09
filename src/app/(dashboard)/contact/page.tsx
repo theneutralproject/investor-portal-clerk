@@ -153,14 +153,13 @@ const ContactPage = () => {
           description="Want to discuss your needs in detail? Schedule a call with us."
           buttonText="Schedule Now"
         />
+        <ContactMethod
+          Icon={QuestionIcon}
+          title="Frequently Asked Questions"
+          description="Check our Learn page for answers to common questions."
+          buttonText="Visit Learn Page"
+        />
       </Grid>
-
-      <ContactMethod
-        Icon={QuestionIcon}
-        title="Frequently Asked Questions"
-        description="Check our Learn page for answers to common questions."
-        buttonText="Visit Learn Page"
-      />
     </Box>
   );
 };

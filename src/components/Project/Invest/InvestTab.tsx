@@ -32,15 +32,24 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   const [selectedDocument, setSelectedDocument] =
     useState<DocumentWithCompletion | null>(null);
 
-  const handleViewDocument = (documentId: number) => {
-    const currentDocument = data.find((doc) => doc.id === documentId);
-    setSelectedDocument(currentDocument!);
+  const handleViewDocument = (document: DocumentWithCompletion) => {
+    setSelectedDocument(document);
 
-    if (currentDocument?.link.includes("docusign")) {
+    if (document?.link.includes("docusign")) {
       setModelOpenType("DOCUSIGN");
     } else {
       setModelOpenType("DOCUMENT");
     }
+  };
+
+  const handleDownloadDocument = (document: DocumentWithCompletion) => {
+    if (!document?.completed) {
+      documentEventMutation.mutate({
+        documentId: document?.id,
+        type: "VIEW",
+      });
+    }
+    window.open(document.link, "_blank");
   };
 
   const handleCloseModal = () => {
@@ -59,9 +68,13 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
       <CardContent>
-        <Typography variant="h6">Review and Sign Investment Agreements</Typography>
+        <Typography variant="h6">
+          Review and Sign Investment Agreements
+        </Typography>
         <Typography variant="caption">
-          Please review these Investment Documents. The files starting with 'Docusign:' will be emailed to you for your e-signature, but we also list them here in case you want a sneak peek.
+          Please review these Investment Documents. The files starting with
+          'Docusign:' will be emailed to you for your e-signature, but we also
+          list them here in case you want a sneak peek.
         </Typography>
 
         {data.map((document: DocumentWithCompletion, index) => (
@@ -70,6 +83,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
             document={document}
             dealStage={deal.dealStage}
             handleViewDocument={handleViewDocument}
+            handleDownloadDocument={handleDownloadDocument}
           />
         ))}
 

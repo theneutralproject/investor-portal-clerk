@@ -38,7 +38,11 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
           value={`$${data.equityMinInvestment}`}
         />
         <LineDisplay name="Term" value={`${data.equityTermMonths} months`} />
-        <LineDisplay name="Distribution" value={`${data.equityPaymentFreq}`} />
+        <LineDisplay name="Distribution" value={`${data.equityPaymentFreq}*`} />
+        <LineDisplay
+          name="Preferred Return"
+          value={`${data.preferredReturn}**`}
+        />
       </Grid>
       <Grid
         item
@@ -50,7 +54,7 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
       </Grid>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
-        <LineDisplay name="Interest" value={`${data.debtInterestRate}%`} />
+        <LineDisplay name="Interest" value={`${data.debtInterestRate}`} />
         <LineDisplay
           name="Min. Investment"
           value={`$${data.debtMinInvestment}`}
@@ -58,6 +62,16 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
         <LineDisplay name="Term" value={`${data.debtTermMonths} months`} />
         <LineDisplay name="Payment" value={`${data.debtPaymentFreq}`} />
       </Grid>
+
+      <Box sx={{ ml: 2 }}>
+        <Typography variant="body2">
+          *Quarterly distribution shall commence upon stabilization, defined as
+          95% occupied.
+        </Typography>
+        <Typography variant="body2">
+          **Equity investors receive a 10% preferred return.
+        </Typography>
+      </Box>
     </Grid>
   );
 };

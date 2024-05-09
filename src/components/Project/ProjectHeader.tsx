@@ -70,7 +70,7 @@ function ProjectHeader({
             sx={{
               justifyContent: "flex-end",
               alignItems: "center",
-              display: "flex",
+              display: percentRaised > 50 ? "flex" : "none",
             }}
           >
             <Hidden smDown>
@@ -84,6 +84,7 @@ function ProjectHeader({
                 variant="determinate"
                 value={percentRaised}
                 size={50}
+                sx={{ color: "#969f7e" }}
                 thickness={5}
               />
               <Box

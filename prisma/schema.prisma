@@ -15,7 +15,7 @@ enum Role {
 model User {
   id             Int             @id @default(autoincrement())
   clerkId        String          @unique
-  role           Role             @default(USER)
+  role           Role            @default(USER)
   email          String          @unique
   firstName      String
   lastName       String
@@ -43,32 +43,34 @@ enum Status {
 }
 
 model Project {
-  id                  Int        @id @default(autoincrement())
-  status              Status     @default(ACTIVE)
-  name                String  @unique
-  description         String
-  marketHighlights    String     @default("")
-  location            String
-  tags                String     @default("")
-  investmentRaised    Float      @default(0.0)
-  investmentGoal      Float      @default(0.0)
-  equityIRR           Float      @default(0.0)
-  equityMinInvestment Int        @default(250000)
-  equityTermMonths    Int        @default(60)
-  equityPaymentFreq   String     @default("quarterly")
-  debtInterestRate    Float      @default(0.0)
-  debtMinInvestment   Int        @default(25000)
-  debtTermMonths      Int        @default(48)
-  debtPaymentFreq     String     @default("quarterly")
-  buildingUnits       Int        @default(0)
-  buildingAvgUnitSize Int        @default(0)
-  buildingAvgRent     Int        @default(0)
-  buildingCommSqFt    Int        @default(0)
-  youtubeUrl          String     @default("")
-  pictures            Pictures[]
-  meetings            Meeting[]
-  documents           Document[]
-  deals               Deal[]
+  id                   Int        @id @default(autoincrement())
+  status               Status     @default(ACTIVE)
+  name                 String     @unique
+  description          String
+  marketHighlights     String     @default("")
+  location             String
+  tags                 String     @default("")
+  investmentRaised     Float      @default(0.0)
+  investmentGoal       Float      @default(0.0)
+  equityIRR            Float      @default(0.0)
+  equityMinInvestment  Int        @default(250000)
+  equityTermMonths     Int        @default(60)
+  equityPaymentFreq    String     @default("quarterly")
+  debtInterestRate     String     @default("")
+  debtMinInvestment    Int        @default(25000)
+  debtTermMonths       Int        @default(48)
+  debtPaymentFreq      String     @default("quarterly")
+  buildingUnits        Int        @default(0)
+  buildingAvgUnitSize  Int        @default(0)
+  buildingAvgRent      Int        @default(0)
+  buildingCommSqFt     Int        @default(0)
+  youtubeUrl           String     @default("")
+  targetEquityMultiple Float      @default(0.0)
+  preferredReturn      String     @default("")
+  pictures             Pictures[]
+  meetings             Meeting[]
+  documents            Document[]
+  deals                Deal[]
 }
 
 enum PictureType {
@@ -86,6 +88,12 @@ model Pictures {
   type      PictureType
 }
 
+enum DocumentType {
+  YOUTUBE
+  DOCUSIGN
+  DOCUMENT
+}
+
 model Document {
   id             Int                 @id @default(autoincrement())
   name           String
@@ -95,6 +103,7 @@ model Document {
   projectId      Int
   project        Project             @relation(fields: [projectId], references: [id])
   dealStage      Int
+  documentType   DocumentType        @default(DOCUMENT)
   documentEvents DocumentEvent[]
   financingTypes DealFinancingType[] @default([])
 }
@@ -116,17 +125,17 @@ model DocumentEvent {
 }
 
 model Deal {
-  id            Int                @id @default(autoincrement())
-  projectId     Int
-  project       Project            @relation(fields: [projectId], references: [id])
-  userId        Int
-  user          User               @relation(fields: [userId], references: [id])
-  dealStage     Int
-  amount        Int
-  hubspotId     String             @unique
-  financingType DealFinancingType? @default(equity)
-  transactionId String             @default("")
-  investmentEntity String          
+  id               Int                @id @default(autoincrement())
+  projectId        Int
+  project          Project            @relation(fields: [projectId], references: [id])
+  userId           Int
+  user             User               @relation(fields: [userId], references: [id])
+  dealStage        Int
+  amount           Int
+  hubspotId        String             @unique
+  financingType    DealFinancingType? @default(equity)
+  transactionId    String             @default("")
+  investmentEntity String
 }
 
 enum DealFinancingType {
