@@ -164,7 +164,12 @@ export async function getFundingAmount(projectName: ProjectName) {
                   propertyName: "dealstage",
                   operator: "EQ",
                   value: "contractsent" //146586773
-                }
+                },
+                {
+                  propertyName: "project_name",
+                  operator: "EQ",
+                  value: "The Edison"
+                },
               ]
             }
           ]
@@ -181,7 +186,12 @@ export async function getFundingAmount(projectName: ProjectName) {
                   propertyName: "dealstage",
                   operator: "EQ",
                   value: "146586773"
-                }
+                },
+                {
+                  propertyName: "project_name",
+                  operator: "EQ",
+                  value: "519 W Main"
+                },
               ]
             }
           ]
