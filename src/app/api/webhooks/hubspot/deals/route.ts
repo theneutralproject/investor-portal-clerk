@@ -58,16 +58,12 @@ export async function POST(req: Request): Promise<Response> {
         break;
     }
 
-    console.log("update project funding 1", updateProjectFunding)
     if(updateProjectFunding) {
-      console.log("update project funding 2")
       const projectToUpdate = getProjectNameFromDealStage(payload.propertyValue);
-      console.log("update project funding 3")
       if(!isError(projectToUpdate)) {
-        console.log("update project funding 4")
         const amountRaised = await getFundingAmount(projectToUpdate)
 
-        console.log("update project funding 5", amountRaised)
+        console.log("update project funding to:", amountRaised)
         if(isError(amountRaised)) {
           console.error(`unable to fetch deal amnount raised for project ${projectToUpdate}: ${amountRaised.message}`);
         } else {

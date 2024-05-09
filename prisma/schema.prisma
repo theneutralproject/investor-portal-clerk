@@ -15,11 +15,11 @@ enum Role {
 model User {
   id             Int             @id @default(autoincrement())
   clerkId        String          @unique
-  role           Role
+  role           Role             @default(USER)
   email          String          @unique
   firstName      String
   lastName       String
-  phoneNumber    String
+  phoneNumber    String?
   hubspotId      String
   meetings       Meeting[]
   deals          Deal[]
