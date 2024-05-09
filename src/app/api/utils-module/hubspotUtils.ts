@@ -162,8 +162,8 @@ export async function getFundingAmount(projectName: ProjectName) {
               filters: [
                 {
                   propertyName: "dealstage",
-                  operator: "EQ",
-                  value: "contractsent" //146586773
+                  operator: "IN",
+                  values: ["contractsent", "decisionmakerboughtin"]
                 },
                 {
                   propertyName: "project_name",
@@ -184,8 +184,8 @@ export async function getFundingAmount(projectName: ProjectName) {
               filters: [
                 {
                   propertyName: "dealstage",
-                  operator: "EQ",
-                  value: "146586773"
+                  operator: "IN",
+                  values: ["146586773","146586772"]
                 },
                 {
                   propertyName: "project_name",
