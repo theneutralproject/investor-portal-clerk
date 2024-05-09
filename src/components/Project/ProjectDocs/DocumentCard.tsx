@@ -46,7 +46,7 @@ const DocumentCard = ({
             In this video our team will review each of the project documents
             below, what they mean, and answer common questions.
           </Typography>
-          <LiteYouTubeEmbed id={id} title={document.name} />
+          <LiteYouTubeEmbed id={id!} title={document.name} />
         </CardContent>
       </Card>
     );
