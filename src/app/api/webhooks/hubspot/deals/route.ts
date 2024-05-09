@@ -46,7 +46,7 @@ export async function POST(req: Request): Promise<Response> {
     switch (payload.propertyName) {
       case "dealstage":
         dealBody.dealStage = getDealStageInt(payload.propertyValue);
-        if(dealBody.dealStage === 4) {
+        if(dealBody.dealStage >= 3) {
           updateProjectFunding = true;
         }
         break;
