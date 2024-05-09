@@ -61,7 +61,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
       <CardContent>
         <Typography variant="h6">Review and Sign Investment Agreements</Typography>
         <Typography variant="caption">
-          Placeholder description about what this process is and how it works.
+          Please review these Investment Documents. The files starting with 'Docusign:' will be emailed to you for your e-signature, but we also list them here in case you want a sneak peek.
         </Typography>
 
         {data.map((document: DocumentWithCompletion, index) => (

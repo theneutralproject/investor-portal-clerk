@@ -1,6 +1,6 @@
 import prisma from "@/libs/prisma";
-import type { HubspotDealUpdateSchema } from "./_globals";
-import { type Deal } from "@prisma/client";
+import { ProjectName, type HubspotDealUpdateSchema } from "./_globals";
+import type { DealFinancingType, Deal } from "@prisma/client";
 
 /**
  * Updates a deal in the database
@@ -42,5 +42,38 @@ export async function updateDeal(
     });
 
   return updatedDeal;
+  /* eslint-enable */
+}
+
+const InvestmentEntity = {
+  "The Edison": {
+    equity: "Edison Project LLC",
+    promissory_note_now: "North Edison LLC",
+    promissory_note_at_closing: "Edison Project LLC",
+    promissory_to_equity: "North Edison LLC",
+  },
+  "519 W Main": {
+    equity: "Vanilla 301 LLC",
+    promissory_note_now: "Vanilla 301 LLC",
+    promissory_note_at_closing: "Vanilla 301 LLC",
+    promissory_to_equity: "Vanilla 301 LLC",
+  }
+}
+
+export function getInvestmentEntity(projectName: string, financingType: DealFinancingType) {
+  /* eslint-disable */
+  switch (projectName) {
+    case ProjectName["The Edison"]: {
+      return InvestmentEntity[projectName][financingType]
+    }
+
+    case ProjectName["519 W Main"]: {
+      return InvestmentEntity[projectName][financingType]
+    }
+    default: {
+      console.error(`The project with name ${projectName} is not yet supported in getInvestmentEntity()`)
+      return null;
+    }
+  }
   /* eslint-enable */
 }

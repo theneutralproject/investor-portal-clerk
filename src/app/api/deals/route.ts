@@ -6,6 +6,8 @@ import {
   initDealPropsForProject,
 } from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
+import { getInvestmentEntity } from "../utils-module/dealUtils";
+import { DealFinancingType } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -151,8 +153,9 @@ export async function POST(request: NextRequest) {
           dealStage: 0,
           amount: 0,
           hubspotId: hsDealId.toString(),
-          financingType: 'equity',
+          financingType: DealFinancingType.equity,
           transactionId: transactionId,
+          investmentEntity: getInvestmentEntity(project.name, DealFinancingType.equity) ?? ""
         },
       });
     }

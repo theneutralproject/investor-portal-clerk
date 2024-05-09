@@ -126,6 +126,7 @@ model Deal {
   hubspotId     String             @unique
   financingType DealFinancingType? @default(equity)
   transactionId String             @default("")
+  investmentEntity String           @default("")
 }
 
 enum DealFinancingType {

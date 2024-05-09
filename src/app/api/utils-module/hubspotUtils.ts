@@ -1,8 +1,9 @@
-import type { User } from "@prisma/client";
+import { DealFinancingType, type User } from "@prisma/client";
 import { z } from "zod";
 import { ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
 import { isError } from "lodash";
+import { getInvestmentEntity } from "./dealUtils";
 
 export type HubspotContact = {
   properties: { property: string; value: string }[];
@@ -118,7 +119,7 @@ export function initDealPropsForProject(projectName: string, user: User, transac
         properties: [
           { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
           { name: "dealstage", value: EdisonDealStages[1]?.value ?? "" },
-          { name: "investment_entity", value: InvestmentEntity[projectName].equity },
+          { name: "investment_entity", value: getInvestmentEntity(projectName, DealFinancingType.equity) },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
           { name: "financing_type", value: "equity" },
@@ -132,7 +133,7 @@ export function initDealPropsForProject(projectName: string, user: User, transac
         properties: [
           { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
           { name: "dealstage", value: _519WMainDealStages[1]?.value ?? "" },
-          { name: "investment_entity", value: InvestmentEntity[projectName].equity },
+          { name: "investment_entity", value: getInvestmentEntity(projectName, DealFinancingType.equity) },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
           { name: "financing_type", value: "equity" },
@@ -263,17 +264,6 @@ export function getProjectNameFromDealStage(dealstage: string) {
   if(_519WMainDealStages.map(e => e.value).indexOf(dealstage) >-1) return ProjectName["519 W Main"];
   return new Error("project not yet supported");
 };
-
-const InvestmentEntity = {
-  "The Edison": {
-    equity: "North Edison LLC",
-    debt: "Edison Project LLC",
-  },
-  "519 W Main": {
-    equity: "Vanilla 301 LLC",
-    debt: "Vanilla 301 LLC",
-  }
-}
 
 export const EdisonDealStages = [
   { key: "aQualified", value: "appointmentscheduled" },
