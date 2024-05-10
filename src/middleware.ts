@@ -10,9 +10,7 @@ export default authMiddleware({
 
   // eslint-disable-next-line consistent-return
   afterAuth(auth, _req) {
-    console.log("after Auth",  _req.url,_req.nextUrl.href)
     if (!auth.userId && !auth.isPublicRoute) {
-      console.log("IF YOU SEE THIS, AUTH FAILED", auth.userId, auth.isPublicRoute)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return redirectToSignUp({ returnBackUrl: process.env.NEXTAUTH_URL });
     }

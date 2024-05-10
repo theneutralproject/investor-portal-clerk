@@ -35,7 +35,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   const handleViewDocument = (document: DocumentWithCompletion) => {
     setSelectedDocument(document);
 
-    if (document?.link.includes("docusign")) {
+    if (document?.link.includes("docusign.")) {
       setModelOpenType("DOCUSIGN");
     } else {
       setModelOpenType("DOCUMENT");
