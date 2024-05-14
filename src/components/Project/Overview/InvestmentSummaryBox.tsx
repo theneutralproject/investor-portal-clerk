@@ -54,7 +54,7 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
       </Grid>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
-        <LineDisplay name="Interest" value={`${data.debtInterestRate}`} />
+        <LineDisplay name="Interest" value={`${data.debtInterestRate}***`} />
         <LineDisplay
           name="Min. Investment"
           value={`$${data.debtMinInvestment}`}
@@ -70,6 +70,9 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
         </Typography>
         <Typography variant="body2">
           **Equity investors receive a 10% preferred return.
+        </Typography>
+        <Typography variant="body2">
+          ***12% for investment amounts above $500k.
         </Typography>
       </Box>
     </Grid>
