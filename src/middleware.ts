@@ -11,10 +11,11 @@ export default authMiddleware({
   // eslint-disable-next-line consistent-return
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       
       console.warn(`_____LOGGING API ${_req.method} REQUEST:\tuser: ${auth.userId}\turl: ${_req.url}`);
       if(_req.body) console.warn(_req.body);
+      
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return redirectToSignUp({ returnBackUrl: process.env.NEXTAUTH_URL });
     }
   },

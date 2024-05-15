@@ -13,18 +13,7 @@ function HubspotContactForm({ onExit }: { onExit?: () => void }) {
   };
 
   // Styles for the modal to center it
-  const meetingStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 500,
-    height: 700,
-    bgcolor: "#1b323e",
-    p: 2,
-  };
-
-  const contactStyle = {
+  const style = {
     position: "absolute",
     top: "50%",
     left: "50%",
@@ -53,7 +42,7 @@ function HubspotContactForm({ onExit }: { onExit?: () => void }) {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={contactStyle}>
+        <Box sx={style}>
           <iframe
             title="hubspot"
             style={{ width: "100%", height: "100%" }}
