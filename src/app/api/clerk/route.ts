@@ -71,7 +71,6 @@ export async function POST(request: Request) {
        }
       const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString();
 
-      console.log("clerk WH3");
       /* Store user in DB**/
       const DBUserData = {
         clerkId: id,

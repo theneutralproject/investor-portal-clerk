@@ -33,7 +33,6 @@ export async function GET(request: NextRequest) {
 
   try {
     const user = await currentUser();
-    console.log(`clerk id: ${user?.id}`)
     if (!user) {
       return new Response(JSON.stringify({ error: "User not found" }), {
         status: 404,
@@ -45,7 +44,7 @@ export async function GET(request: NextRequest) {
       where: { clerkId: user.id },
     });
     if (!neutralUser) {
-      console.log("neutral user not found in api/deals")
+      console.error("neutral user not found in api/deals")
       return new Response(JSON.stringify({ error: "User record not found" }), {
         status: 404,
         headers: { "Content-Type": "application/json" },
@@ -124,7 +123,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (!deal) {
-      console.log("no deal yet");
       const transactionId = `${project.name}-${neutralUser.lastName}-${Math.floor(Math.random() * (999 - 100 + 1) + 100)}`.replace(/\s/g, '').toUpperCase();
 
       const hsDeal = initDealPropsForProject(project.name, neutralUser, transactionId);

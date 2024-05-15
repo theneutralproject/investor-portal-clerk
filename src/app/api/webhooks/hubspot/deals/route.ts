@@ -22,6 +22,9 @@ const arrHubspotWHRes = z.array(hubspotWHDealRes);
 export async function POST(req: Request): Promise<Response> {
   try {
     const payload = arrHubspotWHRes.parse(await req.json())[0];
+    const hsHeader = req.headers.get("X-HubSpot-Signature-Version");
+    console.warn("HS Header:", hsHeader)
+    if(!hsHeader) console.warn(`HS webhook request is not coming from HS!!!`)
 
     if (
       !payload?.propertyValue ||
@@ -62,12 +65,10 @@ export async function POST(req: Request): Promise<Response> {
       const projectToUpdate = getProjectNameFromDealStage(payload.propertyValue);
       if(!isError(projectToUpdate)) {
         const amountRaised = await getFundingAmount(projectToUpdate)
-
-        console.log("update project funding to:", amountRaised)
         if(isError(amountRaised)) {
-          console.error(`unable to fetch deal amnount raised for project ${projectToUpdate}: ${amountRaised.message}`);
+          console.error(`unable to fetch deal amount raised for project ${projectToUpdate}: ${amountRaised.message}`);
         } else {
-          console.log(`\nupdating project funding for ${projectToUpdate} to ${amountRaised}`)
+          console.log(`\attempting to update project funding tracker for ${projectToUpdate} to ${amountRaised}`)
           await prisma.project
           .update({
             where: { name: projectToUpdate },

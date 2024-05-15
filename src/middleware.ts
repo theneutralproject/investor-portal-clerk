@@ -12,16 +12,14 @@ export default authMiddleware({
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      
+      console.warn(`_____LOGGING API ${_req.method} REQUEST:\tuser: ${auth.userId}\turl: ${_req.url}`);
+      if(_req.body) console.warn(_req.body);
       return redirectToSignUp({ returnBackUrl: process.env.NEXTAUTH_URL });
     }
   },
-  // beforeAuth(_req, ) {
-  //   console.log("before auth", _req.url, _req.nextUrl.href)
-  // }
 });
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/"],
 };
-
-

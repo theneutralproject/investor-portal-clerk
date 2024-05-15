@@ -37,6 +37,7 @@ export async function updateDeal(
       data: data,
     })
     .catch((error) => {
+      console.error(`Failed to update deal with hubspot id ${hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`);
       console.error(error);
       return Error("Failed to update deal with hubspot data");
     });
