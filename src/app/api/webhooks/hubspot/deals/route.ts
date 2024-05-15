@@ -22,9 +22,16 @@ const arrHubspotWHRes = z.array(hubspotWHDealRes);
 export async function POST(req: Request): Promise<Response> {
   try {
     const payload = arrHubspotWHRes.parse(await req.json())[0];
-    const hsHeader = req.headers.get("X-HubSpot-Signature-Version");
-    console.warn("HS Header:", hsHeader)
-    if(!hsHeader) console.warn(`HS webhook request is not coming from HS!!!`)
+    if(!(req.headers.get("X-HubSpot-Signature-Version") && req.headers.get("X-HubSpot-Signature"))) {
+      console.error(`HS webhook request is not coming from HS!`)
+      return new Response(
+        JSON.stringify({ message: "Ignoring HubSpot webhook" }),
+        {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
     if (
       !payload?.propertyValue ||
