@@ -40,7 +40,7 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     HUBSPOT_ACCESS_TOKEN: process.env.HUBSPOT_ACCESS_TOKEN,
     BASE_URL: process.env.BASE_URL,
-    GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID
+    GOOGLE_TAG_ID: process.env.GOOGLE_TAG_IDn
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
