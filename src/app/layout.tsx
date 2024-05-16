@@ -1,6 +1,7 @@
 import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
+import { GoogleAnalytics } from '@next/third-parties/google'
 
 import NeutralThemeProvider from "@/components/Shell/NeutralThemeProvider";
 import Sidebar from "@/components/Shell/Sidebar";
@@ -49,6 +50,8 @@ export default function RootLayout({
 
           <ChatInterface type="FAB" />
         </body>
+        
+      <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID??""} />
       </html>
     </ClerkProvider>
   );
