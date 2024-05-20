@@ -27,27 +27,8 @@ const InfoSidebar = () => {
         <CardContent>
           <Typography variant="h5">About The Neutral Project</Typography>
           <Typography variant="caption">
-            The Neutral Project team has more than
-            four decades of collective experience in
-            multifamily and mixed-use development,
-            solidifying their reputation as an innovative
-            and successful sustainable real estate
-            company.
+            The Neutral Project is a regenerative and sustainable real estate company. Our leadership team has successfully completed numerous projects and is committed to maximizing investors’ alpha while maintaining our thesis of developing sustainable and regenerative buildings.
           </Typography>
-          <Typography variant="h5"></Typography>
-          <Typography variant="caption">
-            As a sustainable real estate development
-            firm that aims to redefine traditional
-            practices by focusing on sustainability in the
-            built environment, The Neutral Project team
-            strives to create carbon-neutral mixed-use
-            and multi-family developments, removing
-            carbon emissions during construction and
-            building operations. Their leadership team
-            has successfully completed numerous
-            projects and has a continued commitment
-            to maximizing returns while maintaining
-            their thesis of sustainability.</Typography>
         </CardContent>
       </Card>
     </Grid>
