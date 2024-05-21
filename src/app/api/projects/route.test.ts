@@ -1,0 +1,16 @@
+// https://blog.arcjet.com/testing-next-js-app-router-api-routes/
+import { testApiHandler } from "next-test-api-route-handler"; // Must always be first
+import * as appHandler from "./route";
+
+it("GET returns 200", async () => {
+  await testApiHandler({
+    appHandler,
+    test: async ({ fetch }) => {
+      const response = await fetch({ method: "GET" });
+      const json = await response.json();
+      expect(response.status).toBe(200);
+        //   https://jestjs.io/docs/expect#tohavelengthnumber
+      await expect(json).toHaveLength(3);
+    },
+  });
+});
