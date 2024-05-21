@@ -4,6 +4,8 @@ import { LineDisplay } from "./InvestmentSummaryBox";
 import { type Project } from "@prisma/client";
 import CollapsibleCard from "./CollapsibleCard";
 
+const formatter = Intl.NumberFormat('en', { maximumFractionDigits: 2 });
+
 const BuildingDetails = ({ data }: { data: Project }) => {
   return (
     <CollapsibleCard title="Building Details">
@@ -14,10 +16,10 @@ const BuildingDetails = ({ data }: { data: Project }) => {
         name="Avg. Unit Size"
         value={`${data.buildingAvgUnitSize} SF`}
       />
-      <LineDisplay name="Avg. Gross Rent" value={`$${data.buildingAvgRent}`} />
+      <LineDisplay name="Avg. Gross Rent" value={`$${formatter.format(data.buildingAvgRent)}`} />
       <LineDisplay
         name="Commercial Sq. Ft."
-        value={`${data.buildingCommSqFt} SF`}
+        value={`${formatter.format(data.buildingCommSqFt)} SF`}
       />
     </CollapsibleCard>
   );

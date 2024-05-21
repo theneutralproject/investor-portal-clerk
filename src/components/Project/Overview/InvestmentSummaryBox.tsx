@@ -3,6 +3,8 @@ import { Box, Grid, Typography, Divider } from "@mui/material";
 import { type Project } from "@prisma/client";
 import { type Decimal } from "@prisma/client/runtime/library";
 
+const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+
 export const LineDisplay = ({
   name,
   value,
@@ -35,7 +37,7 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
         <LineDisplay name="IRR" value={`${data.equityIRR}%`} />
         <LineDisplay
           name="Min. Investment"
-          value={`$${data.equityMinInvestment}`}
+          value={`$${formatter.format(data.equityMinInvestment)}`}
         />
         <LineDisplay name="Term" value={`${data.equityTermMonths} months`} />
         <LineDisplay name="Distribution" value={`${data.equityPaymentFreq}*`} />
@@ -57,7 +59,7 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
         <LineDisplay name="Interest" value={`${data.debtInterestRate}***`} />
         <LineDisplay
           name="Min. Investment"
-          value={`$${data.debtMinInvestment}`}
+          value={`$${formatter.format(data.debtMinInvestment)}`}
         />
         <LineDisplay name="Term" value={`${data.debtTermMonths} months`} />
         <LineDisplay name="Payment" value={`${data.debtPaymentFreq}`} />
