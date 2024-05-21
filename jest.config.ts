@@ -10,6 +10,7 @@ const createJestConfig = nextJest({
 // Add any custom config to be passed to Jest
 const config: Config = {
   coverageProvider: "v8",
+  collectCoverage: false,
   testEnvironment: "node",
   moduleNameMapper: {
     // Uncomment to provides the Next.js cache function
