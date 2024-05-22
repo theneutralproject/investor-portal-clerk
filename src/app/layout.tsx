@@ -12,6 +12,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 
 import ChatInterface from "@/components/ChatInterface";
+import { CSPostHogProvider } from "./providers";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -29,30 +30,32 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={inter.className}>
-          <NeutralQueryProvider>
-            <NeutralThemeProvider>
-              <Sidebar>{children}</Sidebar>
-              <ToastContainer
-                position="top-right"
-                autoClose={5000}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                theme="light"
-              />
-            </NeutralThemeProvider>
-          </NeutralQueryProvider>
+    <CSPostHogProvider>
+      <ClerkProvider>
+        <html lang="en">
+          <body className={inter.className}>
+            <NeutralQueryProvider>
+              <NeutralThemeProvider>
+                <Sidebar>{children}</Sidebar>
+                <ToastContainer
+                  position="top-right"
+                  autoClose={5000}
+                  newestOnTop={false}
+                  closeOnClick
+                  rtl={false}
+                  pauseOnFocusLoss
+                  draggable
+                  theme="light"
+                />
+              </NeutralThemeProvider>
+            </NeutralQueryProvider>
 
-          <ChatInterface type="FAB" />
-        </body>
-        
-      <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID??""} />
-      </html>
-    </ClerkProvider>
+            <ChatInterface type="FAB" />
+          </body>
+
+          <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ""} />
+        </html>
+      </ClerkProvider>
+    </CSPostHogProvider>
   );
 }

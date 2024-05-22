@@ -17,6 +17,7 @@ export const env = createEnv({
     BASE_URL: z.string(),
     GOOGLE_TAG_ID: z.string(),
   },
+  
 
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
@@ -26,6 +27,8 @@ export const env = createEnv({
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
+    NEXT_PUBLIC_POSTHOG_KEY: z.string(),
+    NEXT_PUBLIC_POSTHOG_HOST: z.string(),
   },
 
   /**
@@ -40,7 +43,9 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     HUBSPOT_ACCESS_TOKEN: process.env.HUBSPOT_ACCESS_TOKEN,
     BASE_URL: process.env.BASE_URL,
-    GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID
+    GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID,    
+    NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
+    NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
