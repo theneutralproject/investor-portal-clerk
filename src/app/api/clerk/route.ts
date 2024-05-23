@@ -1,5 +1,5 @@
 import prisma from "@/libs/prisma";
-import { type UserJSON, type WebhookEvent } from "@clerk/nextjs/server";
+import { type WebhookEvent } from "@clerk/nextjs/server";
 import { Role, type User } from "@prisma/client";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
@@ -27,19 +27,20 @@ async function validateRequest(request: Request) {
 export async function POST(request: Request) {
   const { type, data } = await validateRequest(request);
 
-  const {
-    id,
-    primary_email_address_id,
-    email_addresses,
-    primary_phone_number_id,
-    first_name,
-    last_name,
-    phone_numbers,
-  } = data as UserJSON;
-
   switch (type) {
     case "user.created": {
       console.log("clerk WH1 - user created");
+
+      const {
+        id,
+        primary_email_address_id,
+        email_addresses,
+        primary_phone_number_id,
+        first_name,
+        last_name,
+        phone_numbers,
+      } = data;
+
       const email =
         email_addresses.find(({ id }) => id === primary_email_address_id)
           ?.email_address ?? "";
@@ -92,6 +93,16 @@ export async function POST(request: Request) {
           headers: { "Content-Type": "application/json" },
         });
        }
+      break;
+    }
+    case "session.created": {
+      console.log("clerk WH1 - session created");
+      break;
+    }
+
+    case "session.ended": /** FALL THROUGH SWITCHES */
+    case "session.revoked": 
+    case "session.removed":{
       break;
     }
 

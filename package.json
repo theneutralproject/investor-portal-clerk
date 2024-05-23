@@ -41,7 +41,8 @@
     "styled-components": "^6.1.8",
     "superjson": "^2.2.1",
     "svix": "^1.21.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
     "@prisma/client": "5.13",
@@ -50,7 +51,6 @@
     "@types/eslint": "^8.56.2",
     "@types/jest": "^29.5.12",
     "@types/lodash": "^4.17.0",
-    "@types/node": "^20.11.20",
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
     "@types/react-image-gallery": "^1.2.4",

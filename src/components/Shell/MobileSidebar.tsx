@@ -19,6 +19,7 @@ import { ListItem, ROUTES, buttonItems } from "./Sidebar";
 import { useRouter, usePathname } from "next/navigation";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useClerk } from "@clerk/nextjs";
+import posthog from "posthog-js";
 
 const MobileSidebar = (props) => {
   const { signOut } = useClerk();
@@ -44,6 +45,11 @@ const MobileSidebar = (props) => {
   const handleClick = (path: string) => {
     router.push(path);
     handleClose();
+  };
+
+  const handleSignOut = () => {
+    posthog.reset();
+    void signOut();
   };
 
   if (!isMobile) {
@@ -140,7 +146,7 @@ const MobileSidebar = (props) => {
               label: "Sign Out",
               icon: <LogoutIcon />,
               path: "/signout",
-              onClick: () => signOut(),
+              onClick: () => handleSignOut(),
             }}
           />
         </List>

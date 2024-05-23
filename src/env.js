@@ -15,6 +15,7 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: z.string(),
     HUBSPOT_ACCESS_TOKEN: z.string(),
     BASE_URL: z.string(),
+    NEXTAUTH_URL: z.string(),
     GOOGLE_TAG_ID: z.string(),
   },
   
@@ -43,6 +44,7 @@ export const env = createEnv({
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     HUBSPOT_ACCESS_TOKEN: process.env.HUBSPOT_ACCESS_TOKEN,
     BASE_URL: process.env.BASE_URL,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID,    
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,

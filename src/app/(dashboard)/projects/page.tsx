@@ -10,6 +10,9 @@ import { useUser } from "@clerk/nextjs";
 
 import { type ProjectWithPictures } from "@/libs/prisma";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
+import { useEffect } from "react";
+import posthog from "posthog-js";
+import { useSearchParams } from "next/navigation";
 
 const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -20,6 +23,15 @@ const Dashboard = () => {
       axios.get<ProjectWithPictures[]>("/api/projects").then((res) => res.data),
   });
 
+  const searchParams = useSearchParams();
+  useEffect(() => {
+    if (user && searchParams.get('afterauth')) {
+      const { id, primaryEmailAddress, firstName, lastName } = user;
+      posthog.identify(primaryEmailAddress?.toString(), {email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id});
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+  }, [user, searchParams])
+
   if (isLoading) {
     return <div>Loading...</div>;
   }
@@ -27,6 +39,8 @@ const Dashboard = () => {
   if (!data || !Array.isArray(data)) {
     return <div>No data available</div>;
   }
+
+
 
   return (
     <Box>

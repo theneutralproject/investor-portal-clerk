@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { Avatar, Menu, MenuItem, IconButton } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import posthog from "posthog-js";
 
 const UserAvatar = () => {
   const { user } = useUser();
@@ -17,6 +18,7 @@ const UserAvatar = () => {
   };
 
   const handleSignOut = () => {
+    posthog.reset();
     void signOut();
   };
 
