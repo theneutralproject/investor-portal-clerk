@@ -13,6 +13,7 @@ import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useEffect } from "react";
 import posthog from "posthog-js";
 import { useSearchParams } from "next/navigation";
+import { Suspense } from 'react'
 
 const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -27,47 +28,53 @@ const Dashboard = () => {
   useEffect(() => {
     if (user && searchParams.get('afterauth')) {
       const { id, primaryEmailAddress, firstName, lastName } = user;
-      posthog.identify(primaryEmailAddress?.toString(), {email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id});
+      posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }
   }, [user, searchParams])
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    <Suspense>
+      return <div>Loading...</div>;
+    </Suspense>
   }
 
   if (!data || !Array.isArray(data)) {
-    return <div>No data available</div>;
+    <Suspense>
+      return <div>No data available</div>;
+    </Suspense>
   }
 
 
 
   return (
-    <Box>
-      <ProjectPageBanner
-        background="/projectBanner.png"
-        headline={`Welcome, ${user?.firstName ?? "User"}`}
-        description="And welcome to a more sustainable tomorrow. Thank you for your interest in investing with Neutral. We believe in the power of thoughtful investment to positively impact your portfolio and the planet. Exploring the projects below allows you to discover innovative, sustainable, and regenerative development solutions."
-      />
+    <Suspense>
+      <Box>
+        <ProjectPageBanner
+          background="/projectBanner.png"
+          headline={`Welcome, ${user?.firstName ?? "User"}`}
+          description="And welcome to a more sustainable tomorrow. Thank you for your interest in investing with Neutral. We believe in the power of thoughtful investment to positively impact your portfolio and the planet. Exploring the projects below allows you to discover innovative, sustainable, and regenerative development solutions."
+        />
 
-      <Typography
-        variant="h5"
-        sx={{ mt: 4, textAlign: isMobile ? "center" : "unset" }}
-      >
-        All Projects
-      </Typography>
-      <Grid
-        sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          justifyContent: { xs: "center", sm: "flex-start" },
-        }}
-      >
-        {data.map((project) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
-      </Grid>
-    </Box>
+        <Typography
+          variant="h5"
+          sx={{ mt: 4, textAlign: isMobile ? "center" : "unset" }}
+        >
+          All Projects
+        </Typography>
+        <Grid
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: { xs: "center", sm: "flex-start" },
+          }}
+        >
+          {data!.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </Grid>
+      </Box>
+    </Suspense>
   );
 };
 
