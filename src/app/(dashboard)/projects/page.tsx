@@ -25,14 +25,6 @@ const Dashboard = () => {
   });
 
   const searchParams = useSearchParams();
-  
-  // This component passed as fallback to the Suspense boundary
-// will be rendered in place of the search bar in the initial HTML.
-// When the value is available during React hydration the fallback
-// will be replaced with the `<SearchBar>` component.
-function LoadingPlaceholder() {
-  return <Box></Box>
-}
 
   useEffect(() => {
     if (user && searchParams.get('afterauth')) {
@@ -43,47 +35,41 @@ function LoadingPlaceholder() {
   }, [user, searchParams])
 
   if (isLoading) {
-    <Suspense fallback={< LoadingPlaceholder />}>
-      return <div>Loading...</div>;
-    </Suspense>
+    return <div>Loading...</div>;
   }
 
   if (!data || !Array.isArray(data)) {
-    <Suspense fallback={< LoadingPlaceholder />}>
-      return <div>No data available</div>;
-    </Suspense>
+    return <div>No data available</div>;
   }
 
 
 
   return (
-    <Suspense fallback={< LoadingPlaceholder />}>
-      <Box>
-        <ProjectPageBanner
-          background="/projectBanner.png"
-          headline={`Welcome, ${user?.firstName ?? "User"}`}
-          description="And welcome to a more sustainable tomorrow. Thank you for your interest in investing with Neutral. We believe in the power of thoughtful investment to positively impact your portfolio and the planet. Exploring the projects below allows you to discover innovative, sustainable, and regenerative development solutions."
-        />
+    <Box>
+      <ProjectPageBanner
+        background="/projectBanner.png"
+        headline={`Welcome, ${user?.firstName ?? "User"}`}
+        description="And welcome to a more sustainable tomorrow. Thank you for your interest in investing with Neutral. We believe in the power of thoughtful investment to positively impact your portfolio and the planet. Exploring the projects below allows you to discover innovative, sustainable, and regenerative development solutions."
+      />
 
-        <Typography
-          variant="h5"
-          sx={{ mt: 4, textAlign: isMobile ? "center" : "unset" }}
-        >
-          All Projects
-        </Typography>
-        <Grid
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: { xs: "center", sm: "flex-start" },
-          }}
-        >
-          {data!.map((project) => (
-            <ProjectCard key={project.id} project={project} />
-          ))}
-        </Grid>
-      </Box>
-    </Suspense>
+      <Typography
+        variant="h5"
+        sx={{ mt: 4, textAlign: isMobile ? "center" : "unset" }}
+      >
+        All Projects
+      </Typography>
+      <Grid
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          justifyContent: { xs: "center", sm: "flex-start" },
+        }}
+      >
+        {data!.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
+      </Grid>
+    </Box>
   );
 };
 
