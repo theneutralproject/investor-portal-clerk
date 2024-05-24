@@ -25,6 +25,15 @@ const Dashboard = () => {
   });
 
   const searchParams = useSearchParams();
+  
+  // This component passed as fallback to the Suspense boundary
+// will be rendered in place of the search bar in the initial HTML.
+// When the value is available during React hydration the fallback
+// will be replaced with the `<SearchBar>` component.
+function LoadingPlaceholder() {
+  return <Box></Box>
+}
+
   useEffect(() => {
     if (user && searchParams.get('afterauth')) {
       const { id, primaryEmailAddress, firstName, lastName } = user;
@@ -34,13 +43,13 @@ const Dashboard = () => {
   }, [user, searchParams])
 
   if (isLoading) {
-    <Suspense>
+    <Suspense fallback={< LoadingPlaceholder />}>
       return <div>Loading...</div>;
     </Suspense>
   }
 
   if (!data || !Array.isArray(data)) {
-    <Suspense>
+    <Suspense fallback={< LoadingPlaceholder />}>
       return <div>No data available</div>;
     </Suspense>
   }
@@ -48,7 +57,7 @@ const Dashboard = () => {
 
 
   return (
-    <Suspense>
+    <Suspense fallback={< LoadingPlaceholder />}>
       <Box>
         <ProjectPageBanner
           background="/projectBanner.png"
