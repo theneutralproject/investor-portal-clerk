@@ -14,10 +14,7 @@ const config = {
         permanent: true,
       },
     ];
-  },
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
-  },
+  }
 };
 
 export default config;
