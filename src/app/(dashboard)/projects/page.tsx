@@ -13,7 +13,6 @@ import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useEffect } from "react";
 import posthog from "posthog-js";
 import { useSearchParams } from "next/navigation";
-import { Suspense } from 'react'
 
 const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -65,7 +64,7 @@ const Dashboard = () => {
           justifyContent: { xs: "center", sm: "flex-start" },
         }}
       >
-        {data!.map((project) => (
+        {data.map((project) => (
           <ProjectCard key={project.id} project={project} />
         ))}
       </Grid>
