@@ -16,4 +16,17 @@ export enum ProjectName {
     financingType: z.string().optional()
   });
 
-  export type HubspotDealUpdateSchema = z.infer<typeof zHubspotDealUpdateSchema>
+  export type HubspotDealUpdateSchema = z.infer<typeof zHubspotDealUpdateSchema>;
+
+  export const zDocusignPayload = z.object({
+    user: z.object({
+      id: z.string(),
+      fullName: z.string(),
+      firstName: z.string(),
+      lastName: z.string(),
+      email: z.string().email(),
+    }),
+    amount: z.number().min(1000)
+});
+
+export type DocusignPayloadSchema = z.infer<typeof zDocusignPayload>;

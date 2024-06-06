@@ -37,18 +37,18 @@ const useManageDealMutation = (projectId: number) => {
 
       return { previousData };
     },
-    onError: (error, _variables, context) => {
+    onError: (_error, _variables, context) => {
       // Reverting to previous data if mutation fails
-      toast.error("Failed to manage deal stage.");
+      // toast.error("Failed to manage deal stage.");
       if (context?.previousData) {
         queryClient.setQueryData(queryKey, context.previousData);
       }
     },
     onSuccess: (_, operation) => {
       if (operation === "increment") {
-        toast.success("Deal stage incremented successfully!");
+        // toast.success("Deal stage incremented successfully!");
       } else if (operation === "reset") {
-        toast.success("Deal stage reset successfully!");
+        // toast.success("Deal stage reset successfully!");
       }
     },
     onSettled: () => {

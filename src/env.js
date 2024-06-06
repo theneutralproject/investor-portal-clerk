@@ -17,6 +17,12 @@ export const env = createEnv({
     BASE_URL: z.string(),
     NEXTAUTH_URL: z.string(),
     GOOGLE_TAG_ID: z.string(),
+    IRON_SESSION_PASSWORD: z.string(),
+    DOCUSIGN_BASE_PATH: z.string(),
+    DOCUSIGN_USER_ID: z.string(),
+    DOCUSIGN_API_ACCOUNT_ID: z.string(),
+    DOCUSIGN_INTEGRATION_KEY: z.string(),
+    DOCUSIGN_RSA_PRIVATE_KEY: z.string(),
   },
   
 
@@ -26,7 +32,6 @@ export const env = createEnv({
    * `NEXT_PUBLIC_`.
    */
   client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_KEY: z.string(),
     NEXT_PUBLIC_POSTHOG_HOST: z.string(),
@@ -48,6 +53,12 @@ export const env = createEnv({
     GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID,    
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
+    IRON_SESSION_PASSWORD: process.env.IRON_SESSION_PASSWORD,
+    DOCUSIGN_BASE_PATH: process.env.DOCUSIGN_BASE_PATH,
+    DOCUSIGN_USER_ID: process.env.DOCUSIGN_USER_ID,
+    DOCUSIGN_API_ACCOUNT_ID: process.env.DOCUSIGN_API_ACCOUNT_ID,
+    DOCUSIGN_INTEGRATION_KEY: process.env.DOCUSIGN_INTEGRATION_KEY,
+    DOCUSIGN_RSA_PRIVATE_KEY: process.env.DOCUSIGN_RSA_PRIVATE_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -4,6 +4,7 @@ import ProjectCard from "@/components/Project/ProjectCard";
 import { Box, Grid, Typography, useMediaQuery } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
+import { toast } from "react-toastify";
 
 import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
 import { useUser } from "@clerk/nextjs";
@@ -31,6 +32,14 @@ const Dashboard = () => {
       posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }
+    if (searchParams.get('event') == "viewing_complete") {
+      console.log("The user viewed the docusign doc")
+      toast.success("🥳 Congratulations on signing your investment document!");
+    }
+    const docusigntoken = searchParams.get('code');
+   if (docusigntoken) {
+    toast.success("You can now begin the signing process for your desired project.");
+   }
   }, [user, searchParams])
 
   if (isLoading) {

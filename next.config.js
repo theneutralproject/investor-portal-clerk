@@ -17,6 +17,7 @@ const config = {
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
+    serverComponentsExternalPackages: ['docusign-esign'],
   },
 };
 
