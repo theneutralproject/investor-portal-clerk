@@ -1,4 +1,4 @@
-import { Deal, DealFinancingType, type User } from "@prisma/client";
+import { DealFinancingType, type User } from "@prisma/client";
 import { z } from "zod";
 import { ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
