@@ -9,6 +9,7 @@ import useDocuments, {
 } from "@/app/hooks/useDocuments";
 import DocumentViewerModal from "./DocumentViewerModal";
 import { useState } from "react";
+import axios from "axios";
 
 export const ProjectDocTab: React.FC<{
   project: Project;
@@ -44,8 +45,11 @@ export const ProjectDocTab: React.FC<{
     if (!document?.completed) {
       documentEventMutation.mutate({
         documentId: document?.id,
-        type: "VIEW",
+        type: "DOWNLOAD",
       });
+      const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
+      const body = { hubspotDealId: deal.hubspotId, dealStage: 1, documentNames };
+      axios.put('/api/deals', body);
     }
     window.open(document.link, "_blank");
   };
@@ -58,6 +62,9 @@ export const ProjectDocTab: React.FC<{
         documentId: currentDocument?.id,
         type: "VIEW",
       });
+      const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
+      const body = { hubspotDealId: deal.hubspotId, dealStage: 1, documentNames };
+      axios.put('/api/deals', body);
     }
   };
 

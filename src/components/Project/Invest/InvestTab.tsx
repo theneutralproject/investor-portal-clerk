@@ -5,10 +5,10 @@ import DocumentCard from "../ProjectDocs/DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
-import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 import { Deal, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
+import axios from "axios";
 
 export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,
@@ -46,8 +46,11 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
     if (!document?.completed) {
       documentEventMutation.mutate({
         documentId: document?.id,
-        type: "VIEW",
+        type: "DOWNLOAD",
       });
+      const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
+      const body = { hubspotDealId: deal.hubspotId, dealStage: 2, documentNames };
+      axios.put('/api/deals', body);
     }
     window.open(document.link, "_blank");
   };
@@ -59,6 +62,9 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
         documentId: selectedDocument.id,
         type: "VIEW",
       });
+      const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
+      const body = { hubspotDealId: deal.hubspotId, dealStage: 2, documentNames };
+      axios.put('/api/deals', body);
     }
   };
 

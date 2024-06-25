@@ -1,4 +1,4 @@
-import { DealFinancingType, type User } from "@prisma/client";
+import { Deal, DealFinancingType, type User } from "@prisma/client";
 import { z } from "zod";
 import { ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
@@ -75,9 +75,9 @@ export const zHsDealSearchResultsSchema = z.object({
   results: z.array(zHsDealSearchObjectSchema)
 })
 
-export async function createHubspotDealForContact(deal: HubspotDeal, contactHubspotId: string) {
+export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, contactHubspotId: string) {
   // first create a deal
-  const { properties } = deal;
+  const { properties } = hubspotDeal;
 
   const body = JSON.stringify({
     associations: {
@@ -107,6 +107,32 @@ export async function createHubspotDealForContact(deal: HubspotDeal, contactHubs
     console.error("No good hs deal making:\n", error);
     return new Error(getErrorMessage(error));
   }
+}
+
+export async function updateHubspotDealProperties(hubspotDealId: string, dealStage: number, documentNames: string) {
+
+  const properties = [{
+    name: dealStage === 1 ? 'project_documents_accessed': 'investment_documents_accessed',
+    value: documentNames
+  }]
+  await fetch(
+    `https://api.hubapi.com/deals/v1/deal/${hubspotDealId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(properties),
+    }
+  ).then(async (response) => {
+    return response;
+  }).catch((err) => {
+    console.log("nooo:")
+    console.log(err)
+    return;
+  })
+  return
 }
 
 

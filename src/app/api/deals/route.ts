@@ -4,6 +4,7 @@ import { type NextRequest } from "next/server";
 import {
   createHubspotDealForContact,
   initDealPropsForProject,
+  updateHubspotDealProperties,
 } from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
 import { getInvestmentEntity } from "../utils-module/dealUtils";
@@ -181,6 +182,20 @@ export async function POST(request: NextRequest) {
     console.error(error);
     return jsonResponse({ error: "Error processing request" }, 500);
   }
+}
+
+// This function is (currently) used to update Hubspot Deal Properties
+export async function PUT(request: NextRequest) {
+  const requestBody = (await (request as Request).json()) as {
+    dealStage: number;
+    hubspotDealId: string;
+    documentNames: string;
+  };
+  const { hubspotDealId, dealStage, documentNames } = requestBody;
+  if (!dealStage || !hubspotDealId || !documentNames) {
+    return jsonResponse({ error: "Missing data" }, 400);
+  }
+  return jsonResponse(await updateHubspotDealProperties(hubspotDealId, dealStage, documentNames));
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
