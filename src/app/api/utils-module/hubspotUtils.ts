@@ -123,7 +123,7 @@ export async function updateHubspotDealProperties(hubspotDealId: string, dealSta
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
       },
-      body: JSON.stringify(properties),
+      body: JSON.stringify({"properties": properties}),
     }
   ).then(async (response) => {
     return response;
