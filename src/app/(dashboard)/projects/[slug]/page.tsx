@@ -6,7 +6,7 @@ import "./dealPage.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { DealFinancingType, Project, type Deal } from "@prisma/client";
+import { DealFinancingType, type Deal } from "@prisma/client";
 import ProjectHeader from "@/components/Project/ProjectHeader";
 import { InvestTab } from "@/components/Project/Invest/InvestTab";
 import { ProjectDocTab } from "@/components/Project/ProjectDocs/ProjectDocTab";
@@ -18,9 +18,10 @@ import { type ProjectWithPictures } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
-import posthog from "posthog-js";
-import { useUser } from "@clerk/nextjs";
-import { DealCreateSchema, DealUpdateSchema } from "@/app/api/utils-module/_globals";
+import {
+  type DealCreateSchema,
+  type DealUpdateSchema,
+} from "@/app/api/utils-module/_globals";
 
 export type PageProps = {
   params: {
@@ -37,121 +38,102 @@ export default function Page({ params: { slug } }: PageProps) {
   };
 
   const searchParams = useSearchParams();
-  const { user } = useUser();
 
   const queryParams = {
-    afterauth: searchParams.get('afterauth') || null,
-    dealStage: searchParams.get('dealStage') || null,
-    financingType: searchParams.get('financingType') || null,
-  }
+    afterauth: searchParams.get("afterauth"),
+    dealStage: searchParams.get("dealStage"),
+    financingType: searchParams.get("financingType"),
+  };
 
-  // register user in posthog
-  useEffect(() => {
-    if (user && queryParams.afterauth) {
-      const { id, primaryEmailAddress, firstName, lastName } = user;
-      posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });
-    }
-  }, [user, queryParams.afterauth])
-
-
-
-  const projectQueryFn = () =>
-    axios
-      .get<ProjectWithPictures[]>(`/api/projects?id=${slug}`)
-      .then((res) => res.data);
-
-  const { isLoading, data } = useQuery<ProjectWithPictures[], Error>({
-    queryKey: ["project", slug],
-    queryFn: projectQueryFn
-  });
-
-  const dealQueryFn = () => {
-    console.log("dealQueryFn", queryParams.financingType);
-
-    return axios
-      .get<Deal | null>(`/api/deals?projectId=${slug}`)
-      .then((res) => res.data);
-  }
-
-  const { isLoading: dealLoading, data: dealData } = useQuery<
-    Deal | null,
+  const { isLoading: projectLoading, data: projectData } = useQuery<
+    ProjectWithPictures[],
     Error
   >({
-    queryKey: ["deal", slug],
-    queryFn: dealQueryFn
+    queryKey: ["project", slug],
+    queryFn: () =>
+      axios
+        .get<ProjectWithPictures[]>(`/api/projects?id=${slug}`)
+        .then((res) => res.data),
   });
 
-  let project : ProjectWithPictures | null = null;
-  let deal = dealData ?? null;
-  let dealStage = deal?.dealStage ?? 0;
+  const {
+    isLoading: dealLoading,
+    data: dealData,
+    refetch: refetchDeal,
+  } = useQuery<Deal | null, Error>({
+    queryKey: ["deal", slug],
+    queryFn: () =>
+      axios
+        .get<Deal | null>(`/api/deals?projectId=${slug}`)
+        .then((res) => res.data),
+  });
 
-  // update/ create the deal to provide access to more documents, if queryparams say so
   useEffect(() => {
-    if (project && queryParams.dealStage && queryParams.financingType) {
-
+    const updateOrCreateDeal = async (project: ProjectWithPictures) => {
       let typedFinancingType: keyof typeof DealFinancingType = "equity";
       if (queryParams.financingType in DealFinancingType) {
-        typedFinancingType = queryParams.financingType as keyof typeof DealFinancingType;
+        typedFinancingType =
+          queryParams.financingType as keyof typeof DealFinancingType;
       }
-
-      // the user should get access to financing docs but a deal might not yet exist.
-      // check if it exists, and potentially create one on the fly
 
       const minDealStage = parseInt(queryParams.dealStage, 10);
-      if (deal) {
-        console.log("GOT DEAL TO UPDATE", deal)
-        // check if existing deal needs to be updated to present the correct financing docs to the user:
-        if (deal.dealStage >= minDealStage && deal?.financingType === queryParams.financingType) return;
-        else {
-          const dealData: DealUpdateSchema = {
-            hubspotId: deal.hubspotId,
-            financingType: DealFinancingType[typedFinancingType],
-          }
-          if (minDealStage > deal.dealStage) dealData.dealStage = minDealStage;
 
-          axios.put(`/api/deals`, dealData).then((res) => {
-            deal = res.data;
-            dealStage = deal!.dealStage;
-          });
+      if (dealData) {
+        if (
+          dealData.dealStage >= minDealStage &&
+          dealData.financingType === queryParams.financingType
+        )
+          return;
+
+        const dealUpdateData: DealUpdateSchema = {
+          hubspotId: dealData.hubspotId,
+          financingType: DealFinancingType[typedFinancingType],
+        };
+        if (minDealStage > dealData.dealStage) {
+          dealUpdateData.dealStage = minDealStage;
         }
-      }
-      else {
-        // create a new deal
-        const dealCreationData: DealCreateSchema = {
+
+        await axios.put(`/api/deals`, dealUpdateData);
+      } else {
+        const dealCreateData: DealCreateSchema = {
           financingType: DealFinancingType[typedFinancingType],
           projectId: project.id,
-          dealStage: minDealStage
-        }
-        axios.post(`/api/deals`, dealCreationData).then((res) => {
-          console.log("Deal has been created");
-          deal = res.data;
-          dealStage = deal!.dealStage;
-        });
+          dealStage: minDealStage,
+        };
+        await axios.post(`/api/deals`, dealCreateData);
+      }
+
+      void refetchDeal();
+    };
+
+    if (projectData && dealData !== undefined) {
+      if (queryParams.dealStage && queryParams.financingType) {
+        void updateOrCreateDeal(projectData[0]);
       }
     }
-  }, [dealData, project,])
+  }, [dealData, projectData]);
 
-
-  // Handle loading state
-  if (isLoading || dealLoading) {
+  if (projectLoading || dealLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!data || !Array.isArray(data) || data.length === 0) {
+  if (!projectData || !Array.isArray(projectData) || projectData.length === 0) {
     return <div>No data available</div>;
   }
 
-  project = data[0]!;
+  const project = projectData[0];
+  const deal = dealData ?? null;
+  const dealStage = deal?.dealStage ?? 0;
 
   const percentRaised = Math.round(
-    (project!.investmentRaised / project!.investmentGoal) * 100
+    (project.investmentRaised / project.investmentGoal) * 100
   );
 
   const images = project.pictures
     .map((picture) => ({
       original: picture.url,
       thumbnail: picture.url,
-      type: picture.type, // Add the type to the mapped object
+      type: picture.type,
     }))
     .filter((picture) => picture.type !== "CARD")
     .sort((a) => (a.type === "HEADER" ? -1 : 1));
@@ -160,9 +142,9 @@ export default function Page({ params: { slug } }: PageProps) {
     return (
       <Box
         sx={{
-          position: isMobile ? "relative" : "sticky", // Sticky positioning only if not mobile
-          top: isMobile ? 0 : "60px", // Adjust top position based on mobile or not
-          mt: isMobile ? 2 : 0, // Adjust margin top based on mobile or not
+          position: isMobile ? "relative" : "sticky",
+          top: isMobile ? 0 : "60px",
+          mt: isMobile ? 2 : 0,
         }}
       >
         {dealStage > 3 ? (
@@ -204,9 +186,7 @@ export default function Page({ params: { slug } }: PageProps) {
           {isMobile && investorStatusBox()}
           <Container disableGutters>
             {tabValue === 0 && <OverviewTab data={project} />}
-            {tabValue === 1 && (
-              <ProjectDocTab project={project} deal={deal!} />
-            )}
+            {tabValue === 1 && <ProjectDocTab project={project} deal={deal!} />}
             {tabValue === 2 && <InvestTab project={project} deal={deal!} />}
             {tabValue === 3 && <FundTab project={project} deal={deal!} />}
           </Container>
