@@ -7,13 +7,15 @@ import {
   Box,
 } from "@mui/material";
 
-import { type Project } from "@prisma/client";
+import { DealFinancingType, type Deal, type Project } from "@prisma/client";
 import ProgressBar from "./ProgressBar";
 import StepIndicator from "./StepIndicator";
-import useIncrementDealMutation from "@/app/hooks/useIncrementDealMutation";
 import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 import StepAvatar from "@/components/StepAvatar";
 import { useRouter } from "next/navigation";
+import { updateDeal } from "@/app/api/utils-module/dealUtils";
+import { DealCreateSchema } from "@/app/api/utils-module/_globals";
+import axios from "axios";
 
 const INVESTMENT_STEPS = [
   "Schedule a Call with an Advisor",
@@ -24,11 +26,10 @@ const INVESTMENT_STEPS = [
 
 const InvestmentProgress: React.FC<{
   project: Project;
-  dealStage: number;
+  deal: Deal | null;
   currentTab: number;
   setTabValue: (number: number) => void;
-}> = ({ project, dealStage, currentTab, setTabValue }) => {
-  const { mutate: mutateDeal } = useIncrementDealMutation(project.id);
+}> = ({ project, deal, currentTab, setTabValue }) => {
   const router = useRouter();
 
   const generateCTAButton = () => {
@@ -40,11 +41,20 @@ const InvestmentProgress: React.FC<{
         </Typography>
       );
     }
-    if (dealStage === 0) {
-      return <HubspotScheduleCall onExit={() => mutateDeal("increment")} />;
+    if (!deal) {  
+      const dealData: DealCreateSchema = {
+        financingType: DealFinancingType.equity,
+        projectId: project.id,
+        dealStage: 1,
+      }
+      return <HubspotScheduleCall onExit={() => axios.post(`/api/deals`, dealData).then((res) => res.data)} />;
     }
 
-    if (dealStage === 1) {
+    if (deal.dealStage === 0) {
+      return <HubspotScheduleCall onExit={() => updateDeal({hubspotId: deal.hubspotId, dealStage: deal.dealStage++ })} />;
+    }
+
+    if (deal.dealStage === 1) {
       if (currentTab === 1) {
         return (
           <Box>
@@ -71,7 +81,7 @@ const InvestmentProgress: React.FC<{
       }
     }
 
-    if (dealStage === 2) {
+    if (deal.dealStage === 2) {
       if (currentTab === 2) {
         return (
           <Box>
@@ -97,7 +107,7 @@ const InvestmentProgress: React.FC<{
       }
     }
 
-    if (dealStage === 3) {
+    if (deal.dealStage === 3) {
       if (currentTab === 3) {
         return (
           <Box>
@@ -151,22 +161,22 @@ const InvestmentProgress: React.FC<{
       </Card>
     );
   }
-
+  
   return (
     <>
       <Card>
         <CardContent>
           <Typography variant="h6">Investment Progress:</Typography>
           <Typography variant="caption">
-            Next Step: {INVESTMENT_STEPS[dealStage]}
+            Next Step: {INVESTMENT_STEPS[deal?.dealStage ?? 0]}
           </Typography>
-          <ProgressBar dealStage={dealStage} />
+          <ProgressBar dealStage={deal?.dealStage ?? 0} />
 
           <Divider sx={{ mt: 2, mb: 2 }} />
 
           {INVESTMENT_STEPS.map((step, index) => (
             <StepIndicator
-              dealStage={dealStage}
+              dealStage={deal?.dealStage ?? 0}
               key={index}
               totalSteps={3}
               label={step}
@@ -179,14 +189,6 @@ const InvestmentProgress: React.FC<{
           {generateCTAButton()}
         </CardContent>
       </Card>
-
-      {/* <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("reset")}>
-        Reset
-      </Button>
-
-      <Button sx={{ mt: "100px" }} onClick={() => mutateDeal("increment")}>
-        Increment
-      </Button> */}
     </>
   );
 };

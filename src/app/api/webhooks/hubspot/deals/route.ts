@@ -1,9 +1,9 @@
-import type { HubspotDealUpdateSchema } from "@/app/api/utils-module/_globals";
+import type { DealUpdateSchema } from "@/app/api/utils-module/_globals";
 import { updateDeal } from "@/app/api/utils-module/dealUtils";
 import { getErrorMessage } from "@/app/api/utils-module/helpers";
 import { getDealStageInt, getFundingAmount, getProjectNameFromDealStage } from "@/app/api/utils-module/hubspotUtils";
 import prisma from "@/libs/prisma";
-import { type Deal } from "@prisma/client";
+import { DealFinancingType, type Deal } from "@prisma/client";
 import { isError } from "lodash";
 import { z } from "zod";
 
@@ -49,7 +49,7 @@ export async function POST(req: Request): Promise<Response> {
       );
     }
 
-    const dealBody: HubspotDealUpdateSchema = {
+    const dealBody: DealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
     let updateProjectFunding = false;
@@ -64,7 +64,12 @@ export async function POST(req: Request): Promise<Response> {
         dealBody.amount = parseFloat(payload.propertyValue);
         break;
       case "financing_type":
-        dealBody.financingType = payload.propertyValue;
+        let typedFinancingType: keyof typeof DealFinancingType = "equity";
+        if (payload.propertyValue in DealFinancingType) {
+          typedFinancingType = payload.propertyValue as keyof typeof DealFinancingType;
+        }
+        
+        dealBody.financingType = typedFinancingType;
         break;
     }
 

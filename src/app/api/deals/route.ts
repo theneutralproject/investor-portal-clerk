@@ -4,11 +4,11 @@ import { type NextRequest } from "next/server";
 import {
   createHubspotDealForContact,
   initDealPropsForProject,
-  updateHubspotDealProperties,
 } from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
-import { getInvestmentEntity } from "../utils-module/dealUtils";
+import { getInvestmentEntity, updateDeal } from "../utils-module/dealUtils";
 import { DealFinancingType } from "@prisma/client";
+import { DealCreateSchema, DealUpdateSchema, zDealCreateSchema, zDealUpdateSchema } from "../utils-module/_globals";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
     if (!deals) {
       return new Response(
         // JSON.stringify({ error: "No deals found for this project" }),
-        JSON.stringify([]),
+        JSON.stringify(null),
         {
           status: 200, //Valid return
           headers: { "Content-Type": "application/json" },
@@ -88,45 +88,36 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "User not found" }, 404);
     }
 
-    const neutralUser = await prisma.user.findUnique({
+    const dbUser = await prisma.user.findUnique({
       where: { clerkId: user.id },
     });
-    if (!neutralUser) {
+    if (!dbUser) {
       return jsonResponse({ error: "User record not found" }, 404);
     }
 
-    const requestBody = (await (request as Request).json()) as {
-      projectId: string;
-      operation: string;
-    };
-    const { projectId, operation } = requestBody;
-    if (!projectId) {
-      return jsonResponse({ error: "Project ID is required" }, 400);
-    }
-
-    const projectIdAsInt = parseInt(projectId, 10);
-    if (isNaN(projectIdAsInt)) {
-      return jsonResponse({ error: "Invalid Project ID" }, 400);
-    }
+    // eslint-disable-next-line
+  const requestBody = (await (request as Request).json())  as DealCreateSchema;
+  let dealData: DealCreateSchema;
+  try {
+    dealData = zDealCreateSchema.parse(requestBody)
+  } catch (parseError) {
+    console.error("ERROR: unable to parse PUT body:\n", parseError);
+    return jsonResponse({ error: "input data malformatted" }, 400);
+  }
 
     const project = await prisma.project.findUnique({
-      where: { id: projectIdAsInt },
+      where: { id: dealData.projectId },
     });
     if (!project) {
       return jsonResponse(
-        { error: `Project with id ${projectId} not found in DB` },
+        { error: `Project with id ${dealData.projectId} not found in DB` },
         400
       );
     }
 
-    let deal = await prisma.deal.findFirst({
-      where: { userId: neutralUser.id, projectId: projectIdAsInt },
-    });
+      const transactionId = `${project.name}-${dbUser.lastName}-${Math.floor(Math.random() * (999 - 100 + 1) + 100)}`.replace(/\s/g, '').toUpperCase();
 
-    if (!deal) {
-      const transactionId = `${project.name}-${neutralUser.lastName}-${Math.floor(Math.random() * (999 - 100 + 1) + 100)}`.replace(/\s/g, '').toUpperCase();
-
-      const hsDeal = initDealPropsForProject(project.name, neutralUser, transactionId);
+      const hsDeal = initDealPropsForProject(project.name, dbUser, transactionId);
       if (!hsDeal) {
         return jsonResponse(
           {
@@ -139,63 +130,46 @@ export async function POST(request: NextRequest) {
 
       const hsDealId = await createHubspotDealForContact(
         hsDeal,
-        String(neutralUser.hubspotId)
+        String(dbUser.hubspotId)
       );
       if (isError(hsDealId)) {
         return jsonResponse({ error: "HS Deal cannot be created." }, 400);
       }
 
-      deal = await prisma.deal.create({
+      const deal = await prisma.deal.create({
         data: {
-          userId: neutralUser.id,
-          projectId: projectIdAsInt,
-          dealStage: 0,
+          userId: dbUser.id,
+          projectId: dealData.projectId,
+          dealStage: dealData.dealStage ?? 0,
           amount: 0,
           hubspotId: hsDealId.toString(),
-          financingType: DealFinancingType.equity,
+          financingType: dealData.financingType ?? DealFinancingType.equity,
           transactionId: transactionId,
           investmentEntity: getInvestmentEntity(project.name, DealFinancingType.equity) ?? ""
         },
       });
-    }
 
-    if (!["increment", "reset"].includes(operation)) {
-      return jsonResponse({ error: "Invalid operation specified" }, 400);
-    }
+      return jsonResponse(deal);
 
-    if (operation === "reset") {
-      await prisma.documentEvent.deleteMany({
-        where: { userId: neutralUser.id },
-      });
-      deal.dealStage = 0;
-    } else if (operation === "increment") {
-      deal.dealStage++;
-    }
-
-    const updatedDeal = await prisma.deal.update({
-      where: { id: deal.id },
-      data: { dealStage: deal.dealStage },
-    });
-
-    return jsonResponse(updatedDeal);
   } catch (error) {
     console.error(error);
     return jsonResponse({ error: "Error processing request" }, 500);
   }
 }
 
-// This function is (currently) used to update Hubspot Deal Properties
-export async function PUT(request: NextRequest) {
-  const requestBody = (await (request as Request).json()) as {
-    dealStage: number;
-    hubspotDealId: string;
-    documentNames: string;
-  };
-  const { hubspotDealId, dealStage, documentNames } = requestBody;
-  if (!dealStage || !hubspotDealId || !documentNames) {
-    return jsonResponse({ error: "Missing data" }, 400);
+export async function PUT(request:NextRequest) {
+  // eslint-disable-next-line
+  const requestBody = (await (request as Request).json())
+  let deal: DealUpdateSchema;
+  try {
+    deal = zDealUpdateSchema.parse(requestBody)
+  } catch (parseError) {
+    console.error("ERROR: unable to parse PUT body:\n", parseError);
+    return jsonResponse({ error: "input data malformatted" }, 400);
   }
-  return jsonResponse(await updateHubspotDealProperties(hubspotDealId, dealStage, documentNames));
+  const updatedDeal = await updateDeal(deal);
+  return jsonResponse(updatedDeal);
+
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

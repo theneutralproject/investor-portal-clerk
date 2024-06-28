@@ -1,5 +1,6 @@
 // This file is used to define reusable functions, types and constants
 
+import { DealFinancingType } from "@prisma/client";
 import { z } from "zod";
 
 export enum ProjectName {
@@ -9,11 +10,21 @@ export enum ProjectName {
     "519 W Main" = "519 W Main"
   }
 
-  export const zHubspotDealUpdateSchema = z.object({
+  // always look up a deal by hubspotId
+  export const zDealUpdateSchema = z.object({
     hubspotId: z.string(),
+    projectId: z.number().optional(),
     dealStage: z.number().optional(),
     amount: z.number().optional(),
-    financingType: z.string().optional()
+    financingType: z.nativeEnum(DealFinancingType).optional(),
   });
 
-  export type HubspotDealUpdateSchema = z.infer<typeof zHubspotDealUpdateSchema>
+  export const zDealCreateSchema = z.object({
+    projectId: z.number(),
+    dealStage: z.number().optional(),
+    financingType: z.nativeEnum(DealFinancingType).optional(),
+  });
+
+
+  export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>
+  export type DealCreateSchema = z.infer<typeof zDealCreateSchema>

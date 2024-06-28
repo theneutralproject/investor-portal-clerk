@@ -1,14 +1,15 @@
 import prisma from "@/libs/prisma";
-import { ProjectName, type HubspotDealUpdateSchema } from "./_globals";
+import { DealCreateSchema, ProjectName, type DealUpdateSchema } from "./_globals";
 import type { DealFinancingType, Deal } from "@prisma/client";
+import axios from "axios";
 
 /**
  * Updates a deal in the database
- * @param {HubspotDealUpdateSchema} dealData - The data of the deal to update
+ * @param {DealUpdateSchema} dealData - The data of the deal to update
  * @returns {Promise<Deal | Error>} The updated deal or an error
  */
 export async function updateDeal(
-  dealData: HubspotDealUpdateSchema
+  dealData: DealUpdateSchema
 ): Promise<Deal | Error> {
   const { hubspotId, dealStage, amount, financingType } = dealData;
   /* eslint-disable */
@@ -44,6 +45,10 @@ export async function updateDeal(
 
   return updatedDeal;
   /* eslint-enable */
+}
+
+export async function createDeal(dealData:DealCreateSchema) {
+    return await axios.post(`/api/deals`)
 }
 
 const InvestmentEntity = {

@@ -8,7 +8,7 @@ import useDocuments, {
 import { Deal, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
-import axios from "axios";
+import { updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
 
 export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,
@@ -49,8 +49,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
         type: "DOWNLOAD",
       });
       const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      const body = { hubspotDealId: deal.hubspotId, dealStage: 2, documentNames };
-      axios.put('/api/deals', body);
+      updateHubspotDealProperties(deal.hubspotId, 2, documentNames);
     }
     window.open(document.link, "_blank");
   };
@@ -63,8 +62,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
         type: "VIEW",
       });
       const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      const body = { hubspotDealId: deal.hubspotId, dealStage: 2, documentNames };
-      axios.put('/api/deals', body);
+      updateHubspotDealProperties(deal.hubspotId, 2, documentNames);
     }
   };
 
