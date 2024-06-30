@@ -14,8 +14,9 @@ import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 import StepAvatar from "@/components/StepAvatar";
 import { useRouter } from "next/navigation";
 import { updateDeal } from "@/app/api/utils-module/dealUtils";
-import { DealCreateSchema } from "@/app/api/utils-module/_globals";
+import { type DealCreateSchema } from "@/app/api/utils-module/_globals";
 import axios from "axios";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const INVESTMENT_STEPS = [
   "Schedule a Call with an Advisor",
@@ -31,6 +32,27 @@ const InvestmentProgress: React.FC<{
   setTabValue: (number: number) => void;
 }> = ({ project, deal, currentTab, setTabValue }) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const createDealMutation = useMutation({
+    mutationFn: (dealData: DealCreateSchema) =>
+      axios.post(`/api/deals`, dealData),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["deal", project.id.toString()],
+      });
+    },
+  });
+
+  const updateDealMutation = useMutation({
+    mutationFn: (updateData: { hubspotId: string; dealStage: number }) =>
+      updateDeal(updateData),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({
+        queryKey: ["deal", project.id.toString()],
+      });
+    },
+  });
 
   const generateCTAButton = () => {
     if (project.status === "INACTIVE") {
@@ -41,17 +63,30 @@ const InvestmentProgress: React.FC<{
         </Typography>
       );
     }
-    if (!deal) {  
+    if (!deal) {
       const dealData: DealCreateSchema = {
         financingType: DealFinancingType.equity,
         projectId: project.id,
         dealStage: 1,
-      }
-      return <HubspotScheduleCall onExit={() => axios.post(`/api/deals`, dealData).then((res) => res.data)} />;
+      };
+      return (
+        <HubspotScheduleCall
+          onExit={() => createDealMutation.mutate(dealData)}
+        />
+      );
     }
 
     if (deal.dealStage === 0) {
-      return <HubspotScheduleCall onExit={() => updateDeal({hubspotId: deal.hubspotId, dealStage: deal.dealStage++ })} />;
+      return (
+        <HubspotScheduleCall
+          onExit={() =>
+            updateDealMutation.mutate({
+              hubspotId: deal.hubspotId,
+              dealStage: deal.dealStage + 1,
+            })
+          }
+        />
+      );
     }
 
     if (deal.dealStage === 1) {
@@ -86,7 +121,7 @@ const InvestmentProgress: React.FC<{
         return (
           <Box>
             <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
-            Review Invest Agreements
+              Review Invest Agreements
             </Typography>
             <Typography variant="caption">
               Review, fill, and execute the Subscription Agreement to your
@@ -161,7 +196,7 @@ const InvestmentProgress: React.FC<{
       </Card>
     );
   }
-  
+
   return (
     <>
       <Card>

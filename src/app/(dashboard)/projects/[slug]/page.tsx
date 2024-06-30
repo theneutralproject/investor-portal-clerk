@@ -29,20 +29,24 @@ export type PageProps = {
   };
 };
 
+interface QueryParams {
+  afterauth: string | null;
+  dealStage: string | null;
+  financingType: string | null;
+}
+
 export default function Page({ params: { slug } }: PageProps) {
   const [tabValue, setTabValue] = useState(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-
-  const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {
-    setTabValue(newValue);
-  };
-
   const searchParams = useSearchParams();
-
-  const queryParams = {
+  const queryParams: QueryParams = {
     afterauth: searchParams.get("afterauth"),
     dealStage: searchParams.get("dealStage"),
     financingType: searchParams.get("financingType"),
+  };
+
+  const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {
+    setTabValue(newValue);
   };
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
@@ -70,13 +74,14 @@ export default function Page({ params: { slug } }: PageProps) {
 
   useEffect(() => {
     const updateOrCreateDeal = async (project: ProjectWithPictures) => {
-      let typedFinancingType: keyof typeof DealFinancingType = "equity";
-      if (queryParams.financingType in DealFinancingType) {
-        typedFinancingType =
-          queryParams.financingType as keyof typeof DealFinancingType;
-      }
+      const typedFinancingType = (
+        queryParams.financingType &&
+        queryParams.financingType in DealFinancingType
+          ? queryParams.financingType
+          : "equity"
+      ) as keyof typeof DealFinancingType;
 
-      const minDealStage = parseInt(queryParams.dealStage, 10);
+      const minDealStage = parseInt(queryParams.dealStage ?? "0", 10);
 
       if (dealData) {
         if (
@@ -85,43 +90,51 @@ export default function Page({ params: { slug } }: PageProps) {
         )
           return;
 
-        const dealUpdateData: DealUpdateSchema = {
+        const dealUpdateData: Partial<DealUpdateSchema> = {
           hubspotId: dealData.hubspotId,
           financingType: DealFinancingType[typedFinancingType],
+          ...(minDealStage > dealData.dealStage && { dealStage: minDealStage }),
         };
-        if (minDealStage > dealData.dealStage) {
-          dealUpdateData.dealStage = minDealStage;
-        }
 
-        await axios.put(`/api/deals`, dealUpdateData);
+        await axios.put("/api/deals", dealUpdateData);
       } else {
         const dealCreateData: DealCreateSchema = {
           financingType: DealFinancingType[typedFinancingType],
           projectId: project.id,
           dealStage: minDealStage,
         };
-        await axios.post(`/api/deals`, dealCreateData);
+        await axios.post("/api/deals", dealCreateData);
       }
 
       void refetchDeal();
     };
 
-    if (projectData && dealData !== undefined) {
-      if (queryParams.dealStage && queryParams.financingType) {
-        void updateOrCreateDeal(projectData[0]);
-      }
+    if (
+      projectData?.[0] &&
+      dealData !== undefined &&
+      queryParams.dealStage &&
+      queryParams.financingType
+    ) {
+      void updateOrCreateDeal(projectData[0]);
     }
-  }, [dealData, projectData]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealData, projectData, queryParams.dealStage, queryParams.financingType]);
 
-  if (projectLoading || dealLoading) {
+  if (projectLoading || dealLoading || !projectData) {
     return <div>Loading...</div>;
   }
 
-  if (!projectData || !Array.isArray(projectData) || projectData.length === 0) {
+  if (
+    !projectData ||
+    !Array.isArray(projectData) ||
+    projectData.length === 0 ||
+    !projectData[0]
+  ) {
     return <div>No data available</div>;
   }
 
   const project = projectData[0];
+
   const deal = dealData ?? null;
   const dealStage = deal?.dealStage ?? 0;
 

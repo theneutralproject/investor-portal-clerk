@@ -11,11 +11,14 @@ export default authMiddleware({
   // eslint-disable-next-line consistent-return
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
-      console.log("not logged in:",_req.url)
-      const returnBackUrl = `${_req.url}${_req.url.includes("?") ? "&" : "?"}afterauth=true` 
+      console.log("not logged in:", _req.url);
+      const returnBackUrl = `${_req.url}${
+        _req.url.includes("?") ? "&" : "?"
+      }afterauth=true`;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       // return redirectToSignUp({ returnBackUrl: process.env.NEXTAUTH_URL });
-      return redirectToSignUp({returnBackUrl: returnBackUrl})
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return redirectToSignUp({ returnBackUrl: returnBackUrl });
     }
   },
 });

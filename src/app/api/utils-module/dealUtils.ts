@@ -1,7 +1,6 @@
 import prisma from "@/libs/prisma";
-import { DealCreateSchema, ProjectName, type DealUpdateSchema } from "./_globals";
+import { ProjectName, type DealUpdateSchema } from "./_globals";
 import type { DealFinancingType, Deal } from "@prisma/client";
-import axios from "axios";
 
 /**
  * Updates a deal in the database
@@ -38,17 +37,15 @@ export async function updateDeal(
       data: data,
     })
     .catch((error) => {
-      console.error(`Failed to update deal with hubspot id ${hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`);
+      console.error(
+        `Failed to update deal with hubspot id ${hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`
+      );
       console.error(error);
       return Error("Failed to update deal with hubspot data");
     });
 
   return updatedDeal;
   /* eslint-enable */
-}
-
-export async function createDeal(dealData:DealCreateSchema) {
-    return await axios.post(`/api/deals`)
 }
 
 const InvestmentEntity = {
@@ -63,21 +60,26 @@ const InvestmentEntity = {
     promissory_note_now: "Vanilla 301 LLC",
     promissory_note_at_closing: "Vanilla 301 LLC",
     promissory_to_equity: "Vanilla 301 LLC",
-  }
-}
+  },
+};
 
-export function getInvestmentEntity(projectName: string, financingType: DealFinancingType) {
+export function getInvestmentEntity(
+  projectName: string,
+  financingType: DealFinancingType
+) {
   /* eslint-disable */
   switch (projectName) {
     case ProjectName["The Edison"]: {
-      return InvestmentEntity[projectName][financingType]
+      return InvestmentEntity[projectName][financingType];
     }
 
     case ProjectName["519 W Main"]: {
-      return InvestmentEntity[projectName][financingType]
+      return InvestmentEntity[projectName][financingType];
     }
     default: {
-      console.error(`The project with name ${projectName} is not yet supported in getInvestmentEntity()`)
+      console.error(
+        `The project with name ${projectName} is not yet supported in getInvestmentEntity()`
+      );
       return null;
     }
   }
