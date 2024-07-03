@@ -16,8 +16,6 @@ export default authMiddleware({
         _req.url.includes("?") ? "&" : "?"
       }afterauth=true`;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      // return redirectToSignUp({ returnBackUrl: process.env.NEXTAUTH_URL });
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return redirectToSignUp({ returnBackUrl: returnBackUrl });
     }
   },
