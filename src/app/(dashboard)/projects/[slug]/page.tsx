@@ -3,10 +3,10 @@ import ImageGallery from "react-image-gallery";
 import { Box, Container, Grid, Hidden } from "@mui/material";
 import "react-image-gallery/styles/css/image-gallery.css";
 import "./dealPage.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { type Deal } from "@prisma/client";
+import { DealFinancingType, type Deal } from "@prisma/client";
 import ProjectHeader from "@/components/Project/ProjectHeader";
 import { InvestTab } from "@/components/Project/Invest/InvestTab";
 import { ProjectDocTab } from "@/components/Project/ProjectDocs/ProjectDocTab";
@@ -17,6 +17,11 @@ import { FundTab } from "@/components/Project/Fund/FundTab";
 import { type ProjectWithPictures } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
+import { useSearchParams } from "next/navigation";
+import {
+  type DealCreateSchema,
+  type DealUpdateSchema,
+} from "@/app/api/utils-module/_globals";
 
 export type PageProps = {
   params: {
@@ -24,15 +29,30 @@ export type PageProps = {
   };
 };
 
+interface QueryParams {
+  afterauth: string | null;
+  dealStage: string | null;
+  financingType: string | null;
+}
+
 export default function Page({ params: { slug } }: PageProps) {
   const [tabValue, setTabValue] = useState(0);
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const searchParams = useSearchParams();
+  const queryParams: QueryParams = {
+    afterauth: searchParams.get("afterauth"),
+    dealStage: searchParams.get("dealStage"),
+    financingType: searchParams.get("financingType"),
+  };
 
   const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const { isLoading, data } = useQuery<ProjectWithPictures[], Error>({
+  const { isLoading: projectLoading, data: projectData } = useQuery<
+    ProjectWithPictures[],
+    Error
+  >({
     queryKey: ["project", slug],
     queryFn: () =>
       axios
@@ -40,10 +60,11 @@ export default function Page({ params: { slug } }: PageProps) {
         .then((res) => res.data),
   });
 
-  const { isLoading: dealLoading, data: dealData } = useQuery<
-    Deal | null,
-    Error
-  >({
+  const {
+    isLoading: dealLoading,
+    data: dealData,
+    refetch: refetchDeal,
+  } = useQuery<Deal | null, Error>({
     queryKey: ["deal", slug],
     queryFn: () =>
       axios
@@ -51,18 +72,71 @@ export default function Page({ params: { slug } }: PageProps) {
         .then((res) => res.data),
   });
 
-  // Handle loading state
-  if (isLoading || dealLoading) {
+  useEffect(() => {
+    const updateOrCreateDeal = async (project: ProjectWithPictures) => {
+      const typedFinancingType = (
+        queryParams.financingType &&
+        queryParams.financingType in DealFinancingType
+          ? queryParams.financingType
+          : "equity"
+      ) as keyof typeof DealFinancingType;
+
+      const minDealStage = parseInt(queryParams.dealStage ?? "0", 10);
+
+      if (dealData) {
+        if (
+          dealData.dealStage >= minDealStage &&
+          dealData.financingType === queryParams.financingType
+        )
+          return;
+
+        const dealUpdateData: Partial<DealUpdateSchema> = {
+          hubspotId: dealData.hubspotId,
+          financingType: DealFinancingType[typedFinancingType],
+          ...(minDealStage > dealData.dealStage && { dealStage: minDealStage }),
+        };
+
+        await axios.put("/api/deals", dealUpdateData);
+      } else {
+        const dealCreateData: DealCreateSchema = {
+          financingType: DealFinancingType[typedFinancingType],
+          projectId: project.id,
+          dealStage: minDealStage,
+        };
+        await axios.post("/api/deals", dealCreateData);
+      }
+
+      void refetchDeal();
+    };
+
+    if (
+      projectData?.[0] &&
+      dealData !== undefined &&
+      queryParams.dealStage &&
+      queryParams.financingType
+    ) {
+      void updateOrCreateDeal(projectData[0]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dealData, projectData, queryParams.dealStage, queryParams.financingType]);
+
+  if (projectLoading || dealLoading || !projectData) {
     return <div>Loading...</div>;
   }
 
-  if (!data || !Array.isArray(data) || data.length === 0) {
+  if (
+    !projectData ||
+    !Array.isArray(projectData) ||
+    projectData.length === 0 ||
+    !projectData[0]
+  ) {
     return <div>No data available</div>;
   }
 
-  const project = data[0]!;
+  const project = projectData[0];
 
-  const dealStage = dealData?.dealStage ?? 0;
+  const deal = dealData ?? null;
+  const dealStage = deal?.dealStage ?? 0;
 
   const percentRaised = Math.round(
     (project.investmentRaised / project.investmentGoal) * 100
@@ -72,7 +146,7 @@ export default function Page({ params: { slug } }: PageProps) {
     .map((picture) => ({
       original: picture.url,
       thumbnail: picture.url,
-      type: picture.type, // Add the type to the mapped object
+      type: picture.type,
     }))
     .filter((picture) => picture.type !== "CARD")
     .sort((a) => (a.type === "HEADER" ? -1 : 1));
@@ -81,9 +155,9 @@ export default function Page({ params: { slug } }: PageProps) {
     return (
       <Box
         sx={{
-          position: isMobile ? "relative" : "sticky", // Sticky positioning only if not mobile
-          top: isMobile ? 0 : "60px", // Adjust top position based on mobile or not
-          mt: isMobile ? 2 : 0, // Adjust margin top based on mobile or not
+          position: isMobile ? "relative" : "sticky",
+          top: isMobile ? 0 : "60px",
+          mt: isMobile ? 2 : 0,
         }}
       >
         {dealStage > 3 ? (
@@ -91,7 +165,7 @@ export default function Page({ params: { slug } }: PageProps) {
         ) : (
           <InvestmentProgress
             project={project}
-            dealStage={dealStage}
+            deal={deal}
             currentTab={tabValue}
             setTabValue={setTabValue}
           />
@@ -125,11 +199,9 @@ export default function Page({ params: { slug } }: PageProps) {
           {isMobile && investorStatusBox()}
           <Container disableGutters>
             {tabValue === 0 && <OverviewTab data={project} />}
-            {tabValue === 1 && (
-              <ProjectDocTab project={project} deal={dealData!} />
-            )}
-            {tabValue === 2 && <InvestTab project={project} deal={dealData!} />}
-            {tabValue === 3 && <FundTab project={project} deal={dealData!} />}
+            {tabValue === 1 && <ProjectDocTab project={project} deal={deal!} />}
+            {tabValue === 2 && <InvestTab project={project} deal={deal!} />}
+            {tabValue === 3 && <FundTab project={project} deal={deal!} />}
           </Container>
         </Grid>
 

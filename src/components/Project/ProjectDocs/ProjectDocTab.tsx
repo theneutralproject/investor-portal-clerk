@@ -9,7 +9,7 @@ import useDocuments, {
 } from "@/app/hooks/useDocuments";
 import DocumentViewerModal from "./DocumentViewerModal";
 import { useState } from "react";
-import axios from "axios";
+import { updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
 
 export const ProjectDocTab: React.FC<{
   project: Project;
@@ -48,8 +48,7 @@ export const ProjectDocTab: React.FC<{
         type: "DOWNLOAD",
       });
       const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      const body = { hubspotDealId: deal.hubspotId, dealStage: 1, documentNames };
-      axios.put('/api/deals', body);
+      updateHubspotDealProperties(deal.hubspotId, 1, documentNames);
     }
     window.open(document.link, "_blank");
   };
@@ -63,8 +62,7 @@ export const ProjectDocTab: React.FC<{
         type: "VIEW",
       });
       const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      const body = { hubspotDealId: deal.hubspotId, dealStage: 1, documentNames };
-      axios.put('/api/deals', body);
+      updateHubspotDealProperties(deal.hubspotId, 1, documentNames);
     }
   };
 

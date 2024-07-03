@@ -1,14 +1,14 @@
 import prisma from "@/libs/prisma";
-import { ProjectName, type HubspotDealUpdateSchema } from "./_globals";
+import { ProjectName, type DealUpdateSchema } from "./_globals";
 import type { DealFinancingType, Deal } from "@prisma/client";
 
 /**
  * Updates a deal in the database
- * @param {HubspotDealUpdateSchema} dealData - The data of the deal to update
+ * @param {DealUpdateSchema} dealData - The data of the deal to update
  * @returns {Promise<Deal | Error>} The updated deal or an error
  */
 export async function updateDeal(
-  dealData: HubspotDealUpdateSchema
+  dealData: DealUpdateSchema
 ): Promise<Deal | Error> {
   const { hubspotId, dealStage, amount, financingType } = dealData;
   /* eslint-disable */
@@ -37,7 +37,9 @@ export async function updateDeal(
       data: data,
     })
     .catch((error) => {
-      console.error(`Failed to update deal with hubspot id ${hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`);
+      console.error(
+        `Failed to update deal with hubspot id ${hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`
+      );
       console.error(error);
       return Error("Failed to update deal with hubspot data");
     });
@@ -58,21 +60,26 @@ const InvestmentEntity = {
     promissory_note_now: "Vanilla 301 LLC",
     promissory_note_at_closing: "Vanilla 301 LLC",
     promissory_to_equity: "Vanilla 301 LLC",
-  }
-}
+  },
+};
 
-export function getInvestmentEntity(projectName: string, financingType: DealFinancingType) {
+export function getInvestmentEntity(
+  projectName: string,
+  financingType: DealFinancingType
+) {
   /* eslint-disable */
   switch (projectName) {
     case ProjectName["The Edison"]: {
-      return InvestmentEntity[projectName][financingType]
+      return InvestmentEntity[projectName][financingType];
     }
 
     case ProjectName["519 W Main"]: {
-      return InvestmentEntity[projectName][financingType]
+      return InvestmentEntity[projectName][financingType];
     }
     default: {
-      console.error(`The project with name ${projectName} is not yet supported in getInvestmentEntity()`)
+      console.error(
+        `The project with name ${projectName} is not yet supported in getInvestmentEntity()`
+      );
       return null;
     }
   }
