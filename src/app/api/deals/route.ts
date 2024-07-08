@@ -93,13 +93,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const transactionId = `${project.name}-${dbUser.lastName}-${Math.floor(
+    dealData.transactionId = `${project.name}-${dbUser.lastName}-${Math.floor(
       Math.random() * 900 + 100
     )}`
       .replace(/\s/g, "")
       .toUpperCase();
 
-    const hsDeal = initDealPropsForProject(project.name, dbUser, transactionId);
+    const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
     if (!hsDeal) {
       return jsonResponse(
         {
@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         amount: 0,
         hubspotId: hsDealId.toString(),
         financingType: dealData.financingType ?? DealFinancingType.equity,
-        transactionId: transactionId,
+        transactionId: dealData.transactionId,
         investmentEntity:
           getInvestmentEntity(project.name, DealFinancingType.equity) ?? "",
       },

@@ -23,6 +23,7 @@ export enum ProjectName {
     projectId: z.number(),
     dealStage: z.number().optional(),
     financingType: z.nativeEnum(DealFinancingType).optional(),
+    transactionId: z.string().optional(),
   });
 
 

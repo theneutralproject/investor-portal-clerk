@@ -1,6 +1,6 @@
 import { DealFinancingType, type User } from "@prisma/client";
 import { z } from "zod";
-import { ProjectName } from "./_globals";
+import { type DealCreateSchema, ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
 import { isError } from "lodash";
 import { getInvestmentEntity } from "./dealUtils";
@@ -76,7 +76,6 @@ export const zHsDealSearchResultsSchema = z.object({
 })
 
 export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, contactHubspotId: string) {
-  // first create a deal
   const { properties } = hubspotDeal;
 
   const body = JSON.stringify({
@@ -110,7 +109,6 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, cont
 }
 
 export async function updateHubspotDealProperties(hubspotDealId: string, dealStage: number, documentNames: string) {
-
   const properties = [{
     name: dealStage === 1 ? 'project_documents_accessed': 'investment_documents_accessed',
     value: documentNames
@@ -138,18 +136,20 @@ export async function updateHubspotDealProperties(hubspotDealId: string, dealSta
 
 
 /* eslint-disable */
-export function initDealPropsForProject(projectName: string, user: User, transactionId: string) {
+export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
+  
+
   switch (projectName) {
     case ProjectName["The Edison"]: {
       return {
         properties: [
           { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
-          { name: "dealstage", value: EdisonDealStages[1]?.value ?? "" },
-          { name: "investment_entity", value: getInvestmentEntity(projectName, DealFinancingType.equity) },
+          { name: "dealstage", value: EdisonDealStages[dealData.dealStage ?? 1]?.value ?? "" },
+          { name: "investment_entity", value: getInvestmentEntity(projectName, dealData.financingType ?? DealFinancingType.equity) },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
-          { name: "financing_type", value: "equity" },
-          { name: "transaction_id", value: transactionId },
+          { name: "financing_type", value: dealData.financingType ?? "equity" },
+          { name: "transaction_id", value: dealData.transactionId! },
           { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
         ]
       } as HubspotDeal
@@ -158,12 +158,12 @@ export function initDealPropsForProject(projectName: string, user: User, transac
       return {
         properties: [
           { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
-          { name: "dealstage", value: _519WMainDealStages[1]?.value ?? "" },
-          { name: "investment_entity", value: getInvestmentEntity(projectName, DealFinancingType.equity) },
+          { name: "dealstage", value: _519WMainDealStages[dealData.dealStage ?? 1]?.value ?? "" },
+          { name: "investment_entity", value: getInvestmentEntity(projectName, dealData.financingType ?? DealFinancingType.equity) },
           { name: "project_name", value: projectName },
           { name: "amount", value: "0" },
-          { name: "financing_type", value: "equity" },
-          { name: "transaction_id", value: transactionId },
+          { name: "financing_type", value: dealData.financingType ?? "equity" },
+          { name: "transaction_id", value: dealData.transactionId! },
           { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
         ]
       } as HubspotDeal
