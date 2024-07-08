@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   const projectIdAsInt = parseInt(projectId, 10);
   if (isNaN(projectIdAsInt)) {
-    return jsonResponse({ error: "Invalid Project ID" }, 400);
+    return jsonResponse({ error: `Invalid Project ID: ${projectId}` }, 400);
   }
 
   try {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     });
     if (!neutralUser) {
       console.error("Neutral user not found in api/deals");
-      return jsonResponse({ error: "User record not found" }, 404);
+      return jsonResponse({ error: `User record with clerkid ${user.id} not found in prisma (GET)` }, 404);
     }
 
     const deals = await prisma.deal.findFirst({
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       where: { clerkId: user.id },
     });
     if (!dbUser) {
-      return jsonResponse({ error: "User record not found" }, 404);
+      return jsonResponse({ error: `User record with clerkid ${user.id} not found in prisma (POST)` }, 404);
     }
 
     const requestBody = (await request.json()) as DealCreateSchema;
