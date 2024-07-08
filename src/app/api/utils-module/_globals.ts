@@ -29,3 +29,10 @@ export enum ProjectName {
 
   export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>
   export type DealCreateSchema = z.infer<typeof zDealCreateSchema>
+
+  export function jsonResponse(data: unknown, status = 200) {
+    return new Response(JSON.stringify(data), {
+      status,
+      headers: { "Content-Type": "application/json" },
+    });
+  }

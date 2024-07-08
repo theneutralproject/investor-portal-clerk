@@ -4,6 +4,7 @@ import { type DealCreateSchema, ProjectName } from "./_globals";
 import { getErrorMessage } from "./helpers";
 import { isError } from "lodash";
 import { getInvestmentEntity } from "./dealUtils";
+import axios from "axios";
 
 export type HubspotContact = {
   properties: { property: string; value: string }[];
@@ -68,12 +69,20 @@ const zHsDealSearchObjectSchema = z.object({
   properties: z.object({
     amount: z.string()
   })
-})
+});
 
 export const zHsDealSearchResultsSchema = z.object({
   total: z.number(),
   results: z.array(zHsDealSearchObjectSchema)
-})
+});
+
+export const zHsDealUpdateSchema = z.object({
+  dealId: z.string(),
+  dealStage: z.number(),
+  documentNames: z.string()
+});
+
+export type HsDealUpdateSchema = z.infer<typeof zHsDealUpdateSchema>
 
 export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, contactHubspotId: string) {
   const { properties } = hubspotDeal;
@@ -108,36 +117,15 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, cont
   }
 }
 
-export async function updateHubspotDealProperties(hubspotDealId: string, dealStage: number, documentNames: string) {
-  const properties = [{
-    name: dealStage === 1 ? 'project_documents_accessed': 'investment_documents_accessed',
-    value: documentNames
-  }]
-  await fetch(
-    `https://api.hubapi.com/deals/v1/deal/${hubspotDealId}`,
-    {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify({"properties": properties}),
-    }
-  ).then(async (response) => {
-    return response;
-  }).catch((err) => {
-    console.log("nooo:")
-    console.log(err)
-    return;
-  })
-  return
-}
 
+export async function updateHubspotDealProperties(hsDealUpdateData: HsDealUpdateSchema) {
+  return await axios.put("/api/deals/hubspot", hsDealUpdateData)
+}
 
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
-  
+
 
   switch (projectName) {
     case ProjectName["The Edison"]: {
@@ -183,7 +171,7 @@ export async function getFundingAmount(projectName: ProjectName) {
       case ProjectName["The Edison"]: {
         return {
           limit: 100, /**pagination - max=100 */
-          after:0,
+          after: 0,
           filterGroups: [
             {
               filters: [
@@ -205,14 +193,14 @@ export async function getFundingAmount(projectName: ProjectName) {
       case ProjectName["519 W Main"]: {
         return {
           limit: 100, /**pagination - max=100 */
-          after:0,
+          after: 0,
           filterGroups: [
             {
               filters: [
                 {
                   propertyName: "dealstage",
                   operator: "IN",
-                  values: ["146586773","146586772"]
+                  values: ["146586773", "146586772"]
                 },
                 {
                   propertyName: "project_name",
@@ -226,8 +214,8 @@ export async function getFundingAmount(projectName: ProjectName) {
 
       }
       default: {
-          console.error(`The project with name ${project} is not yet supported in getDealPropsForProject()`)
-          return new Error(`The project with name ${project} is not yet supported in getDealPropsForProject()`);
+        console.error(`The project with name ${project} is not yet supported in getDealPropsForProject()`)
+        return new Error(`The project with name ${project} is not yet supported in getDealPropsForProject()`);
       }
     }
   }
@@ -237,9 +225,9 @@ export async function getFundingAmount(projectName: ProjectName) {
   let totalAmountRaised = 0;
   let dealsFetched = 0;
   let totalDeals = 100;
-  while (dealsFetched<totalDeals) {
+  while (dealsFetched < totalDeals) {
     const payload = getPayload(projectName)
-    if(isError(payload)) {
+    if (isError(payload)) {
       return 25000000;
     }
     payload.after = dealsFetched;
@@ -254,14 +242,14 @@ export async function getFundingAmount(projectName: ProjectName) {
         body: JSON.stringify(payload),
       }
     )
-    
+
     /* eslint-disable-next-line */
     const hsDealCreateRespBody = await resBody.json();
     try {
       const { results, total } = zHsDealSearchResultsSchema.parse(hsDealCreateRespBody);
       totalDeals = total;
       dealsFetched += results.length
-      totalAmountRaised+= results.map(r => parseFloat(r.properties.amount)).reduce((acc,cur) => acc + cur, 0)
+      totalAmountRaised += results.map(r => parseFloat(r.properties.amount)).reduce((acc, cur) => acc + cur, 0)
     } catch (error) {
       console.error("could not compute updated deal closed amount:\n", error);
       return new Error(getErrorMessage(error));
@@ -286,8 +274,8 @@ export function getDealStageInt(dealstage: string) {
 }
 
 export function getProjectNameFromDealStage(dealstage: string) {
-  if(EdisonDealStages.map(e => e.value).indexOf(dealstage) >-1) return ProjectName["The Edison"];
-  if(_519WMainDealStages.map(e => e.value).indexOf(dealstage) >-1) return ProjectName["519 W Main"];
+  if (EdisonDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["The Edison"];
+  if (_519WMainDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["519 W Main"];
   return new Error("project not yet supported");
 };
 

@@ -48,7 +48,7 @@ export const ProjectDocTab: React.FC<{
         type: "DOWNLOAD",
       });
       const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      updateHubspotDealProperties(deal.hubspotId, 1, documentNames);
+      updateHubspotDealProperties({dealId: deal.hubspotId,dealStage: 1,documentNames: documentNames});
     }
     window.open(document.link, "_blank");
   };
@@ -62,7 +62,7 @@ export const ProjectDocTab: React.FC<{
         type: "VIEW",
       });
       const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      updateHubspotDealProperties(deal.hubspotId, 1, documentNames);
+      updateHubspotDealProperties({dealId: deal.hubspotId,dealStage: 1,documentNames: documentNames});
     }
   };
 

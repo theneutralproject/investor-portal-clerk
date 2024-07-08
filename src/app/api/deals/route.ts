@@ -13,6 +13,7 @@ import {
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
+  jsonResponse,
 } from "../utils-module/_globals";
 
 export const dynamic = "force-dynamic";
@@ -158,9 +159,3 @@ export async function PUT(request: NextRequest) {
   }
 }
 
-function jsonResponse(data: unknown, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
-}
