@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return jsonResponse({ error: "User not found" }, 404);
     }
-
+    
     const neutralUser = await prisma.user.findUnique({
       where: { clerkId: user.id },
     });
@@ -57,6 +57,7 @@ export async function GET(request: NextRequest) {
     return jsonResponse(deals);
   } catch (error) {
     const errorMessage = (error as Error).message;
+    console.error(errorMessage);
     return jsonResponse({ error: "Error fetching data: " + errorMessage }, 500);
   }
 }

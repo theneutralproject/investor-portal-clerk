@@ -8,7 +8,8 @@ import useDocuments, {
 import { Deal, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
-import { updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
+import { _updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
+import { useDebounce } from "@/app/hooks/useDebounce";
 
 export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,
@@ -28,12 +29,16 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
     documentEventMutation: any;
   } = useDocuments(project.id, 2, deal.financingType!);
 
+  // Hubspot can only process 1 webhook request per minute. 
+  // In case the user accesses several docs in a short amount of time, we debounce the request for 75 sec
+  const updateHubspotDealProperties = useDebounce(_updateHubspotDealProperties, 75000)
+
   const [modelOpenType, setModelOpenType] = useState("");
-  const [selectedDocument, setSelectedDocument] =
+  const [currentDocument, setCurrentDocument] =
     useState<DocumentWithCompletion | null>(null);
 
   const handleViewDocument = (document: DocumentWithCompletion) => {
-    setSelectedDocument(document);
+    setCurrentDocument(document);
 
     if (document?.link.includes("docusign.")) {
       setModelOpenType("DOCUSIGN");
@@ -48,21 +53,23 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
         documentId: document?.id,
         type: "DOWNLOAD",
       });
-      const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      updateHubspotDealProperties({dealId: deal.hubspotId,dealStage: 2,documentNames: documentNames});
+      const documentNames = [...[document],...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
+      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames});
     }
     window.open(document.link, "_blank");
   };
 
   const handleCloseModal = () => {
     setModelOpenType("");
-    if (selectedDocument != null) {
+    if (currentDocument != null) {
       documentEventMutation.mutate({
-        documentId: selectedDocument.id,
+        documentId: currentDocument.id,
         type: "VIEW",
       });
-      const documentNames = data.filter(doc => doc.completed).map(doc => doc.name).toString();
-      updateHubspotDealProperties({dealId: deal.hubspotId,dealStage: 2,documentNames: documentNames});
+      
+      // add current doc to list of already read docs and notify hubspot webhook about this event
+      const documentNames = [...[currentDocument],...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
+      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
     }
   };
 
@@ -94,7 +101,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
         <DocumentViewerModal
           open={modelOpenType === "DOCUMENT"}
           onClose={handleCloseModal}
-          fileUrl={selectedDocument?.link ?? ""}
+          fileUrl={currentDocument?.link ?? ""}
         />
         <Modal
           open={modelOpenType === "DOCUSIGN"}

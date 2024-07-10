@@ -77,9 +77,9 @@ export const zHsDealSearchResultsSchema = z.object({
 });
 
 export const zHsDealUpdateSchema = z.object({
-  dealId: z.string(),
-  dealStage: z.number(),
-  documentNames: z.string()
+  dealId: z.number(),
+  dealStage: z.number().min(1).max(5),
+  documentNames: z.string(),
 });
 
 export type HsDealUpdateSchema = z.infer<typeof zHsDealUpdateSchema>
@@ -117,11 +117,9 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, cont
   }
 }
 
-
-export async function updateHubspotDealProperties(hsDealUpdateData: HsDealUpdateSchema) {
-  return await axios.put("/api/deals/hubspot", hsDealUpdateData)
+export async function _updateHubspotDealProperties(hsDealUpdateData: HsDealUpdateSchema) {
+  return await axios.post("/api/deals/hubspot", hsDealUpdateData);
 }
-
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
