@@ -18,10 +18,12 @@ import { type ProjectWithPictures } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
 } from "@/app/api/utils-module/_globals";
+import posthog from "posthog-js";
 
 export type PageProps = {
   params: {
@@ -45,6 +47,9 @@ export default function Page({ params: { slug } }: PageProps) {
     financingType: searchParams.get("financingType"),
   };
 
+  
+  const { user } = useUser();
+  
   const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {
     setTabValue(newValue);
   };
@@ -71,6 +76,14 @@ export default function Page({ params: { slug } }: PageProps) {
         .get<Deal | null>(`/api/deals?projectId=${slug}`)
         .then((res) => res.data),
   });
+
+  useEffect(() => {
+    if (user && queryParams.afterauth) {
+      const { id, primaryEmailAddress, firstName, lastName } = user;
+      posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+  }, [user, queryParams.afterauth])
 
   useEffect(() => {
     const updateOrCreateDeal = async (project: ProjectWithPictures) => {
