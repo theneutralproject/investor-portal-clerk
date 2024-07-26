@@ -9,6 +9,8 @@ import useDocuments, {
 } from "@/app/hooks/useDocuments";
 import DocumentViewerModal from "./DocumentViewerModal";
 import { useState } from "react";
+import { useDebounce } from "@/app/hooks/useDebounce";
+import { _updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
 
 export const ProjectDocTab: React.FC<{
   project: Project;
@@ -17,6 +19,11 @@ export const ProjectDocTab: React.FC<{
   const [openModal, setOpenModal] = useState(false);
   const [currentDocument, setCurrentDocument] =
     useState<DocumentWithCompletion>();
+
+
+  // Hubspot can only process 1 webhook request per minute. 
+  // In case the user accesses several docs in a short amount of time, we debounce the request for 75 sec
+  const updateHubspotDealProperties = useDebounce(_updateHubspotDealProperties, 75000)
 
   const {
     isLoading,
@@ -44,8 +51,11 @@ export const ProjectDocTab: React.FC<{
     if (!document?.completed) {
       documentEventMutation.mutate({
         documentId: document?.id,
-        type: "VIEW",
-      });
+        type: "DOWNLOAD",
+      })
+      // add current doc to list of already read docs and notify hubspot webhook about this event
+      const documentNames = [...[document],...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
+      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 1, documentNames: documentNames });
     }
     window.open(document.link, "_blank");
   };
@@ -58,6 +68,10 @@ export const ProjectDocTab: React.FC<{
         documentId: currentDocument?.id,
         type: "VIEW",
       });
+
+      // add current doc to list of already read docs and notify hubspot webhook about this event
+      const documentNames = [...[currentDocument],...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
+      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 1, documentNames: documentNames });
     }
   };
 
