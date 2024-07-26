@@ -1,10 +1,12 @@
+// https://www.youtube.com/watch?v=sqx8KbVa6Cw I followed much of this docusign tutorial
 
 import { getIronSession } from "iron-session";
 import { type SessionData, sessionOptions } from "./sessionConfig";
 import { cookies } from "next/headers";
-import type { DocusignPayloadSchema } from "./_globals";
+import type { DocusignEnvelopeSchema } from "./_globals";
 import { type EnvelopeDefinition, ApiClient, EnvelopesApi, type Tabs, type TemplateRole, type Text as DSText, type RecipientViewRequest } from "docusign-esign";
-
+import type { Address, User } from "@prisma/client";
+import type { UserWithAddress } from "@/libs/prisma";
 
 /* eslint-disable-next-line*/
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -30,7 +32,7 @@ export async function refreshAccessToken() {
             Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'), //TODO: save as DB file instead of secret
             3600
         )
-            .catch((err: { response: { data: { error: string }; }; }) => {
+            .catch((err: { response: { data: { error: string } } }) => {
 
                 // The user is not logged in
                 const errMessage = err.response.data.error;
@@ -71,7 +73,6 @@ export async function refreshAccessToken() {
     return responseObj;
 }
 
-
 export async function instantiateApiClient(accessToken: string) {
     const dsApiClient = new ApiClient();
     dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
@@ -79,68 +80,182 @@ export async function instantiateApiClient(accessToken: string) {
     return new EnvelopesApi(dsApiClient);
 }
 
-// https://developers.docusign.com/docs/esign-rest-api/how-to/request-signature-template-remote/
-export function makeEnvelope(envelopeData: DocusignPayloadSchema, templateId: string) {
+const addressToCityStateZip = (a: Address | null) => {
+    return a ? `${a.city}, ${a.state} ${a.zipcode}` : ""
+};
 
-    const { user, amount } = envelopeData;
+const addressToOneLine = (a: Address | null) => {
+    return a ? `${a.street}, ${a.city}, ${a.state} ${a.zipcode}` : ""
+};
+
+const addressToStreet = (a: Address | null) => {
+    return a ? `${a.street}` : ""
+}
+
+// https://developers.docusign.com/docs/esign-rest-api/how-to/request-signature-template-remote/
+export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserWithAddress) {
+
+    const { amount, investorName, envelopeId, amountSpelledOut } = envelopeData;
 
     // create the envelope definition
     /* eslint-disable-next-line*/
     const env: EnvelopeDefinition = new docusign.EnvelopeDefinition() as EnvelopeDefinition;
-    env.templateId = templateId;
+    env.templateId = envelopeId;
 
-    // UNSURE ABOUT THIS TYPE
     /* eslint-disable-next-line*/
     const amountTab: DSText = docusign.Text.constructFromObject({
         tabLabel: "amount", value: amount.toString(),
     }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const amountSpelledOutTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "amountSpelledOutTab", value: amountSpelledOut,
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const numAUnitsTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "numAUnits", value: amount < 250000 ? `${amount / 100000}` : "0",
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const numCUnitsTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "numCUnits", value: amount >= 250000 ? `${amount / 100000}` : "0",
+    }) as DSText;
+
     /* eslint-disable-next-line*/
     const interestTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "interest_percent", value: amount < 500000 ? "10%" : "12%",
+        tabLabel: "interest", value: amount >= 250000 ? "12" : "10",
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const investorNameTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "investorName", value: investorName,
+    }) as DSText;
+
+    const sharedTextTabs = [
+        amountTab,
+        amountSpelledOutTab,
+        investorNameTab,
+        numAUnitsTab,
+        numCUnitsTab,
+        interestTab
+    ];
+
+    /* eslint-disable-next-line*/
+    const signer1TitleTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "title", value: signer.title ?? "",
+    }) as DSText;
+
+
+    /* eslint-disable-next-line*/
+    const signer1SsnTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "ssn", value: signer.ssn /** or company.tin */,
+    }) as DSText;
+
+
+    /* eslint-disable-next-line*/
+    const signer1AddressStreetTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "addressStreet", value: addressToStreet(signer.address),
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const signer1AddressCityStateZipTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "addressCityStateZip", value: addressToCityStateZip(signer.address),
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const signer1AddressOneLineTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "addressOneLine", value: addressToOneLine(signer.address),
+    }) as DSText;
+
+    /** TODO: State name from 2digit shorthand */
+
+    /* eslint-disable-next-line*/
+    const signer1PhoneNumberTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "phoneNumber", value: signer.phoneNumber,
     }) as DSText;
 
     // Pull together the existing and new tabs in a Tabs object:
     /* eslint-disable-next-line*/
     let signer1Tabs: Tabs = docusign.Tabs.constructFromObject({
-        textTabs: [amountTab, interestTab],
+        textTabs: [...sharedTextTabs,
+        ...[
+            signer1TitleTab,
+            signer1SsnTab,
+            signer1PhoneNumberTab,
+            signer1AddressStreetTab,
+            signer1AddressCityStateZipTab,
+            signer1AddressOneLineTab
+        ]
+        ],
     }) as Tabs;
+
+    /* eslint-disable-next-line*/
+    const neutralSignerTabs: Tabs = docusign.Tabs.constructFromObject({
+        textTabs: sharedTextTabs
+    })
 
     // Create template role elements to connect the signer and cc recipients to the template
     /* eslint-disable-next-line*/
-    let signer1: TemplateRole = docusign.TemplateRole.constructFromObject({
-        email: user.email,
-        name: user.fullName,
+    // addressStreet
+    // addressCityStateZip
+    // ssn
+    // phoneNumber
+    // title
+    // Accreditation Verifier role
+    /* eslint-disable-next-line*/
+    const signer1Role: TemplateRole = docusign.TemplateRole.constructFromObject({
+        email: signer.email,
+        name: `${signer.firstName} ${signer.lastName}`,
         tabs: signer1Tabs,
-        clientUserId: user.id,
-        roleName: 'Investor',
+        clientUserId: signer.id.toString(),
+        roleName: 'Signer',
     }) as TemplateRole;
-    console.log(signer1)
-    // Create a cc template role.
-    // We're setting the parameters via setters
-    // let cc1 = new docusign.TemplateRole();
-    // cc1.email = "jonatanschumacher@gmail.com";
-    // cc1.name = "Neutral Employee";
-    // cc1.roleName = 'CC';
 
+    // co-signer
+    if (envelopeData.coSigner) {
+        console.log("\n\nTODO: build out cosigner logic")
+        // const coSignerRole: TemplateRole = docusign.TemplateRole.constructFromObject({
+        //     email: user.email,
+        //     name: user.fullName,
+        //     tabs: signer1Tabs,
+        //     clientUserId: user.id,
+        //     roleName: 'Co-Signer',
+        // }) as TemplateRole;
+    }
+    if (envelopeData.accreditationVerifier) {
+        console.log("\n\nTODO: build out accreditationVerifier logic")
+    }
+
+    /* eslint-disable-next-line*/
+    const neutralSignerRole: TemplateRole = docusign.TemplateRole.constructFromObject({
+        email: "jonatan@neutral.us",
+        name: "Nate Helbach",
+        tabs: neutralSignerTabs,
+        clientUserId: "jonatan@neutral.us",
+        roleName: 'Neutral Signer',
+        title: "Authorized Agent"
+    }) as TemplateRole;
     // Add the TemplateRole objects to the envelope object
-    env.templateRoles = [signer1 /*,cc1*/];
+    env.templateRoles = [signer1Role, /**coSigner, */ neutralSignerRole];
     env.status = 'sent'; // We want the envelope to be sent
 
     return env;
 }
 
-export function makeRecipientViewRequest(args: DocusignPayloadSchema) {
+export function makeRecipientViewRequest(signer: User, returnUrl: string) {
+
     /* eslint-disable-next-line*/
     let viewRequest: RecipientViewRequest = new docusign.RecipientViewRequest() as RecipientViewRequest;
 
-    viewRequest.returnUrl = `${process.env.BASE_URL}/projects`;   //comes back with a query parameter. TODO: capture which project they came from
+    viewRequest.returnUrl = `${returnUrl}`;   //comes back with a query parameter. TODO: capture which project they came from
     viewRequest.authenticationMethod = 'none';
 
     // Recipient information must match embedded recipient info
     // we used to create the envelope.
-    viewRequest.email = args.user.email;
-    viewRequest.userName = args.user.fullName;
-    viewRequest.clientUserId = args.user.id;
+    viewRequest.email = signer.email;
+    viewRequest.userName = `${signer.firstName} ${signer.lastName}`;
+    viewRequest.clientUserId = signer.id.toString();
 
     return viewRequest;
 }

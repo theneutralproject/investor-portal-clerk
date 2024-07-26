@@ -38,7 +38,8 @@ const Dashboard = () => {
     }
     const docusigntoken = searchParams.get('code');
    if (docusigntoken) {
-    toast.success("You can now begin the signing process for your desired project.");
+    console.log("TODO: redirect user to the correct URL. Need to implement urls for tabs first.");
+    // TODO: store the project url that the docusign login was initiated from in ironsession, and then return there 
    }
   }, [user, searchParams])
 

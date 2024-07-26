@@ -10,6 +10,7 @@ export enum ProjectName {
   "519 W Main" = "519 W Main"
 }
 
+
 // always look up a deal by hubspotId
 export const zDealUpdateSchema = z.object({
   hubspotId: z.string(),
@@ -29,19 +30,51 @@ export const zDealCreateSchema = z.object({
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>
 
-export const zDocusignPayload = z.object({
-  user: z.object({
-    id: z.string(),
-    fullName: z.string(),
-    firstName: z.string(),
-    lastName: z.string(),
-    email: z.string().email(),
-  }),
-  amount: z.number().min(1000)
+// todo: hook this up in docusignUtils
+enum ownershipTypeEnum {
+  Individual = "ownershipTypeIndividual",
+  Joint = "ownershipTypeJoint",
+  Corporation = "ownershipTypeCorporation",
+  RevocableGrantor = "ownershipTypeRevocable",
+  Other = "ownershipTypeOther",
+  Marital = "ownershipTypeMarital",
+  Common = "ownershipTypeCommon",
+  Partnership = "ownershipTypePartnership"
+}
+
+export const zDocusignEnvelope = z.object({
+  envelopeId: z.string(),
+  projectId: z.number(),
+  clerkUserId: z.string(),
+  amount: z.number().min(0),
+  amountSpelledOut: z.string().optional(),
+  numAUnits: z.number().optional(),
+  numCUnits: z.number().optional(),
+  investorName: z.string().optional(),
+  ownershipType: z.nativeEnum(ownershipTypeEnum).optional(),
+  ownershipTypeOtherValue: z.string().optional(),
+  coSigner: z.object({
+    email: z.string(),
+    fullName: z.string()
+  }).optional(),
+  accreditationVerifier: z.object({
+    email: z.string(),
+    fullName: z.string()
+  }).optional()
 });
 
-export type DocusignPayloadSchema = z.infer<typeof zDocusignPayload>;
+export type DocusignEnvelopeSchema = z.infer<typeof zDocusignEnvelope>;
 
+const zDocusignSigner = z.object({
+  id: z.number(),
+  fullName: z.string(),
+  email: z.string().email(),
+  phoneNumber: z.string().nullable(),
+  title: z.string().nullable(),
+  ssn: z.string().nullable()
+});
+
+export type DocusignSignerSchema = z.infer<typeof zDocusignSigner>;
 
 export function jsonResponse(data: unknown, status = 200) {
   return new Response(JSON.stringify(data), {

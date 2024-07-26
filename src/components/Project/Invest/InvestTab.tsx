@@ -5,13 +5,14 @@ import DocumentCard from "../ProjectDocs/DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
-import { Deal, type Project } from "@prisma/client";
+import { Deal, DocumentType, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
 import { _updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
 import { useDebounce } from "@/app/hooks/useDebounce";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
+import { DocusignEnvelopeSchema } from "@/app/api/utils-module/_globals";
 
 export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,
@@ -31,6 +32,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
     documentEventMutation: any;
   } = useDocuments(project.id, 2, deal.financingType!);
 
+
   // Hubspot can only process 1 webhook request per minute. 
   // In case the user accesses several docs in a short amount of time, we debounce the request for 75 sec
   const updateHubspotDealProperties = useDebounce(_updateHubspotDealProperties, 75000)
@@ -39,13 +41,16 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   const [currentDocument, setCurrentDocument] =
     useState<DocumentWithCompletion | null>(null);
 
-const SHOWDOCUSIGNBUTTON = false;
-
   const handleViewDocument = (document: DocumentWithCompletion) => {
     setCurrentDocument(document);
+      setModelOpenType("DOCUMENT");
+  };
 
-    if (document?.link.includes("docusign.")) {
-      setModelOpenType("DOCUSIGN");
+  const handleSignDocument = (document: DocumentWithCompletion) => {
+    setCurrentDocument(document);
+
+    if (document?.documentType === DocumentType.DOCUSIGN && document.docusignTemplateId) {
+      createDocusignEnvelope(document.docusignTemplateId);
     } else {
       setModelOpenType("DOCUMENT");
     }
@@ -57,8 +62,8 @@ const SHOWDOCUSIGNBUTTON = false;
         documentId: document?.id,
         type: "DOWNLOAD",
       });
-      const documentNames = [...[document],...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
-      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames});
+      const documentNames = [...[document], ...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
+      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
     }
     window.open(document.link, "_blank");
   };
@@ -70,9 +75,9 @@ const SHOWDOCUSIGNBUTTON = false;
         documentId: currentDocument.id,
         type: "VIEW",
       });
-      
+
       // add current doc to list of already read docs and notify hubspot webhook about this event
-      const documentNames = [...[currentDocument],...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
+      const documentNames = [...[currentDocument], ...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
       updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
     }
   };
@@ -80,26 +85,20 @@ const SHOWDOCUSIGNBUTTON = false;
 
   const { user } = useUser();
   let renderCTA = () => <Box></Box>;
-  let renderDocuSignExperimentalButton = () => {
-    if (SHOWDOCUSIGNBUTTON) {
-      return (<Button
-        variant="neutralBlack"
-        fullWidth
-        onClick={() => createDocusignEnvelope()}
-      >
-        Launch Docusign
-      </Button>)
-    }
-  }
-  const createDocusignEnvelope = async () => {
+
+  const createDocusignEnvelope = async (envelopeId: string) => {
     const url = `/api/docusign`;
     if (!user) {
-
+      console.log("!user")
     } else {
 
-
-      const { firstName, fullName, lastName, primaryEmailAddress, id } = user;
-      const body = { user: { id, firstName, lastName, fullName, email: primaryEmailAddress?.emailAddress }, amount: deal.amount };
+      const body: DocusignEnvelopeSchema = {
+        amount: deal.amount,
+        envelopeId: envelopeId,
+        clerkUserId: user.id,
+        projectId: project.id
+      };
+      
       const docusignResponse = await axios.post(url, body).catch((error) => {
         if (error.response) {
           console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:", error.response)
@@ -139,6 +138,7 @@ const SHOWDOCUSIGNBUTTON = false;
               dealStage={deal.dealStage}
               handleViewDocument={handleViewDocument}
               handleDownloadDocument={handleDownloadDocument}
+              handleSignDocument={handleSignDocument}
             />
           ))}
 
@@ -147,36 +147,8 @@ const SHOWDOCUSIGNBUTTON = false;
             onClose={handleCloseModal}
             fileUrl={currentDocument?.link ?? ""}
           />
-          <Modal
-            open={modelOpenType === "DOCUSIGN"}
-            onClose={handleCloseModal}
-            aria-labelledby="modal-modal-title"
-            aria-describedby="modal-modal-description"
-          >
-            <Box
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 800,
-                bgcolor: "background.paper",
-                border: "2px solid #000",
-                p: 4,
-              }}
-            >
-              <Typography id="modal-modal-title" variant="h6" component="h2">
-                Document Viewer
-              </Typography>
-              <iframe
-                src={`https://us.services.docusign.net/webforms-ux/v1.0/forms/ffe2f07796e0e2040fddce114b3d9b04`}
-                style={{ width: "100%", height: "800px" }}
-              ></iframe>
-            </Box>
-          </Modal>
         </CardContent>
       </Card>
-      {renderDocuSignExperimentalButton()}
       {renderCTA()}
     </Box>
   );

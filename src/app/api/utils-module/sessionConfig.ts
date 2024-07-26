@@ -1,4 +1,4 @@
-// this file is a wrapper with defaults to be used in both API routes and `getServerSideProps` functions
+// this file is a wrapper which defaults to be used in both API routes and `getServerSideProps` functions
 // https://github.com/vvo/iron-session/blob/a6c767d425c52575f743e86b64b8b4a4ce64add6/examples/next.js-typescript/lib/session.ts
 import type { SessionOptions } from "iron-session";
 

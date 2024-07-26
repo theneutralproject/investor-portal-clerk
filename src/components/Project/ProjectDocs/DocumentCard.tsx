@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
+import { Box, Card, CardContent, IconButton, Tooltip, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import LockedIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -9,18 +9,24 @@ import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { type DocumentWithCompletion } from "@/app/hooks/useDocuments";
 import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import BorderColorIcon from '@mui/icons-material/BorderColor';
 
 const DocumentCard = ({
   document,
   dealStage,
   handleViewDocument,
   handleDownloadDocument,
+  handleSignDocument
 }: {
   document: DocumentWithCompletion;
   dealStage: number;
   handleViewDocument: (document: DocumentWithCompletion) => void;
   handleDownloadDocument: (document: DocumentWithCompletion) => void;
+  handleSignDocument?: (document: DocumentWithCompletion) => void;
 }) => {
+
+  const DOCUSIGN_FLAG = false;
+
   const documentLocked = dealStage < document.dealStage;
 
   const renderIcon = () => {
@@ -105,6 +111,21 @@ const DocumentCard = ({
             <DownloadIcon />
           </IconButton>
         )}
+        {
+          DOCUSIGN_FLAG &&
+          document?.link?.toUpperCase().includes("DOCUSIGN") &&
+          (
+            <Tooltip title="Launch Docusign" placement="bottom">
+              <IconButton
+                aria-label="sign document"
+                size="large"
+                onClick={() => {
+                  handleSignDocument && handleSignDocument(document);
+                }}
+              >
+                < BorderColorIcon />
+              </IconButton></Tooltip>
+          )}
       </Box>
     </Card>
   );
