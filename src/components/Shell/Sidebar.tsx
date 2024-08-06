@@ -185,7 +185,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             border: "none !important",
           }}
         >
-          <Image width="210" height="65" src="/NeutralWhiteLogo.svg" alt={""} />
+          <Image width="210" height="47" src="/Neutral_White_Medium.png" alt={""} />
         </Toolbar>
 
         <List component="nav">

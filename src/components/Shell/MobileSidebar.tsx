@@ -82,8 +82,8 @@ const MobileSidebar = (props) => {
           >
             <Image
               width="210"
-              height="50"
-              src="/NeutralWhiteLogo.svg"
+              height="47"
+              src="/Neutral_White_Medium.png"
               alt={""}
             />
           </div>
