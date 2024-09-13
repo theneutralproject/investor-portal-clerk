@@ -6612,6 +6612,11 @@ export const UserCreateManyArgsSchema: z.ZodType<Prisma.UserCreateManyArgs> = z.
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
+export const UserCreateManyAndReturnArgsSchema: z.ZodType<Prisma.UserCreateManyAndReturnArgs> = z.object({
+  data: z.union([ UserCreateManyInputSchema,UserCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
 export const UserDeleteArgsSchema: z.ZodType<Prisma.UserDeleteArgs> = z.object({
   select: UserSelectSchema.optional(),
   include: UserIncludeSchema.optional(),
@@ -6649,6 +6654,11 @@ export const MeetingUpsertArgsSchema: z.ZodType<Prisma.MeetingUpsertArgs> = z.ob
 }).strict() ;
 
 export const MeetingCreateManyArgsSchema: z.ZodType<Prisma.MeetingCreateManyArgs> = z.object({
+  data: z.union([ MeetingCreateManyInputSchema,MeetingCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const MeetingCreateManyAndReturnArgsSchema: z.ZodType<Prisma.MeetingCreateManyAndReturnArgs> = z.object({
   data: z.union([ MeetingCreateManyInputSchema,MeetingCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
@@ -6694,6 +6704,11 @@ export const ProjectCreateManyArgsSchema: z.ZodType<Prisma.ProjectCreateManyArgs
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
+export const ProjectCreateManyAndReturnArgsSchema: z.ZodType<Prisma.ProjectCreateManyAndReturnArgs> = z.object({
+  data: z.union([ ProjectCreateManyInputSchema,ProjectCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
 export const ProjectDeleteArgsSchema: z.ZodType<Prisma.ProjectDeleteArgs> = z.object({
   select: ProjectSelectSchema.optional(),
   include: ProjectIncludeSchema.optional(),
@@ -6731,6 +6746,11 @@ export const PicturesUpsertArgsSchema: z.ZodType<Prisma.PicturesUpsertArgs> = z.
 }).strict() ;
 
 export const PicturesCreateManyArgsSchema: z.ZodType<Prisma.PicturesCreateManyArgs> = z.object({
+  data: z.union([ PicturesCreateManyInputSchema,PicturesCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const PicturesCreateManyAndReturnArgsSchema: z.ZodType<Prisma.PicturesCreateManyAndReturnArgs> = z.object({
   data: z.union([ PicturesCreateManyInputSchema,PicturesCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
@@ -6776,6 +6796,11 @@ export const DocumentCreateManyArgsSchema: z.ZodType<Prisma.DocumentCreateManyAr
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
+export const DocumentCreateManyAndReturnArgsSchema: z.ZodType<Prisma.DocumentCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DocumentCreateManyInputSchema,DocumentCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
 export const DocumentDeleteArgsSchema: z.ZodType<Prisma.DocumentDeleteArgs> = z.object({
   select: DocumentSelectSchema.optional(),
   include: DocumentIncludeSchema.optional(),
@@ -6813,6 +6838,11 @@ export const DocumentEventUpsertArgsSchema: z.ZodType<Prisma.DocumentEventUpsert
 }).strict() ;
 
 export const DocumentEventCreateManyArgsSchema: z.ZodType<Prisma.DocumentEventCreateManyArgs> = z.object({
+  data: z.union([ DocumentEventCreateManyInputSchema,DocumentEventCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const DocumentEventCreateManyAndReturnArgsSchema: z.ZodType<Prisma.DocumentEventCreateManyAndReturnArgs> = z.object({
   data: z.union([ DocumentEventCreateManyInputSchema,DocumentEventCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
@@ -6858,6 +6888,11 @@ export const DealCreateManyArgsSchema: z.ZodType<Prisma.DealCreateManyArgs> = z.
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
+export const DealCreateManyAndReturnArgsSchema: z.ZodType<Prisma.DealCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DealCreateManyInputSchema,DealCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
 export const DealDeleteArgsSchema: z.ZodType<Prisma.DealDeleteArgs> = z.object({
   select: DealSelectSchema.optional(),
   include: DealIncludeSchema.optional(),
@@ -6899,6 +6934,11 @@ export const AddressCreateManyArgsSchema: z.ZodType<Prisma.AddressCreateManyArgs
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
 
+export const AddressCreateManyAndReturnArgsSchema: z.ZodType<Prisma.AddressCreateManyAndReturnArgs> = z.object({
+  data: z.union([ AddressCreateManyInputSchema,AddressCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
 export const AddressDeleteArgsSchema: z.ZodType<Prisma.AddressDeleteArgs> = z.object({
   select: AddressSelectSchema.optional(),
   include: AddressIncludeSchema.optional(),
@@ -6936,6 +6976,11 @@ export const ContactUpsertArgsSchema: z.ZodType<Prisma.ContactUpsertArgs> = z.ob
 }).strict() ;
 
 export const ContactCreateManyArgsSchema: z.ZodType<Prisma.ContactCreateManyArgs> = z.object({
+  data: z.union([ ContactCreateManyInputSchema,ContactCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const ContactCreateManyAndReturnArgsSchema: z.ZodType<Prisma.ContactCreateManyAndReturnArgs> = z.object({
   data: z.union([ ContactCreateManyInputSchema,ContactCreateManyInputSchema.array() ]),
   skipDuplicates: z.boolean().optional(),
 }).strict() ;
