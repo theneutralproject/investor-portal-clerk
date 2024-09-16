@@ -10,6 +10,7 @@ import InfoIcon from "@mui/icons-material/Info";
 import DescriptionIcon from "@mui/icons-material/Description";
 import HelpIcon from "@mui/icons-material/Help";
 import {
+  Button,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -41,14 +42,14 @@ export const ROUTES = [
     icon: HomeIcon,
   },
   {
-    name: "Contact",
-    path: "/contact",
-    icon: MessageIcon,
-  },
-  {
     name: "Learn",
     path: "/learn",
     icon: InfoIcon,
+  },
+  {
+    name: "Contact",
+    path: "/contact",
+    icon: MessageIcon,
   },
 ];
 
@@ -148,102 +149,58 @@ export default function Sidebar(props: { children: React.ReactNode }) {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <AppBar position="absolute" open sx={{ backgroundColor: "white" }}>
+      <AppBar position="absolute" sx={{ backgroundColor: "white" }}>
         <Toolbar
           sx={{
-            pr: "24px",
             boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
             border: "none !important",
             [theme.breakpoints.down("md")]: {
               display: "none",
             },
+            backgroundColor: "black",
           }}
         >
-          <NeutralBreadcrumbs />
+          <Image
+            width="94"
+            height="21"
+            src="/Neutral_White_Medium.png"
+            alt={""}
+          />
+
+          <Box sx={{ display: "flex", alignItems: "center", ml: "50px" }}>
+            {ROUTES.map((route) => (
+              <Button
+                key={route.name}
+                onClick={() => router.push(route.path)}
+                sx={{
+                  borderRadius: "15px",
+                  padding: "5px 10px",
+                  
+                  color: isActiveRoute(route.path) ? "white" : "gray",
+                  backgroundColor: isActiveRoute(route.path)
+                    ? "rgba(255,255,255,0.2)"
+                    : "transparent",
+                  "&:hover": {
+                    backgroundColor: isActiveRoute(route.path)
+                      ? "rgba(255,255,255,0.3)"
+                      : "rgba(255,255,255,0.1)",
+                  },
+                  fontSize: "14px",
+                  mr: "10px",
+                  textTransform: "capitalize",
+                }}
+              >
+                {route.name.charAt(0).toUpperCase() +
+                  route.name.slice(1).toLowerCase()}
+              </Button>
+            ))}
+          </Box>
 
           <Box sx={{ alignSelf: "flex-end", ml: "auto", display: "flex" }}>
             <UserAvatar />
           </Box>
         </Toolbar>
       </AppBar>
-      <Drawer
-        variant="permanent"
-        open
-        PaperProps={{
-          sx: {
-            backgroundColor: theme.palette.neutralDarkGray.main,
-            border: "none !important",
-            width: { sm: `${mobileDrawerWidth}px`, md: `${drawerWidth}px` },
-          },
-        }}
-      >
-        <Toolbar
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            border: "none !important",
-          }}
-        >
-          <Image width="210" height="47" src="/Neutral_White_Medium.png" alt={""} />
-        </Toolbar>
-
-        <List component="nav">
-          {ROUTES.map((route) => (
-            <ListItemButton
-              key={route.name}
-              onClick={() => {
-                router.push(route.path);
-              }}
-              sx={{
-                backgroundColor: isActiveRoute(route.path)
-                  ? "#334044"
-                  : theme.palette.neutralDarkGray.main,
-                [theme.breakpoints.down("md")]: {
-                  "& .MuiListItemText-primary": {
-                    display: "none",
-                  },
-                  "& .MuiListItemIcon-root": {
-                    minWidth: "auto", // Adjust icon spacing
-                  },
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  color: isActiveRoute(route.path) ? "white" : "#e2e4e4",
-                  minWidth: "40px",
-                }}
-              >
-                <route.icon />
-              </ListItemIcon>
-              <ListItemText
-                primary={route.name}
-                sx={{
-                  color: isActiveRoute(route.path) ? "white" : "#e2e4e4",
-                }}
-              />
-            </ListItemButton>
-          ))}
-        </List>
-        <List sx={{ marginTop: "auto" }}>
-          {buttonItems.map((item) => (
-            <ListItemButton
-              key={item.key}
-              onClick={() => {
-                if (item.path) {
-                  router.push(item.path);
-                }
-              }}
-            >
-              <ListItemIcon sx={{ color: "#e2e4e4", minWidth: "40px" }}>
-                {item.icon}
-              </ListItemIcon>
-              <ListItemText primary={item.label} sx={{ color: "#e2e4e4" }} />
-            </ListItemButton>
-          ))}
-        </List>
-      </Drawer>
       <Box
         component="main"
         sx={{

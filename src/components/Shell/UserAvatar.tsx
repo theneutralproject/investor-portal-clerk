@@ -29,13 +29,13 @@ const UserAvatar = () => {
   };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return <div></div>;
   }
 
   return (
     <>
       <IconButton onClick={handleClick}>
-        <Avatar sx={{ bgcolor: "#8E6B63" }}>{getInitials()}</Avatar>
+        <Avatar sx={{ bgcolor: "#bdbdbd" }}>{getInitials()}</Avatar>
       </IconButton>
       <Menu
         anchorEl={anchorEl as Element}
