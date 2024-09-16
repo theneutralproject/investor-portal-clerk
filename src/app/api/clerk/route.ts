@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       console.log("clerk WH4", DBUserData);
       try {
         await prisma.user.create({ data: DBUserData });
-        clerkClient.users.updateUser(id, {firstName: startCase(first_name), lastName: startCase(toLower(last_name)),})
+        await clerkClient.users.updateUser(id, {firstName: startCase(first_name), lastName: startCase(toLower(last_name))})
       } catch (error) {
         console.error("ERROR: Cannot create User in DB:\n", error);
         return new Response(JSON.stringify({ error: "Unable to create user in DB" }), {
