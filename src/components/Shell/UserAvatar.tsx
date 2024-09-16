@@ -2,7 +2,9 @@ import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { Avatar, Menu, MenuItem, IconButton } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
+import DescriptionIcon from "@mui/icons-material/Description";
 import posthog from "posthog-js";
+import Link from "next/link";
 
 const UserAvatar = () => {
   const { user } = useUser();
@@ -42,6 +44,11 @@ const UserAvatar = () => {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
+        <Link href="/terms" passHref>
+          <MenuItem component="a" onClick={handleClose} sx={{ width: "200px" }}>
+            <DescriptionIcon sx={{ marginRight: 1 }} /> Terms of Service
+          </MenuItem>
+        </Link>
         <MenuItem onClick={handleSignOut} sx={{ width: "200px" }}>
           <LogoutIcon sx={{ marginRight: 1 }} /> Sign Out
         </MenuItem>

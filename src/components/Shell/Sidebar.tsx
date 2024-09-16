@@ -164,7 +164,9 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             width="94"
             height="21"
             src="/Neutral_White_Medium.png"
-            alt={""}
+            alt="Neutral Logo"
+            onClick={() => router.push("/projects")}
+            style={{ cursor: "pointer" }}
           />
 
           <Box sx={{ display: "flex", alignItems: "center", ml: "50px" }}>
@@ -175,8 +177,10 @@ export default function Sidebar(props: { children: React.ReactNode }) {
                 sx={{
                   borderRadius: "15px",
                   padding: "5px 10px",
-                  
-                  color: isActiveRoute(route.path) ? "white" : "gray",
+
+                  color: isActiveRoute(route.path)
+                    ? "white"
+                    : "rgba(255, 255, 255, 0.66)",
                   backgroundColor: isActiveRoute(route.path)
                     ? "rgba(255,255,255,0.2)"
                     : "transparent",
