@@ -1,14 +1,15 @@
 import prisma from "@/libs/prisma";
-import { type WebhookEvent } from "@clerk/nextjs/server";
+import { clerkClient, type WebhookEvent } from "@clerk/nextjs/server";
 import { Role, type User } from "@prisma/client";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-import { isError } from "lodash";
+import { isError, toLower, startCase } from "lodash";
 
 import {
   type HubspotContact,
   createOrUpdateContact,
 } from "../utils-module/hubspotUtils";
+import _ from "lodash";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -40,21 +41,20 @@ export async function POST(request: Request) {
         last_name,
         phone_numbers,
       } = data;
-
+console.log(data)
       const email =
         email_addresses.find(({ id }) => id === primary_email_address_id)
           ?.email_address ?? "";
-      const phonenumber =
-        phone_numbers.find(({ id }) => id === primary_phone_number_id)
-          ?.phone_number ?? "";
-
+      const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({id}) => id === primary_phone_number_id)) || "") : (phone_numbers[0]?.phone_number || "")
+      console.log("phonenumber", phonenumber)
+      console.log(phone_numbers)
       /* Store/ update user in Hubspot**/
       const hsUserData = {
         email: email,
         properties: [
           { property: `userid`, value: id },
-          { property: `firstname`, value: first_name },
-          { property: `lastname`, value: last_name },
+          { property: `firstname`, value: startCase(toLower(first_name)) },
+          { property: `lastname`, value: startCase(toLower(last_name)) },
           { property: `phone`, value: phonenumber },
         ],
       } as HubspotContact;
@@ -77,8 +77,8 @@ export async function POST(request: Request) {
         clerkId: id,
         email: email,
         role: Role.USER,
-        firstName: first_name,
-        lastName: last_name,
+        firstName: startCase(toLower(first_name)),
+        lastName: startCase(toLower(last_name)),
         phoneNumber: phonenumber,
         hubspotId: hubspotUserId,
       } as User;
@@ -86,6 +86,7 @@ export async function POST(request: Request) {
       console.log("clerk WH4", DBUserData);
       try {
         await prisma.user.create({ data: DBUserData });
+        clerkClient.users.updateUser(id, {firstName: startCase(toLower(first_name)), lastName: startCase(toLower(last_name)),})
       } catch (error) {
         console.error("ERROR: Cannot create User in DB:\n", error);
         return new Response(JSON.stringify({ error: "Unable to create user in DB" }), {
