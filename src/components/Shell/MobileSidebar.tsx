@@ -26,7 +26,7 @@ const MobileSidebar = (props) => {
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const appBarHeight = 56;
+  const appBarHeight = 41;
 
   const handleToggleDrawer = () => {
     setIsOpen(!isOpen);
@@ -64,9 +64,9 @@ const MobileSidebar = (props) => {
       >
         <Toolbar
           sx={{
-            pr: "24px",
             boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
             border: "none !important",
+            backgroundColor: "black"
           }}
         >
           <IconButton
@@ -81,8 +81,8 @@ const MobileSidebar = (props) => {
             style={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
           >
             <Image
-              width="210"
-              height="47"
+              width="90"
+              height="21"
               src="/Neutral_White_Medium.png"
               alt={""}
             />
@@ -100,7 +100,7 @@ const MobileSidebar = (props) => {
         sx={{
           "& .MuiDrawer-paper": {
             top: `${appBarHeight}px`,
-            backgroundColor: theme.palette.neutralDarkGray.main,
+            backgroundColor: "black",
           },
         }}
       >
@@ -113,8 +113,8 @@ const MobileSidebar = (props) => {
               }}
               sx={{
                 backgroundColor: isActiveRoute(route.path)
-                  ? "#334044"
-                  : theme.palette.neutralDarkGray.main,
+                  ? "gray"
+                  : "black",
               }}
             >
               <ListItemIcon
