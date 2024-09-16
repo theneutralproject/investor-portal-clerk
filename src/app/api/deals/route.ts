@@ -21,15 +21,10 @@ export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const projectId = new URLSearchParams(url.search).get("projectId");
+  const slug = new URLSearchParams(url.search).get("slug");
 
-  if (!projectId) {
-    return jsonResponse({ error: "Project ID is required" }, 400);
-  }
-
-  const projectIdAsInt = parseInt(projectId, 10);
-  if (isNaN(projectIdAsInt)) {
-    return jsonResponse({ error: `Invalid Project ID: ${projectId}` }, 400);
+  if (!slug) {
+    return jsonResponse({ error: "Project slug is required" }, 400);
   }
 
   try {
@@ -37,17 +32,34 @@ export async function GET(request: NextRequest) {
     if (!user) {
       return jsonResponse({ error: "User not found" }, 404);
     }
-    
+
     const neutralUser = await prisma.user.findUnique({
       where: { clerkId: user.id },
     });
     if (!neutralUser) {
       console.error("Neutral user not found in api/deals");
-      return jsonResponse({ error: `User record with clerkid ${user.id} not found in prisma (GET)` }, 404);
+      return jsonResponse(
+        {
+          error: `User record with clerkid ${user.id} not found in prisma (GET)`,
+        },
+        404
+      );
+    }
+
+    // Find the project based on the slug
+    const project = await prisma.project.findUnique({
+      where: { slug: slug },
+    });
+
+    if (!project) {
+      return jsonResponse(
+        { error: `Project with slug ${slug} not found` },
+        404
+      );
     }
 
     const deals = await prisma.deal.findFirst({
-      where: { userId: neutralUser.id, projectId: projectIdAsInt },
+      where: { userId: neutralUser.id, projectId: project.id },
     });
 
     if (!deals) {
@@ -159,4 +171,3 @@ export async function PUT(request: NextRequest) {
     return jsonResponse({ error: "Error updating deal" }, 500);
   }
 }
-

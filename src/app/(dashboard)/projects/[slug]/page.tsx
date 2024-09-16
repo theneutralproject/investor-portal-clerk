@@ -61,7 +61,7 @@ export default function Page({ params: { slug } }: PageProps) {
     queryKey: ["project", slug],
     queryFn: () =>
       axios
-        .get<ProjectWithPictures[]>(`/api/projects?id=${slug}`)
+        .get<ProjectWithPictures[]>(`/api/projects?slug=${slug}`)
         .then((res) => res.data),
   });
 
@@ -73,7 +73,7 @@ export default function Page({ params: { slug } }: PageProps) {
     queryKey: ["deal", slug],
     queryFn: () =>
       axios
-        .get<Deal | null>(`/api/deals?projectId=${slug}`)
+        .get<Deal | null>(`/api/deals?slug=${slug}`)
         .then((res) => res.data),
   });
 

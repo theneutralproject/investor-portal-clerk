@@ -83,7 +83,7 @@ const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
       <Divider />
 
       <CardContent>
-        <Link href={`/projects/${project.id}`} passHref>
+        <Link href={`/projects/${project.slug}`} passHref>
           <Button variant="neutralBlack" fullWidth>
             VIEW
           </Button>
