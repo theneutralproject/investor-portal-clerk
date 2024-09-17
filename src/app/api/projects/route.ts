@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       });
     });
 
-  if (!projects || projects.length === 0) {
+  if (!projects) {
     return new Response(JSON.stringify({ error: "Projects not found" }), {
       status: 404,
       headers: { "Content-Type": "application/json" },
