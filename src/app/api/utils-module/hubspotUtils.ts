@@ -11,6 +11,16 @@ export type HubspotContact = {
   email: string;
 };
 
+const zHsContactProperty = z.object({
+  property: z.string(),
+  value: z.string()
+});
+
+export const zHsContactUpdateSchema = z.object({
+  email: z.string(),
+  properties: z.array(zHsContactProperty)
+});
+
 export type HubspotUserCreateResponse = {
   vid: number,
   isNew: boolean
@@ -25,14 +35,7 @@ export const hubspotContactRes = z.object({
   vid: z.number(),
 });
 
-export async function createOrUpdateContact(hubspotContact: HubspotContact) {
-  const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
-    .getTime()
-    .toString();
-  hubspotContact.properties.push({
-    property: "date_signed_up",
-    value: signupDate,
-  });
+async function _createOrUpdateContact(hubspotContact: HubspotContact) {
 
   return await fetch(
     `https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
@@ -59,7 +62,24 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
     console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
     return new Error("unable to update hubspot contact")
   })
-}
+};
+
+export async function createOrUpdateContact(hubspotContact: HubspotContact) {
+  const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
+    .getTime()
+    .toString();
+  hubspotContact.properties.push({
+    property: "date_signed_up",
+    value: signupDate,
+  });
+
+  return await _createOrUpdateContact(hubspotContact);
+};
+
+export async function updateContact(hubspotContact: HubspotContact) {
+  console.log("updating HS user", hubspotContact)
+  return await _createOrUpdateContact(hubspotContact);
+};
 
 export const zHsDealSchema = z.object({
   dealId: z.number()
@@ -284,7 +304,7 @@ export const EdisonDealStages = [
   { key: "dContractSigned", value: "decisionmakerboughtin" },
   { key: "eFunded", value: "contractsent" },
   { key: "fClosedLost", value: "closedlost" }
-]
+];
 
 export const _519WMainDealStages = [
   { key: "aQualified", value: "146586769" },
@@ -293,7 +313,24 @@ export const _519WMainDealStages = [
   { key: "dContractSigned", value: "146586772" },
   { key: "eFunded", value: "146586773" },
   { key: "fClosedLost", value: "146586774" }
-]
+];
+
+export enum ReferralSource {
+  EVENT_MAILER = "event_mailer",
+  INVESTOR_EVENT ="investor_event",
+  REFERRAL = "referral",
+  NEUTRAL_TEAM_MEMBER = "neutral_team_member",
+  GOOGLE_SEARCH = "google",
+  ADVERTISEMENT_ONLINE = "advertisement_online",
+  NEUTRAL_MAIL = "neutral_mail",
+  NEWSLETTER = "newsletter",
+  NEUTRAL_PODCAST = "neutral_podcast",
+  FACEBOOK = "facebook",
+  X = "x",
+  LINKEDIN = "linkedin",
+  INSTAGRAM = "instagram",
+  OTHER = "other"
+}
 
 
 // deal contact association
