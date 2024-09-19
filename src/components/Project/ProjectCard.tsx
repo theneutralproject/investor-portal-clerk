@@ -58,7 +58,7 @@ const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
           <Button
             variant="contained"
             style={{
-              backgroundColor: "#626F52",
+              backgroundColor: "#31713D",
               borderRadius: "100px",
               padding: "6px 10px",
               textTransform: "none",
