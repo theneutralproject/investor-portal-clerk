@@ -20,13 +20,13 @@ model User {
   lastName       String
   phoneNumber    String?
   hubspotId      String
-  address        Address?        @relation(fields: [addressId], references: [id])
-  title          String?
+  addressId      Int?
   ssn            String?
+  title          String?
   deals          Deal[]
   documentEvents DocumentEvent[]
   meetings       Meeting[]
-  addressId      Int?
+  address        Address?        @relation(fields: [addressId], references: [id])
 }
 
 model Meeting {
@@ -42,7 +42,6 @@ model Meeting {
 model Project {
   id                   Int        @id @default(autoincrement())
   name                 String     @unique
-  slug                 String     @default(cuid()) @unique
   location             String
   investmentGoal       Float      @default(0.0)
   investmentRaised     Float      @default(0.0)
@@ -65,6 +64,7 @@ model Project {
   youtubeUrl           String     @default("")
   preferredReturn      String     @default("")
   targetEquityMultiple Float      @default(0.0)
+  slug                 String?    @unique
   deals                Deal[]
   documents            Document[]
   meetings             Meeting[]
@@ -85,11 +85,11 @@ model Document {
   fileName           String
   description        String?
   link               String
-  docusignTemplateId String?
   projectId          Int
   dealStage          Int
   financingTypes     DealFinancingType[] @default([])
   documentType       DocumentType        @default(DOCUMENT)
+  docusignTemplateId String?
   project            Project             @relation(fields: [projectId], references: [id])
   documentEvents     DocumentEvent[]
 }
@@ -114,16 +114,16 @@ model Deal {
   hubspotId               String             @unique
   transactionId           String             @default("")
   investmentEntity        String
-  project                 Project            @relation(fields: [projectId], references: [id])
-  user                    User               @relation(fields: [userId], references: [id])
-  ownershipType           DealOwnershipType?
-  ownershipTypeOtherValue String?
   numberAUnits            Float?             @default(0.0)
   numberCUnits            Float?             @default(0.0)
+  ownershipType           DealOwnershipType?
+  ownershipTypeOtherValue String?
   coSignerEmail           String?
   coSignerFullName        String?
   verifierEmail           String?
   verifierFullName        String?
+  project                 Project            @relation(fields: [projectId], references: [id])
+  user                    User               @relation(fields: [userId], references: [id])
 }
 
 model Address {
@@ -132,8 +132,8 @@ model Address {
   city    String
   zipcode String
   state   String
-  User    User[]
   Contact Contact[]
+  User    User[]
 }
 
 model Contact {
@@ -143,9 +143,9 @@ model Contact {
   email     String
   title     String?
   ssn       Float?
-  address   Address?    @relation(fields: [addressId], references: [id])
   type      ContactType
   addressId Int?
+  address   Address?    @relation(fields: [addressId], references: [id])
 }
 
 enum ContactType {
@@ -199,4 +199,9 @@ enum DealOwnershipType {
   MARITAL
   COMMON
   PARTNERSHIP
+}
+
+enum user_role_enum {
+  ADMIN
+  USER
 }
