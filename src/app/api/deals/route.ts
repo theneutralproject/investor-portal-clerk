@@ -4,7 +4,7 @@ import { type NextRequest } from "next/server";
 import {
   createHubspotDealForContact,
   DealToHubspotDealEnum,
-  HubspotDealUpdate,
+  type HubspotDealUpdate,
   initDealPropsForProject,
   updateHubspotDealProperties,
 } from "../utils-module/hubspotUtils";
@@ -173,11 +173,11 @@ export async function PUT(request: NextRequest) {
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
 
-    let hsDeal: HubspotDealUpdate = {
+    const hsDeal: HubspotDealUpdate = {
       hubspotDealId: parseInt(deal.hubspotId, 10),
       properties: []
     }
-    for (let prop in deal) {
+    for (const prop in deal) {
       if (Object.prototype.hasOwnProperty.call(deal, prop)) {
         if (prop in DealToHubspotDealEnum && deal[prop as keyof DealUpdateSchema]?.toString().length){
           hsDeal.properties.push({

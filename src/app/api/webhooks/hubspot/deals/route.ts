@@ -64,14 +64,14 @@ export async function POST(req: Request): Promise<Response> {
     };
     let updateProjectFunding = false;
     switch (payload.propertyName) {
-      case HSDealPropNames.dealstage:
+      case HSDealPropNames.dealstage.toString():
         dealBody.dealStage = getDealStageInt(payload.propertyValue);
         updateProjectFunding = dealBody.dealStage >= 3;
         break;
-      case HSDealPropNames.amount:
+      case HSDealPropNames.amount.toString():
         dealBody.amount = parseFloat(payload.propertyValue);
         break;
-      case HSDealPropNames.financing_type:
+      case HSDealPropNames.financing_type.toString():
         dealBody.financingType =
           payload.propertyValue in DealFinancingType
             ? (payload.propertyValue as keyof typeof DealFinancingType)
