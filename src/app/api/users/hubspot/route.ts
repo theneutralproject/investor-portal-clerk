@@ -1,6 +1,6 @@
 
 import type { NextRequest } from "next/server";
-import { HubspotContact, ReferralSource, updateContact, zHsContactUpdateSchema } from "../../utils-module/hubspotUtils";
+import { type HubspotContact, updateContact, zHsContactUpdateSchema } from "../../utils-module/hubspotUtils";
 import { jsonResponse } from "../../utils-module/_globals";
 import { isError } from "lodash";
 import { getErrorMessage } from "../../utils-module/helpers";

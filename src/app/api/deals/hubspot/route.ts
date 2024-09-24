@@ -1,5 +1,5 @@
 import type { NextRequest } from "next/server";
-import { HubspotDealUpdate, zHsDealDocsAccessedUpdateSchema, zHsUpdateDealSchema, type HsDealDocsAccessedUpdateSchema } from "../../utils-module/hubspotUtils";
+import { type HubspotDealUpdate, zHsDealDocsAccessedUpdateSchema, zHsUpdateDealSchema, type HsDealDocsAccessedUpdateSchema } from "../../utils-module/hubspotUtils";
 import { jsonResponse } from "../../utils-module/_globals";
 
 /**
