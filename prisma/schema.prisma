@@ -29,7 +29,7 @@ model User {
   cosignedDeal    Deal[]          @relation(name: "cosignedDeal")
   companyOwned    Company[]       @relation(name: "companyOwner")
   companyCosigned Company[]       @relation(name: "companyCosigner")
-  UserDocument    UserDocument[]
+  userDocument    UserDocument[]
 }
 
 model Deal {
@@ -54,7 +54,7 @@ model Deal {
   accreditationVerifierId Int?
   Company                 Company?               @relation(fields: [companyId], references: [id])
   companyId               Int?
-  UserDocument            UserDocument[]
+  userDocument            UserDocument[]
 }
 
 /// if deal.ownershipType === 'CORPROTATION', 'PARTNERSHIP', 'TRUST', create an Company
@@ -68,9 +68,9 @@ model Company {
   owner          User           @relation(fields: [ownerId], references: [id], name: "companyOwner")
   cosigners      User[]         @relation(name: "companyCosigner")
   deals          Deal[]
-  UserDocument   UserDocument[]
-
-  @@map("Company")
+  userDocument   UserDocument[]
+  addressId      Int?
+  address        Address?       @relation(fields: [addressId], references: [id])
 }
 
 model AccreditationVerifier {
@@ -133,6 +133,7 @@ model Project {
   pictures             Pictures[]
 }
 
+/// Project specific pictures
 model Pictures {
   id        Int         @id @default(autoincrement())
   projectId Int
@@ -157,6 +158,7 @@ model Document {
   documentEvents     DocumentEvent[]
 }
 
+/// used to track who accessed which document when
 model DocumentEvent {
   id         Int               @id @default(autoincrement())
   userId     Int
@@ -167,13 +169,15 @@ model DocumentEvent {
   user       User              @relation(fields: [userId], references: [id])
 }
 
+/// 
 model Address {
-  id      Int    @id @default(autoincrement())
+  id      Int       @id @default(autoincrement())
   street  String
   city    String
   zipcode String
   state   String
   user    User[]
+  company Company[]
 }
 
 /// Role is not yet used
