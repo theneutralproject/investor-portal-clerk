@@ -24,14 +24,22 @@ export const zHsContactUpdateSchema = z.object({
 export type HubspotUserCreateResponse = {
   vid: number,
   isNew: boolean
-}
+};
 
-export type HubspotDeal = {
-  dealId?: number, //maybe hs_object_id instead of dealId
+export type HubspotDealPropertiesCollection = {
   properties: { name: string; value: string }[];
 };
 
-export const hubspotContactRes = z.object({
+export type HubspotDealUpdate = {
+  hubspotDealId: number,
+  properties: { name: string; value: string }[]
+};
+
+export const zHsDealCreateResponse = z.object({
+  dealId: z.number()
+});
+
+export const hubspotContactApiResponse = z.object({
   vid: z.number(),
 });
 
@@ -51,7 +59,7 @@ async function _createOrUpdateContact(hubspotContact: HubspotContact) {
     try {
       // eslint-disable-next-line
       const resJson = await response.json();
-      const hsRes = hubspotContactRes.parse(resJson)
+      const hsRes = hubspotContactApiResponse.parse(resJson)
       return hsRes;
     } catch (parseError) {
       console.error("ERROR: unable to parse HS response:\n", parseError);
@@ -81,9 +89,28 @@ export async function updateContact(hubspotContact: HubspotContact) {
   return await _createOrUpdateContact(hubspotContact);
 };
 
-export const zHsDealSchema = z.object({
-  dealId: z.number()
+export const zHsUpdateDealSchema = z.object({
+  hubspotDealId: z.number(),
+  properties: z.array(z.object(
+    {
+      name: z.string(),
+      value: z.string()
+    }
+  ))
 });
+
+
+export enum HSDealPropNames {
+  dealstage = 'dealstage',
+  amount = 'amount',
+  financing_type = 'financing_type',
+};
+
+export enum DealToHubspotDealEnum {
+  amount = "amount",
+  financingType = "financing_type",
+  dealStage = "dealstage",
+};
 
 const zHsDealSearchObjectSchema = z.object({
   properties: z.object({
@@ -96,15 +123,15 @@ export const zHsDealSearchResultsSchema = z.object({
   results: z.array(zHsDealSearchObjectSchema)
 });
 
-export const zHsDealUpdateSchema = z.object({
+export const zHsDealDocsAccessedUpdateSchema = z.object({
   dealId: z.number(),
   dealStage: z.number().min(1).max(5),
   documentNames: z.string(),
 });
 
-export type HsDealUpdateSchema = z.infer<typeof zHsDealUpdateSchema>
+export type HsDealDocsAccessedUpdateSchema = z.infer<typeof zHsDealDocsAccessedUpdateSchema>
 
-export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, contactHubspotId: string) {
+export async function createHubspotDealForContact(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
 
   const body = JSON.stringify({
@@ -129,7 +156,7 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, cont
   /* eslint-disable-next-line */
   const hsDealCreateRespBody = await resBody.json();
   try {
-    const { dealId } = zHsDealSchema.parse(hsDealCreateRespBody);
+    const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
     return dealId;
   } catch (error) {
     console.error("No good hs deal making:\n", error);
@@ -137,13 +164,16 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDeal, cont
   }
 }
 
-export async function _updateHubspotDealProperties(hsDealUpdateData: HsDealUpdateSchema) {
+export async function updateHubspotDealDocsAccessed(hsDealUpdateData: HsDealDocsAccessedUpdateSchema) {
   return await axios.post("/api/deals/hubspot", hsDealUpdateData);
+}
+
+export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealUpdate) {
+  return await axios.put(`/api/deals/hubspot`, hsDealUpdateData);
 }
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
-
 
   switch (projectName) {
     case ProjectName["The Edison"]: {
@@ -158,7 +188,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
           { name: "transaction_id", value: dealData.transactionId! },
           { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
         ]
-      } as HubspotDeal
+      } as HubspotDealPropertiesCollection
     }
     case ProjectName["519 W Main"]: {
       return {
@@ -172,7 +202,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
           { name: "transaction_id", value: dealData.transactionId! },
           { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
         ]
-      } as HubspotDeal
+      } as HubspotDealPropertiesCollection
     }
     default: {
       console.error(`The project with name ${projectName} is not yet supported in getDealPropsForProject()`)
@@ -317,7 +347,7 @@ export const _519WMainDealStages = [
 
 export enum ReferralSource {
   EVENT_MAILER = "event_mailer",
-  INVESTOR_EVENT ="investor_event",
+  INVESTOR_EVENT = "investor_event",
   REFERRAL = "referral",
   NEUTRAL_TEAM_MEMBER = "neutral_team_member",
   GOOGLE_SEARCH = "google",

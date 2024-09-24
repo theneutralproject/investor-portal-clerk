@@ -5,6 +5,7 @@ import {
   getDealStageInt,
   getFundingAmount,
   getProjectNameFromDealStage,
+  HSDealPropNames,
 } from "@/app/api/utils-module/hubspotUtils";
 import prisma from "@/libs/prisma";
 import { DealFinancingType, type Deal } from "@prisma/client";
@@ -63,14 +64,14 @@ export async function POST(req: Request): Promise<Response> {
     };
     let updateProjectFunding = false;
     switch (payload.propertyName) {
-      case "dealstage":
+      case HSDealPropNames.dealstage:
         dealBody.dealStage = getDealStageInt(payload.propertyValue);
         updateProjectFunding = dealBody.dealStage >= 3;
         break;
-      case "amount":
+      case HSDealPropNames.amount:
         dealBody.amount = parseFloat(payload.propertyValue);
         break;
-      case "financing_type":
+      case HSDealPropNames.financing_type:
         dealBody.financingType =
           payload.propertyValue in DealFinancingType
             ? (payload.propertyValue as keyof typeof DealFinancingType)
