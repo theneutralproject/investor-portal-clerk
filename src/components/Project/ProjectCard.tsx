@@ -9,10 +9,10 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import ProjectMetrics from "./ProjectMetrics";
-import { type ProjectWithPictures } from "@/libs/prisma";
+import { type ProjectWithPicturesAndMilestones } from "@/libs/prisma";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
-const ProjectCard: React.FC<{ project: ProjectWithPictures }> = ({
+const ProjectCard: React.FC<{ project: ProjectWithPicturesAndMilestones }> = ({
   project,
 }) => {
   const cardPicture = project?.pictures?.find(
