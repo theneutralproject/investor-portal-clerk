@@ -52,7 +52,7 @@ model Deal {
   ownershipTypeOtherValue String?
   AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   accreditationVerifierId Int?
-  Company                 Company?               @relation(fields: [companyId], references: [id])
+  company                 Company?               @relation(fields: [companyId], references: [id])
   companyId               Int?
   userDocument            UserDocument[]
 }
