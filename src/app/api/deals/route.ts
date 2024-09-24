@@ -3,7 +3,10 @@ import { currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
 import {
   createHubspotDealForContact,
+  DealToHubspotDealEnum,
+  HubspotDealUpdate,
   initDealPropsForProject,
+  updateHubspotDealProperties,
 } from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
 import { getInvestmentEntity, updateDeal } from "../utils-module/dealUtils";
@@ -152,6 +155,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
+/**
+ * Update a deal in the DB, and also trigger a deal update in hubspot
+ * @param request 
+ * @returns updated Deal
+ */
 export async function PUT(request: NextRequest) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -159,12 +167,31 @@ export async function PUT(request: NextRequest) {
     let deal: DealUpdateSchema;
     try {
       deal = zDealUpdateSchema.parse(requestBody);
+
     } catch (parseError) {
       console.error("ERROR: unable to parse PUT body:\n", parseError);
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
 
+    let hsDeal: HubspotDealUpdate = {
+      hubspotDealId: parseInt(deal.hubspotId, 10),
+      properties: []
+    }
+    for (let prop in deal) {
+      if (Object.prototype.hasOwnProperty.call(deal, prop)) {
+        if (prop in DealToHubspotDealEnum && deal[prop as keyof DealUpdateSchema]?.toString().length){
+          hsDeal.properties.push({
+            name: DealToHubspotDealEnum[prop as keyof typeof DealToHubspotDealEnum], 
+            value: deal[prop as keyof DealUpdateSchema]?.toString() ?? ""
+          })
+        }
+      }
+    }
     const updatedDeal = await updateDeal(deal);
+
+    // also update the deal in hubspot:
+    await updateHubspotDealProperties(hsDeal);
+
     return jsonResponse(updatedDeal);
   } catch (error) {
     console.error("Error updating deal:", error);

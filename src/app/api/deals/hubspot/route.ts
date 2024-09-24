@@ -1,29 +1,31 @@
 import type { NextRequest } from "next/server";
-import { zHsDealUpdateSchema, type HsDealUpdateSchema } from "../../utils-module/hubspotUtils";
+import { HubspotDealUpdate, zHsDealDocsAccessedUpdateSchema, zHsUpdateDealSchema, type HsDealDocsAccessedUpdateSchema } from "../../utils-module/hubspotUtils";
 import { jsonResponse } from "../../utils-module/_globals";
 
-// this route is not currently used
+/**
+ * This function is used to update any of the deal properties in hubspot
+ * 
+ * @param request 
+ * @returns { message: "success" }
+ */
 export async function PUT(request: NextRequest) {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const requestBody = await request.json();
-        let deal: HsDealUpdateSchema;
+        let deal: HubspotDealUpdate;
         try {
-            deal = zHsDealUpdateSchema.parse(requestBody)
+            deal = zHsUpdateDealSchema.parse(requestBody)
         } catch (parseError) {
             console.error("ERROR: unable to parse PUT body:\n", parseError);
             return jsonResponse({ error: "Input data malformatted" }, 400);
         }
 
         const body = JSON.stringify({
-            "properties": [{
-                name: deal.dealStage === 1 ? 'project_documents_accessed' : 'investment_documents_accessed',
-                value: deal.documentNames
-            }]
+            properties: deal.properties
         });
 
         await fetch(
-            `https://api.hubapi.com/deals/v1/deal/${deal.dealId}`,
+            `https://api.hubapi.com/deals/v1/deal/${deal.hubspotDealId}`,
             {
                 method: "PUT",
                 headers: {
@@ -46,14 +48,21 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// update documents_accessed property for a given deal via workflow webhook (not via deal crud API)
+
+/**
+ * This function is only used to update the `documents_accessed` property for a given deal
+ * 
+ * @param request (body must be of type HsDealDocsAccessedUpdateSchema)
+ * @returns { message: "success" }
+ * @throws { error: errorMessage }
+ */
 export async function POST(request: NextRequest) {
     try {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const requestBody = await request.json();
-        let deal: HsDealUpdateSchema;
+        let deal: HsDealDocsAccessedUpdateSchema;
         try {
-            deal = zHsDealUpdateSchema.parse(requestBody)
+            deal = zHsDealDocsAccessedUpdateSchema.parse(requestBody)
         } catch (parseError) {
             console.error("ERROR: unable to parse POST body:\n", parseError);
             return jsonResponse({ error: "Input data malformatted" }, 400);
@@ -64,6 +73,7 @@ export async function POST(request: NextRequest) {
             "documents": deal.documentNames,
         });
 
+        // we set up webhooks in hubspot in order to trigger an internal email notification
         // URL stems from workflow trigger "project_documents_accessed" and "finance_documents_accessed" webhook
         const url = deal.dealStage === 1
             ? `https://api-na1.hubapi.com/automation/v4/webhook-triggers/24164917/ICxJOU0`

@@ -8,7 +8,7 @@ import useDocuments, {
 import { Deal, DocumentType, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
-import { _updateHubspotDealProperties } from "@/app/api/utils-module/hubspotUtils";
+import { updateHubspotDealDocsAccessed } from "@/app/api/utils-module/hubspotUtils";
 import { useDebounce } from "@/app/hooks/useDebounce";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
@@ -35,7 +35,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
 
   // Hubspot can only process 1 webhook request per minute. 
   // In case the user accesses several docs in a short amount of time, we debounce the request for 75 sec
-  const updateHubspotDealProperties = useDebounce(_updateHubspotDealProperties, 75000)
+  const updateHubspotDealDocs = useDebounce(updateHubspotDealDocsAccessed, 75000)
 
   const [modelOpenType, setModelOpenType] = useState("");
   const [currentDocument, setCurrentDocument] =
@@ -63,7 +63,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
         type: "DOWNLOAD",
       });
       const documentNames = [...[document], ...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
-      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
+      updateHubspotDealDocs({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
     }
     window.open(document.link, "_blank");
   };
@@ -78,7 +78,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
 
       // add current doc to list of already read docs and notify hubspot webhook about this event
       const documentNames = [...[currentDocument], ...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
-      updateHubspotDealProperties({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
+      updateHubspotDealDocs({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
     }
   };
 
