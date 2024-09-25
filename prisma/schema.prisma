@@ -12,21 +12,23 @@ datasource db {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  clerkId        String          @unique
-  role           Role            @default(USER)
-  email          String          @unique
-  firstName      String
-  lastName       String
-  phoneNumber    String?
-  hubspotId      String
-  addressId      Int?
-  ssn            String?
-  title          String?
-  organizationId Int
-  organization   Organization[]
-  documentEvents DocumentEvent[]
-  address        Address?        @relation(fields: [addressId], references: [id])
+  id                  Int             @id @default(autoincrement())
+  clerkId             String          @unique
+  role                Role            @default(USER)
+  email               String          @unique
+  firstName           String
+  lastName            String
+  phoneNumber         String?
+  hubspotId           String
+  addressId           Int?
+  ssn                 String?
+  title               String?
+  userOrgId           Int?            @unique
+  primaryOrganization Organization?   @relation(fields: [userOrgId], references: [id], name: "userOrg")
+  organization        Organization[]  @relation(name: "allOrgs")
+  documentEvents      DocumentEvent[]
+  address             Address?        @relation(fields: [addressId], references: [id])
+  deal                Deal[]
 }
 
 model Deal {
@@ -47,15 +49,18 @@ model Deal {
   AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   accreditationVerifierId Int?
   document                DealDocument[]
-  organizationId          Int
-  organization            Organization           @relation(fields: [organizationId], references: [id])
+  organizationId          Int?
+  organization            Organization?           @relation(fields: [organizationId], references: [id])
+  userId                  Int @unique
+  user                    User                   @relation(fields: [userId], references: [id])
 }
 
-/// if deal.ownershipType === 'CORPROTATION', 'PARTNERSHIP', 'TRUST', create an Company
 model Organization {
   id             Int                    @id @default(autoincrement())
   name           String
-  members        User[]
+  members        User[]                 @relation(name: "allOrgs")
+  ownerId        Int?                   @unique
+  ownedBy        User?                  @relation(name: "userOrg")
   tin            String?
   dateOfCreation DateTime?
   juristication  String?
@@ -99,36 +104,36 @@ enum DealDocumentType {
 }
 
 model Project {
-  id                   Int        @id @default(autoincrement())
-  name                 String     @unique
+  id                   Int                @id @default(autoincrement())
+  name                 String             @unique
   location             String
-  investmentGoal       Float      @default(0.0)
-  investmentRaised     Float      @default(0.0)
-  tags                 String     @default("")
-  status               Status     @default(ACTIVE)
+  investmentGoal       Float              @default(0.0)
+  investmentRaised     Float              @default(0.0)
+  tags                 String             @default("")
+  status               Status             @default(ACTIVE)
   description          String
-  buildingAvgRent      Int        @default(0)
-  buildingAvgUnitSize  Int        @default(0)
-  buildingCommSqFt     Int        @default(0)
-  buildingUnits        Int        @default(0)
-  debtInterestRate     String     @default("")
-  debtMinInvestment    Int        @default(25000)
-  debtPaymentFreq      String     @default("quarterly")
-  debtTermMonths       Int        @default(48)
-  equityIRR            Float      @default(0.0)
-  equityMinInvestment  Int        @default(250000)
-  equityPaymentFreq    String     @default("quarterly")
-  equityTermMonths     Int        @default(60)
-  marketHighlights     String     @default("")
-  youtubeUrl           String     @default("")
-  preferredReturn      String     @default("")
-  targetEquityMultiple Float      @default(0.0)
-  slug                 String     @unique
+  buildingAvgRent      Int                @default(0)
+  buildingAvgUnitSize  Int                @default(0)
+  buildingCommSqFt     Int                @default(0)
+  buildingUnits        Int                @default(0)
+  debtInterestRate     String             @default("")
+  debtMinInvestment    Int                @default(25000)
+  debtPaymentFreq      String             @default("quarterly")
+  debtTermMonths       Int                @default(48)
+  equityIRR            Float              @default(0.0)
+  equityMinInvestment  Int                @default(250000)
+  equityPaymentFreq    String             @default("quarterly")
+  equityTermMonths     Int                @default(60)
+  marketHighlights     String             @default("")
+  youtubeUrl           String             @default("")
+  preferredReturn      String             @default("")
+  targetEquityMultiple Float              @default(0.0)
+  slug                 String             @unique
   deals                Deal[]
   documents            Document[]
   pictures             Pictures[]
   projectMilestones    ProjectMilestones?
-  equityReturnsFile String? 
+  equityReturnsFile    String?
 }
 
 model ProjectMilestones {
