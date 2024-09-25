@@ -64,7 +64,7 @@ model Project {
   youtubeUrl           String     @default("")
   preferredReturn      String     @default("")
   targetEquityMultiple Float      @default(0.0)
-  slug                 String?
+  slug                 String     @unique
   deals                Deal[]
   documents            Document[]
   meetings             Meeting[]
