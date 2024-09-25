@@ -70,6 +70,7 @@ model Project {
   meetings             Meeting[]
   pictures             Pictures[]
   projectMilestones    ProjectMilestones?
+  equityReturnsFile String? @unique
 }
 
 model ProjectMilestones {
@@ -218,9 +219,4 @@ enum DealOwnershipType {
   MARITAL
   COMMON
   PARTNERSHIP
-}
-
-enum user_role_enum {
-  ADMIN
-  USER
 }
