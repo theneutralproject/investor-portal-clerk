@@ -70,10 +70,6 @@ export const DealOwnershipTypeSchema = z.enum(['INDIVIDUAL','JOINT','CORPROTATIO
 
 export type DealOwnershipTypeType = `${z.infer<typeof DealOwnershipTypeSchema>}`
 
-export const user_role_enumSchema = z.enum(['ADMIN','USER']);
-
-export type user_role_enumType = `${z.infer<typeof user_role_enumSchema>}`
-
 /////////////////////////////////////////
 // MODELS
 /////////////////////////////////////////
@@ -878,72 +874,18 @@ export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrde
 export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueInput> = z.union([
   z.object({
     id: z.number().int(),
-    name: z.string(),
-    slug: z.string(),
-    equityReturnsFile: z.string()
-  }),
-  z.object({
-    id: z.number().int(),
-    name: z.string(),
-    slug: z.string(),
-  }),
-  z.object({
-    id: z.number().int(),
-    name: z.string(),
-    equityReturnsFile: z.string(),
-  }),
-  z.object({
-    id: z.number().int(),
-    name: z.string(),
-  }),
-  z.object({
-    id: z.number().int(),
-    slug: z.string(),
-    equityReturnsFile: z.string(),
-  }),
-  z.object({
-    id: z.number().int(),
-    slug: z.string(),
-  }),
-  z.object({
-    id: z.number().int(),
-    equityReturnsFile: z.string(),
+    name: z.string()
   }),
   z.object({
     id: z.number().int(),
   }),
   z.object({
     name: z.string(),
-    slug: z.string(),
-    equityReturnsFile: z.string(),
-  }),
-  z.object({
-    name: z.string(),
-    slug: z.string(),
-  }),
-  z.object({
-    name: z.string(),
-    equityReturnsFile: z.string(),
-  }),
-  z.object({
-    name: z.string(),
-  }),
-  z.object({
-    slug: z.string(),
-    equityReturnsFile: z.string(),
-  }),
-  z.object({
-    slug: z.string(),
-  }),
-  z.object({
-    equityReturnsFile: z.string(),
   }),
 ])
 .and(z.object({
   id: z.number().int().optional(),
   name: z.string().optional(),
-  slug: z.string().optional(),
-  equityReturnsFile: z.string().optional(),
   AND: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ProjectWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
@@ -969,6 +911,8 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
   youtubeUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   preferredReturn: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   targetEquityMultiple: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  slug: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
   documents: z.lazy(() => DocumentListRelationFilterSchema).optional(),
   meetings: z.lazy(() => MeetingListRelationFilterSchema).optional(),
