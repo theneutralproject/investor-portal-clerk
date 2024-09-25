@@ -28,7 +28,7 @@ function HubspotContactForm({ onExit }: { onExit?: () => void }) {
     <div>
       <Button
         variant="neutralBlack"
-        sx={{}}
+        sx={{ p: "4px 20px", borderRadius: "99px" }}
         fullWidth
         onClick={() => {
           handleOpen();

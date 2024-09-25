@@ -1,7 +1,7 @@
 import "@/styles/globals.css";
 
 import { Inter } from "next/font/google";
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 import NeutralThemeProvider from "@/components/Shell/NeutralThemeProvider";
 import Sidebar from "@/components/Shell/Sidebar";

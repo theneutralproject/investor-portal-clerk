@@ -1,5 +1,12 @@
 /* eslint-disable import/no-mutable-exports */
-import { PrismaClient, ProjectMilestones, type Address, type Pictures, type Project, type User } from "@prisma/client";
+import {
+  PrismaClient,
+  type ProjectMilestones,
+  type Address,
+  type Pictures,
+  type Project,
+  type User,
+} from "@prisma/client";
 
 let prisma: PrismaClient;
 

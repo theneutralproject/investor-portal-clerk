@@ -84,7 +84,7 @@ const ContactMethod = ({
         <Button
           variant="neutralBlack"
           color="primary"
-          sx={{ marginTop: 2 }}
+          sx={{ marginTop: 2, p: "4px 20px", borderRadius: "99px" }}
           onClick={() => router.push("/learn")}
         >
           {buttonText}
@@ -93,16 +93,20 @@ const ContactMethod = ({
     }
 
     return (
-      <Button variant="neutralBlack" color="primary" sx={{ marginTop: 2 }}>
+      <Button
+        variant="neutralBlack"
+        color="primary"
+        sx={{ marginTop: 2, p: "4px 20px", borderRadius: "99px" }}
+      >
         {buttonText}
       </Button>
     );
   };
   return (
     <Grid item xs={12} sm={4}>
-      <Card sx={{ textAlign: "center", padding: 2 }}>
+      <Card sx={{ textAlign: "center", padding: 2, borderRadius: "8px" }}>
         <CardContent>
-          <Icon sx={{ fontSize: 30, color: "#626F52" }} />
+          <Icon sx={{ fontSize: 30, color: "#000000" }} />
           <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
@@ -119,7 +123,7 @@ const ContactPage = () => {
     <Box>
       <Card
         sx={{
-          backgroundColor: "#626F52",
+          backgroundColor: "#31713D",
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
