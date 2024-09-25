@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
       where: { slug: slug },
       include: {
         pictures: true,
+        projectMilestones: true
       },
     })
     .catch((findManyError) => {

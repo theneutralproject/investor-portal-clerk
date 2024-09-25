@@ -14,7 +14,7 @@ import InvestmentProgress from "@/components/Project/InvestmentProgress/Investme
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
 import { FundTab } from "@/components/Project/Fund/FundTab";
-import { type ProjectWithPictures } from "@/libs/prisma";
+import { type ProjectWithPicturesAndMilestones } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
@@ -55,13 +55,13 @@ export default function Page({ params: { slug } }: PageProps) {
   };
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
-    ProjectWithPictures[],
+    ProjectWithPicturesAndMilestones[],
     Error
   >({
     queryKey: ["project", slug],
     queryFn: () =>
       axios
-        .get<ProjectWithPictures[]>(`/api/projects?slug=${slug}`)
+        .get<ProjectWithPicturesAndMilestones[]>(`/api/projects?slug=${slug}`)
         .then((res) => res.data),
   });
 
@@ -86,7 +86,7 @@ export default function Page({ params: { slug } }: PageProps) {
   }, [user, queryParams.afterauth])
 
   useEffect(() => {
-    const updateOrCreateDeal = async (project: ProjectWithPictures) => {
+    const updateOrCreateDeal = async (project: ProjectWithPicturesAndMilestones) => {
       const typedFinancingType = (
         queryParams.financingType &&
         queryParams.financingType in DealFinancingType
