@@ -12,33 +12,27 @@ datasource db {
 }
 
 model User {
-  id              Int             @id @default(autoincrement())
-  clerkId         String          @unique
-  role            Role            @default(USER)
-  email           String          @unique
-  firstName       String
-  lastName        String
-  phoneNumber     String?
-  hubspotId       String
-  addressId       Int?
-  ssn             String?
-  title           String?
-  documentEvents  DocumentEvent[]
-  address         Address?        @relation(fields: [addressId], references: [id])
-  ownedDeal       Deal[]          @relation(name: "ownedDeal")
-  cosignedDeal    Deal[]          @relation(name: "cosignedDeal")
-  companyOwned    Company[]       @relation(name: "companyOwner")
-  companyCosigned Company[]       @relation(name: "companyCosigner")
-  userDocument    UserDocument[]
+  id             Int             @id @default(autoincrement())
+  clerkId        String          @unique
+  role           Role            @default(USER)
+  email          String          @unique
+  firstName      String
+  lastName       String
+  phoneNumber    String?
+  hubspotId      String
+  addressId      Int?
+  ssn            String?
+  title          String?
+  organizationId Int
+  organization   Organization[]
+  documentEvents DocumentEvent[]
+  address        Address?        @relation(fields: [addressId], references: [id])
 }
 
 model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
   project                 Project                @relation(fields: [projectId], references: [id])
-  userId                  Int
-  owner                   User                   @relation(fields: [userId], references: [id], name: "ownedDeal")
-  cosigners               User[]                 @relation(name: "cosignedDeal")
   dealStage               Int
   amount                  Int
   financingType           DealFinancingType?     @default(equity)
@@ -52,25 +46,23 @@ model Deal {
   ownershipTypeOtherValue String?
   AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   accreditationVerifierId Int?
-  company                 Company?               @relation(fields: [companyId], references: [id])
-  companyId               Int?
-  userDocument            UserDocument[]
+  document                DealDocument[]
+  organizationId          Int
+  organization            Organization           @relation(fields: [organizationId], references: [id])
 }
 
 /// if deal.ownershipType === 'CORPROTATION', 'PARTNERSHIP', 'TRUST', create an Company
-model Company {
-  id             Int            @id @default(autoincrement())
+model Organization {
+  id             Int                    @id @default(autoincrement())
   name           String
+  members        User[]
   tin            String?
   dateOfCreation DateTime?
   juristication  String?
-  ownerId        Int
-  owner          User           @relation(fields: [ownerId], references: [id], name: "companyOwner")
-  cosigners      User[]         @relation(name: "companyCosigner")
   deals          Deal[]
-  userDocument   UserDocument[]
+  document       OrganizationDocument[]
   addressId      Int?
-  address        Address?       @relation(fields: [addressId], references: [id])
+  address        Address?               @relation(fields: [addressId], references: [id])
 }
 
 model AccreditationVerifier {
@@ -82,24 +74,28 @@ model AccreditationVerifier {
   deals       Deal[]
 }
 
-/// user specific documents such as tax forms, accreditation verification etc 
-model UserDocument {
-  id               Int              @id @default(autoincrement())
-  name             String
-  ownerId          Int
-  owner            User             @relation(fields: [ownerId], references: [id])
-  link             String
-  userDocumentType UserDocumentType
-  dealId           Int?
-  deal             Deal?            @relation(fields: [dealId], references: [id])
-  companyId        Int?
-  company          Company?         @relation(fields: [companyId], references: [id])
+/// deal specific documents such as tax forms, accreditation verification etc 
+model DealDocument {
+  id     Int              @id @default(autoincrement())
+  name   String
+  link   String
+  type   DealDocumentType
+  dealId Int
+  deal   Deal             @relation(fields: [dealId], references: [id])
 }
 
-enum UserDocumentType {
-  TAX
+/// used for business verification letters and such
+model OrganizationDocument {
+  id             Int          @id @default(autoincrement())
+  name           String
+  link           String
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
+}
+
+enum DealDocumentType {
+  K1
   VERIFICATION_ACCREDITATION
-  BUSINESS
 }
 
 model Project {
@@ -135,9 +131,9 @@ model Project {
 }
 
 model ProjectMilestones {
-  id                        Int      @id @default(autoincrement())
-  projectId                 Int      @unique
-  project                   Project  @relation(fields: [projectId], references: [id])
+  id                        Int       @id @default(autoincrement())
+  projectId                 Int       @unique
+  project                   Project   @relation(fields: [projectId], references: [id])
   equityContribution        DateTime
   financialClosing          DateTime
   groundBreakingCeremony    DateTime?
@@ -190,13 +186,13 @@ model DocumentEvent {
 
 /// 
 model Address {
-  id      Int       @id @default(autoincrement())
-  street  String
-  city    String
-  zipcode String
-  state   String
-  user    User[]
-  company Company[]
+  id           Int            @id @default(autoincrement())
+  street       String
+  city         String
+  zipcode      String
+  state        String
+  user         User[]
+  organization Organization[]
 }
 
 /// Role is not yet used
