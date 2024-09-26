@@ -1,6 +1,5 @@
 // This file is used to define reusable functions, types and constants
 
-import { Organization } from "@clerk/nextjs/server";
 import { DealFinancingType } from "@prisma/client";
 import { z } from "zod";
 
