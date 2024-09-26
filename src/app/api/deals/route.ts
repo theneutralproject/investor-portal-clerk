@@ -31,19 +31,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = await currentUser();
-    if (!user) {
+    const clerkUser = await currentUser();
+    if (!clerkUser) {
       return jsonResponse({ error: "User not found" }, 404);
     }
 
-    const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: user.id },
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: clerkUser.id },
     });
-    if (!neutralUser) {
+    if (!dbUser) {
       console.error("Neutral user not found in api/deals");
       return jsonResponse(
         {
-          error: `User record with clerkid ${user.id} not found in prisma (GET)`,
+          error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
         },
         404
       );
@@ -61,8 +61,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const userOrg = await prisma.organization.findFirst({
+      where: { ownerId: dbUser.id }
+    })
+
     const deals = await prisma.deal.findFirst({
-      where: { userId: neutralUser.id, projectId: project.id },
+      where: { organizationId: userOrg?.id, projectId: project.id },
     });
 
     if (!deals) {
@@ -110,6 +114,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (!dealData.organizationId) {
+      // use the default organization:
+      const userOrg = await prisma.organization.findFirst({
+        where: { ownerId: dbUser.id }
+      });
+      if (userOrg) {
+        dealData.organizationId = userOrg.ownerId!;
+      }
+      else return jsonResponse(
+        {
+          error: `Deal cannot be created. No Owner Org was found for the User w ID ${dbUser.id}`,
+        },
+        500
+      );
+    }
+
+
     dealData.transactionId = `${project.name}-${dbUser.lastName}-${Math.floor(
       Math.random() * 900 + 100
     )}`
@@ -136,7 +157,7 @@ export async function POST(request: NextRequest) {
 
     const deal = await prisma.deal.create({
       data: {
-        userId: dbUser.id,
+        organizationId: dealData.organizationId!,
         projectId: dealData.projectId,
         dealStage: dealData.dealStage ?? 0,
         amount: 0,
@@ -179,9 +200,9 @@ export async function PUT(request: NextRequest) {
     }
     for (const prop in deal) {
       if (Object.prototype.hasOwnProperty.call(deal, prop)) {
-        if (prop in DealToHubspotDealEnum && deal[prop as keyof DealUpdateSchema]?.toString().length){
+        if (prop in DealToHubspotDealEnum && deal[prop as keyof DealUpdateSchema]?.toString().length) {
           hsDeal.properties.push({
-            name: DealToHubspotDealEnum[prop as keyof typeof DealToHubspotDealEnum], 
+            name: DealToHubspotDealEnum[prop as keyof typeof DealToHubspotDealEnum],
             value: deal[prop as keyof DealUpdateSchema]?.toString() ?? ""
           })
         }

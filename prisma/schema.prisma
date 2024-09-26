@@ -24,7 +24,6 @@ model User {
   ssn                 String?
   title               String?
   userOrgId           Int?            @unique
-  deal                Deal[]
   documentEvents      DocumentEvent[]
   address             Address?        @relation(fields: [addressId], references: [id])
   primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
@@ -34,7 +33,6 @@ model User {
 model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
-  userId                  Int
   dealStage               Int
   amount                  Int
   financingType           DealFinancingType?     @default(equity)
@@ -46,11 +44,10 @@ model Deal {
   numberCUnits            Float?                 @default(0.0)
   ownershipType           DealOwnershipType?
   accreditationVerifierId Int?
-  organizationId          Int?
+  organizationId          Int
   AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   organization            Organization?          @relation(fields: [organizationId], references: [id])
   project                 Project                @relation(fields: [projectId], references: [id])
-  user                    User                   @relation(fields: [userId], references: [id])
   document                DealDocument[]
 }
 

@@ -1,5 +1,6 @@
 // This file is used to define reusable functions, types and constants
 
+import { Organization } from "@clerk/nextjs/server";
 import { DealFinancingType } from "@prisma/client";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ export enum ProjectName {
 export const zDealUpdateSchema = z.object({
   hubspotId: z.string(),
   projectId: z.number().optional(),
+  organizationId: z.number().optional(),
   dealStage: z.number().optional(),
   amount: z.number().optional(),
   financingType: z.nativeEnum(DealFinancingType).optional(),
@@ -25,6 +27,7 @@ export const zDealCreateSchema = z.object({
   dealStage: z.number().optional(),
   financingType: z.nativeEnum(DealFinancingType).optional(),
   transactionId: z.string().optional(),
+  organizationId: z.number().optional() /**will be set in the backend if not provided by UI */,
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>
