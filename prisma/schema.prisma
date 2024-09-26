@@ -24,17 +24,17 @@ model User {
   ssn                 String?
   title               String?
   userOrgId           Int?            @unique
-  primaryOrganization Organization?   @relation(fields: [userOrgId], references: [id], name: "userOrg")
-  organization        Organization[]  @relation(name: "allOrgs")
   documentEvents      DocumentEvent[]
   address             Address?        @relation(fields: [addressId], references: [id])
-  deal                Deal[]
+  primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
+  organization        Organization[]  @relation("allOrgs")
+  deal  Deal[]
 }
 
 model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
-  project                 Project                @relation(fields: [projectId], references: [id])
+  userId                  Int                    
   dealStage               Int
   amount                  Int
   financingType           DealFinancingType?     @default(equity)
@@ -45,29 +45,28 @@ model Deal {
   numberAUnits            Float?                 @default(0.0)
   numberCUnits            Float?                 @default(0.0)
   ownershipType           DealOwnershipType?
-  AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   accreditationVerifierId Int?
-  document                DealDocument[]
   organizationId          Int?
-  organization            Organization?           @relation(fields: [organizationId], references: [id])
-  userId                  Int @unique
-  user                    User                   @relation(fields: [userId], references: [id])
+  AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
+  organization            Organization?          @relation(fields: [organizationId], references: [id])
+  project                 Project                @relation(fields: [projectId], references: [id])
+  document                DealDocument[]
+  user User @relation(fields: [userId], references: [id])
 }
 
 model Organization {
   id             Int                    @id @default(autoincrement())
   name           String
-  members        User[]                 @relation(name: "allOrgs")
   ownerId        Int?                   @unique
-  ownedBy        User?                  @relation(name: "userOrg")
   tin            String?
   dateOfCreation DateTime?
   juristication  String?
-  deals          Deal[]
-  document       OrganizationDocument[]
   addressId      Int?
+  deals          Deal[]
   address        Address?               @relation(fields: [addressId], references: [id])
-  type DealOwnershipType @default(INDIVIDUAL)
+  document       OrganizationDocument[]
+  ownedBy        User?                  @relation("userOrg")
+  members        User[]                 @relation("allOrgs")
 }
 
 model AccreditationVerifier {
@@ -98,11 +97,6 @@ model OrganizationDocument {
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
-enum DealDocumentType {
-  K1
-  VERIFICATION_ACCREDITATION
-}
-
 model Project {
   id                   Int                @id @default(autoincrement())
   name                 String             @unique
@@ -129,17 +123,16 @@ model Project {
   preferredReturn      String             @default("")
   targetEquityMultiple Float              @default(0.0)
   slug                 String             @unique
+  equityReturnsFile    String?
   deals                Deal[]
   documents            Document[]
   pictures             Pictures[]
   projectMilestones    ProjectMilestones?
-  equityReturnsFile    String?
 }
 
 model ProjectMilestones {
   id                        Int       @id @default(autoincrement())
   projectId                 Int       @unique
-  project                   Project   @relation(fields: [projectId], references: [id])
   equityContribution        DateTime
   financialClosing          DateTime
   groundBreakingCeremony    DateTime?
@@ -152,6 +145,7 @@ model ProjectMilestones {
   stabilized                DateTime
   refinance                 DateTime
   sale                      DateTime
+  project                   Project   @relation(fields: [projectId], references: [id])
 }
 
 /// Project specific pictures
@@ -190,15 +184,20 @@ model DocumentEvent {
   user       User              @relation(fields: [userId], references: [id])
 }
 
-/// 
+///
 model Address {
   id           Int            @id @default(autoincrement())
   street       String
   city         String
   zipcode      String
   state        String
-  user         User[]
   organization Organization[]
+  user         User[]
+}
+
+enum DealDocumentType {
+  K1
+  VERIFICATION_ACCREDITATION
 }
 
 /// Role is not yet used

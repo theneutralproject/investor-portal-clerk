@@ -8,7 +8,6 @@
 
 import prisma from "@/libs/prisma";
 import { isNull } from "lodash";
-import { NextRequest } from "next/server";
 
 // 1. pull all users
 // 2. create an organization name for the user
@@ -16,7 +15,7 @@ import { NextRequest } from "next/server";
 // 4. find all of the user's deals
 // 5. update the deal.organizationId 
 
-export async function POST(request: NextRequest) {
+export async function POST() {
 
     const allUsers = await prisma.user.findMany();
 
