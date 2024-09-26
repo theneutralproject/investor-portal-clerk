@@ -58,6 +58,7 @@ export async function POST(request: NextRequest) {
     console.log("matched users and orgs");
 
     const dealsPromise = users.map((user) => {
+        if(!user) return Promise.resolve();
         console.log(`user id ${user.id}: org id: ${user.userOrgId}`)
 
         return prisma.deal.updateMany(
