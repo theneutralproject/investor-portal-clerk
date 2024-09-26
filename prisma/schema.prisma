@@ -45,7 +45,6 @@ model Deal {
   numberAUnits            Float?                 @default(0.0)
   numberCUnits            Float?                 @default(0.0)
   ownershipType           DealOwnershipType?
-  ownershipTypeOtherValue String?
   AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   accreditationVerifierId Int?
   document                DealDocument[]
@@ -68,6 +67,7 @@ model Organization {
   document       OrganizationDocument[]
   addressId      Int?
   address        Address?               @relation(fields: [addressId], references: [id])
+  type DealOwnershipType @default(INDIVIDUAL)
 }
 
 model AccreditationVerifier {
