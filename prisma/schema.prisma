@@ -28,27 +28,29 @@ model User {
   address             Address?        @relation(fields: [addressId], references: [id])
   primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
   organization        Organization[]  @relation("allOrgs")
+  deal                Deal[] /// @deprecated Use `organization.deal` instead.
 }
 
 model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
   dealStage               Int
-  amount                  Int
+  amount                  Float @default(0.0)
   financingType           DealFinancingType?     @default(equity)
   hubspotId               String                 @unique
   transactionId           String                 @default("")
-  /// the project, i.e. Edison LLC
-  investmentEntity        String
+  investmentEntity        String    /// the project, i.e. Edison LLC
   numberAUnits            Float?                 @default(0.0)
   numberCUnits            Float?                 @default(0.0)
-  ownershipType           DealOwnershipType?
+  ownershipType           DealOwnershipType?  @default(INDIVIDUAL)
   accreditationVerifierId Int?
   organizationId          Int
+  userId                  Int? /// @deprecated Use `organizationId` instead.
   AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
-  organization            Organization?          @relation(fields: [organizationId], references: [id])
+  organization            Organization           @relation(fields: [organizationId], references: [id])
   project                 Project                @relation(fields: [projectId], references: [id])
   document                DealDocument[]
+  user                    User?                  @relation(fields: [userId], references: [id]) /// @deprecated Use `organization` instead.
 }
 
 model Organization {
@@ -59,6 +61,7 @@ model Organization {
   dateOfCreation DateTime?
   juristication  String?
   addressId      Int?
+  ownershipType  DealOwnershipType @default(INDIVIDUAL)
   deals          Deal[]
   address        Address?               @relation(fields: [addressId], references: [id])
   document       OrganizationDocument[]
@@ -238,7 +241,7 @@ enum DealFinancingType {
 enum DealOwnershipType {
   INDIVIDUAL
   JOINT
-  CORPROTATION
+  CORPORATION
   TRUST
   OTHER
   MARITAL
