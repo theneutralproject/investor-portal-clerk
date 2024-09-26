@@ -12,71 +12,127 @@ datasource db {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  clerkId        String          @unique
-  role           Role            @default(USER)
-  email          String          @unique
-  firstName      String
-  lastName       String
-  phoneNumber    String?
-  hubspotId      String
-  addressId      Int?
-  ssn            String?
-  title          String?
-  deals          Deal[]
-  documentEvents DocumentEvent[]
-  meetings       Meeting[]
-  address        Address?        @relation(fields: [addressId], references: [id])
+  id                  Int             @id @default(autoincrement())
+  clerkId             String          @unique
+  role                Role            @default(USER)
+  email               String          @unique
+  firstName           String
+  lastName            String
+  phoneNumber         String?
+  hubspotId           String
+  addressId           Int?
+  ssn                 String?
+  title               String?
+  userOrgId           Int?            @unique
+  deal                Deal[]
+  documentEvents      DocumentEvent[]
+  address             Address?        @relation(fields: [addressId], references: [id])
+  primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
+  organization        Organization[]  @relation("allOrgs")
 }
 
-model Meeting {
-  id        Int      @id @default(autoincrement())
-  url       String
-  userId    Int
-  projectId Int
-  time      DateTime
-  project   Project  @relation(fields: [projectId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+model Deal {
+  id                      Int                    @id @default(autoincrement())
+  projectId               Int
+  userId                  Int
+  dealStage               Int
+  amount                  Int
+  financingType           DealFinancingType?     @default(equity)
+  hubspotId               String                 @unique
+  transactionId           String                 @default("")
+  /// the project, i.e. Edison LLC
+  investmentEntity        String
+  numberAUnits            Float?                 @default(0.0)
+  numberCUnits            Float?                 @default(0.0)
+  ownershipType           DealOwnershipType?
+  accreditationVerifierId Int?
+  organizationId          Int?
+  AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
+  organization            Organization?          @relation(fields: [organizationId], references: [id])
+  project                 Project                @relation(fields: [projectId], references: [id])
+  user                    User                   @relation(fields: [userId], references: [id])
+  document                DealDocument[]
+}
+
+model Organization {
+  id             Int                    @id @default(autoincrement())
+  name           String
+  ownerId        Int?                   @unique
+  tin            String?
+  dateOfCreation DateTime?
+  juristication  String?
+  addressId      Int?
+  deals          Deal[]
+  address        Address?               @relation(fields: [addressId], references: [id])
+  document       OrganizationDocument[]
+  ownedBy        User?                  @relation("userOrg")
+  members        User[]                 @relation("allOrgs")
+}
+
+model AccreditationVerifier {
+  id          Int    @id @default(autoincrement())
+  firstName   String
+  lastName    String
+  title       String
+  phoneNumber String
+  deals       Deal[]
+}
+
+/// deal specific documents such as tax forms, accreditation verification etc 
+model DealDocument {
+  id     Int              @id @default(autoincrement())
+  name   String
+  link   String
+  type   DealDocumentType
+  dealId Int
+  deal   Deal             @relation(fields: [dealId], references: [id])
+}
+
+/// used for business verification letters and such
+model OrganizationDocument {
+  id             Int          @id @default(autoincrement())
+  name           String
+  link           String
+  organizationId Int
+  organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
 model Project {
-  id                   Int        @id @default(autoincrement())
-  name                 String     @unique
+  id                   Int                @id @default(autoincrement())
+  name                 String             @unique
   location             String
-  investmentGoal       Float      @default(0.0)
-  investmentRaised     Float      @default(0.0)
-  tags                 String     @default("")
-  status               Status     @default(ACTIVE)
+  investmentGoal       Float              @default(0.0)
+  investmentRaised     Float              @default(0.0)
+  tags                 String             @default("")
+  status               Status             @default(ACTIVE)
   description          String
-  buildingAvgRent      Int        @default(0)
-  buildingAvgUnitSize  Int        @default(0)
-  buildingCommSqFt     Int        @default(0)
-  buildingUnits        Int        @default(0)
-  debtInterestRate     String     @default("")
-  debtMinInvestment    Int        @default(25000)
-  debtPaymentFreq      String     @default("quarterly")
-  debtTermMonths       Int        @default(48)
-  equityIRR            Float      @default(0.0)
-  equityMinInvestment  Int        @default(250000)
-  equityPaymentFreq    String     @default("quarterly")
-  equityTermMonths     Int        @default(60)
-  marketHighlights     String     @default("")
-  youtubeUrl           String     @default("")
-  preferredReturn      String     @default("")
-  targetEquityMultiple Float      @default(0.0)
-  slug                 String     @unique
+  buildingAvgRent      Int                @default(0)
+  buildingAvgUnitSize  Int                @default(0)
+  buildingCommSqFt     Int                @default(0)
+  buildingUnits        Int                @default(0)
+  debtInterestRate     String             @default("")
+  debtMinInvestment    Int                @default(25000)
+  debtPaymentFreq      String             @default("quarterly")
+  debtTermMonths       Int                @default(48)
+  equityIRR            Float              @default(0.0)
+  equityMinInvestment  Int                @default(250000)
+  equityPaymentFreq    String             @default("quarterly")
+  equityTermMonths     Int                @default(60)
+  marketHighlights     String             @default("")
+  youtubeUrl           String             @default("")
+  preferredReturn      String             @default("")
+  targetEquityMultiple Float              @default(0.0)
+  slug                 String             @unique
+  equityReturnsFile    String?
   deals                Deal[]
   documents            Document[]
-  meetings             Meeting[]
   pictures             Pictures[]
   projectMilestones    ProjectMilestones?
-  equityReturnsFile String? 
 }
 
 model ProjectMilestones {
-  id                        Int      @id @default(autoincrement())
-  projectId                 Int      @unique
-  project                   Project  @relation(fields: [projectId], references: [id])
+  id                        Int       @id @default(autoincrement())
+  projectId                 Int       @unique
   equityContribution        DateTime
   financialClosing          DateTime
   groundBreakingCeremony    DateTime?
@@ -89,8 +145,10 @@ model ProjectMilestones {
   stabilized                DateTime
   refinance                 DateTime
   sale                      DateTime
+  project                   Project   @relation(fields: [projectId], references: [id])
 }
 
+/// Project specific pictures
 model Pictures {
   id        Int         @id @default(autoincrement())
   projectId Int
@@ -99,6 +157,7 @@ model Pictures {
   project   Project     @relation(fields: [projectId], references: [id])
 }
 
+/// project documents that all logged in users can see
 model Document {
   id                 Int                 @id @default(autoincrement())
   name               String
@@ -114,6 +173,7 @@ model Document {
   documentEvents     DocumentEvent[]
 }
 
+/// used to track who accessed which document when
 model DocumentEvent {
   id         Int               @id @default(autoincrement())
   userId     Int
@@ -124,55 +184,23 @@ model DocumentEvent {
   user       User              @relation(fields: [userId], references: [id])
 }
 
-model Deal {
-  id                      Int                @id @default(autoincrement())
-  projectId               Int
-  userId                  Int
-  dealStage               Int
-  amount                  Int
-  financingType           DealFinancingType? @default(equity)
-  hubspotId               String             @unique
-  transactionId           String             @default("")
-  investmentEntity        String
-  numberAUnits            Float?             @default(0.0)
-  numberCUnits            Float?             @default(0.0)
-  ownershipType           DealOwnershipType?
-  ownershipTypeOtherValue String?
-  coSignerEmail           String?
-  coSignerFullName        String?
-  verifierEmail           String?
-  verifierFullName        String?
-  project                 Project            @relation(fields: [projectId], references: [id])
-  user                    User               @relation(fields: [userId], references: [id])
-}
-
+///
 model Address {
-  id      Int       @id @default(autoincrement())
-  street  String
-  city    String
-  zipcode String
-  state   String
-  Contact Contact[]
-  User    User[]
+  id           Int            @id @default(autoincrement())
+  street       String
+  city         String
+  zipcode      String
+  state        String
+  organization Organization[]
+  user         User[]
 }
 
-model Contact {
-  id        Int         @id @default(autoincrement())
-  firstName String
-  lastName  String
-  email     String
-  title     String?
-  ssn       Float?
-  type      ContactType
-  addressId Int?
-  address   Address?    @relation(fields: [addressId], references: [id])
+enum DealDocumentType {
+  K1
+  VERIFICATION_ACCREDITATION
 }
 
-enum ContactType {
-  COSIGNER
-  VERIFIER
-}
-
+/// Role is not yet used
 enum Role {
   ADMIN
   USER
@@ -214,7 +242,7 @@ enum DealOwnershipType {
   INDIVIDUAL
   JOINT
   CORPROTATION
-  REVOCABLEGRANTOR
+  TRUST
   OTHER
   MARITAL
   COMMON

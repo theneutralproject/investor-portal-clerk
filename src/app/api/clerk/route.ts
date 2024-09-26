@@ -26,7 +26,7 @@ async function validateRequest(request: Request) {
 
 export async function POST(request: Request) {
   const { type, data } = await validateRequest(request);
-
+  console.log("webhook received of type:", type)
   switch (type) {
     case "user.created": {
       console.log("clerk WH1 - user created");
@@ -43,7 +43,7 @@ export async function POST(request: Request) {
       const email =
         email_addresses.find(({ id }) => id === primary_email_address_id)
           ?.email_address ?? "";
-      const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({id}) => id === primary_phone_number_id)) ?? "") : (phone_numbers[0]?.phone_number ?? "")
+      const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({ id }) => id === primary_phone_number_id)) ?? "") : (phone_numbers[0]?.phone_number ?? "")
 
       /* Store/ update user in Hubspot**/
       const hsUserData = {
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
       console.log("clerk WH2 - posting hsUserData", hsUserData);
       let hsUpdate;
-       try{
+      try {
         hsUpdate = await createOrUpdateContact(hsUserData);
       } catch (error) {
         console.error("Unable to create user in hubspot:\n", error);
@@ -66,11 +66,12 @@ export async function POST(request: Request) {
           status: 400,
           headers: { "Content-Type": "application/json" },
         });
-       }
-      const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString();
+      }
+      const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString()
+
 
       /* Store user in DB**/
-      const DBUserData = {
+      const newUserData = {
         clerkId: id,
         email: email,
         role: Role.USER,
@@ -80,17 +81,36 @@ export async function POST(request: Request) {
         hubspotId: hubspotUserId,
       } as User;
 
-      console.log("clerk WH4", DBUserData);
+
+      console.log("clerk WH4", newUserData);
       try {
-        await prisma.user.create({ data: DBUserData });
-        await clerkClient.users.updateUser(id, {firstName: startCase(first_name), lastName: startCase(toLower(last_name))})
+        // create a personal org:
+        const userOrg = await prisma.organization.create({
+          data: {
+            name: `${newUserData.firstName} ${newUserData.lastName}'s Org`,
+          }
+        });
+
+        newUserData.userOrgId = userOrg.id;
+        const dbUser = await prisma.user.create({
+          data: {
+            ...newUserData, organization: { connect: [{ id: userOrg.id }] }
+          }
+        });
+
+        await prisma.organization.update({ 
+          where: { id: userOrg.id },
+          data: { ownerId: dbUser.id }
+        });
+        
+        await clerkClient.users.updateUser(id, { firstName: startCase(first_name), lastName: startCase(toLower(last_name)) })
       } catch (error) {
         console.error("ERROR: Cannot create User in DB:\n", error);
         return new Response(JSON.stringify({ error: "Unable to create user in DB" }), {
           status: 400,
           headers: { "Content-Type": "application/json" },
         });
-       }
+      }
       break;
     }
     case "session.created": {
@@ -99,8 +119,8 @@ export async function POST(request: Request) {
     }
 
     case "session.ended": /** FALL THROUGH SWITCHES */
-    case "session.revoked": 
-    case "session.removed":{
+    case "session.revoked":
+    case "session.removed": {
       break;
     }
 
