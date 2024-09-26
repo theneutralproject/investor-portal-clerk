@@ -149,7 +149,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
 
   return (
     <Box sx={{ display: "flex" }}>
-      <AppBar position="absolute" sx={{ backgroundColor: "white" }}>
+      <AppBar position="absolute">
         <Toolbar
           sx={{
             boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
@@ -208,8 +208,6 @@ export default function Sidebar(props: { children: React.ReactNode }) {
       <Box
         component="main"
         sx={{
-          backgroundColor: "#fcfaf9",
-
           flexGrow: 1,
           height: "100vh",
           overflow: "auto",

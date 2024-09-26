@@ -27,6 +27,9 @@ declare module "@mui/material/Button" {
 }
 
 const palette = {
+  background: {
+    default: "#F3F5F6",
+  },
   primary: {
     main: "#556cd6",
   },
