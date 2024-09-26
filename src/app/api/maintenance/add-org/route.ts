@@ -1,13 +1,16 @@
 /**
  * This script needs to be run after the 20240925210818_add_organization_step1 has been migrated.
  * To run it, use postman. Generate the Bearer token by logging into the portal and running this command in the consolde:
- * await window.Clerk.session.getToken({ template: 'postman-test' })
+ * await window.Clerk.session.getToken({ template: 'postman-scripts' })
  * 
  *  */ 
 // 
 
 import prisma from "@/libs/prisma";
+import { Organization } from "@prisma/client";
 import { isNull } from "lodash";
+import { resolve } from "styled-jsx/css";
+import { jsonResponse } from "../../utils-module/_globals";
 
 // 1. pull all users
 // 2. create an organization name for the user
@@ -17,23 +20,46 @@ import { isNull } from "lodash";
 
 export async function POST() {
 
-    const allUsers = await prisma.user.findMany();
+    const allUsers = await prisma.user.findMany({
+        // process 10 at the time by advancing the skip value by 10
+        take: 10,
+        skip: 0
+    });
 
     console.log(`found ${allUsers.length} users`);
-    const allUsersPromiseArr = allUsers.map((user) => {
-        return prisma.organization.create({
-            data: {
-                ownerId: user.id,
-                name: `${user.firstName} ${user.lastName}'s Org`,
-                members: {
-                    connect: [{ id: user.id }]
-                }
-            }
-        });
+
+    const userOrgsPromiseArr = allUsers.map((user) => {
+        return new Promise<Organization>((resolve) => {return prisma.organization.findFirst(
+                {where: {ownerId: user.id}}
+            ).then((existingOrg) => {
+                if (existingOrg) return resolve(existingOrg);
+                console.log("creating org for", user.email)
+                return prisma.organization.create({
+                    data: {
+                        ownerId: user.id,
+                        name: `${user.firstName} ${user.lastName}'s Org`,
+                        members: {
+                            connect: [{ id: user.id }]
+                        }
+                    }
+                }).then((newOrg) => {
+                    return resolve(newOrg)
+                })
+            }).catch((err) => {
+            console.log(err)
+            return jsonResponse(
+                {
+                  error: err,
+                },
+                404
+              );
+            })
+
+        })
     });
 
 
-    const orgs = await Promise.all(allUsersPromiseArr);
+    const orgs = await Promise.all(userOrgsPromiseArr);
 
     console.log(`Created ${orgs.length} orgs`);
 
