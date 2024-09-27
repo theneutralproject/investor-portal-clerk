@@ -137,6 +137,7 @@ export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
 export default function Sidebar(props: { children: React.ReactNode }) {
   const router = useRouter();
   const pathName = usePathname();
+  const isDealflowRoute = pathName.startsWith("/dealflow");
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const isActiveRoute = (routePath: string) => {
@@ -214,15 +215,21 @@ export default function Sidebar(props: { children: React.ReactNode }) {
         }}
       >
         <Toolbar />
-        <Container
-          maxWidth="xl"
-          sx={{
-            mt: 4,
-            mb: 4,
-          }}
-        >
-          {props.children}
-        </Container>
+        {isDealflowRoute ? (
+          <Box sx={{ height: "calc(100vh - 64px)", backgroundColor: "white" }}>
+            {props.children}
+          </Box>
+        ) : (
+          <Container
+            maxWidth="xl"
+            sx={{
+              mt: 4,
+              mb: 4,
+            }}
+          >
+            {props.children}
+          </Container>
+        )}
       </Box>
     </Box>
   );
