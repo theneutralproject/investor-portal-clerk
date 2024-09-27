@@ -35,14 +35,14 @@ model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
   dealStage               Int
-  amount                  Float @default(0.0)
+  amount                  Float                  @default(0.0)
   financingType           DealFinancingType?     @default(equity)
   hubspotId               String                 @unique
   transactionId           String                 @default("")
-  investmentEntity        String    /// the project, i.e. Edison LLC
+  investmentEntity        String /// the project, i.e. Edison LLC
   numberAUnits            Float?                 @default(0.0)
   numberCUnits            Float?                 @default(0.0)
-  ownershipType           DealOwnershipType?  @default(INDIVIDUAL)
+  ownershipType           DealOwnershipType?     @default(INDIVIDUAL)
   accreditationVerifierId Int?
   organizationId          Int
   userId                  Int? /// @deprecated Use `organizationId` instead.
@@ -61,7 +61,7 @@ model Organization {
   dateOfCreation DateTime?
   juristication  String?
   addressId      Int?
-  ownershipType  DealOwnershipType @default(INDIVIDUAL)
+  ownershipType  DealOwnershipType      @default(INDIVIDUAL)
   deals          Deal[]
   address        Address?               @relation(fields: [addressId], references: [id])
   document       OrganizationDocument[]
@@ -110,6 +110,7 @@ model Project {
   buildingAvgUnitSize  Int                @default(0)
   buildingCommSqFt     Int                @default(0)
   buildingUnits        Int                @default(0)
+  cUnitThresholdAmount Float              @default(200000.0)
   debtInterestRate     String             @default("")
   debtMinInvestment    Int                @default(25000)
   debtPaymentFreq      String             @default("quarterly")
