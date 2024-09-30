@@ -24,6 +24,7 @@ model User {
   ssn                 String?
   title               String?
   userOrgId           Int?            @unique
+  referralSource      String?
   documentEvents      DocumentEvent[]
   address             Address?        @relation(fields: [addressId], references: [id])
   primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
@@ -140,6 +141,7 @@ model ProjectInvestmentStats {
   preferredReturn      String  @default("")
   investmentGoal       Float   @default(0.0)
   investmentRaised     Float   @default(0.0)
+  targetEquityMultiple  Float @default(0.0)
   projectId            Int     @unique
   project              Project @relation(fields: [projectId], references: [id])
 }

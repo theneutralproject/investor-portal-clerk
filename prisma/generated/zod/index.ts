@@ -12,7 +12,7 @@ import type { Prisma } from '@prisma/client';
 
 export const TransactionIsolationLevelSchema = z.enum(['ReadUncommitted','ReadCommitted','RepeatableRead','Serializable']);
 
-export const UserScalarFieldEnumSchema = z.enum(['id','clerkId','role','email','firstName','lastName','phoneNumber','hubspotId','addressId','ssn','title','userOrgId']);
+export const UserScalarFieldEnumSchema = z.enum(['id','clerkId','role','email','firstName','lastName','phoneNumber','hubspotId','addressId','ssn','title','userOrgId','referralSource']);
 
 export const DealScalarFieldEnumSchema = z.enum(['id','projectId','dealStage','amount','financingType','hubspotId','transactionId','investmentEntity','numberAUnits','numberCUnits','ownershipType','accreditationVerifierId','organizationId','userId']);
 
@@ -28,7 +28,7 @@ export const ProjectScalarFieldEnumSchema = z.enum(['id','name','location','tags
 
 export const ProjectPropertyStatsScalarFieldEnumSchema = z.enum(['id','avgRent','avgUnitSize','commercialSqFt','numUnits','projectId']);
 
-export const ProjectInvestmentStatsScalarFieldEnumSchema = z.enum(['id','cUnitThresholdAmount','debtInterestRate','debtMinInvestment','debtPaymentFreq','debtTermMonths','equityIRR','equityMinInvestment','equityPaymentFreq','equityTermMonths','preferredReturn','investmentGoal','investmentRaised','projectId']);
+export const ProjectInvestmentStatsScalarFieldEnumSchema = z.enum(['id','cUnitThresholdAmount','debtInterestRate','debtMinInvestment','debtPaymentFreq','debtTermMonths','equityIRR','equityMinInvestment','equityPaymentFreq','equityTermMonths','preferredReturn','investmentGoal','investmentRaised','targetEquityMultiple','projectId']);
 
 export const ProjectMilestonesScalarFieldEnumSchema = z.enum(['id','projectId','equityContribution','financialClosing','groundBreakingCeremony','startVerticalConstruction','toppingOut','preLeasing','fullEnclosure','temporaryOccupancy','grandOpening','stabilized','refinance','sale']);
 
@@ -99,6 +99,7 @@ export const UserSchema = z.object({
   ssn: z.string().nullable(),
   title: z.string().nullable(),
   userOrgId: z.number().int().nullable(),
+  referralSource: z.string().nullable(),
 })
 
 export type User = z.infer<typeof UserSchema>
@@ -248,6 +249,7 @@ export const ProjectInvestmentStatsSchema = z.object({
   preferredReturn: z.string(),
   investmentGoal: z.number(),
   investmentRaised: z.number(),
+  targetEquityMultiple: z.number(),
   projectId: z.number().int(),
 })
 
@@ -389,6 +391,7 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   ssn: z.boolean().optional(),
   title: z.boolean().optional(),
   userOrgId: z.boolean().optional(),
+  referralSource: z.boolean().optional(),
   documentEvents: z.union([z.boolean(),z.lazy(() => DocumentEventFindManyArgsSchema)]).optional(),
   address: z.union([z.boolean(),z.lazy(() => AddressArgsSchema)]).optional(),
   primaryOrganization: z.union([z.boolean(),z.lazy(() => OrganizationArgsSchema)]).optional(),
@@ -657,6 +660,7 @@ export const ProjectInvestmentStatsSelectSchema: z.ZodType<Prisma.ProjectInvestm
   preferredReturn: z.boolean().optional(),
   investmentGoal: z.boolean().optional(),
   investmentRaised: z.boolean().optional(),
+  targetEquityMultiple: z.boolean().optional(),
   projectId: z.boolean().optional(),
   project: z.union([z.boolean(),z.lazy(() => ProjectArgsSchema)]).optional(),
 }).strict()
@@ -827,6 +831,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   ssn: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   userOrgId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  referralSource: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
   address: z.union([ z.lazy(() => AddressNullableRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
   primaryOrganization: z.union([ z.lazy(() => OrganizationNullableRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional().nullable(),
@@ -847,6 +852,7 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   ssn: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   title: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   userOrgId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  referralSource: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   documentEvents: z.lazy(() => DocumentEventOrderByRelationAggregateInputSchema).optional(),
   address: z.lazy(() => AddressOrderByWithRelationInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationOrderByWithRelationInputSchema).optional(),
@@ -934,6 +940,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   addressId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
   ssn: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  referralSource: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
   address: z.union([ z.lazy(() => AddressNullableRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
   primaryOrganization: z.union([ z.lazy(() => OrganizationNullableRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional().nullable(),
@@ -954,6 +961,7 @@ export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderBy
   ssn: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   title: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   userOrgId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  referralSource: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => UserCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => UserAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => UserMaxOrderByAggregateInputSchema).optional(),
@@ -977,6 +985,7 @@ export const UserScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.UserScal
   ssn: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   title: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   userOrgId: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  referralSource: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const DealWhereInputSchema: z.ZodType<Prisma.DealWhereInput> = z.object({
@@ -1592,6 +1601,7 @@ export const ProjectInvestmentStatsWhereInputSchema: z.ZodType<Prisma.ProjectInv
   preferredReturn: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentRaised: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  targetEquityMultiple: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
@@ -1610,6 +1620,7 @@ export const ProjectInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Pri
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   project: z.lazy(() => ProjectOrderByWithRelationInputSchema).optional()
 }).strict();
@@ -1644,6 +1655,7 @@ export const ProjectInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.Proj
   preferredReturn: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentRaised: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  targetEquityMultiple: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
@@ -1661,6 +1673,7 @@ export const ProjectInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ProjectInvestmentStatsCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => ProjectInvestmentStatsAvgOrderByAggregateInputSchema).optional(),
@@ -1686,6 +1699,7 @@ export const ProjectInvestmentStatsScalarWhereWithAggregatesInputSchema: z.ZodTy
   preferredReturn: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   investmentRaised: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  targetEquityMultiple: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   projectId: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
@@ -2082,6 +2096,7 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutUserInputSchema).optional(),
   address: z.lazy(() => AddressCreateNestedOneWithoutUserInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationCreateNestedOneWithoutOwnedByInputSchema).optional(),
@@ -2102,6 +2117,7 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutMembersInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -2117,6 +2133,7 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutUserNestedInputSchema).optional(),
   address: z.lazy(() => AddressUpdateOneWithoutUserNestedInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationUpdateOneWithoutOwnedByNestedInputSchema).optional(),
@@ -2137,6 +2154,7 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutMembersNestedInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
@@ -2154,7 +2172,8 @@ export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = 
   addressId: z.number().int().optional().nullable(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
-  userOrgId: z.number().int().optional().nullable()
+  userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable()
 }).strict();
 
 export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyMutationInput> = z.object({
@@ -2167,6 +2186,7 @@ export const UserUpdateManyMutationInputSchema: z.ZodType<Prisma.UserUpdateManyM
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedUpdateManyInput> = z.object({
@@ -2182,6 +2202,7 @@ export const UserUncheckedUpdateManyInputSchema: z.ZodType<Prisma.UserUncheckedU
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const DealCreateInputSchema: z.ZodType<Prisma.DealCreateInput> = z.object({
@@ -2727,6 +2748,7 @@ export const ProjectInvestmentStatsCreateInputSchema: z.ZodType<Prisma.ProjectIn
   preferredReturn: z.string().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
+  targetEquityMultiple: z.number().optional(),
   project: z.lazy(() => ProjectCreateNestedOneWithoutInvestmentStatsInputSchema)
 }).strict();
 
@@ -2744,6 +2766,7 @@ export const ProjectInvestmentStatsUncheckedCreateInputSchema: z.ZodType<Prisma.
   preferredReturn: z.string().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
+  targetEquityMultiple: z.number().optional(),
   projectId: z.number().int()
 }).strict();
 
@@ -2760,6 +2783,7 @@ export const ProjectInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.ProjectIn
   preferredReturn: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   project: z.lazy(() => ProjectUpdateOneRequiredWithoutInvestmentStatsNestedInputSchema).optional()
 }).strict();
 
@@ -2777,6 +2801,7 @@ export const ProjectInvestmentStatsUncheckedUpdateInputSchema: z.ZodType<Prisma.
   preferredReturn: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   projectId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -2794,6 +2819,7 @@ export const ProjectInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.Proje
   preferredReturn: z.string().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
+  targetEquityMultiple: z.number().optional(),
   projectId: z.number().int()
 }).strict();
 
@@ -2810,6 +2836,7 @@ export const ProjectInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Pris
   preferredReturn: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUncheckedUpdateManyInput> = z.object({
@@ -2826,6 +2853,7 @@ export const ProjectInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Pri
   preferredReturn: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   projectId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -3308,7 +3336,8 @@ export const UserCountOrderByAggregateInputSchema: z.ZodType<Prisma.UserCountOrd
   addressId: z.lazy(() => SortOrderSchema).optional(),
   ssn: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
-  userOrgId: z.lazy(() => SortOrderSchema).optional()
+  userOrgId: z.lazy(() => SortOrderSchema).optional(),
+  referralSource: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const UserAvgOrderByAggregateInputSchema: z.ZodType<Prisma.UserAvgOrderByAggregateInput> = z.object({
@@ -3329,7 +3358,8 @@ export const UserMaxOrderByAggregateInputSchema: z.ZodType<Prisma.UserMaxOrderBy
   addressId: z.lazy(() => SortOrderSchema).optional(),
   ssn: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
-  userOrgId: z.lazy(() => SortOrderSchema).optional()
+  userOrgId: z.lazy(() => SortOrderSchema).optional(),
+  referralSource: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const UserMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserMinOrderByAggregateInput> = z.object({
@@ -3344,7 +3374,8 @@ export const UserMinOrderByAggregateInputSchema: z.ZodType<Prisma.UserMinOrderBy
   addressId: z.lazy(() => SortOrderSchema).optional(),
   ssn: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
-  userOrgId: z.lazy(() => SortOrderSchema).optional()
+  userOrgId: z.lazy(() => SortOrderSchema).optional(),
+  referralSource: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const UserSumOrderByAggregateInputSchema: z.ZodType<Prisma.UserSumOrderByAggregateInput> = z.object({
@@ -4008,6 +4039,7 @@ export const ProjectInvestmentStatsCountOrderByAggregateInputSchema: z.ZodType<P
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4021,6 +4053,7 @@ export const ProjectInvestmentStatsAvgOrderByAggregateInputSchema: z.ZodType<Pri
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4038,6 +4071,7 @@ export const ProjectInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Pri
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4055,6 +4089,7 @@ export const ProjectInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Pri
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -4068,6 +4103,7 @@ export const ProjectInvestmentStatsSumOrderByAggregateInputSchema: z.ZodType<Pri
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
+  targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -6218,6 +6254,7 @@ export const UserCreateWithoutDealInputSchema: z.ZodType<Prisma.UserCreateWithou
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutUserInputSchema).optional(),
   address: z.lazy(() => AddressCreateNestedOneWithoutUserInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationCreateNestedOneWithoutOwnedByInputSchema).optional(),
@@ -6237,6 +6274,7 @@ export const UserUncheckedCreateWithoutDealInputSchema: z.ZodType<Prisma.UserUnc
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutMembersInputSchema).optional()
 }).strict();
@@ -6404,6 +6442,7 @@ export const UserUpdateWithoutDealInputSchema: z.ZodType<Prisma.UserUpdateWithou
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutUserNestedInputSchema).optional(),
   address: z.lazy(() => AddressUpdateOneWithoutUserNestedInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationUpdateOneWithoutOwnedByNestedInputSchema).optional(),
@@ -6423,6 +6462,7 @@ export const UserUncheckedUpdateWithoutDealInputSchema: z.ZodType<Prisma.UserUnc
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutMembersNestedInputSchema).optional()
 }).strict();
@@ -6523,6 +6563,7 @@ export const UserCreateWithoutPrimaryOrganizationInputSchema: z.ZodType<Prisma.U
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutUserInputSchema).optional(),
   address: z.lazy(() => AddressCreateNestedOneWithoutUserInputSchema).optional(),
   organization: z.lazy(() => OrganizationCreateNestedManyWithoutMembersInputSchema).optional(),
@@ -6541,6 +6582,7 @@ export const UserUncheckedCreateWithoutPrimaryOrganizationInputSchema: z.ZodType
   addressId: z.number().int().optional().nullable(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutMembersInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -6561,6 +6603,7 @@ export const UserCreateWithoutOrganizationInputSchema: z.ZodType<Prisma.UserCrea
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutUserInputSchema).optional(),
   address: z.lazy(() => AddressCreateNestedOneWithoutUserInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationCreateNestedOneWithoutOwnedByInputSchema).optional(),
@@ -6580,6 +6623,7 @@ export const UserUncheckedCreateWithoutOrganizationInputSchema: z.ZodType<Prisma
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
@@ -6680,6 +6724,7 @@ export const UserUpdateWithoutPrimaryOrganizationInputSchema: z.ZodType<Prisma.U
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutUserNestedInputSchema).optional(),
   address: z.lazy(() => AddressUpdateOneWithoutUserNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUpdateManyWithoutMembersNestedInputSchema).optional(),
@@ -6698,6 +6743,7 @@ export const UserUncheckedUpdateWithoutPrimaryOrganizationInputSchema: z.ZodType
   addressId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutMembersNestedInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
@@ -6735,6 +6781,7 @@ export const UserScalarWhereInputSchema: z.ZodType<Prisma.UserScalarWhereInput> 
   ssn: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   userOrgId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
+  referralSource: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const DealCreateWithoutAccreditationVerifierInputSchema: z.ZodType<Prisma.DealCreateWithoutAccreditationVerifierInput> = z.object({
@@ -7115,7 +7162,8 @@ export const ProjectInvestmentStatsCreateWithoutProjectInputSchema: z.ZodType<Pr
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.string().optional(),
   investmentGoal: z.number().optional(),
-  investmentRaised: z.number().optional()
+  investmentRaised: z.number().optional(),
+  targetEquityMultiple: z.number().optional()
 }).strict();
 
 export const ProjectInvestmentStatsUncheckedCreateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUncheckedCreateWithoutProjectInput> = z.object({
@@ -7131,7 +7179,8 @@ export const ProjectInvestmentStatsUncheckedCreateWithoutProjectInputSchema: z.Z
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.string().optional(),
   investmentGoal: z.number().optional(),
-  investmentRaised: z.number().optional()
+  investmentRaised: z.number().optional(),
+  targetEquityMultiple: z.number().optional()
 }).strict();
 
 export const ProjectInvestmentStatsCreateOrConnectWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsCreateOrConnectWithoutProjectInput> = z.object({
@@ -7305,6 +7354,7 @@ export const ProjectInvestmentStatsUpdateWithoutProjectInputSchema: z.ZodType<Pr
   preferredReturn: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUncheckedUpdateWithoutProjectInput> = z.object({
@@ -7321,6 +7371,7 @@ export const ProjectInvestmentStatsUncheckedUpdateWithoutProjectInputSchema: z.Z
   preferredReturn: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPropertyStatsInput> = z.object({
@@ -7832,6 +7883,7 @@ export const UserCreateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserCr
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   address: z.lazy(() => AddressCreateNestedOneWithoutUserInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationCreateNestedOneWithoutOwnedByInputSchema).optional(),
   organization: z.lazy(() => OrganizationCreateNestedManyWithoutMembersInputSchema).optional(),
@@ -7851,6 +7903,7 @@ export const UserUncheckedCreateWithoutDocumentEventsInputSchema: z.ZodType<Pris
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutMembersInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedCreateNestedManyWithoutUserInputSchema).optional()
 }).strict();
@@ -7917,6 +7970,7 @@ export const UserUpdateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserUp
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   address: z.lazy(() => AddressUpdateOneWithoutUserNestedInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationUpdateOneWithoutOwnedByNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUpdateManyWithoutMembersNestedInputSchema).optional(),
@@ -7936,6 +7990,7 @@ export const UserUncheckedUpdateWithoutDocumentEventsInputSchema: z.ZodType<Pris
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutMembersNestedInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
@@ -7987,6 +8042,7 @@ export const UserCreateWithoutAddressInputSchema: z.ZodType<Prisma.UserCreateWit
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutUserInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationCreateNestedOneWithoutOwnedByInputSchema).optional(),
   organization: z.lazy(() => OrganizationCreateNestedManyWithoutMembersInputSchema).optional(),
@@ -8005,6 +8061,7 @@ export const UserUncheckedCreateWithoutAddressInputSchema: z.ZodType<Prisma.User
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
   userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutMembersInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedCreateNestedManyWithoutUserInputSchema).optional()
@@ -8307,6 +8364,7 @@ export const UserUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma.UserUpda
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutUserNestedInputSchema).optional(),
   address: z.lazy(() => AddressUpdateOneWithoutUserNestedInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationUpdateOneWithoutOwnedByNestedInputSchema).optional(),
@@ -8326,6 +8384,7 @@ export const UserUncheckedUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
 }).strict();
@@ -8343,6 +8402,7 @@ export const UserUncheckedUpdateManyWithoutOrganizationInputSchema: z.ZodType<Pr
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const DealCreateManyAccreditationVerifierInputSchema: z.ZodType<Prisma.DealCreateManyAccreditationVerifierInput> = z.object({
@@ -8595,7 +8655,8 @@ export const UserCreateManyAddressInputSchema: z.ZodType<Prisma.UserCreateManyAd
   hubspotId: z.string(),
   ssn: z.string().optional().nullable(),
   title: z.string().optional().nullable(),
-  userOrgId: z.number().int().optional().nullable()
+  userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable()
 }).strict();
 
 export const OrganizationUpdateWithoutAddressInputSchema: z.ZodType<Prisma.OrganizationUpdateWithoutAddressInput> = z.object({
@@ -8645,6 +8706,7 @@ export const UserUpdateWithoutAddressInputSchema: z.ZodType<Prisma.UserUpdateWit
   hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutUserNestedInputSchema).optional(),
   primaryOrganization: z.lazy(() => OrganizationUpdateOneWithoutOwnedByNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUpdateManyWithoutMembersNestedInputSchema).optional(),
@@ -8663,6 +8725,7 @@ export const UserUncheckedUpdateWithoutAddressInputSchema: z.ZodType<Prisma.User
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutMembersNestedInputSchema).optional(),
   deal: z.lazy(() => DealUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
@@ -8680,6 +8743,7 @@ export const UserUncheckedUpdateManyWithoutAddressInputSchema: z.ZodType<Prisma.
   ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 /////////////////////////////////////////

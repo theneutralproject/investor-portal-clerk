@@ -92,9 +92,20 @@ export async function POST(req: Request): Promise<Response> {
           console.log(
             `\attempting to update project funding tracker for ${projectToUpdate} to ${amountRaised}`
           );
-          await prisma.project
+
+          const project= await prisma.project.findUnique({
+            where:{ name: projectToUpdate}
+          });
+          if(!project) return new Response(
+            JSON.stringify({ error: `project with name ${projectToUpdate} does not exist` }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+          await prisma.projectInvestmentStats
             .update({
-              where: { name: projectToUpdate },
+              where: { projectId: project.id },
               data: { investmentRaised: amountRaised },
             })
             .catch((error) => {
