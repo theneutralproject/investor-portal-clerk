@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
 import { useUser } from "@clerk/nextjs";
 
-import { type ProjectWithPicturesAndMilestones } from "@/libs/prisma";
+import { type ProjectWithAllNestedData } from "@/libs/prisma";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useEffect } from "react";
 import posthog from "posthog-js";
@@ -18,10 +18,10 @@ import { useSearchParams } from "next/navigation";
 const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { user } = useUser();
-  const { isLoading, data } = useQuery<ProjectWithPicturesAndMilestones[], Error>({
+  const { isLoading, data } = useQuery<ProjectWithAllNestedData[], Error>({
     queryKey: ["project", "all"],
     queryFn: () =>
-      axios.get<ProjectWithPicturesAndMilestones[]>("/api/projects").then((res) => res.data),
+      axios.get<ProjectWithAllNestedData[]>("/api/projects").then((res) => res.data),
   });
 
   const searchParams = useSearchParams();

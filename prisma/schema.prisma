@@ -98,39 +98,22 @@ model OrganizationDocument {
 }
 
 model Project {
-  id                     Int                      @id @default(autoincrement())
-  name                   String                   @unique
-  location               String
-  investmentGoal         Float                    @default(0.0) /// @deprecated
-  investmentRaised       Float                    @default(0.0) /// @deprecated
-  tags                   String                   @default("")
-  status                 Status                   @default(ACTIVE)
-  description            String
-  buildingAvgRent        Int                      @default(0) /// @deprecated
-  buildingAvgUnitSize    Int                      @default(0) /// @deprecated
-  buildingCommSqFt       Int                      @default(0) /// @deprecated
-  buildingUnits          Int                      @default(0) /// @deprecated
-  cUnitThresholdAmount   Float                    @default(200000.0) /// @deprecated
-  debtInterestRate       String                   @default("") /// @deprecated
-  debtMinInvestment      Int                      @default(25000) /// @deprecated
-  debtPaymentFreq        String                   @default("quarterly") /// @deprecated
-  debtTermMonths         Int                      @default(48) /// @deprecated
-  equityIRR              Float                    @default(0.0) /// @deprecated
-  equityMinInvestment    Int                      @default(250000) /// @deprecated
-  equityPaymentFreq      String                   @default("quarterly") /// @deprecated
-  equityTermMonths       Int                      @default(60) /// @deprecated
-  marketHighlights       String                   @default("")
-  youtubeUrl             String                   @default("")
-  preferredReturn        String                   @default("") /// @deprecated
-  targetEquityMultiple   Float                    @default(0.0) /// @deprecated
-  slug                   String                   @unique
-  equityReturnsFile      String?
-  deals                  Deal[]
-  documents              ProjectDocument[]
-  pictures               ProjectPicture[]
-  projectMilestones      ProjectMilestones?
-  ProjectPropertyStats   ProjectPropertyStats[]
-  ProjectInvestmentStats ProjectInvestmentStats[]
+  id                Int                     @id @default(autoincrement())
+  name              String                  @unique
+  location          String
+  tags              String                  @default("")
+  status            Status                  @default(ACTIVE)
+  description       String
+  marketHighlights  String                  @default("")
+  youtubeUrl        String                  @default("")
+  slug              String                  @unique
+  equityReturnsFile String?
+  deals             Deal[]
+  documents         ProjectDocument[]
+  pictures          ProjectPicture[]
+  milestones        ProjectMilestones?
+  propertyStats     ProjectPropertyStats?
+  investmentStats   ProjectInvestmentStats?
 }
 
 model ProjectPropertyStats {
@@ -139,7 +122,7 @@ model ProjectPropertyStats {
   avgUnitSize    Int     @default(0)
   commercialSqFt Int     @default(0)
   numUnits       Int     @default(0)
-  projectId      Int
+  projectId      Int     @unique
   project        Project @relation(fields: [projectId], references: [id])
 }
 
@@ -157,7 +140,7 @@ model ProjectInvestmentStats {
   preferredReturn      String  @default("")
   investmentGoal       Float   @default(0.0)
   investmentRaised     Float   @default(0.0)
-  projectId            Int
+  projectId            Int     @unique
   project              Project @relation(fields: [projectId], references: [id])
 }
 
