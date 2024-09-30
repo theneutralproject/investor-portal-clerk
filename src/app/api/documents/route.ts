@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       financingType as DealFinancingType
     );
 
-    const documents = await prisma.document.findMany({
+    const documents = await prisma.projectDocument.findMany({
       where: {
         projectId: projectId,
         ...(dealStage ? { dealStage: dealStage } : {}),
