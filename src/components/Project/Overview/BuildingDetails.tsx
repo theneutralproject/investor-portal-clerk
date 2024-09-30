@@ -2,7 +2,7 @@ import React from "react";
 import { Divider } from "@mui/material";
 import { LineDisplay } from "./InvestmentSummaryBox";
 import CollapsibleCard from "./CollapsibleCard";
-import { ProjectWithStats } from "@/libs/prisma";
+import type { ProjectWithStats } from "@/libs/prisma";
 
 const formatter = Intl.NumberFormat('en', { maximumFractionDigits: 2 });
 

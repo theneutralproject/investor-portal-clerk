@@ -12,7 +12,7 @@ import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import BuildingDetails from "./BuildingDetails";
 import BasicTitleDescriptionCard from "../BasicTitleDescriptionCard";
 import ProjectCalculator from "./ProjectCalculator";
-import { ProjectWithAllNestedData } from "@/libs/prisma";
+import type { ProjectWithAllNestedData } from "@/libs/prisma";
 
 export const OverviewTab = ({ data }: { data: ProjectWithAllNestedData }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

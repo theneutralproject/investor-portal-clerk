@@ -1,7 +1,6 @@
 import React from "react";
 import { CardContent, Grid, Typography } from "@mui/material";
-import { type Project } from "@prisma/client";
-import { ProjectWithStats } from "@/libs/prisma";
+import type { ProjectWithStats } from "@/libs/prisma";
 
 const ProjectMetrics: React.FC<{ project: ProjectWithStats }> = ({ project }) => {
   const { equityIRR } = project.investmentStats;
