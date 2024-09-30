@@ -10,7 +10,7 @@ import {
 } from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
 import { getInvestmentEntity, updateDeal } from "../utils-module/dealUtils";
-import { DealFinancingType } from "@prisma/client";
+import { DealFinancingType, DealUnitType } from "@prisma/client";
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
@@ -161,6 +161,7 @@ export async function POST(request: NextRequest) {
         projectId: dealData.projectId,
         dealStage: dealData.dealStage ?? 0,
         amount: 0,
+        unitType: DealUnitType.AUNIT,
         hubspotId: hsDealId.toString(),
         financingType: dealData.financingType ?? DealFinancingType.equity,
         transactionId: dealData.transactionId,

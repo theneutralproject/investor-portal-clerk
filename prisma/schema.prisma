@@ -43,6 +43,7 @@ model Deal {
   investmentEntity        String /// the project, i.e. Edison LLC
   numberAUnits            Float?                 @default(0.0)
   numberCUnits            Float?                 @default(0.0)
+  unitType                DealUnitType           @default(AUNIT)
   ownershipType           DealOwnershipType?     @default(INDIVIDUAL)
   accreditationVerifierId Int?
   organizationId          Int
@@ -141,7 +142,7 @@ model ProjectInvestmentStats {
   preferredReturn      String  @default("")
   investmentGoal       Float   @default(0.0)
   investmentRaised     Float   @default(0.0)
-  targetEquityMultiple  Float @default(0.0)
+  targetEquityMultiple Float   @default(0.0)
   projectId            Int     @unique
   project              Project @relation(fields: [projectId], references: [id])
 }
@@ -263,4 +264,9 @@ enum DealOwnershipType {
   MARITAL
   COMMON
   PARTNERSHIP
+}
+
+enum DealUnitType {
+  AUNIT
+  CUNIT
 }
