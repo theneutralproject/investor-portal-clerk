@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "ProjectInvestmentStats" ADD COLUMN     "totalAUnitReturn" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+ADD COLUMN     "totalCUnitReturn" DOUBLE PRECISION NOT NULL DEFAULT 0.0;

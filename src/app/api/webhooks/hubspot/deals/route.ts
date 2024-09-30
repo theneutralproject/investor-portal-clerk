@@ -1,4 +1,4 @@
-import type { DealUpdateSchema } from "@/app/api/utils-module/_globals";
+import type { DealUpdateSchema, HubspotDealUpdateSchema } from "@/app/api/utils-module/_globals";
 import { updateDeal } from "@/app/api/utils-module/dealUtils";
 import { getErrorMessage } from "@/app/api/utils-module/helpers";
 import {
@@ -58,8 +58,8 @@ export async function POST(req: Request): Promise<Response> {
         }
       );
     }
-
-    const dealBody: DealUpdateSchema = {
+// TODO: create hubspot schema here
+    const dealBody: HubspotDealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
     let updateProjectFunding = false;

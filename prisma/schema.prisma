@@ -36,23 +36,33 @@ model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
   dealStage               Int
-  amount                  Float                  @default(0.0)
-  financingType           DealFinancingType?     @default(equity)
+  amount                  Float                  @default(0.0) /// @deprecated. Use DealInvestmentStats model instead
+  financingType           DealFinancingType?     @default(equity) /// @deprecated. Use DealInvestmentStats model instead
   hubspotId               String                 @unique
   transactionId           String                 @default("")
   investmentEntity        String /// the project, i.e. Edison LLC
-  numberAUnits            Float?                 @default(0.0)
-  numberCUnits            Float?                 @default(0.0)
-  unitType                DealUnitType           @default(AUNIT)
-  ownershipType           DealOwnershipType?     @default(INDIVIDUAL)
+  ownershipType           DealOwnershipType?     @default(INDIVIDUAL) /// @deprecated. Use DealInvestmentStats model instead
   accreditationVerifierId Int?
   organizationId          Int
   userId                  Int? /// @deprecated Use `organizationId` instead.
-  AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
+  accreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   organization            Organization           @relation(fields: [organizationId], references: [id])
   project                 Project                @relation(fields: [projectId], references: [id])
   document                DealDocument[]
   user                    User?                  @relation(fields: [userId], references: [id]) /// @deprecated Use `organization` instead.
+  investmentStats     DealInvestmentStats?
+}
+
+model DealInvestmentStats {
+  id            Int                @id @default(autoincrement())
+  dealId        Int                @unique
+  amount        Float              @default(0.0)
+  financingType DealFinancingType? @default(equity)
+  unitType      DealUnitType       @default(AUNIT)
+  ownershipType DealOwnershipType? @default(INDIVIDUAL)
+  numberAUnits  Float              @default(0.0)
+  numberCUnits  Float              @default(0.0)
+  deal          Deal               @relation(fields: [dealId], references: [id])
 }
 
 model Organization {
@@ -143,6 +153,8 @@ model ProjectInvestmentStats {
   investmentGoal       Float   @default(0.0)
   investmentRaised     Float   @default(0.0)
   targetEquityMultiple Float   @default(0.0)
+  totalAUnitReturn     Float   @default(0.0)
+  totalCUnitReturn     Float   @default(0.0)
   projectId            Int     @unique
   project              Project @relation(fields: [projectId], references: [id])
 }
