@@ -67,6 +67,7 @@ export async function GET(request: NextRequest) {
 
     const deals = await prisma.deal.findFirst({
       where: { organizationId: userOrg?.id, projectId: project.id },
+      include: {investmentStats: true}
     });
 
     if (!deals) {
@@ -120,7 +121,7 @@ export async function POST(request: NextRequest) {
         where: { ownerId: dbUser.id }
       });
       if (userOrg) {
-        dealData.organizationId = userOrg.ownerId!;
+        dealData.organizationId = userOrg.id;
       }
       else return jsonResponse(
         {
@@ -160,14 +161,21 @@ export async function POST(request: NextRequest) {
         organizationId: dealData.organizationId,
         projectId: dealData.projectId,
         dealStage: dealData.dealStage ?? 0,
-        amount: 0,
         hubspotId: hsDealId.toString(),
-        financingType: dealData.financingType ?? DealFinancingType.equity,
         transactionId: dealData.transactionId,
         investmentEntity:
-          getInvestmentEntity(project.name, DealFinancingType.equity) ?? "",
+          getInvestmentEntity(project.name, dealData.financingType ?? DealFinancingType.equity) ?? "",
       },
     });
+
+    await prisma.dealInvestmentStats.create({
+      data: {
+        dealId: deal.id,
+        amount: dealData.amount ?? 0,
+        financingType: dealData.financingType ?? DealFinancingType.equity,
+        /**all other fields have postgresql defaults */
+      }
+    })
 
     return jsonResponse(deal);
   } catch (error) {
@@ -208,6 +216,7 @@ export async function PUT(request: NextRequest) {
         }
       }
     }
+
     const updatedDeal = await updateDeal(deal);
 
     // also update the deal in hubspot:

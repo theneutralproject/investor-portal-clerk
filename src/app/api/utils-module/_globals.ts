@@ -1,6 +1,6 @@
 // This file is used to define reusable functions, types and constants
 
-import { DealFinancingType } from "@prisma/client";
+import { DealFinancingType, DealOwnershipType, DealUnitType } from "@prisma/client";
 import { z } from "zod";
 
 export enum ProjectName {
@@ -11,26 +11,49 @@ export enum ProjectName {
 }
 
 
+export const zDealInvestmentStatsUpdateSchema = z.object({
+  amount: z.number().optional(),
+  ownershipType: z.nativeEnum(DealOwnershipType).optional(),
+  financingType: z.nativeEnum(DealFinancingType).optional(),
+  unitType: z.nativeEnum(DealUnitType).optional(),
+  numberAUnits: z.number().min(0).optional(),
+  numberCUnits: z.number().min(0).optional(),
+});
+
 // always look up a deal by hubspotId
 export const zDealUpdateSchema = z.object({
   hubspotId: z.string(),
   projectId: z.number().optional(),
   organizationId: z.number().optional(),
   dealStage: z.number().optional(),
-  amount: z.number().optional(),
-  financingType: z.nativeEnum(DealFinancingType).optional(),
+  accreditationVerifierId: z.number().optional(),
+  investmentStats: zDealInvestmentStatsUpdateSchema.optional()
 });
 
 export const zDealCreateSchema = z.object({
   projectId: z.number(),
+  amount: z.number().optional(),
   dealStage: z.number().optional(),
   financingType: z.nativeEnum(DealFinancingType).optional(),
   transactionId: z.string().optional(),
   organizationId: z.number().optional() /**will be set in the backend if not provided by UI */,
 });
 
+export const zHubspotDealUpdateSchema = z.object({
+  hubspotId: z.string(),
+  projectId: z.number().optional(),
+  organizationId: z.number().optional(),
+  dealStage: z.number().optional(),
+  amount: z.number().optional(),
+  financingType: z.nativeEnum(DealFinancingType).optional(),
+  unitType: z.nativeEnum(DealUnitType).optional()
+}) 
+
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>
+export type HubspotDealUpdateSchema = z.infer<typeof zHubspotDealUpdateSchema>
+
+export type DealInvestmentStatsUpdateSchema = z.infer<typeof zDealInvestmentStatsUpdateSchema>
 
 // todo: hook this up in docusignUtils
 enum ownershipTypeEnum {

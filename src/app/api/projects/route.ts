@@ -23,7 +23,9 @@ export async function GET(request: NextRequest) {
       where: { slug: slug },
       include: {
         pictures: true,
-        projectMilestones: true
+        milestones: true,
+        investmentStats: true,
+        propertyStats: true,
       },
     })
     .catch((findManyError) => {

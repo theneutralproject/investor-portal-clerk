@@ -1,51 +1,48 @@
 import prisma from "@/libs/prisma";
 import { ProjectName, type DealUpdateSchema } from "./_globals";
 import type { DealFinancingType, Deal } from "@prisma/client";
+import { isError } from "lodash";
 
 /**
  * Updates a deal in the database
- * @param {DealUpdateSchema} dealData - The data of the deal to update
+ * @param {DealUpdateSchema} updateDealData - The data of the deal to update
  * @returns {Promise<Deal | Error>} The updated deal or an error
  */
 export async function updateDeal(
-  dealData: DealUpdateSchema
+  updateDealData: DealUpdateSchema /**dealData includes fields for both Deal and DealInvestmentStats */
 ): Promise<Deal | Error> {
-  const { hubspotId, dealStage, amount, financingType } = dealData;
-  /* eslint-disable */
-  interface PartialDeal {
-    [key: string]: any;
-  }
-  /* eslint-enable */
-
-  const data: PartialDeal = {};
-  if (dealStage) {
-    data.dealStage = dealStage;
-  }
-
-  if (amount) {
-    data.amount = amount;
-  }
-
-  if (financingType) {
-    data.financingType = financingType;
-  }
+  const { investmentStats, ...dealData } = updateDealData;
 
   /* eslint-disable-next-line */
   const updatedDeal = await prisma.deal
     .update({
-      where: { hubspotId: hubspotId },
-      data: data,
+      where: { hubspotId: dealData.hubspotId },
+      data: dealData,
     })
+
+  if(!updatedDeal || isError(updateDeal))  {
+    console.error(
+      `Failed to update deal with hubspot id ${dealData.hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`
+    );
+    console.error(updatedDeal);
+    return Error("Failed to update deal with hubspot data");
+  } 
+  if(investmentStats) {
+    const updatedStats = await prisma.dealInvestmentStats.update({
+      where: {dealId: updatedDeal.id}, 
+      data: investmentStats
+    })    
     .catch((error) => {
       console.error(
-        `Failed to update deal with hubspot id ${hubspotId}. It is possible that the Hubspot UI was used to update a deal that was not created in the investor portal:`
+        `Failed to update deal investment stats for deal id ${updatedDeal.id}. `
       );
       console.error(error);
       return Error("Failed to update deal with hubspot data");
     });
+  }
+
 
   return updatedDeal;
-  /* eslint-enable */
 }
 
 const InvestmentEntity = {
