@@ -1,23 +1,18 @@
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
-import {
-  createHubspotDealForContact,
-  DealToHubspotDealEnum,
-  type HubspotDealUpdate,
-  initDealPropsForProject,
-  updateHubspotDealProperties,
-} from "../utils-module/hubspotUtils";
 import { isError } from "lodash";
-import { getInvestmentEntity, updateDeal } from "../utils-module/dealUtils";
 import { DealFinancingType } from "@prisma/client";
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
-  jsonResponse,
-} from "../utils-module/_globals";
+} from "../../../libs/deal/schema";
+import { HubspotDealUpdate } from "@/libs/hubspot/schema";
+import { initDealPropsForProject, createHubspotDealForContact, DealToHubspotDealEnum, updateHubspotDealProperties } from "@/libs/hubspot/utils";
+import { jsonResponse } from "@/libs/utils";
+import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

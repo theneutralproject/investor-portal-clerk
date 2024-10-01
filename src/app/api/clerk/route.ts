@@ -1,14 +1,11 @@
 import prisma from "@/libs/prisma";
-import { clerkClient, type WebhookEvent } from "@clerk/nextjs/server";
+import type { WebhookEvent } from "@clerk/nextjs/server";
 import { Role, type User } from "@prisma/client";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-import { isError, toLower, startCase } from "lodash";
-
-import {
-  type HubspotContact,
-  createOrUpdateContact,
-} from "../utils-module/hubspotUtils";
+import { isError } from "lodash";
+import type { HubspotContact } from "@/libs/hubspot/schema";
+import { createOrUpdateHubspotContact } from "@/libs/hubspot/utils";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -49,8 +46,8 @@ export async function POST(request: Request) {
         email: email,
         properties: [
           { property: `userid`, value: id },
-          { property: `firstname`, value: startCase(first_name) },
-          { property: `lastname`, value: startCase(toLower(last_name)) },
+          { property: `firstname`, value: first_name },
+          { property: `lastname`, value: last_name },
           { property: `phone`, value: phonenumber },
         ],
       } as HubspotContact;
@@ -58,7 +55,7 @@ export async function POST(request: Request) {
       console.log("clerk WH2 - posting hsUserData", hsUserData);
       let hsUpdate;
       try {
-        hsUpdate = await createOrUpdateContact(hsUserData);
+        hsUpdate = await createOrUpdateHubspotContact(hsUserData);
       } catch (error) {
         console.error("Unable to create user in hubspot:\n", error);
         return new Response(JSON.stringify({ error: "Unable to create user in hubspot" }), {
@@ -74,8 +71,10 @@ export async function POST(request: Request) {
         clerkId: id,
         email: email,
         role: Role.USER,
-        firstName: startCase(first_name),
-        lastName: startCase(toLower(last_name)),
+        // firstName: startCase(first_name),
+        // lastName: startCase(toLower(last_name)),
+        firstName: first_name,
+        lastName: last_name,
         phoneNumber: phonenumber,
         hubspotId: hubspotUserId,
       } as User;
@@ -100,14 +99,14 @@ export async function POST(request: Request) {
 
         console.log(`created dbUser with id ${dbUser.id}`)
 
-        const updatedOrg = await prisma.organization.update({ 
+        const updatedOrg = await prisma.organization.update({
           where: { id: userOrg.id },
           data: { ownerId: dbUser.id }
         })
-        
+
         console.log(`updated org with id ${updatedOrg.id}`)
-        
-        await clerkClient.users.updateUser(id, { firstName: startCase(first_name), lastName: startCase(toLower(last_name)) })
+
+        // await clerkClient.users.updateUser(id, { firstName: startCase(first_name), lastName: startCase(toLower(last_name)) })
       } catch (error) {
         console.error("ERROR: Cannot create user and org:\n", error);
       }

@@ -19,11 +19,8 @@ import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
-import {
-  type DealCreateSchema,
-  type DealUpdateSchema,
-} from "@/app/api/utils-module/_globals";
 import posthog from "posthog-js";
+import { DealUpdateSchema, DealCreateSchema } from "@/libs/deal/schema";
 
 export type PageProps = {
   params: {
@@ -69,7 +66,7 @@ export default function Page({ params: { slug } }: PageProps) {
     isLoading: dealLoading,
     data: dealData,
     refetch: refetchDeal,
-  } = useQuery<Deal | null, Error>({
+  } = useQuery<DealWithInvestmentStats | null, Error>({
     queryKey: ["deal", slug],
     queryFn: () =>
       axios

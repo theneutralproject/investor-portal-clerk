@@ -13,10 +13,10 @@ import StepIndicator from "./StepIndicator";
 import HubspotScheduleCall from "@/components/HubspotScheduleCall";
 import StepAvatar from "@/components/StepAvatar";
 import { useRouter } from "next/navigation";
-import { updateDeal } from "@/app/api/utils-module/dealUtils";
-import { type DealCreateSchema } from "@/app/api/utils-module/_globals";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { DealCreateSchema } from "@/libs/deal/schema";
+import { updateDeal } from "@/libs/deal/utils";
 
 const INVESTMENT_STEPS = [
   "Schedule a Call with an Advisor",

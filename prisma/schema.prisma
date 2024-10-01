@@ -220,6 +220,7 @@ model Address {
   city         String
   zipcode      String
   state        String
+  country String @default("United States")
   organization Organization[]
   user         User[]
 }
