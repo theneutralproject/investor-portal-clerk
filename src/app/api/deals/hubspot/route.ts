@@ -1,4 +1,4 @@
-import { HubspotDealUpdate, zHsUpdateDealSchema, HsDealDocsAccessedUpdateSchema, zHsDealDocsAccessedUpdateSchema } from "@/libs/hubspot/schema";
+import { type HubspotDealUpdate, zHsUpdateDealSchema, type HsDealDocsAccessedUpdateSchema, zHsDealDocsAccessedUpdateSchema } from "@/libs/hubspot/schema";
 import { jsonResponse } from "@/libs/utils";
 import type { NextRequest } from "next/server";
 /**

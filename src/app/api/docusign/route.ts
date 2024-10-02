@@ -2,7 +2,7 @@
 import { isError } from "lodash";
 import prisma from "@/libs/prisma";
 import { toWords } from "number-to-words";
-import { DocusignEnvelopeSchema, zDocusignEnvelope } from '@/libs/docusign/schema';
+import { type DocusignEnvelopeSchema, zDocusignEnvelope } from '@/libs/docusign/schema';
 import { getErrorMessage, jsonResponse } from '@/libs/utils';
 import { refreshAccessToken, instantiateApiClient, makeEnvelope, makeRecipientViewRequest } from "@/libs/docusign/utils";
 

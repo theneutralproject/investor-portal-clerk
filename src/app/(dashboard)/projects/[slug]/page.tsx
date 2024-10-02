@@ -6,7 +6,7 @@ import "./dealPage.css";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
-import { DealFinancingType, type Deal } from "@prisma/client";
+import { DealFinancingType } from "@prisma/client";
 import ProjectHeader from "@/components/Project/ProjectHeader";
 import { InvestTab } from "@/components/Project/Invest/InvestTab";
 import { ProjectDocTab } from "@/components/Project/ProjectDocs/ProjectDocTab";
@@ -14,13 +14,13 @@ import InvestmentProgress from "@/components/Project/InvestmentProgress/Investme
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
 import { FundTab } from "@/components/Project/Fund/FundTab";
-import { DealWithInvestmentStats, type ProjectWithAllNestedData } from "@/libs/prisma";
+import type { DealWithInvestmentStats, ProjectWithAllNestedData } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import posthog from "posthog-js";
-import { DealUpdateSchema, DealCreateSchema } from "@/libs/deal/schema";
+import type { DealUpdateSchema, DealCreateSchema } from "@/libs/deal/schema";
 
 export type PageProps = {
   params: {

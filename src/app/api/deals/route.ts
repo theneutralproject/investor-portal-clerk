@@ -9,7 +9,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import { HubspotDealUpdate } from "@/libs/hubspot/schema";
+import type { HubspotDealUpdate } from "@/libs/hubspot/schema";
 import { initDealPropsForProject, createHubspotDealForContact, DealToHubspotDealEnum, updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";

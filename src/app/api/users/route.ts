@@ -2,7 +2,7 @@ import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
-import { ClerkUserUpdateSchema, UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
+import { type ClerkUserUpdateSchema, type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
 import { decryptData, encryptString } from "@/libs/encryption/utils";
 
@@ -10,7 +10,7 @@ import { decryptData, encryptString } from "@/libs/encryption/utils";
  * @param request 
  * @returns the full user data for the currently logged in user
  */
-export async function GET(request: NextRequest) {
+export async function GET() {
     const clerkUser = await currentUser();
     if (!clerkUser) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
@@ -60,6 +60,7 @@ export async function PUT(request: NextRequest) {
     }
 
     //  Check if hubspot and clerk needs to be updated, and then update them
+    // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (userData.firstName || userData.lastName) {
         const { emailAddresses, primaryEmailAddressId } = clerkUser
         const email = emailAddresses.find(({ id }) => id === primaryEmailAddressId)
