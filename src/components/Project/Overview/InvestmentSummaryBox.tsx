@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Grid, Typography, Divider } from "@mui/material";
-import { type Project } from "@prisma/client";
 import { type Decimal } from "@prisma/client/runtime/library";
+import type { ProjectWithStats } from "@/libs/prisma";
 
 const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 
@@ -29,21 +29,21 @@ export const LineDisplay = ({
   </Box>
 );
 
-const InvestmentSummaryBox = ({ data }: { data: Project }) => {
+const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
   return (
     <Grid container spacing={2} sx={{ alignItems: "stretch", height: "100%" }}>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Equity Returns</Typography>
-        <LineDisplay name="IRR" value={`${data.equityIRR}%`} />
+        <LineDisplay name="IRR" value={`${data.investmentStats.equityIRR}%`} />
         <LineDisplay
           name="Min. Investment"
-          value={`$${formatter.format(data.equityMinInvestment)}`}
+          value={`$${formatter.format(data.investmentStats.equityMinInvestment)}`}
         />
-        <LineDisplay name="Term" value={`${data.equityTermMonths} months`} />
-        <LineDisplay name="Distribution" value={`${data.equityPaymentFreq}*`} />
+        <LineDisplay name="Term" value={`${data.investmentStats.equityTermMonths} months`} />
+        <LineDisplay name="Distribution" value={`${data.investmentStats.equityPaymentFreq}*`} />
         <LineDisplay
           name="Preferred Return"
-          value={`${data.preferredReturn}**`}
+          value={`${data.investmentStats.preferredReturn}**`}
         />
       </Grid>
       <Grid
@@ -56,13 +56,13 @@ const InvestmentSummaryBox = ({ data }: { data: Project }) => {
       </Grid>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
-        <LineDisplay name="Interest" value={`${data.debtInterestRate}***`} />
+        <LineDisplay name="Interest" value={`${data.investmentStats.debtInterestRate}***`} />
         <LineDisplay
           name="Min. Investment"
-          value={`$${formatter.format(data.debtMinInvestment)}`}
+          value={`$${formatter.format(data.investmentStats.debtMinInvestment)}`}
         />
-        <LineDisplay name="Term" value={`${data.debtTermMonths} months`} />
-        <LineDisplay name="Payment" value={`${data.debtPaymentFreq}`} />
+        <LineDisplay name="Term" value={`${data.investmentStats.debtTermMonths} months`} />
+        <LineDisplay name="Payment" value={`${data.investmentStats.debtPaymentFreq}`} />
       </Grid>
 
       <Box sx={{ ml: 2 }}>

@@ -1,21 +1,21 @@
 import React, { useState } from "react";
 import { Typography, Divider, TextField } from "@mui/material";
 import { LineDisplay } from "./InvestmentSummaryBox";
-import { type Project } from "@prisma/client";
 import CollapsibleCard from "./CollapsibleCard";
+import type { ProjectWithStats } from "@/libs/prisma";
 
-const ProjectCalculator = ({ data }: { data: Project }) => {
+const ProjectCalculator = ({ data }: { data: ProjectWithStats }) => {
   const [investment, setInvestment] = useState(100000);
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInvestment(Number(event.target.value));
   };
 
-  const targetTermLength = data.equityTermMonths;
+  const targetTermLength = data.investmentStats.equityTermMonths;
 
   const sp_annual_rate = 12.2;
   const reit_annual_rate = 11.3;
-  const targetEquityMultiple = data.targetEquityMultiple;
+  const { targetEquityMultiple } = data.investmentStats;
 
   const sp500return = Math.round(
     investment * (1 + (sp_annual_rate / 100) * (targetTermLength / 12))

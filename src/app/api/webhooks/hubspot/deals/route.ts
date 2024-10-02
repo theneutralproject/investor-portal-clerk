@@ -1,4 +1,4 @@
-import type { DealUpdateSchema } from "@/app/api/utils-module/_globals";
+import type { DealUpdateSchema, HubspotDealUpdateSchema } from "@/app/api/utils-module/_globals";
 import { updateDeal } from "@/app/api/utils-module/dealUtils";
 import { getErrorMessage } from "@/app/api/utils-module/helpers";
 import {
@@ -58,8 +58,8 @@ export async function POST(req: Request): Promise<Response> {
         }
       );
     }
-
-    const dealBody: DealUpdateSchema = {
+// TODO: create hubspot schema here
+    const dealBody: HubspotDealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
     let updateProjectFunding = false;
@@ -92,9 +92,20 @@ export async function POST(req: Request): Promise<Response> {
           console.log(
             `\attempting to update project funding tracker for ${projectToUpdate} to ${amountRaised}`
           );
-          await prisma.project
+
+          const project= await prisma.project.findUnique({
+            where:{ name: projectToUpdate}
+          });
+          if(!project) return new Response(
+            JSON.stringify({ error: `project with name ${projectToUpdate} does not exist` }),
+            {
+              status: 500,
+              headers: { "Content-Type": "application/json" },
+            }
+          );
+          await prisma.projectInvestmentStats
             .update({
-              where: { name: projectToUpdate },
+              where: { projectId: project.id },
               data: { investmentRaised: amountRaised },
             })
             .catch((error) => {

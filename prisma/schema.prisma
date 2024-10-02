@@ -24,6 +24,7 @@ model User {
   ssn                 String?
   title               String?
   userOrgId           Int?            @unique
+  referralSource      String?
   documentEvents      DocumentEvent[]
   address             Address?        @relation(fields: [addressId], references: [id])
   primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
@@ -35,22 +36,33 @@ model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
   dealStage               Int
-  amount                  Float @default(0.0)
-  financingType           DealFinancingType?     @default(equity)
+  amount                  Float                  @default(0.0) /// @deprecated. Use DealInvestmentStats model instead
+  financingType           DealFinancingType?     @default(equity) /// @deprecated. Use DealInvestmentStats model instead
   hubspotId               String                 @unique
   transactionId           String                 @default("")
-  investmentEntity        String    /// the project, i.e. Edison LLC
-  numberAUnits            Float?                 @default(0.0)
-  numberCUnits            Float?                 @default(0.0)
-  ownershipType           DealOwnershipType?  @default(INDIVIDUAL)
+  investmentEntity        String /// the project, i.e. Edison LLC
+  ownershipType           DealOwnershipType?     @default(INDIVIDUAL) /// @deprecated. Use DealInvestmentStats model instead
   accreditationVerifierId Int?
   organizationId          Int
   userId                  Int? /// @deprecated Use `organizationId` instead.
-  AccreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
+  accreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   organization            Organization           @relation(fields: [organizationId], references: [id])
   project                 Project                @relation(fields: [projectId], references: [id])
   document                DealDocument[]
   user                    User?                  @relation(fields: [userId], references: [id]) /// @deprecated Use `organization` instead.
+  investmentStats     DealInvestmentStats?
+}
+
+model DealInvestmentStats {
+  id            Int                @id @default(autoincrement())
+  dealId        Int                @unique
+  amount        Float              @default(0.0)
+  financingType DealFinancingType? @default(equity)
+  unitType      DealUnitType       @default(AUNIT)
+  ownershipType DealOwnershipType? @default(INDIVIDUAL)
+  numberAUnits  Float              @default(0.0)
+  numberCUnits  Float              @default(0.0)
+  deal          Deal               @relation(fields: [dealId], references: [id])
 }
 
 model Organization {
@@ -61,7 +73,7 @@ model Organization {
   dateOfCreation DateTime?
   juristication  String?
   addressId      Int?
-  ownershipType  DealOwnershipType @default(INDIVIDUAL)
+  ownershipType  DealOwnershipType      @default(INDIVIDUAL)
   deals          Deal[]
   address        Address?               @relation(fields: [addressId], references: [id])
   document       OrganizationDocument[]
@@ -98,36 +110,53 @@ model OrganizationDocument {
 }
 
 model Project {
-  id                   Int                @id @default(autoincrement())
-  name                 String             @unique
-  location             String
-  investmentGoal       Float              @default(0.0)
-  investmentRaised     Float              @default(0.0)
-  tags                 String             @default("")
-  status               Status             @default(ACTIVE)
-  description          String
-  buildingAvgRent      Int                @default(0)
-  buildingAvgUnitSize  Int                @default(0)
-  buildingCommSqFt     Int                @default(0)
-  buildingUnits        Int                @default(0)
-  debtInterestRate     String             @default("")
-  debtMinInvestment    Int                @default(25000)
-  debtPaymentFreq      String             @default("quarterly")
-  debtTermMonths       Int                @default(48)
-  equityIRR            Float              @default(0.0)
-  equityMinInvestment  Int                @default(250000)
-  equityPaymentFreq    String             @default("quarterly")
-  equityTermMonths     Int                @default(60)
-  marketHighlights     String             @default("")
-  youtubeUrl           String             @default("")
-  preferredReturn      String             @default("")
-  targetEquityMultiple Float              @default(0.0)
-  slug                 String             @unique
-  equityReturnsFile    String?
-  deals                Deal[]
-  documents            Document[]
-  pictures             Pictures[]
-  projectMilestones    ProjectMilestones?
+  id                Int                     @id @default(autoincrement())
+  name              String                  @unique
+  location          String
+  tags              String                  @default("")
+  status            Status                  @default(ACTIVE)
+  description       String
+  marketHighlights  String                  @default("")
+  youtubeUrl        String                  @default("")
+  slug              String                  @unique
+  equityReturnsFile String?
+  deals             Deal[]
+  documents         ProjectDocument[]
+  pictures          ProjectPicture[]
+  milestones        ProjectMilestones?
+  propertyStats     ProjectPropertyStats?
+  investmentStats   ProjectInvestmentStats?
+}
+
+model ProjectPropertyStats {
+  id             Int     @id @default(autoincrement())
+  avgRent        Int     @default(0)
+  avgUnitSize    Int     @default(0)
+  commercialSqFt Int     @default(0)
+  numUnits       Int     @default(0)
+  projectId      Int     @unique
+  project        Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectInvestmentStats {
+  id                   Int     @id @default(autoincrement())
+  cUnitThresholdAmount Float   @default(200000.0)
+  debtInterestRate     String  @default("")
+  debtMinInvestment    Int     @default(5000)
+  debtPaymentFreq      String  @default("quarterly")
+  debtTermMonths       Int     @default(48)
+  equityIRR            Float   @default(0.0)
+  equityMinInvestment  Int     @default(5000)
+  equityPaymentFreq    String  @default("quarterly")
+  equityTermMonths     Int     @default(60)
+  preferredReturn      String  @default("")
+  investmentGoal       Float   @default(0.0)
+  investmentRaised     Float   @default(0.0)
+  targetEquityMultiple Float   @default(0.0)
+  totalAUnitReturn     Float   @default(0.0)
+  totalCUnitReturn     Float   @default(0.0)
+  projectId            Int     @unique
+  project              Project @relation(fields: [projectId], references: [id])
 }
 
 model ProjectMilestones {
@@ -149,7 +178,7 @@ model ProjectMilestones {
 }
 
 /// Project specific pictures
-model Pictures {
+model ProjectPicture {
   id        Int         @id @default(autoincrement())
   projectId Int
   url       String
@@ -158,7 +187,7 @@ model Pictures {
 }
 
 /// project documents that all logged in users can see
-model Document {
+model ProjectDocument {
   id                 Int                 @id @default(autoincrement())
   name               String
   fileName           String
@@ -180,7 +209,7 @@ model DocumentEvent {
   documentId Int
   date       DateTime
   type       DocumentEventType
-  document   Document          @relation(fields: [documentId], references: [id])
+  document   ProjectDocument   @relation(fields: [documentId], references: [id])
   user       User              @relation(fields: [userId], references: [id])
 }
 
@@ -247,4 +276,9 @@ enum DealOwnershipType {
   MARITAL
   COMMON
   PARTNERSHIP
+}
+
+enum DealUnitType {
+  AUNIT
+  CUNIT
 }

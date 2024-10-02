@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Project" ADD COLUMN     "cUnitThresholdAmount" DOUBLE PRECISION NOT NULL DEFAULT 200000.0;
