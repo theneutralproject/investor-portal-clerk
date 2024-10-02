@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -13,40 +13,46 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { type HubspotContact } from "@/app/api/utils-module/hubspotUtils";
+import {
+  ReferralSource,
+  type HubspotContact,
+} from "@/app/api/utils-module/hubspotUtils";
 import { useUser } from "@clerk/nextjs";
+import { type User } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
 
-const ReferralSources = {
-  "Event Mailer": "Event Mailer",
-  "Investor Event": "Investor Event",
-  Referral: "Referral",
-  "A Neutral Team Member": "A Neutral Team Member",
-  Google: "Google",
-  "Advertisement Online": "Advertisement Online",
-  "Neutral Email": "Neutral Email",
-  Newsletter: "Newsletter",
-  "Neutral Podcast": "Neutral Podcast",
-  Facebook: "Facebook",
-  X: "X",
-  LinkedIn: "LinkedIn",
-  Instagram: "Instagram",
-  Other: "Other",
-} as const;
-
-type ReferralSource = keyof typeof ReferralSources;
+const normalizeLabel = (label: string) => {
+  return label
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+};
 
 const Referral: React.FC = () => {
   const [referralSource, setReferralSource] = useState<ReferralSource | "">("");
   const router = useRouter();
   const { user } = useUser();
 
+  const { isLoading, data } = useQuery<User, Error>({
+    queryKey: ["currentUser"],
+    queryFn: () => axios.get<User>("/api/currentUser").then((res) => res.data),
+  });
+
+  useEffect(() => {
+    if (data?.referralSource) {
+      router.push("/projects");
+    }
+  }, [data?.referralSource, router]);
+
+  if (isLoading) return <div>Loading...</div>;
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!referralSource) return;
 
-    console.log("Selected referral source:", referralSource);
-
     try {
+      await axios.post("/api/currentUser", { referralSource });
+
       if (!user?.primaryEmailAddress) {
         throw new Error("User email address not found");
       }
@@ -62,11 +68,10 @@ const Referral: React.FC = () => {
       };
 
       await axios.put("/api/users/hubspot", hsUser);
+
+      router.push("/projects");
     } catch (error) {
       console.error("Error updating user information:", error);
-    } finally {
-      console.log("Redirecting to projects page");
-      router.push("/projects");
     }
   };
 
@@ -91,12 +96,12 @@ const Referral: React.FC = () => {
                 setReferralSource(e.target.value as ReferralSource)
               }
             >
-              {Object.entries(ReferralSources).map(([key, value]) => (
+              {Object.entries(ReferralSource).map(([key, value]) => (
                 <FormControlLabel
                   key={key}
-                  value={key}
+                  value={value}
                   control={<Radio />}
-                  label={value}
+                  label={normalizeLabel(key)}
                 />
               ))}
             </RadioGroup>
