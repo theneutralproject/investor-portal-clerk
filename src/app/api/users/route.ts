@@ -4,6 +4,7 @@ import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
 import { ClerkUserUpdateSchema, UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
+import { decryptData, encryptString } from "@/libs/encryption/utils";
 
 /**
  * @param request 
@@ -14,11 +15,11 @@ export async function GET(request: NextRequest) {
     if (!clerkUser) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
-
     const dbUser = await prisma.user.findUnique({
         where: { clerkId: clerkUser.id },
         include: { address: true }
     });
+    
     if (!dbUser) {
         console.error("Neutral user not found in api/deals");
         return jsonResponse(
@@ -29,9 +30,18 @@ export async function GET(request: NextRequest) {
         );
     }
 
+    if (dbUser.ssn) {
+        dbUser.ssn = `***-**-${decryptData(dbUser.ssn).slice(-4)}`;
+    }
+    
     return jsonResponse(dbUser)
 }
 
+/**
+ * This function handles encryption of the Social Security Number (SSN) on user object
+ * @param request with body:UserUpdateSchema
+ * @returns updated user
+ */
 export async function PUT(request: NextRequest) {
     // user can only update their own information
     const clerkUser = await currentUser();
@@ -74,6 +84,12 @@ export async function PUT(request: NextRequest) {
         } catch (clerkError) {
             console.log(clerkError)
         }
+    }
+
+    if (userData.ssn) {
+        // encrypt SSN before storing it:
+        userData.ssn = encryptString(userData.ssn)
+        console.log(`encrypted userdata.ssn`, userData.ssn)
     }
 
     try {

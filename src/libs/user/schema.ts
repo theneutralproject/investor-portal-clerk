@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 // we are excluding the email and phoneNumber, since these were previosuly verified by the user
-// TODO: use clerk API to update and verify these 
+// TODO: use clerk API to update and verify phone and email 
 export const zUserUpdateSchema = z.object({
     // email: z.string().email().optional(),
     // phoneNumber: z.string().optional(),

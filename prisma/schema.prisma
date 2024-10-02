@@ -29,7 +29,7 @@ model User {
   address             Address?        @relation(fields: [addressId], references: [id])
   primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
   organization        Organization[]  @relation("allOrgs")
-  deal                Deal[] /// @deprecated Use `organization.deal` instead.
+  deal                Deal[] /// @deprecated. Use `organization.deal` instead.
 }
 
 model Deal {
@@ -49,7 +49,7 @@ model Deal {
   organization            Organization           @relation(fields: [organizationId], references: [id])
   project                 Project                @relation(fields: [projectId], references: [id])
   document                DealDocument[]
-  user                    User?                  @relation(fields: [userId], references: [id]) /// @deprecated Use `organization` instead.
+  user                    User?                  @relation(fields: [userId], references: [id]) /// @deprecated. Use `organization` instead.
   investmentStats     DealInvestmentStats?
 }
 

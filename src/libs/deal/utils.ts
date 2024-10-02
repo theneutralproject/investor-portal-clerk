@@ -1,7 +1,8 @@
 import type { DealFinancingType, Deal } from "@prisma/client";
 import { isError } from "lodash";
-import { DealUpdateSchema, ProjectName } from "../schema";
+import { ProjectName } from "../schema";
 import prisma from "../prisma";
+import { DealUpdateSchema } from "./schema";
 
 /**
  * Updates a deal in the database
@@ -40,7 +41,6 @@ export async function updateDeal(
                 return Error("Failed to update deal with hubspot data");
             });
     }
-
 
     return updatedDeal;
 }
@@ -81,4 +81,4 @@ export function getInvestmentEntity(
         }
     }
     /* eslint-enable */
-}
+};
