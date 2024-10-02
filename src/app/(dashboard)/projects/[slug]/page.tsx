@@ -14,7 +14,7 @@ import InvestmentProgress from "@/components/Project/InvestmentProgress/Investme
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
 import { FundTab } from "@/components/Project/Fund/FundTab";
-import { type ProjectWithPicturesAndMilestones } from "@/libs/prisma";
+import { DealWithInvestmentStats, type ProjectWithAllNestedData } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
@@ -47,21 +47,21 @@ export default function Page({ params: { slug } }: PageProps) {
     financingType: searchParams.get("financingType"),
   };
 
-  
+
   const { user } = useUser();
-  
+
   const handleChange = (event: React.ChangeEvent<object>, newValue: number) => {
     setTabValue(newValue);
   };
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
-    ProjectWithPicturesAndMilestones[],
+    ProjectWithAllNestedData[],
     Error
   >({
     queryKey: ["project", slug],
     queryFn: () =>
       axios
-        .get<ProjectWithPicturesAndMilestones[]>(`/api/projects?slug=${slug}`)
+        .get<ProjectWithAllNestedData[]>(`/api/projects?slug=${slug}`)
         .then((res) => res.data),
   });
 
@@ -73,7 +73,7 @@ export default function Page({ params: { slug } }: PageProps) {
     queryKey: ["deal", slug],
     queryFn: () =>
       axios
-        .get<Deal | null>(`/api/deals?slug=${slug}`)
+        .get<DealWithInvestmentStats | null>(`/api/deals?slug=${slug}`)
         .then((res) => res.data),
   });
 
@@ -86,10 +86,10 @@ export default function Page({ params: { slug } }: PageProps) {
   }, [user, queryParams.afterauth])
 
   useEffect(() => {
-    const updateOrCreateDeal = async (project: ProjectWithPicturesAndMilestones) => {
+    const updateOrCreateDeal = async (project: ProjectWithAllNestedData) => {
       const typedFinancingType = (
         queryParams.financingType &&
-        queryParams.financingType in DealFinancingType
+          queryParams.financingType in DealFinancingType
           ? queryParams.financingType
           : "equity"
       ) as keyof typeof DealFinancingType;
@@ -105,8 +105,10 @@ export default function Page({ params: { slug } }: PageProps) {
 
         const dealUpdateData: Partial<DealUpdateSchema> = {
           hubspotId: dealData.hubspotId,
-          financingType: DealFinancingType[typedFinancingType],
-          ...(minDealStage > dealData.dealStage && { dealStage: minDealStage }),
+          investmentStats: {
+            financingType: DealFinancingType[typedFinancingType],
+            ...(minDealStage > dealData.dealStage && { dealStage: minDealStage }),
+          },
         };
 
         await axios.put("/api/deals", dealUpdateData);
@@ -152,7 +154,7 @@ export default function Page({ params: { slug } }: PageProps) {
   const dealStage = deal?.dealStage ?? 0;
 
   const percentRaised = Math.round(
-    (project.investmentRaised / project.investmentGoal) * 100
+    (project.investmentStats.investmentRaised / project.investmentStats.investmentGoal) * 100
   );
 
   const images = project.pictures

@@ -11,10 +11,10 @@ import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import BuildingDetails from "./BuildingDetails";
 import BasicTitleDescriptionCard from "../BasicTitleDescriptionCard";
-import { type Project } from "@prisma/client";
 import ProjectCalculator from "./ProjectCalculator";
+import type { ProjectWithAllNestedData } from "@/libs/prisma";
 
-export const OverviewTab = ({ data }: { data: Project }) => {
+export const OverviewTab = ({ data }: { data: ProjectWithAllNestedData }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   let youtubeID = "";

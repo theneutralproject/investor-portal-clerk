@@ -1,9 +1,9 @@
 import React from "react";
 import { CardContent, Grid, Typography } from "@mui/material";
-import { type Project } from "@prisma/client";
+import type { ProjectWithStats } from "@/libs/prisma";
 
-const ProjectMetrics: React.FC<{ project: Project }> = ({ project }) => {
-  const { equityIRR } = project;
+const ProjectMetrics: React.FC<{ project: ProjectWithStats }> = ({ project }) => {
+  const { equityIRR } = project.investmentStats;
   return (
     <CardContent>
       <Grid container spacing={2} sx={{ textAlign: "center" }}>

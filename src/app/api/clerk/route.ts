@@ -30,7 +30,6 @@ export async function POST(request: Request) {
   switch (type) {
     case "user.created": {
       console.log("clerk WH1 - user created");
-
       const {
         id,
         primary_email_address_id,
@@ -43,7 +42,7 @@ export async function POST(request: Request) {
       const email =
         email_addresses.find(({ id }) => id === primary_email_address_id)
           ?.email_address ?? "";
-      const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({ id }) => id === primary_phone_number_id)) ?? "") : (phone_numbers[0]?.phone_number ?? "")
+      const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({ id }) => id === primary_phone_number_id))?.phone_number ?? "") : (phone_numbers[0]?.phone_number ?? "")
 
       /* Store/ update user in Hubspot**/
       const hsUserData = {
@@ -90,6 +89,7 @@ export async function POST(request: Request) {
             name: `${newUserData.firstName} ${newUserData.lastName}'s Org`,
           }
         });
+        console.log(`created user org with id ${userOrg.id}`)
 
         newUserData.userOrgId = userOrg.id;
         const dbUser = await prisma.user.create({
@@ -98,18 +98,18 @@ export async function POST(request: Request) {
           }
         });
 
-        await prisma.organization.update({ 
+        console.log(`created dbUser with id ${dbUser.id}`)
+
+        const updatedOrg = await prisma.organization.update({ 
           where: { id: userOrg.id },
           data: { ownerId: dbUser.id }
-        });
+        })
+        
+        console.log(`updated org with id ${updatedOrg.id}`)
         
         await clerkClient.users.updateUser(id, { firstName: startCase(first_name), lastName: startCase(toLower(last_name)) })
       } catch (error) {
-        console.error("ERROR: Cannot create User in DB:\n", error);
-        return new Response(JSON.stringify({ error: "Unable to create user in DB" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
+        console.error("ERROR: Cannot create user and org:\n", error);
       }
       break;
     }

@@ -3,9 +3,9 @@
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { DealFinancingType, Document } from "@prisma/client";
+import { DealFinancingType, ProjectDocument } from "@prisma/client";
 
-export type DocumentWithCompletion = Document & { completed: boolean };
+export type DocumentWithCompletion = ProjectDocument & { completed: boolean };
 
 const useDocuments = (
   projectId: number,

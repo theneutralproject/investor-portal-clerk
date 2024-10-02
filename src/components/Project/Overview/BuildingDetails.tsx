@@ -1,25 +1,25 @@
 import React from "react";
 import { Divider } from "@mui/material";
 import { LineDisplay } from "./InvestmentSummaryBox";
-import { type Project } from "@prisma/client";
 import CollapsibleCard from "./CollapsibleCard";
+import type { ProjectWithStats } from "@/libs/prisma";
 
 const formatter = Intl.NumberFormat('en', { maximumFractionDigits: 2 });
 
-const BuildingDetails = ({ data }: { data: Project }) => {
+const BuildingDetails = ({ data }: { data: ProjectWithStats }) => {
   return (
     <CollapsibleCard title="Building Details">
       <Divider />
 
-      <LineDisplay name="Total Units" value={`${data.buildingUnits}`} />
+      <LineDisplay name="Total Units" value={`${data.propertyStats.numUnits}`} />
       <LineDisplay
         name="Avg. Unit Size"
-        value={`${data.buildingAvgUnitSize} SF`}
+        value={`${data.propertyStats.avgUnitSize} SF`}
       />
-      <LineDisplay name="Avg. Gross Rent" value={`$${formatter.format(data.buildingAvgRent)}`} />
+      <LineDisplay name="Avg. Gross Rent" value={`$${formatter.format(data.propertyStats.avgRent)}`} />
       <LineDisplay
         name="Commercial Sq. Ft."
-        value={`${formatter.format(data.buildingCommSqFt)} SF`}
+        value={`${formatter.format(data.propertyStats.commercialSqFt)} SF`}
       />
     </CollapsibleCard>
   );
