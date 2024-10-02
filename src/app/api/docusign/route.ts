@@ -1,10 +1,10 @@
 
-import { getErrorMessage } from "../utils-module/helpers";
-import { type DocusignEnvelopeSchema, jsonResponse, zDocusignEnvelope } from "../utils-module/_globals";
-import { instantiateApiClient, makeEnvelope, makeRecipientViewRequest, refreshAccessToken } from '../utils-module/docusignUtils';
 import { isError } from "lodash";
 import prisma from "@/libs/prisma";
 import { toWords } from "number-to-words";
+import { type DocusignEnvelopeSchema, zDocusignEnvelope } from '@/libs/docusign/schema';
+import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { refreshAccessToken, instantiateApiClient, makeEnvelope, makeRecipientViewRequest } from "@/libs/docusign/utils";
 
 export async function POST(req: Request) {
     let envelopeData: DocusignEnvelopeSchema;

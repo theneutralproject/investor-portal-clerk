@@ -1,7 +1,6 @@
 // import prisma from "@/libs/prisma";
 // import { currentUser } from "@clerk/nextjs/server";
 // import { type NextRequest } from "next/server";
-// import {  jsonResponse } from "../../utils-module/_globals";
 
 // export const dynamic = "force-dynamic";
 // export const revalidate = 0;

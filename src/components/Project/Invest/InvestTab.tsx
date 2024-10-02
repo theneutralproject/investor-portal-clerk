@@ -8,11 +8,11 @@ import useDocuments, {
 import { Deal, DocumentType, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
-import { updateHubspotDealDocsAccessed } from "@/app/api/utils-module/hubspotUtils";
 import { useDebounce } from "@/app/hooks/useDebounce";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
-import { DocusignEnvelopeSchema } from "@/app/api/utils-module/_globals";
+import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
+import type { DocusignEnvelopeSchema } from "@/libs/docusign/schema";
 
 export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
   project,

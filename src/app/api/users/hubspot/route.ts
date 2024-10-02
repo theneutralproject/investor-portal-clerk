@@ -1,11 +1,14 @@
 
 import type { NextRequest } from "next/server";
-import { type HubspotContact, updateContact, zHsContactUpdateSchema } from "../../utils-module/hubspotUtils";
-import { jsonResponse } from "../../utils-module/_globals";
 import { isError } from "lodash";
-import { getErrorMessage } from "../../utils-module/helpers";
+import { type HubspotContact, zHsContactUpdateSchema } from "@/libs/hubspot/schema";
+import { updateHubspotContact } from "@/libs/hubspot/utils";
+import { getErrorMessage, jsonResponse } from "@/libs/utils";
 
-// used to update an existing user in hubspot
+/**
+ * ! THIS ROUTE IS NOT CURRENTLY USED AND SHOULD BE DELETED
+ * @deprecated Hubspot contacts are updated via the PUT api/users route
+ *  */ 
 export async function PUT(request: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestBody = await request.json();
@@ -18,7 +21,7 @@ export async function PUT(request: NextRequest) {
         return jsonResponse({ error: "Input data malformatted" }, 400);
     }
 
-    const hsResponse = await updateContact(hsContact);
+    const hsResponse = await updateHubspotContact(hsContact);
     if (isError(hsResponse)) {
         return new Response(
             JSON.stringify({ error: getErrorMessage(hsResponse) }),

@@ -1,0 +1,38 @@
+import { DealOwnershipType, DealFinancingType, DealUnitType } from "@prisma/client";
+import { z } from "zod";
+
+
+export const zDealInvestmentStatsUpdateSchema = z.object({
+    amount: z.number().optional(),
+    ownershipType: z.nativeEnum(DealOwnershipType).optional(),
+    financingType: z.nativeEnum(DealFinancingType).optional(),
+    unitType: z.nativeEnum(DealUnitType).optional(),
+    numberAUnits: z.number().min(0).optional(),
+    numberCUnits: z.number().min(0).optional(),
+  });
+  
+  export type DealInvestmentStatsUpdateSchema = z.infer<typeof zDealInvestmentStatsUpdateSchema>;
+  
+  // always look up a deal by hubspotId
+  export const zDealUpdateSchema = z.object({
+    hubspotId: z.string(),
+    projectId: z.number().int().optional(),
+    organizationId: z.number().optional(),
+    dealStage: z.number().optional(),
+    accreditationVerifierId: z.number().optional(),
+    investmentStats: zDealInvestmentStatsUpdateSchema.optional()
+  });
+  
+  export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
+  
+  export const zDealCreateSchema = z.object({
+    projectId: z.number().int(),
+    amount: z.number().optional(),
+    dealStage: z.number().optional(),
+    financingType: z.nativeEnum(DealFinancingType).optional(),
+    transactionId: z.string().optional(),
+    organizationId: z.number().optional() /**will be set in the backend if not provided by UI */,
+  });
+  
+  export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;
+  

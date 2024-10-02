@@ -11,6 +11,7 @@
     "postinstall": "prisma generate",
     "lint": "next lint",
     "prebuild": "tsc --noEmit && eslint && prisma generate && prisma migrate deploy",
+    "precommit": "tsc && eslint && prisma generate",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch"

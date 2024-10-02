@@ -40,7 +40,7 @@ export const ProjectDocumentScalarFieldEnumSchema = z.enum(['id','name','fileNam
 
 export const DocumentEventScalarFieldEnumSchema = z.enum(['id','userId','documentId','date','type']);
 
-export const AddressScalarFieldEnumSchema = z.enum(['id','street','city','zipcode','state']);
+export const AddressScalarFieldEnumSchema = z.enum(['id','street','city','zipcode','state','country']);
 
 export const SortOrderSchema = z.enum(['asc','desc']);
 
@@ -375,6 +375,7 @@ export const AddressSchema = z.object({
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string(),
 })
 
 export type Address = z.infer<typeof AddressSchema>
@@ -863,6 +864,7 @@ export const AddressSelectSchema: z.ZodType<Prisma.AddressSelect> = z.object({
   city: z.boolean().optional(),
   zipcode: z.boolean().optional(),
   state: z.boolean().optional(),
+  country: z.boolean().optional(),
   organization: z.union([z.boolean(),z.lazy(() => OrganizationFindManyArgsSchema)]).optional(),
   user: z.union([z.boolean(),z.lazy(() => UserFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => AddressCountOutputTypeArgsSchema)]).optional(),
@@ -2177,6 +2179,7 @@ export const AddressWhereInputSchema: z.ZodType<Prisma.AddressWhereInput> = z.ob
   city: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   zipcode: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   state: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  country: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   organization: z.lazy(() => OrganizationListRelationFilterSchema).optional(),
   user: z.lazy(() => UserListRelationFilterSchema).optional()
 }).strict();
@@ -2187,6 +2190,7 @@ export const AddressOrderByWithRelationInputSchema: z.ZodType<Prisma.AddressOrde
   city: z.lazy(() => SortOrderSchema).optional(),
   zipcode: z.lazy(() => SortOrderSchema).optional(),
   state: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional(),
   organization: z.lazy(() => OrganizationOrderByRelationAggregateInputSchema).optional(),
   user: z.lazy(() => UserOrderByRelationAggregateInputSchema).optional()
 }).strict();
@@ -2203,6 +2207,7 @@ export const AddressWhereUniqueInputSchema: z.ZodType<Prisma.AddressWhereUniqueI
   city: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   zipcode: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   state: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  country: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   organization: z.lazy(() => OrganizationListRelationFilterSchema).optional(),
   user: z.lazy(() => UserListRelationFilterSchema).optional()
 }).strict());
@@ -2213,6 +2218,7 @@ export const AddressOrderByWithAggregationInputSchema: z.ZodType<Prisma.AddressO
   city: z.lazy(() => SortOrderSchema).optional(),
   zipcode: z.lazy(() => SortOrderSchema).optional(),
   state: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => AddressCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => AddressAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => AddressMaxOrderByAggregateInputSchema).optional(),
@@ -2229,6 +2235,7 @@ export const AddressScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Addre
   city: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   zipcode: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   state: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  country: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object({
@@ -3386,6 +3393,7 @@ export const AddressCreateInputSchema: z.ZodType<Prisma.AddressCreateInput> = z.
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string().optional(),
   organization: z.lazy(() => OrganizationCreateNestedManyWithoutAddressInputSchema).optional(),
   user: z.lazy(() => UserCreateNestedManyWithoutAddressInputSchema).optional()
 }).strict();
@@ -3396,6 +3404,7 @@ export const AddressUncheckedCreateInputSchema: z.ZodType<Prisma.AddressUnchecke
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string().optional(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAddressInputSchema).optional(),
   user: z.lazy(() => UserUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
 }).strict();
@@ -3405,6 +3414,7 @@ export const AddressUpdateInputSchema: z.ZodType<Prisma.AddressUpdateInput> = z.
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   organization: z.lazy(() => OrganizationUpdateManyWithoutAddressNestedInputSchema).optional(),
   user: z.lazy(() => UserUpdateManyWithoutAddressNestedInputSchema).optional()
 }).strict();
@@ -3415,6 +3425,7 @@ export const AddressUncheckedUpdateInputSchema: z.ZodType<Prisma.AddressUnchecke
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAddressNestedInputSchema).optional(),
   user: z.lazy(() => UserUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
 }).strict();
@@ -3424,7 +3435,8 @@ export const AddressCreateManyInputSchema: z.ZodType<Prisma.AddressCreateManyInp
   street: z.string(),
   city: z.string(),
   zipcode: z.string(),
-  state: z.string()
+  state: z.string(),
+  country: z.string().optional()
 }).strict();
 
 export const AddressUpdateManyMutationInputSchema: z.ZodType<Prisma.AddressUpdateManyMutationInput> = z.object({
@@ -3432,6 +3444,7 @@ export const AddressUpdateManyMutationInputSchema: z.ZodType<Prisma.AddressUpdat
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AddressUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AddressUncheckedUpdateManyInput> = z.object({
@@ -3440,6 +3453,7 @@ export const AddressUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AddressUnch
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
@@ -4649,7 +4663,8 @@ export const AddressCountOrderByAggregateInputSchema: z.ZodType<Prisma.AddressCo
   street: z.lazy(() => SortOrderSchema).optional(),
   city: z.lazy(() => SortOrderSchema).optional(),
   zipcode: z.lazy(() => SortOrderSchema).optional(),
-  state: z.lazy(() => SortOrderSchema).optional()
+  state: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const AddressAvgOrderByAggregateInputSchema: z.ZodType<Prisma.AddressAvgOrderByAggregateInput> = z.object({
@@ -4661,7 +4676,8 @@ export const AddressMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AddressMaxO
   street: z.lazy(() => SortOrderSchema).optional(),
   city: z.lazy(() => SortOrderSchema).optional(),
   zipcode: z.lazy(() => SortOrderSchema).optional(),
-  state: z.lazy(() => SortOrderSchema).optional()
+  state: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const AddressMinOrderByAggregateInputSchema: z.ZodType<Prisma.AddressMinOrderByAggregateInput> = z.object({
@@ -4669,7 +4685,8 @@ export const AddressMinOrderByAggregateInputSchema: z.ZodType<Prisma.AddressMinO
   street: z.lazy(() => SortOrderSchema).optional(),
   city: z.lazy(() => SortOrderSchema).optional(),
   zipcode: z.lazy(() => SortOrderSchema).optional(),
-  state: z.lazy(() => SortOrderSchema).optional()
+  state: z.lazy(() => SortOrderSchema).optional(),
+  country: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const AddressSumOrderByAggregateInputSchema: z.ZodType<Prisma.AddressSumOrderByAggregateInput> = z.object({
@@ -6155,6 +6172,7 @@ export const AddressCreateWithoutUserInputSchema: z.ZodType<Prisma.AddressCreate
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string().optional(),
   organization: z.lazy(() => OrganizationCreateNestedManyWithoutAddressInputSchema).optional()
 }).strict();
 
@@ -6164,6 +6182,7 @@ export const AddressUncheckedCreateWithoutUserInputSchema: z.ZodType<Prisma.Addr
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string().optional(),
   organization: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
 }).strict();
 
@@ -6320,6 +6339,7 @@ export const AddressUpdateWithoutUserInputSchema: z.ZodType<Prisma.AddressUpdate
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   organization: z.lazy(() => OrganizationUpdateManyWithoutAddressNestedInputSchema).optional()
 }).strict();
 
@@ -6329,6 +6349,7 @@ export const AddressUncheckedUpdateWithoutUserInputSchema: z.ZodType<Prisma.Addr
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   organization: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
 }).strict();
 
@@ -6950,6 +6971,7 @@ export const AddressCreateWithoutOrganizationInputSchema: z.ZodType<Prisma.Addre
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string().optional(),
   user: z.lazy(() => UserCreateNestedManyWithoutAddressInputSchema).optional()
 }).strict();
 
@@ -6959,6 +6981,7 @@ export const AddressUncheckedCreateWithoutOrganizationInputSchema: z.ZodType<Pri
   city: z.string(),
   zipcode: z.string(),
   state: z.string(),
+  country: z.string().optional(),
   user: z.lazy(() => UserUncheckedCreateNestedManyWithoutAddressInputSchema).optional()
 }).strict();
 
@@ -7100,6 +7123,7 @@ export const AddressUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma.Addre
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUpdateManyWithoutAddressNestedInputSchema).optional()
 }).strict();
 
@@ -7109,6 +7133,7 @@ export const AddressUncheckedUpdateWithoutOrganizationInputSchema: z.ZodType<Pri
   city: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   zipcode: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   state: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  country: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   user: z.lazy(() => UserUncheckedUpdateManyWithoutAddressNestedInputSchema).optional()
 }).strict();
 

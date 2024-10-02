@@ -10,11 +10,12 @@ import useDocuments, {
 import DocumentViewerModal from "./DocumentViewerModal";
 import { useState } from "react";
 import { useDebounce } from "@/app/hooks/useDebounce";
-import { updateHubspotDealDocsAccessed } from "@/app/api/utils-module/hubspotUtils";
+import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
+import { DealWithInvestmentStats } from "@/libs/prisma";
 
 export const ProjectDocTab: React.FC<{
   project: Project;
-  deal: Deal;
+  deal: DealWithInvestmentStats;
 }> = ({ project, deal }) => {
   const [openModal, setOpenModal] = useState(false);
   const [currentDocument, setCurrentDocument] =
@@ -37,7 +38,7 @@ export const ProjectDocTab: React.FC<{
     data: DocumentWithCompletion[];
     error: any;
     documentEventMutation: any;
-  } = useDocuments(project.id, 1, deal.financingType!);
+  } = useDocuments(project.id, 1, deal.investmentStats.financingType!);
 
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error.message}</div>;

@@ -1,13 +1,8 @@
-import type { DealUpdateSchema, HubspotDealUpdateSchema } from "@/app/api/utils-module/_globals";
-import { updateDeal } from "@/app/api/utils-module/dealUtils";
-import { getErrorMessage } from "@/app/api/utils-module/helpers";
-import {
-  getDealStageInt,
-  getFundingAmount,
-  getProjectNameFromDealStage,
-  HSDealPropNames,
-} from "@/app/api/utils-module/hubspotUtils";
+import { updateDeal } from "@/libs/deal/utils";
+import type { HubspotDealUpdateSchema } from "@/libs/hubspot/schema";
+import { HSDealPropNames, getDealStageInt, getProjectNameFromDealStage, getFundingAmount } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma";
+import { getErrorMessage } from "@/libs/utils";
 import { DealFinancingType, type Deal } from "@prisma/client";
 import { isError } from "lodash";
 import { z } from "zod";
