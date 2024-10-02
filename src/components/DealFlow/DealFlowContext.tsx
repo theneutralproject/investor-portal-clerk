@@ -1,8 +1,13 @@
 import React, { createContext, useState, useContext } from "react";
 
-const DealFlowContext = createContext();
+interface DealFlowContextType {
+  step: number;
+  setStep: React.Dispatch<React.SetStateAction<number>>;
+}
 
-export const DealFlowProvider = ({ children }) => {
+const DealFlowContext = createContext<DealFlowContextType | undefined>(undefined);
+
+export const DealFlowProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [step, setStep] = useState(1);
 
   return (
@@ -12,4 +17,10 @@ export const DealFlowProvider = ({ children }) => {
   );
 };
 
-export const useDealFlow = () => useContext(DealFlowContext);
+export const useDealFlow = (): DealFlowContextType => {
+  const context = useContext(DealFlowContext);
+  if (context === undefined) {
+    throw new Error("useDealFlow must be used within a DealFlowProvider");
+  }
+  return context;
+};

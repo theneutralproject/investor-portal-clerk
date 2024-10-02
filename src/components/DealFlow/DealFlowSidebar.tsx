@@ -3,13 +3,13 @@ import { Typography, Box, Button, Divider } from "@mui/material";
 
 const DealFlowSidebar = () => {
   return (
-    <Box 
-      sx={{ 
-        p: 2, 
-        backgroundColor: "#f4f5f7", 
-        height: "100%", 
-        display: "flex", 
-        flexDirection: "column" 
+    <Box
+      sx={{
+        p: 2,
+        backgroundColor: "#f4f5f7",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
       }}
     >
       <Box>
@@ -43,7 +43,7 @@ const DealFlowSidebar = () => {
 
       <Divider sx={{ my: 2 }} />
 
-      <Box sx={{ mt: 'auto' }}>
+      <Box sx={{ mt: "auto" }}>
         <Typography
           variant="subtitle1"
           gutterBottom
@@ -59,7 +59,8 @@ const DealFlowSidebar = () => {
             sx={{ width: 40, height: 40, mr: 2, borderRadius: "50%" }}
           />
           <Typography variant="body2" color="text.secondary">
-            Give us a call or chat anytime - we'll answer any questions you have
+            Give us a call or chat anytime - we will answer any questions you
+            have
           </Typography>
         </Box>
         <Button

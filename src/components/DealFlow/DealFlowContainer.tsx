@@ -2,7 +2,7 @@ import React from "react";
 import { Paper, Typography, Button, Box } from "@mui/material";
 import { useDealFlow } from "./DealFlowContext";
 
-const DealFlowContainer = () => {
+const DealFlowContainer: React.FC = () => {
   const { step, setStep } = useDealFlow();
 
   return (

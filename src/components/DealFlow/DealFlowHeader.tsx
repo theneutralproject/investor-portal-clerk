@@ -27,7 +27,7 @@ const DealFlowHeader = () => {
         </Typography>
       </Toolbar>
       <Stepper activeStep={step - 1} alternativeLabel>
-        {steps.map((label, index) => (
+        {steps.map((label) => (
           <Step key={label}>
             <StepLabel>{label}</StepLabel>
           </Step>
