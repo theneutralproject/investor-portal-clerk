@@ -1,7 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React from "react";
 import { Typography, Box, Button, Divider } from "@mui/material";
+import { useDealFlow } from "./DealFlowContext";
 
 const DealFlowSidebar = () => {
+  const { project, deal } = useDealFlow();
+
   return (
     <Box
       sx={{
@@ -29,14 +33,14 @@ const DealFlowSidebar = () => {
           />
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
-              The Edison
+              {project?.name}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              Milwaukee, WI
+              {project?.location}
             </Typography>
           </Box>
           <Typography variant="h6" sx={{ ml: "auto", fontWeight: "bold" }}>
-            $0
+            {deal?.investmentStats?.amount}
           </Typography>
         </Box>
       </Box>
