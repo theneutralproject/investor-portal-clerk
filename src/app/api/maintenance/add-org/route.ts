@@ -10,7 +10,6 @@
 // import { Organization } from "@prisma/client";
 // import { isNull } from "lodash";
 // import { resolve } from "styled-jsx/css";
-// import { jsonResponse } from "../../utils-module/_globals";
 
 // // 1. pull all users
 // // 2. create an organization name for the user

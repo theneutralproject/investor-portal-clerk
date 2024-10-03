@@ -1,47 +1,13 @@
-import { DealFinancingType, type User } from "@prisma/client";
-import { z } from "zod";
-import { type DealCreateSchema, ProjectName } from "./_globals";
-import { getErrorMessage } from "./helpers";
-import { isError } from "lodash";
-import { getInvestmentEntity } from "./dealUtils";
+import { User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
+import { isError } from "lodash";
+import { HubspotContact, hubspotContactApiResponse, HubspotDealPropertiesCollection, zHsDealCreateResponse, HsDealDocsAccessedUpdateSchema, HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
+import { type DealCreateSchema} from "../deal/schema";
+import { getErrorMessage } from "../utils";
+import { getInvestmentEntity } from "../deal/utils";
+import { ProjectName } from "../schema";
 
-export type HubspotContact = {
-  properties: { property: string; value: string }[];
-  email: string;
-};
 
-const zHsContactProperty = z.object({
-  property: z.string(),
-  value: z.string()
-});
-
-export const zHsContactUpdateSchema = z.object({
-  email: z.string(),
-  properties: z.array(zHsContactProperty)
-});
-
-export type HubspotUserCreateResponse = {
-  vid: number,
-  isNew: boolean
-};
-
-export type HubspotDealPropertiesCollection = {
-  properties: { name: string; value: string }[];
-};
-
-export type HubspotDealUpdate = {
-  hubspotDealId: number,
-  properties: { name: string; value: string }[]
-};
-
-export const zHsDealCreateResponse = z.object({
-  dealId: z.number()
-});
-
-export const hubspotContactApiResponse = z.object({
-  vid: z.number(),
-});
 
 async function _createOrUpdateContact(hubspotContact: HubspotContact) {
 
@@ -72,7 +38,7 @@ async function _createOrUpdateContact(hubspotContact: HubspotContact) {
   })
 };
 
-export async function createOrUpdateContact(hubspotContact: HubspotContact) {
+export async function createOrUpdateHubspotContact(hubspotContact: HubspotContact) {
   const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
     .getTime()
     .toString();
@@ -84,52 +50,10 @@ export async function createOrUpdateContact(hubspotContact: HubspotContact) {
   return await _createOrUpdateContact(hubspotContact);
 };
 
-export async function updateContact(hubspotContact: HubspotContact) {
+export async function updateHubspotContact(hubspotContact: HubspotContact) {
   console.log("updating HS user", hubspotContact)
   return await _createOrUpdateContact(hubspotContact);
 };
-
-export const zHsUpdateDealSchema = z.object({
-  hubspotDealId: z.number(),
-  properties: z.array(z.object(
-    {
-      name: z.string(),
-      value: z.string()
-    }
-  ))
-});
-
-
-export enum HSDealPropNames {
-  dealstage = 'dealstage',
-  amount = 'amount',
-  financing_type = 'financing_type',
-};
-
-export enum DealToHubspotDealEnum {
-  amount = "amount",
-  financingType = "financing_type",
-  dealStage = "dealstage",
-};
-
-const zHsDealSearchObjectSchema = z.object({
-  properties: z.object({
-    amount: z.string()
-  })
-});
-
-export const zHsDealSearchResultsSchema = z.object({
-  total: z.number(),
-  results: z.array(zHsDealSearchObjectSchema)
-});
-
-export const zHsDealDocsAccessedUpdateSchema = z.object({
-  dealId: z.number(),
-  dealStage: z.number().min(1).max(5),
-  documentNames: z.string(),
-});
-
-export type HsDealDocsAccessedUpdateSchema = z.infer<typeof zHsDealDocsAccessedUpdateSchema>
 
 export async function createHubspotDealForContact(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
@@ -363,6 +287,16 @@ export enum ReferralSource {
 }
 
 
-// deal contact association
-//https://developers.hubspot.com/docs/api/crm/associations
-//https://community.hubspot.com/t5/APIs-Integrations/Fetch-contacts-related-to-a-deal/m-p/550199
+export enum HSDealPropNames {
+  dealstage = 'dealstage',
+  amount = 'amount',
+  financing_type = 'financing_type',
+};
+
+export enum DealToHubspotDealEnum {
+  amount = "amount",
+  financingType = "financing_type",
+  dealStage = "dealstage",
+};
+
+
