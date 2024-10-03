@@ -12,7 +12,7 @@ import { ProjectName } from "../schema";
 async function _createOrUpdateContact(hubspotContact: HubspotContact) {
 
   return await fetch(
-    `https://api.hubapi.com/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
+    `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
     {
       method: "POST",
       headers: {
@@ -67,7 +67,7 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDealProper
   });
 
   const resBody = await fetch(
-    `https://api.hubapi.com/deals/v1/deal`,
+    `${process.env.HUBSPOT_API_BASE_URL}/deals/v1/deal`,
     {
       method: "POST",
       headers: {
@@ -110,7 +110,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
           { name: "amount", value: "0" },
           { name: "financing_type", value: dealData.financingType ?? "equity" },
           { name: "transaction_id", value: dealData.transactionId! },
-          { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
+          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID}
         ]
       } as HubspotDealPropertiesCollection
     }
@@ -124,7 +124,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
           { name: "amount", value: "0" },
           { name: "financing_type", value: dealData.financingType ?? "equity" },
           { name: "transaction_id", value: dealData.transactionId! },
-          { name: 'hubspot_owner_id', value: "345391171" /** CJ Fermanich */ },
+          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID},
         ]
       } as HubspotDealPropertiesCollection
     }
@@ -204,7 +204,7 @@ export async function getFundingAmount(projectName: ProjectName) {
     }
     payload.after = dealsFetched;
     const resBody = await fetch(
-      `https://api.hubapi.com/crm/v3/objects/deals/search`,
+      `${process.env.HUBSPOT_API_BASE_URL}/crm/v3/objects/deals/search`,
       {
         method: "POST",
         headers: {

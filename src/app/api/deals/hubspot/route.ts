@@ -24,7 +24,7 @@ export async function PUT(request: NextRequest) {
         });
 
         await fetch(
-            `https://api.hubapi.com/deals/v1/deal/${deal.hubspotDealId}`,
+            `${process.env.HUBSPOT_API_BASE_URL}/deals/v1/deal/${deal.hubspotDealId}`,
             {
                 method: "PUT",
                 headers: {
@@ -75,8 +75,8 @@ export async function POST(request: NextRequest) {
         // we set up webhooks in hubspot in order to trigger an internal email notification
         // URL stems from workflow trigger "project_documents_accessed" and "finance_documents_accessed" webhook
         const url = deal.dealStage === 1
-            ? `https://api-na1.hubapi.com/automation/v4/webhook-triggers/24164917/ICxJOU0`
-            : 'https://api-na1.hubapi.com/automation/v4/webhook-triggers/24164917/sSDHS4I'
+            ? `${process.env.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK}`
+            : `${process.env.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK}`
         await fetch(
             url,
             {
