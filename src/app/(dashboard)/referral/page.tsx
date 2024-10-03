@@ -13,13 +13,11 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import {
-  ReferralSource,
-  type HubspotContact,
-} from "@/app/api/utils-module/hubspotUtils";
 import { useUser } from "@clerk/nextjs";
 import { type User } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
+import { ReferralSource } from "@/libs/hubspot/utils";
+import { type HubspotContact } from "@/libs/hubspot/schema";
 
 const normalizeLabel = (label: string) => {
   return label
@@ -34,8 +32,8 @@ const Referral: React.FC = () => {
   const { user } = useUser();
 
   const { isLoading, data } = useQuery<User, Error>({
-    queryKey: ["currentUser"],
-    queryFn: () => axios.get<User>("/api/currentUser").then((res) => res.data),
+    queryKey: ["user"],
+    queryFn: () => axios.get<User>("/api/users").then((res) => res.data),
   });
 
   useEffect(() => {
@@ -51,7 +49,7 @@ const Referral: React.FC = () => {
     if (!referralSource) return;
 
     try {
-      await axios.post("/api/currentUser", { referralSource });
+      await axios.put("/api/users", { referralSource });
 
       if (!user?.primaryEmailAddress) {
         throw new Error("User email address not found");
