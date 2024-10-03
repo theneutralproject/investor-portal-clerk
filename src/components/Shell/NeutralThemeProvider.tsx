@@ -23,6 +23,7 @@ declare module "@mui/material/Button" {
   interface ButtonPropsVariantOverrides {
     snowdayBlue: true;
     neutralBlack: true;
+    neutralYellow: true;
   }
 }
 
@@ -123,6 +124,25 @@ export const theme = createTheme({
             "&:disabled": {
               color: "#fff",
               backgroundColor: "#1E2B31",
+              opacity: 0.5,
+            },
+          },
+        },
+        {
+          props: { variant: "neutralYellow" },
+          style: {
+            borderRadius: "56px",
+            background: "#DFAF44",
+            boxShadow:
+              "0px 1px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.20)",
+            padding: "6px 20px",
+            color: "#fff",
+            "&:hover": {
+              backgroundColor: "#E6BF69",
+            },
+            "&:disabled": {
+              color: "#fff",
+              backgroundColor: "#DFAF44",
               opacity: 0.5,
             },
           },
