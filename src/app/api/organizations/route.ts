@@ -2,7 +2,7 @@ import { decryptData, encryptString } from "@/libs/encryption/utils";
 import { OrganizationCreateSchema, OrganizationUpdateSchema, zOrganizationCreateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
-import { currentUser, User } from "@clerk/nextjs/server";
+import { currentUser } from "@clerk/nextjs/server";
 import { DealOwnershipType } from "@prisma/client";
 import { NextRequest } from "next/server";
 
@@ -42,7 +42,7 @@ export async function GET() {
         // eslint-disable-next-line prefer-const
         let { tin, ...rest } = org;
         if (tin) tin = `***-**-${decryptData(tin).slice(-4)}`;
-        return { ...rest, ...{ tin } }
+        return jsonResponse({ ...rest, ...{ tin } });
     });
 }
 
