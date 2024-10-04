@@ -21,7 +21,7 @@ export async function GET() {
     });
     
     if (!dbUser) {
-        console.error("Neutral user not found in api/deals");
+        console.error(`User record with clerkid ${clerkUser.id} not found in prisma (GET)`);
         return jsonResponse(
             {
                 error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
@@ -51,9 +51,9 @@ export async function PUT(request: NextRequest) {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestBody = await request.json();
-    let userData: UserUpdateSchema;
+    let putData: UserUpdateSchema;
     try {
-        userData = zUserUpdateSchema.parse(requestBody)
+        putData = zUserUpdateSchema.parse(requestBody)
     } catch (parseError) {
         console.error("ERROR: unable to parse PUT body:\n", parseError);
         return jsonResponse({ error: "Input data malformatted" }, 400);
@@ -61,19 +61,19 @@ export async function PUT(request: NextRequest) {
 
     //  Check if hubspot and clerk needs to be updated, and then update them
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
-    if (userData.firstName || userData.lastName) {
+    if (putData.firstName || putData.lastName) {
         const { emailAddresses, primaryEmailAddressId } = clerkUser
         const email = emailAddresses.find(({ id }) => id === primaryEmailAddressId)
             ?.emailAddress ?? "";
         const properties = [];
         const clerkUpdate: ClerkUserUpdateSchema = {};
-        if (userData.firstName) {
-            properties.push({ property: 'firstname', value: userData.firstName });
-            clerkUpdate.firstName = userData.firstName;
+        if (putData.firstName) {
+            properties.push({ property: 'firstname', value: putData.firstName });
+            clerkUpdate.firstName = putData.firstName;
         }
-        if (userData.lastName) {
-            properties.push({ property: 'lastname', value: userData.lastName });
-            clerkUpdate.lastName = userData.lastName;
+        if (putData.lastName) {
+            properties.push({ property: 'lastname', value: putData.lastName });
+            clerkUpdate.lastName = putData.lastName;
         }
         try {
             await updateHubspotContact({ email, properties });
@@ -87,20 +87,19 @@ export async function PUT(request: NextRequest) {
         }
     }
 
-    if (userData.ssn) {
-        // encrypt SSN before storing it:
-        userData.ssn = encryptString(userData.ssn)
-        console.log(`encrypted userdata.ssn`, userData.ssn)
+    if (putData.ssn) {
+        // sanitize it (digits only) and encrypt SSN before storing it:
+        putData.ssn = encryptString(putData.ssn.replace(/\D/g, ""));
     }
 
     try {
         const updatedUser = await prisma.user.update({
             where: { clerkId: clerkUser.id },
-            data: userData,
+            data: putData,
         });
         return jsonResponse(updatedUser);
     } catch (dbError) {
         console.error("ERROR: unable to update user:\n", dbError);
-        return jsonResponse({ error: dbError }, 400);
+        return jsonResponse({ error: 'unable to update user' }, 400);
     }
 }
