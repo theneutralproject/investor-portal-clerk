@@ -35,15 +35,15 @@ export async function GET() {
         );
     }
 
-    // TODO: encypt TIN on orgs
+    // encypt TIN on orgs
     const { organization } = dbUser;
 
-    return organization.map((org) => {
+    return jsonResponse(organization.map((org) => {
         // eslint-disable-next-line prefer-const
         let { tin, ...rest } = org;
         if (tin) tin = `***-**-${decryptData(tin).slice(-4)}`;
-        return jsonResponse({ ...rest, ...{ tin } });
-    });
+        return { ...rest, ...{ tin } };
+    }));
 }
 
 /**
