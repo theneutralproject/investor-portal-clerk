@@ -39,6 +39,7 @@ export async function GET() {
     const { organization } = dbUser;
 
     return organization.map((org) => {
+        // eslint-disable-next-line prefer-const
         let { tin, ...rest } = org;
         if (tin) tin = `***-**-${decryptData(tin).slice(-4)}`;
         return { ...rest, ...{ tin } }

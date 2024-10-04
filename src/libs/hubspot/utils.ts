@@ -1,4 +1,4 @@
-import { User, DealFinancingType } from "@prisma/client";
+import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { isError } from "lodash";
 import { HubspotContact, hubspotContactApiResponse, HubspotDealPropertiesCollection, zHsDealCreateResponse, HsDealDocsAccessedUpdateSchema, HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";

@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
 import { type EnvelopeDefinition, ApiClient, EnvelopesApi, type Tabs, type TemplateRole, type Text as DSText, type RecipientViewRequest } from "docusign-esign";
 import type { Address, User } from "@prisma/client";
 import type { UserWithAddress } from "@/libs/prisma";
-import { DocusignEnvelopeSchema } from "./schema";
-import { SessionData, sessionOptions } from "../session/utils";
+import type { DocusignEnvelopeSchema } from "./schema";
+import { type SessionData, sessionOptions } from "../session/utils";
 
 /* eslint-disable-next-line*/
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332

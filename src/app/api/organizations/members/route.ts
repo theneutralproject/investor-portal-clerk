@@ -86,10 +86,11 @@ export async function POST(request: NextRequest) {
 
 }
 
+// TODO!
 /**
  * Remove one member at the time (but not self)
  * @param request 
  */
-export async function DELETE(request: NextRequest) {
+// export async function DELETE(request: NextRequest) {
 
-}
+// }
