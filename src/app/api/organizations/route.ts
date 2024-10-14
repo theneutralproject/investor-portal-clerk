@@ -1,11 +1,10 @@
 import { decryptData, encryptString } from "@/libs/encryption/utils";
-import { OrganizationCreateSchema, OrganizationUpdateSchema, zOrganizationCreateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
+import { type OrganizationCreateSchema, type OrganizationUpdateSchema, zOrganizationCreateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { DealOwnershipType, MembershipType } from "@prisma/client";
-import { create } from "lodash";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * @param request GET all organizations that a user is a member of

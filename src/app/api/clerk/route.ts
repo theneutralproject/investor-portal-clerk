@@ -2,7 +2,7 @@ import type { WebhookEvent } from "@clerk/nextjs/server";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
 import { createUserInDbAndHubspot } from "@/libs/user/utils";
-import { UserCreateSchema } from "@/libs/user/schema";
+import type { UserCreateSchema } from "@/libs/user/schema";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();

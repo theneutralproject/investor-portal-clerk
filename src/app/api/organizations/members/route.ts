@@ -1,10 +1,10 @@
 
-import { OrganizationMemberCreateSchema, zOrganizationMemberCreateSchema } from "@/libs/organization/schema";
+import { type OrganizationMemberCreateSchema, zOrganizationMemberCreateSchema } from "@/libs/organization/schema";
 import prisma from "@/libs/prisma";
 import { createUserInDbAndHubspot } from "@/libs/user/utils";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs";
-import { User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import type { NextRequest } from "next/server";
 
 
@@ -84,7 +84,7 @@ export async function POST(request: NextRequest) {
     try {
         newUser = await createUserInDbAndHubspot(user, dealId);
         // add them as an org member
-        const orgWithMember = await prisma.organization.update({
+        await prisma.organization.update({
             where: { id: postData.organizationId },
             data: { members: { connect: { id: newUser.id } } }
         })
@@ -108,10 +108,10 @@ export async function DELETE(request: NextRequest) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
 
-    // eslint-disable
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const requestBody = await request.json();
-    const { organizationId, userId } = requestBody;
-    // eslint-enable
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { organizationId, userId } = requestBody as { organizationId: number, userId: number };
 
     if (!organizationId || !userId) {
         return jsonResponse({ error: "Input data malformatted" }, 400);

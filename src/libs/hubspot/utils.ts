@@ -1,7 +1,7 @@
 import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { isError } from "lodash";
-import { HubspotContact, hubspotContactApiResponse, HubspotDealPropertiesCollection, zHsDealCreateResponse, HsDealDocsAccessedUpdateSchema, HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
+import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
 import { type DealCreateSchema} from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
