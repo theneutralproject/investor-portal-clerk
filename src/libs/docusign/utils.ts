@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
 import { type EnvelopeDefinition, ApiClient, EnvelopesApi, type Tabs, type TemplateRole, type Text as DSText, type RecipientViewRequest } from "docusign-esign";
 import type { Address, User } from "@prisma/client";
 import type { UserWithAddress } from "@/libs/prisma";
-import { DocusignEnvelopeSchema } from "./schema";
-import { SessionData, sessionOptions } from "../session/utils";
+import type { DocusignEnvelopeSchema } from "./schema";
+import { type SessionData, sessionOptions } from "../session/utils";
 
 /* eslint-disable-next-line*/
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -141,10 +141,11 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
         interestTab
     ];
 
+    // todo: get title from org member, or just ignore this field
     /* eslint-disable-next-line*/
-    const signer1TitleTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "title", value: signer.title ?? "",
-    }) as DSText;
+    // const signer1TitleTab: DSText = docusign.Text.constructFromObject({
+    //     tabLabel: "title", value: signer.title ?? "",
+    // }) as DSText;
 
 
     /* eslint-disable-next-line*/
@@ -180,7 +181,7 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
     let signer1Tabs: Tabs = docusign.Tabs.constructFromObject({
         textTabs: [...sharedTextTabs,
         ...[
-            signer1TitleTab,
+            // signer1TitleTab,
             signer1SsnTab,
             signer1PhoneNumberTab,
             signer1AddressStreetTab,
