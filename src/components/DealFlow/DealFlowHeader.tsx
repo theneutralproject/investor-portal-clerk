@@ -27,9 +27,22 @@ const DealFlowHeader = () => {
         </Typography>
       </Toolbar>
       <Stepper activeStep={stepIndex} alternativeLabel>
-        {steps.map((step) => (
-          <Step key={step.value}>
-            <StepLabel>{step.display}</StepLabel>
+        {steps.map((stepObj, index) => (
+          <Step key={stepObj.value}>
+            <StepLabel
+              StepIconProps={{
+                active: index === stepIndex,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: index === stepIndex ? "bold" : "normal",
+                }}
+              >
+                {stepObj.display}
+              </Typography>
+            </StepLabel>
           </Step>
         ))}
       </Stepper>

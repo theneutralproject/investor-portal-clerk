@@ -4,9 +4,12 @@ import { steps, useDealFlow } from "./DealFlowContext";
 import { useRouter } from "next/navigation";
 import DealFlowGetStarted from "./DealFlowGetStarted";
 import DealFlowType from "./DealFlowType";
+import DealFlowAmount from "./DealFlowAmount";
+
 const stepComponents = {
   "get-started": DealFlowGetStarted,
   type: DealFlowType,
+  amount: DealFlowAmount,
   // Add other step components here
 };
 
@@ -32,13 +35,14 @@ const DealFlowContainer: React.FC = () => {
     }
   }, [router, project?.slug, deal?.id, nextStep]);
 
-  console.log(step)
-  console.log(stepComponents)
-
   const StepComponent = stepComponents[step as keyof typeof stepComponents];
 
   if (!StepComponent) {
     return <div>Invalid step</div>;
+  }
+
+  if (!deal && step !== "get-started") {
+    return <div>Loading...</div>;
   }
 
   return (

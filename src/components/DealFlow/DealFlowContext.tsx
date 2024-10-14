@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type DealWithInvestmentStats } from "@/libs/prisma";
-import { type Project } from "@prisma/client";
+import {
+  ProjectWithAllNestedData,
+  type DealWithInvestmentStats,
+} from "@/libs/prisma";
+import { DealFinancingType, type Project } from "@prisma/client";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import React, { createContext, useState, useContext, useEffect } from "react";
 
 // Define the step types
@@ -30,14 +35,20 @@ export const steps: Step[] = [
 
 // If you need just the values, you can derive them from the steps array
 export const stepValues: StepType[] = steps.map((step) => step.value);
+
 interface DealFlowContextType {
   step: StepType;
   projectSlug: string;
   dealId: string;
-  project: Project | null;
+  project: ProjectWithAllNestedData | null;
   deal: DealWithInvestmentStats | null;
   isLoading: boolean;
   error: string | null;
+  updateDeal: (
+    updatedDeal: Partial<DealWithInvestmentStats>,
+    onContinue: () => void
+  ) => Promise<void>;
+  createDeal: () => Promise<void>;
 }
 
 const DealFlowContext = createContext<DealFlowContextType | undefined>(
@@ -62,6 +73,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<StepType>(initialStep);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -92,17 +104,55 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     void fetchData();
   }, [projectSlug, dealId]);
 
-  // useEffect(() => {
-  //   if (deal) {
-  //     if (deal.investmentStats?.financingType) {
-  //       setStep("amount");
-  //     } else if (deal.investmentStats?.amount) {
-  //       setStep("details");
-  //     } else {
-  //       setStep("type");
-  //     }
-  //   }
-  // }, [deal]);
+  const updateDeal = async (
+    updatedDealData: Partial<DealWithInvestmentStats>,
+    onContinue: () => void
+  ) => {
+    if (!deal) return;
+    setIsLoading(true);
+
+    const updatedDeal = {
+      ...deal,
+      ...updatedDealData,
+    };
+
+    try {
+      const { data } = await axios.put<DealWithInvestmentStats>(
+        `/api/deals`,
+        updatedDeal
+      );
+      setDeal(data);
+      onContinue();
+    } catch (error) {
+      console.error("Error updating deal:", error);
+      setError("Failed to update deal. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createDeal = async () => {
+    if (!project) return;
+    setIsLoading(true);
+
+    const dealCreateData = {
+      financingType: DealFinancingType.equity,
+      projectId: project.id,
+    };
+
+    try {
+      const { data } = await axios.post<{ id: string }>(
+        "/api/deals",
+        dealCreateData
+      );
+      router.push(`/dealflow/${project?.slug}/${data.id}/type`);
+    } catch (error) {
+      console.error("Error creating deal:", error);
+      setError("Failed to create deal. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const contextValue: DealFlowContextType = {
     step,
@@ -112,6 +162,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     deal,
     isLoading,
     error,
+    updateDeal,
+    createDeal,
   };
 
   return (

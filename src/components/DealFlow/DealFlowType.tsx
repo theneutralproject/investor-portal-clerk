@@ -4,14 +4,11 @@ import {
   Typography,
   Button,
   RadioGroup,
-  FormControlLabel,
-  Radio,
+  Card,
+  CardContent,
 } from "@mui/material";
-import { DealCreateSchema, DealUpdateSchema } from "@/libs/deal/schema";
 import { DealFinancingType } from "@prisma/client";
-import axios from "axios";
 import { useDealFlow } from "./DealFlowContext";
-import { useRouter } from "next/navigation";
 
 interface DealFlowTypeProps {
   onBack: () => void;
@@ -19,41 +16,30 @@ interface DealFlowTypeProps {
 }
 
 const DealFlowType: React.FC<DealFlowTypeProps> = ({ onBack, onContinue }) => {
-  const { project, deal } = useDealFlow();
-  const [isLoading, setIsLoading] = useState(false);
+  const { deal, updateDeal, isLoading } = useDealFlow();
   const [financingType, setFinancingType] = useState<DealFinancingType>(
-    DealFinancingType.equity
+    deal?.investmentStats?.financingType ?? DealFinancingType.equity
   );
 
-  const handleFinancingTypeChange = (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFinancingType(event.target.value as DealFinancingType);
+  const handleFinancingTypeChange = (type: DealFinancingType) => {
+    setFinancingType(type);
   };
 
-  const updateDeal = async () => {
+  const handleUpdateDeal = async () => {
     if (!deal) return;
-    setIsLoading(true);
 
-    const updatedDeal: DealUpdateSchema = {
-      ...deal,
-      investmentStats: {
-        ...deal.investmentStats,
-        financingType: financingType,
+    await updateDeal(
+      {
+        ...deal,
+        investmentStats: {
+          ...deal.investmentStats,
+          financingType: financingType,
+        },
       },
-    };
-
-    try {
-      const { data } = await axios.put<DealUpdateSchema>(
-        `/api/deals`,
-        updatedDeal
-      );
-      onContinue();
-    } catch (error) {
-      console.error("Error updating deal:", error);
-    } finally {
-      setIsLoading(false);
-    }
+      () => {
+        onContinue();
+      }
+    );
   };
 
   return (
@@ -68,22 +54,60 @@ const DealFlowType: React.FC<DealFlowTypeProps> = ({ onBack, onContinue }) => {
         aria-label="financing-type"
         name="financing-type"
         value={financingType}
-        onChange={handleFinancingTypeChange}
       >
-        {Object.values(DealFinancingType).map((type) => (
-          <FormControlLabel
-            key={type}
-            value={type}
-            control={<Radio />}
-            label={type.charAt(0).toUpperCase() + type.slice(1)}
-          />
-        ))}
+        <Box display="flex" flexDirection="column" gap={2}>
+          {Object.values(DealFinancingType).map((type) => (
+            <Card
+              key={type}
+              onClick={() => handleFinancingTypeChange(type)}
+              sx={{
+                cursor: "pointer",
+                border: financingType === type ? "2px solid #1976d2" : "none",
+                "&:hover": { boxShadow: 3 },
+              }}
+            >
+              <CardContent>
+                <Box display="flex" alignItems="center">
+                  <Box
+                    width={20}
+                    height={20}
+                    borderRadius="50%"
+                    border="2px solid #1976d2"
+                    mr={2}
+                    display="flex"
+                    alignItems="center"
+                    justifyContent="center"
+                  >
+                    {financingType === type && (
+                      <Box
+                        width={12}
+                        height={12}
+                        borderRadius="50%"
+                        bgcolor="#1976d2"
+                      />
+                    )}
+                  </Box>
+                  <Typography variant="h6">
+                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                  </Typography>
+                </Box>
+                <Typography variant="body2" sx={{ mt: 1 }}>
+                  Placeholder text for {type} financing type
+                </Typography>
+              </CardContent>
+            </Card>
+          ))}
+        </Box>
       </RadioGroup>
       <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
         <Button variant="outlined" onClick={onBack} disabled={isLoading}>
           Back
         </Button>
-        <Button variant="contained" onClick={updateDeal} disabled={isLoading}>
+        <Button
+          variant="contained"
+          onClick={handleUpdateDeal}
+          disabled={isLoading}
+        >
           Continue
         </Button>
       </Box>

@@ -4,7 +4,6 @@ import { DealCreateSchema } from "@/libs/deal/schema";
 import { DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { useDealFlow } from "./DealFlowContext";
-import { useRouter } from "next/navigation";
 
 interface DealFlowGetStartedProps {
   onBack: () => void;
@@ -15,31 +14,7 @@ const DealFlowGetStarted: React.FC<DealFlowGetStartedProps> = ({
   onBack,
   onContinue,
 }) => {
-  const { project } = useDealFlow();
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  const createDeal = async () => {
-    if (!project) return;
-    setIsLoading(true);
-
-    const dealCreateData: DealCreateSchema = {
-      financingType: DealFinancingType.equity,
-      projectId: project.id,
-    };
-
-    try {
-      const { data } = await axios.post<{ id: string }>(
-        "/api/deals",
-        dealCreateData
-      );
-      router.push(`/dealflow/${project?.slug}/${data.id}/type`);
-    } catch (error) {
-      console.error("Error creating deal:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  const { createDeal, isLoading } = useDealFlow();
 
   return (
     <Box>
