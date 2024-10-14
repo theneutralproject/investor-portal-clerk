@@ -7,12 +7,12 @@ import {
   Step,
   StepLabel,
 } from "@mui/material";
-import { useDealFlow } from "./DealFlowContext";
-
-const steps = ["Type", "Amount", "Details", "Review & Sign", "Fund"];
+import { steps, useDealFlow } from "./DealFlowContext";
 
 const DealFlowHeader = () => {
   const { step } = useDealFlow();
+
+  const stepIndex = steps.findIndex((stepObj) => stepObj.value === step);
 
   return (
     <AppBar
@@ -26,10 +26,10 @@ const DealFlowHeader = () => {
           The Edison / Invest
         </Typography>
       </Toolbar>
-      <Stepper activeStep={step - 1} alternativeLabel>
-        {steps.map((label) => (
-          <Step key={label}>
-            <StepLabel>{label}</StepLabel>
+      <Stepper activeStep={stepIndex} alternativeLabel>
+        {steps.map((step) => (
+          <Step key={step.value}>
+            <StepLabel>{step.display}</StepLabel>
           </Step>
         ))}
       </Stepper>
