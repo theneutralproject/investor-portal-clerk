@@ -99,8 +99,9 @@ model AccreditationVerifier {
   id          Int    @id @default(autoincrement())
   firstName   String
   lastName    String
-  title       String
-  phoneNumber String
+  email       String
+  title       String?
+  phoneNumber String?
   deals       Deal[]
 }
 

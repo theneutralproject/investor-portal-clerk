@@ -50,8 +50,7 @@ export async function PUT(request: NextRequest) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
+    const requestBody = (await request.json()) as UserUpdateSchema;
     let putData: UserUpdateSchema;
     try {
         putData = zUserUpdateSchema.parse(requestBody)
