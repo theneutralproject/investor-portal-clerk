@@ -38,6 +38,7 @@ export async function GET() {
 }
 
 /**
+ * Update own user information
  * This function handles encryption of the Social Security Number (SSN) on user object
  * @param request with body:UserUpdateSchema
  * @returns updated user

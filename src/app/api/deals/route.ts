@@ -17,6 +17,11 @@ import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+/**
+ * 
+ * @param request 
+ * @returns Deal for a given project, if the user is a member of the organization that owns the deal
+ */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
   const slug = new URLSearchParams(url.search).get("slug");
@@ -56,20 +61,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userOrg = await prisma.organization.findFirst({
-      where: { ownerId: dbUser.id }
-    })
-
-    const deals = await prisma.deal.findFirst({
-      where: { organizationId: userOrg?.id, projectId: project.id },
-      include: {investmentStats: true}
+    const userOrgs = await prisma.organization.findMany({
+      where: { members: { some: { userId: dbUser.id } } },
     });
 
-    if (!deals) {
+    const deals = await prisma.deal.findMany({
+      where: { organizationId: { in: userOrgs.map((org) => org.id) }, projectId: project.id },
+      include: { investmentStats: true }
+    });
+
+    if (!deals || deals.length === 0) {
       return jsonResponse(null, 200); // Valid return with no deals found
     }
 
-    return jsonResponse(deals);
+
+    // only return deals for organizations (1) that the user is the owner of, or (2) that are completed, and the user is a member of its organization
+    return jsonResponse(deals.filter(deal => deal.dealStage === 5 || userOrgs.some(org => org.id === deal.organizationId && org.ownerId === dbUser.id))[0] ?? null);
+
   } catch (error) {
     const errorMessage = (error as Error).message;
     console.error(errorMessage);
@@ -108,6 +116,21 @@ export async function POST(request: NextRequest) {
         { error: `Project with id ${dealData.projectId} not found in DB` },
         400
       );
+    }
+
+    // only create a deal if the user is the owner of the organization
+    if (dealData.organizationId) {
+      const org = await prisma.organization.findFirst({
+        where: { id: dealData.organizationId, ownerId: dbUser.id }
+      });
+      if (!org) {
+        return jsonResponse(
+          {
+            error: `Deal cannot be created. User is not the owner of the organization`,
+          },
+          403
+        );
+      }
     }
 
     if (!dealData.organizationId) {

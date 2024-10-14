@@ -1,18 +1,27 @@
 import { isError } from "lodash";
 import { HubspotContact } from "../hubspot/schema";
-import { createOrUpdateHubspotContact } from "../hubspot/utils";
+import { associateContactWithDeal, createOrUpdateHubspotContact } from "../hubspot/utils";
 import prisma from "../prisma";
 import { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
-import { User } from "@prisma/client";
+import { Deal, User } from "@prisma/client";
 
 /**
  * creates a user in both hubspot and our DB
  * @param data 
  */
-export async function createUserInDbAndHubspot(data: UserCreateSchema): Promise<User> {
+export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: number): Promise<User> {
 
     const { address, ...userData } = data;
+
+    let deal: Deal | null = null;
+    if (dealId) {
+        // attach user to hubspot deal
+        deal = await prisma.deal.findUnique({where : {id: dealId}});
+        if (!deal) {
+            throw new Error(`Deal with id ${dealId} not found`);
+        }
+    }
     /* Upsert user in Hubspot**/
     const hsUserData = {
         email: userData.email,
@@ -33,27 +42,13 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema): Promise<
     }
     const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString()
 
+    // create user and address in DB
     let userOrgId: number;
     try {
-        // create a personal org:
-        const userOrg = await prisma.organization.create({
-            data: {
-                name: `${userData.firstName} ${userData.lastName}'s Org`,
-            }
-        });
-        userOrgId = userOrg.id;
-        console.log(`created user org with id ${userOrg.id}`);
-    } catch (error) {
-        throw new Error(getErrorMessage(error));
-    }
-
-    let userCreateData = {
-        ...userData,
-        hubspotId: hubspotUserId,
-        organization: { connect: [{ id: userOrgId }] },
-    }
-
-    try {
+        let userCreateData = {
+            ...userData,
+            hubspotId: hubspotUserId,
+        }
         if (address) {
             const userAddress = await prisma.address.create({ data: address });
             console.log(`created address for new user`);
@@ -65,16 +60,30 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema): Promise<
             data: userCreateData,
         });
 
-        console.log(`created dbUser with id ${dbUser.id}`)
-        const updatedOrg = await prisma.organization.update({
-            where: { id: userOrgId },
-            data: { ownerId: dbUser.id }
-        })
-        console.log(`updated org with id ${updatedOrg.id}`)
-        return dbUser;
+
+        // create a personal org:
+        const userOrg = await prisma.organization.create({
+            data: {
+                name: `${userData.firstName} ${userData.lastName}'s Organization`,
+                ownedBy: { connect: { id: dbUser.id } }
+            }
+        });
+        userOrgId = userOrg.id;
+
+        // add orgId to user
+        const updatedUser = await prisma.user.update({ where: { id: dbUser.id }, data: { userOrgId } });
+
+        if (deal)
+        {
+            const res = await associateContactWithDeal(hubspotUserId, deal.hubspotId);
+            if (isError(res)) {
+                console.error("Unable to associate user with deal in hubspot:\n", res);
+            }
+        }
+
+        return updatedUser;
 
     } catch (error) {
-        console.error("ERROR: Cannot create user and org:\n", error);
         throw new Error(getErrorMessage(error));
     }
 }

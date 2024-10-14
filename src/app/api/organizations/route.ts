@@ -3,11 +3,12 @@ import { OrganizationCreateSchema, OrganizationUpdateSchema, zOrganizationCreate
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { DealOwnershipType } from "@prisma/client";
+import { DealOwnershipType, MembershipType } from "@prisma/client";
+import { create } from "lodash";
 import { NextRequest } from "next/server";
 
 /**
- * @param request GET all organizations for a user
+ * @param request GET all organizations that a user is a member of
  */
 export async function GET() {
 
@@ -20,7 +21,7 @@ export async function GET() {
         where: { clerkId: clerkUser.id },
         include: {
             address: true,
-            organization: true
+            organizationMember: true
         }
     });
 
@@ -35,10 +36,11 @@ export async function GET() {
         );
     }
 
-    // encypt TIN on orgs
-    const { organization } = dbUser;
+    // get orgs they are a member of
+    const userOrganizations = await prisma.organization.findMany({ where: { members: { some: { id: dbUser.id } }} });
 
-    return jsonResponse(organization.map((org) => {
+    // encypt TIN on orgs
+    return jsonResponse(userOrganizations.map((org) => {
         // eslint-disable-next-line prefer-const
         let { tin, ...rest } = org;
         if (tin) tin = `***-**-${decryptData(tin).slice(-4)}`;
@@ -47,7 +49,7 @@ export async function GET() {
 }
 
 /**
- * This route assumes that all specified members exist in the DB
+ * Create a new organization without specifying members
  * @param request POST create a new organization
  */
 export async function POST(request: NextRequest) {
@@ -80,19 +82,33 @@ export async function POST(request: NextRequest) {
         console.error("ERROR: unable to parse POST body:\n", parseError);
         return jsonResponse({ error: "Input data malformatted" }, 400);
     }
-    if (!postData.memberIds) postData.memberIds = [dbUser.id]
-    if (!postData.memberIds.includes(dbUser.id)) {
-        console.error(`The id of the requesting user must be present in the list of memberIds`);
-        return jsonResponse(
-            {
-                error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
-            },
-            404
-        );
+
+    const getOrgName = () => {
+        if (postData.name) {
+            return postData.name;
+        }
+        switch (postData.ownershipType) {
+            case DealOwnershipType.CORPORATION: {
+                return `Corporation of ${dbUser.firstName} ${dbUser.lastName}`;
+            }
+            case DealOwnershipType.PARTNERSHIP: {
+                return `${dbUser.firstName} ${dbUser.lastName}'s Parnership Organization`; 
+            }
+            case DealOwnershipType.MARITAL: {
+                return `${dbUser.firstName} ${dbUser.lastName}'s Marital Organization`;
+            }
+            case DealOwnershipType.COMMON: {
+                return `${dbUser.firstName} ${dbUser.lastName}'s Common Organization`;
+            }
+            case DealOwnershipType.TRUST: {
+                return `${dbUser.firstName} ${dbUser.lastName}'s Trust Organization`;
+            }
+            default: return `${dbUser.firstName} ${dbUser.lastName}'s Organization`
+        }
     }
 
     const orgCreateData = {
-        name: postData.name ?? `hello`,
+        name: getOrgName(),
         ownershipType: postData.ownershipType ?? DealOwnershipType.INDIVIDUAL,
         ownerId: dbUser.id,
         addressId: postData.addressId,
@@ -100,7 +116,10 @@ export async function POST(request: NextRequest) {
         dateOfCreation: postData.dateOfCreation,
         juristication: postData.juristication,
         members: {
-            connect: postData.memberIds.map((mid) => { return { id: mid } })
+            create: {
+                type: MembershipType.OWNER,
+                userId: dbUser.id
+            }
         }
     };
     try {
@@ -138,41 +157,6 @@ export async function PUT(request: NextRequest) {
     if (data.tin) {
         data.tin = encryptString(data.tin.replace(/\D/g, ""));
     }
-
-    // if (memberIds) {
-    //     // !this will replace all existing members
-    //     const dbUser = await prisma.user.findUnique({
-    //         where: { clerkId: clerkUser.id },
-    //         include: { address: true }
-    //     });
-
-    //     if (!dbUser) {
-    //         console.error(`User record with clerkid ${clerkUser.id} not found in prisma (GET)`);
-    //         return jsonResponse(
-    //             {
-    //                 error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
-    //             },
-    //             404
-    //         );
-    //     }
-    //     if (!memberIds.includes(dbUser.id)) {
-    //         console.error(`The id of the requesting user must be present in the list of memberIds`);
-    //         return jsonResponse(
-    //             {
-    //                 error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
-    //             },
-    //             404
-    //         );
-    //     }
-
-    //     updateData = {
-    //         ...updateData, ...{
-    //             members: {
-    //                 connect: memberIds.map((mid) => { return { id: mid } })
-    //             }
-    //         }
-    //     }
-    // }
 
     try {
         const updatedOrg = await prisma.organization.update({

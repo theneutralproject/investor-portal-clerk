@@ -136,6 +136,27 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 }
 /* eslint-enable */
 
+export async function associateContactWithDeal(contactId: string, dealId: string) {
+  const body = JSON.stringify({
+    fromObjectId: parseInt(contactId),
+    toObjectId: parseInt(dealId),
+    category: "HUBSPOT_DEFINED",
+    definitionId: 4
+  });
+
+  return await fetch(    
+    `${process.env.HUBSPOT_API_BASE_URL}/crm-associations/v1/associations`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    }
+  );
+}
+
 
 export async function getFundingAmount(projectName: ProjectName) {
   function getPayload(project: ProjectName) {

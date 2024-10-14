@@ -141,10 +141,11 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
         interestTab
     ];
 
+    // todo: get title from org member, or just ignore this field
     /* eslint-disable-next-line*/
-    const signer1TitleTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "title", value: signer.title ?? "",
-    }) as DSText;
+    // const signer1TitleTab: DSText = docusign.Text.constructFromObject({
+    //     tabLabel: "title", value: signer.title ?? "",
+    // }) as DSText;
 
 
     /* eslint-disable-next-line*/
@@ -180,7 +181,7 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
     let signer1Tabs: Tabs = docusign.Tabs.constructFromObject({
         textTabs: [...sharedTextTabs,
         ...[
-            signer1TitleTab,
+            // signer1TitleTab,
             signer1SsnTab,
             signer1PhoneNumberTab,
             signer1AddressStreetTab,
