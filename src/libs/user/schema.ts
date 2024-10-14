@@ -7,10 +7,13 @@ import { zAddressCreateSchema } from "../address/schema";
 export const zUserUpdateSchema = z.object({
     // email: z.string().email().optional(),
     // phoneNumber: z.string().optional(),
-    firstName: z.string().length(50).optional(),
-    lastName: z.string().length(50).optional(),
-    ssn: z.string().length(200).optional(),
-    referralsource: z.nativeEnum(ReferralSource).optional(),
+    firstName: z.string(),
+    lastName: z.string(),
+    ssn: z.string().optional(),
+    dateOfBirth: z.string().datetime().optional(),
+    referralsource: z.nativeEnum(ReferralSource).optional(),    
+    phoneNumber: z.string().optional(),
+    address: zAddressCreateSchema.optional()
   });
   
   export type UserUpdateSchema = z.infer<typeof zUserUpdateSchema>;

@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import DealFlowGetStarted from "./DealFlowGetStarted";
 import DealFlowType from "./DealFlowType";
 import DealFlowAmount from "./DealFlowAmount";
-
+import DealFlowDetails from "./DealFlowDetails";
 const stepComponents = {
   "get-started": DealFlowGetStarted,
   type: DealFlowType,
   amount: DealFlowAmount,
+  details: DealFlowDetails,
   // Add other step components here
 };
 
