@@ -2,7 +2,7 @@ import type { DealFinancingType, Deal } from "@prisma/client";
 import { isError } from "lodash";
 import { ProjectName } from "../schema";
 import prisma from "../prisma";
-import { DealUpdateSchema } from "./schema";
+import type { DealUpdateSchema } from "./schema";
 
 /**
  * Updates a deal in the database

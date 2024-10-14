@@ -15,7 +15,7 @@ import StepAvatar from "@/components/StepAvatar";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { DealCreateSchema } from "@/libs/deal/schema";
+import type { DealCreateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils";
 
 const INVESTMENT_STEPS = [

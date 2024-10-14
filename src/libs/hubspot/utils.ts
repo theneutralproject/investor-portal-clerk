@@ -1,7 +1,7 @@
-import { User, DealFinancingType } from "@prisma/client";
+import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { isError } from "lodash";
-import { HubspotContact, hubspotContactApiResponse, HubspotDealPropertiesCollection, zHsDealCreateResponse, HsDealDocsAccessedUpdateSchema, HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
+import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
 import { type DealCreateSchema} from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
@@ -135,6 +135,27 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
   }
 }
 /* eslint-enable */
+
+export async function associateContactWithDeal(contactId: string, dealId: string) {
+  const body = JSON.stringify({
+    fromObjectId: parseInt(contactId),
+    toObjectId: parseInt(dealId),
+    category: "HUBSPOT_DEFINED",
+    definitionId: 4
+  });
+
+  return await fetch(    
+    `${process.env.HUBSPOT_API_BASE_URL}/crm-associations/v1/associations`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    }
+  );
+}
 
 
 export async function getFundingAmount(projectName: ProjectName) {

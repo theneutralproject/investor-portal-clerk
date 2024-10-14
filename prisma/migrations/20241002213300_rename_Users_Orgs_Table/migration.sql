@@ -1,0 +1,1 @@
+ALTER TABLE "_allOrgs" RENAME TO "OrganizationUsers";

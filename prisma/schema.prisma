@@ -12,45 +12,50 @@ datasource db {
 }
 
 model User {
-  id                  Int             @id @default(autoincrement())
-  clerkId             String          @unique
-  role                Role            @default(USER)
-  email               String          @unique
-  firstName           String
-  lastName            String
-  phoneNumber         String?
-  hubspotId           String
-  addressId           Int?
-  ssn                 String?
-  title               String?
-  userOrgId           Int?            @unique
-  referralSource      String?
-  documentEvents      DocumentEvent[]
-  address             Address?        @relation(fields: [addressId], references: [id])
-  primaryOrganization Organization?   @relation("userOrg", fields: [userOrgId], references: [id])
-  organization        Organization[]  @relation("allOrgs")
-  deal                Deal[] /// @deprecated. Use `organization.deal` instead.
+  id                 Int             @id @default(autoincrement())
+  clerkId            String?         @unique
+  role               Role            @default(USER)
+  email              String          @unique
+  firstName          String
+  lastName           String
+  phoneNumber        String?
+  hubspotId          String
+  addressId          Int?
+  ssn                String?
+  dateOfBirth        DateTime?
+  userOrgId          Int?             @unique
+  referralSource     String?
+  deal               Deal[]
+  documentEvents     DocumentEvent[]
+  address            Address?        @relation(fields: [addressId], references: [id])
+  organizationMember Member[]
+  organizationsOwned  Organization[]   @relation(name: "userOrg")
 }
 
 model Deal {
   id                      Int                    @id @default(autoincrement())
   projectId               Int
+  /// @deprecated Use `organizationId` instead.
+  userId                  Int?
   dealStage               Int
-  amount                  Float                  @default(0.0) /// @deprecated. Use DealInvestmentStats model instead
-  financingType           DealFinancingType?     @default(equity) /// @deprecated. Use DealInvestmentStats model instead
+  /// @deprecated. Use DealInvestmentStats model instead
+  amount                  Float                  @default(0.0)
+  /// @deprecated. Use DealInvestmentStats model instead
+  financingType           DealFinancingType?     @default(equity)
   hubspotId               String                 @unique
   transactionId           String                 @default("")
-  investmentEntity        String /// the project, i.e. Edison LLC
-  ownershipType           DealOwnershipType?     @default(INDIVIDUAL) /// @deprecated. Use DealInvestmentStats model instead
+  /// the project, i.e. Edison LLC
+  investmentEntity        String
+  /// @deprecated. Use DealInvestmentStats model instead
+  ownershipType           DealOwnershipType?     @default(INDIVIDUAL)
   accreditationVerifierId Int?
   organizationId          Int
-  userId                  Int? /// @deprecated Use `organizationId` instead.
   accreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
   organization            Organization           @relation(fields: [organizationId], references: [id])
   project                 Project                @relation(fields: [projectId], references: [id])
+  user                    User?                  @relation(fields: [userId], references: [id])
   document                DealDocument[]
-  user                    User?                  @relation(fields: [userId], references: [id]) /// @deprecated. Use `organization` instead.
-  investmentStats     DealInvestmentStats?
+  investmentStats         DealInvestmentStats?
 }
 
 model DealInvestmentStats {
@@ -68,7 +73,7 @@ model DealInvestmentStats {
 model Organization {
   id             Int                    @id @default(autoincrement())
   name           String
-  ownerId        Int?                   @unique
+  ownerId        Int                    @unique
   tin            String?
   dateOfCreation DateTime?
   juristication  String?
@@ -77,8 +82,17 @@ model Organization {
   deals          Deal[]
   address        Address?               @relation(fields: [addressId], references: [id])
   document       OrganizationDocument[]
-  ownedBy        User?                  @relation("userOrg")
-  members        User[]                 @relation("allOrgs")
+  ownedBy        User                   @relation(name: "userOrg", fields: [ownerId], references: [id])
+  members         Member[]
+}
+
+model Member {
+  id             Int            @id @default(autoincrement())
+  userId         Int
+  organizationId Int
+  user           User           @relation(fields: [userId], references: [id])
+  organization   Organization   @relation(fields: [organizationId], references: [id])
+  type           MembershipType
 }
 
 model AccreditationVerifier {
@@ -122,10 +136,10 @@ model Project {
   equityReturnsFile String?
   deals             Deal[]
   documents         ProjectDocument[]
-  pictures          ProjectPicture[]
-  milestones        ProjectMilestones?
-  propertyStats     ProjectPropertyStats?
   investmentStats   ProjectInvestmentStats?
+  milestones        ProjectMilestones?
+  pictures          ProjectPicture[]
+  propertyStats     ProjectPropertyStats?
 }
 
 model ProjectPropertyStats {
@@ -152,10 +166,10 @@ model ProjectInvestmentStats {
   preferredReturn      String  @default("")
   investmentGoal       Float   @default(0.0)
   investmentRaised     Float   @default(0.0)
+  projectId            Int     @unique
   targetEquityMultiple Float   @default(0.0)
   totalAUnitReturn     Float   @default(0.0)
   totalCUnitReturn     Float   @default(0.0)
-  projectId            Int     @unique
   project              Project @relation(fields: [projectId], references: [id])
 }
 
@@ -198,8 +212,8 @@ model ProjectDocument {
   financingTypes     DealFinancingType[] @default([])
   documentType       DocumentType        @default(DOCUMENT)
   docusignTemplateId String?
-  project            Project             @relation(fields: [projectId], references: [id])
   documentEvents     DocumentEvent[]
+  project            Project             @relation(fields: [projectId], references: [id])
 }
 
 /// used to track who accessed which document when
@@ -213,14 +227,13 @@ model DocumentEvent {
   user       User              @relation(fields: [userId], references: [id])
 }
 
-///
 model Address {
   id           Int            @id @default(autoincrement())
   street       String
   city         String
   zipcode      String
   state        String
-  country String @default("United States")
+  country      String         @default("United States")
   organization Organization[]
   user         User[]
 }
@@ -259,6 +272,12 @@ enum DocumentEventType {
   VIEW
   DOWNLOAD
   SIGN
+}
+
+enum MembershipType {
+  OWNER
+  COINVESTOR
+  CPA
 }
 
 enum DealFinancingType {

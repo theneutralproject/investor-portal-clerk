@@ -1,11 +1,8 @@
-import prisma from "@/libs/prisma";
 import type { WebhookEvent } from "@clerk/nextjs/server";
-import { Role, type User } from "@prisma/client";
 import { headers } from "next/headers";
 import { Webhook } from "svix";
-import { isError } from "lodash";
-import type { HubspotContact } from "@/libs/hubspot/schema";
-import { createOrUpdateHubspotContact } from "@/libs/hubspot/utils";
+import { createUserInDbAndHubspot } from "@/libs/user/utils";
+import type { UserCreateSchema } from "@/libs/user/schema";
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -23,10 +20,9 @@ async function validateRequest(request: Request) {
 
 export async function POST(request: Request) {
   const { type, data } = await validateRequest(request);
-  console.log("webhook received of type:", type)
+  console.log("clerk webhook received of type:", type)
   switch (type) {
     case "user.created": {
-      console.log("clerk WH1 - user created");
       const {
         id,
         primary_email_address_id,
@@ -41,79 +37,28 @@ export async function POST(request: Request) {
           ?.email_address ?? "";
       const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({ id }) => id === primary_phone_number_id))?.phone_number ?? "") : (phone_numbers[0]?.phone_number ?? "")
 
-      /* Store/ update user in Hubspot**/
-      const hsUserData = {
-        email: email,
-        properties: [
-          { property: `userid`, value: id },
-          { property: `firstname`, value: first_name },
-          { property: `lastname`, value: last_name },
-          { property: `phone`, value: phonenumber },
-        ],
-      } as HubspotContact;
-
-      console.log("clerk WH2 - posting hsUserData", hsUserData);
-      let hsUpdate;
-      try {
-        hsUpdate = await createOrUpdateHubspotContact(hsUserData);
-      } catch (error) {
-        console.error("Unable to create user in hubspot:\n", error);
-        return new Response(JSON.stringify({ error: "Unable to create user in hubspot" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      const hubspotUserId = isError(hsUpdate) ? "" : hsUpdate.vid.toString()
-
-
-      /* Store user in DB**/
       const newUserData = {
         clerkId: id,
         email: email,
-        role: Role.USER,
-        // firstName: startCase(first_name),
-        // lastName: startCase(toLower(last_name)),
         firstName: first_name,
         lastName: last_name,
         phoneNumber: phonenumber,
-        hubspotId: hubspotUserId,
-      } as User;
+        address: undefined
+      } as UserCreateSchema;
 
-
-      console.log("clerk WH4", newUserData);
+      /* Store user in DB**/
       try {
-        // create a personal org:
-        const userOrg = await prisma.organization.create({
-          data: {
-            name: `${newUserData.firstName} ${newUserData.lastName}'s Org`,
-          }
+        await createUserInDbAndHubspot(newUserData)
+        break;
+      } catch (userCreateError) {
+        return new Response(JSON.stringify(userCreateError), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
         });
-        console.log(`created user org with id ${userOrg.id}`)
-
-        newUserData.userOrgId = userOrg.id;
-        const dbUser = await prisma.user.create({
-          data: {
-            ...newUserData, organization: { connect: [{ id: userOrg.id }] }
-          }
-        });
-
-        console.log(`created dbUser with id ${dbUser.id}`)
-
-        const updatedOrg = await prisma.organization.update({
-          where: { id: userOrg.id },
-          data: { ownerId: dbUser.id }
-        })
-
-        console.log(`updated org with id ${updatedOrg.id}`)
-
-        // await clerkClient.users.updateUser(id, { firstName: startCase(first_name), lastName: startCase(toLower(last_name)) })
-      } catch (error) {
-        console.error("ERROR: Cannot create user and org:\n", error);
       }
-      break;
+
     }
     case "session.created": {
-      console.log("clerk WH1 - session created");
       break;
     }
 
