@@ -19,7 +19,7 @@ export const zDealInvestmentStatsUpdateSchema = z.object({
     projectId: z.number().int().optional(),
     organizationId: z.number().optional(),
     dealStage: z.number().optional(),
-    accreditationVerifierId: z.number().optional(),
+    accreditationVerifierId: z.number().optional().nullable(),
     investmentStats: zDealInvestmentStatsUpdateSchema.optional()
   });
   

@@ -92,17 +92,17 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     void fetchData();
   }, [projectSlug, dealId]);
 
-  useEffect(() => {
-    if (deal) {
-      if (deal.investmentStats?.financingType) {
-        setStep("amount");
-      } else if (deal.investmentStats?.amount) {
-        setStep("details");
-      } else {
-        setStep("type");
-      }
-    }
-  }, [deal]);
+  // useEffect(() => {
+  //   if (deal) {
+  //     if (deal.investmentStats?.financingType) {
+  //       setStep("amount");
+  //     } else if (deal.investmentStats?.amount) {
+  //       setStep("details");
+  //     } else {
+  //       setStep("type");
+  //     }
+  //   }
+  // }, [deal]);
 
   const contextValue: DealFlowContextType = {
     step,
