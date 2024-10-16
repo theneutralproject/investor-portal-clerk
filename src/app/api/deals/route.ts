@@ -209,8 +209,7 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
+    const requestBody = await request.json() as DealUpdateSchema;
     let deal: DealUpdateSchema;
     try {
       deal = zDealUpdateSchema.parse(requestBody);

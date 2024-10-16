@@ -72,8 +72,7 @@ export async function POST(request: NextRequest) {
         );
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
+    const requestBody = (await request.json()) as OrganizationCreateSchema;
     let postData: OrganizationCreateSchema;
     try {
         postData = zOrganizationCreateSchema.parse(requestBody)
@@ -147,8 +146,7 @@ export async function PUT(request: NextRequest) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
+    const requestBody = (await request.json()) as OrganizationUpdateSchema;
     let putData: OrganizationUpdateSchema;
     try {
         putData = zOrganizationUpdateSchema.parse(requestBody)
