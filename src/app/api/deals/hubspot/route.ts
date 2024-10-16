@@ -9,8 +9,7 @@ import type { NextRequest } from "next/server";
  */
 export async function PUT(request: NextRequest) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const requestBody = await request.json();
+        const requestBody = (await request.json()) as HubspotDealUpdate;
         let deal: HubspotDealUpdate;
         try {
             deal = zHsUpdateDealSchema.parse(requestBody)
@@ -57,8 +56,7 @@ export async function PUT(request: NextRequest) {
  */
 export async function POST(request: NextRequest) {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const requestBody = await request.json();
+        const requestBody = (await request.json()) as HsDealDocsAccessedUpdateSchema;
         let deal: HsDealDocsAccessedUpdateSchema;
         try {
             deal = zHsDealDocsAccessedUpdateSchema.parse(requestBody)

@@ -10,8 +10,8 @@ import { getErrorMessage, jsonResponse } from "@/libs/utils";
  * @deprecated Hubspot contacts are updated via the PUT api/users route
  *  */ 
 export async function PUT(request: NextRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
+    
+    const requestBody = (await request.json()) as HubspotContact;
 
     let hsContact: HubspotContact;
     try {

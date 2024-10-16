@@ -22,7 +22,7 @@ export const OrganizationScalarFieldEnumSchema = z.enum(['id','name','ownerId','
 
 export const MemberScalarFieldEnumSchema = z.enum(['id','userId','organizationId','type']);
 
-export const AccreditationVerifierScalarFieldEnumSchema = z.enum(['id','firstName','lastName','title','phoneNumber']);
+export const AccreditationVerifierScalarFieldEnumSchema = z.enum(['id','firstName','lastName','email','title','phoneNumber']);
 
 export const DealDocumentScalarFieldEnumSchema = z.enum(['id','name','link','type','dealId']);
 
@@ -207,8 +207,9 @@ export const AccreditationVerifierSchema = z.object({
   id: z.number().int(),
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
-  phoneNumber: z.string(),
+  email: z.string(),
+  title: z.string().nullable(),
+  phoneNumber: z.string().nullable(),
 })
 
 export type AccreditationVerifier = z.infer<typeof AccreditationVerifierSchema>
@@ -616,6 +617,7 @@ export const AccreditationVerifierSelectSchema: z.ZodType<Prisma.AccreditationVe
   id: z.boolean().optional(),
   firstName: z.boolean().optional(),
   lastName: z.boolean().optional(),
+  email: z.boolean().optional(),
   title: z.boolean().optional(),
   phoneNumber: z.boolean().optional(),
   deals: z.union([z.boolean(),z.lazy(() => DealFindManyArgsSchema)]).optional(),
@@ -1454,8 +1456,9 @@ export const AccreditationVerifierWhereInputSchema: z.ZodType<Prisma.Accreditati
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   firstName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   lastName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  title: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  phoneNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  phoneNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional()
 }).strict();
 
@@ -1463,8 +1466,9 @@ export const AccreditationVerifierOrderByWithRelationInputSchema: z.ZodType<Pris
   id: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
   lastName: z.lazy(() => SortOrderSchema).optional(),
-  title: z.lazy(() => SortOrderSchema).optional(),
-  phoneNumber: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  title: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  phoneNumber: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   deals: z.lazy(() => DealOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
@@ -1478,8 +1482,9 @@ export const AccreditationVerifierWhereUniqueInputSchema: z.ZodType<Prisma.Accre
   NOT: z.union([ z.lazy(() => AccreditationVerifierWhereInputSchema),z.lazy(() => AccreditationVerifierWhereInputSchema).array() ]).optional(),
   firstName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   lastName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  title: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  phoneNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  phoneNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional()
 }).strict());
 
@@ -1487,8 +1492,9 @@ export const AccreditationVerifierOrderByWithAggregationInputSchema: z.ZodType<P
   id: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
   lastName: z.lazy(() => SortOrderSchema).optional(),
-  title: z.lazy(() => SortOrderSchema).optional(),
-  phoneNumber: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
+  title: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  phoneNumber: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   _count: z.lazy(() => AccreditationVerifierCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => AccreditationVerifierAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => AccreditationVerifierMaxOrderByAggregateInputSchema).optional(),
@@ -1503,8 +1509,9 @@ export const AccreditationVerifierScalarWhereWithAggregatesInputSchema: z.ZodTyp
   id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   firstName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   lastName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  title: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  phoneNumber: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  email: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  title: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  phoneNumber: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
 }).strict();
 
 export const DealDocumentWhereInputSchema: z.ZodType<Prisma.DealDocumentWhereInput> = z.object({
@@ -2772,8 +2779,9 @@ export const MemberUncheckedUpdateManyInputSchema: z.ZodType<Prisma.MemberUnchec
 export const AccreditationVerifierCreateInputSchema: z.ZodType<Prisma.AccreditationVerifierCreateInput> = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
-  phoneNumber: z.string(),
+  email: z.string(),
+  title: z.string().optional().nullable(),
+  phoneNumber: z.string().optional().nullable(),
   deals: z.lazy(() => DealCreateNestedManyWithoutAccreditationVerifierInputSchema).optional()
 }).strict();
 
@@ -2781,16 +2789,18 @@ export const AccreditationVerifierUncheckedCreateInputSchema: z.ZodType<Prisma.A
   id: z.number().int().optional(),
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
-  phoneNumber: z.string(),
+  email: z.string(),
+  title: z.string().optional().nullable(),
+  phoneNumber: z.string().optional().nullable(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutAccreditationVerifierInputSchema).optional()
 }).strict();
 
 export const AccreditationVerifierUpdateInputSchema: z.ZodType<Prisma.AccreditationVerifierUpdateInput> = z.object({
   firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deals: z.lazy(() => DealUpdateManyWithoutAccreditationVerifierNestedInputSchema).optional()
 }).strict();
 
@@ -2798,8 +2808,9 @@ export const AccreditationVerifierUncheckedUpdateInputSchema: z.ZodType<Prisma.A
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutAccreditationVerifierNestedInputSchema).optional()
 }).strict();
 
@@ -2807,23 +2818,26 @@ export const AccreditationVerifierCreateManyInputSchema: z.ZodType<Prisma.Accred
   id: z.number().int().optional(),
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
-  phoneNumber: z.string()
+  email: z.string(),
+  title: z.string().optional().nullable(),
+  phoneNumber: z.string().optional().nullable()
 }).strict();
 
 export const AccreditationVerifierUpdateManyMutationInputSchema: z.ZodType<Prisma.AccreditationVerifierUpdateManyMutationInput> = z.object({
   firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AccreditationVerifierUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AccreditationVerifierUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const DealDocumentCreateInputSchema: z.ZodType<Prisma.DealDocumentCreateInput> = z.object({
@@ -4235,6 +4249,7 @@ export const AccreditationVerifierCountOrderByAggregateInputSchema: z.ZodType<Pr
   id: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
   lastName: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4247,6 +4262,7 @@ export const AccreditationVerifierMaxOrderByAggregateInputSchema: z.ZodType<Pris
   id: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
   lastName: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4255,6 +4271,7 @@ export const AccreditationVerifierMinOrderByAggregateInputSchema: z.ZodType<Pris
   id: z.lazy(() => SortOrderSchema).optional(),
   firstName: z.lazy(() => SortOrderSchema).optional(),
   lastName: z.lazy(() => SortOrderSchema).optional(),
+  email: z.lazy(() => SortOrderSchema).optional(),
   title: z.lazy(() => SortOrderSchema).optional(),
   phoneNumber: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -6702,16 +6719,18 @@ export const OrganizationScalarWhereInputSchema: z.ZodType<Prisma.OrganizationSc
 export const AccreditationVerifierCreateWithoutDealsInputSchema: z.ZodType<Prisma.AccreditationVerifierCreateWithoutDealsInput> = z.object({
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
-  phoneNumber: z.string()
+  email: z.string(),
+  title: z.string().optional().nullable(),
+  phoneNumber: z.string().optional().nullable()
 }).strict();
 
 export const AccreditationVerifierUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.AccreditationVerifierUncheckedCreateWithoutDealsInput> = z.object({
   id: z.number().int().optional(),
   firstName: z.string(),
   lastName: z.string(),
-  title: z.string(),
-  phoneNumber: z.string()
+  email: z.string(),
+  title: z.string().optional().nullable(),
+  phoneNumber: z.string().optional().nullable()
 }).strict();
 
 export const AccreditationVerifierCreateOrConnectWithoutDealsInputSchema: z.ZodType<Prisma.AccreditationVerifierCreateOrConnectWithoutDealsInput> = z.object({
@@ -6892,16 +6911,18 @@ export const AccreditationVerifierUpdateToOneWithWhereWithoutDealsInputSchema: z
 export const AccreditationVerifierUpdateWithoutDealsInputSchema: z.ZodType<Prisma.AccreditationVerifierUpdateWithoutDealsInput> = z.object({
   firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AccreditationVerifierUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.AccreditationVerifierUncheckedUpdateWithoutDealsInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  title: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  phoneNumber: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  title: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const OrganizationUpsertWithoutDealsInputSchema: z.ZodType<Prisma.OrganizationUpsertWithoutDealsInput> = z.object({
