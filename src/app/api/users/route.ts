@@ -19,7 +19,7 @@ export async function GET() {
         where: { clerkId: clerkUser.id },
         include: { address: true }
     });
-    
+
     if (!dbUser) {
         console.error(`User record with clerkid ${clerkUser.id} not found in prisma (GET)`);
         return jsonResponse(
@@ -33,7 +33,7 @@ export async function GET() {
     if (dbUser.ssn) {
         dbUser.ssn = `***-**-${decryptData(dbUser.ssn).slice(-4)}`;
     }
-    
+
     return jsonResponse(dbUser)
 }
 
@@ -57,15 +57,20 @@ export async function PUT(request: NextRequest) {
         putData = zUserUpdateSchema.parse(requestBody)
     } catch (parseError) {
         console.error("ERROR: unable to parse PUT body:\n", parseError);
-        return jsonResponse({ error: "Input data malformatted" }, 400);
+        return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
 
     //  Check if hubspot and clerk needs to be updated, and then update them
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (putData.firstName || putData.lastName) {
-        const { emailAddresses, primaryEmailAddressId } = clerkUser
-        const email = emailAddresses.find(({ id }) => id === primaryEmailAddressId)
-            ?.emailAddress ?? "";
+        const { emailAddresses, primaryEmailAddressId } = clerkUser;
+        const email = primaryEmailAddressId ?
+            emailAddresses.find(({ id }) => id === primaryEmailAddressId)?.emailAddress ?? "" :
+            emailAddresses[0]?.emailAddress ?? "";
+        if (!email) {
+            console.error("No email found for user", clerkUser);
+            return jsonResponse({ error: "No email found for user" }, 500);
+        }
         const properties = [];
         const clerkUpdate: ClerkUserUpdateSchema = {};
         if (putData.firstName) {
@@ -90,6 +95,10 @@ export async function PUT(request: NextRequest) {
 
     if (putData.ssn) {
         // sanitize it (digits only) and encrypt SSN before storing it:
+        const presanitizedSSN = putData.ssn.replace(/\D/g, "");
+        if (presanitizedSSN.length !== 9) {
+            return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
+        }
         putData.ssn = encryptString(putData.ssn.replace(/\D/g, ""));
     }
 
@@ -98,6 +107,11 @@ export async function PUT(request: NextRequest) {
             where: { clerkId: clerkUser.id },
             data: putData,
         });
+
+        if (updatedUser.ssn) {
+            updatedUser.ssn = `***-**-${decryptData(updatedUser.ssn).slice(-4)}`;
+        }
+
         return jsonResponse(updatedUser);
     } catch (dbError) {
         console.error("ERROR: unable to update user:\n", dbError);

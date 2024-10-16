@@ -1,4 +1,4 @@
-import crypto from 'crypto'
+import crypto from 'crypto';
 
 const {ENCRYPTION_SECRET, ENCRYPTION_SECRET_IV, ENCRYPTION_METHOD} = process.env;
 if(!ENCRYPTION_METHOD || !ENCRYPTION_SECRET || !ENCRYPTION_SECRET_IV) {

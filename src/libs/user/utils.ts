@@ -4,7 +4,7 @@ import { associateContactWithDeal, createOrUpdateHubspotContact } from "../hubsp
 import prisma from "../prisma";
 import { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
-import { Deal, User } from "@prisma/client";
+import { Deal, MembershipType, User } from "@prisma/client";
 
 /**
  * creates a user in both hubspot and our DB
@@ -60,12 +60,12 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
             data: userCreateData,
         });
 
-
         // create a personal org:
         const userOrg = await prisma.organization.create({
             data: {
                 name: `${userData.firstName} ${userData.lastName}'s Organization`,
-                ownedBy: { connect: { id: dbUser.id } }
+                ownedBy: { connect: { id: dbUser.id } },
+                members: { create: { userId: dbUser.id, type: MembershipType.OWNER } },
             }
         });
         userOrgId = userOrg.id;

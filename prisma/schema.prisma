@@ -73,7 +73,7 @@ model DealInvestmentStats {
 model Organization {
   id             Int                    @id @default(autoincrement())
   name           String
-  ownerId        Int                    @unique
+  ownerId        Int                    
   tin            String?
   dateOfCreation DateTime?
   juristication  String?

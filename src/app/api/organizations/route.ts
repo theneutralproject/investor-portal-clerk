@@ -36,7 +36,7 @@ export async function GET() {
     }
 
     // get orgs they are a member of
-    const userOrganizations = await prisma.organization.findMany({ where: { members: { some: { id: dbUser.id } }} });
+    const userOrganizations = await prisma.organization.findMany({ where: { members: { some: { userId: dbUser.id } } } });
 
     // encypt TIN on orgs
     return jsonResponse(userOrganizations.map((org) => {
@@ -78,8 +78,8 @@ export async function POST(request: NextRequest) {
     try {
         postData = zOrganizationCreateSchema.parse(requestBody)
     } catch (parseError) {
-        console.error("ERROR: unable to parse POST body:\n", parseError);
-        return jsonResponse({ error: "Input data malformatted" }, 400);
+        console.error("ERROR: unable to parse PUT body:\n", parseError);
+        return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
 
     const getOrgName = () => {
@@ -91,7 +91,7 @@ export async function POST(request: NextRequest) {
                 return `Corporation of ${dbUser.firstName} ${dbUser.lastName}`;
             }
             case DealOwnershipType.PARTNERSHIP: {
-                return `${dbUser.firstName} ${dbUser.lastName}'s Parnership Organization`; 
+                return `${dbUser.firstName} ${dbUser.lastName}'s Parnership Organization`;
             }
             case DealOwnershipType.MARITAL: {
                 return `${dbUser.firstName} ${dbUser.lastName}'s Marital Organization`;
@@ -104,6 +104,10 @@ export async function POST(request: NextRequest) {
             }
             default: return `${dbUser.firstName} ${dbUser.lastName}'s Organization`
         }
+    }
+
+    if (postData.tin && postData.tin.replace(/\D/g, "").length !== 9) {
+        return jsonResponse({ error: "TIN must be 9 digits" }, 400);
     }
 
     const orgCreateData = {
@@ -122,10 +126,10 @@ export async function POST(request: NextRequest) {
         }
     };
     try {
-        const newOrg = prisma.organization.create({
+        const newOrg = await prisma.organization.create({
             data: orgCreateData
         });
-        return jsonResponse(newOrg);
+        return jsonResponse(newOrg, 201);
     } catch (dbError) {
         console.error("ERROR: unable to update org:\n", dbError);
         return jsonResponse({ error: dbError }, 400);
@@ -150,10 +154,14 @@ export async function PUT(request: NextRequest) {
         putData = zOrganizationUpdateSchema.parse(requestBody)
     } catch (parseError) {
         console.error("ERROR: unable to parse PUT body:\n", parseError);
-        return jsonResponse({ error: "Input data malformatted" }, 400);
+        return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
     const { id, ...data } = putData;
     if (data.tin) {
+        if (data.tin.replace(/\D/g, "").length !== 9) {
+            return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
+        }
+
         data.tin = encryptString(data.tin.replace(/\D/g, ""));
     }
 
@@ -166,6 +174,11 @@ export async function PUT(request: NextRequest) {
                 members: true
             }
         })
+
+        if (updatedOrg.tin) {
+            updatedOrg.tin = `***-**-${decryptData(updatedOrg.tin).slice(-4)}`;
+        }
+
         return jsonResponse(updatedOrg);
     } catch (dbError) {
         console.error("ERROR: unable to update org:\n", dbError);
