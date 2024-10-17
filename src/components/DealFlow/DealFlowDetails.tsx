@@ -2,16 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   Box,
   Typography,
-  Button,
   TextField,
   Grid,
   CircularProgress,
   Autocomplete,
 } from "@mui/material";
-import { UserWithAddress } from "@/libs/prisma";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import axios from "axios";
 import { zUserUpdateSchema, UserUpdateSchema } from "@/libs/user/schema";
+import DealFlowFooter from "./DealFlowFooter";
+import { useDealFlow } from "./DealFlowContext";
 
 // US states array
 const usStates = [
@@ -67,24 +65,8 @@ const usStates = [
   "Wyoming",
 ];
 
-interface DealFlowTypeProps {
-  onBack: () => void;
-  onContinue: () => void;
-}
-
-const DealFlowDetails: React.FC<DealFlowTypeProps> = ({
-  onBack,
-  onContinue,
-}) => {
-  const { data: user, isLoading: isLoadingUser } = useQuery<
-    UserWithAddress,
-    Error
-  >({
-    queryKey: ["user"],
-    queryFn: () =>
-      axios.get<UserWithAddress>("/api/users").then((res) => res.data),
-  });
-
+const DealFlowDetails: React.FC = () => {
+  const { user, updateUser, isLoading } = useDealFlow();
   const [formData, setFormData] = useState<UserUpdateSchema | null>(null);
 
   useEffect(() => {
@@ -95,8 +77,8 @@ const DealFlowDetails: React.FC<DealFlowTypeProps> = ({
         ssn: user.ssn ?? "",
         phoneNumber: user.phoneNumber ?? "",
         dateOfBirth: user.dateOfBirth
-        ? new Date(user.dateOfBirth).toISOString().split('T')[0]
-        : "",
+          ? new Date(user.dateOfBirth).toISOString().split("T")[0]
+          : "",
         address: user.address ?? {
           street: "",
           city: "",
@@ -107,11 +89,6 @@ const DealFlowDetails: React.FC<DealFlowTypeProps> = ({
       });
     }
   }, [user]);
-
-  const updateUserMutation = useMutation({
-    mutationFn: (data: UserUpdateSchema) => axios.put("/api/users", data),
-    onSuccess: onContinue,
-  });
 
   const handleInputChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -148,14 +125,14 @@ const DealFlowDetails: React.FC<DealFlowTypeProps> = ({
             ? new Date(formData.dateOfBirth + "T00:00:00.000Z").toISOString()
             : null,
         });
-        updateUserMutation.mutate(validatedData);
+        updateUser(validatedData);
       } catch (error) {
         console.error("Validation error:", error);
       }
     }
   };
 
-  if (isLoadingUser || !formData) {
+  if (isLoading || !formData) {
     return (
       <Box
         display="flex"
@@ -278,18 +255,8 @@ const DealFlowDetails: React.FC<DealFlowTypeProps> = ({
           />
         </Grid>
       </Grid>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-        <Button variant="outlined" onClick={onBack}>
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={updateUserMutation.isLoading}
-        >
-          {updateUserMutation.isLoading ? "Updating..." : "Continue"}
-        </Button>
-      </Box>
+
+      <DealFlowFooter onBack={() => null} onContinue={handleSubmit} />
     </Box>
   );
 };

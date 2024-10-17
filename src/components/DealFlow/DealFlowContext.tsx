@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   ProjectWithAllNestedData,
+  UserWithAddress,
   type DealWithInvestmentStats,
 } from "@/libs/prisma";
 import { DealFinancingType, type Project } from "@prisma/client";
@@ -42,13 +43,12 @@ interface DealFlowContextType {
   dealId: string;
   project: ProjectWithAllNestedData | null;
   deal: DealWithInvestmentStats | null;
+  user: UserWithAddress | null;
   isLoading: boolean;
   error: string | null;
-  updateDeal: (
-    updatedDeal: Partial<DealWithInvestmentStats>,
-    onContinue: () => void
-  ) => Promise<void>;
+  updateDeal: (updatedDeal: Partial<DealWithInvestmentStats>) => Promise<void>;
   createDeal: () => Promise<void>;
+  updateUser: (updatedUser: Partial<UserWithAddress>) => Promise<void>;
 }
 
 const DealFlowContext = createContext<DealFlowContextType | undefined>(
@@ -70,29 +70,49 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 }) => {
   const [project, setProject] = useState<Project | null>(null);
   const [deal, setDeal] = useState<DealWithInvestmentStats | null>(null);
+  const [user, setUser] = useState<UserWithAddress | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [step, setStep] = useState<StepType>(initialStep);
   const router = useRouter();
 
+  const getNextStep = (currentStep: StepType): StepType | null => {
+    const currentIndex = steps.findIndex((s) => s.value === currentStep);
+    return steps[currentIndex + 1]?.value ?? null;
+  };
+
   useEffect(() => {
     const fetchData = async () => {
+      return;
+
       setIsLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(
-          `/api/deals/flow?projectSlug=${encodeURIComponent(
-            projectSlug
-          )}&dealId=${encodeURIComponent(dealId)}`
-        );
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+        const [dealResponse, userResponse] = await Promise.all([
+          fetch(
+            `/api/deals/flow?projectSlug=${encodeURIComponent(
+              projectSlug
+            )}&dealId=${encodeURIComponent(dealId)}`
+          ),
+          fetch("/api/users"),
+        ]);
+
+        if (!dealResponse.ok || !userResponse.ok) {
+          throw new Error(
+            `HTTP error! status: ${dealResponse.status} ${userResponse.status}`
+          );
         }
-        const data: { project: Project; deal: DealWithInvestmentStats | null } =
-          await response.json();
-        setProject(data.project);
-        setDeal(data.deal);
+
+        const dealData: {
+          project: Project;
+          deal: DealWithInvestmentStats | null;
+        } = await dealResponse.json();
+        const userData: UserWithAddress = await userResponse.json();
+
+        setProject(dealData.project);
+        setDeal(dealData.deal);
+        setUser(userData);
       } catch (error) {
         console.error("Error fetching data:", error);
         setError("Failed to load data. Please try again.");
@@ -105,8 +125,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   }, [projectSlug, dealId]);
 
   const updateDeal = async (
-    updatedDealData: Partial<DealWithInvestmentStats>,
-    onContinue: () => void
+    updatedDealData: Partial<DealWithInvestmentStats>
   ) => {
     if (!deal) return;
     setIsLoading(true);
@@ -122,7 +141,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         updatedDeal
       );
       setDeal(data);
-      onContinue();
+
+      const nextStep = getNextStep(step);
+      if (nextStep) {
+        router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
+      }
     } catch (error) {
       console.error("Error updating deal:", error);
       setError("Failed to update deal. Please try again.");
@@ -145,10 +168,38 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         "/api/deals",
         dealCreateData
       );
-      router.push(`/dealflow/${project?.slug}/${data.id}/type`);
+      const nextStep = getNextStep(step);
+      if (nextStep) {
+        router.push(`/dealflow/${project.slug}/${data.id}/${nextStep}`);
+      }
     } catch (error) {
       console.error("Error creating deal:", error);
       setError("Failed to create deal. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateUser = async (updatedUserData: Partial<UserWithAddress>) => {
+    if (!user) return;
+    setIsLoading(true);
+
+    const updatedUser = {
+      ...user,
+      ...updatedUserData,
+    };
+
+    try {
+      const { data } = await axios.put<UserWithAddress>(
+        `/api/users`,
+        updatedUser
+      );
+      setUser(data);
+
+      // Note: We don't navigate to the next step here as it might not be appropriate for all user updates
+    } catch (error) {
+      console.error("Error updating user:", error);
+      setError("Failed to update user. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -160,10 +211,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     dealId,
     project,
     deal,
+    user,
     isLoading,
     error,
     updateDeal,
     createDeal,
+    updateUser,
   };
 
   return (

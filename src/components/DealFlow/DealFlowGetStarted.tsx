@@ -1,20 +1,10 @@
-import React, { useState } from "react";
-import { Box, Typography, Button } from "@mui/material";
-import { DealCreateSchema } from "@/libs/deal/schema";
-import { DealFinancingType } from "@prisma/client";
-import axios from "axios";
+import React from "react";
+import { Box, Typography } from "@mui/material";
 import { useDealFlow } from "./DealFlowContext";
+import DealFlowFooter from "./DealFlowFooter";
 
-interface DealFlowGetStartedProps {
-  onBack: () => void;
-  onContinue: () => void;
-}
-
-const DealFlowGetStarted: React.FC<DealFlowGetStartedProps> = ({
-  onBack,
-  onContinue,
-}) => {
-  const { createDeal, isLoading } = useDealFlow();
+const DealFlowGetStarted: React.FC = ({}) => {
+  const { createDeal } = useDealFlow();
 
   return (
     <Box>
@@ -28,14 +18,7 @@ const DealFlowGetStarted: React.FC<DealFlowGetStartedProps> = ({
         In this video, Nate, CEO of Neutral, provides an overview of the
         investment process.
       </Typography>
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-        <Button variant="outlined" onClick={onBack} disabled={isLoading}>
-          Back
-        </Button>
-        <Button variant="contained" onClick={createDeal} disabled={isLoading}>
-          Continue
-        </Button>
-      </Box>
+      <DealFlowFooter onBack={() => null} onContinue={createDeal} />
     </Box>
   );
 };

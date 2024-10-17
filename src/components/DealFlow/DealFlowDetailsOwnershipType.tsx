@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { Box, Typography, RadioGroup, Card, CardContent } from "@mui/material";
-import { DealFinancingType } from "@prisma/client";
+import { DealOwnershipType } from "@prisma/client";
 import { useDealFlow } from "./DealFlowContext";
 import DealFlowFooter from "./DealFlowFooter";
 
-const DealFlowType: React.FC = ({}) => {
+const DealFlowDetailsOwnershipType: React.FC = () => {
   const { deal, updateDeal } = useDealFlow();
-  const [financingType, setFinancingType] = useState<DealFinancingType>(
-    deal?.investmentStats?.financingType ?? DealFinancingType.equity
+  const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
+    deal?.investmentStats?.ownershipType ?? DealOwnershipType.INDIVIDUAL
   );
 
-  const handleFinancingTypeChange = (type: DealFinancingType) => {
-    setFinancingType(type);
+  const handleOwnershipTypeChange = (type: DealOwnershipType) => {
+    setOwnershipType(type);
   };
 
   const handleUpdateDeal = async () => {
@@ -21,32 +21,39 @@ const DealFlowType: React.FC = ({}) => {
       ...deal,
       investmentStats: {
         ...deal.investmentStats,
-        financingType: financingType,
+        ownershipType: ownershipType,
       },
     });
+  };
+
+  const formatOwnershipType = (type: string): string => {
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
   };
 
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
-        Get Started
+        Investment Details
       </Typography>
       <Typography variant="body1" paragraph>
-        Select the financing type for this deal.
+        How are you investing?
       </Typography>
       <RadioGroup
-        aria-label="financing-type"
-        name="financing-type"
-        value={financingType}
+        aria-label="ownership-type"
+        name="ownership-type"
+        value={ownershipType}
       >
         <Box display="flex" flexDirection="column" gap={2}>
-          {Object.values(DealFinancingType).map((type) => (
+          {Object.values(DealOwnershipType).map((type) => (
             <Card
               key={type}
-              onClick={() => handleFinancingTypeChange(type)}
+              onClick={() => handleOwnershipTypeChange(type)}
               sx={{
                 cursor: "pointer",
-                border: financingType === type ? "2px solid #1976d2" : "none",
+                border: ownershipType === type ? "2px solid #1976d2" : "none",
                 "&:hover": { boxShadow: 3 },
               }}
             >
@@ -62,7 +69,7 @@ const DealFlowType: React.FC = ({}) => {
                     alignItems="center"
                     justifyContent="center"
                   >
-                    {financingType === type && (
+                    {ownershipType === type && (
                       <Box
                         width={12}
                         height={12}
@@ -72,12 +79,9 @@ const DealFlowType: React.FC = ({}) => {
                     )}
                   </Box>
                   <Typography variant="h6">
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
+                    {formatOwnershipType(type)}
                   </Typography>
                 </Box>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  Placeholder text for {type} financing type
-                </Typography>
               </CardContent>
             </Card>
           ))}
@@ -89,4 +93,4 @@ const DealFlowType: React.FC = ({}) => {
   );
 };
 
-export default DealFlowType;
+export default DealFlowDetailsOwnershipType;

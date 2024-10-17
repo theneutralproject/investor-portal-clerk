@@ -2,7 +2,6 @@ import React, { useState, useMemo, useCallback } from "react";
 import {
   Box,
   Typography,
-  Button,
   TextField,
   InputAdornment,
   Chip,
@@ -17,13 +16,9 @@ import {
   Legend,
 } from "recharts";
 import { useDealFlow } from "./DealFlowContext";
+import DealFlowFooter from "./DealFlowFooter";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 75000, 100000];
-
-interface DealFlowAmountProps {
-  onBack: () => void;
-  onContinue: () => void;
-}
 
 const getBaseReturns = (investmentAmount: number): number[] => {
   if (investmentAmount >= 100000) return [0.5, 0.8, 1.4, 2.0, 2.8, 4.0];
@@ -31,18 +26,13 @@ const getBaseReturns = (investmentAmount: number): number[] => {
   return [0.4, 0.6, 1.0, 1.4, 1.8, 3.0];
 };
 
-const DealFlowAmount: React.FC<DealFlowAmountProps> = ({
-  onBack,
-  onContinue,
-}) => {
+const DealFlowAmount: React.FC = ({}) => {
   const { deal, updateDeal, project } = useDealFlow();
   const minInvestment = project?.investmentStats?.debtMinInvestment ?? 5000;
 
   const [amount, setAmount] = useState(
     deal?.investmentStats?.amount ?? minInvestment
   );
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const error =
     amount < minInvestment
@@ -75,24 +65,19 @@ const DealFlowAmount: React.FC<DealFlowAmountProps> = ({
 
   const handleSubmit = useCallback(async () => {
     if (!deal) return;
-    setIsLoading(true);
     try {
-      await updateDeal(
-        {
-          ...deal,
-          investmentStats: {
-            ...deal.investmentStats,
-            amount: amount,
-          },
+      await updateDeal({
+        ...deal,
+        investmentStats: {
+          ...deal.investmentStats,
+          amount: amount,
         },
-        onContinue
-      );
+      });
     } catch (error) {
       console.error("Error updating deal:", error);
     } finally {
-      setIsLoading(false);
     }
-  }, [deal, amount, updateDeal, onContinue]);
+  }, [deal, amount, updateDeal]);
 
   const investmentStats = useMemo(() => {
     const irr = project?.investmentStats?.equityIRR ?? "18%";
@@ -191,18 +176,7 @@ const DealFlowAmount: React.FC<DealFlowAmountProps> = ({
         </Typography>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "space-between", mt: 3 }}>
-        <Button variant="outlined" onClick={onBack} disabled={isLoading}>
-          Back
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={isLoading || !!error}
-        >
-          Continue
-        </Button>
-      </Box>
+      <DealFlowFooter onBack={() => null} onContinue={handleSubmit} />
     </Box>
   );
 };
