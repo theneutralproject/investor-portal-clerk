@@ -21,8 +21,7 @@ export async function POST(request: NextRequest) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
+    const requestBody = (await request.json()) as OrganizationMemberCreateSchema;
     let postData: OrganizationMemberCreateSchema;
 
     try {
@@ -108,10 +107,8 @@ export async function DELETE(request: NextRequest) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const requestBody = await request.json();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const { organizationId, userId } = requestBody as { organizationId: number, userId: number };
+    const requestBody = await request.json() as { organizationId: number, userId: number };
+    const { organizationId, userId } = requestBody;
 
     if (!organizationId || !userId) {
         return jsonResponse({ error: "Input data malformatted" }, 400);

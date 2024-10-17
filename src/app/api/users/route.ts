@@ -56,15 +56,14 @@ export async function PUT(request: NextRequest) {
     return jsonResponse({ error: "Clerk user not found" }, 404);
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const requestBody = await request.json();
-  let putData: UserUpdateSchema;
-  try {
-    putData = zUserUpdateSchema.parse(requestBody);
-  } catch (parseError) {
-    console.error("ERROR: unable to parse PUT body:\n", parseError);
-    return jsonResponse({ error: "Input data malformatted" }, 400);
-  }
+    const requestBody = (await request.json()) as UserUpdateSchema;
+    let putData: UserUpdateSchema;
+    try {
+        putData = zUserUpdateSchema.parse(requestBody)
+    } catch (parseError) {
+        console.error("ERROR: unable to parse PUT body:\n", parseError);
+        return jsonResponse({ error: "Input data malformatted" }, 400);
+    }
 
   //  Check if hubspot and clerk needs to be updated, and then update them
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
