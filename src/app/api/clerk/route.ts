@@ -38,10 +38,10 @@ export async function POST(request: Request) {
       if(email === "") {
         // TODO: log this error. The user will not be created in the DB!
         console.error("No email found for user", data)
-        return new Response("No email found for user"), {
+        return new Response(JSON.stringify({error: `No email found for new clerk user!!!`}), {
           status: 500,
           headers: { "Content-Type": "application/json" },
-        };
+        });
       } 
       
       const newUserData = {
