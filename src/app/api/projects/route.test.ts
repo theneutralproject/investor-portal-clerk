@@ -12,7 +12,7 @@ it("GET returns 200", async () => {
   await testApiHandler({
     appHandler,
     test: async ({ fetch }) => {
-      const response = await fetch({ method: "GET" });
+      const response = await fetch({ method: "GET",headers: { 'Authorization': `Bearer ${process.env.TEST_USER_TOKEN}` } });
       const json = await response.json();
       expect(response.status).toBe(200);
       //   https://jestjs.io/docs/expect#tohavelengthnumber

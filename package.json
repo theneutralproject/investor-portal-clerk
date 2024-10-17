@@ -14,10 +14,11 @@
     "precommit": "tsc && eslint && prisma generate",
     "start": "next start",
     "test": "jest",
-    "test:watch": "jest --watch"
+    "test:watch": "jest --watch",
+    "test:e2e": "npx playwright test --ui"
   },
   "dependencies": {
-    "@clerk/nextjs": "^4.29.12",
+    "@clerk/nextjs": "^4.31.5",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.15.15",
@@ -30,6 +31,7 @@
     "axios": "^1.6.8",
     "canvas": "^2.11.2",
     "docusign-esign": "^7.0.1",
+    "dotenv": "^16.4.5",
     "iron-session": "^8.0.1",
     "lodash": "^4.17.21",
     "next": "^14.2.3",
@@ -52,6 +54,7 @@
     "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
+    "@clerk/testing": "^1.3.11",
     "@prisma/client": "^5.20.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^15.0.7",
@@ -82,6 +85,12 @@
   },
   "packageManager": "npm@10.2.3",
   "prisma": {
-    "seed": "tsx seedScripts/FILENAMETOSEED.ts"
+    "seed": "tsx seedScripts/201410161208-setOrgIsPrimary.ts"
+  },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "e2e",
+      "e2e-examples"
+    ]
   }
 }

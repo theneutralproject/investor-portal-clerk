@@ -1,10 +1,10 @@
 import { isError } from "lodash";
-import { HubspotContact } from "../hubspot/schema";
+import type { HubspotContact } from "../hubspot/schema";
 import { associateContactWithDeal, createOrUpdateHubspotContact } from "../hubspot/utils";
 import prisma from "../prisma";
-import { UserCreateSchema } from "./schema";
+import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
-import { Deal, User } from "@prisma/client";
+import { type Deal, MembershipType, type User } from "@prisma/client";
 
 /**
  * creates a user in both hubspot and our DB
@@ -12,6 +12,7 @@ import { Deal, User } from "@prisma/client";
  */
 export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: number): Promise<User> {
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { address, ...userData } = data;
 
     let deal: Deal | null = null;
@@ -45,27 +46,29 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
     // create user and address in DB
     let userOrgId: number;
     try {
-        let userCreateData = {
+        const userCreateData = {
             ...userData,
             hubspotId: hubspotUserId,
         }
-        if (address) {
-            const userAddress = await prisma.address.create({ data: address });
-            console.log(`created address for new user`);
-            const addressId = userAddress.id;
-            userCreateData = { ...userCreateData, ...{ address: { connect: { id: addressId } }, addressId: addressId } }
-        }
+
+        // TODO: regigger address creation 
+        // if (address) {
+        //     const userAddress = await prisma.address.create({ data: address });
+        //     console.log(`created address for new user`);
+        //     const addressId = userAddress.id;
+        //     userCreateData = { ...userCreateData, ...{ address: { connect: { id: addressId } }, addressId: addressId } }
+        // }
 
         const dbUser = await prisma.user.create({
             data: userCreateData,
         });
 
-
         // create a personal org:
         const userOrg = await prisma.organization.create({
             data: {
                 name: `${userData.firstName} ${userData.lastName}'s Organization`,
-                ownedBy: { connect: { id: dbUser.id } }
+                ownedBy: { connect: { id: dbUser.id } },
+                members: { create: { userId: dbUser.id, type: MembershipType.OWNER } },
             }
         });
         userOrgId = userOrg.id;
