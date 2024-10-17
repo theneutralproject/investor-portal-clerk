@@ -91,15 +91,46 @@ export async function PUT(request: NextRequest) {
         // sanitize it (digits only) and encrypt SSN before storing it:
         putData.ssn = encryptString(putData.ssn.replace(/\D/g, ""));
     }
-
+  // Handle address update
+  let addressId: number | undefined;
+  if (putData.address) {
     try {
-        const updatedUser = await prisma.user.update({
-            where: { clerkId: clerkUser.id },
-            data: putData,
-        });
-        return jsonResponse(updatedUser);
-    } catch (dbError) {
-        console.error("ERROR: unable to update user:\n", dbError);
-        return jsonResponse({ error: 'unable to update user' }, 400);
+      const address = await prisma.address.upsert({
+        where: {
+          id:
+            (
+              await prisma.user.findUnique({
+                where: { clerkId: clerkUser.id },
+                select: { addressId: true },
+              })
+            )?.addressId ?? -1,
+        },
+        update: putData.address,
+        create: putData.address,
+      });
+      addressId = address.id;
+    } catch (addressError) {
+      console.error("ERROR: unable to update/create address:\n", addressError);
+      return jsonResponse({ error: "unable to update/create address" }, 400);
     }
+  }
+
+  // Prepare data for user update
+  const userData = {
+    ...putData,
+    address: addressId ? { connect: { id: addressId } } : undefined,
+  };
+
+
+  try {
+    const updatedUser = await prisma.user.update({
+      where: { clerkId: clerkUser.id },
+      data: userData,
+      include: { address: true }, // Include the address in the response
+    });
+    return jsonResponse(updatedUser);
+  } catch (dbError) {
+    console.error("ERROR: unable to update user:\n", dbError);
+    return jsonResponse({ error: "unable to update user" }, 400);
+  }
 }
