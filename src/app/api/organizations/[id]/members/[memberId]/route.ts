@@ -46,7 +46,7 @@ export async function DELETE(request: NextRequest) {
                 return jsonResponse(updatedOrg);
             } catch (deleteError: unknown) {
                 console.error("ERROR: unable to delete ghost user from db:\n", deleteError);
-                return jsonResponse({ error: `The ghost user could not be deleted from the database:\n${deleteError}` }, 400);
+                return jsonResponse({ error: `The ghost user could not be deleted from the database:\n${getErrorMessage(deleteError)}` }, 400);
             }
         } else {
             // they already signed up for an account. Only disassociate them from the org
