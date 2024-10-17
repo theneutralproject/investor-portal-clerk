@@ -1,9 +1,9 @@
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { isNumber } from "lodash";
 
-export async function getUserAndOrg(request: NextRequest, idIdxFromRight: number = 0) {
+export async function getUserAndOrg(request: NextRequest, idIdxFromRight = 0) {
     const url = new URL(request.url);
     const urlBits = url.pathname.split("/");
     const id = parseInt(urlBits[urlBits.length - 1 - idIdxFromRight] ?? "");

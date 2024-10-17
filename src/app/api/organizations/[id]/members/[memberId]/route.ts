@@ -1,6 +1,6 @@
 import prisma from "@/libs/prisma";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { getUserAndOrg } from "../helpers";
 import { isNumber } from "lodash";
 
@@ -44,7 +44,7 @@ export async function DELETE(request: NextRequest) {
                     include: { members: { include: { user: true } } }
                 });
                 return jsonResponse(updatedOrg);
-            } catch (deleteError) {
+            } catch (deleteError: unknown) {
                 console.error("ERROR: unable to delete ghost user from db:\n", deleteError);
                 return jsonResponse({ error: `The ghost user could not be deleted from the database:\n${deleteError}` }, 400);
             }

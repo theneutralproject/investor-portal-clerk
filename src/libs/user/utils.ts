@@ -1,10 +1,10 @@
 import { isError } from "lodash";
-import { HubspotContact } from "../hubspot/schema";
+import type { HubspotContact } from "../hubspot/schema";
 import { associateContactWithDeal, createOrUpdateHubspotContact } from "../hubspot/utils";
 import prisma from "../prisma";
-import { UserCreateSchema } from "./schema";
+import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
-import { Deal, MembershipType, User } from "@prisma/client";
+import { type Deal, MembershipType, type User } from "@prisma/client";
 
 /**
  * creates a user in both hubspot and our DB
@@ -12,6 +12,7 @@ import { Deal, MembershipType, User } from "@prisma/client";
  */
 export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: number): Promise<User> {
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { address, ...userData } = data;
 
     let deal: Deal | null = null;
@@ -45,7 +46,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
     // create user and address in DB
     let userOrgId: number;
     try {
-        let userCreateData = {
+        const userCreateData = {
             ...userData,
             hubspotId: hubspotUserId,
         }
