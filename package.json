@@ -85,7 +85,7 @@
   },
   "packageManager": "npm@10.2.3",
   "prisma": {
-    "seed": "tsx seedScripts/FILENAMETOSEED.ts"
+    "seed": "tsx seedScripts/201410161208-setOrgIsPrimary.ts"
   },
   "jest": {
     "testPathIgnorePatterns": [

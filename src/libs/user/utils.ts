@@ -49,12 +49,14 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
             ...userData,
             hubspotId: hubspotUserId,
         }
-        if (address) {
-            const userAddress = await prisma.address.create({ data: address });
-            console.log(`created address for new user`);
-            const addressId = userAddress.id;
-            userCreateData = { ...userCreateData, ...{ address: { connect: { id: addressId } }, addressId: addressId } }
-        }
+
+        // TODO: regigger address creation 
+        // if (address) {
+        //     const userAddress = await prisma.address.create({ data: address });
+        //     console.log(`created address for new user`);
+        //     const addressId = userAddress.id;
+        //     userCreateData = { ...userCreateData, ...{ address: { connect: { id: addressId } }, addressId: addressId } }
+        // }
 
         const dbUser = await prisma.user.create({
             data: userCreateData,

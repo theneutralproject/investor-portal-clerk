@@ -3,7 +3,6 @@ import { z } from "zod";
 import { zUserCreateSchema } from "../user/schema";
 
 export const zOrganizationUpdateSchema = z.object({
-    id: z.number().int(),
     name: z.string().max(120, "120 characters max").optional(),
     tin: z.string().max(200).optional(),
     dateOfCreation: z.coerce.date().optional(),
@@ -14,7 +13,7 @@ export const zOrganizationUpdateSchema = z.object({
 export type OrganizationUpdateSchema = z.infer<typeof zOrganizationUpdateSchema>;
 
 export const zOrganizationCreateSchema = z.object({
-    name: z.string().max(120, "120 characters max"),
+    name: z.string().max(120, "120 characters max").nullish(),
     tin: z.string().max(200).nullish(),
     dateOfCreation: z.coerce.date().nullish(),
     juristication: z.string().max(120, "120 characters max").nullish(),
@@ -25,8 +24,8 @@ export const zOrganizationCreateSchema = z.object({
 export type OrganizationCreateSchema = z.infer<typeof zOrganizationCreateSchema>;
 
 export const zOrganizationMemberCreateSchema = z.object({
-    organizationId: z.number().int(),
-    dealId: z.number().int(),
+    // organizationId: z.number().int(),
+    dealId: z.number().int().optional(),
     user: zUserCreateSchema,
     type: z.nativeEnum(MembershipType),
 });

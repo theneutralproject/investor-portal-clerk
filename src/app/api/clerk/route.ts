@@ -65,11 +65,8 @@ export async function POST(request: Request) {
       }
 
     }
-    case "session.created": {
-      break;
-    }
-
-    case "session.ended": /** FALL THROUGH SWITCHES */
+    case "session.created": /** FALL THROUGH SWITCHES */
+    case "session.ended":
     case "session.revoked":
     case "session.removed": {
       break;

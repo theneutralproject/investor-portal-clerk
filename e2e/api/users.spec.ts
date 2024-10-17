@@ -43,7 +43,7 @@ test.describe("api/users test", () => {
         expect(response.status()).toBe(400);
     });
 
-    test.afterAll(async ({ request }) => {
+    test.afterEach(async ({ request }) => {
         await request.put('/api/users', {
             data: { firstName: 'Testi', lastName: 'Tester' }
         });
