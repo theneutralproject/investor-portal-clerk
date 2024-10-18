@@ -8,12 +8,12 @@ import { fileURLToPath } from 'url';
 import { defineConfig, devices } from '@playwright/test';
 
 // Only load .env in development
-if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'production' && !process.env.CI == true) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   dotenv.config({ path: path.resolve(__dirname, '.env') });
 }
-
+console.log("BASE_URL",process.env.BASE_URL);
 const baseURL = process.env.BASE_URL;
 const testUserToken = process.env.TEST_USER_TOKEN;
 if (!baseURL || !testUserToken) {
