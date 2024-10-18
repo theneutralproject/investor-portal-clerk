@@ -20,16 +20,15 @@ model User {
   lastName           String
   phoneNumber        String?
   hubspotId          String
-  addressId          Int?
   ssn                String?
   dateOfBirth        DateTime?
-  userOrgId          Int?             @unique
+  userOrgId          Int?            @unique
   referralSource     String?
   deal               Deal[]
   documentEvents     DocumentEvent[]
-  address            Address?        @relation(fields: [addressId], references: [id])
+  address            Address?
   organizationMember Member[]
-  organizationsOwned  Organization[]   @relation(name: "userOrg")
+  organizationsOwned Organization[]  @relation(name: "userOrg")
 }
 
 model Deal {
@@ -51,8 +50,8 @@ model Deal {
   accreditationVerifierId Int?
   organizationId          Int
   accreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
-  organization            Organization           @relation(fields: [organizationId], references: [id])
-  project                 Project                @relation(fields: [projectId], references: [id])
+  organization            Organization           @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  project                 Project                @relation(fields: [projectId], references: [id], onDelete: Restrict)
   user                    User?                  @relation(fields: [userId], references: [id])
   document                DealDocument[]
   investmentStats         DealInvestmentStats?
@@ -73,30 +72,30 @@ model DealInvestmentStats {
 model Organization {
   id             Int                    @id @default(autoincrement())
   name           String
-  ownerId        Int                    @unique
+  ownerId        Int
   tin            String?
   dateOfCreation DateTime?
   juristication  String?
-  addressId      Int?
+  isPrimary      Boolean                @default(false) /// used to determine which organization is the primary individual one for the user
   ownershipType  DealOwnershipType      @default(INDIVIDUAL)
   deals          Deal[]
-  address        Address?               @relation(fields: [addressId], references: [id])
+  address        Address?
   document       OrganizationDocument[]
-  ownedBy        User                   @relation(name: "userOrg", fields: [ownerId], references: [id])
-  members         Member[]
+  ownedBy        User                   @relation(name: "userOrg", fields: [ownerId], references: [id], onDelete: Cascade)
+  members        Member[]
 }
 
 model Member {
   id             Int            @id @default(autoincrement())
   userId         Int
   organizationId Int
-  user           User           @relation(fields: [userId], references: [id])
-  organization   Organization   @relation(fields: [organizationId], references: [id])
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   type           MembershipType
 }
 
 model AccreditationVerifier {
-  id          Int    @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   firstName   String
   lastName    String
   email       String
@@ -229,14 +228,16 @@ model DocumentEvent {
 }
 
 model Address {
-  id           Int            @id @default(autoincrement())
-  street       String
-  city         String
-  zipcode      String
-  state        String
-  country      String         @default("United States")
-  organization Organization[]
-  user         User[]
+  id             Int          @id @default(autoincrement())
+  street         String
+  city           String
+  zipcode        String
+  state          String
+  country        String       @default("United States")
+  organization   Organization? @relation(onDelete: Cascade, fields: [organizationId], references: [id])
+  organizationId Int?          @unique
+  user           User?         @relation(onDelete: Cascade, fields: [userId], references: [id])
+  userId         Int?          @unique
 }
 
 enum DealDocumentType {

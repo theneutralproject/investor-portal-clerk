@@ -1,8 +1,8 @@
-import { AccreditationVerifierCreateSchema, zAccreditationVerifierCreateSchema } from "@/libs/accreditationVerifier/schema";
+import { type AccreditationVerifierCreateSchema, zAccreditationVerifierCreateSchema } from "@/libs/accreditationVerifier/schema";
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 /**
  * Specify an AccreditationVerifier for a deal

@@ -50,13 +50,13 @@ const Referral: React.FC = () => {
 
     try {
       await axios.put("/api/users", { referralSource });
-
-      if (!user?.primaryEmailAddress) {
+      const email = user?.primaryEmailAddress ? user.primaryEmailAddress.emailAddress : user?.emailAddresses[0]?.emailAddress ?? null;
+      if (!email) {
         throw new Error("User email address not found");
       }
 
       const hsUser: HubspotContact = {
-        email: user.primaryEmailAddress.toString(),
+        email,
         properties: [
           {
             property: "referral_source",

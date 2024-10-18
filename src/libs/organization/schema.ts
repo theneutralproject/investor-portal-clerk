@@ -1,32 +1,32 @@
 import { DealOwnershipType, MembershipType } from "@prisma/client";
 import { z } from "zod";
 import { zUserCreateSchema } from "../user/schema";
+import { zAddressCreateSchema } from "../address/schema";
 
 export const zOrganizationUpdateSchema = z.object({
-    id: z.number().int(),
-    name: z.string().length(120, "120 characters max").optional(),
-    tin: z.string().length(200).optional(),
-    dateOfCreation: z.date().optional(),
-    juristication: z.string().length(120, "120 characters max").optional(),
-    addressId: z.number().int().optional(),
+    name: z.string().max(120, "120 characters max").optional(),
+    tin: z.string().max(200).optional(),
+    dateOfCreation: z.coerce.date().optional(),
+    juristication: z.string().max(120, "120 characters max").optional(),
     ownershipType: z.nativeEnum(DealOwnershipType).optional(),
+    address: zAddressCreateSchema.nullish()
 });
 export type OrganizationUpdateSchema = z.infer<typeof zOrganizationUpdateSchema>;
 
 export const zOrganizationCreateSchema = z.object({
-    name: z.string().length(120, "120 characters max"),
-    tin: z.string().length(200).nullable(),
-    dateOfCreation: z.date().nullable(),
-    juristication: z.string().length(120, "120 characters max").nullable(),
-    addressId: z.number().int().nullable(),
-    ownershipType: z.nativeEnum(DealOwnershipType).nullable(),
+    name: z.string().max(120, "120 characters max").nullish(),
+    tin: z.string().max(200).nullish(),
+    dateOfCreation: z.coerce.date().nullish(),
+    juristication: z.string().max(120, "120 characters max").nullish(),
+    ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
+    address: zAddressCreateSchema.nullish()
 });
 
 export type OrganizationCreateSchema = z.infer<typeof zOrganizationCreateSchema>;
 
 export const zOrganizationMemberCreateSchema = z.object({
-    organizationId: z.number().int(),
-    dealId: z.number().int(),
+    // organizationId: z.number().int(),
+    dealId: z.number().int().optional(),
     user: zUserCreateSchema,
     type: z.nativeEnum(MembershipType),
 });

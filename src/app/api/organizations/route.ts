@@ -1,5 +1,6 @@
-import { decryptData, encryptString } from "@/libs/encryption/utils";
-import { type OrganizationCreateSchema, type OrganizationUpdateSchema, zOrganizationCreateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
+import { encryptString } from "@/libs/encryption/utils";
+import { type OrganizationCreateSchema, zOrganizationCreateSchema } from "@/libs/organization/schema";
+import { sanitizeOrganization } from "@/libs/organization/utils";
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
@@ -36,15 +37,10 @@ export async function GET() {
     }
 
     // get orgs they are a member of
-    const userOrganizations = await prisma.organization.findMany({ where: { members: { some: { id: dbUser.id } }} });
+    const userOrganizations = await prisma.organization.findMany({ where: { members: { some: { userId: dbUser.id } } } });
 
     // encypt TIN on orgs
-    return jsonResponse(userOrganizations.map((org) => {
-        // eslint-disable-next-line prefer-const
-        let { tin, ...rest } = org;
-        if (tin) tin = `***-**-${decryptData(tin).slice(-4)}`;
-        return { ...rest, ...{ tin } };
-    }));
+    return jsonResponse(userOrganizations.map(sanitizeOrganization), 200);
 }
 
 /**
@@ -77,8 +73,8 @@ export async function POST(request: NextRequest) {
     try {
         postData = zOrganizationCreateSchema.parse(requestBody)
     } catch (parseError) {
-        console.error("ERROR: unable to parse POST body:\n", parseError);
-        return jsonResponse({ error: "Input data malformatted" }, 400);
+        console.error("ERROR: unable to parse PUT body:\n", parseError);
+        return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
 
     const getOrgName = () => {
@@ -90,7 +86,7 @@ export async function POST(request: NextRequest) {
                 return `Corporation of ${dbUser.firstName} ${dbUser.lastName}`;
             }
             case DealOwnershipType.PARTNERSHIP: {
-                return `${dbUser.firstName} ${dbUser.lastName}'s Parnership Organization`; 
+                return `${dbUser.firstName} ${dbUser.lastName}'s Parnership Organization`;
             }
             case DealOwnershipType.MARITAL: {
                 return `${dbUser.firstName} ${dbUser.lastName}'s Marital Organization`;
@@ -105,11 +101,14 @@ export async function POST(request: NextRequest) {
         }
     }
 
+    if (postData.tin && postData.tin.replace(/\D/g, "").length !== 9) {
+        return jsonResponse({ error: "TIN must be 9 digits" }, 400);
+    }
+
     const orgCreateData = {
         name: getOrgName(),
         ownershipType: postData.ownershipType ?? DealOwnershipType.INDIVIDUAL,
         ownerId: dbUser.id,
-        addressId: postData.addressId,
         tin: postData.tin ? encryptString(postData.tin.replace(/\D/g, "")) : null,
         dateOfCreation: postData.dateOfCreation,
         juristication: postData.juristication,
@@ -121,52 +120,12 @@ export async function POST(request: NextRequest) {
         }
     };
     try {
-        const newOrg = prisma.organization.create({
+        const newOrg = await prisma.organization.create({
             data: orgCreateData
         });
-        return jsonResponse(newOrg);
+        return jsonResponse(sanitizeOrganization(newOrg), 201);
     } catch (dbError) {
         console.error("ERROR: unable to update org:\n", dbError);
         return jsonResponse({ error: dbError }, 400);
-    }
-};
-
-/**
- * Update an existing org  - EXCLUSIVE of their members! User api/organization/members for that
- * @param request with body:OrganizationUpdateSchema
- * @returns updated organization
- **/
-export async function PUT(request: NextRequest) {
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
-        return jsonResponse({ error: "Clerk user not found" }, 404);
-    }
-
-    const requestBody = (await request.json()) as OrganizationUpdateSchema;
-    let putData: OrganizationUpdateSchema;
-    try {
-        putData = zOrganizationUpdateSchema.parse(requestBody)
-    } catch (parseError) {
-        console.error("ERROR: unable to parse PUT body:\n", parseError);
-        return jsonResponse({ error: "Input data malformatted" }, 400);
-    }
-    const { id, ...data } = putData;
-    if (data.tin) {
-        data.tin = encryptString(data.tin.replace(/\D/g, ""));
-    }
-
-    try {
-        const updatedOrg = await prisma.organization.update({
-            where: { id },
-            data,
-            include: {
-                address: true,
-                members: true
-            }
-        })
-        return jsonResponse(updatedOrg);
-    } catch (dbError) {
-        console.error("ERROR: unable to update org:\n", dbError);
-        return jsonResponse({ error: 'unable to update the organization' }, 400);
     }
 };

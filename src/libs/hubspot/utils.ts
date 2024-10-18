@@ -2,7 +2,7 @@ import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { isError } from "lodash";
 import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
-import { type DealCreateSchema} from "../deal/schema";
+import { type DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
@@ -22,6 +22,12 @@ async function _createOrUpdateContact(hubspotContact: HubspotContact) {
       body: JSON.stringify(hubspotContact),
     }
   ).then(async (response) => {
+    if (response.status >= 300) {
+      console.error("ERROR: unable to update Hubspot contact:\n", response.statusText);
+      console.log("response", response);
+      return new Error("unable to update hubspot contact");
+    }
+
     try {
       // eslint-disable-next-line
       const resJson = await response.json();
@@ -98,7 +104,6 @@ export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealU
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
-
   switch (projectName) {
     case ProjectName["The Edison"]: {
       return {
@@ -110,7 +115,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
           { name: "amount", value: "0" },
           { name: "financing_type", value: dealData.financingType ?? "equity" },
           { name: "transaction_id", value: dealData.transactionId! },
-          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID}
+          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID }
         ]
       } as HubspotDealPropertiesCollection
     }
@@ -124,7 +129,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
           { name: "amount", value: "0" },
           { name: "financing_type", value: dealData.financingType ?? "equity" },
           { name: "transaction_id", value: dealData.transactionId! },
-          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID},
+          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
         ]
       } as HubspotDealPropertiesCollection
     }
@@ -136,7 +141,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 }
 /* eslint-enable */
 
-export async function associateContactWithDeal(contactId: string, dealId: string) {
+export async function associateContactWithDealInHubspot(contactId: string, dealId: string) {
   const body = JSON.stringify({
     fromObjectId: parseInt(contactId),
     toObjectId: parseInt(dealId),
@@ -144,7 +149,7 @@ export async function associateContactWithDeal(contactId: string, dealId: string
     definitionId: 4
   });
 
-  return await fetch(    
+  return await fetch(
     `${process.env.HUBSPOT_API_BASE_URL}/crm-associations/v1/associations`,
     {
       method: "POST",
@@ -156,7 +161,6 @@ export async function associateContactWithDeal(contactId: string, dealId: string
     }
   );
 }
-
 
 export async function getFundingAmount(projectName: ProjectName) {
   function getPayload(project: ProjectName) {

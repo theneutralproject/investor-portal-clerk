@@ -3,16 +3,14 @@ import { ReferralSource } from "../hubspot/utils";
 import { zAddressCreateSchema } from "../address/schema";
 
 // we are excluding the email and phoneNumber, since these were previously verified by the user
-// TODO: use clerk API to update and verify phone and email 
+// TODO: use clerk API to update and verify phone and email
 export const zUserUpdateSchema = z.object({
     // email: z.string().email().optional(),
     // phoneNumber: z.string().optional(),
-    firstName: z.string(),
-    lastName: z.string(),
-    ssn: z.string().optional(),
-    dateOfBirth: z.string().datetime().optional(),
-    referralsource: z.nativeEnum(ReferralSource).optional(),    
-    phoneNumber: z.string().optional(),
+    firstName: z.string().max(50).optional(),
+    lastName: z.string().max(50).optional(),
+    ssn: z.string().max(200).optional(),
+    referralsource: z.nativeEnum(ReferralSource).optional(),
     address: zAddressCreateSchema.optional()
   });
   
@@ -24,10 +22,10 @@ export const zUserUpdateSchema = z.object({
   };
 
 export const zUserCreateSchema = z.object({
-  firstName: z.string().length(50),
-  lastName: z.string().length(50),
-  clerkId: z.string().length(60).optional(),
-  ssn: z.string().length(200).optional(),
+  firstName: z.string().max(50),
+  lastName: z.string().max(50),
+  clerkId: z.string().max(60).optional(),
+  ssn: z.string().max(200).optional(),
   referralsource: z.nativeEnum(ReferralSource).optional(),    
   email: z.string().email(),
   phoneNumber: z.string().optional(),
