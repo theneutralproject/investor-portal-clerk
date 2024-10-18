@@ -16,8 +16,6 @@ if (process.env.NODE_ENV !== 'production' && !process.env.CI === true) {
 
 const baseURL = process.env.BASE_URL;
 const testUserToken = process.env.TEST_USER_TOKEN;
-console.log("BASE_URL",baseURL);
-console.log("TEST_USER_TOKEN",testUserToken);
 if (!baseURL || !testUserToken) {
   throw new Error('Please provide BASE_URL and TEST_USER_TOKEN environment variable.');
 }
