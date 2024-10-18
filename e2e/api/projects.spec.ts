@@ -7,7 +7,6 @@ test.describe("[GET] api/projects test", () => {
     const response = await request.get('/api/projects');
     expect(response.status()).toBe(200);
     const body = await JSON.parse(await response.text());
-    console.log('response.body', body);
     expect(response.headers()['content-type']).toBe('application/json');
     expect(body).toHaveLength(3);
   });

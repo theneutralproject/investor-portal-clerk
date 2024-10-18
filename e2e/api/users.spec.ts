@@ -4,7 +4,6 @@ import { test, expect } from '@playwright/test';
 
 
 test.describe("api/users test", () => {
-    test.skip();
     // get all users should only return the current user
     test('[GET] get all users', async ({ request }) => {
         const response = await request.get('/api/users');
