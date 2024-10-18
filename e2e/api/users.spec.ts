@@ -1,7 +1,6 @@
 import { AddressCreateSchema } from '@/libs/address/schema';
 import prisma, { UserWithAddress } from '@/libs/prisma';
 import { test, expect } from '@playwright/test';
-import { first } from 'lodash';
 
 
 test.describe("api/users test", () => {
