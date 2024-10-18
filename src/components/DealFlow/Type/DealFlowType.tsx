@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Box, Typography, RadioGroup, Card, CardContent } from "@mui/material";
 import { DealFinancingType } from "@prisma/client";
-import { useDealFlow } from "./DealFlowContext";
-import DealFlowFooter from "./DealFlowFooter";
+import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 
-const DealFlowType: React.FC = ({}) => {
+const DealFlowType: React.FC = () => {
   const { deal, updateDeal } = useDealFlow();
   const [financingType, setFinancingType] = useState<DealFinancingType>(
     deal?.investmentStats?.financingType ?? DealFinancingType.equity
@@ -26,13 +26,25 @@ const DealFlowType: React.FC = ({}) => {
     });
   };
 
+  const investmentTypes = [
+    {
+      type: DealFinancingType.equity,
+      title: "Equity Investment",
+      description:
+        "Common Equity benefits from the property's performance; in contrast to Common Debt, this type of investment offers higher potential returns and tax optimization. Common Equity does have a higher risk associated with the higher return.",
+    },
+    {
+      type: DealFinancingType.promissory_note_now,
+      title: "Debt Investment",
+      description:
+        "Common Debt provides a fixed rate of return, and it has priority in repayment to Common Equity, making it a less risky investment. Furthermore, Common Debt has a fixed rate of return per annum, distributed quarterly.",
+    },
+  ];
+
   return (
-    <Box>
+    <Box sx={{ maxWidth: 800, margin: "auto", padding: 2 }}>
       <Typography variant="h5" gutterBottom>
-        Get Started
-      </Typography>
-      <Typography variant="body1" paragraph>
-        Select the financing type for this deal.
+        Choose Investment Type
       </Typography>
       <RadioGroup
         aria-label="financing-type"
@@ -40,21 +52,25 @@ const DealFlowType: React.FC = ({}) => {
         value={financingType}
       >
         <Box display="flex" flexDirection="column" gap={2}>
-          {Object.values(DealFinancingType).map((type) => (
+          {investmentTypes.map(({ type, title, description }) => (
             <Card
-              key={type}
+              key={title}
               onClick={() => handleFinancingTypeChange(type)}
               sx={{
                 cursor: "pointer",
-                border: financingType === type ? "2px solid #1976d2" : "none",
+                border:
+                  financingType === type
+                    ? "2px solid #1976d2"
+                    : "1px solid #e0e0e0",
+                borderRadius: 2,
                 "&:hover": { boxShadow: 3 },
               }}
             >
               <CardContent>
-                <Box display="flex" alignItems="center">
+                <Box display="flex" alignItems="center" mb={1}>
                   <Box
-                    width={20}
-                    height={20}
+                    width={24}
+                    height={24}
                     borderRadius="50%"
                     border="2px solid #1976d2"
                     mr={2}
@@ -71,12 +87,10 @@ const DealFlowType: React.FC = ({}) => {
                       />
                     )}
                   </Box>
-                  <Typography variant="h6">
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Typography>
+                  <Typography variant="h6">{title}</Typography>
                 </Box>
-                <Typography variant="body2" sx={{ mt: 1 }}>
-                  Placeholder text for {type} financing type
+                <Typography variant="body2" color="text.secondary">
+                  {description}
                 </Typography>
               </CardContent>
             </Card>

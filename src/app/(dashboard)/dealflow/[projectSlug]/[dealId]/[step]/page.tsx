@@ -2,13 +2,13 @@
 import React from "react";
 import { useParams } from "next/navigation";
 import { Grid } from "@mui/material";
-import DealFlowContainer from "@/components/DealFlow/DealFlowContainer";
+import DealFlowContainer from "@/components/DealFlow/Shared/DealFlowContainer";
 import {
   DealFlowProvider,
   type StepType,
-} from "@/components/DealFlow/DealFlowContext";
-import DealFlowHeader from "@/components/DealFlow/DealFlowHeader";
-import DealFlowSidebar from "@/components/DealFlow/DealFlowSidebar";
+} from "@/components/DealFlow/Shared/DealFlowContext";
+import DealFlowHeader from "@/components/DealFlow/Shared/DealFlowHeader";
+import DealFlowSidebar from "@/components/DealFlow/Shared/DealFlowSidebar";
 
 const DealFlow = () => {
   const { projectSlug, dealId, step } = useParams();

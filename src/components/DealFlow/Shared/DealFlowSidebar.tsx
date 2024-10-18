@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React from "react";
-import { Typography, Box, Button, Divider } from "@mui/material";
-import { useDealFlow } from "./DealFlowContext";
+import { Typography, Box, Button, Divider, Badge, Chip } from "@mui/material";
+import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+import { DealFinancingType } from "@prisma/client";
 
 const DealFlowSidebar = () => {
   const { project, deal } = useDealFlow();
@@ -11,7 +12,9 @@ const DealFlowSidebar = () => {
   )?.url;
 
   const investmentAmount = deal?.investmentStats?.amount;
-  const displayAmount = investmentAmount ? `$${investmentAmount}` : "$0";
+  const displayAmount = investmentAmount
+    ? `$${investmentAmount.toLocaleString()}`
+    : "$0";
 
   return (
     <Box
@@ -46,16 +49,43 @@ const DealFlowSidebar = () => {
                 {project?.location}
               </Typography>
             </Box>
-            <Typography
-              variant="h6"
+            <Box
               sx={{
+                display: "flex",
+                alignItems: "center",
+                flexDirection: "column",
                 ml: "auto",
-                fontWeight: "bold",
-                color: investmentAmount ? "inherit" : "gray",
               }}
             >
-              {displayAmount}
-            </Typography>
+              <Typography
+                variant="h6"
+                sx={{
+                  ml: "auto",
+                  fontWeight: "bold",
+                  color: investmentAmount ? "inherit" : "text.disabled",
+                }}
+              >
+                {displayAmount}
+              </Typography>
+              {deal?.investmentStats?.financingType && (
+                <Chip
+                  label={
+                    deal.investmentStats.financingType ===
+                    DealFinancingType.equity
+                      ? "Equity"
+                      : "Debt"
+                  }
+                  size="small"
+                  sx={{
+                    mt: 0.5,
+                    fontWeight: "bold",
+                    color: "gray",
+                    borderRadius: "16px",
+                    backgroundColor: "action.selected",
+                  }}
+                />
+              )}
+            </Box>
           </Box>
         )}
       </Box>

@@ -228,12 +228,12 @@ model DocumentEvent {
 }
 
 model Address {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   street         String
   city           String
   zipcode        String
   state          String
-  country        String       @default("United States")
+  country        String        @default("United States")
   organization   Organization? @relation(onDelete: Cascade, fields: [organizationId], references: [id])
   organizationId Int?          @unique
   user           User?         @relation(onDelete: Cascade, fields: [userId], references: [id])
