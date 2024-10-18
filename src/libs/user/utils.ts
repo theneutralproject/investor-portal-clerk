@@ -1,7 +1,7 @@
 import { isError } from "lodash";
 import type { HubspotContact } from "../hubspot/schema";
 import { associateContactWithDealInHubspot, createOrUpdateHubspotContact } from "../hubspot/utils";
-import prisma, { UserWithAddress } from "../prisma";
+import prisma, { type UserWithAddress } from "../prisma";
 import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
 import { type Deal, MembershipType, type User } from "@prisma/client";

@@ -1,5 +1,5 @@
 import { type OrganizationMemberCreateSchema, zOrganizationMemberCreateSchema } from "@/libs/organization/schema";
-import prisma, { OrganizationWithFullMembers } from "@/libs/prisma";
+import prisma, { type OrganizationWithFullMembers } from "@/libs/prisma";
 import { createUserInDbAndHubspot } from "@/libs/user/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import type { User } from "@prisma/client";

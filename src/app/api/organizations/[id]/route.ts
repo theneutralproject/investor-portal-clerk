@@ -83,7 +83,7 @@ export async function PUT(request: NextRequest) {
             throw new Error(`Input data malformatted: \n${(parseError as Error).message}`);
         }
 
-        let { address, ...orgData } = putData;
+        const { address, ...orgData } = putData;
 
         // upsert address
         if (address) {

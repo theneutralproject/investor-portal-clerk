@@ -56,7 +56,7 @@ export async function PUT(request: NextRequest) {
         return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
 
-    let { address, ...userData } = putData;
+    const { address, ...userData } = putData;
     //  Check if hubspot and clerk needs to be updated, and then update them
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (userData.firstName || userData.lastName) {
