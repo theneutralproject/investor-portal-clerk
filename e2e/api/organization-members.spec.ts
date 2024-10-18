@@ -44,6 +44,39 @@ test.describe("api/organizations/members test", () => {
         }
     });
 
+    test('[POST] api/organizations/members should update a ghost user', async ({ request }) => {
+
+        if (!testOrg) {
+            console.error("testOrg is null - skipping test");
+            test.fixme();
+            return;
+        }
+        const postResonse = await request.post(`/api/organizations/${testOrg.id}/members`, {
+            data: memberData
+        });
+
+        const postResponseBody = await JSON.parse(await postResonse.text());
+        if (postResponseBody.id) {
+            // find the user in the list of members
+            const newMember: MemberWithUser = postResponseBody.members.find((member: MemberWithUser) => member.user.email === memberData.user.email);
+            memberId = newMember.id;
+
+            const updateResponse = await request.put(`/api/users/${newMember.userId}`, {
+                data: { email: 'updatedEmail@test-email.org' }
+            });
+            const putResponseBody = await JSON.parse(await updateResponse.text());
+            console.log(putResponseBody);
+            expect(putResponseBody.email).toBe('updatedEmail@test-email.org');
+            expect(putResponseBody.firstName).toBe(memberData.user.firstName);
+            expect(updateResponse.status()).toBe(200);
+        }
+        else {
+            console.error("No org returned from POST request - skipping test");
+            console.error(postResponseBody);
+            test.fixme();
+        }
+    });
+
 
     test.afterEach(async ({ request }) => {
         console.log(`cleaning up after member tests for org ${testOrg?.id} and member ${memberId}`);

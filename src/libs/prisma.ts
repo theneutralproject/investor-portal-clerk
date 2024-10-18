@@ -13,21 +13,31 @@ import {
   type Organization, 
   type Member } from "@prisma/client";
 
-let prisma: PrismaClient;
 
-if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient();
-} else {
-  const globalWithPrisma = global as typeof globalThis & {
-    prisma: PrismaClient;
-  };
-  if (!globalWithPrisma.prisma) {
-    globalWithPrisma.prisma = new PrismaClient();
-  }
-  prisma = globalWithPrisma.prisma;
+const prismaClientSingleton = () => {
+  return new PrismaClient().$extends({
+    result: {
+      user: {
+        isGhost: {
+          needs: { clerkId: true },
+          compute: (user: User) => {
+            return !user.clerkId;
+          }
+        }
+      }
+    }
+  });
 }
 
-export default prisma;
+declare const globalThis: {
+  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
+} & typeof global;
+
+const prisma = globalThis.prismaGlobal ?? prismaClientSingleton()
+
+export default prisma
+
+if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
 
 export type ProjectWithAllNestedData = Project & {
   pictures: ProjectPicture[];

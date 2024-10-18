@@ -1,6 +1,6 @@
 import { isError } from "lodash";
 import type { HubspotContact } from "../hubspot/schema";
-import { associateContactWithDealInHubspot, createOrUpdateHubspotContact } from "../hubspot/utils";
+import { associateContactWithDealInHubspot, createHubspotContact } from "../hubspot/utils";
 import prisma, { type UserWithAddress } from "../prisma";
 import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
@@ -37,7 +37,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
 
     let hsUpdate;
     try {
-        hsUpdate = await createOrUpdateHubspotContact(hsUserData);
+        hsUpdate = await createHubspotContact(hsUserData);
     } catch (error) {
         console.error("Unable to create user in hubspot:\n", error);
         throw new Error(getErrorMessage(error));
