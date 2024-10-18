@@ -3,7 +3,7 @@ import { test, expect } from '@playwright/test';
 
 test.describe("[GET] api/projects test", () => {
   test('API get all projects', async ({ request }) => {
-
+    console.log('GET /api/projects');
     const response = await request.get('/api/projects');
 
     console.log(await response.json());

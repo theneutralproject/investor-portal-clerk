@@ -22,7 +22,6 @@ if (!baseURL || !testUserToken) {
   throw new Error('Please provide BASE_URL and TEST_USER_TOKEN environment variable.');
 }
 
-
 export default defineConfig({
   testDir: './e2e',
   /* Run tests in files in parallel */
@@ -39,7 +38,6 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: baseURL,
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     extraHTTPHeaders: {
@@ -91,7 +89,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: baseURL,
-    timeout: 120 * 1000,
+    timeout: 60 * 1000,
     reuseExistingServer: !process.env.CI,
   },
 });

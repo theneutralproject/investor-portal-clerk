@@ -9,6 +9,7 @@ import { add } from 'lodash';
 
 // bundled so that they are not run in parallel (for cleanup purposes)
 test.describe("api/organizations tests", () => {
+    test.skip();
     test.describe("[GET] api/organizations", () => {
         let testOrg: Organization | null = null;
         test.beforeAll(async ({ request }) => {

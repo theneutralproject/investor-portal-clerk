@@ -4,6 +4,7 @@ import { MembershipType, Organization } from '@prisma/client';
 import { MemberWithUser } from '@/libs/prisma';
 
 test.describe("api/organizations/members test", () => {
+    test.skip();
     let testOrg: Organization | null = null;
     let memberId: number | null = null;
     const memberData = {

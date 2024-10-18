@@ -30,7 +30,6 @@ jobs:
           HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK: ${{ secrets.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK }}
           HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK: ${{ secrets.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK }}
           HUBSPOT_OWNER_ID: ${{ secrets.HUBSPOT_OWNER_ID }}
-          NEXTAUTH_URL: ${{ secrets.NEXTAUTH_URL }}
           GOOGLE_TAG_ID: ${{ secrets.GOOGLE_TAG_ID }}
           NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
           NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
@@ -55,4 +54,4 @@ jobs:
       with:
         name: playwright-report
         path: playwright-report/
-        retention-days: 30
+        retention-days: 10
