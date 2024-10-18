@@ -1,14 +1,15 @@
 import { DealOwnershipType, MembershipType } from "@prisma/client";
 import { z } from "zod";
 import { zUserCreateSchema } from "../user/schema";
+import { zAddressCreateSchema } from "../address/schema";
 
 export const zOrganizationUpdateSchema = z.object({
     name: z.string().max(120, "120 characters max").optional(),
     tin: z.string().max(200).optional(),
     dateOfCreation: z.coerce.date().optional(),
     juristication: z.string().max(120, "120 characters max").optional(),
-    addressId: z.number().int().optional(),
     ownershipType: z.nativeEnum(DealOwnershipType).optional(),
+    address: zAddressCreateSchema.nullish()
 });
 export type OrganizationUpdateSchema = z.infer<typeof zOrganizationUpdateSchema>;
 
@@ -17,8 +18,8 @@ export const zOrganizationCreateSchema = z.object({
     tin: z.string().max(200).nullish(),
     dateOfCreation: z.coerce.date().nullish(),
     juristication: z.string().max(120, "120 characters max").nullish(),
-    addressId: z.number().int().nullish(),
     ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
+    address: zAddressCreateSchema.nullish()
 });
 
 export type OrganizationCreateSchema = z.infer<typeof zOrganizationCreateSchema>;

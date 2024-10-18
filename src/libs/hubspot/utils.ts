@@ -104,7 +104,6 @@ export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealU
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
-
   switch (projectName) {
     case ProjectName["The Edison"]: {
       return {
@@ -142,7 +141,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 }
 /* eslint-enable */
 
-export async function associateContactWithDeal(contactId: string, dealId: string) {
+export async function associateContactWithDealInHubspot(contactId: string, dealId: string) {
   const body = JSON.stringify({
     fromObjectId: parseInt(contactId),
     toObjectId: parseInt(dealId),
@@ -162,7 +161,6 @@ export async function associateContactWithDeal(contactId: string, dealId: string
     }
   );
 }
-
 
 export async function getFundingAmount(projectName: ProjectName) {
   function getPayload(project: ProjectName) {

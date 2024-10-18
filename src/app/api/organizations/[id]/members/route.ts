@@ -1,10 +1,11 @@
 import { type OrganizationMemberCreateSchema, zOrganizationMemberCreateSchema } from "@/libs/organization/schema";
-import prisma from "@/libs/prisma";
+import prisma, { OrganizationWithFullMembers } from "@/libs/prisma";
 import { createUserInDbAndHubspot } from "@/libs/user/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import type { User } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { getUserAndOrg } from "./helpers";
+import { sanitizeOrganizationWithMembers } from "@/libs/organization/utils";
 
 
 /**
@@ -12,7 +13,7 @@ import { getUserAndOrg } from "./helpers";
  * Will create a user if they do not yet exist, or add an existing user to the organization
  
  * @param request 
- * returns the user object, and a message
+ * returns the updated organization: OrganizationWithMembersAndAddress
  */
 export async function POST(request: NextRequest) {
     try {
@@ -60,15 +61,18 @@ export async function POST(request: NextRequest) {
         });
         if (existingUser) {
             try {
-                await prisma.organization.update({
+                const updatedOrg: OrganizationWithFullMembers = await prisma.organization.update({
                     where: { id: organization.id },
-                    data: { members: { create: { userId: existingUser.id, type: postData.type } } }
-                })
+                    data: { members: { create: { userId: existingUser.id, type: postData.type } } },
+                    include: {
+                        members: { include: { user: true } },
+                    }
+                });
+                return jsonResponse(sanitizeOrganizationWithMembers(updatedOrg), 201);
             } catch (error) {
                 console.error(`ERROR: unable to CONNECT existing user to org with id ${organization.id}:\n`, error);
                 return jsonResponse(getErrorMessage(error), 400);
             }
-            return jsonResponse({ message: `An existing user has been added as an org member.`, user: existingUser }, 201);
         }
 
         // create a new user
@@ -83,17 +87,19 @@ export async function POST(request: NextRequest) {
 
         try {
             // add them as an org member
-            await prisma.organization.update({
+            const updatedOrg: OrganizationWithFullMembers = await prisma.organization.update({
                 where: { id: organization.id },
-                data: { members: { create: { userId: newUser.id, type: postData.type } } }
-            })
+                data: { members: { create: { userId: newUser.id, type: postData.type } } },
+                include: {
+                    members: { include: { user: true } },
+                }
+            });
+            return jsonResponse(sanitizeOrganizationWithMembers(updatedOrg), 201);
         } catch (error) {
             console.error(`ERROR: unable to CONNECT new user to org with id ${organization.id}:\n`, error);
             return jsonResponse(getErrorMessage(error), 400);
         }
 
-
-        return jsonResponse({ message: `User successfully created.`, user: newUser }, 201);
     } catch (error: unknown) {
         console.error("ERROR: unable to add user to org:\n", error);
         return jsonResponse(getErrorMessage(error), 400);

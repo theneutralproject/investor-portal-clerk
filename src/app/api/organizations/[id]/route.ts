@@ -1,5 +1,6 @@
-import { decryptData, encryptString } from "@/libs/encryption/utils";
+import { encryptString } from "@/libs/encryption/utils";
 import { type OrganizationUpdateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
+import { sanitizeOrganization } from "@/libs/organization/utils";
 import prisma from "@/libs/prisma";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
@@ -39,7 +40,7 @@ async function getUserAndOrg(request: NextRequest) {
         {
             AND: [{ members: { some: { userId: user.id } } },
             { id: id }]
-        }
+        }, include: { members: true, address: true }
     });
 
     return { user, organization };
@@ -53,11 +54,8 @@ async function getUserAndOrg(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         const { organization } = await getUserAndOrg(request);
-        if (organization?.tin) {
-            organization.tin = `***-**-${decryptData(organization.tin).slice(-4)}`;
-        }
 
-        return jsonResponse(organization);
+        return jsonResponse(organization ? sanitizeOrganization(organization) : organization);
     } catch (error: unknown) {
         return jsonResponse(getErrorMessage(error), 400);
     }
@@ -70,11 +68,9 @@ export async function GET(request: NextRequest) {
  * @returns updated organization
  **/
 export async function PUT(request: NextRequest) {
-
     try {
         const { user, organization: orgToUpdate } = await getUserAndOrg(request);
-
-        if (!orgToUpdate) {
+        if(!orgToUpdate) {
             throw new Error('You do not have access to this organization');
         }
 
@@ -87,18 +83,32 @@ export async function PUT(request: NextRequest) {
             throw new Error(`Input data malformatted: \n${(parseError as Error).message}`);
         }
 
-        if (putData.ownershipType) {
-            if (orgToUpdate.isPrimary && putData.ownershipType !== DealOwnershipType.INDIVIDUAL) {
+        let { address, ...orgData } = putData;
+
+        // upsert address
+        if (address) {
+            await prisma.address.upsert({
+                where: { organizationId: orgToUpdate.id },
+                create: {...address, organizationId: orgToUpdate.id},
+                update: {...address, organizationId: orgToUpdate.id}
+            }).catch((dbError) => {
+                console.error("ERROR: unable to upsert address:\n", dbError);
+                throw new Error('unable to update the organization');
+            });
+        }
+
+        if (orgData.ownershipType) {
+            if (orgToUpdate.isPrimary && orgData.ownershipType !== DealOwnershipType.INDIVIDUAL) {
                 throw new Error('Cannot update primary organization to non-INDIVIDUAL ownership type');
             }
         }
 
-        if (putData.tin) {
-            if (putData.tin.replace(/\D/g, "").length !== 9) {
+        if (orgData.tin) {
+            if (orgData.tin.replace(/\D/g, "").length !== 9) {
                 return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
             }
 
-            putData.tin = encryptString(putData.tin.replace(/\D/g, ""));
+            orgData.tin = encryptString(orgData.tin.replace(/\D/g, ""));
         }
 
         const updatedOrg = await prisma.organization.update({
@@ -106,17 +116,15 @@ export async function PUT(request: NextRequest) {
                 ownerId: user.id,
                 id: orgToUpdate.id
 
-            }, data: putData
+            }, 
+            data: orgData,
+            include: { members: true, address: true }
         }).catch((dbError) => {
             console.error("ERROR: unable to update org:\n", dbError);
             throw new Error('unable to update the organization');
         });
 
-        if (updatedOrg.tin) {
-            updatedOrg.tin = `***-**-${decryptData(updatedOrg.tin).slice(-4)}`;
-        }
-
-        return jsonResponse(updatedOrg);
+        return jsonResponse(sanitizeOrganization(updatedOrg));
     } catch (error: unknown) {
         return jsonResponse(getErrorMessage(error), 400);
     }
@@ -125,7 +133,7 @@ export async function PUT(request: NextRequest) {
 /**
  * Delete an organization (if it has no deals, and if it is not the last INDIVIDUAL one) by its owner
  * @param request with query param: {id: number}
- * @returns 204 if successful
+ * @returns 200 if successful
  */
 export async function DELETE(request: NextRequest) {
     try {
@@ -155,7 +163,7 @@ export async function DELETE(request: NextRequest) {
                 throw new Error('unable to delete the organization');
             });
 
-        return jsonResponse({ success: true, message: "organization successfully deleted" }, 204);
+        return jsonResponse({ success: true, message: "organization successfully deleted" }, 200);
     } catch (error: unknown) {
         return jsonResponse(getErrorMessage(error), 400);
     }

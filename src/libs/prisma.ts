@@ -1,5 +1,5 @@
 /* eslint-disable import/no-mutable-exports */
-import { PrismaClient, type ProjectMilestones, type Address, type ProjectPicture, type Deal, type Project, type User, type ProjectInvestmentStats, type ProjectPropertyStats, type DealInvestmentStats, type Organization } from "@prisma/client";
+import { PrismaClient, type ProjectMilestones, type Address, type ProjectPicture, type Deal, type Project, type User, type ProjectInvestmentStats, type ProjectPropertyStats, type DealInvestmentStats, type Organization, Member } from "@prisma/client";
 
 let prisma: PrismaClient;
 
@@ -38,7 +38,14 @@ export type DealWithInvestmentStats = Deal & {
 }
 
 export type OrganizationWithMembersAndAddress = Organization & {
-  members: User[],
+  members: Member[],
   address: Address,
-  ownedBy: User
+}
+
+export type OrganizationWithFullMembers = Organization & {
+  members: MemberWithUser[],
+}
+
+export type MemberWithUser = Member & {
+  user: User;
 }

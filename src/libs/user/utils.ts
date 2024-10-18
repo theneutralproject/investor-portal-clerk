@@ -1,10 +1,11 @@
 import { isError } from "lodash";
 import type { HubspotContact } from "../hubspot/schema";
-import { associateContactWithDeal, createOrUpdateHubspotContact } from "../hubspot/utils";
-import prisma from "../prisma";
+import { associateContactWithDealInHubspot, createOrUpdateHubspotContact } from "../hubspot/utils";
+import prisma, { UserWithAddress } from "../prisma";
 import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
 import { type Deal, MembershipType, type User } from "@prisma/client";
+import { decryptData } from "../encryption/utils";
 
 /**
  * creates a user in both hubspot and our DB
@@ -18,7 +19,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
     let deal: Deal | null = null;
     if (dealId) {
         // attach user to hubspot deal
-        deal = await prisma.deal.findUnique({where : {id: dealId}});
+        deal = await prisma.deal.findUnique({ where: { id: dealId } });
         if (!deal) {
             throw new Error(`Deal with id ${dealId} not found`);
         }
@@ -46,18 +47,17 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
     // create user and address in DB
     let userOrgId: number;
     try {
-        const userCreateData = {
+        let userCreateData = {
             ...userData,
             hubspotId: hubspotUserId,
         }
 
-        // TODO: regigger address creation 
-        // if (address) {
-        //     const userAddress = await prisma.address.create({ data: address });
-        //     console.log(`created address for new user`);
-        //     const addressId = userAddress.id;
-        //     userCreateData = { ...userCreateData, ...{ address: { connect: { id: addressId } }, addressId: addressId } }
-        // }
+        if (address) {
+            const userAddress = await prisma.address.create({ data: address });
+            console.log(`created address for new user`);
+            const addressId = userAddress.id;
+            userCreateData = { ...userCreateData, ...{ address: { connect: userAddress.id }, addressId: addressId } }
+        }
 
         const dbUser = await prisma.user.create({
             data: userCreateData,
@@ -76,9 +76,8 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
         // add orgId to user
         const updatedUser = await prisma.user.update({ where: { id: dbUser.id }, data: { userOrgId } });
 
-        if (deal)
-        {
-            const res = await associateContactWithDeal(hubspotUserId, deal.hubspotId);
+        if (deal) {
+            const res = await associateContactWithDealInHubspot(hubspotUserId, deal.hubspotId);
             if (isError(res)) {
                 console.error("Unable to associate user with deal in hubspot:\n", res);
             }
@@ -88,5 +87,12 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
 
     } catch (error) {
         throw new Error(getErrorMessage(error));
+    }
+}
+
+export function sanitizeUser(user: User | UserWithAddress) {
+    return {
+        ...user,
+        ssn: user.ssn ? `***-**-${decryptData(user.ssn).slice(-4)}` : null,
     }
 }

@@ -1,5 +1,5 @@
 import prisma from "@/libs/prisma";
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { isNumber } from "lodash";
 
