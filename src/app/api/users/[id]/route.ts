@@ -49,7 +49,7 @@ export async function PUT(request: NextRequest) {
         return jsonResponse({ error: "use /api/users PUT route to update your own user data" }, 401);
     }
 
-    if (!userToUpdate.isGhost) {
+    if (userToUpdate.clerkId) {
         return jsonResponse({ error: "You cannot update a user that is not a ghost user" }, 401);
     }
 
