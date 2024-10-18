@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import { defineConfig, devices } from '@playwright/test';
 
 // Only load .env in development
-if (process.env.NODE_ENV !== 'production' && !process.env.CI == true) {
+if (process.env.NODE_ENV !== 'production' && !process.env.CI === true) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -86,10 +86,10 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'DEBUG=pw:webserver npm run dev',
-  //   url: baseURL,
-  //   timeout: 60 * 1000,
-  //   reuseExistingServer: !process.env.CI,
-  // }
+  webServer: {
+    command: 'DEBUG=pw:webserver npm run build && npm run start',
+    url: baseURL,
+    timeout: 120 * 1000,
+    reuseExistingServer: !process.env.CI,
+  }
 });
