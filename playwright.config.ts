@@ -89,7 +89,7 @@ export default defineConfig({
   webServer: {
     command: 'DEBUG=pw:webserver npm run build && npm run start',
     url: baseURL,
-    timeout: 120 * 1000,
+    timeout: 600 * 1000,
     reuseExistingServer: !process.env.CI,
   }
 });
