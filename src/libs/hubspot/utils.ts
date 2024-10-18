@@ -7,10 +7,17 @@ import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
 
-
-
-async function _createOrUpdateContact(hubspotContact: HubspotContact) {
-
+export async function createHubspotContact(hubspotContact: HubspotContact) {
+  const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
+    .getTime()
+    .toString();
+  hubspotContact.properties.push({
+    property: "date_signed_up",
+    value: signupDate,
+  });
+  if (!hubspotContact.email) {
+    return new Error("email is required to create a contact in hubspot")
+  }
   return await fetch(
     `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
     {
@@ -44,21 +51,30 @@ async function _createOrUpdateContact(hubspotContact: HubspotContact) {
   })
 };
 
-export async function createOrUpdateHubspotContact(hubspotContact: HubspotContact) {
-  const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
-    .getTime()
-    .toString();
-  hubspotContact.properties.push({
-    property: "date_signed_up",
-    value: signupDate,
-  });
-
-  return await _createOrUpdateContact(hubspotContact);
-};
-
 export async function updateHubspotContact(hubspotContact: HubspotContact) {
-  console.log("updating HS user", hubspotContact)
-  return await _createOrUpdateContact(hubspotContact);
+  if(!hubspotContact.hubspotId) {
+    return new Error("hubspotId is required to update a contact in hubspot")
+  }
+  return await fetch(
+    `${process.env.HUBSPOT_API_BASE_URL} /contacts/v1/contact/vid/${hubspotContact.hubspotId}/profile`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body: JSON.stringify(hubspotContact),
+    }
+  ).then(async (response) => {
+    if (response.status >= 300) {
+      console.error("ERROR: unable to update Hubspot contact:\n", response.statusText);
+      console.log("response", response);
+      return new Error("unable to update hubspot contact");
+    }
+  }).catch((fetchError) => {
+    console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
+    return new Error("unable to update hubspot contact")
+  });
 };
 
 export async function createHubspotDealForContact(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {

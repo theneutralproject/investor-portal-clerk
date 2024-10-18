@@ -8,7 +8,8 @@ import { z } from "zod";
 
 export type HubspotContact = {
   properties: { property: string; value: string }[];
-  email: string;
+  email?: string;
+  hubspotId?: string;
 };
 
 const zHsContactProperty = z.object({

@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import { defineConfig, devices } from '@playwright/test';
 
 // Only load .env in development
-if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'production' && !process.env.CI === true) {
   const __filename = fileURLToPath(import.meta.url);
   const __dirname = path.dirname(__filename);
   dotenv.config({ path: path.resolve(__dirname, '.env') });
@@ -16,15 +16,17 @@ if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
 
 const baseURL = process.env.BASE_URL;
 const testUserToken = process.env.TEST_USER_TOKEN;
+console.log("BASE_URL",baseURL);
+console.log("TEST_USER_TOKEN",testUserToken);
 if (!baseURL || !testUserToken) {
   throw new Error('Please provide BASE_URL and TEST_USER_TOKEN environment variable.');
 }
 
-
 export default defineConfig({
+  timeout: 30 * 1000,
   testDir: './e2e',
   /* Run tests in files in parallel */
-  fullyParallel: true,
+  fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
@@ -37,7 +39,6 @@ export default defineConfig({
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: baseURL,
-
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     extraHTTPHeaders: {
@@ -46,7 +47,14 @@ export default defineConfig({
       'Authorization': `Bearer ${testUserToken}`,
     },
   },
-
+  /* Run your local dev server before starting the tests */
+  webServer: {
+    // command: process.env.CI ? 'DEBUG=pw:webserver npm run build && npm run start' : 'npm run dev',
+    command: 'npm run dev',
+    url: baseURL,
+    timeout: 1000 * 1000,
+    reuseExistingServer: !process.env.CI,
+  },
   /* Configure projects for major browsers */
   projects: [
     {
@@ -83,13 +91,5 @@ export default defineConfig({
     //   name: 'Google Chrome',
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
-  ],
-
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'npm run dev',
-    url: baseURL,
-    timeout: 120 * 1000,
-    reuseExistingServer: !process.env.CI,
-  },
+  ]
 });

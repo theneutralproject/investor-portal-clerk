@@ -45,6 +45,17 @@ test.describe("api/users test", () => {
         expect(response.status()).toBe(400);
     });
 
+    test('[PUT] user should ignore ssn. if it start with `***-`', async ({ request }) => {
+        const response = await request.put('/api/users', {
+            data: { ssn: '***-**-abcd', firstName: 'Johnny' }
+        });
+        expect(response.status()).toBe(200);
+        const body = await JSON.parse(await response.text());
+        expect(body.email).toBe(process.env.E2E_CLERK_USER_USERNAME);
+        expect(body.firstName).toBe('Johnny');
+        expect(body.ssn).toBe('***-**-6789');
+    });
+
     // put user with address should return updated user with a new address
     test('[PUT] user with address should return updated user with a new address', async ({ request }) => {
         const addressData: AddressCreateSchema = {
