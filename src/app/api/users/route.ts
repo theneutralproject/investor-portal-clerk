@@ -46,6 +46,10 @@ export async function PUT(request: NextRequest) {
     if (!clerkUser) {
         return jsonResponse({ error: "Clerk user not found" }, 404);
     }
+    const requestingUser = await prisma.user.findUnique({ where: { clerkId: clerkUser.id } });
+    if (!requestingUser) {
+        return jsonResponse({ error: "Requesting user not found" }, 404);
+    }
 
     const requestBody = (await request.json()) as UserUpdateSchema;
     let putData: UserUpdateSchema;
@@ -60,14 +64,6 @@ export async function PUT(request: NextRequest) {
     //  Check if hubspot and clerk needs to be updated, and then update them
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (userData.firstName || userData.lastName) {
-        const { emailAddresses, primaryEmailAddressId } = clerkUser;
-        const email = primaryEmailAddressId ?
-            emailAddresses.find(({ id }) => id === primaryEmailAddressId)?.emailAddress ?? "" :
-            emailAddresses[0]?.emailAddress ?? "";
-        if (!email) {
-            console.error("No email found for user", clerkUser);
-            return jsonResponse({ error: "No email found for user" }, 400);
-        }
         const properties = [];
         const clerkUpdate: ClerkUserUpdateSchema = {};
         if (userData.firstName) {
@@ -79,7 +75,7 @@ export async function PUT(request: NextRequest) {
             clerkUpdate.lastName = userData.lastName;
         }
         try {
-            await updateHubspotContact({ email, properties });
+            await updateHubspotContact({ hubspotId: requestingUser.hubspotId, properties });
         } catch (hsError) {
             console.log(hsError)
         }
