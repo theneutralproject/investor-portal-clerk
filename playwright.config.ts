@@ -23,6 +23,7 @@ if (!baseURL || !testUserToken) {
 }
 
 export default defineConfig({
+  timeout: 30 * 1000,
   testDir: './e2e',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -46,7 +47,14 @@ export default defineConfig({
       'Authorization': `Bearer ${testUserToken}`,
     },
   },
-
+  /* Run your local dev server before starting the tests */
+  webServer: {
+    // command: process.env.CI ? 'DEBUG=pw:webserver npm run build && npm run start' : 'npm run dev',
+    command: 'npm run dev',
+    url: baseURL,
+    timeout: 1000 * 1000,
+    reuseExistingServer: !process.env.CI,
+  },
   /* Configure projects for major browsers */
   projects: [
     {
@@ -83,13 +91,5 @@ export default defineConfig({
     //   name: 'Google Chrome',
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
-  ],
-
-  /* Run your local dev server before starting the tests */
-  webServer: {
-    command: 'DEBUG=pw:webserver npm run build && npm run start',
-    url: baseURL,
-    timeout: 600 * 1000,
-    reuseExistingServer: !process.env.CI,
-  }
+  ]
 });
