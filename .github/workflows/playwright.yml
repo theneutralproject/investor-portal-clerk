@@ -1,9 +1,9 @@
 name: Playwright Tests
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 jobs:
   test:
     timeout-minutes: 15
@@ -19,6 +19,32 @@ jobs:
       run: npx playwright install --with-deps
     - name: Run Playwright tests
       run: npx playwright test
+      env:
+        CI: true
+        DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+        CLERK_WEBHOOK_SECRET: ${{ secrets.CLERK_WEBHOOK_SECRET }}
+        HUBSPOT_ACCESS_TOKEN: ${{ secrets.HUBSPOT_ACCESS_TOKEN }}
+        HUBSPOT_API_BASE_URL: ${{ secrets.HUBSPOT_API_BASE_URL }}
+        HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK: ${{ secrets.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK }}
+        HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK: ${{ secrets.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK }}
+        HUBSPOT_OWNER_ID: ${{ secrets.HUBSPOT_OWNER_ID }}
+        NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+        ENCRYPTION_SECRET: ${{ secrets.ENCRYPTION_SECRET }}
+        ENCRYPTION_SECRET_IV: ${{ secrets.ENCRYPTION_SECRET_IV }}
+        ENCRYPTION_METHOD: ${{ secrets.ENCRYPTION_METHOD }}
+        E2E_CLER_USER_USERNAME: ${{ secrets.E2E_CLER_USER_USERNAME }}
+        E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+        EE_CLERK_USER_VERIFY_CODE: ${{ secrets.EE_CLERK_USER_VERIFY_CODE }}
+        E2E_CLERK_USER_PHONE: ${{ secrets.E2E_CLERK_USER_PHONE }}
+        TEST_USER_TOKEN: ${{ secrets.TEST_USER_TOKEN }}
+        IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
+        DOCUSIGN_BASE_PATH: ${{ secrets.DOCUSIGN_BASE_PATH }}
+        DOCUSIGN_USER_ID: ${{ secrets.DOCUSIGN_USER_ID }}
+        DOCUSIGN_INTEGRATION_KEY: ${{ secrets.DOCUSIGN_INTEGRATION_KEY }}
+        DOCUUSIGN_API_ACCOUNT_ID: ${{ secrets.DOCUUSIGN_API_ACCOUNT_ID }}
+        DOCUSIGN_RSA_PRIVATE_KEY: ${{ secrets.DOCUSIGN_RSA_PRIVATE_KEY }}
+
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:
