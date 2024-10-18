@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 
-test.describe("api/projects test", () => {
-  test('API get all projects', async ({ page, request }) => {
+test.describe("[GET] api/projects test", () => {
+  test('API get all projects', async ({ request }) => {
 
     const response = await request.get('/api/projects');
 

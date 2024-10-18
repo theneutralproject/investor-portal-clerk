@@ -1,24 +1,14 @@
+import { AddressCreateSchema } from '@/libs/address/schema';
 import { OrganizationUpdateSchema } from '@/libs/organization/schema';
-import prisma from '@/libs/prisma';
-import { test, expect, APIRequestContext } from '@playwright/test';
+import prisma, { OrganizationWithMembersAndAddress } from '@/libs/prisma';
+import { test, expect } from '@playwright/test';
 import { DealOwnershipType, Organization } from '@prisma/client';
-
-async function resetOrgInDb(request: APIRequestContext): Promise<Organization> {
-    console.log("begin resetting org in db");
-    const testUser = await prisma.user.findFirst({ where: { email: `${process.env.E2E_CLERK_USER_USERNAME}` } });
-    const response = await request.put(`/api/organizations/${testUser?.userOrgId}`, {
-        data: {
-            name: "Testi Tester's Organization",
-            ownershipType: DealOwnershipType.INDIVIDUAL,
-        }
-    });
-    return await JSON.parse(await response.text());
-}
+import { resetOrgInDb } from 'e2e/helpers';
+import { add } from 'lodash';
 
 
-// bundled so that they are not run in parallel
+// bundled so that they are not run in parallel (for cleanup purposes)
 test.describe("api/organizations tests", () => {
-
     test.describe("[GET] api/organizations", () => {
         let testOrg: Organization | null = null;
         test.beforeAll(async ({ request }) => {
@@ -54,7 +44,6 @@ test.describe("api/organizations tests", () => {
         });
 
     });
-
 
     test.describe("[PUT] api/organizations", () => {
         let testOrg: Organization | null = null;
@@ -119,7 +108,42 @@ test.describe("api/organizations tests", () => {
         });
     });
 
-    test.describe("api/organizations post tests", () => {
+    test.describe("[PUT] organization address tests", () => {
+        let testOrg: OrganizationWithMembersAndAddress | null = null;
+        const addressData: AddressCreateSchema = {
+            street: '1234 Org Test St',
+            city: 'Org Testville',
+            state: 'TS',
+            zipcode: '12345',
+            country: 'USA'
+        }
+        test('API should return organization with new address', async ({ request }) => {
+            testOrg = await resetOrgInDb(request);
+            if (!testOrg) {
+                console.error("testOrg is null - skipping test");
+                return;
+            };
+            const response = await request.put(`/api/organizations/${testOrg.id}`, {
+                data: { address: addressData }
+            });
+            expect(response.status()).toBe(200);
+            const body = await JSON.parse(await response.text());
+            expect(response.headers()['content-type']).toBe('application/json');
+            expect(body.address?.street).toBe(addressData.street);
+        });
+
+        test.afterEach(async () => {
+            if (!testOrg || !testOrg.address) {
+                console.error(`testOrg with id ${testOrg?.id} is null or without address - skipping test`);
+                return;
+            };
+            await prisma.address.delete({
+                where: { organizationId: testOrg.id }
+            });
+        });
+    })
+
+    test.describe("[POST] api/organizations tests", () => {
         let orgId: number;
         test('API post organization should return new organization', async ({ request }) => {
             const response = await request.post('/api/organizations', {

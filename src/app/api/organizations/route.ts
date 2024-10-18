@@ -1,5 +1,6 @@
-import { decryptData, encryptString } from "@/libs/encryption/utils";
+import { encryptString } from "@/libs/encryption/utils";
 import { type OrganizationCreateSchema, zOrganizationCreateSchema } from "@/libs/organization/schema";
+import { sanitizeOrganization } from "@/libs/organization/utils";
 import prisma from "@/libs/prisma";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
@@ -39,12 +40,7 @@ export async function GET() {
     const userOrganizations = await prisma.organization.findMany({ where: { members: { some: { userId: dbUser.id } } } });
 
     // encypt TIN on orgs
-    return jsonResponse(userOrganizations.map((org) => {
-        // eslint-disable-next-line prefer-const
-        let { tin, ...rest } = org;
-        if (tin) tin = `***-**-${decryptData(tin).slice(-4)}`;
-        return { ...rest, ...{ tin } };
-    }));
+    return jsonResponse(userOrganizations.map(sanitizeOrganization), 200);
 }
 
 /**
@@ -113,7 +109,6 @@ export async function POST(request: NextRequest) {
         name: getOrgName(),
         ownershipType: postData.ownershipType ?? DealOwnershipType.INDIVIDUAL,
         ownerId: dbUser.id,
-        addressId: postData.addressId,
         tin: postData.tin ? encryptString(postData.tin.replace(/\D/g, "")) : null,
         dateOfCreation: postData.dateOfCreation,
         juristication: postData.juristication,
@@ -128,12 +123,7 @@ export async function POST(request: NextRequest) {
         const newOrg = await prisma.organization.create({
             data: orgCreateData
         });
-
-        if (newOrg.tin) {
-            newOrg.tin = `***-**-${decryptData(newOrg.tin).slice(-4)}`;
-        }
-
-        return jsonResponse(newOrg, 201);
+        return jsonResponse(sanitizeOrganization(newOrg), 201);
     } catch (dbError) {
         console.error("ERROR: unable to update org:\n", dbError);
         return jsonResponse({ error: dbError }, 400);

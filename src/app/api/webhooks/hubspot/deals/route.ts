@@ -53,7 +53,7 @@ export async function POST(req: Request): Promise<Response> {
         }
       );
     }
-// TODO: create hubspot schema here
+    
     const dealBody: HubspotDealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
