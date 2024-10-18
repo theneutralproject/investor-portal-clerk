@@ -18,7 +18,6 @@ jobs:
     - name: Install Playwright Chromium Browser
       run: npx playwright install-deps chromium
     - name: Run Playwright tests
-      working-directory: .
       env:
           CI: true
           BASE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
