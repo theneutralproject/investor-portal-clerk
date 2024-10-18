@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
             if (presanitizedSSN.length !== 9) {
                 return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
             }
-            userData.ssn = encryptString(userData.ssn.replace(/\D/g, ""));
+            userData.ssn = encryptString(presanitizedSSN.replace(/\D/g, ""));
         }
     }
 
