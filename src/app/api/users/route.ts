@@ -87,12 +87,17 @@ export async function PUT(request: NextRequest) {
     }
 
     if (userData.ssn) {
-        // sanitize it (digits only) and encrypt SSN before storing it:
-        const presanitizedSSN = userData.ssn.replace(/\D/g, "");
-        if (presanitizedSSN.length !== 9) {
-            return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
+        if (userData.ssn.startsWith("***-**-")) {
+            delete userData.ssn;
         }
-        userData.ssn = encryptString(userData.ssn.replace(/\D/g, ""));
+        else {
+            // sanitize it (digits only) and encrypt SSN before storing it:
+            const presanitizedSSN = userData.ssn.replace(/\D/g, "");
+            if (presanitizedSSN.length !== 9) {
+                return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
+            }
+            userData.ssn = encryptString(presanitizedSSN.replace(/\D/g, ""));
+        }
     }
 
     if (address) {
@@ -130,7 +135,7 @@ export async function PUT(request: NextRequest) {
                 data: userData,
                 include: { address: true }
             });
-            
+
             return jsonResponse(sanitizeUser(updatedUser));
         } catch (dbError) {
             console.error("ERROR: unable to update user:\n", dbError);

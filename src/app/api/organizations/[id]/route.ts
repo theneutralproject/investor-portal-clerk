@@ -104,11 +104,12 @@ export async function PUT(request: NextRequest) {
         }
 
         if (orgData.tin) {
-            if (orgData.tin.replace(/\D/g, "").length !== 9) {
+            const presanitizedTIN = orgData.tin.replace(/\D/g, "");
+            if (presanitizedTIN.length !== 9) {
                 return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
             }
 
-            orgData.tin = encryptString(orgData.tin.replace(/\D/g, ""));
+            orgData.tin = encryptString(presanitizedTIN);
         }
 
         const updatedOrg = await prisma.organization.update({
