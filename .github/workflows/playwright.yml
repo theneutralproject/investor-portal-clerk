@@ -48,7 +48,7 @@ jobs:
           DOCUSIGN_INTEGRATION_KEY: ${{ secrets.DOCUSIGN_INTEGRATION_KEY }}
           DOCUSIGN_API_ACCOUNT_ID: ${{ secrets.DOCUSIGN_API_ACCOUNT_ID }}
           DOCUSIGN_RSA_PRIVATE_KEY: ${{ secrets.DOCUSIGN_RSA_PRIVATE_KEY }}
-      run: npx playwright test
+      run: DEBUG=pw:browser npx playwright test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
       with:

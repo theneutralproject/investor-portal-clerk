@@ -91,5 +91,5 @@ export default defineConfig({
     url: baseURL,
     timeout: 60 * 1000,
     reuseExistingServer: !process.env.CI,
-  },
+  }
 });
