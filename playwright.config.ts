@@ -14,7 +14,7 @@ if (process.env.NODE_ENV !== 'production' && !process.env.CI === true) {
   dotenv.config({ path: path.resolve(__dirname, '.env') });
 }
 
-const baseURL = process.env.BASE_URL;
+const baseURL = 'http://localhost:3000'//process.env.BASE_URL;
 const testUserToken = process.env.TEST_USER_TOKEN;
 console.log("BASE_URL",baseURL);
 console.log("TEST_USER_TOKEN",testUserToken);
