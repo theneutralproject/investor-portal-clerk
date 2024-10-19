@@ -4,66 +4,86 @@ import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import CoInvestorCard from "@components/DealFlow/Details/CoInvestorCard";
 import { useRouter } from "next/navigation";
-const DealFlowCoInvestor = () => {
+import { MembershipType, Role, type User } from "@prisma/client";
+import { type MemberWithUser } from "@/libs/prisma";
+
+const DealFlowCoInvestor: React.FC = () => {
   const { deal, project, organization, updateOrganizationMember } =
     useDealFlow();
-  const [coInvestors, setCoInvestors] = useState(organization?.members || []);
-  const [expandedCards, setExpandedCards] = useState([]);
+  const [coInvestors, setCoInvestors] = useState<MemberWithUser[]>(
+    organization?.members ?? []
+  );
+  const [expandedCards, setExpandedCards] = useState<number[]>([]);
 
   const router = useRouter();
 
   const handleAddCoInvestor = useCallback(() => {
-    const newCoInvestor = {
+    const newCoInvestor: MemberWithUser = {
       id: Date.now(),
       userId: Date.now(),
-      organizationId: organization.id,
-      type: "MEMBER",
+      organizationId: organization?.id ?? 0,
+      type: MembershipType.COINVESTOR,
       user: {
         id: Date.now(),
+        hubspotId: "",
+        role: Role.USER,
         email: "",
         firstName: "",
         lastName: "",
-        phoneNumber: "",
       },
     };
     setCoInvestors((prev) => [...prev, newCoInvestor]);
     setExpandedCards((prev) => [...prev, coInvestors.length]);
   }, [organization?.id, coInvestors.length]);
 
-  const handleCoInvestorChange = useCallback((index, field, value) => {
-    setCoInvestors((prev) =>
-      prev.map((investor, i) =>
-        i === index
-          ? { ...investor, user: { ...investor.user, [field]: value } }
-          : investor
-      )
-    );
-  }, []);
+  const handleCoInvestorChange = useCallback(
+    (index: number, field: keyof User, value: string) => {
+      setCoInvestors((prev) =>
+        prev.map((investor, i) =>
+          i === index
+            ? { ...investor, user: { ...investor.user, [field]: value } }
+            : investor
+        )
+      );
+    },
+    []
+  );
 
   const nextRoute = () => {
-    router.push(`/dealflow/${project.slug}/${deal.id}/verify-accreditation`);
+    if (project?.slug && deal?.id) {
+      router.push(`/dealflow/${project.slug}/${deal.id}/verify-accreditation`);
+    }
   };
 
   const handleSaveCoInvestor = useCallback(
-    async (index) => {
+    async (index: number) => {
       const coInvestor = coInvestors[index];
-      try {
-        await updateOrganizationMember(deal.id, coInvestor.user, "COINVESTOR");
-        console.log("Co-investor saved successfully");
-        setExpandedCards((prev) => prev.filter((i) => i !== index));
-      } catch (error) {
-        console.error("Error saving co-investor:", error);
+      if (deal?.id) {
+        try {
+          if (coInvestor?.user) {
+            await updateOrganizationMember(
+              deal.id,
+              coInvestor.user,
+              MembershipType.COINVESTOR
+            );
+            console.log("Co-investor saved successfully");
+            setExpandedCards((prev) => prev.filter((i) => i !== index));
+          } else {
+            console.error("Co-investor user data is missing");
+          }
+        } catch (error) {
+          console.error("Error saving co-investor:", error);
+        }
       }
     },
     [coInvestors, deal?.id, updateOrganizationMember]
   );
 
-  const handleCancelCoInvestor = useCallback((index) => {
-    // setCoInvestors((prev) => prev.filter((_, i) => i !== index));
+  const handleCancelCoInvestor = useCallback((index: number) => {
     setExpandedCards((prev) => prev.filter((i) => i !== index));
   }, []);
 
-  const handleExpandCard = useCallback((index) => {
+  const handleExpandCard = useCallback((index: number) => {
     setExpandedCards((prev) =>
       prev.includes(index) ? prev.filter((i) => i !== index) : [...prev, index]
     );
@@ -106,7 +126,7 @@ const DealFlowCoInvestor = () => {
 
       <Divider sx={{ my: 4 }} />
 
-      <DealFlowFooter onBack={() => {}} onContinue={nextRoute} />
+      <DealFlowFooter onBack={() => null} onContinue={nextRoute} />
     </Box>
   );
 };

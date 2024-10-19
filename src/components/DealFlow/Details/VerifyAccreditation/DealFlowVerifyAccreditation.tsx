@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import React, { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -11,26 +10,29 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import { VerifierInfo } from "@/components/DealFlow/Helpers/types";
 import AccreditationQuestion from "@/components/DealFlow/Details/VerifyAccreditation/AccreditationQuestion";
 import UploadDocumentContent from "@/components/DealFlow/Details/VerifyAccreditation/UploadDocumentContent";
 import ThirdPartyVerifierForm from "@/components/DealFlow/Details/VerifyAccreditation/ThirdPartyVerifierForm";
 import { questions } from "@/components/DealFlow/Helpers/types";
+import { type AccreditationVerifier } from "@prisma/client";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
   const router = useRouter();
   const { deal, project, createVerifier } = useDealFlow();
-  const [answers, setAnswers] = useState<{ [key: string]: string }>({});
+  const [answers, setAnswers] = useState<Record<string, string>>({});
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(
     "accreditation"
   );
-  const [verifierInfo, setVerifierInfo] = useState<VerifierInfo>({
+  const [verifierInfo, setVerifierInfo] = useState<
+    Partial<AccreditationVerifier>
+  >({
     firstName: "",
     lastName: "",
     email: "",
     phoneNumber: "",
     title: "",
   });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -61,13 +63,16 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     setError(null);
 
     try {
+      if (!deal) {
+        throw new Error("Deal not found");
+      }
       await createVerifier({
         dealId: deal.id,
-        email: verifierInfo.email,
-        firstName: verifierInfo.firstName,
-        lastName: verifierInfo.lastName,
-        phoneNumber: verifierInfo.phoneNumber || undefined,
-        title: verifierInfo.title || undefined,
+        email: verifierInfo?.email ?? "",
+        firstName: verifierInfo?.firstName ?? "",
+        lastName: verifierInfo?.lastName ?? "",
+        phoneNumber: verifierInfo?.phoneNumber ?? undefined,
+        title: verifierInfo?.title ?? undefined,
       });
     } catch (err) {
       setError("Failed to submit verifier information. Please try again.");
@@ -75,24 +80,26 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [createVerifier, deal.id, project.slug, router, verifierInfo]);
+  }, [createVerifier, verifierInfo, deal]);
 
   const handleContinue = useCallback(() => {
     if (Object.keys(answers).length === 2) {
       if (answers.verification === "Contact Third Party Verifier") {
-        handleSubmitVerifier();
+        void handleSubmitVerifier();
       }
 
-      router.push(`/dealflow/${project.slug}/${deal.id}/review`);
+      router.push(`/dealflow/${project?.slug}/${deal?.id}/review`);
     }
-  }, [answers, handleSubmitVerifier, project.slug, deal.id, router]);
+  }, [answers, handleSubmitVerifier, project, deal, router]);
 
   const renderVerificationContent = useCallback(() => {
     const accreditationType = answers.accreditation;
     const verificationType = answers.verification;
 
     if (verificationType === "Upload Document") {
-      return <UploadDocumentContent accreditationType={accreditationType} />;
+      return (
+        <UploadDocumentContent accreditationType={accreditationType ?? ""} />
+      );
     } else if (verificationType === "Contact Third Party Verifier") {
       return (
         <ThirdPartyVerifierForm
@@ -115,7 +122,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   const visibleQuestions = useMemo(() => {
     const result = [];
     for (const question of questions) {
-      if (result.length === 0 || answers[result[result.length - 1].id]) {
+      if (result.length === 0 || answers[result[result.length - 1]?.id ?? ""]) {
         result.push(question);
       } else {
         break;
@@ -130,7 +137,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
         <AccreditationQuestion
           key={question.id}
           question={question}
-          answer={answers[question.id]}
+          answer={answers[question.id] ?? ""}
           onChange={handleOptionChange}
           expanded={expandedQuestion === question.id}
           onToggle={handleToggleAccordion}

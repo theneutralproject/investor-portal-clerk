@@ -1,11 +1,3 @@
-export type VerifierInfo = {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  title: string;
-};
-
 export type Question = {
   id: string;
   title: string;

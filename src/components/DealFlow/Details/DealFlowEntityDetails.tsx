@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, type ChangeEvent } from "react";
 import {
   Box,
   Typography,
@@ -6,34 +6,57 @@ import {
   Button,
   Autocomplete,
 } from "@mui/material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";
-import usStates from "@components/DealFlow/Helpers/DealFlowHelpers";
+import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
 
-const DealFlowEntityDetails = () => {
+interface FormData {
+  name: string;
+  tin: string;
+  dateOfCreation: string;
+  juristication: string;
+}
+
+export const formatDate = (date: Date | null | undefined | string): string => {
+  if (!date) return "";
+  if (typeof date === "string") {
+    return date.split("T")[0] ?? "";
+  }
+  return date.toISOString().split("T")[0] ?? "";
+};
+
+const DealFlowEntityDetails: React.FC = () => {
   const { organization, updateOrganization, project, deal } = useDealFlow();
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    name: organization?.name || "",
-    tin: organization?.tin || "",
-    dateOfCreation: organization?.dateOfCreation
-      ? new Date(organization.dateOfCreation).toISOString().split("T")[0]
-      : "",
-    juristication: organization?.juristication || "",
+  const [formData, setFormData] = useState<FormData>({
+    name: organization?.name ?? "",
+    tin: organization?.tin ?? "",
+    dateOfCreation: formatDate(organization?.dateOfCreation),
+    juristication: organization?.juristication ?? "",
   });
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleContinue = async () => {
     try {
-      await updateOrganization(organization.id, formData);
-      router.push(
-        `/dealflow/${project.slug}/${deal.id}/entity-details-co-investor`
-      );
+      if (organization?.id) {
+        const updatedFormData = {
+          ...formData,
+          dateOfCreation: formData.dateOfCreation
+            ? new Date(formData.dateOfCreation)
+            : undefined,
+        };
+        await updateOrganization(organization.id, updatedFormData);
+        router.push(
+          `/dealflow/${project?.slug}/${deal?.id}/entity-details-co-investor`
+        );
+      }
     } catch (error) {
       console.error("Error updating organization:", error);
     }

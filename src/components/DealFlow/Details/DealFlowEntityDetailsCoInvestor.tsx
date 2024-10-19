@@ -24,8 +24,8 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
 
   const handleContinue = () => {
     const route = hasCoInvestors
-      ? `/dealflow/${project.slug}/${deal.id}/co-investor`
-      : `/dealflow/${project.slug}/${deal.id}/verify-accreditation`;
+      ? `/dealflow/${project?.slug}/${deal?.id}/co-investor`
+      : `/dealflow/${project?.slug}/${deal?.id}/verify-accreditation`;
 
     router.push(route);
   };

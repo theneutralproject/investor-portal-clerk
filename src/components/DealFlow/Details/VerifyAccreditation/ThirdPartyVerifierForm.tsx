@@ -2,10 +2,10 @@
 
 import React from "react";
 import { Box, Typography, TextField } from "@mui/material";
-import { type VerifierInfo } from "@/components/DealFlow/Helpers/types";
+import { type AccreditationVerifier } from "@prisma/client";
 
 interface ThirdPartyVerifierFormProps {
-  verifierInfo: VerifierInfo;
+  verifierInfo: Partial<AccreditationVerifier>;
   onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   error: string | null;
 }

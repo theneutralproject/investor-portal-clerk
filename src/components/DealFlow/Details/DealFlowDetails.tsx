@@ -10,11 +10,18 @@ import {
 import { zUserUpdateSchema, type UserUpdateSchema } from "@/libs/user/schema";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import usStates from "@components/DealFlow/Helpers/DealFlowHelpers";
+import { usStates } from "@components/DealFlow/Helpers/DealFlowHelpers";
+import { formatDate } from "@components/DealFlow/Details/DealFlowEntityDetails";
+import { Address } from "@prisma/client";
 
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
   const [formData, setFormData] = useState<UserUpdateSchema | null>(null);
+
+  //'2024-10-29T00:00:00.000Z'
+  console.log(user.dateOfBirth);
+
+  console.log(formData);
 
   useEffect(() => {
     if (user) {
@@ -23,9 +30,7 @@ const DealFlowDetails: React.FC = () => {
         lastName: user.lastName ?? "",
         ssn: user.ssn ?? "",
         phoneNumber: user.phoneNumber ?? "",
-        dateOfBirth: user.dateOfBirth
-          ? new Date(user.dateOfBirth).toISOString().split("T")[0]
-          : "",
+        dateOfBirth: formatDate(user.dateOfBirth),
         address: user.address ?? {
           street: "",
           city: "",
@@ -54,10 +59,19 @@ const DealFlowDetails: React.FC = () => {
       prevData
         ? {
             ...prevData,
-            address: {
-              ...prevData.address,
-              [name]: value,
-            },
+            address: prevData.address
+              ? {
+                  ...prevData.address,
+                  [name]: value,
+                }
+              : {
+                  street: "",
+                  city: "",
+                  zipcode: "",
+                  state: "",
+                  country: "United States",
+                  [name]: value,
+                },
           }
         : null
     );
@@ -68,11 +82,15 @@ const DealFlowDetails: React.FC = () => {
       try {
         const validatedData = zUserUpdateSchema.parse({
           ...formData,
-          dateOfBirth: formData.dateOfBirth
-            ? new Date(formData.dateOfBirth + "T00:00:00.000Z").toISOString()
-            : null,
         });
-        updateUser(validatedData);
+
+        const dateOfBirth = formData.dateOfBirth
+          ? new Date(formData.dateOfBirth)
+          : null;
+        const address = formData.address
+          ? ({ ...formData.address } as Address)
+          : null;
+        void updateUser({ ...validatedData, dateOfBirth, address });
       } catch (error) {
         console.error("Validation error:", error);
       }

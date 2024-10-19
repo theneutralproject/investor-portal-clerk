@@ -36,11 +36,17 @@ async function getUserAndOrg(request: NextRequest) {
 
     // get org by id if they are a member
     const organization = await prisma.organization.findFirst({
-        where:
-        {
-            AND: [{ members: { some: { userId: user.id } } },
-            { id: id }]
-        }, include: { members: true, address: true }
+      where: {
+        AND: [{ members: { some: { userId: user.id } } }, { id: id }],
+      },
+      include: {
+        address: true,
+        members: {
+          include: {
+            user: true,
+          },
+        },
+      },
     });
 
     return { user, organization };

@@ -38,7 +38,7 @@ async function fetchDeal(id: number) {
   });
 }
 
-async function checkUserAccess(userId: string, dealOrganizationId: number) {
+async function checkUserAccess(_userId: string, _dealOrganizationId: number) {
   return true; //TODO
 }
 

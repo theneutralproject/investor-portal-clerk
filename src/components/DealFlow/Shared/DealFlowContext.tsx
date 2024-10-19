@@ -13,6 +13,7 @@ import {
   type Organization,
   type MembershipType,
   type User,
+  type AccreditationVerifier,
 } from "@prisma/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -119,10 +120,10 @@ interface DealFlowContextType {
   step: StepType;
   projectSlug: string;
   dealId: string;
-  project: ProjectWithAllNestedData | null;
-  deal: DealWithInvestmentStats | null;
-  user: UserWithAddress | null;
-  organization: OrganizationWithFullMembers | null;
+  project: ProjectWithAllNestedData;
+  deal: DealWithInvestmentStats;
+  user: UserWithAddress;
+  organization: OrganizationWithFullMembers;
   isLoading: boolean;
   error: string | null;
   updateDeal: (updatedDeal: Partial<DealWithInvestmentStats>) => Promise<void>;
@@ -162,13 +163,14 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   dealId,
   initialStep,
 }) => {
-  const [project, setProject] = useState<Project | null>(null);
+  const [project, setProject] = useState<ProjectWithAllNestedData | null>(null);
   const [deal, setDeal] = useState<DealWithInvestmentStats | null>(null);
   const [user, setUser] = useState<UserWithAddress | null>(null);
   const [organization, setOrganization] =
     useState<OrganizationWithFullMembers | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [step, setStep] = useState<StepType>(initialStep);
   const router = useRouter();
 
@@ -179,26 +181,30 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     //Note: NEXT STEP DEPENDS ON ANSWER
     if (currentStep === "details-ownership-type") {
-      if (
-        deal?.investmentStats?.ownershipType &&
-        [
-          DealOwnershipType.PARTNERSHIP,
-          DealOwnershipType.MARITAL,
-          DealOwnershipType.JOINT,
-        ].includes(deal.investmentStats.ownershipType)
-      ) {
+      const ownershipType = deal?.investmentStats?.ownershipType;
+
+      if (!ownershipType) {
+        return "verify-accreditation";
+      }
+
+      const coInvestorTypes: DealOwnershipType[] = [
+        DealOwnershipType.PARTNERSHIP,
+        DealOwnershipType.MARITAL,
+        DealOwnershipType.JOINT,
+      ];
+
+      const entityDetailsTypes: DealOwnershipType[] = [
+        DealOwnershipType.CORPORATION,
+        DealOwnershipType.COMMON,
+        DealOwnershipType.OTHER,
+        DealOwnershipType.TRUST,
+      ];
+
+      if (coInvestorTypes.some((type) => type === ownershipType)) {
         return "co-investor";
       }
 
-      if (
-        deal?.investmentStats?.ownershipType &&
-        [
-          DealOwnershipType.CORPORATION,
-          DealOwnershipType.COMMON,
-          DealOwnershipType.OTHER,
-          DealOwnershipType.TRUST,
-        ].includes(deal.investmentStats.ownershipType)
-      ) {
+      if (entityDetailsTypes.some((type) => type === ownershipType)) {
         return "entity-details";
       }
 
@@ -235,7 +241,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         } = await dealResponse.json();
         const userData: UserWithAddress = await userResponse.json();
 
-        setProject(dealData.project);
+        setProject(dealData.project as ProjectWithAllNestedData);
         setDeal(dealData.deal);
         setUser(userData);
 
@@ -252,7 +258,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
           const organizationData: Organization =
             await organizationResponse.json();
-          setOrganization(organizationData);
+          setOrganization(organizationData as OrganizationWithFullMembers);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -343,7 +349,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
       const nextStep = getNextStep(step);
       if (nextStep) {
-        router.push(`/dealflow/${project.slug}/${deal.id}/${nextStep}`);
+        router.push(`/dealflow/${project?.slug}/${deal?.id}/${nextStep}`);
       }
       toast.success("User updated successfully");
     } catch (error) {
@@ -366,7 +372,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         "/api/organizations",
         organizationData
       );
-      setOrganization(data);
+      setOrganization(data as OrganizationWithFullMembers);
+
+      if (!deal) {
+        throw new Error("Deal not found");
+      }
 
       //Update deal with new organizationId
       await updateDeal({
@@ -374,7 +384,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         organizationId: data.id,
         investmentStats: {
           ...deal.investmentStats,
-          ownershipType: organizationData.ownershipType,
+          ownershipType: organizationData.ownershipType ?? null,
         },
       });
 
@@ -401,7 +411,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         `/api/organizations/${organizationId}`,
         updatedOrganizationData
       );
-      setOrganization(data);
+      setOrganization(data as OrganizationWithFullMembers);
 
       const nextStep = getNextStep(step);
       if (nextStep) {
@@ -450,7 +460,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setError(null);
 
     try {
-      const { data } = await axios.post<AccreditationVerifierCreateSchema>(
+      const { data } = await axios.post<AccreditationVerifier>(
         "/api/deals/verifier",
         { ...verifierData, dealId: deal.id }
       );
@@ -475,10 +485,10 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     step,
     projectSlug,
     dealId,
-    project,
-    deal,
-    user,
-    organization,
+    project: project!,
+    deal: deal!,
+    user: user!,
+    organization: organization!,
     isLoading,
     error,
     updateDeal,

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React from "react";
-import { Typography, Box, Button, Divider, Badge, Chip } from "@mui/material";
+import { Typography, Box, Button, Divider, Chip } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { DealFinancingType } from "@prisma/client";
 

@@ -25,7 +25,6 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
   const handleUpdateDeal = async () => {
     if (!deal) return;
 
-
     if (ownershipType === DealOwnershipType.INDIVIDUAL) {
       await updateDeal({
         ...deal,
@@ -46,11 +45,9 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
         ownershipType === DealOwnershipType.MARITAL ||
         ownershipType === DealOwnershipType.JOINT
       ) {
-        router.push(`/dealflow/${project.slug}/${deal.id}/co-investor`);
+        router.push(`/dealflow/${project?.slug}/${deal?.id}/co-investor`);
       } else {
-        router.push(
-          `/dealflow/${project.slug}/${deal.id}/entity-details`
-        );
+        router.push(`/dealflow/${project?.slug}/${deal.id}/entity-details`);
       }
     }
   };

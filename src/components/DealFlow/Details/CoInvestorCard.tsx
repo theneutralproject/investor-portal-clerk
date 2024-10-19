@@ -11,6 +11,8 @@ import {
   styled,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { type User } from "@prisma/client";
+import { type MemberWithUser } from "@/libs/prisma";
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -24,7 +26,12 @@ const ExpandableHeader = styled(Box)(({ theme }) => ({
   },
 }));
 
-const ExpandMore = styled(({ expand, ...other }) => {
+interface ExpandMoreProps extends React.HTMLAttributes<HTMLDivElement> {
+  expand: boolean;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const ExpandMore = styled(({ expand, ...other }: ExpandMoreProps) => {
   const { onClick, ...rest } = other;
   return (
     <div {...rest} onClick={onClick}>
@@ -39,7 +46,17 @@ const ExpandMore = styled(({ expand, ...other }) => {
   }),
 }));
 
-const CoInvestorCard = ({
+interface CoInvestorCardProps {
+  coInvestor: MemberWithUser;
+  index: number;
+  onSave: (index: number) => void;
+  onCancel: (index: number) => void;
+  onChange: (index: number, field: keyof User, value: string) => void;
+  expanded: boolean;
+  onExpand: (index: number) => void;
+}
+
+const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
   coInvestor,
   index,
   onSave,
@@ -48,7 +65,8 @@ const CoInvestorCard = ({
   expanded,
   onExpand,
 }) => {
-  const handleChange = (field, value) => onChange(index, field, value);
+  const handleChange = (field: keyof User, value: string) =>
+    onChange(index, field, value);
   const investorType = coInvestor.type === "OWNER" ? "Investor" : "Co-Investor";
 
   return (
@@ -64,14 +82,14 @@ const CoInvestorCard = ({
             {investorType}
           </Typography>
           <Typography variant="h6">
-            {coInvestor.user.firstName || coInvestor.user.lastName
+            {coInvestor.user.firstName ?? coInvestor.user.lastName
               ? `${coInvestor.user.firstName} ${coInvestor.user.lastName}`
               : `${investorType} ${index + 1}`}
           </Typography>
         </Box>
         <ExpandMore
           expand={expanded}
-          onClick={(e) => {
+          onClick={(e: React.MouseEvent<HTMLDivElement>) => {
             e.stopPropagation();
             onExpand(index);
           }}

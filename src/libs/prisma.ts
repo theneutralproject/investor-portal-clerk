@@ -60,5 +60,5 @@ export type OrganizationWithFullMembers = Organization & {
 }
 
 export type MemberWithUser = Member & {
-  user: User;
+  user: Partial<User>;
 }
