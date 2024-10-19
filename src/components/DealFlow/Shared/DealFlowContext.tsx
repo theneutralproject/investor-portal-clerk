@@ -138,7 +138,7 @@ interface DealFlowContextType {
   ) => Promise<void>;
   updateOrganizationMember: (
     dealId: number,
-    user: User,
+    user: Partial<User>,
     type: MembershipType
   ) => Promise<void>;
   createVerifier: (
@@ -429,7 +429,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
   const updateOrganizationMember = async (
     dealId: number,
-    user: User,
+    user: Partial<User>,
     type: MembershipType
   ) => {
     if (!organization) return;
