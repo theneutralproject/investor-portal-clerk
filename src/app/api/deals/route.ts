@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     await prisma.dealInvestmentStats.create({
       data: {
         dealId: deal.id,
-        amount: dealData.amount ?? 0,
+        amount: dealData.amount ?? 5000,
         financingType: dealData.financingType ?? DealFinancingType.equity,
         /**all other fields have postgresql defaults */
       }
