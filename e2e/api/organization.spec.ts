@@ -81,6 +81,22 @@ test.describe("api/organizations tests", () => {
             expect(response.status()).toBe(400);
         });
 
+        test("API should ignore masked TIN when updating organization", async ({ request }) => {
+            if (!testOrg) {
+                console.error("testOrg is null - skipping test");
+                test.fixme();
+                return;
+            };
+            const response = await request.put(`/api/organizations/${testOrg.id}`, {
+                data: { tin: '***-**-1234', name: 'That Org' }
+            });
+            expect(response.status()).toBe(200);
+            const body = await JSON.parse(await response.text());
+            expect(response.headers()['content-type']).toBe('application/json');
+            expect(body.tin).toBe('***-**-6789');
+            expect(body.name).toBe('That Org');
+        });
+
         test('API should return 400 if ownershipType is not INDIVIDUAL and org is primary', async ({ request }) => {
             if (!testOrg) {
                 console.error("testOrg is null - skipping test");
