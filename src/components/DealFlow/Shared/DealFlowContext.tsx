@@ -385,7 +385,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         organizationId: data.id,
         investmentStats: {
           ...deal.investmentStats,
-          ownershipType: organizationData.ownershipType ?? null,
+          ownershipType: data.ownershipType,
         },
       });
     } catch (error) {
