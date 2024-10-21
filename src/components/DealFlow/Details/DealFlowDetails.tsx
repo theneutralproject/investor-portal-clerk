@@ -12,7 +12,7 @@ import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { usStates } from "@components/DealFlow/Helpers/DealFlowHelpers";
 import { formatDate } from "@components/DealFlow/Details/DealFlowEntityDetails";
-import { Address } from "@prisma/client";
+import { type Address } from "@prisma/client";
 
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
