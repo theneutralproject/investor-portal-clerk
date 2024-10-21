@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { Box, Typography, Button, Divider } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
@@ -8,75 +8,96 @@ import { MembershipType, Role, type User } from "@prisma/client";
 import { type MemberWithUser } from "@/libs/prisma";
 
 const DealFlowCoInvestor: React.FC = () => {
-  const { deal, project, organization, updateOrganizationMember } =
-    useDealFlow();
-  const [coInvestors, setCoInvestors] = useState<MemberWithUser[]>(
-    organization?.members ?? []
-  );
+  const {
+    deal,
+    project,
+    organization,
+    createOrganizationMember,
+    updateOrganizationMember,
+  } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
+  const [localMembers, setLocalMembers] = useState<MemberWithUser[]>([]);
 
   const router = useRouter();
 
-  const handleAddCoInvestor = useCallback(() => {
-    const newCoInvestor: MemberWithUser = {
-      id: Date.now(),
-      userId: Date.now(),
-      organizationId: organization?.id ?? 0,
-      type: MembershipType.COINVESTOR,
-      user: {
-        id: Date.now(),
-        hubspotId: "",
+  useEffect(() => {
+    if (organization?.members) {
+      setLocalMembers(
+        organization.members.map((member) => ({
+          ...member,
+          user: {
+            id: member.userId,
+            email: member.user.email,
+            firstName: member.user.firstName,
+            lastName: member.user.lastName,
+          },
+        }))
+      );
+    }
+  }, [organization]);
+
+  const handleAddCoInvestor = useCallback(async () => {
+    if (!deal || !organization) return;
+
+    try {
+      const newUser: Partial<User> = {
         role: Role.USER,
-        email: "",
+        email: `coinvestor-${organization.members.length + 1}@example.com`,
         firstName: "",
         lastName: "",
-      },
-    };
-    setCoInvestors((prev) => [...prev, newCoInvestor]);
-    setExpandedCards((prev) => [...prev, coInvestors.length]);
-  }, [organization?.id, coInvestors.length]);
+      };
+
+      await createOrganizationMember(
+        deal.id,
+        newUser,
+        MembershipType.COINVESTOR
+      );
+
+      setExpandedCards((prev) => [...prev, organization.members.length]);
+    } catch (error) {
+      console.error("Error adding co-investor:", error);
+    }
+  }, [deal, organization, createOrganizationMember]);
 
   const handleCoInvestorChange = useCallback(
     (index: number, field: keyof User, value: string) => {
-      setCoInvestors((prev) =>
-        prev.map((investor, i) =>
+      setLocalMembers((prevMembers) => {
+        if (!prevMembers) return prevMembers;
+        return prevMembers.map((member, i) =>
           i === index
-            ? { ...investor, user: { ...investor.user, [field]: value } }
-            : investor
-        )
-      );
+            ? {
+                ...member,
+                user: { ...member.user, [field]: value } as User,
+              }
+            : member
+        );
+      });
     },
     []
   );
 
-  const nextRoute = () => {
+  const nextRoute = useCallback(() => {
     if (project?.slug && deal?.id) {
       router.push(`/dealflow/${project.slug}/${deal.id}/verify-accreditation`);
     }
-  };
+  }, [project, deal, router]);
 
   const handleSaveCoInvestor = useCallback(
     async (index: number) => {
-      const coInvestor = coInvestors[index];
-      if (deal?.id) {
+      const coInvestor = localMembers[index];
+      if (coInvestor?.user) {
         try {
-          if (coInvestor?.user) {
-            await updateOrganizationMember(
-              deal.id,
-              coInvestor.user,
-              MembershipType.COINVESTOR
-            );
-            console.log("Co-investor saved successfully");
-            setExpandedCards((prev) => prev.filter((i) => i !== index));
-          } else {
-            console.error("Co-investor user data is missing");
-          }
+          await updateOrganizationMember(coInvestor.user);
+          console.log("Co-investor saved successfully");
+          setExpandedCards((prev) => prev.filter((i) => i !== index));
         } catch (error) {
           console.error("Error saving co-investor:", error);
         }
+      } else {
+        console.error("Co-investor user data is missing");
       }
     },
-    [coInvestors, deal?.id, updateOrganizationMember]
+    [localMembers, updateOrganizationMember]
   );
 
   const handleCancelCoInvestor = useCallback((index: number) => {
@@ -101,7 +122,7 @@ const DealFlowCoInvestor: React.FC = () => {
         <Typography variant="body1">Add Investors</Typography>
       </Box>
 
-      {coInvestors.map((coInvestor, index) => (
+      {localMembers.map((coInvestor, index) => (
         <CoInvestorCard
           key={coInvestor.id}
           coInvestor={coInvestor}

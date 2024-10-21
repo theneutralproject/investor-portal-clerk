@@ -11,7 +11,7 @@ import {
   styled,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { type User } from "@prisma/client";
+import { MembershipType, type User } from "@prisma/client";
 import { type MemberWithUser } from "@/libs/prisma";
 
 const StyledCard = styled(Card)(({ theme }) => ({
@@ -69,6 +69,8 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
     onChange(index, field, value);
   const investorType = coInvestor.type === "OWNER" ? "Investor" : "Co-Investor";
 
+  const readOnly = coInvestor.type === MembershipType.OWNER;
+
   return (
     <StyledCard>
       <ExpandableHeader
@@ -106,12 +108,14 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
                 value={coInvestor.user.firstName}
                 onChange={(e) => handleChange("firstName", e.target.value)}
                 fullWidth
+                disabled={readOnly}
               />
               <TextField
                 label="Last Name"
                 value={coInvestor.user.lastName}
                 onChange={(e) => handleChange("lastName", e.target.value)}
                 fullWidth
+                disabled={readOnly}
               />
             </Box>
             <TextField
@@ -119,12 +123,14 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
               value={coInvestor.user.email}
               onChange={(e) => handleChange("email", e.target.value)}
               fullWidth
+              disabled={readOnly}
             />
             <TextField
               label="Phone Number"
               value={coInvestor.user.phoneNumber}
               onChange={(e) => handleChange("phoneNumber", e.target.value)}
               fullWidth
+              disabled={readOnly}
             />
           </Box>
         </CardContent>
@@ -133,6 +139,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             variant="outlined"
             color="primary"
             onClick={() => onCancel(index)}
+            disabled={readOnly}
           >
             Cancel
           </Button>
@@ -140,6 +147,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             variant="contained"
             color="primary"
             onClick={() => onSave(index)}
+            disabled={readOnly}
           >
             Save {investorType}
           </Button>

@@ -136,11 +136,12 @@ interface DealFlowContextType {
     organizationId: number,
     updatedOrganization: Partial<OrganizationWithFullMembers>
   ) => Promise<void>;
-  updateOrganizationMember: (
+  createOrganizationMember: (
     dealId: number,
     user: Partial<User>,
     type: MembershipType
   ) => Promise<void>;
+  updateOrganizationMember: (user: Partial<User>) => Promise<void>;
   createVerifier: (
     verifierData: AccreditationVerifierCreateSchema
   ) => Promise<void>;
@@ -387,8 +388,6 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
           ownershipType: organizationData.ownershipType ?? null,
         },
       });
-
-      toast.success("Organization created successfully");
     } catch (error) {
       console.error("Error creating organization:", error);
       setError("Failed to create organization. Please try again.");
@@ -417,7 +416,6 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       if (nextStep) {
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
-      toast.success("Organization updated successfully");
     } catch (error) {
       console.error("Error updating organization:", error);
       setError("Failed to update organization. Please try again.");
@@ -427,7 +425,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     }
   };
 
-  const updateOrganizationMember = async (
+  const createOrganizationMember = async (
     dealId: number,
     user: Partial<User>,
     type: MembershipType
@@ -442,7 +440,39 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         { dealId, user, type }
       );
       setOrganization(data);
-      toast.success("Co-investor added successfully");
+      toast.success("Co-investor created successfully");
+    } catch (error) {
+      console.error("Error creating organization member:", error);
+      setError("Failed to create organization member. Please try again.");
+      toast.error("Failed to create organization member. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const updateOrganizationMember = async (user: Partial<User>) => {
+    if (!user || !organization) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { data } = await axios.put<UserWithAddress>(
+        `/api/users/${user.id}`,
+        user
+      );
+      //Find organization member by userId and update
+      const organizationMember = organization?.members.find(
+        (member) => member.userId === user.id
+      );
+      if (organizationMember) {
+        organizationMember.user.email = user.email;
+        organizationMember.user.phoneNumber = user.phoneNumber;
+        organizationMember.user.firstName = user.firstName;
+        organizationMember.user.lastName = user.lastName;
+      }
+      setOrganization(organization);
+      toast.success("Co-investor updated successfully");
     } catch (error) {
       console.error("Error updating organization member:", error);
       setError("Failed to update organization member. Please try again.");
@@ -497,6 +527,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     createOrganization,
     updateOrganization,
     updateOrganizationMember,
+    createOrganizationMember,
     createVerifier,
   };
 
