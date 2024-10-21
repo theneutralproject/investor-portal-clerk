@@ -36,11 +36,17 @@ async function getUserAndOrg(request: NextRequest) {
 
     // get org by id if they are a member
     const organization = await prisma.organization.findFirst({
-        where:
-        {
-            AND: [{ members: { some: { userId: user.id } } },
-            { id: id }]
-        }, include: { members: true, address: true }
+        where: {
+            AND: [{ members: { some: { userId: user.id } } }, { id: id }],
+        },
+        include: {
+            address: true,
+            members: {
+                include: {
+                    user: true,
+                },
+            },
+        },
     });
 
     return { user, organization };
@@ -70,7 +76,7 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
     try {
         const { user, organization: orgToUpdate } = await getUserAndOrg(request);
-        if(!orgToUpdate) {
+        if (!orgToUpdate) {
             throw new Error('You do not have access to this organization');
         }
 
@@ -89,8 +95,8 @@ export async function PUT(request: NextRequest) {
         if (address) {
             await prisma.address.upsert({
                 where: { organizationId: orgToUpdate.id },
-                create: {...address, organizationId: orgToUpdate.id},
-                update: {...address, organizationId: orgToUpdate.id}
+                create: { ...address, organizationId: orgToUpdate.id },
+                update: { ...address, organizationId: orgToUpdate.id }
             }).catch((dbError) => {
                 console.error("ERROR: unable to upsert address:\n", dbError);
                 throw new Error('unable to update the organization');
@@ -104,12 +110,16 @@ export async function PUT(request: NextRequest) {
         }
 
         if (orgData.tin) {
-            const presanitizedTIN = orgData.tin.replace(/\D/g, "");
-            if (presanitizedTIN.length !== 9) {
-                return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
+            if (orgData.tin.startsWith("***-**")) {
+                delete orgData.tin;
             }
-
-            orgData.tin = encryptString(presanitizedTIN);
+            else {
+                const presanitizedTIN = orgData.tin.replace(/\D/g, "");
+                if (presanitizedTIN.length !== 9) {
+                    return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
+                }
+                orgData.tin = encryptString(presanitizedTIN);
+            }
         }
 
         const updatedOrg = await prisma.organization.update({
@@ -117,7 +127,7 @@ export async function PUT(request: NextRequest) {
                 ownerId: user.id,
                 id: orgToUpdate.id
 
-            }, 
+            },
             data: orgData,
             include: { members: true, address: true }
         }).catch((dbError) => {

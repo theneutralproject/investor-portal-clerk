@@ -115,7 +115,7 @@ export async function updateHubspotDealDocsAccessed(hsDealUpdateData: HsDealDocs
 }
 
 export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealUpdate) {
-  return await axios.put(`/api/deals/hubspot`, hsDealUpdateData);
+  return await axios.put(`${process.env.BASE_URL}/api/deals/hubspot`, hsDealUpdateData);
 }
 
 /* eslint-disable */

@@ -38,7 +38,7 @@ model Deal {
   userId                  Int?
   dealStage               Int
   /// @deprecated. Use DealInvestmentStats model instead
-  amount                  Float                  @default(0.0)
+  amount                  Float                  @default(5000.0)
   /// @deprecated. Use DealInvestmentStats model instead
   financingType           DealFinancingType?     @default(equity)
   hubspotId               String                 @unique
@@ -228,12 +228,12 @@ model DocumentEvent {
 }
 
 model Address {
-  id             Int          @id @default(autoincrement())
+  id             Int           @id @default(autoincrement())
   street         String
   city           String
   zipcode        String
   state          String
-  country        String       @default("United States")
+  country        String        @default("United States")
   organization   Organization? @relation(onDelete: Cascade, fields: [organizationId], references: [id])
   organizationId Int?          @unique
   user           User?         @relation(onDelete: Cascade, fields: [userId], references: [id])

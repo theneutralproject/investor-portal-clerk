@@ -1,0 +1,94 @@
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+} from "@mui/material";
+import { DealOwnershipType } from "@prisma/client";
+import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
+import { useRouter } from "next/navigation";
+const DealFlowDetailsOwnershipType: React.FC = () => {
+  const { deal, updateDeal, createOrganization, project } = useDealFlow();
+  const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
+    deal?.investmentStats?.ownershipType ?? DealOwnershipType.INDIVIDUAL
+  );
+  const router = useRouter();
+  const handleOwnershipTypeChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setOwnershipType(event.target.value as DealOwnershipType);
+  };
+
+  const handleUpdateDeal = async () => {
+    if (!deal) return;
+
+    if (ownershipType === DealOwnershipType.INDIVIDUAL) {
+      await updateDeal({
+        ...deal,
+        investmentStats: {
+          ...deal.investmentStats,
+          ownershipType: ownershipType,
+        },
+      });
+    } else {
+      await createOrganization({
+        tin: "123456789",
+        dateOfCreation: new Date(),
+        ownershipType: ownershipType,
+      });
+
+      if (
+        ownershipType === DealOwnershipType.PARTNERSHIP ||
+        ownershipType === DealOwnershipType.MARITAL ||
+        ownershipType === DealOwnershipType.JOINT
+      ) {
+        router.push(`/dealflow/${project?.slug}/${deal?.id}/co-investor`);
+      } else {
+        router.push(`/dealflow/${project?.slug}/${deal.id}/entity-details`);
+      }
+    }
+  };
+
+  const formatOwnershipType = (type: string): string => {
+    return type
+      .split("_")
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(" ");
+  };
+
+  return (
+    <Box>
+      <Typography variant="h5" gutterBottom>
+        Investment Details
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        Ownership Type
+      </Typography>
+      <Typography variant="body2" gutterBottom>
+        How are you investing?
+      </Typography>
+      <RadioGroup
+        aria-label="ownership-type"
+        name="ownership-type"
+        value={ownershipType}
+        onChange={handleOwnershipTypeChange}
+      >
+        {Object.values(DealOwnershipType).map((type) => (
+          <FormControlLabel
+            key={type}
+            value={type}
+            control={<Radio />}
+            label={formatOwnershipType(type)}
+          />
+        ))}
+      </RadioGroup>
+
+      <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
+    </Box>
+  );
+};
+
+export default DealFlowDetailsOwnershipType;
