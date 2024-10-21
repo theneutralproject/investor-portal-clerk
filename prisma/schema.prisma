@@ -38,7 +38,7 @@ model Deal {
   userId                  Int?
   dealStage               Int
   /// @deprecated. Use DealInvestmentStats model instead
-  amount                  Float                  @default(0.0)
+  amount                  Float                  @default(5000.0)
   /// @deprecated. Use DealInvestmentStats model instead
   financingType           DealFinancingType?     @default(equity)
   hubspotId               String                 @unique
