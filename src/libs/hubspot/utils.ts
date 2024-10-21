@@ -56,7 +56,7 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
     return new Error("hubspotId is required to update a contact in hubspot")
   }
   return await fetch(
-    `${process.env.HUBSPOT_API_BASE_URL} /contacts/v1/contact/vid/${hubspotContact.hubspotId}/profile`,
+    `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vid/${hubspotContact.hubspotId}/profile`,
     {
       method: "POST",
       headers: {
