@@ -38,7 +38,7 @@ export const ProjectDocTab: React.FC<{
     data: DocumentWithCompletion[];
     error: any;
     documentEventMutation: any;
-  } = useDocuments(project.id, 1, deal.investmentStats.financingType!);
+  } = useDocuments(project.id, 1, deal.investmentStats.financingType);
 
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error.message}</div>;

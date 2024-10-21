@@ -69,7 +69,7 @@ const useDocuments = (
       }
     },
     onSuccess: (_, { documentId, type }) => {
-      toast.success(`Document ${type.toLowerCase()} successfully!`);
+      // toast.success(`Document ${type.toLowerCase()} successfully!`);
     },
     onSettled: () => {
       // Always refetch after error or success to ensure data consistency

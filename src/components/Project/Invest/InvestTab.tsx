@@ -1,11 +1,11 @@
 /* eslint-disable */
 import React, { use, useState } from "react";
-import { Modal, Box, Typography, Card, CardContent, Button } from "@mui/material";
+import { Box, Typography, Card, CardContent } from "@mui/material";
 import DocumentCard from "../ProjectDocs/DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
-import { Deal, DocumentType, type Project } from "@prisma/client";
+import { DocumentType, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
 import { useDebounce } from "@/app/hooks/useDebounce";
@@ -13,8 +13,9 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
 import type { DocusignEnvelopeSchema } from "@/libs/docusign/schema";
+import { DealWithInvestmentStats } from "@/libs/prisma";
 
-export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
+export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentStats }> = ({
   project,
   deal,
 }) => {
@@ -30,7 +31,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
     data: DocumentWithCompletion[];
     error: any;
     documentEventMutation: any;
-  } = useDocuments(project.id, 2, deal.financingType!);
+  } = useDocuments(project.id, 2, deal.investmentStats.financingType);
 
 
   // Hubspot can only process 1 webhook request per minute. 
@@ -93,7 +94,7 @@ export const InvestTab: React.FC<{ project: Project; deal: Deal }> = ({
     } else {
 
       const body: DocusignEnvelopeSchema = {
-        amount: deal.amount,
+        amount: deal.investmentStats.amount,
         envelopeId: envelopeId,
         clerkUserId: user.id,
         projectId: project.id

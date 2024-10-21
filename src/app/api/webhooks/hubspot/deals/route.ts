@@ -1,5 +1,5 @@
+import type { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils";
-import type { HubspotDealUpdateSchema } from "@/libs/hubspot/schema";
 import { HSDealPropNames, getDealStageInt, getProjectNameFromDealStage, getFundingAmount } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma";
 import { getErrorMessage } from "@/libs/utils";
@@ -19,7 +19,7 @@ const arrHubspotWHRes = z.array(hubspotWHDealRes);
     this webhook is called when a deal property is changed in hubspot 
     [dealstage, amount, investment_entity, dealname, dealtype, financing_type]
 **/
-export async function POST(req: Request): Promise<Response> {
+export async function POST(req: Request) {
   try {
     const payload = arrHubspotWHRes.parse(await req.json())[0];
     if (
@@ -53,9 +53,10 @@ export async function POST(req: Request): Promise<Response> {
         }
       );
     }
-    
-    const dealBody: HubspotDealUpdateSchema = {
+
+    const dealBody: DealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
+      // investmentStats: {},
     };
     let updateProjectFunding = false;
     switch (payload.propertyName) {
@@ -64,13 +65,15 @@ export async function POST(req: Request): Promise<Response> {
         updateProjectFunding = dealBody.dealStage >= 3;
         break;
       case HSDealPropNames.amount.toString():
-        dealBody.amount = parseFloat(payload.propertyValue);
+        dealBody.investmentStats = { amount: parseFloat(payload.propertyValue) };
         break;
       case HSDealPropNames.financing_type.toString():
-        dealBody.financingType =
-          payload.propertyValue in DealFinancingType
-            ? (payload.propertyValue as keyof typeof DealFinancingType)
-            : "equity";
+        dealBody.investmentStats = {
+          financingType:
+            payload.propertyValue in DealFinancingType
+              ? (payload.propertyValue as keyof typeof DealFinancingType)
+              : "equity"
+        };
     }
 
     if (updateProjectFunding) {
@@ -85,13 +88,13 @@ export async function POST(req: Request): Promise<Response> {
           );
         } else {
           console.log(
-            `\attempting to update project funding tracker for ${projectToUpdate} to ${amountRaised}`
+            `attempting to update project funding tracker for ${projectToUpdate} to ${amountRaised}`
           );
 
-          const project= await prisma.project.findUnique({
-            where:{ name: projectToUpdate}
+          const project = await prisma.project.findUnique({
+            where: { name: projectToUpdate }
           });
-          if(!project) return new Response(
+          if (!project) return new Response(
             JSON.stringify({ error: `project with name ${projectToUpdate} does not exist` }),
             {
               status: 500,
@@ -113,6 +116,7 @@ export async function POST(req: Request): Promise<Response> {
 
     const updatedDeal: Deal | Error = await updateDeal(dealBody);
     if (isError(updatedDeal)) {
+      console.error("Error updateDeal response:\n", updateDeal.toString());
       return new Response(
         JSON.stringify({ error: getErrorMessage(updatedDeal) }),
         {

@@ -12,10 +12,11 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import { type Deal, type Project } from "@prisma/client";
+import { type Project } from "@prisma/client";
 
 import { LineDisplay } from "../Overview/InvestmentSummaryBox";
 import { SetStateAction, useState } from "react";
+import { DealWithInvestmentStats } from "@/libs/prisma";
 
 const routingNumbers = [
   {
@@ -44,7 +45,7 @@ function lookupAccountNumber(investmentEntity: string) {
   }
 }
 
-export const FundTab: React.FC<{ project: Project; deal: Deal }> = ({
+export const FundTab: React.FC<{ project: Project; deal: DealWithInvestmentStats }> = ({
   project,
   deal,
 }) => {
@@ -73,7 +74,7 @@ export const FundTab: React.FC<{ project: Project; deal: Deal }> = ({
               <Divider sx={{ mt: 2 }} />
 
               <LineDisplay name="Payable To" value={deal.investmentEntity} />
-              <LineDisplay name="Amount" value={`$${deal.amount}`} />
+              <LineDisplay name="Amount" value={`$${deal.investmentStats.amount}`} />
               <LineDisplay
                 name="Ref Number"
                 value={`${deal.transactionId}`}
@@ -105,7 +106,7 @@ export const FundTab: React.FC<{ project: Project; deal: Deal }> = ({
               <Typography variant="body1">Pay by Wire Transfer</Typography>
               <Divider sx={{ mt: 2 }} />
 
-              <LineDisplay name="Amount" value={`$${deal.amount}`} />
+              <LineDisplay name="Amount" value={`$${deal.investmentStats.amount}`} />
               <LineDisplay name="Account Number" value={lookupAccountNumber(deal.investmentEntity)} />
 
               <FormControl fullWidth sx={{ mt: 2 }}>

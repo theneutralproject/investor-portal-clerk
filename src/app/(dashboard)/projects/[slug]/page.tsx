@@ -96,7 +96,7 @@ export default function Page({ params: { slug } }: PageProps) {
       if (dealData) {
         if (
           dealData.dealStage >= minDealStage &&
-          dealData.financingType === queryParams.financingType
+          dealData.investmentStats.financingType === queryParams.financingType
         )
           return;
 
