@@ -119,6 +119,16 @@ const getSsnOrTin = (org: OrganizationWithFullMembersAndAddress, deal: DealWithI
     }
 }
 
+const getInvestingEntityName = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {   
+    switch (deal.investmentStats.ownershipType) {
+        case DealOwnershipType.INDIVIDUAL:
+        case DealOwnershipType.MARITAL:
+        case DealOwnershipType.JOINT:
+            return `${user.firstName} ${user.lastName}`;
+        default: return org.name;
+    }
+}
+
 const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
     let tabname = "initial_company";
     switch (deal.investmentStats.ownershipType) {
@@ -209,7 +219,7 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
 
     const { amount, numberAUnits, numberCUnits } = deal.investmentStats;
     const amountSpelledOut = toWords(amount);
-    const investorName = `${signer.firstName} ${signer.lastName}`; //TODO: change to investingEntityName and add verificationMethodNetworth //TODO: add verificationMethodIncome
+    const investingEntityName = getInvestingEntityName(org, deal, signer);
 
 
     /* eslint-disable-next-line*/
@@ -225,7 +235,7 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
 
     /* eslint-disable-next-line*/
     const amountSpelledOutTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "amountSpelledOutTab", value: amountSpelledOut,
+        tabLabel: "amountSpelledOut", value: amountSpelledOut,
     }) as DSText;
 
     /* eslint-disable-next-line*/
@@ -244,14 +254,14 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
     }) as DSText;
 
     /* eslint-disable-next-line*/
-    const investorNameTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "investorName", value: investorName,
+    const investingEntityNameTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "investingEntityName", value: investingEntityName,
     }) as DSText;
 
     const sharedTextTabs = [
         amountTab,
         amountSpelledOutTab,
-        investorNameTab,
+        investingEntityNameTab,
         numberAUnitsTab,
         numberCUnitsTab,
         interestTab

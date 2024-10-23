@@ -81,6 +81,7 @@ test.describe("api/users test", () => {
             data: { firstName: 'Testi', lastName: 'Tester' }
         });
         const body = await JSON.parse(await response.text());
+        expect (body.firstName).toBe('Testi');
         if (body.address) {
             await prisma.address.delete({ where: { id: body.address.id } });
         }
