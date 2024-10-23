@@ -35,7 +35,6 @@ export async function GET(request: NextRequest) {
     if (!clerkUser) {
       return jsonResponse({ error: "User not found" }, 404);
     }
-
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: clerkUser.id },
     });

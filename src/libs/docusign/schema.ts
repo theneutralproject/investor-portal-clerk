@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-
-// todo: hook this up in docusignUtils
-enum ownershipTypeEnum {
+export enum docusignOwnershipTypeEnum {
   Individual = "ownershipTypeIndividual",
   Joint = "ownershipTypeJoint",
   Corporation = "ownershipTypeCorporation",
@@ -13,28 +11,12 @@ enum ownershipTypeEnum {
   Partnership = "ownershipTypePartnership"
 };
 
-export const zDocusignEnvelope = z.object({
+export const zDocusignEvelopeCreate = z.object({
   envelopeId: z.string(),
-  projectId: z.number().int(),
-  clerkUserId: z.string(),
-  amount: z.number().min(0),
-  amountSpelledOut: z.string().optional(),
-  numAUnits: z.number().optional(),
-  numCUnits: z.number().optional(),
-  investorName: z.string().optional(),
-  ownershipType: z.nativeEnum(ownershipTypeEnum).optional(),
-  ownershipTypeOtherValue: z.string().optional(),
-  coSigner: z.object({
-    email: z.string(),
-    fullName: z.string()
-  }).optional(),
-  accreditationVerifier: z.object({
-    email: z.string(),
-    fullName: z.string()
-  }).optional()
+  dealId: z.number().int(),
 });
 
-export type DocusignEnvelopeSchema = z.infer<typeof zDocusignEnvelope>;
+export type DocusignEnvelopeCreateSchema = z.infer<typeof zDocusignEvelopeCreate>;
 
 const zDocusignSigner = z.object({
   id: z.number(),

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type AccreditationVerifierCreateSchema } from "@/libs/accreditationVerifier/schema";
+import { type AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 import {
   type OrganizationWithFullMembers,
   type ProjectWithAllNestedData,
@@ -13,7 +13,7 @@ import {
   type Organization,
   type MembershipType,
   type User,
-  type AccreditationVerifier,
+  type AccreditationVerification,
 } from "@prisma/client";
 import axios from "axios";
 import { useRouter } from "next/navigation";
@@ -142,8 +142,8 @@ interface DealFlowContextType {
     type: MembershipType
   ) => Promise<void>;
   updateOrganizationMember: (user: Partial<User>) => Promise<void>;
-  createVerifier: (
-    verifierData: AccreditationVerifierCreateSchema
+  createVerification: (
+    verificationData: AccreditationVerificationCreateSchema
   ) => Promise<void>;
 }
 
@@ -482,24 +482,18 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     }
   };
 
-  const createVerifier = async (
-    verifierData: AccreditationVerifierCreateSchema
+  const createVerification = async (
+    verificationData: AccreditationVerificationCreateSchema
   ) => {
     if (!deal) return;
     setIsLoading(true);
     setError(null);
 
     try {
-      const { data } = await axios.post<AccreditationVerifier>(
-        "/api/deals/verifier",
-        { ...verifierData, dealId: deal.id }
+      const { data } = await axios.post<AccreditationVerification>(
+        "/api/deals/verification",
+        { ...verificationData, dealId: deal.id }
       );
-
-      //Update deal.accreditationVerifierId
-      await updateDeal({
-        ...deal,
-        accreditationVerifierId: data.id,
-      });
 
       toast.success("Accreditation verifier created successfully");
     } catch (error) {
@@ -528,7 +522,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     updateOrganization,
     updateOrganizationMember,
     createOrganizationMember,
-    createVerifier,
+    createVerification,
   };
 
   return (

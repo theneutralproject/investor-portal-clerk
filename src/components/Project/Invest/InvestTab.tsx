@@ -1,5 +1,5 @@
 /* eslint-disable */
-import React, { use, useState } from "react";
+import React, { useState } from "react";
 import { Box, Typography, Card, CardContent } from "@mui/material";
 import DocumentCard from "../ProjectDocs/DocumentCard";
 import useDocuments, {
@@ -12,7 +12,7 @@ import { useDebounce } from "@/app/hooks/useDebounce";
 import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
-import type { DocusignEnvelopeSchema } from "@/libs/docusign/schema";
+import type { DocusignEnvelopeCreateSchema } from "@/libs/docusign/schema";
 import { DealWithInvestmentStats } from "@/libs/prisma";
 
 export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentStats }> = ({
@@ -44,7 +44,7 @@ export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentSta
 
   const handleViewDocument = (document: DocumentWithCompletion) => {
     setCurrentDocument(document);
-      setModelOpenType("DOCUMENT");
+    setModelOpenType("DOCUMENT");
   };
 
   const handleSignDocument = (document: DocumentWithCompletion) => {
@@ -91,29 +91,28 @@ export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentSta
     const url = `/api/docusign`;
     if (!user) {
       console.log("!user")
-    } else {
-
-      const body: DocusignEnvelopeSchema = {
-        amount: deal.investmentStats.amount,
-        envelopeId: envelopeId,
-        clerkUserId: user.id,
-        projectId: project.id
-      };
-      
-      const docusignResponse = await axios.post(url, body).catch((error) => {
-        if (error.response) {
-          console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:", error.response)
-        }
-      })
-      if (docusignResponse?.data?.consentUrl) {
-        console.log("must authenticate using consentUrl")
-        window.location.assign(docusignResponse.data.consentUrl)
-      }
-
-      if (docusignResponse?.data?.url) {
-        window.location.assign(docusignResponse.data.url)
-      }
+      return null;
     }
+
+    const body: DocusignEnvelopeCreateSchema = {
+      dealId: deal.id,
+      envelopeId: envelopeId,
+    };
+
+    const docusignResponse = await axios.post(url, body).catch((error) => {
+      if (error.response) {
+        console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:", error.response)
+      }
+    })
+    if (docusignResponse?.data?.consentUrl) {
+      console.log("must authenticate using consentUrl")
+      window.location.assign(docusignResponse.data.consentUrl)
+    }
+
+    if (docusignResponse?.data?.url) {
+      window.location.assign(docusignResponse.data.url)
+    }
+
   }
 
   if (isLoading) return <div>Loading documents...</div>;
