@@ -31,20 +31,19 @@ model User {
 }
 
 model Deal {
-  id                      Int                    @id @default(autoincrement())
-  projectId               Int
-  dealStage               Int
-  hubspotId               String                 @unique
-  transactionId           String                 @default("")
+  id                        Int                        @id @default(autoincrement())
+  projectId                 Int
+  dealStage                 Int
+  hubspotId                 String                     @unique
+  transactionId             String                     @default("")
   /// the project, i.e. Edison LLC
-  investmentEntity        String
-  accreditationVerifierId Int?
-  organizationId          Int
-  accreditationVerifier   AccreditationVerifier? @relation(fields: [accreditationVerifierId], references: [id])
-  organization            Organization           @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  project                 Project                @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  document                DealDocument[]
-  investmentStats         DealInvestmentStats?
+  investmentEntity          String
+  organizationId            Int
+  organization              Organization               @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+  project                   Project                    @relation(fields: [projectId], references: [id], onDelete: Restrict)
+  document                  DealDocument[]
+  investmentStats           DealInvestmentStats?
+  accreditationVerification AccreditationVerification?
 }
 
 model DealInvestmentStats {
@@ -84,14 +83,23 @@ model Member {
   type           MembershipType
 }
 
+model AccreditationVerification {
+  id         Int                    @id @default(autoincrement())
+  method     AccreditationMethod
+  dealId     Int                    @unique
+  deal       Deal                   @relation(fields: [dealId], references: [id])
+  verifierId Int?                   @unique
+  verifier   AccreditationVerifier? @relation(fields: [verifierId], references: [id])
+}
+
 model AccreditationVerifier {
-  id          Int     @id @default(autoincrement())
-  firstName   String
-  lastName    String
-  email       String
-  title       String?
-  phoneNumber String?
-  deals       Deal[]
+  id                        Int                        @id @default(autoincrement())
+  firstName                 String
+  lastName                  String
+  email                     String
+  title                     String?
+  phoneNumber               String?
+  AccreditationVerification AccreditationVerification?
 }
 
 /// deal specific documents such as tax forms, accreditation verification etc 
@@ -293,4 +301,11 @@ enum DealOwnershipType {
 enum DealUnitType {
   AUNIT
   CUNIT
+}
+
+enum AccreditationMethod {
+  INCOME
+  ASSETS
+  LICENSE
+  OTHER
 }

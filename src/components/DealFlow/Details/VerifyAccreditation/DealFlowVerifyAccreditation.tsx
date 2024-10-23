@@ -1,3 +1,4 @@
+// TODO: Fully hook up verification submission to the backend and ensure that no partial verifier information is submitted
 import React, { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -14,11 +15,12 @@ import AccreditationQuestion from "@/components/DealFlow/Details/VerifyAccredita
 import UploadDocumentContent from "@/components/DealFlow/Details/VerifyAccreditation/UploadDocumentContent";
 import ThirdPartyVerifierForm from "@/components/DealFlow/Details/VerifyAccreditation/ThirdPartyVerifierForm";
 import { questions } from "@/components/DealFlow/Helpers/types";
-import { type AccreditationVerifier } from "@prisma/client";
+import { AccreditationMethod, type AccreditationVerifier } from "@prisma/client";
+import type { AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
   const router = useRouter();
-  const { deal, project, createVerifier } = useDealFlow();
+  const { deal, project, createVerification } = useDealFlow();
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(
     "accreditation"
@@ -66,21 +68,29 @@ const DealFlowVerifyAccreditation: React.FC = () => {
       if (!deal) {
         throw new Error("Deal not found");
       }
-      await createVerifier({
+
+      const data = {
         dealId: deal.id,
-        email: verifierInfo?.email ?? "",
-        firstName: verifierInfo?.firstName ?? "",
-        lastName: verifierInfo?.lastName ?? "",
-        phoneNumber: verifierInfo?.phoneNumber ?? undefined,
-        title: verifierInfo?.title ?? undefined,
-      });
+        method: AccreditationMethod.INCOME,  //TODO: Update this to use the actual method,
+      } as AccreditationVerificationCreateSchema;
+      if (verifierInfo) {
+        data.verifier = {
+          email: verifierInfo?.email ?? "",
+          firstName: verifierInfo?.firstName ?? "",
+          lastName: verifierInfo?.lastName ?? "",
+          phoneNumber: verifierInfo?.phoneNumber ?? undefined,
+          title: verifierInfo?.title ?? undefined,
+        };
+      }
+
+      await createVerification(data);
     } catch (err) {
       setError("Failed to submit verifier information. Please try again.");
       console.error("Error submitting verifier:", err);
     } finally {
       setIsSubmitting(false);
     }
-  }, [createVerifier, verifierInfo, deal]);
+  }, [createVerification, verifierInfo, deal]);
 
   const handleContinue = useCallback(() => {
     if (Object.keys(answers).length === 2) {

@@ -11,7 +11,9 @@ import {
   type ProjectPropertyStats,
   type DealInvestmentStats,
   type Organization,
-  type Member
+  type Member,
+  type AccreditationVerifier,
+  type AccreditationVerification
 } from "@prisma/client";
 
 let prisma: PrismaClient;
@@ -50,6 +52,14 @@ export type DealWithInvestmentStats = Deal & {
   investmentStats: DealInvestmentStats
 }
 
+export type AccreditationVerificationWithVerifier = AccreditationVerification & {
+  verifier: AccreditationVerifier | null;
+}
+
+export type DealWithInvestmentStatsAndVerification = DealWithInvestmentStats & {
+  accreditationVerification: AccreditationVerificationWithVerifier | null;
+}
+
 export type OrganizationWithMembersAndAddress = Organization & {
   members: Member[],
   address: Address,
@@ -57,6 +67,11 @@ export type OrganizationWithMembersAndAddress = Organization & {
 
 export type OrganizationWithFullMembers = Organization & {
   members: MemberWithUser[],
+}
+
+export type OrganizationWithFullMembersAndAddress = Organization & {
+  members: MemberWithUser[],
+  address: Address | null,
 }
 
 export type MemberWithUser = Member & {

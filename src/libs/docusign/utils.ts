@@ -2,11 +2,23 @@
 
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { type EnvelopeDefinition, ApiClient, EnvelopesApi, type Tabs, type TemplateRole, type Text as DSText, type RecipientViewRequest } from "docusign-esign";
-import type { Address, User } from "@prisma/client";
-import type { UserWithAddress } from "@/libs/prisma";
-import type { DocusignEnvelopeSchema } from "./schema";
+import {
+    type EnvelopeDefinition,
+    ApiClient,
+    EnvelopesApi,
+    type Tabs,
+    type TemplateRole,
+    type RadioGroup,
+    type Radio,
+    type Text as DSText,
+    type RecipientViewRequest,
+    type InitialHere
+} from "docusign-esign";
+import { DealOwnershipType, type Address, type User } from "@prisma/client";
+import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/prisma";
+import { docusignOwnershipTypeEnum } from "./schema";
 import { type SessionData, sessionOptions } from "../session/utils";
+import { toWords } from "number-to-words";
 
 /* eslint-disable-next-line*/
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -19,7 +31,7 @@ export async function refreshAccessToken() {
         consentUrl: ""
     };
     if (!(session.docusignJwt && (session.docusignExpiresAt ?? 0) > Date.now())) {
-        console.log("attempting to generate a new access token");
+        console.log("generating a new DS access token");
         const dsApiClient: ApiClient = new ApiClient();
         dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
         // dsApiClient.addDefaultHeader('Authorization', 'Bearer ' + process.env.DOCUSIGN_INTEGRATION_KEY);
@@ -28,8 +40,8 @@ export async function refreshAccessToken() {
             process.env.DOCUSIGN_INTEGRATION_KEY!,
             process.env.DOCUSIGN_USER_ID!,
             ["signature"],
-            // fs.readFileSync(path.join(__dirname, "private.key")),
-            Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'), //TODO: save as DB file instead of secret
+            // fs.readFileSync(path.join(__dirname, "private.key")), //TODO: save as DB file instead of secret
+            Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
             3600
         )
             .catch((err: { response: { data: { error: string } } }) => {
@@ -51,11 +63,9 @@ export async function refreshAccessToken() {
 
         /* eslint-disable */
         if (results.body.consentUrl) {
-            //.catch returned { consentUrl: string }
             responseObj.consentUrl = results.body.consentUrl
         }
         else {
-
             const { access_token, expires_in } = results.body as { access_token: string, expires_in: number };
             /* eslint-enable */
 
@@ -66,10 +76,9 @@ export async function refreshAccessToken() {
             responseObj.accessToken = access_token;
         }
     } else {
-        console.log("reusing unexpired access token")
+        console.log("reusing unexpired DS access token")
         responseObj.accessToken = session.docusignJwt!;
     }
-
     return responseObj;
 }
 
@@ -88,19 +97,88 @@ const addressToOneLine = (a: Address | null) => {
     return a ? `${a.street}, ${a.city}, ${a.state} ${a.zipcode}` : ""
 };
 
-const addressToStreet = (a: Address | null) => {
-    return a ? `${a.street}` : ""
+const getAddress = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {
+    switch (deal.investmentStats.ownershipType) {
+        case DealOwnershipType.INDIVIDUAL:
+        case DealOwnershipType.MARITAL:
+        case DealOwnershipType.JOINT:
+            return user.address;
+        default: return org.address ?? user.address;
+    }
+}
+
+const getSsnOrTin = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {
+    switch (deal.investmentStats.ownershipType) {
+        case DealOwnershipType.INDIVIDUAL:
+        case DealOwnershipType.MARITAL:
+        case DealOwnershipType.JOINT:
+            return user.ssn;
+        default: return org.tin ?? user.ssn;
+    }
+}
+// init_verifier_networth, init_verifier_income
+
+const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
+    let tabname = "initial_company";
+    switch (deal.investmentStats.ownershipType) {
+        case DealOwnershipType.INDIVIDUAL:
+        case DealOwnershipType.MARITAL:
+        case DealOwnershipType.JOINT:
+            tabname = "initial_individual";
+            break;
+    }
+
+    /* eslint-disable-next-line*/
+    const initialTab: InitialHere = docusign.InitialHere.constructFromObject({
+        tabLabel: tabname, optional: "false", required: "true",
+    }) as InitialHere;
+
+    return initialTab;
+}
+
+const getSignerCompanyDetailsTabs = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {
+    /* eslint-disable-next-line*/
+    const stateNotOrgTab = docusign.Text.constructFromObject({
+        tabLabel: "stateNotOrg", value: getAddress(org, deal, user)?.state ?? '',
+        required: "true"
+    }) as DSText;
+
+    if(deal.investmentStats.ownershipType in [DealOwnershipType.INDIVIDUAL, DealOwnershipType.MARITAL, DealOwnershipType.OTHER]) return[stateNotOrgTab];
+    console.log("getting company details tabs", org.address)
+    /* eslint-disable-next-line*/
+    const corporationStateTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "corporationState", value: getAddress(org,deal, user)?.state ??'',
+        required: "true"
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const corporationCityTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "corporationCity", value: getAddress(org,deal, user)?.city ?? '',
+        required: "true"
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
+    const corporationFormationDateTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "corporationFormationDate", value: org.dateOfCreation?.toDateString() ?? '',
+        required: "true"
+    }) as DSText;
+
+    return [corporationStateTab, corporationCityTab, corporationFormationDateTab];
 }
 
 // https://developers.docusign.com/docs/esign-rest-api/how-to/request-signature-template-remote/
-export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserWithAddress) {
+export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, signer: UserWithAddress) {
+    const coSigners = org.members.filter(m => m.userId !== org.ownerId).map(m => m.user as UserWithAddress);
+    const accreditationVerifier = deal.accreditationVerification?.verifier;
 
-    const { amount, investorName, envelopeId, amountSpelledOut } = envelopeData;
-
-    // create the envelope definition
+    const { amount, numberAUnits, numberCUnits } = deal.investmentStats;
+    const amountSpelledOut = toWords(amount);
+    const investorName = `${signer.firstName} ${signer.lastName}`;
     /* eslint-disable-next-line*/
     const env: EnvelopeDefinition = new docusign.EnvelopeDefinition() as EnvelopeDefinition;
     env.templateId = envelopeId;
+
+    // SHARED TABS
 
     /* eslint-disable-next-line*/
     const amountTab: DSText = docusign.Text.constructFromObject({
@@ -113,13 +191,13 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
     }) as DSText;
 
     /* eslint-disable-next-line*/
-    const numAUnitsTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "numAUnits", value: amount < 250000 ? `${amount / 100000}` : "0",
+    const numberAUnitsTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "numberAUnits", value: numberAUnits?.toString() ?? "",
     }) as DSText;
 
     /* eslint-disable-next-line*/
-    const numCUnitsTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "numCUnits", value: amount >= 250000 ? `${amount / 100000}` : "0",
+    const numberCUnitsTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "numberCUnits", value: numberCUnits?.toString() ?? "",
     }) as DSText;
 
     /* eslint-disable-next-line*/
@@ -136,47 +214,58 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
         amountTab,
         amountSpelledOutTab,
         investorNameTab,
-        numAUnitsTab,
-        numCUnitsTab,
+        numberAUnitsTab,
+        numberCUnitsTab,
         interestTab
     ];
 
-    // todo: get title from org member, or just ignore this field
-    /* eslint-disable-next-line*/
-    // const signer1TitleTab: DSText = docusign.Text.constructFromObject({
-    //     tabLabel: "title", value: signer.title ?? "",
-    // }) as DSText;
-
-
     /* eslint-disable-next-line*/
     const signer1SsnTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "ssn", value: signer.ssn /** or company.tin */,
+        tabLabel: "ssn", value: getSsnOrTin(org, deal, signer),
     }) as DSText;
 
 
     /* eslint-disable-next-line*/
     const signer1AddressStreetTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "addressStreet", value: addressToStreet(signer.address),
+        tabLabel: "addressStreet", value: getAddress(org, deal, signer)?.street ?? "",
     }) as DSText;
 
     /* eslint-disable-next-line*/
     const signer1AddressCityStateZipTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "addressCityStateZip", value: addressToCityStateZip(signer.address),
+        tabLabel: "addressCityStateZip", value: addressToCityStateZip(getAddress(org, deal, signer)),
     }) as DSText;
 
     /* eslint-disable-next-line*/
     const signer1AddressOneLineTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "addressOneLine", value: addressToOneLine(signer.address),
+        tabLabel: "addressOneLine", value: addressToOneLine(getAddress(org, deal, signer)),
     }) as DSText;
 
-    /** TODO: State name from 2digit shorthand */
+    /* eslint-disable-next-line*/
+    const signer1State: DSText = docusign.Text.constructFromObject({
+        tabLabel: "state", value: getAddress(org, deal, signer)?.state,
+    }) as DSText;
 
     /* eslint-disable-next-line*/
     const signer1PhoneNumberTab: DSText = docusign.Text.constructFromObject({
         tabLabel: "phoneNumber", value: signer.phoneNumber,
     }) as DSText;
 
-    // Pull together the existing and new tabs in a Tabs object:
+    // Ownership type
+    const ownershipType = getOwnershipTypeFromDeal(deal.investmentStats.ownershipType);
+    /* eslint-disable-next-line*/
+    const signer1OwnershipTypeTab: RadioGroup = docusign.RadioGroup.constructFromObject({
+        groupName: "ownershipType",
+        /* eslint-disable-next-line*/
+        radios: [docusign.Radio.constructFromObject({
+            value: ownershipType,
+            selected: "true",
+            locked: "true",
+            required: "false",
+        }) as Radio],
+    }) as RadioGroup;
+
+
+    // Combine the existing and new tabs in a Tabs object:
     /* eslint-disable-next-line*/
     let signer1Tabs: Tabs = docusign.Tabs.constructFromObject({
         textTabs: [...sharedTextTabs,
@@ -186,48 +275,35 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
             signer1PhoneNumberTab,
             signer1AddressStreetTab,
             signer1AddressCityStateZipTab,
-            signer1AddressOneLineTab
+            signer1AddressOneLineTab,
+            signer1State,
+            ...getSignerCompanyDetailsTabs(org, deal, signer)
         ]
         ],
+        radioGroupTabs: [signer1OwnershipTypeTab],
+        initialHereTabs: [getInitialHereTabs(deal)] //TODO: add more tabs for accreditation verification initials
     }) as Tabs;
-
+    /* eslint-disable-next-line*/
+    const neutralSignerTitleTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "title", value: "Authorized Agent",
+    }) as DSText;
     /* eslint-disable-next-line*/
     const neutralSignerTabs: Tabs = docusign.Tabs.constructFromObject({
-        textTabs: sharedTextTabs
+        textTabs: [...sharedTextTabs,
+        ...[neutralSignerTitleTab]
+        ]
     })
 
-    // Create template role elements to connect the signer and cc recipients to the template
-    /* eslint-disable-next-line*/
-    // addressStreet
-    // addressCityStateZip
-    // ssn
-    // phoneNumber
-    // title
-    // Accreditation Verifier role
     /* eslint-disable-next-line*/
     const signer1Role: TemplateRole = docusign.TemplateRole.constructFromObject({
         email: signer.email,
         name: `${signer.firstName} ${signer.lastName}`,
         tabs: signer1Tabs,
-        clientUserId: signer.id.toString(),
+        clientUserId: `signer-${signer.id.toString()}`,
         roleName: 'Signer',
     }) as TemplateRole;
 
-    // co-signer
-    if (envelopeData.coSigner) {
-        console.log("\n\nTODO: build out cosigner logic")
-        // const coSignerRole: TemplateRole = docusign.TemplateRole.constructFromObject({
-        //     email: user.email,
-        //     name: user.fullName,
-        //     tabs: signer1Tabs,
-        //     clientUserId: user.id,
-        //     roleName: 'Co-Signer',
-        // }) as TemplateRole;
-    }
-    if (envelopeData.accreditationVerifier) {
-        console.log("\n\nTODO: build out accreditationVerifier logic")
-    }
-
+    // TODO: Dont hardcode this
     /* eslint-disable-next-line*/
     const neutralSignerRole: TemplateRole = docusign.TemplateRole.constructFromObject({
         email: "jonatan@neutral.us",
@@ -235,10 +311,34 @@ export function makeEnvelope(envelopeData: DocusignEnvelopeSchema, signer: UserW
         tabs: neutralSignerTabs,
         clientUserId: "jonatan@neutral.us",
         roleName: 'Neutral Signer',
-        title: "Authorized Agent"
     }) as TemplateRole;
-    // Add the TemplateRole objects to the envelope object
-    env.templateRoles = [signer1Role, /**coSigner, */ neutralSignerRole];
+
+    env.templateRoles = [signer1Role, neutralSignerRole];
+
+    // co-signer
+    if (coSigners.length > 0) {
+        const coSigner = coSigners[0];
+        /* eslint-disable-next-line*/
+        const coSignerRole1: TemplateRole = docusign.TemplateRole.constructFromObject({
+            email: coSigner!.email,
+            name: `${coSigner!.firstName} ${coSigner!.lastName}`,
+            clientUserId: `cosigner-${coSigner!.id.toString()}`,
+            roleName: 'Co-Signer',
+        }) as TemplateRole;
+        env.templateRoles.push(coSignerRole1);
+    }
+    if (accreditationVerifier) {
+        /* eslint-disable-next-line*/
+        const accreditationVerifierRole: TemplateRole = docusign.TemplateRole.constructFromObject({
+            email: accreditationVerifier.email,
+            name: `${accreditationVerifier.firstName} ${accreditationVerifier.lastName}`,
+            clientUserId: `accver-${accreditationVerifier.id.toString()}`,
+            roleName: 'Accreditation Verifier',
+        }) as TemplateRole;
+        env.templateRoles.push(accreditationVerifierRole);
+    }
+
+
     env.status = 'sent'; // We want the envelope to be sent
 
     return env;
@@ -256,7 +356,19 @@ export function makeRecipientViewRequest(signer: User, returnUrl: string) {
     // we used to create the envelope.
     viewRequest.email = signer.email;
     viewRequest.userName = `${signer.firstName} ${signer.lastName}`;
-    viewRequest.clientUserId = signer.id.toString();
+    viewRequest.clientUserId =`signer-${signer.id.toString()}`;
 
     return viewRequest;
+}
+
+export function getOwnershipTypeFromDeal(ownershipType: DealOwnershipType) {
+    switch (ownershipType) {
+        case DealOwnershipType.INDIVIDUAL: return docusignOwnershipTypeEnum.Individual;
+        case DealOwnershipType.JOINT: return docusignOwnershipTypeEnum.Joint;
+        case DealOwnershipType.CORPORATION: return docusignOwnershipTypeEnum.Corporation;
+        case DealOwnershipType.PARTNERSHIP: return docusignOwnershipTypeEnum.Partnership;
+        case DealOwnershipType.COMMON: return docusignOwnershipTypeEnum.Common;
+        case DealOwnershipType.MARITAL: return docusignOwnershipTypeEnum.Marital;
+        default: return docusignOwnershipTypeEnum.Other;
+    }
 }
