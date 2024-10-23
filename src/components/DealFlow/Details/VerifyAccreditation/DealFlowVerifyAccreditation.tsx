@@ -15,7 +15,7 @@ import AccreditationQuestion from "@/components/DealFlow/Details/VerifyAccredita
 import UploadDocumentContent from "@/components/DealFlow/Details/VerifyAccreditation/UploadDocumentContent";
 import ThirdPartyVerifierForm from "@/components/DealFlow/Details/VerifyAccreditation/ThirdPartyVerifierForm";
 import { questions } from "@/components/DealFlow/Helpers/types";
-import { AccreditationMethod, type AccreditationVerifier } from "@prisma/client";
+import { VerificationBasis, VerificationMethod, type AccreditationVerifier } from "@prisma/client";
 import type { AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
@@ -71,7 +71,8 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
       const data = {
         dealId: deal.id,
-        method: AccreditationMethod.INCOME,  //TODO: Update this to use the actual method,
+        method: VerificationMethod.SELF,  //TODO: Update this to use the actual method,
+        basis: VerificationBasis.INCOME,  //TODO: Update this to use the actual basis,
       } as AccreditationVerificationCreateSchema;
       if (verifierInfo) {
         data.verifier = {

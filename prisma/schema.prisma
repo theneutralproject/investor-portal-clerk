@@ -85,7 +85,8 @@ model Member {
 
 model AccreditationVerification {
   id         Int                    @id @default(autoincrement())
-  method     AccreditationMethod
+  basis     VerificationBasis
+  method     VerificationMethod
   dealId     Int                    @unique
   deal       Deal                   @relation(fields: [dealId], references: [id])
   verifierId Int?                   @unique
@@ -303,9 +304,14 @@ enum DealUnitType {
   CUNIT
 }
 
-enum AccreditationMethod {
+enum VerificationBasis {
   INCOME
   ASSETS
   LICENSE
   OTHER
+}
+
+enum VerificationMethod {
+  SELF
+  THIRD_PARTY
 }

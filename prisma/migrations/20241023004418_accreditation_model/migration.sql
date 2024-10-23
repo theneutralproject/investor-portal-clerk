@@ -5,7 +5,7 @@
 
 */
 -- CreateEnum
-CREATE TYPE "AccreditationMethod" AS ENUM ('INCOME', 'ASSETS', 'LICENSE', 'OTHER');
+CREATE TYPE "VerificationBasis" AS ENUM ('INCOME', 'ASSETS', 'LICENSE', 'OTHER');
 
 -- DropForeignKey
 ALTER TABLE "Deal" DROP CONSTRAINT "Deal_accreditationVerifierId_fkey";
@@ -16,7 +16,7 @@ ALTER TABLE "Deal" DROP COLUMN "accreditationVerifierId";
 -- CreateTable
 CREATE TABLE "AccreditationVerification" (
     "id" SERIAL NOT NULL,
-    "method" "AccreditationMethod" NOT NULL,
+    "method" "VerificationBasis" NOT NULL,
     "dealId" INTEGER NOT NULL,
     "verifierId" INTEGER NOT NULL,
 

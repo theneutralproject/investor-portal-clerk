@@ -25,7 +25,7 @@ export async function POST(req: Request) {
         }
     });
     if (!userWOrgsAndAddress) {
-        console.error("Neutral user not found in api/deals");
+        console.error("Neutral user not found in api/docusign");
         return jsonResponse(
             {
                 error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,

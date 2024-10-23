@@ -12,13 +12,15 @@ import {
     type Radio,
     type Text as DSText,
     type RecipientViewRequest,
-    type InitialHere
+    type InitialHere,
+    Checkbox
 } from "docusign-esign";
-import { DealOwnershipType, type Address, type User } from "@prisma/client";
+import { DealOwnershipType, VerificationBasis, VerificationMethod, type Address, type User } from "@prisma/client";
 import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/prisma";
 import { docusignOwnershipTypeEnum } from "./schema";
 import { type SessionData, sessionOptions } from "../session/utils";
 import { toWords } from "number-to-words";
+import { isNull } from "lodash";
 
 /* eslint-disable-next-line*/
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -116,7 +118,6 @@ const getSsnOrTin = (org: OrganizationWithFullMembersAndAddress, deal: DealWithI
         default: return org.tin ?? user.ssn;
     }
 }
-// init_verifier_networth, init_verifier_income
 
 const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
     let tabname = "initial_company";
@@ -129,11 +130,46 @@ const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
     }
 
     /* eslint-disable-next-line*/
-    const initialTab: InitialHere = docusign.InitialHere.constructFromObject({
-        tabLabel: tabname, optional: "false", required: "true",
+    const companyOrIndividualTab: InitialHere = docusign.InitialHere.constructFromObject({
+        tabLabel: tabname, optional: "false",
     }) as InitialHere;
 
-    return initialTab;
+    let basis = "init_verifier_networth";
+    if(deal.accreditationVerification?.basis === "INCOME") basis = "init_verifier_income";
+    if(deal.accreditationVerification?.basis === "OTHER") basis = "init_verifier_other";
+    /* eslint-disable-next-line*/
+    const VerificationBasisTab: InitialHere = docusign.InitialHere.constructFromObject({
+        tabLabel: basis, optional: isNull(deal.accreditationVerification),
+    }) as InitialHere;
+
+    return [companyOrIndividualTab, VerificationBasisTab];
+}
+
+const getSignerCheckboxTabs = (deal: DealWithInvestmentStatsAndVerification) => {
+       /**
+     * CHECKBOXES:
+     * verification_irs &&
+     * verification_w2
+     * verification_1099
+     * verification_1065
+     * verification_1040
+     * or
+     * verification_other
+     * 
+     */
+    let tabLabel = "verification_irs";
+    switch (deal.accreditationVerification?.basis) {
+        case VerificationBasis.OTHER:
+        case VerificationBasis.LICENSE:
+            tabLabel = "verification_other";
+            break;
+    }
+
+    /* eslint-disable-next-line*/
+    const verificationMethodTab: Checkbox = docusign.Checkbox.constructFromObject({
+        tabLabel, selected: "true",
+    }) as Checkbox;
+    return [verificationMethodTab];
 }
 
 const getSignerCompanyDetailsTabs = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {
@@ -173,7 +209,9 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
 
     const { amount, numberAUnits, numberCUnits } = deal.investmentStats;
     const amountSpelledOut = toWords(amount);
-    const investorName = `${signer.firstName} ${signer.lastName}`;
+    const investorName = `${signer.firstName} ${signer.lastName}`; //TODO: change to investingEntityName and add verificationMethodNetworth //TODO: add verificationMethodIncome
+
+
     /* eslint-disable-next-line*/
     const env: EnvelopeDefinition = new docusign.EnvelopeDefinition() as EnvelopeDefinition;
     env.templateId = envelopeId;
@@ -264,7 +302,6 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
         }) as Radio],
     }) as RadioGroup;
 
-
     // Combine the existing and new tabs in a Tabs object:
     /* eslint-disable-next-line*/
     let signer1Tabs: Tabs = docusign.Tabs.constructFromObject({
@@ -281,7 +318,8 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
         ]
         ],
         radioGroupTabs: [signer1OwnershipTypeTab],
-        initialHereTabs: [getInitialHereTabs(deal)] //TODO: add more tabs for accreditation verification initials
+        initialHereTabs: getInitialHereTabs(deal),
+        checkboxTabs: getSignerCheckboxTabs(deal),
     }) as Tabs;
     /* eslint-disable-next-line*/
     const neutralSignerTitleTab: DSText = docusign.Text.constructFromObject({

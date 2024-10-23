@@ -1,5 +1,5 @@
 
-import { AccreditationMethod } from "@prisma/client";
+import { VerificationBasis, VerificationMethod } from "@prisma/client";
 import { z } from "zod";
 
 export const zAccreditationVerifierCreateSchema = z.object({
@@ -14,7 +14,8 @@ export type AccreditationVerifierCreateSchema = z.infer<typeof zAccreditationVer
 
 export const zAccreditationVerificationCreateSchema = z.object({
     dealId: z.number().int(),
-    method: z.nativeEnum(AccreditationMethod),
+    basis: z.nativeEnum(VerificationBasis),
+    method: z.nativeEnum(VerificationMethod),
     verifier: zAccreditationVerifierCreateSchema.nullish(),
     // verifierId: z.number().int().nullish(),
 });

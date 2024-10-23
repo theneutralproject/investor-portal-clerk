@@ -22,7 +22,7 @@ export const OrganizationScalarFieldEnumSchema = z.enum(['id','name','ownerId','
 
 export const MemberScalarFieldEnumSchema = z.enum(['id','userId','organizationId','type']);
 
-export const AccreditationVerificationScalarFieldEnumSchema = z.enum(['id','method','dealId','verifierId']);
+export const AccreditationVerificationScalarFieldEnumSchema = z.enum(['id','basis','method','dealId','verifierId']);
 
 export const AccreditationVerifierScalarFieldEnumSchema = z.enum(['id','firstName','lastName','email','title','phoneNumber']);
 
@@ -92,9 +92,13 @@ export const DealUnitTypeSchema = z.enum(['AUNIT','CUNIT']);
 
 export type DealUnitTypeType = `${z.infer<typeof DealUnitTypeSchema>}`
 
-export const AccreditationMethodSchema = z.enum(['INCOME','ASSETS','LICENSE','OTHER']);
+export const VerificationBasisSchema = z.enum(['INCOME','ASSETS','LICENSE','OTHER']);
 
-export type AccreditationMethodType = `${z.infer<typeof AccreditationMethodSchema>}`
+export type VerificationBasisType = `${z.infer<typeof VerificationBasisSchema>}`
+
+export const VerificationMethodSchema = z.enum(['SELF','THIRD_PARTY']);
+
+export type VerificationMethodType = `${z.infer<typeof VerificationMethodSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -195,7 +199,8 @@ export type Member = z.infer<typeof MemberSchema>
 /////////////////////////////////////////
 
 export const AccreditationVerificationSchema = z.object({
-  method: AccreditationMethodSchema,
+  basis: VerificationBasisSchema,
+  method: VerificationMethodSchema,
   id: z.number().int(),
   dealId: z.number().int(),
   verifierId: z.number().int().nullable(),
@@ -602,6 +607,7 @@ export const AccreditationVerificationArgsSchema: z.ZodType<Prisma.Accreditation
 
 export const AccreditationVerificationSelectSchema: z.ZodType<Prisma.AccreditationVerificationSelect> = z.object({
   id: z.boolean().optional(),
+  basis: z.boolean().optional(),
   method: z.boolean().optional(),
   dealId: z.boolean().optional(),
   verifierId: z.boolean().optional(),
@@ -1407,7 +1413,8 @@ export const AccreditationVerificationWhereInputSchema: z.ZodType<Prisma.Accredi
   OR: z.lazy(() => AccreditationVerificationWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => AccreditationVerificationWhereInputSchema),z.lazy(() => AccreditationVerificationWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
-  method: z.union([ z.lazy(() => EnumAccreditationMethodFilterSchema),z.lazy(() => AccreditationMethodSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => EnumVerificationBasisFilterSchema),z.lazy(() => VerificationBasisSchema) ]).optional(),
+  method: z.union([ z.lazy(() => EnumVerificationMethodFilterSchema),z.lazy(() => VerificationMethodSchema) ]).optional(),
   dealId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   verifierId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
   deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
@@ -1416,6 +1423,7 @@ export const AccreditationVerificationWhereInputSchema: z.ZodType<Prisma.Accredi
 
 export const AccreditationVerificationOrderByWithRelationInputSchema: z.ZodType<Prisma.AccreditationVerificationOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  basis: z.lazy(() => SortOrderSchema).optional(),
   method: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   verifierId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1458,13 +1466,15 @@ export const AccreditationVerificationWhereUniqueInputSchema: z.ZodType<Prisma.A
   AND: z.union([ z.lazy(() => AccreditationVerificationWhereInputSchema),z.lazy(() => AccreditationVerificationWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => AccreditationVerificationWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => AccreditationVerificationWhereInputSchema),z.lazy(() => AccreditationVerificationWhereInputSchema).array() ]).optional(),
-  method: z.union([ z.lazy(() => EnumAccreditationMethodFilterSchema),z.lazy(() => AccreditationMethodSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => EnumVerificationBasisFilterSchema),z.lazy(() => VerificationBasisSchema) ]).optional(),
+  method: z.union([ z.lazy(() => EnumVerificationMethodFilterSchema),z.lazy(() => VerificationMethodSchema) ]).optional(),
   deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
   verifier: z.union([ z.lazy(() => AccreditationVerifierNullableRelationFilterSchema),z.lazy(() => AccreditationVerifierWhereInputSchema) ]).optional().nullable(),
 }).strict());
 
 export const AccreditationVerificationOrderByWithAggregationInputSchema: z.ZodType<Prisma.AccreditationVerificationOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  basis: z.lazy(() => SortOrderSchema).optional(),
   method: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   verifierId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -1480,7 +1490,8 @@ export const AccreditationVerificationScalarWhereWithAggregatesInputSchema: z.Zo
   OR: z.lazy(() => AccreditationVerificationScalarWhereWithAggregatesInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => AccreditationVerificationScalarWhereWithAggregatesInputSchema),z.lazy(() => AccreditationVerificationScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
-  method: z.union([ z.lazy(() => EnumAccreditationMethodWithAggregatesFilterSchema),z.lazy(() => AccreditationMethodSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => EnumVerificationBasisWithAggregatesFilterSchema),z.lazy(() => VerificationBasisSchema) ]).optional(),
+  method: z.union([ z.lazy(() => EnumVerificationMethodWithAggregatesFilterSchema),z.lazy(() => VerificationMethodSchema) ]).optional(),
   dealId: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   verifierId: z.union([ z.lazy(() => IntNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
 }).strict();
@@ -2818,45 +2829,52 @@ export const MemberUncheckedUpdateManyInputSchema: z.ZodType<Prisma.MemberUnchec
 }).strict();
 
 export const AccreditationVerificationCreateInputSchema: z.ZodType<Prisma.AccreditationVerificationCreateInput> = z.object({
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   deal: z.lazy(() => DealCreateNestedOneWithoutAccreditationVerificationInputSchema),
   verifier: z.lazy(() => AccreditationVerifierCreateNestedOneWithoutAccreditationVerificationInputSchema).optional()
 }).strict();
 
 export const AccreditationVerificationUncheckedCreateInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedCreateInput> = z.object({
   id: z.number().int().optional(),
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   dealId: z.number().int(),
   verifierId: z.number().int().optional().nullable()
 }).strict();
 
 export const AccreditationVerificationUpdateInputSchema: z.ZodType<Prisma.AccreditationVerificationUpdateInput> = z.object({
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   deal: z.lazy(() => DealUpdateOneRequiredWithoutAccreditationVerificationNestedInputSchema).optional(),
   verifier: z.lazy(() => AccreditationVerifierUpdateOneWithoutAccreditationVerificationNestedInputSchema).optional()
 }).strict();
 
 export const AccreditationVerificationUncheckedUpdateInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedUpdateInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   dealId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   verifierId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AccreditationVerificationCreateManyInputSchema: z.ZodType<Prisma.AccreditationVerificationCreateManyInput> = z.object({
   id: z.number().int().optional(),
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   dealId: z.number().int(),
   verifierId: z.number().int().optional().nullable()
 }).strict();
 
 export const AccreditationVerificationUpdateManyMutationInputSchema: z.ZodType<Prisma.AccreditationVerificationUpdateManyMutationInput> = z.object({
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AccreditationVerificationUncheckedUpdateManyInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   dealId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   verifierId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
@@ -4297,11 +4315,18 @@ export const EnumMembershipTypeWithAggregatesFilterSchema: z.ZodType<Prisma.Enum
   _max: z.lazy(() => NestedEnumMembershipTypeFilterSchema).optional()
 }).strict();
 
-export const EnumAccreditationMethodFilterSchema: z.ZodType<Prisma.EnumAccreditationMethodFilter> = z.object({
-  equals: z.lazy(() => AccreditationMethodSchema).optional(),
-  in: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  notIn: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  not: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => NestedEnumAccreditationMethodFilterSchema) ]).optional(),
+export const EnumVerificationBasisFilterSchema: z.ZodType<Prisma.EnumVerificationBasisFilter> = z.object({
+  equals: z.lazy(() => VerificationBasisSchema).optional(),
+  in: z.lazy(() => VerificationBasisSchema).array().optional(),
+  notIn: z.lazy(() => VerificationBasisSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => NestedEnumVerificationBasisFilterSchema) ]).optional(),
+}).strict();
+
+export const EnumVerificationMethodFilterSchema: z.ZodType<Prisma.EnumVerificationMethodFilter> = z.object({
+  equals: z.lazy(() => VerificationMethodSchema).optional(),
+  in: z.lazy(() => VerificationMethodSchema).array().optional(),
+  notIn: z.lazy(() => VerificationMethodSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => NestedEnumVerificationMethodFilterSchema) ]).optional(),
 }).strict();
 
 export const AccreditationVerifierNullableRelationFilterSchema: z.ZodType<Prisma.AccreditationVerifierNullableRelationFilter> = z.object({
@@ -4311,6 +4336,7 @@ export const AccreditationVerifierNullableRelationFilterSchema: z.ZodType<Prisma
 
 export const AccreditationVerificationCountOrderByAggregateInputSchema: z.ZodType<Prisma.AccreditationVerificationCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  basis: z.lazy(() => SortOrderSchema).optional(),
   method: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   verifierId: z.lazy(() => SortOrderSchema).optional()
@@ -4324,6 +4350,7 @@ export const AccreditationVerificationAvgOrderByAggregateInputSchema: z.ZodType<
 
 export const AccreditationVerificationMaxOrderByAggregateInputSchema: z.ZodType<Prisma.AccreditationVerificationMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  basis: z.lazy(() => SortOrderSchema).optional(),
   method: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   verifierId: z.lazy(() => SortOrderSchema).optional()
@@ -4331,6 +4358,7 @@ export const AccreditationVerificationMaxOrderByAggregateInputSchema: z.ZodType<
 
 export const AccreditationVerificationMinOrderByAggregateInputSchema: z.ZodType<Prisma.AccreditationVerificationMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  basis: z.lazy(() => SortOrderSchema).optional(),
   method: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   verifierId: z.lazy(() => SortOrderSchema).optional()
@@ -4342,14 +4370,24 @@ export const AccreditationVerificationSumOrderByAggregateInputSchema: z.ZodType<
   verifierId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const EnumAccreditationMethodWithAggregatesFilterSchema: z.ZodType<Prisma.EnumAccreditationMethodWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => AccreditationMethodSchema).optional(),
-  in: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  notIn: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  not: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => NestedEnumAccreditationMethodWithAggregatesFilterSchema) ]).optional(),
+export const EnumVerificationBasisWithAggregatesFilterSchema: z.ZodType<Prisma.EnumVerificationBasisWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => VerificationBasisSchema).optional(),
+  in: z.lazy(() => VerificationBasisSchema).array().optional(),
+  notIn: z.lazy(() => VerificationBasisSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => NestedEnumVerificationBasisWithAggregatesFilterSchema) ]).optional(),
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumAccreditationMethodFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumAccreditationMethodFilterSchema).optional()
+  _min: z.lazy(() => NestedEnumVerificationBasisFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumVerificationBasisFilterSchema).optional()
+}).strict();
+
+export const EnumVerificationMethodWithAggregatesFilterSchema: z.ZodType<Prisma.EnumVerificationMethodWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => VerificationMethodSchema).optional(),
+  in: z.lazy(() => VerificationMethodSchema).array().optional(),
+  notIn: z.lazy(() => VerificationMethodSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => NestedEnumVerificationMethodWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumVerificationMethodFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumVerificationMethodFilterSchema).optional()
 }).strict();
 
 export const AccreditationVerifierCountOrderByAggregateInputSchema: z.ZodType<Prisma.AccreditationVerifierCountOrderByAggregateInput> = z.object({
@@ -5604,8 +5642,12 @@ export const AccreditationVerifierCreateNestedOneWithoutAccreditationVerificatio
   connect: z.lazy(() => AccreditationVerifierWhereUniqueInputSchema).optional()
 }).strict();
 
-export const EnumAccreditationMethodFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumAccreditationMethodFieldUpdateOperationsInput> = z.object({
-  set: z.lazy(() => AccreditationMethodSchema).optional()
+export const EnumVerificationBasisFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumVerificationBasisFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => VerificationBasisSchema).optional()
+}).strict();
+
+export const EnumVerificationMethodFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumVerificationMethodFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => VerificationMethodSchema).optional()
 }).strict();
 
 export const DealUpdateOneRequiredWithoutAccreditationVerificationNestedInputSchema: z.ZodType<Prisma.DealUpdateOneRequiredWithoutAccreditationVerificationNestedInput> = z.object({
@@ -6390,21 +6432,38 @@ export const NestedEnumMembershipTypeWithAggregatesFilterSchema: z.ZodType<Prism
   _max: z.lazy(() => NestedEnumMembershipTypeFilterSchema).optional()
 }).strict();
 
-export const NestedEnumAccreditationMethodFilterSchema: z.ZodType<Prisma.NestedEnumAccreditationMethodFilter> = z.object({
-  equals: z.lazy(() => AccreditationMethodSchema).optional(),
-  in: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  notIn: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  not: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => NestedEnumAccreditationMethodFilterSchema) ]).optional(),
+export const NestedEnumVerificationBasisFilterSchema: z.ZodType<Prisma.NestedEnumVerificationBasisFilter> = z.object({
+  equals: z.lazy(() => VerificationBasisSchema).optional(),
+  in: z.lazy(() => VerificationBasisSchema).array().optional(),
+  notIn: z.lazy(() => VerificationBasisSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => NestedEnumVerificationBasisFilterSchema) ]).optional(),
 }).strict();
 
-export const NestedEnumAccreditationMethodWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumAccreditationMethodWithAggregatesFilter> = z.object({
-  equals: z.lazy(() => AccreditationMethodSchema).optional(),
-  in: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  notIn: z.lazy(() => AccreditationMethodSchema).array().optional(),
-  not: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => NestedEnumAccreditationMethodWithAggregatesFilterSchema) ]).optional(),
+export const NestedEnumVerificationMethodFilterSchema: z.ZodType<Prisma.NestedEnumVerificationMethodFilter> = z.object({
+  equals: z.lazy(() => VerificationMethodSchema).optional(),
+  in: z.lazy(() => VerificationMethodSchema).array().optional(),
+  notIn: z.lazy(() => VerificationMethodSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => NestedEnumVerificationMethodFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedEnumVerificationBasisWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumVerificationBasisWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => VerificationBasisSchema).optional(),
+  in: z.lazy(() => VerificationBasisSchema).array().optional(),
+  notIn: z.lazy(() => VerificationBasisSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => NestedEnumVerificationBasisWithAggregatesFilterSchema) ]).optional(),
   _count: z.lazy(() => NestedIntFilterSchema).optional(),
-  _min: z.lazy(() => NestedEnumAccreditationMethodFilterSchema).optional(),
-  _max: z.lazy(() => NestedEnumAccreditationMethodFilterSchema).optional()
+  _min: z.lazy(() => NestedEnumVerificationBasisFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumVerificationBasisFilterSchema).optional()
+}).strict();
+
+export const NestedEnumVerificationMethodWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumVerificationMethodWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => VerificationMethodSchema).optional(),
+  in: z.lazy(() => VerificationMethodSchema).array().optional(),
+  notIn: z.lazy(() => VerificationMethodSchema).array().optional(),
+  not: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => NestedEnumVerificationMethodWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumVerificationMethodFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumVerificationMethodFilterSchema).optional()
 }).strict();
 
 export const NestedEnumDealDocumentTypeFilterSchema: z.ZodType<Prisma.NestedEnumDealDocumentTypeFilter> = z.object({
@@ -6855,13 +6914,15 @@ export const DealInvestmentStatsCreateOrConnectWithoutDealInputSchema: z.ZodType
 }).strict();
 
 export const AccreditationVerificationCreateWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationCreateWithoutDealInput> = z.object({
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   verifier: z.lazy(() => AccreditationVerifierCreateNestedOneWithoutAccreditationVerificationInputSchema).optional()
 }).strict();
 
 export const AccreditationVerificationUncheckedCreateWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedCreateWithoutDealInput> = z.object({
   id: z.number().int().optional(),
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   verifierId: z.number().int().optional().nullable()
 }).strict();
 
@@ -7023,13 +7084,15 @@ export const AccreditationVerificationUpdateToOneWithWhereWithoutDealInputSchema
 }).strict();
 
 export const AccreditationVerificationUpdateWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUpdateWithoutDealInput> = z.object({
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   verifier: z.lazy(() => AccreditationVerifierUpdateOneWithoutAccreditationVerificationNestedInputSchema).optional()
 }).strict();
 
 export const AccreditationVerificationUncheckedUpdateWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedUpdateWithoutDealInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   verifierId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
@@ -7650,13 +7713,15 @@ export const AccreditationVerifierUncheckedUpdateWithoutAccreditationVerificatio
 }).strict();
 
 export const AccreditationVerificationCreateWithoutVerifierInputSchema: z.ZodType<Prisma.AccreditationVerificationCreateWithoutVerifierInput> = z.object({
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   deal: z.lazy(() => DealCreateNestedOneWithoutAccreditationVerificationInputSchema)
 }).strict();
 
 export const AccreditationVerificationUncheckedCreateWithoutVerifierInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedCreateWithoutVerifierInput> = z.object({
   id: z.number().int().optional(),
-  method: z.lazy(() => AccreditationMethodSchema),
+  basis: z.lazy(() => VerificationBasisSchema),
+  method: z.lazy(() => VerificationMethodSchema),
   dealId: z.number().int()
 }).strict();
 
@@ -7677,13 +7742,15 @@ export const AccreditationVerificationUpdateToOneWithWhereWithoutVerifierInputSc
 }).strict();
 
 export const AccreditationVerificationUpdateWithoutVerifierInputSchema: z.ZodType<Prisma.AccreditationVerificationUpdateWithoutVerifierInput> = z.object({
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   deal: z.lazy(() => DealUpdateOneRequiredWithoutAccreditationVerificationNestedInputSchema).optional()
 }).strict();
 
 export const AccreditationVerificationUncheckedUpdateWithoutVerifierInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedUpdateWithoutVerifierInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  method: z.union([ z.lazy(() => AccreditationMethodSchema),z.lazy(() => EnumAccreditationMethodFieldUpdateOperationsInputSchema) ]).optional(),
+  basis: z.union([ z.lazy(() => VerificationBasisSchema),z.lazy(() => EnumVerificationBasisFieldUpdateOperationsInputSchema) ]).optional(),
+  method: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => EnumVerificationMethodFieldUpdateOperationsInputSchema) ]).optional(),
   dealId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 

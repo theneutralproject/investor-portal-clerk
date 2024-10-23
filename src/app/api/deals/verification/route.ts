@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
             return jsonResponse({ error: "Input data malformatted" }, 400);
         }
 
-        const { dealId, method, verifier} = requestData;
+        const { dealId, method, basis, verifier} = requestData;
 
         // check if deal belongs to the user
         const dealToUpdate = await prisma.deal.findFirst({
@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
             newVerifier = await prisma.accreditationVerifier.create({ data: verifier });
         }
 
-        const newAccreditationVerification = await prisma.accreditationVerification.create({ data: {dealId, method, verifierId: newVerifier?.id ?? null} });
+        const newAccreditationVerification = await prisma.accreditationVerification.create({ data: {dealId, method, basis, verifierId: newVerifier?.id ?? null} });
         return jsonResponse(newAccreditationVerification);
     } catch (error) {
         console.error("ERROR: unable to create AccreditationVerification:\n", error);
