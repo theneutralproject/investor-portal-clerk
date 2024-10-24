@@ -36,8 +36,9 @@ export type OrganizationMemberCreateSchema = z.infer<typeof zOrganizationMemberC
 
 export const zOrganizationMemberUpdateSchema = z.object({
     // organizationId: z.number().int(),
+    id: z.number().int(), //member ID
     dealId: z.number().int().nullish(),
-    user: zUserUpdateSchema.nullish(),
+    user: zUserUpdateSchema.partial().nullish(),
     type: z.nativeEnum(MembershipType),
     title: z.string().max(120, "120 characters max").nullish(),
 });

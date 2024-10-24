@@ -5,14 +5,13 @@ import {
   type ProjectWithAllNestedData,
   type UserWithAddress,
   type DealWithInvestmentStats,
+  type MemberWithUser,
 } from "@/libs/prisma";
 import {
   DealOwnershipType,
   DealFinancingType,
   type Project,
   type Organization,
-  type MembershipType,
-  type User,
   type AccreditationVerification,
 } from "@prisma/client";
 import axios from "axios";
@@ -28,6 +27,10 @@ import DealFlowCoInvestor from "@components/DealFlow/Details/DealFlowCoInvestor"
 import DealFlowEntityDetails from "@components/DealFlow/Details/DealFlowEntityDetails";
 import DealFlowEntityDetailsCoInvestor from "@components/DealFlow/Details/DealFlowEntityDetailsCoInvestor";
 import DealFlowVerifyAccreditation from "@components/DealFlow/Details/VerifyAccreditation/DealFlowVerifyAccreditation";
+import {
+  OrganizationMemberCreateSchema,
+  OrganizationMemberUpdateSchema,
+} from "@/libs/organization/schema";
 
 // Define the step types
 export type StepType =
@@ -137,11 +140,11 @@ interface DealFlowContextType {
     updatedOrganization: Partial<OrganizationWithFullMembers>
   ) => Promise<void>;
   createOrganizationMember: (
-    dealId: number,
-    user: Partial<User>,
-    type: MembershipType
+    createData: OrganizationMemberCreateSchema
   ) => Promise<void>;
-  updateOrganizationMember: (user: Partial<User>) => Promise<void>;
+  updateOrganizationMember: (
+    updateData: OrganizationMemberUpdateSchema
+  ) => Promise<void>;
   createVerification: (
     verificationData: AccreditationVerificationCreateSchema
   ) => Promise<void>;
@@ -426,9 +429,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   };
 
   const createOrganizationMember = async (
-    dealId: number,
-    user: Partial<User>,
-    type: MembershipType
+    createData: OrganizationMemberCreateSchema
   ) => {
     if (!organization) return;
     setIsLoading(true);
@@ -437,7 +438,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     try {
       const { data } = await axios.post<OrganizationWithFullMembers>(
         `/api/organizations/${organization.id}/members`,
-        { dealId, user, type }
+        createData
       );
       setOrganization(data);
       toast.success("Co-investor created successfully");
@@ -450,26 +451,26 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     }
   };
 
-  const updateOrganizationMember = async (user: Partial<User>) => {
+  const updateOrganizationMember = async (
+    updateData: OrganizationMemberUpdateSchema
+  ) => {
     if (!user || !organization) return;
     setIsLoading(true);
     setError(null);
 
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { data } = await axios.put<UserWithAddress>(
-        `/api/users/${user.id}`,
-        user
+      const { data } = await axios.put<MemberWithUser>(
+        `/api/organizations/${organization.id}/members/${updateData?.id}`,
+        updateData
       );
       //Find organization member by userId and update
       const organizationMember = organization?.members.find(
-        (member) => member.userId === user.id
+        (member) => member.id === data?.id
       );
       if (organizationMember) {
-        organizationMember.user.email = user.email;
-        organizationMember.user.phoneNumber = user.phoneNumber;
-        organizationMember.user.firstName = user.firstName;
-        organizationMember.user.lastName = user.lastName;
+        organizationMember.title = data.title;
+        organizationMember.user = data.user;
       }
       setOrganization(organization);
       toast.success("Co-investor updated successfully");

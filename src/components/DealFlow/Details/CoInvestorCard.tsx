@@ -51,7 +51,7 @@ interface CoInvestorCardProps {
   index: number;
   onSave: (index: number) => void;
   onCancel: (index: number) => void;
-  onChange: (index: number, field: keyof User, value: string) => void;
+  onChange: (index: number, field: keyof User | "title", value: string) => void;
   expanded: boolean;
   onExpand: (index: number) => void;
 }
@@ -65,7 +65,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
   expanded,
   onExpand,
 }) => {
-  const handleChange = (field: keyof User, value: string) =>
+  const handleChange = (field: keyof User | "title", value: string) =>
     onChange(index, field, value);
   const investorType = coInvestor.type === "OWNER" ? "Investor" : "Co-Investor";
 
@@ -129,6 +129,13 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
               label="Phone Number"
               value={coInvestor.user.phoneNumber}
               onChange={(e) => handleChange("phoneNumber", e.target.value)}
+              fullWidth
+              disabled={readOnly}
+            />
+            <TextField
+              label="Title"
+              value={coInvestor.title}
+              onChange={(e) => handleChange("title", e.target.value)}
               fullWidth
               disabled={readOnly}
             />

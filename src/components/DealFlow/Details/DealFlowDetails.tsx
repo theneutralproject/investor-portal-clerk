@@ -26,6 +26,7 @@ const DealFlowDetails: React.FC = () => {
   useEffect(() => {
     if (user) {
       setFormData({
+        id: user.id,
         firstName: user.firstName ?? "",
         lastName: user.lastName ?? "",
         ssn: user.ssn ?? "",

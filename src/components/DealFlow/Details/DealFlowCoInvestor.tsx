@@ -6,6 +6,10 @@ import CoInvestorCard from "@components/DealFlow/Details/CoInvestorCard";
 import { useRouter } from "next/navigation";
 import { MembershipType, Role, type User } from "@prisma/client";
 import { type MemberWithUser } from "@/libs/prisma";
+import {
+  type UserCreateSchema,
+  type UserUpdateSchema,
+} from "@/libs/user/schema";
 
 const DealFlowCoInvestor: React.FC = () => {
   const {
@@ -24,25 +28,17 @@ const DealFlowCoInvestor: React.FC = () => {
 
   useEffect(() => {
     if (organization?.members) {
-      setLocalMembers(
-        organization.members.map((member) => ({
-          ...member,
-          user: {
-            id: member.userId,
-            email: member.user.email,
-            firstName: member.user.firstName,
-            lastName: member.user.lastName,
-          },
-        }))
-      );
+      setLocalMembers(organization.members);
     }
-  }, [organization]);
+  }, [organization?.members]);
 
   const handleAddCoInvestor = useCallback(() => {
     const newMember: Partial<MemberWithUser> = {
+      type: MembershipType.COINVESTOR,
+      title: "",
       user: {
         role: Role.USER,
-        email: ``,
+        email: "",
         firstName: "",
         lastName: "",
       },
@@ -53,14 +49,18 @@ const DealFlowCoInvestor: React.FC = () => {
   }, [localMembers.length]);
 
   const handleCoInvestorChange = useCallback(
-    (index: number, field: keyof User, value: string) => {
+    (index: number, field: keyof User | "title", value: string) => {
       setLocalMembers((prevMembers) => {
         if (!prevMembers) return prevMembers;
         return prevMembers.map((member, i) =>
           i === index
             ? {
                 ...member,
-                user: { ...member.user, [field]: value } as Partial<User>,
+                ...(field === "title"
+                  ? { title: value }
+                  : {
+                      user: { ...member.user, [field]: value } as Partial<User>,
+                    }),
               }
             : member
         );
@@ -88,14 +88,21 @@ const DealFlowCoInvestor: React.FC = () => {
       try {
         if (coInvestor.id) {
           // Update existing member
-          await updateOrganizationMember(coInvestor.user as User);
+          await updateOrganizationMember({
+            id: coInvestor.id,
+            dealId: deal.id,
+            user: coInvestor.user as UserUpdateSchema,
+            title: coInvestor.title ?? "",
+            type: MembershipType.COINVESTOR,
+          });
         } else {
           // Create new member
-          await createOrganizationMember(
-            deal.id,
-            coInvestor.user,
-            MembershipType.COINVESTOR
-          );
+          await createOrganizationMember({
+            dealId: deal.id,
+            user: coInvestor.user as UserCreateSchema,
+            title: coInvestor.title ?? "",
+            type: MembershipType.COINVESTOR,
+          });
         }
         setExpandedCards((prev) => prev.filter((i) => i !== index));
       } catch (error) {
