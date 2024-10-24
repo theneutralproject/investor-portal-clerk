@@ -16,7 +16,9 @@ const DealFlowCoInvestor: React.FC = () => {
     updateOrganizationMember,
   } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
-  const [localMembers, setLocalMembers] = useState<MemberWithUser[]>([]);
+  const [localMembers, setLocalMembers] = useState<Partial<MemberWithUser>[]>(
+    []
+  );
 
   const router = useRouter();
 
@@ -36,28 +38,19 @@ const DealFlowCoInvestor: React.FC = () => {
     }
   }, [organization]);
 
-  const handleAddCoInvestor = useCallback(async () => {
-    if (!deal || !organization) return;
-
-    try {
-      const newUser: Partial<User> = {
+  const handleAddCoInvestor = useCallback(() => {
+    const newMember: Partial<MemberWithUser> = {
+      user: {
         role: Role.USER,
-        email: `coinvestor-${organization.members.length + 1}@example.com`,
+        email: ``,
         firstName: "",
         lastName: "",
-      };
+      },
+    };
 
-      await createOrganizationMember(
-        deal.id,
-        newUser,
-        MembershipType.COINVESTOR
-      );
-
-      setExpandedCards((prev) => [...prev, organization.members.length]);
-    } catch (error) {
-      console.error("Error adding co-investor:", error);
-    }
-  }, [deal, organization, createOrganizationMember]);
+    setLocalMembers((prev) => [...prev, newMember]);
+    setExpandedCards((prev) => [...prev, localMembers.length]);
+  }, [localMembers.length]);
 
   const handleCoInvestorChange = useCallback(
     (index: number, field: keyof User, value: string) => {
@@ -67,7 +60,7 @@ const DealFlowCoInvestor: React.FC = () => {
           i === index
             ? {
                 ...member,
-                user: { ...member.user, [field]: value } as User,
+                user: { ...member.user, [field]: value } as Partial<User>,
               }
             : member
         );
@@ -84,25 +77,46 @@ const DealFlowCoInvestor: React.FC = () => {
 
   const handleSaveCoInvestor = useCallback(
     async (index: number) => {
+      if (!deal) return;
+
       const coInvestor = localMembers[index];
-      if (coInvestor?.user) {
-        try {
-          await updateOrganizationMember(coInvestor.user);
-          console.log("Co-investor saved successfully");
-          setExpandedCards((prev) => prev.filter((i) => i !== index));
-        } catch (error) {
-          console.error("Error saving co-investor:", error);
-        }
-      } else {
+      if (!coInvestor?.user) {
         console.error("Co-investor user data is missing");
+        return;
+      }
+
+      try {
+        if (coInvestor.id) {
+          // Update existing member
+          await updateOrganizationMember(coInvestor.user as User);
+        } else {
+          // Create new member
+          await createOrganizationMember(
+            deal.id,
+            coInvestor.user,
+            MembershipType.COINVESTOR
+          );
+        }
+        setExpandedCards((prev) => prev.filter((i) => i !== index));
+      } catch (error) {
+        console.error("Error saving co-investor:", error);
       }
     },
-    [localMembers, updateOrganizationMember]
+    [deal, localMembers, createOrganizationMember, updateOrganizationMember]
   );
 
-  const handleCancelCoInvestor = useCallback((index: number) => {
-    setExpandedCards((prev) => prev.filter((i) => i !== index));
-  }, []);
+  const handleCancelCoInvestor = useCallback(
+    (index: number) => {
+      setExpandedCards((prev) => prev.filter((i) => i !== index));
+
+      // If the member has no ID (newly added), remove it from localMembers
+      const member = localMembers[index];
+      if (!member?.id) {
+        setLocalMembers((prev) => prev.filter((_, i) => i !== index));
+      }
+    },
+    [localMembers]
+  );
 
   const handleExpandCard = useCallback((index: number) => {
     setExpandedCards((prev) =>
@@ -124,8 +138,8 @@ const DealFlowCoInvestor: React.FC = () => {
 
       {localMembers.map((coInvestor, index) => (
         <CoInvestorCard
-          key={coInvestor.id}
-          coInvestor={coInvestor}
+          key={`${coInvestor.id ?? index}`}
+          coInvestor={coInvestor as MemberWithUser}
           index={index}
           onSave={handleSaveCoInvestor}
           onCancel={handleCancelCoInvestor}
