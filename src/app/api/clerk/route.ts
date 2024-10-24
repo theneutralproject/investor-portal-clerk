@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       
       const newUserData = {
         clerkId: id,
-        email: email,
+        email: email.toLowerCase(),
         firstName: first_name,
         lastName: last_name,
         phoneNumber: phonenumber,
