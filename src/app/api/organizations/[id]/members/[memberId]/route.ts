@@ -56,7 +56,7 @@ export async function DELETE(request: NextRequest) {
                 const updatedOrg = await prisma.organization.update({
                     where: { id: organization.id },
                     data: { members: { delete: { id: memberId } } },
-                    include: { members: true }
+                    include: { members: { include: { user: true } } }
                 });
                 return jsonResponse(updatedOrg);
             } catch (deleteError) {

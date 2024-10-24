@@ -18,12 +18,15 @@ const DealFlowCoInvestor: React.FC = () => {
     organization,
     createOrganizationMember,
     updateOrganizationMember,
+    deleteOrganizationMember,
   } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
   const [localMembers, setLocalMembers] = useState<Partial<MemberWithUser>[]>(
     []
   );
 
+  console.log("localMembers", localMembers);
+  console.log("organization", organization);
   const router = useRouter();
 
   useEffect(() => {
@@ -153,6 +156,7 @@ const DealFlowCoInvestor: React.FC = () => {
           onChange={handleCoInvestorChange}
           expanded={expandedCards.includes(index)}
           onExpand={handleExpandCard}
+          deleteOrganizationMember={deleteOrganizationMember}
         />
       ))}
 

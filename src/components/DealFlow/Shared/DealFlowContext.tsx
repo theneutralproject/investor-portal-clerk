@@ -148,6 +148,7 @@ interface DealFlowContextType {
   createVerification: (
     verificationData: AccreditationVerificationCreateSchema
   ) => Promise<void>;
+  deleteOrganizationMember: (memberId: number) => Promise<void>;
 }
 
 const DealFlowContext = createContext<DealFlowContextType | undefined>(
@@ -436,16 +437,38 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setError(null);
 
     try {
-      const { data } = await axios.post<OrganizationWithFullMembers>(
+      const { data } = await axios.post<MemberWithUser>(
         `/api/organizations/${organization.id}/members`,
         createData
       );
-      setOrganization(data);
+      //Add new member to local organization state
+      setOrganization({
+        ...organization,
+        members: [...organization.members, data],
+      });
       toast.success("Co-investor created successfully");
     } catch (error) {
       console.error("Error creating organization member:", error);
       setError("Failed to create organization member. Please try again.");
       toast.error("Failed to create organization member. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const deleteOrganizationMember = async (memberId: number) => {
+    if (!organization) return;
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { data } = await axios.delete<OrganizationWithFullMembers>(
+        `/api/organizations/${organization.id}/members/${memberId}`
+      );
+      setOrganization(data);
+      toast.success("Co-investor deleted successfully");
+    } catch (error) {
+      console.error("Error deleting organization member:", error);
     } finally {
       setIsLoading(false);
     }
@@ -523,6 +546,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     updateOrganization,
     updateOrganizationMember,
     createOrganizationMember,
+    deleteOrganizationMember,
     createVerification,
   };
 
