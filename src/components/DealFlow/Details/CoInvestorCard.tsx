@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -9,8 +9,12 @@ import {
   CardActions,
   Collapse,
   styled,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import DeleteIcon from "@mui/icons-material/Delete";
+import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { MembershipType, type User } from "@prisma/client";
 import { type MemberWithUser } from "@/libs/prisma";
 
@@ -30,7 +34,6 @@ interface ExpandMoreProps extends React.HTMLAttributes<HTMLDivElement> {
   expand: boolean;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ExpandMore = styled(({ expand, ...other }: ExpandMoreProps) => {
   const { onClick, ...rest } = other;
   return (
@@ -47,13 +50,17 @@ const ExpandMore = styled(({ expand, ...other }: ExpandMoreProps) => {
 }));
 
 interface CoInvestorCardProps {
-  coInvestor: MemberWithUser;
+  coInvestor: MemberWithUser & {
+    title: string | null;
+    user: Partial<User>;
+  };
   index: number;
   onSave: (index: number) => void;
   onCancel: (index: number) => void;
-  onChange: (index: number, field: keyof User, value: string) => void;
+  onChange: (index: number, field: keyof User | "title", value: string) => void;
   expanded: boolean;
   onExpand: (index: number) => void;
+  deleteOrganizationMember?: (memberId: number) => void;
 }
 
 const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
@@ -64,12 +71,75 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
   onChange,
   expanded,
   onExpand,
+  deleteOrganizationMember,
 }) => {
-  const handleChange = (field: keyof User, value: string) =>
-    onChange(index, field, value);
-  const investorType = coInvestor.type === "OWNER" ? "Investor" : "Co-Investor";
+  // Track which fields have been touched
+  const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
 
+  // Validation functions
+  const isEmailValid = (email: string | null | undefined) => {
+    if (!email) return true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const isPhoneValid = (phone: string | null | undefined) => {
+    if (!phone) return true;
+    const phoneRegex = /^\+?[\d\s-()]{10,}$/;
+    return phoneRegex.test(phone);
+  };
+
+  const isNameValid = (name: string | null | undefined) => {
+    if (!name) return true;
+    return name.trim().length >= 2;
+  };
+
+  const isTitleValid = (title: string | null | undefined) => {
+    if (!title) return true;
+    return title.trim().length >= 2;
+  };
+
+  // Check if all required fields are filled and valid
+  const isFormValid = () => {
+    const { firstName, lastName, email } = coInvestor.user;
+    const { title } = coInvestor;
+
+    return (
+      firstName?.trim() &&
+      lastName?.trim() &&
+      email?.trim() &&
+      title?.trim() &&
+      isEmailValid(email) &&
+      isNameValid(firstName) &&
+      isNameValid(lastName) &&
+      isTitleValid(title)
+    );
+  };
+
+  const handleChange = (field: keyof User | "title", value: string) => {
+    setTouchedFields((prev) => new Set(prev).add(field));
+    onChange(index, field, value);
+  };
+
+  const isFieldTouched = (field: string) => touchedFields.has(field);
+
+  const showError = (
+    field: string,
+    validationFn: (value: string | null | undefined) => boolean,
+    value: string | null | undefined
+  ) => {
+    return isFieldTouched(field) && !validationFn(value);
+  };
+
+  const investorType = coInvestor.type === "OWNER" ? "Investor" : "Co-Investor";
   const readOnly = coInvestor.type === MembershipType.OWNER;
+  const showDelete = coInvestor.id && deleteOrganizationMember && !readOnly;
+  const isRegisteredUser =
+    coInvestor?.user?.clerkId !== undefined && coInvestor.user.clerkId !== null;
+  const userName =
+    coInvestor.user.firstName ?? coInvestor.user.lastName
+      ? `${coInvestor.user.firstName ?? ""} ${coInvestor.user.lastName ?? ""}`
+      : `${investorType} ${index + 1}`;
 
   return (
     <StyledCard>
@@ -82,22 +152,58 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
         <Box>
           <Typography variant="overline" display="block" gutterBottom>
             {investorType}
+            {isRegisteredUser && (
+              <Tooltip title="Registered User">
+                <VerifiedUserIcon
+                  sx={{
+                    ml: 1,
+                    fontSize: "1rem",
+                    verticalAlign: "middle",
+                    color: "primary.main",
+                  }}
+                />
+              </Tooltip>
+            )}
           </Typography>
-          <Typography variant="h6">
-            {coInvestor.user.firstName ?? coInvestor.user.lastName
-              ? `${coInvestor.user.firstName} ${coInvestor.user.lastName}`
-              : `${investorType} ${index + 1}`}
+          <Typography variant="h6" gutterBottom>
+            {userName}
           </Typography>
+          {isRegisteredUser && coInvestor.user.email && (
+            <Typography variant="body2" color="text.secondary" sx={{ mt: -1 }}>
+              {coInvestor.user.email}
+            </Typography>
+          )}
         </Box>
-        <ExpandMore
-          expand={expanded}
-          onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-            e.stopPropagation();
-            onExpand(index);
-          }}
-          aria-expanded={expanded}
-          aria-label="show more"
-        />
+        <Box display="flex" alignItems="center">
+          {showDelete && (
+            <Tooltip title="Delete Member">
+              <IconButton
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (deleteOrganizationMember && coInvestor.id) {
+                    deleteOrganizationMember(coInvestor.id);
+                  }
+                }}
+                size="small"
+                color="error"
+                sx={{ mr: 1 }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Tooltip>
+          )}
+          {!isRegisteredUser && (
+            <ExpandMore
+              expand={expanded}
+              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                e.stopPropagation();
+                onExpand(index);
+              }}
+              aria-expanded={expanded}
+              aria-label="show more"
+            />
+          )}
+        </Box>
       </ExpandableHeader>
       <Collapse in={expanded} timeout="auto" unmountOnExit>
         <CardContent>
@@ -105,32 +211,89 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             <Box display="flex" gap={2}>
               <TextField
                 label="First Name"
-                value={coInvestor.user.firstName}
+                value={coInvestor.user.firstName ?? ""}
                 onChange={(e) => handleChange("firstName", e.target.value)}
                 fullWidth
-                disabled={readOnly}
+                disabled={readOnly || isRegisteredUser}
+                error={showError(
+                  "firstName",
+                  isNameValid,
+                  coInvestor.user.firstName
+                )}
+                helperText={
+                  showError(
+                    "firstName",
+                    isNameValid,
+                    coInvestor.user.firstName
+                  ) && "First name must be at least 2 characters"
+                }
+                required
               />
               <TextField
                 label="Last Name"
-                value={coInvestor.user.lastName}
+                value={coInvestor.user.lastName ?? ""}
                 onChange={(e) => handleChange("lastName", e.target.value)}
                 fullWidth
-                disabled={readOnly}
+                disabled={readOnly || isRegisteredUser}
+                error={showError(
+                  "lastName",
+                  isNameValid,
+                  coInvestor.user.lastName
+                )}
+                helperText={
+                  showError(
+                    "lastName",
+                    isNameValid,
+                    coInvestor.user.lastName
+                  ) && "Last name must be at least 2 characters"
+                }
+                required
               />
             </Box>
             <TextField
               label="Email"
-              value={coInvestor.user.email}
+              value={coInvestor.user.email ?? ""}
               onChange={(e) => handleChange("email", e.target.value)}
               fullWidth
-              disabled={readOnly}
+              disabled={readOnly || isRegisteredUser}
+              error={showError("email", isEmailValid, coInvestor.user.email)}
+              helperText={
+                showError("email", isEmailValid, coInvestor.user.email) &&
+                "Please enter a valid email address"
+              }
+              required
             />
             <TextField
               label="Phone Number"
-              value={coInvestor.user.phoneNumber}
+              value={coInvestor.user.phoneNumber ?? ""}
               onChange={(e) => handleChange("phoneNumber", e.target.value)}
               fullWidth
-              disabled={readOnly}
+              disabled={readOnly || isRegisteredUser}
+              error={showError(
+                "phoneNumber",
+                isPhoneValid,
+                coInvestor.user.phoneNumber
+              )}
+              helperText={
+                showError(
+                  "phoneNumber",
+                  isPhoneValid,
+                  coInvestor.user.phoneNumber
+                ) && "Please enter a valid phone number"
+              }
+            />
+            <TextField
+              label="Title"
+              value={coInvestor.title ?? ""}
+              onChange={(e) => handleChange("title", e.target.value)}
+              fullWidth
+              disabled={readOnly || isRegisteredUser}
+              error={showError("title", isTitleValid, coInvestor.title)}
+              helperText={
+                showError("title", isTitleValid, coInvestor.title) &&
+                "Title must be at least 2 characters"
+              }
+              required
             />
           </Box>
         </CardContent>
@@ -139,7 +302,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             variant="outlined"
             color="primary"
             onClick={() => onCancel(index)}
-            disabled={readOnly}
+            disabled={readOnly || isRegisteredUser}
           >
             Cancel
           </Button>
@@ -147,7 +310,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             variant="contained"
             color="primary"
             onClick={() => onSave(index)}
-            disabled={readOnly}
+            disabled={readOnly || isRegisteredUser || !isFormValid()}
           >
             Save {investorType}
           </Button>

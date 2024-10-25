@@ -42,6 +42,7 @@ export type ProjectWithAllNestedData = Project & {
 export type ProjectWithStats = Project & {
   investmentStats: ProjectInvestmentStats;
   propertyStats: ProjectPropertyStats;
+  milestones: ProjectMilestones;
 }
 
 export type UserWithAddress = User & {

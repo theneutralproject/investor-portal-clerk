@@ -13,6 +13,7 @@ import type { HubspotDealUpdate } from "@/libs/hubspot/schema";
 import { initDealPropsForProject, createHubspotDealForContact, DealToHubspotDealEnum, updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
+import { getEquityStatsFromProject } from "@/libs/project/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -109,8 +110,9 @@ export async function POST(request: NextRequest) {
 
     const project = await prisma.project.findUnique({
       where: { id: dealData.projectId },
+      include: { investmentStats: true }
     });
-    if (!project) {
+    if (!project || !project.investmentStats || !project.equityReturnsFile) {
       return jsonResponse(
         { error: `Project with id ${dealData.projectId} not found in DB` },
         400
@@ -148,7 +150,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-
     dealData.transactionId = `${project.name}-${dbUser.lastName}-${Math.floor(
       Math.random() * 900 + 100
     )}`
@@ -173,6 +174,21 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "HS Deal cannot be created." }, 400);
     }
 
+    if (!dealData.financingType) dealData.financingType = DealFinancingType.equity;
+    let minInvestmentAmount = 5000;
+    if (dealData.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
+    else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
+
+    if (!dealData.amount) dealData.amount = minInvestmentAmount;
+    const equityDetails = await getEquityStatsFromProject(dealData.amount, project.equityReturnsFile, project.investmentStats.cUnitThresholdAmount);
+    if (isError(equityDetails)) {
+        console.error(
+            `Failed to get equity stats during deal creation`
+        );
+        return jsonResponse({ error: "Failed to get equity stats during deal creation" }, 500);
+    }
+    const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
+
     const deal = await prisma.deal.create({
       data: {
         organizationId: dealData.organizationId,
@@ -181,15 +197,19 @@ export async function POST(request: NextRequest) {
         hubspotId: hsDealId.toString(),
         transactionId: dealData.transactionId,
         investmentEntity:
-          getInvestmentEntity(project.name, dealData.financingType ?? DealFinancingType.equity) ?? "",
+          getInvestmentEntity(project.name, dealData.financingType) ?? "",
       },
     });
 
     await prisma.dealInvestmentStats.create({
       data: {
         dealId: deal.id,
-        amount: dealData.amount ?? 5000,
-        financingType: dealData.financingType ?? DealFinancingType.equity,
+        amount: dealData.amount,
+        financingType: dealData.financingType,
+        unitType,
+        shareOfEquity,
+        numberAUnits,
+        numberCUnits,
         /**all other fields have postgresql defaults */
       }
     })

@@ -2,16 +2,19 @@ import { test, expect } from '@playwright/test';
 import { resetOrgInDb } from '../helpers';
 import { MembershipType, Organization } from '@prisma/client';
 import { MemberWithUser } from '@/libs/prisma';
+import { OrganizationMemberCreateSchema } from '@/libs/organization/schema';
+import { title } from 'process';
 
 test.describe("api/organizations/members test", () => {
     let testOrg: Organization | null = null;
     let memberId: number | null = null;
-    const memberData = {
+    const memberData: OrganizationMemberCreateSchema = {
         user: {
             email: 'NewtonTester@test.org',
             firstName: 'Newton',
             lastName: 'Tester',
-        }, type: MembershipType.COINVESTOR
+        }, 
+        type: MembershipType.COINVESTOR
     }
 
     test.beforeAll(async ({ request }) => {
@@ -31,21 +34,18 @@ test.describe("api/organizations/members test", () => {
 
         expect(response.status()).toBe(201);
         const body = await JSON.parse(await response.text());
-        if (body.id) {
-            // find the user in the list of members
-            const newMember: MemberWithUser = body.members.find((member: MemberWithUser) => member.user.email === memberData.user.email);
-            memberId = newMember.id;
-            expect(newMember.user.email).toBe(memberData.user.email);
-        }
-        else {
+        if (!body?.id) {
             console.error("No org returned from POST request - skipping test");
             console.error(body);
             test.fixme();
         }
+        // find the user in the list of members
+        const newMember: MemberWithUser = body;
+        memberId = newMember.id;
+        expect(newMember.user.email).toBe(memberData.user.email.toLowerCase());
     });
 
-    test('[POST] api/organizations/members should update a ghost user', async ({ request }) => {
-
+    test('[PUT] api/organizations/members should update a ghost user', async ({ request }) => {
         if (!testOrg) {
             console.error("testOrg is null - skipping test");
             test.fixme();
@@ -56,27 +56,29 @@ test.describe("api/organizations/members test", () => {
         });
 
         const postResponseBody = await JSON.parse(await postResonse.text());
-        if (postResponseBody.id) {
-            // find the user in the list of members
-            const newMember: MemberWithUser = postResponseBody.members.find((member: MemberWithUser) => member.user.email === memberData.user.email);
-            memberId = newMember.id;
 
-            const updateResponse = await request.put(`/api/users/${newMember.userId}`, {
-                data: { email: 'updatedEmail@test-email.org' }
-            });
-            const putResponseBody = await JSON.parse(await updateResponse.text());
-            console.log(putResponseBody);
-            expect(putResponseBody.email).toBe('updatedEmail@test-email.org');
-            expect(putResponseBody.firstName).toBe(memberData.user.firstName);
-            expect(updateResponse.status()).toBe(200);
-        }
-        else {
+        if (!postResponseBody.id) {
             console.error("No org returned from POST request - skipping test");
             console.error(postResponseBody);
             test.fixme();
         }
-    });
 
+        // find the user in the list of members
+        const newMember: MemberWithUser = postResponseBody;
+        memberId = newMember.id;
+        const updateResponse = await request.put(`/api/organizations/${testOrg.id}/members/${memberId}`, {
+            data: { 
+                type: MembershipType.COINVESTOR,
+                title: 'Test Title',
+                user: { email: 'updatedEmail@test-email.org' } 
+            }
+        });
+        const putResponseBody = await JSON.parse(await updateResponse.text());
+        console.log(putResponseBody);
+        expect(putResponseBody.user.email).toBe('updatedEmail@test-email.org');
+        expect(putResponseBody.user.firstName).toBe(memberData.user.firstName);
+        expect(updateResponse.status()).toBe(200);
+    });
 
     test.afterEach(async ({ request }) => {
         console.log(`cleaning up after member tests for org ${testOrg?.id} and member ${memberId}`);

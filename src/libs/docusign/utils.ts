@@ -13,9 +13,9 @@ import {
     type Text as DSText,
     type RecipientViewRequest,
     type InitialHere,
-    Checkbox
+    type Checkbox
 } from "docusign-esign";
-import { DealOwnershipType, VerificationBasis, VerificationMethod, type Address, type User } from "@prisma/client";
+import { DealOwnershipType, VerificationBasis, type Address, type User } from "@prisma/client";
 import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/prisma";
 import { docusignOwnershipTypeEnum } from "./schema";
 import { type SessionData, sessionOptions } from "../session/utils";

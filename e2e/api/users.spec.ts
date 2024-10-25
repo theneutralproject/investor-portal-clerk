@@ -9,6 +9,7 @@ test.describe("api/users test", () => {
         const response = await request.get('/api/users');
         expect(response.status()).toBe(200);
         const body = await JSON.parse(await response.text());
+        console.log(body)
         expect(response.headers()['content-type']).toBe('application/json');
         expect(body).toHaveProperty('clerkId');
         expect(body.email).toBe(process.env.E2E_CLERK_USER_USERNAME);
@@ -81,6 +82,7 @@ test.describe("api/users test", () => {
             data: { firstName: 'Testi', lastName: 'Tester' }
         });
         const body = await JSON.parse(await response.text());
+        console.log(body);
         expect (body.firstName).toBe('Testi');
         if (body.address) {
             await prisma.address.delete({ where: { id: body.address.id } });

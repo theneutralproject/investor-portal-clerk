@@ -5,14 +5,15 @@ import { zAddressCreateSchema } from "../address/schema";
 // we are excluding the email and phoneNumber, since these were previously verified by the user
 // TODO: use clerk API to update and verify phone and email
 export const zUserUpdateSchema = z.object({
+    id: z.number().int().optional(),
     email: z.string().email().optional(),
     phoneNumber: z.string().optional(),
     firstName: z.string().max(50).optional(),
     lastName: z.string().max(50).optional(),
-    ssn: z.string().max(200).optional(),
-    referralsource: z.nativeEnum(ReferralSource).optional(),
-    address: zAddressCreateSchema.optional(),
-    dateOfBirth: z.string().optional()
+    ssn: z.string().max(200).optional().nullish(),
+    referralsource: z.nativeEnum(ReferralSource).optional().nullish(),
+    address: zAddressCreateSchema.optional().nullish(),
+    dateOfBirth: z.string().optional().nullish()
   });
   
   export type UserUpdateSchema = z.infer<typeof zUserUpdateSchema>;

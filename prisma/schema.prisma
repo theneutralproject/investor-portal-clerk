@@ -55,6 +55,7 @@ model DealInvestmentStats {
   ownershipType DealOwnershipType @default(INDIVIDUAL)
   numberAUnits  Float             @default(0.0)
   numberCUnits  Float             @default(0.0)
+  shareOfEquity Float             @default(0.0)
   deal          Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
@@ -81,11 +82,12 @@ model Member {
   user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   type           MembershipType
+  title          String?
 }
 
 model AccreditationVerification {
   id         Int                    @id @default(autoincrement())
-  basis     VerificationBasis
+  basis      VerificationBasis
   method     VerificationMethod
   dealId     Int                    @unique
   deal       Deal                   @relation(fields: [dealId], references: [id])
@@ -152,24 +154,27 @@ model ProjectPropertyStats {
 }
 
 model ProjectInvestmentStats {
-  id                   Int     @id @default(autoincrement())
-  cUnitThresholdAmount Float   @default(200000.0)
-  debtInterestRate     String  @default("")
-  debtMinInvestment    Int     @default(5000)
-  debtPaymentFreq      String  @default("quarterly")
-  debtTermMonths       Int     @default(48)
-  equityIRR            Float   @default(0.0)
-  equityMinInvestment  Int     @default(5000)
-  equityPaymentFreq    String  @default("quarterly")
-  equityTermMonths     Int     @default(60)
-  preferredReturn      String  @default("")
-  investmentGoal       Float   @default(0.0)
-  investmentRaised     Float   @default(0.0)
-  projectId            Int     @unique
-  targetEquityMultiple Float   @default(0.0)
-  totalAUnitReturn     Float   @default(0.0)
-  totalCUnitReturn     Float   @default(0.0)
-  project              Project @relation(fields: [projectId], references: [id])
+  id                          Int     @id @default(autoincrement())
+  cUnitThresholdAmount        Float   @default(200000.0)
+  debtInterestRate            String  @default("")
+  debtMinInvestment           Int     @default(5000)
+  debtPaymentFreq             String  @default("quarterly")
+  debtTermMonths              Int     @default(48)
+  equityIRR                   Float   @default(0.0)
+  equityMinInvestment         Int     @default(5000)
+  equityPaymentFreq           String  @default("quarterly")
+  equityTermMonths            Int     @default(60)
+  preferredReturn             String  @default("")
+  investmentGoal              Float   @default(0.0)
+  investmentRaised            Float   @default(0.0)
+  interestRateMin             Float   @default(10.0)
+  interestRateMax             Float   @default(12.0)
+  interestRateDollarThreshold Float   @default(250000)
+  projectId                   Int     @unique
+  targetEquityMultiple        Float   @default(0.0)
+  totalAUnitReturn            Float   @default(0.0)
+  totalCUnitReturn            Float   @default(0.0)
+  project                     Project @relation(fields: [projectId], references: [id])
 }
 
 model ProjectMilestones {

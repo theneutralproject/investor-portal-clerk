@@ -2,6 +2,7 @@ import React from "react";
 import { Box, Grid, Typography, Divider } from "@mui/material";
 import { type Decimal } from "@prisma/client/runtime/library";
 import type { ProjectWithStats } from "@/libs/prisma";
+import type { ProjectInvestmentStats } from "@prisma/client";
 
 const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 
@@ -28,6 +29,13 @@ export const LineDisplay = ({
     )}
   </Box>
 );
+
+const getInterestRate = (investmentStats: ProjectInvestmentStats) => {
+  if(investmentStats.interestRateMax !== investmentStats.interestRateMin) {
+    return `${investmentStats.interestRateMin}% - ${investmentStats.interestRateMax}%`;
+  }
+  else return `${investmentStats.interestRateMin}%`;
+}
 
 const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
   return (
@@ -56,7 +64,7 @@ const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
       </Grid>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
-        <LineDisplay name="Interest" value={`${data.investmentStats.debtInterestRate}***`} />
+        <LineDisplay name="Interest" value={`${getInterestRate(data.investmentStats)}***`} />
         <LineDisplay
           name="Min. Investment"
           value={`$${formatter.format(data.investmentStats.debtMinInvestment)}`}
@@ -67,14 +75,14 @@ const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
 
       <Box sx={{ ml: 2 }}>
         <Typography variant="body2">
-          *Quarterly distribution shall commence upon stabilization, defined as
-          95% occupied.
+          {`*${data.investmentStats.equityPaymentFreq} distribution shall commence upon stabilization, defined as
+          95% occupied.`}
         </Typography>
         <Typography variant="body2">
           **Equity investors receive a 10% preferred return.
         </Typography>
         <Typography variant="body2">
-          ***12% for investment amounts above $500k.
+          {`***${data.investmentStats.interestRateMax} for investment amounts above $${data.investmentStats.interestRateDollarThreshold/1000}k.`}
         </Typography>
       </Box>
     </Grid>

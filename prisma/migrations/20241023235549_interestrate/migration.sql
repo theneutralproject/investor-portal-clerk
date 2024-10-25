@@ -1,0 +1,4 @@
+-- AlterTable
+ALTER TABLE "ProjectInvestmentStats" ADD COLUMN     "interestRateDollarThreshold" DOUBLE PRECISION NOT NULL DEFAULT 250000,
+ADD COLUMN     "interestRateMax" DOUBLE PRECISION NOT NULL DEFAULT 12.0,
+ADD COLUMN     "interestRateMin" DOUBLE PRECISION NOT NULL DEFAULT 10.0;
