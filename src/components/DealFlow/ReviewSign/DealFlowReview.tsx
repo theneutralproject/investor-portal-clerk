@@ -13,7 +13,8 @@ const DealFlowReview: React.FC = () => {
 
   const handleSignDocument = () => {
     if (docusign?.docusignTemplateId && deal?.id) {
-      void createDocusignEnvelope(docusign.docusignTemplateId, deal.id, user);
+      const templateId = "5d02fc24-4096-4995-b40b-0a024955d1a7"
+      void createDocusignEnvelope(templateId, deal.id, user);
     }
   };
 

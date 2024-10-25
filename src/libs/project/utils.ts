@@ -24,7 +24,6 @@ async function readEquityMilestoneData(csvUrl: string): Promise<MilestoneType[] 
 
     const milestones: MilestoneType[] = [];
     parser.on('readable', function () {
-        console.log('readable');
         let record;
         /* eslint-disable */
         while ((record = parser.read()) !== null) {
@@ -101,8 +100,8 @@ export function getDebtPayoutSchedule(
     }
 
     // Calculate interest rate based on threshold
-    const interestRate = amount >= investmentStats.interestRateDollarThreshold 
-        ? investmentStats.interestRateMax 
+    const interestRate = amount >= investmentStats.interestRateDollarThreshold
+        ? investmentStats.interestRateMax
         : investmentStats.interestRateMin;
 
     const debtPayoutSchedule: ReturnsDateObjectSchema[] = [];
@@ -159,41 +158,48 @@ function roundTo(num: number, decimals: number): number {
 }
 
 export function getEquityPayoutSchedule(
-    amount: number, 
-    projectMilestones: ProjectMilestones, 
-    equityMilestones: MilestoneType[], 
-    shareOfEquity: number, 
+    amount: number,
+    projectMilestones: ProjectMilestones,
+    equityMilestones: MilestoneType[],
+    shareOfEquity: number,
     unitType: DealUnitType
 ): ReturnsDateObjectSchema[] {
     const closingDate = projectMilestones.financialClosing;
     let date = closingDate.getUTCDate() !== 1 ? startOfMonth(closingDate) : closingDate;
-    
+
     if (!equityMilestones?.length) {
         throw new Error('Milestone data not found in equity returns file');
     }
-
+    let previousEntry: ReturnsDateObjectSchema | undefined = {
+        date: new Date(),
+        distributionAmount: 0,
+        multiple: 1,
+        cumulativeDistribution: 0,
+        cumulativeMultiple: 1,
+        totalGrossReturn: 0,
+        totalNetReturn: 0
+    }
     return equityMilestones.reduce<ReturnsDateObjectSchema[]>((schedule, em, index) => {
         if (!em) {
             throw new Error(`Invalid milestone data at index ${index}`);
         }
-
+        if (index === 0) {
+            return schedule;
+        }
         // Advance date by one month
         date = startOfMonth(add(date, { months: 1 }));
-        
+
         // Calculate distribution amount based on unit type
-        const distributionAmount = shareOfEquity * 
+        const distributionAmount = shareOfEquity *
             (unitType === DealUnitType.CUNIT ? em.cUnitReturns : em.aUnitReturns);
-        
-        // Calculate cumulative values
-        const previousEntry = schedule[index - 1];
+
         const cumulativeDistribution = (previousEntry?.cumulativeDistribution ?? 0) + distributionAmount;
-        const multiple = ((previousEntry?.multiple ?? 1) + distributionAmount / amount);
-        const cumulativeMultiple = 1 + (cumulativeDistribution / amount);
-        
+        const multiple = distributionAmount / amount;
+        const cumulativeMultiple = cumulativeDistribution / amount;
+
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
         const totalNetReturn = cumulativeDistribution - amount;
-
         schedule.push({
             date,
             distributionAmount: Number(distributionAmount.toFixed(2)),
@@ -203,6 +209,7 @@ export function getEquityPayoutSchedule(
             totalGrossReturn: Number(totalGrossReturn.toFixed(2)),
             totalNetReturn: Number(totalNetReturn.toFixed(2))
         });
+        previousEntry = schedule[schedule.length - 1];
 
         return schedule;
     }, []);

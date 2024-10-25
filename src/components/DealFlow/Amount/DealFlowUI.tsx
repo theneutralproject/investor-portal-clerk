@@ -108,12 +108,12 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
         const monthsDiff = Math.floor(
           (lastDate.getTime() - firstDate.getTime()) / MS_PER_MONTH
         );
-        return monthsDiff;
+        return monthsDiff + 1;
       })()}{" "}
       Months
     </Typography>
     <Typography>IRR: {stats.irr}</Typography>
-    <Typography>Equity Multiple: {stats.equityMultiple.toFixed(1)}x</Typography>
+    <Typography>Equity Multiple: {stats.equityMultiple.toFixed(2)}X</Typography>
     <Typography>
       Total Gross Return: ${stats.totalGrossReturn.toLocaleString()}
     </Typography>
