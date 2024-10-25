@@ -1,21 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Box, Typography, Button } from "@mui/material";
-import { DealOwnershipType } from "@prisma/client";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 
 const DealFlowReview: React.FC = () => {
-  const { deal, updateDeal, createOrganization, project } = useDealFlow();
-  const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
-    deal?.investmentStats?.ownershipType ?? DealOwnershipType.INDIVIDUAL
-  );
+  const { project } = useDealFlow();
 
   console.log(project);
 
   //First project.document that contains "docusign" in the fileName
-  const docusign = project?.documents?.find((doc) =>
-    doc.fileName.toLowerCase().includes("docusign")
-  );
-  console.log(docusign);
+  // const docusign = project?.documents?.find((doc) =>
+  //   doc.fileName.toLowerCase().includes("docusign")
+  // );
+  // console.log(docusign);
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
