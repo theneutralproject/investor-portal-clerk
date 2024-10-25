@@ -28,10 +28,10 @@ import DealFlowEntityDetails from "@components/DealFlow/Details/DealFlowEntityDe
 import DealFlowEntityDetailsCoInvestor from "@components/DealFlow/Details/DealFlowEntityDetailsCoInvestor";
 import DealFlowVerifyAccreditation from "@components/DealFlow/Details/VerifyAccreditation/DealFlowVerifyAccreditation";
 import {
-  OrganizationMemberCreateSchema,
-  OrganizationMemberUpdateSchema,
+  type OrganizationMemberCreateSchema,
+  type OrganizationMemberUpdateSchema,
 } from "@/libs/organization/schema";
-
+import DealFlowReview from "@components/DealFlow/ReviewSign/DealFlowReview";
 // Define the step types
 export type StepType =
   | "get-started"
@@ -105,7 +105,12 @@ export const steps: Step[] = [
     component: DealFlowVerifyAccreditation,
     majorParent: "details",
   },
-  { value: "review", display: "Review & Sign", isMajor: true },
+  {
+    value: "review",
+    display: "Review & Sign",
+    component: DealFlowReview,
+    isMajor: true,
+  },
   { value: "fund", display: "Fund", isMajor: true },
 ];
 
@@ -143,7 +148,8 @@ interface DealFlowContextType {
     createData: OrganizationMemberCreateSchema
   ) => Promise<void>;
   updateOrganizationMember: (
-    memberId: number, updateData: OrganizationMemberUpdateSchema
+    memberId: number,
+    updateData: OrganizationMemberUpdateSchema
   ) => Promise<void>;
   createVerification: (
     verificationData: AccreditationVerificationCreateSchema
@@ -474,7 +480,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     }
   };
 
-  const updateOrganizationMember = async (memberId: number,
+  const updateOrganizationMember = async (
+    memberId: number,
     updateData: OrganizationMemberUpdateSchema
   ) => {
     if (!user || !organization) return;
@@ -514,10 +521,10 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setError(null);
 
     try {
-      const { data } = await axios.post<AccreditationVerification>(
-        "/api/deals/verification",
-        { ...verificationData, dealId: deal.id }
-      );
+      await axios.post<AccreditationVerification>("/api/deals/verification", {
+        ...verificationData,
+        dealId: deal.id,
+      });
 
       toast.success("Accreditation verifier created successfully");
     } catch (error) {

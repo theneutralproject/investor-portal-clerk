@@ -1,54 +1,76 @@
+// components/DealFlowAmount.tsx
 import React, { useState, useMemo, useCallback } from "react";
 import {
   Box,
+  Card,
+  CardContent,
   Typography,
   TextField,
   InputAdornment,
-  Chip,
+  CircularProgress,
+  Alert,
+  ToggleButtonGroup,
+  ToggleButton,
 } from "@mui/material";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  Tooltip,
-} from "recharts";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
+import { QuickSelectChips } from "./DealFlowUI";
+import { ReturnsChart } from "./DealFlowUI";
+import { InvestmentStatsDisplay } from "./DealFlowUI";
+import { useReturnsData } from "./useReturnsData";
+import { useInvestmentStats } from "./useInvestmentStats";
+import { type ViewMode } from "./dealFlow.types";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 75000, 100000];
+const MIN_INVESTMENT = 5000;
 
-// Fake data for multiples per year
-const FAKE_MULTIPLES = [
-  { year: 2024, multiple: 0.4 },
-  { year: 2025, multiple: 0.6 },
-  { year: 2026, multiple: 1.2 },
-  { year: 2027, multiple: 1.4 },
-  { year: 2028, multiple: 1.8 },
-  { year: 2029, multiple: 3.0 },
-];
+const DealFlowAmount: React.FC = () => {
+  const { deal, updateDeal, project } = useDealFlow();
+  const [amount, setAmount] = useState<number>(
+    deal?.investmentStats?.amount ?? 75000
+  );
+  const [viewMode, setViewMode] = useState<ViewMode>("distribution");
 
-const DealFlowAmount = () => {
-  const { deal, updateDeal } = useDealFlow();
-  const [amount, setAmount] = useState(deal?.investmentStats?.amount ?? 75000);
-  const minInvestment = 5000;
+  const { returnsData, isLoading, error } = useReturnsData({
+    projectId: project?.id,
+    amount,
+    minInvestment: MIN_INVESTMENT,
+    financingType: deal?.investmentStats?.financingType,
+  });
 
-  const error =
-    amount < minInvestment
-      ? `Minimum investment amount is $${minInvestment.toLocaleString()}`
-      : "";
+  const investmentStats = useInvestmentStats(returnsData);
+
+  const validationError = useMemo(
+    () =>
+      amount < MIN_INVESTMENT
+        ? `Minimum investment amount is $${MIN_INVESTMENT.toLocaleString()}`
+        : "",
+    [amount]
+  );
 
   const projectedReturns = useMemo(() => {
-    return FAKE_MULTIPLES.map(({ year, multiple }) => ({
-      year,
-      value: amount * multiple,
+    return returnsData.map((dataPoint) => ({
+      year: dataPoint.date.getFullYear(),
+      cumulativeDistribution: dataPoint.cumulativeDistribution,
+      cumulativeMultiple: dataPoint.cumulativeMultiple,
+      totalGrossReturn: dataPoint.totalGrossReturn,
+      totalNetReturn: dataPoint.totalNetReturn,
     }));
-  }, [amount]);
+  }, [returnsData]);
 
   const handleAmountChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      setAmount(Number(event.target.value));
+      const newAmount = Number(event.target.value);
+      setAmount(newAmount);
+    },
+    []
+  );
+
+  const handleViewModeChange = useCallback(
+    (event: React.MouseEvent<HTMLElement>, newMode: ViewMode) => {
+      if (newMode !== null) {
+        setViewMode(newMode);
+      }
     },
     []
   );
@@ -65,98 +87,117 @@ const DealFlowAmount = () => {
     });
   };
 
-  const handleQuickSelect = useCallback((value: number) => {
-    setAmount(value);
-  }, []);
-
-  const investmentStats = useMemo(
-    () => ({
-      irr: "18%",
-      equityMultiple: 2.4,
-      totalReturn: amount * 2.4,
-    }),
-    [amount]
-  );
+  const chartConfig = useMemo(() => {
+    if (viewMode === "distribution") {
+      return {
+        dataKey: "cumulativeDistribution",
+        yAxisFormatter: (value: number) => `$${value.toLocaleString()}`,
+        tooltipFormatter: (value: number) => [
+          `$${value.toLocaleString()}`,
+          "Cumulative Distribution",
+        ],
+      };
+    }
+    return {
+      dataKey: "cumulativeMultiple",
+      yAxisFormatter: (value: number) => `${value.toFixed(1)}x`,
+      tooltipFormatter: (value: number) => [
+        `${value.toFixed(2)}x`,
+        "Cumulative Multiple",
+      ],
+    };
+  }, [viewMode]);
 
   return (
-    <Box sx={{ p: 2, borderRadius: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Investment Amount
-      </Typography>
-      <TextField
-        fullWidth
-        value={amount}
-        onChange={handleAmountChange}
-        error={!!error}
-        helperText={error}
-        InputProps={{
-          startAdornment: <InputAdornment position="start">$</InputAdornment>,
-        }}
-        sx={{ marginBottom: 2, bgcolor: "white", borderRadius: 1 }}
-      />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          marginBottom: 1,
-        }}
-      >
-        {QUICK_SELECT_AMOUNTS.map((value) => (
-          <Chip
-            key={value}
-            label={`$${value.toLocaleString()}`}
-            onClick={() => handleQuickSelect(value)}
-            color={amount === value ? "primary" : "default"}
-            clickable
-            sx={{ flex: 1, mx: 0.5 }}
-          />
-        ))}
-      </Box>
-      <Typography variant="caption">
-        Minimum: ${minInvestment.toLocaleString()}
-      </Typography>
-
-      <Typography variant="h6" gutterBottom sx={{ mt: 3, mb: 1 }}>
-        Projected Returns
-      </Typography>
-      <ResponsiveContainer width="100%" height={200}>
-        <AreaChart data={projectedReturns}>
-          <XAxis dataKey="year" />
-          <YAxis
-            tickFormatter={(value) => `${(value / amount).toFixed(1)}x`}
-            domain={[0, "dataMax"]}
-          />
-          <Tooltip
-            formatter={(value) => [
-              `${(Number(value) / amount).toFixed(2)}x`,
-              "Return",
-            ]}
-            labelFormatter={(label) => `Year: ${label}`}
-          />
-          <Area
-            type="monotone"
-            dataKey="value"
-            stroke="#31713d"
-            fill="#31713d"
-            fillOpacity={0.8}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
-
-      <Box sx={{ mt: 3, textAlign: "center" }}>
-        <Typography>Investment Term: 60 Months</Typography>
-        <Typography>IRR: {investmentStats.irr}</Typography>
-        <Typography>
-          Equity Multiple: {investmentStats.equityMultiple}x
+    <Card sx={{ width: "100%", border: "none", boxShadow: "none" }}>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          Investment Amount
         </Typography>
-        <Typography variant="h6" sx={{ mt: 1 }}>
-          Total Investment Return: $
-          {investmentStats.totalReturn.toLocaleString()}
-        </Typography>
-      </Box>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
-    </Box>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <TextField
+            fullWidth
+            type="number"
+            value={amount}
+            onChange={handleAmountChange}
+            error={!!validationError}
+            helperText={validationError}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">$</InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "white",
+              },
+            }}
+          />
+
+          <QuickSelectChips
+            amounts={QUICK_SELECT_AMOUNTS}
+            selectedAmount={amount}
+            onSelect={setAmount}
+          />
+
+          <Typography variant="caption" color="text.secondary">
+            Minimum: ${MIN_INVESTMENT.toLocaleString()}
+          </Typography>
+
+          {isLoading ? (
+            <Box
+              sx={{
+                height: 200,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CircularProgress />
+            </Box>
+          ) : error ? (
+            <Alert severity="error" sx={{ height: 200 }}>
+              {error}
+            </Alert>
+          ) : (
+            <>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  mt: 2,
+                }}
+              >
+                <Typography variant="h6">Projected Returns</Typography>
+                <ToggleButtonGroup
+                  value={viewMode}
+                  exclusive
+                  onChange={handleViewModeChange}
+                  size="small"
+                >
+                  <ToggleButton value="distribution">Distribution</ToggleButton>
+                  <ToggleButton value="multiple">Multiple</ToggleButton>
+                </ToggleButtonGroup>
+              </Box>
+
+              {/* @ts-expect-error chart types */}
+              <ReturnsChart data={projectedReturns} config={chartConfig} />
+
+              {investmentStats && (
+                <InvestmentStatsDisplay
+                  stats={investmentStats}
+                  returnsData={returnsData}
+                />
+              )}
+            </>
+          )}
+        </Box>
+
+        <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
+      </CardContent>
+    </Card>
   );
 };
 
