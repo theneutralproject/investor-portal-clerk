@@ -35,8 +35,6 @@ export const zOrganizationMemberCreateSchema = z.object({
 export type OrganizationMemberCreateSchema = z.infer<typeof zOrganizationMemberCreateSchema>;
 
 export const zOrganizationMemberUpdateSchema = z.object({
-    // organizationId: z.number().int(),
-    id: z.number().int(), //member ID
     dealId: z.number().int().nullish(),
     user: zUserUpdateSchema.partial().nullish(),
     type: z.nativeEnum(MembershipType),

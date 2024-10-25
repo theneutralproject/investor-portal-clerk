@@ -58,13 +58,13 @@ const DealFlowCoInvestor: React.FC = () => {
         return prevMembers.map((member, i) =>
           i === index
             ? {
-                ...member,
-                ...(field === "title"
-                  ? { title: value }
-                  : {
-                      user: { ...member.user, [field]: value } as Partial<User>,
-                    }),
-              }
+              ...member,
+              ...(field === "title"
+                ? { title: value }
+                : {
+                  user: { ...member.user, [field]: value } as Partial<User>,
+                }),
+            }
             : member
         );
       });
@@ -91,8 +91,7 @@ const DealFlowCoInvestor: React.FC = () => {
       try {
         if (coInvestor.id) {
           // Update existing member
-          await updateOrganizationMember({
-            id: coInvestor.id,
+          await updateOrganizationMember(coInvestor.id, {
             dealId: deal.id,
             user: coInvestor.user as UserUpdateSchema,
             title: coInvestor.title ?? "",

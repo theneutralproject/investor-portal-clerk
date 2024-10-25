@@ -77,7 +77,7 @@ export async function PUT(request: NextRequest) {
         if (!memberId || !isNumber(memberId)) {
             throw new Error('userId is required in url');
         }
-
+console.log('memberId', memberId);
         const { user: dbUser, organization } = await getUserAndOrg(request, 2);
         if (!organization) {
             return jsonResponse({ error: "Organization not found" }, 404);

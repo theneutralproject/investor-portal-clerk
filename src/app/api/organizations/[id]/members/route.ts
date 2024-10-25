@@ -2,7 +2,7 @@ import { type OrganizationMemberCreateSchema, zOrganizationMemberCreateSchema } 
 import prisma from "@/libs/prisma";
 import { createUserInDbAndHubspot, sanitizeUser } from "@/libs/user/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
-import type {  User } from "@prisma/client";
+import type { User } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { getUserAndOrg } from "./helpers";
 

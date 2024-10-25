@@ -143,7 +143,7 @@ interface DealFlowContextType {
     createData: OrganizationMemberCreateSchema
   ) => Promise<void>;
   updateOrganizationMember: (
-    updateData: OrganizationMemberUpdateSchema
+    memberId: number, updateData: OrganizationMemberUpdateSchema
   ) => Promise<void>;
   createVerification: (
     verificationData: AccreditationVerificationCreateSchema
@@ -474,7 +474,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     }
   };
 
-  const updateOrganizationMember = async (
+  const updateOrganizationMember = async (memberId: number,
     updateData: OrganizationMemberUpdateSchema
   ) => {
     if (!user || !organization) return;
@@ -484,7 +484,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     try {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data } = await axios.put<MemberWithUser>(
-        `/api/organizations/${organization.id}/members/${updateData?.id}`,
+        `/api/organizations/${organization.id}/members/${memberId}`,
         updateData
       );
       //Find organization member by userId and update
