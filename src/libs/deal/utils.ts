@@ -1,8 +1,9 @@
-import type { DealFinancingType, Deal } from "@prisma/client";
+import { type Deal, DealFinancingType } from "@prisma/client";
 import { isError } from "lodash";
 import { ProjectName } from "../schema";
 import prisma from "../prisma";
 import type { DealUpdateSchema } from "./schema";
+import { getEquityStatsFromProject } from "../project/utils";
 
 /**
  * Updates a deal in the database
@@ -29,6 +30,43 @@ export async function updateDeal(
         return Error("Failed to update deal with hubspot data");
     }
     if (investmentStats) {
+        const project = await prisma.project.findUnique({
+            where: { id: updatedDeal.projectId },
+            include: { investmentStats: true },
+        });
+        if (!project || !project.investmentStats || !project.equityReturnsFile) {
+            console.error(
+                `Failed to find project with id ${updatedDeal.projectId} for deal with hubspot id ${dealData.hubspotId}.`
+            );
+            return Error("Failed to update deal with hubspot data");
+        }
+
+
+        if (investmentStats.amount) {
+            const equityDetails = await getEquityStatsFromProject(investmentStats.amount, project.equityReturnsFile, project.investmentStats.cUnitThresholdAmount);
+            if (isError(equityDetails)) {
+                console.error(
+                    `Failed to get equity stats for deal with hubspot id ${dealData.hubspotId}.`
+                );
+                return Error("Failed to update deal with hubspot data");
+            }
+            const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
+            investmentStats.unitType = unitType;
+            investmentStats.shareOfEquity = shareOfEquity;
+            investmentStats.numberAUnits = numberAUnits;
+            investmentStats.numberCUnits = numberCUnits;
+
+            let minInvestmentAmount = 5000;
+            if (investmentStats.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
+            else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
+            if (investmentStats.amount < minInvestmentAmount) {
+                console.error(
+                    `The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`
+                );
+                return Error(`The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`);
+            }
+        }
+
         await prisma.dealInvestmentStats.update({
             where: { dealId: updatedDeal.id },
             data: investmentStats

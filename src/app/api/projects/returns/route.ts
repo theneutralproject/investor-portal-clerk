@@ -2,47 +2,57 @@ import prisma from '@/libs/prisma';
 import { jsonResponse } from '@/libs/utils';
 import { DealFinancingType } from '@prisma/client';
 import { type NextRequest } from 'next/server';
-
+import { getDebtPayoutSchedule, getEquityPayoutSchedule, getEquityStatsFromProject } from '@/libs/project/utils';
+import { isError } from 'lodash';
 
 type RequestBody = {
     projectId: number;
     amount: number;
     financingType: DealFinancingType;
 };
-
 export async function POST(request: NextRequest) {
     const { projectId, amount, financingType } = (await request.json()) as RequestBody;
 
     if (!projectId || !amount || !financingType) {
         return jsonResponse({ message: 'Missing required fields' }, 400);
     }
-    const project = await prisma.project.findUnique({
+    const projectResponse = await prisma.project.findUnique({
         where: { id: projectId },
-        include: { investmentStats: true, milestones: true }
+        include: {
+            investmentStats: true, milestones: true
+        }
     });
-
-    if (!project || !project.investmentStats || !project.milestones) {
-        return jsonResponse({ message: 'Project and stats not found' }, 404);
+    if (!projectResponse) {
+        return jsonResponse({ message: 'Project not found' }, 404);
+    }
+    const { investmentStats, milestones, ...project } = projectResponse;
+    if (!investmentStats) {
+        return jsonResponse({ message: 'Project investment stats not found' }, 404);
+    }
+    if (!milestones) {
+        return jsonResponse({ message: 'Project milestones not found' }, 404);
+    }
+    if (!project.equityReturnsFile) {
+        return jsonResponse({ message: 'Project equity returns file not found' }, 404);
     }
 
     // debt financing
     if (financingType === DealFinancingType.promissory_note_now) {
-        const closingDate = project.milestones.financialClosing;
-        console.log("closingDate", closingDate);
-        const interestRate = amount >= project.investmentStats.interestRateDollarThreshold ? project.investmentStats.interestRateMax : project.investmentStats.interestRateMin;
-        // let lastDate = new Date(closingDate);
-        const debtPayoutSchedule = []
-        for (let i = 0; i < project.investmentStats.debtTermMonths / 4 ; i++) {
-            console.log("i", i);
-            const date = new Date(closingDate.setMonth(closingDate.getMonth() + i * 3));
-            console.log("date", date);  
-            const distributionAmount = (amount * interestRate/100) / 4;
-            const multiple = Math.round(distributionAmount / amount * (i+1)*10000) / 10000;
-            debtPayoutSchedule.push({ date, distributionAmount, multiple });
+        if (amount < investmentStats.debtMinInvestment) {
+            return jsonResponse({ message: `The minimum investment amount for this project is $${investmentStats.debtMinInvestment.toLocaleString()}` }, 400);
         }
+        return jsonResponse(getDebtPayoutSchedule(amount, investmentStats, milestones));
+    }
 
-        return jsonResponse(debtPayoutSchedule);
+    // equity financing
+    if (financingType === DealFinancingType.equity) {
+        const equityDetails = await getEquityStatsFromProject(amount, project.equityReturnsFile, investmentStats.cUnitThresholdAmount);
+        if(isError(equityDetails)) {
+            return jsonResponse({ message: equityDetails.message }, 400);
+        }
+        const { unitType, shareOfEquity, equityMilestones } = equityDetails;
+        const equityPayoutSchedule = getEquityPayoutSchedule(amount, milestones, equityMilestones, shareOfEquity, unitType);
+        return jsonResponse(equityPayoutSchedule);
     }
     return jsonResponse({ message: 'Financing type not supported' }, 400);
-
 } 

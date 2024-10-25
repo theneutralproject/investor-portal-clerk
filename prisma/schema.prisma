@@ -55,6 +55,7 @@ model DealInvestmentStats {
   ownershipType DealOwnershipType @default(INDIVIDUAL)
   numberAUnits  Float             @default(0.0)
   numberCUnits  Float             @default(0.0)
+  shareOfEquity Float             @default(0.0)
   deal          Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 

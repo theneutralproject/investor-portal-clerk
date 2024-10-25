@@ -16,7 +16,7 @@ export const UserScalarFieldEnumSchema = z.enum(['id','clerkId','role','email','
 
 export const DealScalarFieldEnumSchema = z.enum(['id','projectId','dealStage','hubspotId','transactionId','investmentEntity','organizationId']);
 
-export const DealInvestmentStatsScalarFieldEnumSchema = z.enum(['id','dealId','amount','financingType','unitType','ownershipType','numberAUnits','numberCUnits']);
+export const DealInvestmentStatsScalarFieldEnumSchema = z.enum(['id','dealId','amount','financingType','unitType','ownershipType','numberAUnits','numberCUnits','shareOfEquity']);
 
 export const OrganizationScalarFieldEnumSchema = z.enum(['id','name','ownerId','tin','dateOfCreation','juristication','isPrimary','ownershipType']);
 
@@ -157,6 +157,7 @@ export const DealInvestmentStatsSchema = z.object({
   amount: z.number(),
   numberAUnits: z.number(),
   numberCUnits: z.number(),
+  shareOfEquity: z.number(),
 })
 
 export type DealInvestmentStats = z.infer<typeof DealInvestmentStatsSchema>
@@ -527,6 +528,7 @@ export const DealInvestmentStatsSelectSchema: z.ZodType<Prisma.DealInvestmentSta
   ownershipType: z.boolean().optional(),
   numberAUnits: z.boolean().optional(),
   numberCUnits: z.boolean().optional(),
+  shareOfEquity: z.boolean().optional(),
   deal: z.union([z.boolean(),z.lazy(() => DealArgsSchema)]).optional(),
 }).strict()
 
@@ -1199,6 +1201,7 @@ export const DealInvestmentStatsWhereInputSchema: z.ZodType<Prisma.DealInvestmen
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict();
 
@@ -1211,6 +1214,7 @@ export const DealInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Prisma
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
   numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   deal: z.lazy(() => DealOrderByWithRelationInputSchema).optional()
 }).strict();
 
@@ -1238,6 +1242,7 @@ export const DealInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.DealInv
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict());
 
@@ -1250,6 +1255,7 @@ export const DealInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<Pri
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
   numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => DealInvestmentStatsCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => DealInvestmentStatsAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => DealInvestmentStatsMaxOrderByAggregateInputSchema).optional(),
@@ -1269,6 +1275,7 @@ export const DealInvestmentStatsScalarWhereWithAggregatesInputSchema: z.ZodType<
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeWithAggregatesFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  shareOfEquity: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
 export const OrganizationWhereInputSchema: z.ZodType<Prisma.OrganizationWhereInput> = z.object({
@@ -2657,6 +2664,7 @@ export const DealInvestmentStatsCreateInputSchema: z.ZodType<Prisma.DealInvestme
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
   numberAUnits: z.number().optional(),
   numberCUnits: z.number().optional(),
+  shareOfEquity: z.number().optional(),
   deal: z.lazy(() => DealCreateNestedOneWithoutInvestmentStatsInputSchema)
 }).strict();
 
@@ -2668,7 +2676,8 @@ export const DealInvestmentStatsUncheckedCreateInputSchema: z.ZodType<Prisma.Dea
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional()
+  numberCUnits: z.number().optional(),
+  shareOfEquity: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.DealInvestmentStatsUpdateInput> = z.object({
@@ -2678,6 +2687,7 @@ export const DealInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.DealInvestme
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   deal: z.lazy(() => DealUpdateOneRequiredWithoutInvestmentStatsNestedInputSchema).optional()
 }).strict();
 
@@ -2690,6 +2700,7 @@ export const DealInvestmentStatsUncheckedUpdateInputSchema: z.ZodType<Prisma.Dea
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.DealInvestmentStatsCreateManyInput> = z.object({
@@ -2700,7 +2711,8 @@ export const DealInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.DealInve
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional()
+  numberCUnits: z.number().optional(),
+  shareOfEquity: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Prisma.DealInvestmentStatsUpdateManyMutationInput> = z.object({
@@ -2710,6 +2722,7 @@ export const DealInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Prisma.
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Prisma.DealInvestmentStatsUncheckedUpdateManyInput> = z.object({
@@ -2721,6 +2734,7 @@ export const DealInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Prisma
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const OrganizationCreateInputSchema: z.ZodType<Prisma.OrganizationCreateInput> = z.object({
@@ -4153,7 +4167,8 @@ export const DealInvestmentStatsCountOrderByAggregateInputSchema: z.ZodType<Pris
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsAvgOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsAvgOrderByAggregateInput> = z.object({
@@ -4161,7 +4176,8 @@ export const DealInvestmentStatsAvgOrderByAggregateInputSchema: z.ZodType<Prisma
   dealId: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsMaxOrderByAggregateInput> = z.object({
@@ -4172,7 +4188,8 @@ export const DealInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Prisma
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsMinOrderByAggregateInput> = z.object({
@@ -4183,7 +4200,8 @@ export const DealInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Prisma
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsSumOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsSumOrderByAggregateInput> = z.object({
@@ -4191,7 +4209,8 @@ export const DealInvestmentStatsSumOrderByAggregateInputSchema: z.ZodType<Prisma
   dealId: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const FloatWithAggregatesFilterSchema: z.ZodType<Prisma.FloatWithAggregatesFilter> = z.object({
@@ -6972,7 +6991,8 @@ export const DealInvestmentStatsCreateWithoutDealInputSchema: z.ZodType<Prisma.D
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional()
+  numberCUnits: z.number().optional(),
+  shareOfEquity: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsUncheckedCreateWithoutDealInputSchema: z.ZodType<Prisma.DealInvestmentStatsUncheckedCreateWithoutDealInput> = z.object({
@@ -6982,7 +7002,8 @@ export const DealInvestmentStatsUncheckedCreateWithoutDealInputSchema: z.ZodType
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional()
+  numberCUnits: z.number().optional(),
+  shareOfEquity: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsCreateOrConnectWithoutDealInputSchema: z.ZodType<Prisma.DealInvestmentStatsCreateOrConnectWithoutDealInput> = z.object({
@@ -7137,6 +7158,7 @@ export const DealInvestmentStatsUpdateWithoutDealInputSchema: z.ZodType<Prisma.D
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsUncheckedUpdateWithoutDealInputSchema: z.ZodType<Prisma.DealInvestmentStatsUncheckedUpdateWithoutDealInput> = z.object({
@@ -7147,6 +7169,7 @@ export const DealInvestmentStatsUncheckedUpdateWithoutDealInputSchema: z.ZodType
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AccreditationVerificationUpsertWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUpsertWithoutDealInput> = z.object({

@@ -3,6 +3,7 @@ import { currentUser } from "@clerk/nextjs";
 import { jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma";
 import { z } from "zod";
+import type { Organization } from "@prisma/client";
 
 const QuerySchema = z.object({
   projectSlug: z.string().min(1),
@@ -38,8 +39,8 @@ async function fetchDeal(id: number) {
   });
 }
 
-async function checkUserAccess(_userId: string, _dealOrganizationId: number) {
-  return true; //TODO
+async function checkUserAccess(_userId: number, _dealOrganization: Organization) {
+  return _dealOrganization.ownerId === _userId;
 }
 
 export async function GET(request: NextRequest) {
@@ -70,6 +71,13 @@ export async function GET(request: NextRequest) {
       return errorResponse("User not authenticated", 401);
     }
 
+    const dbUser = await prisma.user.findUnique({
+      where: { clerkId: clerkUser.id },
+    });
+    if (!dbUser) {
+      return errorResponse("User not found", 404);
+    }
+
     const deal = await fetchDeal(parseInt(dealId, 10));
     if (!deal) {
       return errorResponse("Deal not found", 404);
@@ -82,7 +90,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const hasAccess = await checkUserAccess(clerkUser.id, deal.organizationId);
+    const hasAccess = await checkUserAccess(dbUser.id, deal.organization);
     if (!hasAccess) {
       return errorResponse("You do not have access to this deal", 403);
     }
