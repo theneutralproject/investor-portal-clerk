@@ -13,7 +13,8 @@ import {
   type Organization,
   type Member,
   type AccreditationVerifier,
-  type AccreditationVerification
+  type AccreditationVerification,
+  type ProjectDocument,
 } from "@prisma/client";
 
 let prisma: PrismaClient;
@@ -37,44 +38,46 @@ export type ProjectWithAllNestedData = Project & {
   milestones: ProjectMilestones;
   investmentStats: ProjectInvestmentStats;
   propertyStats: ProjectPropertyStats;
+  documents: ProjectDocument[];
 };
 
 export type ProjectWithStats = Project & {
   investmentStats: ProjectInvestmentStats;
   propertyStats: ProjectPropertyStats;
   milestones: ProjectMilestones;
-}
+};
 
 export type UserWithAddress = User & {
   address: Address | null;
 };
 
 export type DealWithInvestmentStats = Deal & {
-  investmentStats: DealInvestmentStats
-}
+  investmentStats: DealInvestmentStats;
+};
 
-export type AccreditationVerificationWithVerifier = AccreditationVerification & {
-  verifier: AccreditationVerifier | null;
-}
+export type AccreditationVerificationWithVerifier =
+  AccreditationVerification & {
+    verifier: AccreditationVerifier | null;
+  };
 
 export type DealWithInvestmentStatsAndVerification = DealWithInvestmentStats & {
   accreditationVerification: AccreditationVerificationWithVerifier | null;
-}
+};
 
 export type OrganizationWithMembersAndAddress = Organization & {
-  members: Member[],
-  address: Address,
-}
+  members: Member[];
+  address: Address;
+};
 
 export type OrganizationWithFullMembers = Organization & {
-  members: MemberWithUser[],
-}
+  members: MemberWithUser[];
+};
 
 export type OrganizationWithFullMembersAndAddress = Organization & {
-  members: MemberWithUser[],
-  address: Address | null,
-}
+  members: MemberWithUser[];
+  address: Address | null;
+};
 
 export type MemberWithUser = Member & {
   user: Partial<User>;
-}
+};
