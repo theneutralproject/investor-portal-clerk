@@ -1,4 +1,5 @@
 import { type HubspotDealUpdate, zHsUpdateDealSchema, type HsDealDocsAccessedUpdateSchema, zHsDealDocsAccessedUpdateSchema } from "@/libs/hubspot/schema";
+import { updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import type { NextRequest } from "next/server";
 /**
@@ -18,34 +19,14 @@ export async function PUT(request: NextRequest) {
             return jsonResponse({ error: "Input data malformatted" }, 400);
         }
 
-        const body = JSON.stringify({
-            properties: deal.properties
-        });
+        const res = await updateHubspotDealProperties(deal)
+        return jsonResponse(res);
 
-        await fetch(
-            `${process.env.HUBSPOT_API_BASE_URL}/deals/v1/deal/${deal.hubspotDealId}`,
-            {
-                method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-                },
-                body,
-            }
-        ).then(async (response) => response)
-            .catch((err) => {
-                const errorMessage = (err as Error).message;
-                console.log("unable to update Hubspot deal:")
-                console.log(err)
-                return jsonResponse({ error: errorMessage ?? "unable to update HS deal" }, 500);
-            })
-        return jsonResponse({ message: "success" });
     } catch (error) {
         console.error("Error updating Hubspot deal:", error);
         return jsonResponse({ error: "Error updating Hubspot deal" }, 500);
     }
 }
-
 
 /**
  * This function is only used to update the `documents_accessed` property for a given deal

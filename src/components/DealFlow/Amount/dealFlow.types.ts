@@ -20,7 +20,7 @@ export interface ProjectedReturn {
 
 export interface InvestmentStats {
   irr: string;
-  equityMultiple: number;
+  investmentMultiple: number;
   totalGrossReturn: number;
   totalNetReturn: number;
 }

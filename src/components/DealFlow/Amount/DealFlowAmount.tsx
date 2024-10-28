@@ -21,13 +21,13 @@ import { useReturnsData } from "./useReturnsData";
 import { useInvestmentStats } from "./useInvestmentStats";
 import { type ViewMode } from "./dealFlow.types";
 
-const QUICK_SELECT_AMOUNTS = [25000, 50000, 75000, 100000];
-const MIN_INVESTMENT = 5000;
+const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
+const MIN_INVESTMENT =  5000;
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
   const [amount, setAmount] = useState<number>(
-    deal?.investmentStats?.amount ?? 75000
+    deal?.investmentStats?.amount ?? 100000
   );
   const [viewMode, setViewMode] = useState<ViewMode>("distribution");
 

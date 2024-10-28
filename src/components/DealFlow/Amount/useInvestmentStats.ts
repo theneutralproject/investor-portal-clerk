@@ -22,7 +22,7 @@ export const useInvestmentStats = (
         ((lastDataPoint.cumulativeMultiple - 1) * 100) /
         (investmentPeriodInMonths / 12)
       ).toFixed(1)}%`,
-      equityMultiple: lastDataPoint.cumulativeMultiple,
+      investmentMultiple: lastDataPoint.cumulativeMultiple,
       totalGrossReturn: lastDataPoint.totalGrossReturn,
       totalNetReturn: lastDataPoint.totalNetReturn,
     };

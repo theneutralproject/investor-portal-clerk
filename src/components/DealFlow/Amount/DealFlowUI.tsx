@@ -113,9 +113,9 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
       Months
     </Typography>
     <Typography>IRR: {stats.irr}</Typography>
-    <Typography>Equity Multiple: {stats.equityMultiple.toFixed(2)}X</Typography>
+    <Typography>MOIC: {stats.investmentMultiple.toFixed(2)}X</Typography>
     <Typography>
-      Total Gross Return: ${stats.totalGrossReturn.toLocaleString()}
+      Gross Return: ${stats.totalGrossReturn.toLocaleString()}
     </Typography>
   </Box>
 );

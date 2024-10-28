@@ -106,9 +106,9 @@ export function getDebtPayoutSchedule(
 
     const debtPayoutSchedule: ReturnsDateObjectSchema[] = [];
     let cumulativeDistribution = 0;
-    let lastMultiple = 0;
+    let cumulativeMultiple = 0;
 
-    for (let i = 0; i <= investmentStats.debtTermMonths; i++) {
+    for (let i = 1; i <= investmentStats.debtTermMonths; i++) {
         // Move to next month
         date = startOfMonth(add(date, { months: 1 }));
 
@@ -125,14 +125,13 @@ export function getDebtPayoutSchedule(
 
         // Calculate running totals
         cumulativeDistribution += distributionAmount;
-        const multiple = lastMultiple + (distributionAmount / amount);
-        lastMultiple = multiple;
-        const cumulativeMultiple = i === investmentStats.debtTermMonths ? multiple + 1 : multiple;
+    
+        const multiple = (distributionAmount / amount);
+        cumulativeMultiple += multiple;
 
         // Calculate returns
-        const totalGrossReturn = cumulativeDistribution - amount;
-        // Assuming net return is gross return for this example - adjust if there are fees to consider
-        const totalNetReturn = totalGrossReturn;
+        const totalGrossReturn = cumulativeDistribution;
+        const totalNetReturn = cumulativeDistribution - amount;
 
         // Round all numerical values for consistency
         const entry: ReturnsDateObjectSchema = {
