@@ -2,11 +2,10 @@ import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { isError } from "lodash";
 import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
-import { DealUpdateSchema, type DealCreateSchema } from "../deal/schema";
+import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
-import type { DealWithInvestmentStats } from "../prisma";
 
 export async function createHubspotContact(hubspotContact: HubspotContact) {
   const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
@@ -174,7 +173,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 
 export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
   const { dealStage, hubspotId, investmentStats } = deal;
-  let retObj = {
+  const retObj = {
     hubspotDealId: parseInt(hubspotId, 10),
     properties: []
   } as HubspotDealUpdate;
