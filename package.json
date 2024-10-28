@@ -39,7 +39,7 @@
     "lodash": "^4.17.21",
     "next": "^14.2.3",
     "number-to-words": "^1.2.4",
-    "pdfjs-dist": "3.4.120",
+    "pdfjs-dist": "3.11.174",
     "posthog-js": "^1.165.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
