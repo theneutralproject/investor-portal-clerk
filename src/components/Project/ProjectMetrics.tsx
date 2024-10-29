@@ -15,7 +15,7 @@ const ProjectMetrics: React.FC<{ project: ProjectWithStats }> = ({ project }) =>
         </Grid>
         <Grid item xs={6}>
           <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-            60mo.
+            {project.investmentStats.equityTermMonths}mo.
           </Typography>
           <Typography variant="body2">Term</Typography>
         </Grid>
