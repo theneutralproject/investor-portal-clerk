@@ -2,7 +2,7 @@ import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { isError } from "lodash";
 import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
-import { type DealCreateSchema } from "../deal/schema";
+import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
@@ -52,7 +52,7 @@ export async function createHubspotContact(hubspotContact: HubspotContact) {
 };
 
 export async function updateHubspotContact(hubspotContact: HubspotContact) {
-  if(!hubspotContact.hubspotId) {
+  if (!hubspotContact.hubspotId) {
     return new Error("hubspotId is required to update a contact in hubspot")
   }
   return await fetch(
@@ -115,7 +115,21 @@ export async function updateHubspotDealDocsAccessed(hsDealUpdateData: HsDealDocs
 }
 
 export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealUpdate) {
-  return await axios.put(`${process.env.BASE_URL}/api/deals/hubspot`, hsDealUpdateData);
+  console.log("hsDealUpdateData", hsDealUpdateData);
+  const body = JSON.stringify({
+    properties: hsDealUpdateData.properties
+  });
+  return await fetch(
+    `${process.env.HUBSPOT_API_BASE_URL}/deals/v1/deal/${hsDealUpdateData.hubspotDealId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    }
+  )
 }
 
 /* eslint-disable */
@@ -169,6 +183,18 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
   }
 }
 /* eslint-enable */
+
+export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
+  const { dealStage, hubspotId, investmentStats } = deal;
+  const retObj = {
+    hubspotDealId: parseInt(hubspotId, 10),
+    properties: []
+  } as HubspotDealUpdate;
+  if (dealStage) retObj.properties.push({ name: "dealstage", value: dealStage.toString() });
+  if (investmentStats?.amount) retObj.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
+  if (investmentStats?.financingType) retObj.properties.push({ name: "financing_type", value: investmentStats?.financingType });
+  return retObj;
+}
 
 export async function associateContactWithDealInHubspot(contactId: string, dealId: string) {
   const body = JSON.stringify({

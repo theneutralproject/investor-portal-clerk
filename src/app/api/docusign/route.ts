@@ -107,8 +107,7 @@ export async function POST(req: Request) {
         );
     }
 
-    // TODO: route to the correct sub page after signing
-    const returnUrl = `${process.env.BASE_URL}/projects/${deal.project.slug}`
+    const returnUrl = `${process.env.BASE_URL}/dealflow/${deal.project.slug}/${deal.id}/review`;
     // Create the recipient view for the Signing Ceremony
     const viewRequest = makeRecipientViewRequest(userWOrgsAndAddress, returnUrl);
     const viewRequestResponse = await envelopesApi.createRecipientView(process.env.DOCUSIGN_API_ACCOUNT_ID!, envelopeResponse.envelopeId!,

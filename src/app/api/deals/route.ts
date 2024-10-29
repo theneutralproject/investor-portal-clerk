@@ -9,8 +9,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import type { HubspotDealUpdate } from "@/libs/hubspot/schema";
-import { initDealPropsForProject, createHubspotDealForContact, DealToHubspotDealEnum, updateHubspotDealProperties } from "@/libs/hubspot/utils";
+import { initDealPropsForProject, createHubspotDealForContact, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
 import { getEquityStatsFromProject } from "@/libs/project/utils";
@@ -237,25 +236,9 @@ export async function PUT(request: NextRequest) {
       console.error("ERROR: unable to parse PUT body:\n", parseError);
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
-
-    const hsDeal: HubspotDealUpdate = {
-      hubspotDealId: parseInt(deal.hubspotId, 10),
-      properties: []
-    }
-    for (const prop in deal) {
-      if (Object.prototype.hasOwnProperty.call(deal, prop)) {
-        if (prop in DealToHubspotDealEnum && deal[prop as keyof DealUpdateSchema]?.toString().length) {
-          hsDeal.properties.push({
-            name: DealToHubspotDealEnum[prop as keyof typeof DealToHubspotDealEnum],
-            value: deal[prop as keyof DealUpdateSchema]?.toString() ?? ""
-          })
-        }
-      }
-    }
-
-    const updatedDeal = await updateDeal(deal);
-
     // also update the deal in hubspot:
+    const hsDeal = getHsDealPropsFromDeal(deal);
+    const updatedDeal = await updateDeal(deal);
     await updateHubspotDealProperties(hsDeal);
 
     return jsonResponse(updatedDeal);
