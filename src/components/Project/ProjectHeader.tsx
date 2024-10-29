@@ -82,7 +82,7 @@ function ProjectHeader({
             <Box position="relative" display="inline-flex">
               <CircularProgress
                 variant="determinate"
-                value={percentRaised}
+                value={ percentRaised >= 100 ? 100 : percentRaised}
                 size={50}
                 sx={{ color: "#969f7e" }}
                 thickness={5}
@@ -97,7 +97,7 @@ function ProjectHeader({
                 alignItems="center"
                 justifyContent="center"
               >
-                <Typography variant="caption">{percentRaised}%</Typography>
+                <Typography variant="caption">{percentRaised >= 100 ? 100 : percentRaised}%</Typography>
               </Box>
             </Box>
           </Grid>
