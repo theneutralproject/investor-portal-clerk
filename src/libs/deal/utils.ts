@@ -96,6 +96,12 @@ const InvestmentEntity = {
         promissory_note_at_closing: "Vanilla 301 LLC",
         promissory_to_equity: "Vanilla 301 LLC",
     },
+    "Bakers Place": {
+        equity: "Bakers Place Investment LLC",
+        promissory_note_now: "Bakers Place Investment LLC",
+        promissory_note_at_closing: "Bakers Place Investment LLC",
+        promissory_to_equity: "Bakers Place Investment LLC",
+    },
 };
 
 export function getInvestmentEntity(
@@ -104,11 +110,9 @@ export function getInvestmentEntity(
 ) {
     /* eslint-disable */
     switch (projectName) {
-        case ProjectName["The Edison"]: {
-            return InvestmentEntity[projectName][financingType];
-        }
-
-        case ProjectName["519 W Main"]: {
+        case ProjectName["The Edison"]:
+        case ProjectName["519 W Main"]: 
+        case ProjectName["Bakers Place"]: {
             return InvestmentEntity[projectName][financingType];
         }
         default: {

@@ -163,6 +163,19 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
         ]
       } as HubspotDealPropertiesCollection
     }
+    case ProjectName["Bakers Place"]: {
+      return {
+        properties: [
+          { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
+          { name: "dealstage", value: BakersPlaceDealStages[dealData.dealStage ?? 1]?.value ?? "" },
+          { name: "project_name", value: projectName },
+          { name: "amount", value: "0" },
+          { name: "financing_type", value: dealData.financingType ?? "promisory_note_now" },
+          { name: "transaction_id", value: dealData.transactionId! },
+          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
+        ]
+      } as HubspotDealPropertiesCollection
+    }
     default: {
       console.error(`The project with name ${projectName} is not yet supported in getDealPropsForProject()`)
       return null;
@@ -315,6 +328,7 @@ export function getDealStageInt(dealstage: string) {
 export function getProjectNameFromDealStage(dealstage: string) {
   if (EdisonDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["The Edison"];
   if (_519WMainDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["519 W Main"];
+  if(BakersPlaceDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["Bakers Place"];
   return new Error("project not yet supported");
 };
 
@@ -335,6 +349,16 @@ export const _519WMainDealStages = [
   { key: "eFunded", value: "146586773" },
   { key: "fClosedLost", value: "146586774" }
 ];
+
+// TODO: Add Bakers Place
+export const BakersPlaceDealStages = [
+  { key: "aQualified", value: "257595997" },
+  { key: "bAwareness", value: "257595998" },
+  { key: "cContractShared", value: "257595999" },
+  { key: "dContractSigned", value: "257596000" },
+  { key: "eFunded", value: "257596001" },
+  { key: "fClosedLost", value: "257596001" }
+]
 
 export enum ReferralSource {
   EVENT_MAILER = "event_mailer",

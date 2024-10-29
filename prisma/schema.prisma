@@ -156,7 +156,6 @@ model ProjectPropertyStats {
 model ProjectInvestmentStats {
   id                          Int     @id @default(autoincrement())
   cUnitThresholdAmount        Float   @default(200000.0)
-  debtInterestRate            String  @default("")
   debtMinInvestment           Int     @default(5000)
   debtPaymentFreq             String  @default("quarterly")
   debtTermMonths              Int     @default(48)

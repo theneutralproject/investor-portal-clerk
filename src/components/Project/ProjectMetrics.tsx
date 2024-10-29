@@ -11,11 +11,11 @@ const ProjectMetrics: React.FC<{ project: ProjectWithStats }> = ({ project }) =>
           <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
             {equityIRR}%
           </Typography>
-          <Typography variant="body2">IRR</Typography>
+          <Typography variant="body2">{project.id===2 ? "Interest Rate": "IRR"}</Typography>
         </Grid>
         <Grid item xs={6}>
           <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>
-            60mo.
+            {project.investmentStats.equityTermMonths}mo.
           </Typography>
           <Typography variant="body2">Term</Typography>
         </Grid>
