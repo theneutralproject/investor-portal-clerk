@@ -22,6 +22,8 @@ export const env = createEnv({
     HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK: z.string(),
     HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK: z.string(),
     HUBSPOT_OWNER_ID: z.string(),
+    SUPABASE_STORAGE_URL: z.string(),
+    SUPABASE_SERVICE_ROLE_KEY: z.string(),
     BASE_URL: z.string(),
     GOOGLE_TAG_ID: z.string(),
     ENCRYPTION_SECRET: z.string(),
@@ -35,7 +37,7 @@ export const env = createEnv({
     DOCUSIGN_INTEGRATION_KEY: z.string(),
     DOCUSIGN_RSA_PRIVATE_KEY: z.string(),
   },
-  
+
 
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
@@ -67,8 +69,10 @@ export const env = createEnv({
     HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK: process.env.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK,
     HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK: process.env.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK,
     HUBSPOT_OWNER_ID: process.env.HUBSPOT_OWNER_ID,
+    SUPABASE_STORAGE_URL: process.env.SUPABASE_STORAGE_URL,
+    SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     BASE_URL: process.env.BASE_URL,
-    GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID,    
+    GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     ENCRYPTION_SECRET: process.env.ENCRYPTION_SECRET,

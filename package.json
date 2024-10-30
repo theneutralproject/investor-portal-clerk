@@ -26,6 +26,8 @@
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
     "@next/third-parties": "^14.2.3",
     "@react-pdf-viewer/core": "^3.12.0",
+    "@supabase/storage-js": "^2.7.1",
+    "@supabase/supabase-js": "^2.46.0",
     "@t3-oss/env-nextjs": "^0.11.0",
     "@tanstack/react-query": "^5.29.2",
     "axios": "^1.6.8",
@@ -55,6 +57,7 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "zod": "^3.22.4",
+    "zod-form-data": "^2.0.2",
     "zod-prisma-types": "^3.1.8"
   },
   "devDependencies": {
@@ -89,7 +92,7 @@
   },
   "packageManager": "npm@10.9.0",
   "prisma": {
-    "seed": "tsx seedScripts/201410161208-setOrgIsPrimary.ts"
+    "seed": "tsx seedScripts/202410291330-moveProjectPictures.ts"
   },
   "jest": {
     "testPathIgnorePatterns": [

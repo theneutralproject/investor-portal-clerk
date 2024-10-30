@@ -51,6 +51,10 @@ export type UserWithAddress = User & {
   address: Address | null;
 };
 
+export type UserWithOrganizations = User & {
+  organizationsOwned: Organization[];
+};
+
 export type DealWithInvestmentStats = Deal & {
   investmentStats: DealInvestmentStats;
 };

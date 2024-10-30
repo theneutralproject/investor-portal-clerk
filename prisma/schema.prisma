@@ -109,9 +109,10 @@ model AccreditationVerifier {
 model DealDocument {
   id     Int              @id @default(autoincrement())
   name   String
-  link   String
+  path   String
   type   DealDocumentType
   dealId Int
+  dateCreated DateTime @default(now())
   deal   Deal             @relation(fields: [dealId], references: [id])
 }
 
@@ -119,8 +120,9 @@ model DealDocument {
 model OrganizationDocument {
   id             Int          @id @default(autoincrement())
   name           String
-  link           String
+  path           String
   organizationId Int
+  dateCreated DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
 

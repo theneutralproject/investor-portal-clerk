@@ -42,7 +42,7 @@ const useDocuments = (
       documentId: number;
       type: string;
     }) => {
-      const url = `/api/documents`;
+      const url = `/api/documents/events`;
       const body = { projectId, documentId, type };
       return axios.post(url, body);
     },
