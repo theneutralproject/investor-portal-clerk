@@ -55,7 +55,7 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
   if (!hubspotContact.hubspotId) {
     return new Error("hubspotId is required to update a contact in hubspot")
   }
-  return await fetch(
+  const hsRes = await fetch(
     `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vid/${hubspotContact.hubspotId}/profile`,
     {
       method: "POST",
@@ -71,10 +71,12 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
       console.log("response", response);
       return new Error("unable to update hubspot contact");
     }
+    return {success: true};
   }).catch((fetchError) => {
     console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
     return new Error("unable to update hubspot contact")
   });
+  return hsRes;
 };
 
 export async function createHubspotDealForContact(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {

@@ -87,6 +87,9 @@ export async function PUT(request: NextRequest) {
         if (userUpdateData.email) {
             hsUserUpdateProps.push({ property: 'email', value: userUpdateData.email });
         }
+        if(userToUpdate.phoneNumber) {
+            hsUserUpdateProps.push({ property: 'phone', value: userUpdateData.phoneNumber! });
+        }
         try {
             await updateHubspotContact({ properties: hsUserUpdateProps, hubspotId: userToUpdate.hubspotId });
         } catch (hsError) {

@@ -6,7 +6,6 @@ import type { User } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { getUserAndOrg } from "./helpers";
 
-
 /**
  * Add one member to an org (but not self)
  * Will create a user if they do not yet exist, or add an existing user to the organization
@@ -60,12 +59,6 @@ export async function POST(request: NextRequest) {
         });
         if (existingUser) {
             try {
-                // const updatedOrg: OrganizationWithFullMembers = await prisma.organization.update({
-                //     where: { id: organization.id },
-                //     data: { members: { create: { userId: existingUser.id, type: postData.type } } },
-                //     include: {
-                //         members: { include: { user: true } },
-                //     }
                 const newMember = await prisma.member.create({
                     data: {
                         userId: existingUser.id,
@@ -94,15 +87,6 @@ export async function POST(request: NextRequest) {
         }
 
         try {
-            // add them as an org member
-            // const updatedOrg: OrganizationWithFullMembers = await prisma.organization.update({
-            //     where: { id: organization.id },
-            //     data: { members: { create: { userId: newUser.id, type: postData.type } } },
-            //     include: {
-            //         members: { include: { user: true } },
-            //     }
-            // });
-            // return jsonResponse(sanitizeOrganizationWithMembers(updatedOrg), 201);
             const newMember = await prisma.member.create({
                 data: {
                     userId: newUser.id,
