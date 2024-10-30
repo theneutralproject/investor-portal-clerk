@@ -20,7 +20,6 @@ jobs:
     - name: Run Playwright tests
       env:
           CI: true
-          # BASE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           BASE_URL: "http://localhost:3000"
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
@@ -30,6 +29,8 @@ jobs:
           HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK: ${{ secrets.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK }}
           HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK: ${{ secrets.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK }}
           HUBSPOT_OWNER_ID: ${{ secrets.HUBSPOT_OWNER_ID }}
+          SUPABASE_STORAGE_URL: ${{ secrets.SUPABASE_STORAGE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           GOOGLE_TAG_ID: ${{ secrets.GOOGLE_TAG_ID }}
           NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
           NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
