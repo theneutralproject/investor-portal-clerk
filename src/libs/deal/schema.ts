@@ -1,6 +1,5 @@
-import { DealOwnershipType, DealFinancingType, DealUnitType, DealDocumentType } from "@prisma/client";
+import { DealOwnershipType, DealFinancingType, DealUnitType } from "@prisma/client";
 import { z } from "zod";
-import { file, zfd } from "zod-form-data";
 
 
 export const zDealInvestmentStatsUpdateSchema = z.object({

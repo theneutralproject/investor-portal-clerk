@@ -1,4 +1,4 @@
-import { PdfDocumentCreateSchema, zPdfDocumentCreateSchema } from "@/libs/document/schema";
+import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
 import prisma from "@/libs/prisma";
 import { storageClient } from "@/libs/supabase";
 import { jsonResponse } from "@/libs/utils";
@@ -118,7 +118,7 @@ export async function POST(request: NextRequest) {
   }
   let postData;
   try {
-    postData = zPdfDocumentCreateSchema.parse(await request.formData()) as PdfDocumentCreateSchema;
+    postData = zPdfDocumentCreateSchema.parse(await request.formData());
   } catch (parseError) {
     console.error("unable to parse POST body:\n", parseError);
     return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);

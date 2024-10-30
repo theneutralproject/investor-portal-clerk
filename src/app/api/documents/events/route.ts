@@ -1,6 +1,7 @@
+import type { DocumentEventCreateSchema } from "@/libs/document/schema";
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 // Create a DocumentEvent for the given document and user
 export async function POST(request: NextRequest) {
@@ -26,13 +27,13 @@ export async function POST(request: NextRequest) {
         });
       }
   
-      const requestBody = await request.json();
-      const { projectId, documentId, type } = requestBody;
+      const requestBody = (await request.json()) as DocumentEventCreateSchema;
+      const { documentId, type } = requestBody;
   
-      if (!projectId || !documentId || !type) {
+      if (!documentId || !type) {
         return new Response(
           JSON.stringify({
-            error: "All parameters (projectId, documentId, type) are required",
+            error: "All parameters (documentId, type) are required",
           }),
           {
             status: 400,
@@ -41,22 +42,13 @@ export async function POST(request: NextRequest) {
         );
       }
   
-      const parsedProjectId = parseInt(String(projectId), 10);
-      const parsedDocumentId = parseInt(String(documentId), 10);
-      if (isNaN(parsedProjectId) || isNaN(parsedDocumentId)) {
-        return new Response(JSON.stringify({ error: "Invalid IDs" }), {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-  
       // Create the document event
       const documentEvent = await prisma.documentEvent.create({
         data: {
           userId: neutralUser.id,
-          documentId: parsedDocumentId,
+          documentId,
           date: new Date(),
-          type: type,
+          type,
         },
       });
   
