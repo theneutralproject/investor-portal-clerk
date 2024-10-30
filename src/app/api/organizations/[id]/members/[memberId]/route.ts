@@ -77,7 +77,6 @@ export async function PUT(request: NextRequest) {
         if (!memberId || !isNumber(memberId)) {
             throw new Error('userId is required in url');
         }
-console.log('memberId', memberId);
         const { user: dbUser, organization } = await getUserAndOrg(request, 2);
         if (!organization) {
             return jsonResponse({ error: "Organization not found" }, 404);
@@ -110,7 +109,7 @@ console.log('memberId', memberId);
             return jsonResponse({ error: "Member not found" }, 404);
         }
 
-        if(memberToUpdate.user.clerkId) {
+        if (memberToUpdate.user.clerkId) {
             return jsonResponse({ error: "Cannot update a user who has already signed up for an account" }, 403);
         }
 

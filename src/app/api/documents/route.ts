@@ -1,9 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import { PdfDocumentCreateSchema, zPdfDocumentCreateSchema } from "@/libs/document/schema";
 import prisma from "@/libs/prisma";
+import { storageClient } from "@/libs/supabase";
+import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { DealFinancingType, type DocumentEvent } from "@prisma/client";
+import { DealFinancingType, type DocumentEvent, DealDocumentType } from "@prisma/client";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -47,11 +47,11 @@ export async function GET(request: NextRequest) {
         ...(dealStage ? { dealStage: dealStage } : {}),
         ...(isDealFinancingType
           ? {
-              OR: [
-                { financingTypes: { has: financingType as DealFinancingType } },
-                { financingTypes: { equals: [] } },
-              ],
-            }
+            OR: [
+              { financingTypes: { has: financingType as DealFinancingType } },
+              { financingTypes: { equals: [] } },
+            ],
+          }
           : { financingTypes: { equals: [] } }),
       },
       include: {
@@ -97,72 +97,88 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create a DocumentEvent for the given document and user
+/**
+ * User can upload deal and org documents
+ * We will use a different route for admins to upload documents
+ * @param request formData with PdfDocumentCreateSchema
+ * @returns 
+ */
 export async function POST(request: NextRequest) {
-  try {
-    const user = await currentUser();
-
-    if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const { id } = user;
-    const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: id },
-    });
-
-    if (!neutralUser) {
-      return new Response(JSON.stringify({ error: "User record not found" }), {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    const requestBody = await request.json();
-    const { projectId, documentId, type } = requestBody;
-
-    if (!projectId || !documentId || !type) {
-      return new Response(
-        JSON.stringify({
-          error: "All parameters (projectId, documentId, type) are required",
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-    }
-
-    const parsedProjectId = parseInt(String(projectId), 10);
-    const parsedDocumentId = parseInt(String(documentId), 10);
-    if (isNaN(parsedProjectId) || isNaN(parsedDocumentId)) {
-      return new Response(JSON.stringify({ error: "Invalid IDs" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    // Create the document event
-    const documentEvent = await prisma.documentEvent.create({
-      data: {
-        userId: neutralUser.id,
-        documentId: parsedDocumentId,
-        date: new Date(),
-        type: type,
-      },
-    });
-
-    return new Response(JSON.stringify(documentEvent), {
-      headers: { "Content-Type": "application/json" },
-    });
-  } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: "Error processing request" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+  const user = await currentUser();
+  if (!user) {
+    return jsonResponse({ error: "User not found" }, 404);
   }
-}
+
+  const dbUser = await prisma.user.findUnique({
+    where: { clerkId: user.id },
+    include: { organizationsOwned: true }
+  });
+  if (!dbUser) {
+    return jsonResponse({ error: `User record with clerkid ${user.id} not found in prisma (POST)` }, 404);
+  }
+  let postData;
+  try {
+    postData = zPdfDocumentCreateSchema.parse(await request.formData()) as PdfDocumentCreateSchema;
+  } catch (parseError) {
+    console.error("unable to parse POST body:\n", parseError);
+    return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
+  }
+  const { dealId, organizationId, file, type } = postData;
+  if (type === "deal") {
+    if (!dealId) return jsonResponse({ error: "Deal ID is required" }, 400);
+    const deal = await prisma.deal.findUnique({ where: { id: dealId } });
+    if (!deal) return jsonResponse({ error: "Deal not found" }, 404);
+    if (!dbUser.organizationsOwned.some(org => org.id === deal.organizationId)) {
+      return jsonResponse({ error: "You are not the owner of the organization that the deal belongs to" }, 403);
+    }
+  }
+
+  if (type === "organization") {
+    if (!organizationId) return jsonResponse({ error: "Organization ID is required" }, 400);
+    if (!dbUser.organizationsOwned.some(org => org.id === organizationId)) {
+      return jsonResponse({ error: "You are not the owner of the organization you are trying to upload a document for" }, 403);
+    }
+  }
+
+  const id: number = type === "deal" ? dealId! : organizationId!;
+
+  const name = file.name;
+  const { data, error } = await storageClient.from(`${type}-documents`).upload(`${type}-${id}/${name}`, file);
+  if (error) {
+    console.error(error);
+    return jsonResponse({ error: "File upload failed" }, 400);
+  }
+  const { path } = data;
+  if (type === "deal") {
+    try {
+      const newDocEntry = await prisma.dealDocument.create({
+        data: {
+          dealId: id,
+          name,
+          path,
+          type: DealDocumentType.VERIFICATION_ACCREDITATION
+        }
+      });
+      return jsonResponse({ newDocEntry });
+    }
+    catch (error) {
+      console.error(error);
+      return jsonResponse({ error: "Error creating document entry" }, 400);
+    }
+  } else {
+    try {
+      const newDocEntry = await prisma.organizationDocument.create({
+        data: {
+          organizationId: id,
+          name,
+          path,
+        }
+      });
+
+      return jsonResponse({ newDocEntry });
+    } catch (error) {
+      console.error(error);
+      return jsonResponse({ error: "Error creating document entry" }, 400);
+    }
+  }
+};
