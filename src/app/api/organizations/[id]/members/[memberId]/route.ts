@@ -4,6 +4,8 @@ import type { NextRequest } from "next/server";
 import { getUserAndOrg } from "../helpers";
 import { isNumber } from "lodash";
 import { type OrganizationMemberUpdateSchema, zOrganizationMemberUpdateSchema } from "@/libs/organization/schema";
+import { updateHubspotContact } from "@/libs/hubspot/utils";
+import type { HubspotContact } from "@/libs/hubspot/schema";
 
 /**
  * Remove one member at the time (but not self)
@@ -70,6 +72,11 @@ export async function DELETE(request: NextRequest) {
     }
 }
 
+/**
+ * Update a member's details
+ * @param request
+ * @returns the updated member (Member)
+ */
 export async function PUT(request: NextRequest) {
     try {
         const url = new URL(request.url);
@@ -77,7 +84,6 @@ export async function PUT(request: NextRequest) {
         if (!memberId || !isNumber(memberId)) {
             throw new Error('userId is required in url');
         }
-console.log('memberId', memberId);
         const { user: dbUser, organization } = await getUserAndOrg(request, 2);
         if (!organization) {
             return jsonResponse({ error: "Organization not found" }, 404);
@@ -110,7 +116,7 @@ console.log('memberId', memberId);
             return jsonResponse({ error: "Member not found" }, 404);
         }
 
-        if(memberToUpdate.user.clerkId) {
+        if (memberToUpdate.user.clerkId) {
             return jsonResponse({ error: "Cannot update a user who has already signed up for an account" }, 403);
         }
 
@@ -132,6 +138,25 @@ console.log('memberId', memberId);
                 },
                 include: { user: true }
             });
+
+            // also update them in hubspot
+            const hubspotContact: HubspotContact = {
+                hubspotId: updatedMember.user.hubspotId,
+                email: updatedMember.user.email,
+                properties: [
+                    { property: `firstname`, value: updatedMember.user.firstName },
+                    { property: `lastname`, value: updatedMember.user.lastName },
+                ]
+            };
+            if (updatedMember.user.phoneNumber) {
+                hubspotContact.properties.push({ property: `phone`, value: updatedMember.user.phoneNumber });
+            }
+            try {
+                const hsRes = await updateHubspotContact(hubspotContact);
+                console.log("updated hubspot contact: ", hsRes);
+            } catch (hubspotError) {
+                console.error("Unable to update hubspot contact:\n", hubspotError);
+            }
             return jsonResponse(updatedMember);
         } catch (updateError) {
             console.error("ERROR: unable to update member:\n", updateError);

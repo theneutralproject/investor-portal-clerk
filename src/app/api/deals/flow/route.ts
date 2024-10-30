@@ -21,9 +21,7 @@ async function fetchProject(slug: string) {
       propertyStats: true,
       milestones: true,
       pictures: true,
-      documents: {
-        where: { documentType: "DOCUMENT" },
-      },
+      documents: true,
     },
   });
 }
@@ -39,7 +37,10 @@ async function fetchDeal(id: number) {
   });
 }
 
-async function checkUserAccess(_userId: number, _dealOrganization: Organization) {
+async function checkUserAccess(
+  _userId: number,
+  _dealOrganization: Organization
+) {
   return _dealOrganization.ownerId === _userId;
 }
 

@@ -41,7 +41,7 @@ const ProjectCalculator = ({ data }: { data: ProjectWithStats }) => {
       />
 
       <LineDisplay
-        name="Target Equity Multiple"
+        name="Target Multiple"
         value={targetEquityMultiple + "x"}
       />
       <LineDisplay

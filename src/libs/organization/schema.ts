@@ -2,7 +2,6 @@ import { DealOwnershipType, MembershipType } from "@prisma/client";
 import { z } from "zod";
 import { zUserCreateSchema, zUserUpdateSchema } from "../user/schema";
 import { zAddressCreateSchema } from "../address/schema";
-import { title } from "process";
 
 export const zOrganizationUpdateSchema = z.object({
     name: z.string().max(120, "120 characters max").optional(),
