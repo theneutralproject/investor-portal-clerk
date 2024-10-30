@@ -5,7 +5,7 @@ import { getUserAndOrg } from "../helpers";
 import { isNumber } from "lodash";
 import { type OrganizationMemberUpdateSchema, zOrganizationMemberUpdateSchema } from "@/libs/organization/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
-import { HubspotContact } from "@/libs/hubspot/schema";
+import type { HubspotContact } from "@/libs/hubspot/schema";
 
 /**
  * Remove one member at the time (but not self)
