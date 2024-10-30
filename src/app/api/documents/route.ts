@@ -1,9 +1,9 @@
-import { PdfDocumentCreateSchema, zPdfDocumentCreateSchema } from "@/libs/document/schema";
-import prisma, { UserWithOrganizations } from "@/libs/prisma";
+import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
+import prisma, { type UserWithOrganizations } from "@/libs/prisma";
 import { storageClient } from "@/libs/supabase";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { DealFinancingType, type DocumentEvent, DealDocumentType, Organization } from "@prisma/client";
+import { DealFinancingType, type DocumentEvent, DealDocumentType } from "@prisma/client";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -115,17 +115,17 @@ async function validateUser() {
   return dbUser;
 }
 
-async function validateAccess(dbUser: any, type: string, id: number) {
+async function validateAccess(dbUser: UserWithOrganizations, type: string, id: number) {
   if (type === 'deal') {
     const deal = await prisma.deal.findUnique({ where: { id } });
     if (!deal) {
       throw new Error('Deal not found');
     }
-    if (!dbUser.organizationsOwned.some((org: Organization) => org.id === deal.organizationId)) {
+    if (!dbUser.organizationsOwned.some((org) => org.id === deal.organizationId)) {
       throw new Error('You are not the owner of the organization that the deal belongs to');
     }
   } else {
-    if (!dbUser.organizationsOwned.some((org: Organization) => org.id === id)) {
+    if (!dbUser.organizationsOwned.some((org) => org.id === id)) {
       throw new Error('You are not the owner of the organization you are trying to upload a document for');
     }
   }
@@ -178,7 +178,7 @@ export async function POST(request: NextRequest) {
     // Parse and validate request data
     const postData = zPdfDocumentCreateSchema.parse(
       await request.formData()
-    ) as PdfDocumentCreateSchema;
+    );
 
     const { dealId, organizationId, file, type } = postData;
 
@@ -189,7 +189,7 @@ export async function POST(request: NextRequest) {
     if (type === 'organization' && !organizationId) {
       return jsonResponse({ error: 'Organization ID is required' }, 400);
     }
-    if(type !== 'deal' && type !== 'organization') {
+    if (type !== 'deal' && type !== 'organization') {
       return jsonResponse({ error: 'Invalid document type' }, 400);
     }
 
@@ -209,7 +209,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error processing document upload:', error);
     const message = error instanceof Error ? error.message : 'Unknown error occurred';
-    return jsonResponse({ error: message }, 
+    return jsonResponse({ error: message },
       error instanceof Error && error.message.includes('not found') ? 404 : 400
     );
   }
