@@ -1,9 +1,9 @@
-import { type Deal, DealFinancingType, DealInvestmentStats } from "@prisma/client";
+import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import { isError } from "lodash";
 import { ProjectName } from "../schema";
-import prisma, { DealWithInvestmentStats } from "../prisma";
 import type { DealUpdateSchema } from "./schema";
 import { getEquityStatsFromProject } from "../project/utils";
+import prisma from "../prisma";
 
 /**
  * Updates a deal in the database
