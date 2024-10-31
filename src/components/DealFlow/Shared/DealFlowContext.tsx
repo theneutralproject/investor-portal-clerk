@@ -32,7 +32,7 @@ import {
   type OrganizationMemberUpdateSchema,
 } from "@/libs/organization/schema";
 import DealFlowReview from "@components/DealFlow/ReviewSign/DealFlowReview";
-import { DealCreateSchema } from "@/libs/deal/schema";
+import type { DealCreateSchema } from "@/libs/deal/schema";
 // Define the step types
 export type StepType =
   | "get-started"

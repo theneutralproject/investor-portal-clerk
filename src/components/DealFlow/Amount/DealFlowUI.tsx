@@ -13,7 +13,7 @@ import {
   type ChartConfig,
   type InvestmentStats,
 } from "./dealFlow.types";
-import { ReturnsDateObject } from "@/libs/project/schema";
+import type { ReturnsDateObject } from "@/libs/project/schema";
 import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 
 interface QuickSelectChipsProps {

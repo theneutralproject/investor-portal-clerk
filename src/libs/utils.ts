@@ -10,3 +10,7 @@ export function jsonResponse(data: unknown, status = 200) {
         headers: { "Content-Type": "application/json" },
     });
 }
+
+export function errorResponse(message: string, status: number) {
+    return jsonResponse({ error: message }, status);
+};

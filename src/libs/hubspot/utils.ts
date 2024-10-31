@@ -1,6 +1,6 @@
 import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
-import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
+import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema, type HsDealCreateResponse } from "./schema";
 import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
@@ -100,9 +100,8 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
       body,
     }
   )
-  /* eslint-disable-next-line */
-  const hsDealCreateRespBody = await resBody.json();
-  console.log("hsDealCreateRespBody", hsDealCreateRespBody);
+  
+  const hsDealCreateRespBody = (await resBody.json()) as HsDealCreateResponse;
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
     return dealId;
@@ -317,7 +316,6 @@ export function getDealStageInt(dealstage: string) {
   if (pos === -1) {
     pos = _519WMainDealStages.map(e => e.value).indexOf(dealstage);
   }
-
   return pos;
 }
 
@@ -346,7 +344,6 @@ export const _519WMainDealStages = [
   { key: "fClosedLost", value: "146586774" }
 ];
 
-// TODO: Add Bakers Place
 export const BakersPlaceDealStages = [
   { key: "aQualified", value: "257595997" },
   { key: "bAwareness", value: "257595998" },
@@ -373,7 +370,6 @@ export enum ReferralSource {
   OTHER = "other"
 }
 
-
 export enum HSDealPropNames {
   dealstage = 'dealstage',
   amount = 'amount',
@@ -385,5 +381,3 @@ export enum DealToHubspotDealEnum {
   financingType = "financing_type",
   dealStage = "dealstage",
 };
-
-
