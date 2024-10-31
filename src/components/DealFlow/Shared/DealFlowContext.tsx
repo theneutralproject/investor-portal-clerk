@@ -32,6 +32,7 @@ import {
   type OrganizationMemberUpdateSchema,
 } from "@/libs/organization/schema";
 import DealFlowReview from "@components/DealFlow/ReviewSign/DealFlowReview";
+import { DealCreateSchema } from "@/libs/deal/schema";
 // Define the step types
 export type StepType =
   | "get-started"
@@ -318,8 +319,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     if (!project) return;
     setIsLoading(true);
 
-    const dealCreateData = {
-      financingType: DealFinancingType.equity,
+    const dealCreateData: DealCreateSchema = {
+      financingType: DealFinancingType.promissory_note_now,
       projectId: project.id,
     };
 

@@ -1,25 +1,14 @@
 // types/dealFlow.ts
-
-export interface ReturnsDataPoint {
-  date: Date;
-  distributionAmount: number;
-  multiple: number;
-  cumulativeDistribution: number;
-  cumulativeMultiple: number;
-  totalGrossReturn: number;
-  totalNetReturn: number;
-}
-
 export interface ProjectedReturn {
   year: number;
   cumulativeDistribution: number;
-  cumulativeMultiple: number;
+  investmentMultiple: number;
   totalGrossReturn: number;
   totalNetReturn: number;
 }
 
 export interface InvestmentStats {
-  irr: string;
+  interestRateOrIrr: number;
   investmentMultiple: number;
   totalGrossReturn: number;
   totalNetReturn: number;

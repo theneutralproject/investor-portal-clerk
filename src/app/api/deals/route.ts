@@ -155,6 +155,21 @@ export async function POST(request: NextRequest) {
       .replace(/\s/g, "")
       .toUpperCase();
 
+    if (!dealData.financingType) dealData.financingType = DealFinancingType.equity;
+    let minInvestmentAmount = 5000;
+    if (dealData.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
+    else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
+
+    if (!dealData.amount) dealData.amount = minInvestmentAmount;
+    const equityDetails = await getEquityStatsFromProject(dealData.amount, project.equityReturnsFile, project.investmentStats.cUnitThresholdAmount);
+    if (isError(equityDetails)) {
+        console.error(
+            `Failed to get equity stats during deal creation`
+        );
+        return jsonResponse({ error: "Failed to get equity stats during deal creation" }, 500);
+    }
+    const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
+
     const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
     if (!hsDeal) {
       return jsonResponse(
@@ -172,22 +187,7 @@ export async function POST(request: NextRequest) {
     if (isError(hsDealId)) {
       return jsonResponse({ error: "HS Deal cannot be created." }, 400);
     }
-
-    if (!dealData.financingType) dealData.financingType = DealFinancingType.equity;
-    let minInvestmentAmount = 5000;
-    if (dealData.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
-    else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
-
-    if (!dealData.amount) dealData.amount = minInvestmentAmount;
-    const equityDetails = await getEquityStatsFromProject(dealData.amount, project.equityReturnsFile, project.investmentStats.cUnitThresholdAmount);
-    if (isError(equityDetails)) {
-        console.error(
-            `Failed to get equity stats during deal creation`
-        );
-        return jsonResponse({ error: "Failed to get equity stats during deal creation" }, 500);
-    }
-    const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
-
+    
     const deal = await prisma.deal.create({
       data: {
         organizationId: dealData.organizationId,

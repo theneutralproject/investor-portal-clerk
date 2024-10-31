@@ -41,13 +41,14 @@ export async function POST(request: NextRequest) {
         if (amount < investmentStats.debtMinInvestment) {
             return jsonResponse({ message: `The minimum investment amount for this project is $${investmentStats.debtMinInvestment.toLocaleString()}` }, 400);
         }
-        return jsonResponse(getDebtPayoutSchedule(amount, investmentStats, milestones));
+        const payoutSchedule = getDebtPayoutSchedule(amount, investmentStats, milestones);
+        return jsonResponse(payoutSchedule);
     }
 
     // equity financing
     if (financingType === DealFinancingType.equity) {
         const equityDetails = await getEquityStatsFromProject(amount, project.equityReturnsFile, investmentStats.cUnitThresholdAmount);
-        if(isError(equityDetails)) {
+        if (isError(equityDetails)) {
             return jsonResponse({ message: equityDetails.message }, 400);
         }
         const { unitType, shareOfEquity, equityMilestones } = equityDetails;

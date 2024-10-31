@@ -1,7 +1,7 @@
 // hooks/useReturnsData.ts
 import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
-import { type ReturnsDataPoint } from "./dealFlow.types";
+import type { ReturnsDateObject } from "@/libs/project/schema";
 
 interface UseReturnsDataProps {
   projectId?: number;
@@ -16,7 +16,7 @@ export const useReturnsData = ({
   minInvestment,
   financingType,
 }: UseReturnsDataProps) => {
-  const [returnsData, setReturnsData] = useState<ReturnsDataPoint[]>([]);
+  const [returnsData, setReturnsData] = useState<ReturnsDateObject[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -26,7 +26,7 @@ export const useReturnsData = ({
 
       setIsLoading(true);
       try {
-        const { data } = await axios.post<ReturnsDataPoint[]>(
+        const { data } = await axios.post<ReturnsDateObject[]>(
           "/api/projects/returns",
           {
             projectId,

@@ -102,6 +102,7 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
   )
   /* eslint-disable-next-line */
   const hsDealCreateRespBody = await resBody.json();
+  console.log("hsDealCreateRespBody", hsDealCreateRespBody);
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
     return dealId;
@@ -167,7 +168,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
         properties: [...properties,
         ...[
           { name: "dealstage", value: BakersPlaceDealStages[dealData.dealStage ?? 1]?.value ?? "" },
-          { name: "financing_type", value: dealData.financingType ?? "promisory_note_now" },
+          { name: "financing_type", value: dealData.financingType ?? "promissory_note_now" },
         ]]
       } as HubspotDealPropertiesCollection
     }
