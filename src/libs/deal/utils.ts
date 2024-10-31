@@ -1,7 +1,7 @@
-import { type Deal, DealFinancingType } from "@prisma/client";
+import { type Deal, DealFinancingType, DealInvestmentStats } from "@prisma/client";
 import { isError } from "lodash";
 import { ProjectName } from "../schema";
-import prisma from "../prisma";
+import prisma, { DealWithInvestmentStats } from "../prisma";
 import type { DealUpdateSchema } from "./schema";
 import { getEquityStatsFromProject } from "../project/utils";
 
@@ -12,14 +12,15 @@ import { getEquityStatsFromProject } from "../project/utils";
  */
 export async function updateDeal(
     updateDealData: DealUpdateSchema /**dealData includes fields for both Deal and DealInvestmentStats */
-): Promise<Deal | Error> {
+) {
     const { investmentStats, ...dealData } = updateDealData;
-
+    let updatedStats: DealInvestmentStats | null | Error = null;
     /* eslint-disable-next-line */
     const updatedDeal = await prisma.deal
         .update({
             where: { hubspotId: dealData.hubspotId },
             data: dealData,
+            include: { investmentStats: true },
         })
 
     if (!updatedDeal || isError(updateDeal)) {
@@ -41,7 +42,6 @@ export async function updateDeal(
             return Error("Failed to update deal with hubspot data");
         }
 
-
         if (investmentStats.amount) {
             const equityDetails = await getEquityStatsFromProject(investmentStats.amount, project.equityReturnsFile, project.investmentStats.cUnitThresholdAmount);
             if (isError(equityDetails)) {
@@ -56,9 +56,8 @@ export async function updateDeal(
             investmentStats.numberAUnits = numberAUnits;
             investmentStats.numberCUnits = numberCUnits;
 
-            let minInvestmentAmount = 5000;
+            let minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
             if (investmentStats.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
-            else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
             if (investmentStats.amount < minInvestmentAmount) {
                 console.error(
                     `The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`
@@ -67,9 +66,9 @@ export async function updateDeal(
             }
         }
 
-        await prisma.dealInvestmentStats.update({
+        updatedStats = await prisma.dealInvestmentStats.update({
             where: { dealId: updatedDeal.id },
-            data: investmentStats
+            data: investmentStats,
         })
             .catch((error) => {
                 console.error(
@@ -79,7 +78,8 @@ export async function updateDeal(
                 return Error("Failed to update deal with hubspot data");
             });
     }
-
+    if(isError(updatedStats)) return updatedStats;
+    updatedDeal.investmentStats = updatedStats;
     return updatedDeal;
 }
 
@@ -111,7 +111,7 @@ export function getInvestmentEntity(
     /* eslint-disable */
     switch (projectName) {
         case ProjectName["The Edison"]:
-        case ProjectName["519 W Main"]: 
+        case ProjectName["519 W Main"]:
         case ProjectName["Bakers Place"]: {
             return InvestmentEntity[projectName][financingType];
         }

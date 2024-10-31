@@ -9,7 +9,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import { initDealPropsForProject, createHubspotDealForContact, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
+import { initDealPropsForProject, createHubspotDeal, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
 import { getEquityStatsFromProject } from "@/libs/project/utils";
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const hsDealId = await createHubspotDealForContact(
+    const hsDealId = await createHubspotDeal(
       hsDeal,
       String(dbUser.hubspotId)
     );
@@ -197,26 +197,23 @@ export async function POST(request: NextRequest) {
         transactionId: dealData.transactionId,
         investmentEntity:
           getInvestmentEntity(project.name, dealData.financingType) ?? "",
+          investmentStats: {create: {
+            amount: dealData.amount,
+            financingType: dealData.financingType,
+            unitType,
+            shareOfEquity,
+            numberAUnits,
+            numberCUnits,
+            /**all other fields have postgresql defaults */
+          }}
       },
+      include: { investmentStats: true }
     });
 
-    await prisma.dealInvestmentStats.create({
-      data: {
-        dealId: deal.id,
-        amount: dealData.amount,
-        financingType: dealData.financingType,
-        unitType,
-        shareOfEquity,
-        numberAUnits,
-        numberCUnits,
-        /**all other fields have postgresql defaults */
-      }
-    })
-
-    return jsonResponse(deal);
+    return jsonResponse(deal, 201);
   } catch (error) {
     console.error(error);
-    return jsonResponse({ error: "Error processing request" }, 500);
+    return jsonResponse({ error }, 500);
   }
 }
 
