@@ -9,7 +9,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import { initDealPropsForProject, createHubspotDealForContact, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
+import { initDealPropsForProject, createHubspotDeal, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
 import { getEquityStatsFromProject } from "@/libs/project/utils";
@@ -155,24 +155,6 @@ export async function POST(request: NextRequest) {
       .replace(/\s/g, "")
       .toUpperCase();
 
-    const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
-    if (!hsDeal) {
-      return jsonResponse(
-        {
-          error: "Deal cannot be created. Project not yet supported in Hubspot",
-        },
-        400
-      );
-    }
-
-    const hsDealId = await createHubspotDealForContact(
-      hsDeal,
-      String(dbUser.hubspotId)
-    );
-    if (isError(hsDealId)) {
-      return jsonResponse({ error: "HS Deal cannot be created." }, 400);
-    }
-
     if (!dealData.financingType) dealData.financingType = DealFinancingType.equity;
     let minInvestmentAmount = 5000;
     if (dealData.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
@@ -188,6 +170,24 @@ export async function POST(request: NextRequest) {
     }
     const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
 
+    const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
+    if (!hsDeal) {
+      return jsonResponse(
+        {
+          error: "Deal cannot be created. Project not yet supported in Hubspot",
+        },
+        400
+      );
+    }
+
+    const hsDealId = await createHubspotDeal(
+      hsDeal,
+      String(dbUser.hubspotId)
+    );
+    if (isError(hsDealId)) {
+      return jsonResponse({ error: "HS Deal cannot be created." }, 400);
+    }
+    
     const deal = await prisma.deal.create({
       data: {
         organizationId: dealData.organizationId,
@@ -197,26 +197,23 @@ export async function POST(request: NextRequest) {
         transactionId: dealData.transactionId,
         investmentEntity:
           getInvestmentEntity(project.name, dealData.financingType) ?? "",
+          investmentStats: {create: {
+            amount: dealData.amount,
+            financingType: dealData.financingType,
+            unitType,
+            shareOfEquity,
+            numberAUnits,
+            numberCUnits,
+            /**all other fields have postgresql defaults */
+          }}
       },
+      include: { investmentStats: true }
     });
 
-    await prisma.dealInvestmentStats.create({
-      data: {
-        dealId: deal.id,
-        amount: dealData.amount,
-        financingType: dealData.financingType,
-        unitType,
-        shareOfEquity,
-        numberAUnits,
-        numberCUnits,
-        /**all other fields have postgresql defaults */
-      }
-    })
-
-    return jsonResponse(deal);
+    return jsonResponse(deal, 201);
   } catch (error) {
     console.error(error);
-    return jsonResponse({ error: "Error processing request" }, 500);
+    return jsonResponse({ error }, 500);
   }
 }
 

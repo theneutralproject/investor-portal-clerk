@@ -1,7 +1,7 @@
 import { DealUnitType, type ProjectInvestmentStats, type ProjectMilestones } from "@prisma/client";
 import { parse } from 'csv-parse';
 import { add, startOfMonth } from "date-fns";
-import type { ReturnsDateObjectSchema } from "./schema";
+import type { ReturnsDateObject } from "./schema";
 import { isError } from "lodash";
 import { finished } from "stream";
 import { promisify } from "util";
@@ -91,7 +91,7 @@ export function getDebtPayoutSchedule(
     amount: number,
     investmentStats: ProjectInvestmentStats,
     milestones: ProjectMilestones
-): ReturnsDateObjectSchema[] {
+): ReturnsDateObject[] {
     // Initialize closing date logic
     const closingDate = milestones.financialClosing;
     let date = closingDate;
@@ -104,9 +104,9 @@ export function getDebtPayoutSchedule(
         ? investmentStats.interestRateMax
         : investmentStats.interestRateMin;
 
-    const debtPayoutSchedule: ReturnsDateObjectSchema[] = [];
+    const debtPayoutSchedule: ReturnsDateObject[] = [];
     let cumulativeDistribution = 0;
-    let cumulativeMultiple = 0;
+    let investmentMultiple = 0;
 
     for (let i = 1; i <= investmentStats.debtTermMonths; i++) {
         // Move to next month
@@ -127,21 +127,22 @@ export function getDebtPayoutSchedule(
         cumulativeDistribution += distributionAmount;
     
         const multiple = (distributionAmount / amount);
-        cumulativeMultiple += multiple;
+        investmentMultiple += multiple;
 
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
         const totalNetReturn = cumulativeDistribution - amount;
 
         // Round all numerical values for consistency
-        const entry: ReturnsDateObjectSchema = {
+        const entry: ReturnsDateObject = {
             date,
             distributionAmount: roundTo(distributionAmount, 2),
             multiple: roundTo(multiple, 4),
             cumulativeDistribution: roundTo(cumulativeDistribution, 2),
-            cumulativeMultiple: roundTo(cumulativeMultiple, 4),
+            investmentMultiple: roundTo(investmentMultiple, 4),
             totalGrossReturn: roundTo(totalGrossReturn, 2),
             totalNetReturn: roundTo(totalNetReturn, 2),
+            interestRateOrIrr: interestRate
         };
 
         debtPayoutSchedule.push(entry);
@@ -162,23 +163,24 @@ export function getEquityPayoutSchedule(
     equityMilestones: MilestoneType[],
     shareOfEquity: number,
     unitType: DealUnitType
-): ReturnsDateObjectSchema[] {
+): ReturnsDateObject[] {
     const closingDate = projectMilestones.financialClosing;
     let date = closingDate.getUTCDate() !== 1 ? startOfMonth(closingDate) : closingDate;
 
     if (!equityMilestones?.length) {
         throw new Error('Milestone data not found in equity returns file');
     }
-    let previousEntry: ReturnsDateObjectSchema | undefined = {
+    let previousEntry: ReturnsDateObject | undefined = {
         date: new Date(),
         distributionAmount: 0,
         multiple: 1,
         cumulativeDistribution: 0,
-        cumulativeMultiple: 1,
+        investmentMultiple: 1,
         totalGrossReturn: 0,
-        totalNetReturn: 0
+        totalNetReturn: 0,
+        interestRateOrIrr: 0
     }
-    return equityMilestones.reduce<ReturnsDateObjectSchema[]>((schedule, em, index) => {
+    return equityMilestones.reduce<ReturnsDateObject[]>((schedule, em, index) => {
         if (!em) {
             throw new Error(`Invalid milestone data at index ${index}`);
         }
@@ -194,7 +196,8 @@ export function getEquityPayoutSchedule(
 
         const cumulativeDistribution = (previousEntry?.cumulativeDistribution ?? 0) + distributionAmount;
         const multiple = distributionAmount / amount;
-        const cumulativeMultiple = cumulativeDistribution / amount;
+        const investmentMultiple = cumulativeDistribution / amount;
+        const irr = (investmentMultiple - 1) / (index / 12);
 
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
@@ -204,9 +207,10 @@ export function getEquityPayoutSchedule(
             distributionAmount: Number(distributionAmount.toFixed(2)),
             multiple: Number(multiple.toFixed(4)),
             cumulativeDistribution: Number(cumulativeDistribution.toFixed(2)),
-            cumulativeMultiple: Number(cumulativeMultiple.toFixed(4)),
+            investmentMultiple: Number(investmentMultiple.toFixed(4)),
             totalGrossReturn: Number(totalGrossReturn.toFixed(2)),
-            totalNetReturn: Number(totalNetReturn.toFixed(2))
+            totalNetReturn: Number(totalNetReturn.toFixed(2)),
+            interestRateOrIrr: Number(irr.toFixed(3))
         });
         previousEntry = schedule[schedule.length - 1];
 

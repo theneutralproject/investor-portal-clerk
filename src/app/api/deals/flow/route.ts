@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import { currentUser } from "@clerk/nextjs";
-import { jsonResponse } from "@/libs/utils";
+import { errorResponse, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma";
 import { z } from "zod";
 import type { Organization } from "@prisma/client";
@@ -9,9 +9,6 @@ const QuerySchema = z.object({
   projectSlug: z.string().min(1),
   dealId: z.string().optional(),
 });
-
-const errorResponse = (message: string, status: number) =>
-  jsonResponse({ error: message }, status);
 
 async function fetchProject(slug: string) {
   return prisma.project.findUnique({

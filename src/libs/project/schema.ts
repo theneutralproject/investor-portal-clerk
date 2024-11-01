@@ -5,8 +5,9 @@ export const zReturnsDateObjectSchema = z.object({
     distributionAmount: z.number(),
     multiple: z.number(),
     cumulativeDistribution: z.number(),
-    cumulativeMultiple: z.number(),
+    investmentMultiple: z.number(),
     totalGrossReturn: z.number(),
     totalNetReturn: z.number(),
+    interestRateOrIrr: z.number(),
 });
-export type ReturnsDateObjectSchema = z.infer<typeof zReturnsDateObjectSchema>;
+export type ReturnsDateObject = z.infer<typeof zReturnsDateObjectSchema>;

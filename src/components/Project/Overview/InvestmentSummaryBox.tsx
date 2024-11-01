@@ -3,7 +3,6 @@ import { Box, Grid, Typography, Divider } from "@mui/material";
 import { type Decimal } from "@prisma/client/runtime/library";
 import type { ProjectWithStats } from "@/libs/prisma";
 import type { ProjectInvestmentStats } from "@prisma/client";
-import { get } from "lodash";
 
 const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
 

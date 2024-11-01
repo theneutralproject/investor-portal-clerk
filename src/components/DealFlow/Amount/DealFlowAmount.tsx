@@ -52,7 +52,7 @@ const DealFlowAmount: React.FC = () => {
     return returnsData.map((dataPoint) => ({
       year: dataPoint.date.getFullYear(),
       cumulativeDistribution: dataPoint.cumulativeDistribution,
-      cumulativeMultiple: dataPoint.cumulativeMultiple,
+      investmentMultiple: dataPoint.investmentMultiple,
       totalGrossReturn: dataPoint.totalGrossReturn,
       totalNetReturn: dataPoint.totalNetReturn,
     }));
@@ -99,7 +99,7 @@ const DealFlowAmount: React.FC = () => {
       };
     }
     return {
-      dataKey: "cumulativeMultiple",
+      dataKey: "investmentMultiple",
       yAxisFormatter: (value: number) => `${value.toFixed(1)}x`,
       tooltipFormatter: (value: number) => [
         `${value.toFixed(2)}x`,
@@ -189,6 +189,7 @@ const DealFlowAmount: React.FC = () => {
                 <InvestmentStatsDisplay
                   stats={investmentStats}
                   returnsData={returnsData}
+                  dealInvestmentStats={deal.investmentStats}
                 />
               )}
             </>
