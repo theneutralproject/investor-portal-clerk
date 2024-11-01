@@ -35,7 +35,7 @@ const fileSchema = z
 
     return true;
   })
-  .transform((val) => val as File | Blob);
+  .transform((val) => val);
 
 export const zPdfDocumentCreateSchema = z.object({
   dealId: z

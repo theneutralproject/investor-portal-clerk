@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef } from "react";
+import React, { useState, useCallback } from "react";
 import {
   Box,
   Typography,
@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { Upload, Check, X, FileText } from "lucide-react";
 import { useDealFlow } from "./DealFlowContext";
-import { OrganizationDocument } from "@prisma/client";
+import { type OrganizationDocument } from "@prisma/client";
 
 type UploadStatus = "uploading" | "success" | "error";
 
@@ -62,10 +62,12 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           body: formData,
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const responseData = await response.json();
 
         if (!response.ok) {
-          throw new Error(responseData.error || "Upload failed");
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+          throw new Error(responseData?.error || "Upload failed");
         }
 
         setUploadState((prev) => ({
