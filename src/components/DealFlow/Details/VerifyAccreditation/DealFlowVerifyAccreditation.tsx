@@ -29,6 +29,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(
     "accreditation"
   );
+  console.log(answers);
   const [verifierInfo, setVerifierInfo] = useState<
     Partial<AccreditationVerifier>
   >({
@@ -90,10 +91,24 @@ const DealFlowVerifyAccreditation: React.FC = () => {
         throw new Error("Deal not found");
       }
 
+      const method =
+        answers.verification === "Upload Document"
+          ? VerificationMethod.SELF
+          : VerificationMethod.THIRD_PARTY;
+
+      const basis = answers.accreditation
+        ?.toLowerCase()
+        .includes("income of at least")
+        ? VerificationBasis.INCOME
+        : answers.accreditation?.toLowerCase().includes("verifiable net worth")
+        ? VerificationBasis.ASSETS
+        : answers.accreditation?.toLowerCase().includes("professional license")
+        ? VerificationBasis.LICENSE
+        : VerificationBasis.OTHER;
       const data = {
         dealId: deal.id,
-        method: VerificationMethod.SELF, //TODO: Update this to use the actual method,
-        basis: VerificationBasis.INCOME, //TODO: Update this to use the actual basis,
+        method,
+        basis,
       } as AccreditationVerificationCreateSchema;
       if (verifierInfo) {
         data.verifier = {
