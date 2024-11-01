@@ -39,6 +39,7 @@
     "dotenv": "^16.4.5",
     "iron-session": "^8.0.1",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.454.0",
     "next": "^14.2.3",
     "number-to-words": "^1.2.4",
     "pdfjs-dist": "^3.11.174",

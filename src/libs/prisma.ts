@@ -15,6 +15,7 @@ import {
   type AccreditationVerifier,
   type AccreditationVerification,
   type ProjectDocument,
+  OrganizationDocument,
 } from "@prisma/client";
 
 let prisma: PrismaClient;
@@ -75,6 +76,10 @@ export type OrganizationWithMembersAndAddress = Organization & {
 
 export type OrganizationWithFullMembers = Organization & {
   members: MemberWithUser[];
+};
+
+export type OrganizationWithDocuments = OrganizationWithFullMembers & {
+  document: OrganizationDocument[];
 };
 
 export type OrganizationWithFullMembersAndAddress = Organization & {

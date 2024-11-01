@@ -9,7 +9,19 @@ import {
 import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";
 import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
+import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
+import DealFlowFooter from "../Shared/DealFlowFooter";
 
+const REQUIRED_DOCUMENTS = [
+  {
+    display: "Certificate of Formation",
+    key: "organization-certificate-of-formation",
+  },
+  {
+    display: "Operating Agreement",
+    key: "organization-operating-agreement",
+  },
+];
 interface FormData {
   name: string;
   tin: string;
@@ -62,6 +74,19 @@ const DealFlowEntityDetails: React.FC = () => {
     }
   };
 
+  const allRequiredDocumentsAreUploaded = () => {
+    const orgDocuments = organization?.document ?? [];
+    const requiredKeys = REQUIRED_DOCUMENTS.map((doc) => doc.key);
+
+    const hasAllRequired = requiredKeys.every((requiredKey) => {
+      const matchingDocs = orgDocuments.filter(
+        (doc) => doc.key === requiredKey
+      );
+      return matchingDocs.length > 0;
+    });
+
+    return hasAllRequired;
+  };
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
@@ -111,14 +136,13 @@ const DealFlowEntityDetails: React.FC = () => {
         }
       />
 
-      <Box mt={4} display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => null}>
-          Back
-        </Button>
-        <Button variant="contained" onClick={handleContinue}>
-          Continue
-        </Button>
-      </Box>
+      <DealFlowDocumentUpload documents={REQUIRED_DOCUMENTS} />
+
+      <DealFlowFooter
+        onBack={() => null}
+        onContinue={handleContinue}
+        isContinueDisabled={!allRequiredDocumentsAreUploaded()}
+      />
     </Box>
   );
 };
