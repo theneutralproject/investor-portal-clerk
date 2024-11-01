@@ -143,10 +143,11 @@ async function uploadFile(
   type: string,
   id: number
 ): Promise<string> {
+  const fileName = file instanceof File ? file.name : "blob-" + Date.now();
   try {
     const { data, error } = await storageClient
       .from(`${type}-documents`)
-      .upload(`${type}-${id}/${file.name}`, file);
+      .upload(`${type}-${id}/${fileName}`, file);
 
     if (error) {
       console.error("File upload error:", error);
@@ -258,10 +259,11 @@ export async function POST(request: NextRequest) {
     const path = await uploadFile(file, type, id);
 
     // Create document entry
+    const fileName = file instanceof File ? file.name : "blob-" + Date.now();
     const newDocEntry = await createDocumentEntry(
       type,
       id,
-      file?.name ?? "",
+      fileName,
       path,
       key
     );

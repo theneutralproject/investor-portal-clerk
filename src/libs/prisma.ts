@@ -15,7 +15,7 @@ import {
   type AccreditationVerifier,
   type AccreditationVerification,
   type ProjectDocument,
-  OrganizationDocument,
+  type OrganizationDocument,
 } from "@prisma/client";
 
 let prisma: PrismaClient;
