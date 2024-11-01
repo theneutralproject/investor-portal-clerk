@@ -121,6 +121,7 @@ model OrganizationDocument {
   id             Int          @id @default(autoincrement())
   name           String
   path           String
+  key            String         @default("")
   organizationId Int
   dateCreated DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])

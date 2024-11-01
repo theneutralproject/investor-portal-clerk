@@ -82,7 +82,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     []
   );
 
-  const handleSubmitVerifier = useCallback(async () => {
+  const handleSubmitVerifier = async () => {
     setIsSubmitting(true);
     setError(null);
 
@@ -127,9 +127,9 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [createVerification, verifierInfo, deal]);
+  };
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = () => {
     if (Object.keys(answers).length === 2) {
       if (answers.verification === "Contact Third Party Verifier") {
         void handleSubmitVerifier();
@@ -137,7 +137,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
       router.push(`/dealflow/${project?.slug}/${deal?.id}/review`);
     }
-  }, [answers, handleSubmitVerifier, project, deal, router]);
+  };
 
   const renderVerificationContent = useCallback(() => {
     const accreditationType = answers.accreditation;

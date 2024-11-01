@@ -46,6 +46,7 @@ async function getUserAndOrg(request: NextRequest) {
                     user: true,
                 },
             },
+            document: true,
         },
     });
 

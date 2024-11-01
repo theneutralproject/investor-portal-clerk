@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 import {
-  type OrganizationWithFullMembers,
+  type OrganizationWithDocuments,
   type ProjectWithAllNestedData,
   type UserWithAddress,
   type DealWithInvestmentStats,
@@ -132,18 +132,18 @@ interface DealFlowContextType {
   project: ProjectWithAllNestedData;
   deal: DealWithInvestmentStats;
   user: UserWithAddress;
-  organization: OrganizationWithFullMembers;
+  organization: OrganizationWithDocuments;
   isLoading: boolean;
   error: string | null;
   updateDeal: (updatedDeal: Partial<DealWithInvestmentStats>) => Promise<void>;
   createDeal: () => Promise<void>;
   updateUser: (updatedUser: Partial<UserWithAddress>) => Promise<void>;
   createOrganization: (
-    organizationData: Partial<OrganizationWithFullMembers>
+    organizationData: Partial<OrganizationWithDocuments>
   ) => Promise<void>;
   updateOrganization: (
     organizationId: number,
-    updatedOrganization: Partial<OrganizationWithFullMembers>
+    updatedOrganization: Partial<OrganizationWithDocuments>
   ) => Promise<void>;
   createOrganizationMember: (
     createData: OrganizationMemberCreateSchema
@@ -156,6 +156,7 @@ interface DealFlowContextType {
     verificationData: AccreditationVerificationCreateSchema
   ) => Promise<void>;
   deleteOrganizationMember: (memberId: number) => Promise<void>;
+  refetchOrganization: () => Promise<void>;
 }
 
 const DealFlowContext = createContext<DealFlowContextType | undefined>(
@@ -179,7 +180,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const [deal, setDeal] = useState<DealWithInvestmentStats | null>(null);
   const [user, setUser] = useState<UserWithAddress | null>(null);
   const [organization, setOrganization] =
-    useState<OrganizationWithFullMembers | null>(null);
+    useState<OrganizationWithDocuments | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -270,7 +271,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
           const organizationData: Organization =
             await organizationResponse.json();
-          setOrganization(organizationData as OrganizationWithFullMembers);
+          setOrganization(organizationData as OrganizationWithDocuments);
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -384,7 +385,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         "/api/organizations",
         organizationData
       );
-      setOrganization(data as OrganizationWithFullMembers);
+      setOrganization(data as OrganizationWithDocuments);
 
       if (!deal) {
         throw new Error("Deal not found");
@@ -408,6 +409,14 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     }
   };
 
+  const refetchOrganization = async () => {
+    if (!organization) return;
+    const { data } = await axios.get<Organization>(
+      `/api/organizations/${organization.id}`
+    );
+    setOrganization(data as OrganizationWithDocuments);
+  };
+
   const updateOrganization = async (
     organizationId: number,
     updatedOrganizationData: Partial<Organization>
@@ -421,7 +430,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         `/api/organizations/${organizationId}`,
         updatedOrganizationData
       );
-      setOrganization(data as OrganizationWithFullMembers);
+      setOrganization(data as OrganizationWithDocuments);
 
       const nextStep = getNextStep(step);
       if (nextStep) {
@@ -469,7 +478,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setError(null);
 
     try {
-      const { data } = await axios.delete<OrganizationWithFullMembers>(
+      const { data } = await axios.delete<OrganizationWithDocuments>(
         `/api/organizations/${organization.id}/members/${memberId}`
       );
       setOrganization(data);
@@ -556,6 +565,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     createOrganizationMember,
     deleteOrganizationMember,
     createVerification,
+    refetchOrganization,
   };
 
   return (
