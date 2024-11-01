@@ -1,10 +1,19 @@
 import React, { useState } from "react";
-import { Box, Typography, RadioGroup, Card, CardContent } from "@mui/material";
+import {
+  Box,
+  Typography,
+  RadioGroup,
+  Card,
+  CardContent,
+  Link,
+} from "@mui/material";
 import { DealFinancingType } from "@prisma/client";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
+import { useRouter } from "next/navigation";
 
 const DealFlowType: React.FC = () => {
+  const router = useRouter();
   const { deal, updateDeal } = useDealFlow();
   const [financingType, setFinancingType] = useState<DealFinancingType>(
     deal?.investmentStats?.financingType ?? DealFinancingType.equity
@@ -24,6 +33,11 @@ const DealFlowType: React.FC = () => {
         financingType: financingType,
       },
     });
+  };
+
+  const handleLearnMore = (e: React.MouseEvent) => {
+    e.preventDefault();
+    router.push("/learn#11");
   };
 
   const investmentTypes = [
@@ -97,6 +111,25 @@ const DealFlowType: React.FC = () => {
           ))}
         </Box>
       </RadioGroup>
+
+      <Box sx={{ textAlign: "center", mt: 2, mb: 2 }}>
+        <Typography variant="body2">Not sure which to choose?</Typography>
+        <Link
+          href="/learn#11"
+          onClick={handleLearnMore}
+          underline="hover"
+          target="_blank"
+          rel="noopener noreferrer"
+          sx={{
+            cursor: "pointer",
+            color: "black",
+            textDecoration: "underline",
+            fontSize: 14,
+          }}
+        >
+          Learn More
+        </Link>
+      </Box>
 
       <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
     </Box>
