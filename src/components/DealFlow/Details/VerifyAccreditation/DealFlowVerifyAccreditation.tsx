@@ -15,7 +15,11 @@ import AccreditationQuestion from "@/components/DealFlow/Details/VerifyAccredita
 import UploadDocumentContent from "@/components/DealFlow/Details/VerifyAccreditation/UploadDocumentContent";
 import ThirdPartyVerifierForm from "@/components/DealFlow/Details/VerifyAccreditation/ThirdPartyVerifierForm";
 import { questions } from "@/components/DealFlow/Helpers/types";
-import { VerificationBasis, VerificationMethod, type AccreditationVerifier } from "@prisma/client";
+import {
+  VerificationBasis,
+  VerificationMethod,
+  type AccreditationVerifier,
+} from "@prisma/client";
 import type { AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
@@ -37,6 +41,23 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isThirdPartyVerifierValid = useMemo(() => {
+    if (answers.verification !== "Contact Third Party Verifier") {
+      return true;
+    }
+
+    return Boolean(
+      verifierInfo.firstName?.trim() &&
+        verifierInfo.lastName?.trim() &&
+        verifierInfo.email?.trim()
+    );
+  }, [
+    answers.verification,
+    verifierInfo.firstName,
+    verifierInfo.lastName,
+    verifierInfo.email,
+  ]);
 
   const handleOptionChange = useCallback(
     (questionId: string, value: string) => {
@@ -71,8 +92,8 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
       const data = {
         dealId: deal.id,
-        method: VerificationMethod.SELF,  //TODO: Update this to use the actual method,
-        basis: VerificationBasis.INCOME,  //TODO: Update this to use the actual basis,
+        method: VerificationMethod.SELF, //TODO: Update this to use the actual method,
+        basis: VerificationBasis.INCOME, //TODO: Update this to use the actual basis,
       } as AccreditationVerificationCreateSchema;
       if (verifierInfo) {
         data.verifier = {
@@ -141,6 +162,10 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     }
     return result;
   }, [answers]);
+
+  const isContinueDisabled = useMemo(() => {
+    return Object.keys(answers).length !== 2 || !isThirdPartyVerifierValid;
+  }, [answers, isThirdPartyVerifierValid]);
 
   return (
     <Box>
@@ -215,7 +240,11 @@ const DealFlowVerifyAccreditation: React.FC = () => {
         </AccordionDetails>
       </Accordion>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleContinue} />
+      <DealFlowFooter
+        onBack={() => null}
+        onContinue={handleContinue}
+        isContinueDisabled={isContinueDisabled}
+      />
     </Box>
   );
 };

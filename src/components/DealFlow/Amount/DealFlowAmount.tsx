@@ -22,7 +22,8 @@ import { useInvestmentStats } from "./useInvestmentStats";
 import { type ViewMode } from "./dealFlow.types";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
-const MIN_INVESTMENT =  5000;
+const MIN_INVESTMENT = 5000;
+const MAX_INVESTMENT = 10_000_000;
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -61,7 +62,12 @@ const DealFlowAmount: React.FC = () => {
   const handleAmountChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newAmount = Number(event.target.value);
-      setAmount(newAmount);
+
+      if (newAmount > MAX_INVESTMENT) {
+        setAmount(MAX_INVESTMENT);
+      } else {
+        setAmount(newAmount);
+      }
     },
     []
   );
