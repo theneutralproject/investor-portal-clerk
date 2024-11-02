@@ -178,9 +178,24 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     return result;
   }, [answers]);
 
+  // Check if document is uploaded when "Upload Document" is selected
+  const isDocumentValid = useMemo(() => {
+    if (answers.verification !== "Upload Document") {
+      return true;
+    }
+
+    // Verify that deal.documents exists and has exactly one document
+    return deal?.document?.length === 1;
+  }, [answers.verification, deal?.document]);
+
+  // Combined validation for the continue button
   const isContinueDisabled = useMemo(() => {
-    return Object.keys(answers).length !== 2 || !isThirdPartyVerifierValid;
-  }, [answers, isThirdPartyVerifierValid]);
+    const hasRequiredAnswers = Object.keys(answers).length === 2;
+
+    return (
+      !hasRequiredAnswers || !isThirdPartyVerifierValid || !isDocumentValid
+    );
+  }, [answers, isThirdPartyVerifierValid, isDocumentValid]);
 
   return (
     <Box>

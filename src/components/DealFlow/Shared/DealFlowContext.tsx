@@ -157,6 +157,7 @@ interface DealFlowContextType {
   ) => Promise<void>;
   deleteOrganizationMember: (memberId: number) => Promise<void>;
   refetchOrganization: () => Promise<void>;
+  refetchDeal: () => Promise<void>;
 }
 
 const DealFlowContext = createContext<DealFlowContextType | undefined>(
@@ -417,6 +418,31 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setOrganization(data as OrganizationWithDocuments);
   };
 
+  const refetchDeal = async () => {
+    if (!deal || !project) return;
+    try {
+      const dealResponse = await fetch(
+        `/api/deals/flow?projectSlug=${encodeURIComponent(
+          project.slug
+        )}&dealId=${encodeURIComponent(deal.id)}`
+      );
+
+      if (!dealResponse.ok) {
+        throw new Error(`HTTP error! status: ${dealResponse.status}`);
+      }
+
+      const dealData: {
+        project: Project;
+        deal: DealWithInvestmentStats | null;
+      } = await dealResponse.json();
+
+      setDeal(dealData.deal);
+    } catch (error) {
+      console.error("Error fetching deal data:", error);
+      setError("Failed to load deal data. Please try again.");
+    }
+  };
+
   const updateOrganization = async (
     organizationId: number,
     updatedOrganizationData: Partial<Organization>
@@ -566,6 +592,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     deleteOrganizationMember,
     createVerification,
     refetchOrganization,
+    refetchDeal,
   };
 
   return (

@@ -14,6 +14,47 @@ import { z } from "zod";
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
+// Type definitions for file-like objects
+interface FileDetails {
+  name: string;
+  type: string;
+  size?: number;
+}
+
+interface FileWrapper {
+  name: string;
+  type: string;
+  size?: number;
+  arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+// Helper function to determine if value is File-like
+function isFileLike(value: unknown): value is FileWrapper {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "name" in value &&
+    "type" in value &&
+    typeof (value as FileWrapper).arrayBuffer === "function"
+  );
+}
+
+// Helper function to safely get file details
+function getFileDetails(file: FormDataEntryValue): FileDetails {
+  if (isFileLike(file)) {
+    return {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    };
+  }
+  // Fallback for non-File objects
+  return {
+    name: `upload-${Date.now()}`,
+    type: "application/octet-stream",
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     const user = await currentUser();
@@ -139,15 +180,31 @@ async function validateAccess(
 }
 
 async function uploadFile(
-  file: File | Blob,
+  file: FormDataEntryValue,
   type: string,
   id: number
 ): Promise<string> {
-  const fileName = file instanceof File ? file.name : "blob-" + Date.now();
+  const fileDetails = getFileDetails(file);
+  const fileName = `${
+    fileDetails.name || `upload-${Date.now()}`
+  }${getFileExtension(fileDetails.type)}`;
+
   try {
+    let fileData: ArrayBuffer;
+    if (isFileLike(file)) {
+      fileData = await file.arrayBuffer();
+    } else if (typeof file === "string") {
+      // Handle string data if needed
+      fileData = new TextEncoder().encode(file).buffer;
+    } else {
+      throw new Error("Invalid file format");
+    }
+
     const { data, error } = await storageClient
       .from(`${type}-documents`)
-      .upload(`${type}-${id}/${fileName}`, file);
+      .upload(`${type}-${id}/${fileName}`, fileData, {
+        contentType: fileDetails.type,
+      });
 
     if (error) {
       console.error("File upload error:", error);
@@ -163,6 +220,16 @@ async function uploadFile(
     console.error("Error in uploadFile:", error);
     throw error;
   }
+}
+
+function getFileExtension(mimeType: string): string {
+  const extensions: Record<string, string> = {
+    "application/pdf": ".pdf",
+    "image/png": ".png",
+    "image/jpg": ".jpg",
+    "image/jpeg": ".jpg",
+  };
+  return extensions[mimeType] ?? "";
 }
 
 async function createDocumentEntry(
@@ -200,13 +267,9 @@ async function createDocumentEntry(
 
 export async function POST(request: NextRequest) {
   try {
-    // Validate user first
     const dbUser = await validateUser();
-
-    // Get the form data
     const formData = await request.formData();
 
-    // Log the received form data
     console.log("Received form data:", {
       keys: Array.from(formData.keys()),
       type: formData.get("type"),
@@ -216,7 +279,6 @@ export async function POST(request: NextRequest) {
       hasFile: formData.has("file"),
     });
 
-    // Create the data object for validation
     const dataToValidate = {
       type: formData.get("type"),
       organizationId: formData.get("organizationId"),
@@ -225,7 +287,6 @@ export async function POST(request: NextRequest) {
       file: formData.get("file"),
     };
 
-    // Validate the data
     const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
 
     if (!validationResult.success) {
@@ -241,7 +302,6 @@ export async function POST(request: NextRequest) {
 
     const { type, organizationId, dealId, file, key } = validationResult.data;
 
-    // Additional validation
     const id = type === "deal" ? dealId : organizationId;
     if (!id) {
       return jsonResponse(
@@ -252,18 +312,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate access
     await validateAccess(dbUser, type, id);
-
-    // Upload file
     const path = await uploadFile(file, type, id);
 
-    // Create document entry
-    const fileName = file instanceof File ? file.name : "blob-" + Date.now();
+    const fileDetails = getFileDetails(file);
     const newDocEntry = await createDocumentEntry(
       type,
       id,
-      fileName,
+      fileDetails.name,
       path,
       key
     );
