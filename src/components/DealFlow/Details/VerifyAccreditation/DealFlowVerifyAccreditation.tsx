@@ -184,8 +184,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
       return true;
     }
 
-    // Verify that deal.documents exists and has exactly one document
-    return deal?.document?.length === 1;
+    return deal?.document?.length >= 1;
   }, [answers.verification, deal?.document]);
 
   // Combined validation for the continue button
