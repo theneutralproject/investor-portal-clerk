@@ -18,7 +18,7 @@
     "test:e2e": "npx playwright test --ui"
   },
   "dependencies": {
-    "@clerk/nextjs": "^4.31.5",
+    "@clerk/nextjs": "^6.0.0",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^6.0.0",
