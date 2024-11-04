@@ -1,9 +1,10 @@
-import { SessionData } from "@/libs/session/utils";
+import prisma from "@/libs/prisma";
+import type { SessionData } from "@/libs/session/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import jwt from "jsonwebtoken";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
-// test route to get all users if correct jwt is provided
+// test route to get user if correct jwt is provided
 export async function GET(request: NextRequest) {
     // get jwt from request headers
     const token = request.headers.get("authorization");
@@ -12,10 +13,14 @@ export async function GET(request: NextRequest) {
     }
     try{
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    const { userId, userEmail } = decoded as SessionData;
+    const {  userId, userEmail } = decoded as SessionData;
+    console.log("decoded", userId, userEmail);
+    const currentUser = await prisma.user.findUnique({ where: { email: userEmail } });
+    return jsonResponse(currentUser);
     } catch (error) {
         console.error(error);
         return jsonResponse(getErrorMessage(error), 401);
     }
+
 
 }

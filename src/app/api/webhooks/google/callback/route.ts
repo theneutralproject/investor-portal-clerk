@@ -1,10 +1,10 @@
 import prisma from "@/libs/prisma";
-import { SessionData, sessionOptions } from "@/libs/session/utils";
+import { type SessionData, sessionOptions } from "@/libs/session/utils";
 import { jsonResponse } from "@/libs/utils";
 import { Role } from "@prisma/client";
 import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import jwt from 'jsonwebtoken';
 import { redirect } from "next/navigation";
 
@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
         },
         body: JSON.stringify(data),
     });
-    const access_token_data = await response.json();
+    const access_token_data = (await response.json()) as { id_token: string };
     const { id_token } = access_token_data;
 
     // verify and extract the information in the id token
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
     if (!token_info_response.ok) {
         return jsonResponse(await token_info_response.json(), token_info_response.status);
     }
-    const { email, name, family_name } = await token_info_response.json();
+    const { email, name, family_name } = (await token_info_response.json()) as {email: string, name: string, family_name: string};
 
     const user = await prisma.user.findUnique({ where: { email, role: Role.ADMIN } });
     if (!user) {
