@@ -26,6 +26,7 @@ import { isNull } from "lodash";
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
 export async function refreshAccessToken() {
+    "use server";   // TODO: Ensure this does not break docusign!!!
     const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
     const responseObj = {
