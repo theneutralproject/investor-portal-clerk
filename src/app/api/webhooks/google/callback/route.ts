@@ -45,14 +45,14 @@ export async function GET(request: NextRequest) {
     if (!token_info_response.ok) {
         return jsonResponse(await token_info_response.json(), token_info_response.status);
     }
-    const { email, name, family_name } = (await token_info_response.json()) as {email: string, name: string, family_name: string};
+    const { email, given_name, family_name } = (await token_info_response.json()) as {email: string, given_name: string, family_name: string};
 
     const user = await prisma.user.findUnique({ where: { email, role: Role.ADMIN } });
     if (!user) {
         return jsonResponse({ error: "Admin User not found" }, 404);
     }
-    if (user.lastName !== family_name || user.firstName !== name) {
-        console.error(email, name, family_name);
+    if (user.lastName !== family_name || user.firstName !== given_name) {
+        console.error(email, given_name, family_name);
         return jsonResponse({ error: "User information does not match" }, 400);
     }
 

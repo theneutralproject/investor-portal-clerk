@@ -2,9 +2,9 @@ import { authMiddleware, redirectToSignUp } from "@clerk/nextjs";
 import { type NextRequest } from "next/server";
 
 export default authMiddleware({
-  ignoredRoutes: ["/api/webhooks/(.*)"],
+  ignoredRoutes: ["/api/webhooks/(.*)", "/api/admin/(.*)"],
   publicRoutes: (req: NextRequest) => {
-    const publicRoutes = ["/terms", "/support", "/api/clerk", "/api/admin/auth"];
+    const publicRoutes = ["/terms", "/support", "/api/clerk"];
     return publicRoutes.some((route) => req.nextUrl.pathname.includes(route));
   },
 
