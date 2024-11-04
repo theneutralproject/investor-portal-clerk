@@ -64,7 +64,7 @@ export async function GET(request: NextRequest) {
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET!, {
         expiresIn: '24h',
     });
-    console.log(`redirecting to https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}?retoolNonce=${retoolNonce}`);
+    console.log(`redirecting to https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}&retoolNonce=${retoolNonce}`);
     // redirect to the admin UI
-    redirect(`https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}?retoolNonce=${retoolNonce}`);
+    redirect(`https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}&retoolNonce=${retoolNonce}`);
 }
