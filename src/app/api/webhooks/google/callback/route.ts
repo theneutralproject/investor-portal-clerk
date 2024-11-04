@@ -20,6 +20,7 @@ export async function GET(request: NextRequest) {
     // &scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=0
     // &hd=neutral.us&prompt=consent
     const code = request.nextUrl.searchParams.get("code");
+    const retoolNonce = request.nextUrl.searchParams.get("state");
     const data = {
         code,
         client_id: process.env.GOOGLE_CLIENT_ID,
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET!, {
         expiresIn: '24h',
     });
-
+    console.log(`redirecting to https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}?retoolNonce=${retoolNonce}`);
     // redirect to the admin UI
-    redirect(`https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}`);
+    redirect(`https://neutral.retool.com/oauth/user/redirectCallback?auth_token=${token}?retoolNonce=${retoolNonce}`);
 }
