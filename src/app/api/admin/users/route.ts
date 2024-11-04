@@ -7,7 +7,10 @@ import type { NextRequest } from "next/server";
 // test route to get user if correct jwt is provided
 export async function GET(request: NextRequest) {
     // get jwt from request headers
-    const token = request.headers.get("authorization");
+    const token = request.headers.get("Authorization");
+    if(token){
+        console.log("token", token);
+    }  
     if(!token){
         return jsonResponse("No token provided", 401);
     }
