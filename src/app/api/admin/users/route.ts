@@ -1,5 +1,4 @@
 import prisma from "@/libs/prisma";
-import type { SessionData } from "@/libs/session/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import jwt from "jsonwebtoken";
 import type { NextRequest } from "next/server";
@@ -19,7 +18,7 @@ export async function GET(request: NextRequest) {
     console.log("decoded1", decoded);
     const {  email } = decoded as { id: number, email: string };
     if(!email){
-        return jsonResponse(`decoded looks like this ${decoded.toString()}`, 401);
+        return jsonResponse(`decoded contains no email`, 401);
     }
     const currentUser = await prisma.user.findUnique({ where: { email } });
     return jsonResponse(currentUser);
