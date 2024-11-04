@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 const GOOGLE_OAUTH_SCOPES = [
     "https%3A//www.googleapis.com/auth/userinfo.email",

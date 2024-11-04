@@ -16,9 +16,12 @@ export async function GET(request: NextRequest) {
     }
     try{
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    const {  userId, userEmail } = decoded as SessionData;
-    console.log("decoded", userId, userEmail);
-    const currentUser = await prisma.user.findUnique({ where: { email: userEmail } });
+    console.log("decoded1", decoded);
+    const {  email } = decoded as { id: number, email: string };
+    if(!email){
+        return jsonResponse(`decoded looks like this ${decoded.toString()}`, 401);
+    }
+    const currentUser = await prisma.user.findUnique({ where: { email } });
     return jsonResponse(currentUser);
     } catch (error) {
         console.error(error);
