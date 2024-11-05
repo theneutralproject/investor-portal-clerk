@@ -1,6 +1,6 @@
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { isError } from "lodash";
 import { DealFinancingType } from "@prisma/client";
 import {

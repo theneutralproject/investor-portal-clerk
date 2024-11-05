@@ -61,6 +61,11 @@ export type DealWithInvestmentStats = Deal & {
   investmentStats: DealInvestmentStats;
 };
 
+export type DealWithOrgMembersAndProject = Deal & {
+  organization: OrganizationWithFullMembers 
+  project: Project;
+};
+
 export type DealWithInvestmentStatsAndDocument = DealWithInvestmentStats & {
   document: DealDocument[];
 };

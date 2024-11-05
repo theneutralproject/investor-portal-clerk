@@ -55,6 +55,11 @@ function getFileDetails(file: FormDataEntryValue): FileDetails {
   };
 }
 
+/**
+ * 
+ * @param request Get documents for a project
+ * @returns 
+ */
 export async function GET(request: NextRequest) {
   try {
     const user = await currentUser();
