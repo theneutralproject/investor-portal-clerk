@@ -3,10 +3,12 @@ import {
   Box,
   Typography,
   TextField,
-  Grid,
   CircularProgress,
   Autocomplete,
+  Card,
+  CardContent,
 } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { zUserUpdateSchema, type UserUpdateSchema } from "@/libs/user/schema";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
@@ -14,14 +16,41 @@ import { usStates } from "@components/DealFlow/Helpers/DealFlowHelpers";
 import { formatDate } from "@components/DealFlow/Details/DealFlowEntityDetails";
 import { type Address } from "@prisma/client";
 
+import LockIcon from "@mui/icons-material/Lock";
+
+const EncryptionCard = () => {
+  return (
+    <Card>
+      <CardContent>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <LockIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+          <Typography
+            variant="subtitle1"
+            component="div"
+            sx={{ fontWeight: 500, color: "text.primary" }}
+          >
+            256-Bit Encryption
+          </Typography>
+        </Box>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mt: 0.5,
+            pl: "28px",
+          }}
+        >
+          Neutral uses industry-standard 256-bit encryption to ensure that your
+          data remains private and secure.
+        </Typography>
+      </CardContent>
+    </Card>
+  );
+};
+
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
   const [formData, setFormData] = useState<UserUpdateSchema | null>(null);
-
-  //'2024-10-29T00:00:00.000Z'
-  console.log(user.dateOfBirth);
-
-  console.log(formData);
 
   useEffect(() => {
     if (user) {
@@ -112,96 +141,83 @@ const DealFlowDetails: React.FC = () => {
   }
 
   return (
-    <Box>
-      <Typography variant="h5" gutterBottom>
-        Update User Information
+    <Box sx={{ maxWidth: 800, mx: "auto" }}>
+      <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
+        Personal Details
       </Typography>
       <Grid container spacing={2}>
-        <Grid item xs={12} sm={6}>
+        {/* Personal Information Section */}
+        <Grid size={6}>
           <TextField
             fullWidth
+            variant="standard"
             label="First Name"
             name="firstName"
             value={formData.firstName}
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={6}>
           <TextField
             fullWidth
+            variant="standard"
             label="Last Name"
             name="lastName"
             value={formData.lastName}
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={12}>
           <TextField
             fullWidth
+            variant="standard"
             label="Phone Number"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleInputChange}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="SSN"
-            name="ssn"
-            value={formData.ssn}
-            onChange={handleInputChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Date of Birth"
-            name="dateOfBirth"
-            type="date"
-            value={formData.dateOfBirth}
-            onChange={handleInputChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          />
-        </Grid>
 
-        <Grid item xs={12}>
-          <Typography variant="h6">Address</Typography>
-        </Grid>
-        <Grid item xs={12}>
+        {/* Address Section */}
+        <Grid size={12}>
           <TextField
             fullWidth
-            label="Street"
+            variant="standard"
+            label="Address"
             name="street"
             value={formData.address?.street}
             onChange={handleAddressChange}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={12}>
           <TextField
             fullWidth
+            variant="standard"
+            label="Address Line 2 (Optional)"
+            name="street2"
+            onChange={handleAddressChange}
+          />
+        </Grid>
+        <Grid size={12}>
+          <TextField
+            fullWidth
+            variant="standard"
             label="City"
             name="city"
             value={formData.address?.city}
             onChange={handleAddressChange}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            fullWidth
-            label="Zipcode"
-            name="zipcode"
-            value={formData.address?.zipcode}
-            onChange={handleAddressChange}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={6}>
           <Autocomplete
             options={usStates}
             renderInput={(params) => (
-              <TextField {...params} label="State" fullWidth />
+              <TextField
+                {...params}
+                label="State"
+                fullWidth
+                variant="standard"
+              />
             )}
             value={formData.address?.state}
             onChange={(_, newValue) =>
@@ -211,14 +227,57 @@ const DealFlowDetails: React.FC = () => {
             }
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid size={6}>
           <TextField
             fullWidth
+            variant="standard"
+            label="Zip"
+            name="zipcode"
+            value={formData.address?.zipcode}
+            onChange={handleAddressChange}
+          />
+        </Grid>
+        <Grid size={12}>
+          <TextField
+            fullWidth
+            variant="standard"
             label="Country"
             name="country"
             value="United States"
             disabled
           />
+        </Grid>
+
+        {/* Additional Information Section */}
+        <Grid size={12}>
+          <TextField
+            fullWidth
+            variant="standard"
+            label="Social Security Number"
+            name="ssn"
+            value={formData.ssn}
+            onChange={handleInputChange}
+            placeholder="___-__-____"
+          />
+        </Grid>
+        <Grid size={12}>
+          <TextField
+            fullWidth
+            variant="standard"
+            label="Date of Birth"
+            name="dateOfBirth"
+            type="date"
+            value={formData.dateOfBirth}
+            onChange={handleInputChange}
+            InputLabelProps={{
+              shrink: true,
+            }}
+            placeholder="MM/DD/YYYY"
+          />
+        </Grid>
+
+        <Grid size={12}>
+          <EncryptionCard />
         </Grid>
       </Grid>
 
