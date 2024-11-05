@@ -59,6 +59,11 @@ export type DealWithInvestmentStats = Deal & {
   investmentStats: DealInvestmentStats;
 };
 
+export type DealWithOrgMembersAndProject = Deal & {
+  organization: OrganizationWithFullMembers 
+  project: Project;
+};
+
 export type AccreditationVerificationWithVerifier =
   AccreditationVerification & {
     verifier: AccreditationVerifier | null;
