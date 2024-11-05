@@ -48,8 +48,7 @@ export type HubspotDealUpdate = {
 export const zHsDealCreateResponse = z.object({
   dealId: z.number()
 });
-
-export type HsDealDocsAccessedUpdateSchema = z.infer<typeof zHsDealDocsAccessedUpdateSchema>
+export type HsDealCreateResponse = z.infer<typeof zHsDealCreateResponse>;
 
 export const zHubspotDealUpdateSchema = z.object({
   hubspotId: z.string(),
@@ -89,3 +88,5 @@ export const zHsDealDocsAccessedUpdateSchema = z.object({
   dealStage: z.number().min(1).max(5),
   documentNames: z.string(),
 });
+
+export type HsDealDocsAccessedUpdateSchema = z.infer<typeof zHsDealDocsAccessedUpdateSchema>

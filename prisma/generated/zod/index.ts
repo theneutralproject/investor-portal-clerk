@@ -28,7 +28,7 @@ export const AccreditationVerifierScalarFieldEnumSchema = z.enum(['id','firstNam
 
 export const DealDocumentScalarFieldEnumSchema = z.enum(['id','name','path','type','dealId','dateCreated']);
 
-export const OrganizationDocumentScalarFieldEnumSchema = z.enum(['id','name','path','organizationId','dateCreated']);
+export const OrganizationDocumentScalarFieldEnumSchema = z.enum(['id','name','path','key','organizationId','dateCreated']);
 
 export const ProjectScalarFieldEnumSchema = z.enum(['id','name','location','tags','status','description','marketHighlights','youtubeUrl','slug','equityReturnsFile']);
 
@@ -254,6 +254,7 @@ export const OrganizationDocumentSchema = z.object({
   id: z.number().int(),
   name: z.string(),
   path: z.string(),
+  key: z.string(),
   organizationId: z.number().int(),
   dateCreated: z.coerce.date(),
 })
@@ -683,6 +684,7 @@ export const OrganizationDocumentSelectSchema: z.ZodType<Prisma.OrganizationDocu
   id: z.boolean().optional(),
   name: z.boolean().optional(),
   path: z.boolean().optional(),
+  key: z.boolean().optional(),
   organizationId: z.boolean().optional(),
   dateCreated: z.boolean().optional(),
   organization: z.union([z.boolean(),z.lazy(() => OrganizationArgsSchema)]).optional(),
@@ -1655,6 +1657,7 @@ export const OrganizationDocumentWhereInputSchema: z.ZodType<Prisma.Organization
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   path: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  key: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
@@ -1664,6 +1667,7 @@ export const OrganizationDocumentOrderByWithRelationInputSchema: z.ZodType<Prism
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   path: z.lazy(() => SortOrderSchema).optional(),
+  key: z.lazy(() => SortOrderSchema).optional(),
   organizationId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   organization: z.lazy(() => OrganizationOrderByWithRelationInputSchema).optional()
@@ -1679,6 +1683,7 @@ export const OrganizationDocumentWhereUniqueInputSchema: z.ZodType<Prisma.Organi
   NOT: z.union([ z.lazy(() => OrganizationDocumentWhereInputSchema),z.lazy(() => OrganizationDocumentWhereInputSchema).array() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   path: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  key: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
@@ -1688,6 +1693,7 @@ export const OrganizationDocumentOrderByWithAggregationInputSchema: z.ZodType<Pr
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   path: z.lazy(() => SortOrderSchema).optional(),
+  key: z.lazy(() => SortOrderSchema).optional(),
   organizationId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => OrganizationDocumentCountOrderByAggregateInputSchema).optional(),
@@ -1704,6 +1710,7 @@ export const OrganizationDocumentScalarWhereWithAggregatesInputSchema: z.ZodType
   id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   path: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  key: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   organizationId: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
 }).strict();
@@ -3061,6 +3068,7 @@ export const DealDocumentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.DealDo
 export const OrganizationDocumentCreateInputSchema: z.ZodType<Prisma.OrganizationDocumentCreateInput> = z.object({
   name: z.string(),
   path: z.string(),
+  key: z.string().optional(),
   dateCreated: z.coerce.date().optional(),
   organization: z.lazy(() => OrganizationCreateNestedOneWithoutDocumentInputSchema)
 }).strict();
@@ -3069,6 +3077,7 @@ export const OrganizationDocumentUncheckedCreateInputSchema: z.ZodType<Prisma.Or
   id: z.number().int().optional(),
   name: z.string(),
   path: z.string(),
+  key: z.string().optional(),
   organizationId: z.number().int(),
   dateCreated: z.coerce.date().optional()
 }).strict();
@@ -3076,6 +3085,7 @@ export const OrganizationDocumentUncheckedCreateInputSchema: z.ZodType<Prisma.Or
 export const OrganizationDocumentUpdateInputSchema: z.ZodType<Prisma.OrganizationDocumentUpdateInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   organization: z.lazy(() => OrganizationUpdateOneRequiredWithoutDocumentNestedInputSchema).optional()
 }).strict();
@@ -3084,6 +3094,7 @@ export const OrganizationDocumentUncheckedUpdateInputSchema: z.ZodType<Prisma.Or
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   organizationId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
@@ -3092,6 +3103,7 @@ export const OrganizationDocumentCreateManyInputSchema: z.ZodType<Prisma.Organiz
   id: z.number().int().optional(),
   name: z.string(),
   path: z.string(),
+  key: z.string().optional(),
   organizationId: z.number().int(),
   dateCreated: z.coerce.date().optional()
 }).strict();
@@ -3099,6 +3111,7 @@ export const OrganizationDocumentCreateManyInputSchema: z.ZodType<Prisma.Organiz
 export const OrganizationDocumentUpdateManyMutationInputSchema: z.ZodType<Prisma.OrganizationDocumentUpdateManyMutationInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -3106,6 +3119,7 @@ export const OrganizationDocumentUncheckedUpdateManyInputSchema: z.ZodType<Prism
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   organizationId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
@@ -4600,6 +4614,7 @@ export const OrganizationDocumentCountOrderByAggregateInputSchema: z.ZodType<Pri
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   path: z.lazy(() => SortOrderSchema).optional(),
+  key: z.lazy(() => SortOrderSchema).optional(),
   organizationId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4613,6 +4628,7 @@ export const OrganizationDocumentMaxOrderByAggregateInputSchema: z.ZodType<Prism
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   path: z.lazy(() => SortOrderSchema).optional(),
+  key: z.lazy(() => SortOrderSchema).optional(),
   organizationId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -4621,6 +4637,7 @@ export const OrganizationDocumentMinOrderByAggregateInputSchema: z.ZodType<Prism
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
   path: z.lazy(() => SortOrderSchema).optional(),
+  key: z.lazy(() => SortOrderSchema).optional(),
   organizationId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional()
 }).strict();
@@ -7338,6 +7355,7 @@ export const AddressCreateOrConnectWithoutOrganizationInputSchema: z.ZodType<Pri
 export const OrganizationDocumentCreateWithoutOrganizationInputSchema: z.ZodType<Prisma.OrganizationDocumentCreateWithoutOrganizationInput> = z.object({
   name: z.string(),
   path: z.string(),
+  key: z.string().optional(),
   dateCreated: z.coerce.date().optional()
 }).strict();
 
@@ -7345,6 +7363,7 @@ export const OrganizationDocumentUncheckedCreateWithoutOrganizationInputSchema: 
   id: z.number().int().optional(),
   name: z.string(),
   path: z.string(),
+  key: z.string().optional(),
   dateCreated: z.coerce.date().optional()
 }).strict();
 
@@ -7503,6 +7522,7 @@ export const OrganizationDocumentScalarWhereInputSchema: z.ZodType<Prisma.Organi
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   path: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  key: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
 }).strict();
@@ -9318,6 +9338,7 @@ export const OrganizationDocumentCreateManyOrganizationInputSchema: z.ZodType<Pr
   id: z.number().int().optional(),
   name: z.string(),
   path: z.string(),
+  key: z.string().optional(),
   dateCreated: z.coerce.date().optional()
 }).strict();
 
@@ -9363,6 +9384,7 @@ export const DealUncheckedUpdateManyWithoutOrganizationInputSchema: z.ZodType<Pr
 export const OrganizationDocumentUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma.OrganizationDocumentUpdateWithoutOrganizationInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -9370,6 +9392,7 @@ export const OrganizationDocumentUncheckedUpdateWithoutOrganizationInputSchema: 
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
@@ -9377,6 +9400,7 @@ export const OrganizationDocumentUncheckedUpdateManyWithoutOrganizationInputSche
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   path: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  key: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 

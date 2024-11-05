@@ -12,8 +12,9 @@ import {
   type ProjectedReturn,
   type ChartConfig,
   type InvestmentStats,
-  type ReturnsDataPoint,
 } from "./dealFlow.types";
+import type { ReturnsDateObject } from "@/libs/project/schema";
+import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 
 interface QuickSelectChipsProps {
   amounts: number[];
@@ -79,12 +80,14 @@ export const ReturnsChart: React.FC<ReturnsChartProps> = ({ data, config }) => (
 
 interface InvestmentStatsDisplayProps {
   stats: InvestmentStats;
-  returnsData: ReturnsDataPoint[];
+  returnsData: ReturnsDateObject[];
+  dealInvestmentStats: DealInvestmentStats
 }
 
 export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
   stats,
   returnsData,
+  dealInvestmentStats
 }) => (
   <Box
     sx={{
@@ -112,7 +115,7 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
       })()}{" "}
       Months
     </Typography>
-    <Typography>IRR: {stats.irr}</Typography>
+    <Typography>{dealInvestmentStats.financingType === DealFinancingType.equity ? "IRR" : "Interest Rate"}: {stats.interestRateOrIrr * 100}%</Typography>
     <Typography>MOIC: {stats.investmentMultiple.toFixed(2)}X</Typography>
     <Typography>
       Gross Return: ${stats.totalGrossReturn.toLocaleString()}

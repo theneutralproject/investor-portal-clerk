@@ -3,7 +3,6 @@ import { resetOrgInDb } from '../helpers';
 import { MembershipType, Organization } from '@prisma/client';
 import { MemberWithUser } from '@/libs/prisma';
 import { OrganizationMemberCreateSchema } from '@/libs/organization/schema';
-import { title } from 'process';
 
 test.describe("api/organizations/members test", () => {
     let testOrg: Organization | null = null;

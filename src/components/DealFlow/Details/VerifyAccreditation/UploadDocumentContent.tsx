@@ -1,7 +1,6 @@
-// UploadDocumentContent.tsx
-
 import React from "react";
-import { Box, Typography, Button } from "@mui/material";
+import { Box, Typography } from "@mui/material";
+import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
 
 interface UploadDocumentContentProps {
   accreditationType: string;
@@ -26,7 +25,7 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
     ];
   } else if (accreditationType?.includes("professional license")) {
     uploadInstructions =
-      "Upload document to prove you hold a license and are in good standing.";
+      "Upload documents to prove you hold a license and are in good standing.";
   }
 
   return (
@@ -48,15 +47,16 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
             : "net worth over $1 million, excluding primary residence (individually or with spouse or partner)."}
         </Typography>
       )}
-      <Box sx={{ mt: 2 }}>
-        <Button variant="contained" component="label">
-          Upload File
-          <input type="file" hidden />
-        </Button>
-        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-          Upload PDF, JPEG, PNG or DOCX File. Max 5MB.
-        </Typography>
-      </Box>
+
+      <DealFlowDocumentUpload
+        type="deal"
+        documents={[
+          {
+            display: "Verification Accreditation",
+            key: "VERIFICATION_ACCREDITATION",
+          },
+        ]}
+      />
     </Box>
   );
 };
