@@ -1,5 +1,6 @@
 import prisma from "@/libs/prisma";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
+import { Role } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import type { NextRequest } from "next/server";
 
@@ -15,17 +16,14 @@ export async function GET(request: NextRequest) {
     }
     try{
     const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    console.log("decoded1", decoded);
-    const {  email } = decoded as { id: number, email: string };
+    const { email } = decoded as { id: number, email: string };
     if(!email){
         return jsonResponse(`decoded contains no email`, 401);
     }
-    const currentUser = await prisma.user.findUnique({ where: { email } });
+    const currentUser = await prisma.user.findUnique({ where: { email, role: Role.ADMIN } });
     return jsonResponse(currentUser);
     } catch (error) {
         console.error(error);
         return jsonResponse(getErrorMessage(error), 401);
     }
-
-
 }
