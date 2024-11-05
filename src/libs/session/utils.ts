@@ -7,11 +7,17 @@ export const sessionOptions: SessionOptions = {
     cookieName: "neutral-investor-portal",
     cookieOptions: {
         secure: process.env.NODE_ENV === "production",
+        httpOnly: true, /** TODO: Ensure this does not break docusign. set to true if the client should not be able to access it */
     },
 };
+
 
 // This is where we specify the typings of req.session.*
 export interface SessionData {
     docusignJwt?: string;
-    docusignExpiresAt?: number
+    docusignExpiresAt?: number;
+    userId?: number;
+    userEmail?: string;
+    authExpiresAt?: number;
+    authJwt?: string;
 }

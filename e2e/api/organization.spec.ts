@@ -4,7 +4,6 @@ import prisma, { OrganizationWithMembersAndAddress } from '@/libs/prisma';
 import { test, expect } from '@playwright/test';
 import { DealOwnershipType, Organization } from '@prisma/client';
 import { resetOrgInDb } from 'e2e/helpers';
-import { add } from 'lodash';
 
 
 // bundled so that they are not run in parallel (for cleanup purposes)

@@ -15,7 +15,11 @@ import AccreditationQuestion from "@/components/DealFlow/Details/VerifyAccredita
 import UploadDocumentContent from "@/components/DealFlow/Details/VerifyAccreditation/UploadDocumentContent";
 import ThirdPartyVerifierForm from "@/components/DealFlow/Details/VerifyAccreditation/ThirdPartyVerifierForm";
 import { questions } from "@/components/DealFlow/Helpers/types";
-import { VerificationBasis, VerificationMethod, type AccreditationVerifier } from "@prisma/client";
+import {
+  VerificationBasis,
+  VerificationMethod,
+  type AccreditationVerifier,
+} from "@prisma/client";
 import type { AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
@@ -25,6 +29,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(
     "accreditation"
   );
+  console.log(answers);
   const [verifierInfo, setVerifierInfo] = useState<
     Partial<AccreditationVerifier>
   >({
@@ -37,6 +42,23 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const isThirdPartyVerifierValid = useMemo(() => {
+    if (answers.verification !== "Contact Third Party Verifier") {
+      return true;
+    }
+
+    return Boolean(
+      verifierInfo.firstName?.trim() &&
+        verifierInfo.lastName?.trim() &&
+        verifierInfo.email?.trim()
+    );
+  }, [
+    answers.verification,
+    verifierInfo.firstName,
+    verifierInfo.lastName,
+    verifierInfo.email,
+  ]);
 
   const handleOptionChange = useCallback(
     (questionId: string, value: string) => {
@@ -60,7 +82,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     []
   );
 
-  const handleSubmitVerifier = useCallback(async () => {
+  const handleSubmitVerifier = async () => {
     setIsSubmitting(true);
     setError(null);
 
@@ -69,10 +91,24 @@ const DealFlowVerifyAccreditation: React.FC = () => {
         throw new Error("Deal not found");
       }
 
+      const method =
+        answers.verification === "Upload Document"
+          ? VerificationMethod.SELF
+          : VerificationMethod.THIRD_PARTY;
+
+      const basis = answers.accreditation
+        ?.toLowerCase()
+        .includes("income of at least")
+        ? VerificationBasis.INCOME
+        : answers.accreditation?.toLowerCase().includes("verifiable net worth")
+        ? VerificationBasis.ASSETS
+        : answers.accreditation?.toLowerCase().includes("professional license")
+        ? VerificationBasis.LICENSE
+        : VerificationBasis.OTHER;
       const data = {
         dealId: deal.id,
-        method: VerificationMethod.SELF,  //TODO: Update this to use the actual method,
-        basis: VerificationBasis.INCOME,  //TODO: Update this to use the actual basis,
+        method,
+        basis,
       } as AccreditationVerificationCreateSchema;
       if (verifierInfo) {
         data.verifier = {
@@ -91,9 +127,9 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [createVerification, verifierInfo, deal]);
+  };
 
-  const handleContinue = useCallback(() => {
+  const handleContinue = () => {
     if (Object.keys(answers).length === 2) {
       if (answers.verification === "Contact Third Party Verifier") {
         void handleSubmitVerifier();
@@ -101,7 +137,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
       router.push(`/dealflow/${project?.slug}/${deal?.id}/review`);
     }
-  }, [answers, handleSubmitVerifier, project, deal, router]);
+  };
 
   const renderVerificationContent = useCallback(() => {
     const accreditationType = answers.accreditation;
@@ -141,6 +177,24 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     }
     return result;
   }, [answers]);
+
+  // Check if document is uploaded when "Upload Document" is selected
+  const isDocumentValid = useMemo(() => {
+    if (answers.verification !== "Upload Document") {
+      return true;
+    }
+
+    return deal?.document?.length >= 1;
+  }, [answers.verification, deal?.document]);
+
+  // Combined validation for the continue button
+  const isContinueDisabled = useMemo(() => {
+    const hasRequiredAnswers = Object.keys(answers).length === 2;
+
+    return (
+      !hasRequiredAnswers || !isThirdPartyVerifierValid || !isDocumentValid
+    );
+  }, [answers, isThirdPartyVerifierValid, isDocumentValid]);
 
   return (
     <Box>
@@ -215,7 +269,11 @@ const DealFlowVerifyAccreditation: React.FC = () => {
         </AccordionDetails>
       </Accordion>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleContinue} />
+      <DealFlowFooter
+        onBack={() => null}
+        onContinue={handleContinue}
+        isContinueDisabled={isContinueDisabled}
+      />
     </Box>
   );
 };

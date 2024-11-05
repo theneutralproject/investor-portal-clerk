@@ -1,6 +1,6 @@
 import prisma from "@/libs/prisma";
 import { currentUser } from "@clerk/nextjs/server";
-import { type NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { isError } from "lodash";
 import { DealFinancingType } from "@prisma/client";
 import {
@@ -9,8 +9,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import type { HubspotDealUpdate } from "@/libs/hubspot/schema";
-import { initDealPropsForProject, createHubspotDealForContact, DealToHubspotDealEnum, updateHubspotDealProperties } from "@/libs/hubspot/utils";
+import { initDealPropsForProject, createHubspotDeal, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
 import { getEquityStatsFromProject } from "@/libs/project/utils";
@@ -156,24 +155,6 @@ export async function POST(request: NextRequest) {
       .replace(/\s/g, "")
       .toUpperCase();
 
-    const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
-    if (!hsDeal) {
-      return jsonResponse(
-        {
-          error: "Deal cannot be created. Project not yet supported in Hubspot",
-        },
-        400
-      );
-    }
-
-    const hsDealId = await createHubspotDealForContact(
-      hsDeal,
-      String(dbUser.hubspotId)
-    );
-    if (isError(hsDealId)) {
-      return jsonResponse({ error: "HS Deal cannot be created." }, 400);
-    }
-
     if (!dealData.financingType) dealData.financingType = DealFinancingType.equity;
     let minInvestmentAmount = 5000;
     if (dealData.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
@@ -189,6 +170,24 @@ export async function POST(request: NextRequest) {
     }
     const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
 
+    const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
+    if (!hsDeal) {
+      return jsonResponse(
+        {
+          error: "Deal cannot be created. Project not yet supported in Hubspot",
+        },
+        400
+      );
+    }
+
+    const hsDealId = await createHubspotDeal(
+      hsDeal,
+      String(dbUser.hubspotId)
+    );
+    if (isError(hsDealId)) {
+      return jsonResponse({ error: "HS Deal cannot be created." }, 400);
+    }
+    
     const deal = await prisma.deal.create({
       data: {
         organizationId: dealData.organizationId,
@@ -198,26 +197,23 @@ export async function POST(request: NextRequest) {
         transactionId: dealData.transactionId,
         investmentEntity:
           getInvestmentEntity(project.name, dealData.financingType) ?? "",
+          investmentStats: {create: {
+            amount: dealData.amount,
+            financingType: dealData.financingType,
+            unitType,
+            shareOfEquity,
+            numberAUnits,
+            numberCUnits,
+            /**all other fields have postgresql defaults */
+          }}
       },
+      include: { investmentStats: true }
     });
 
-    await prisma.dealInvestmentStats.create({
-      data: {
-        dealId: deal.id,
-        amount: dealData.amount,
-        financingType: dealData.financingType,
-        unitType,
-        shareOfEquity,
-        numberAUnits,
-        numberCUnits,
-        /**all other fields have postgresql defaults */
-      }
-    })
-
-    return jsonResponse(deal);
+    return jsonResponse(deal, 201);
   } catch (error) {
     console.error(error);
-    return jsonResponse({ error: "Error processing request" }, 500);
+    return jsonResponse({ error }, 500);
   }
 }
 
@@ -237,25 +233,9 @@ export async function PUT(request: NextRequest) {
       console.error("ERROR: unable to parse PUT body:\n", parseError);
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
-
-    const hsDeal: HubspotDealUpdate = {
-      hubspotDealId: parseInt(deal.hubspotId, 10),
-      properties: []
-    }
-    for (const prop in deal) {
-      if (Object.prototype.hasOwnProperty.call(deal, prop)) {
-        if (prop in DealToHubspotDealEnum && deal[prop as keyof DealUpdateSchema]?.toString().length) {
-          hsDeal.properties.push({
-            name: DealToHubspotDealEnum[prop as keyof typeof DealToHubspotDealEnum],
-            value: deal[prop as keyof DealUpdateSchema]?.toString() ?? ""
-          })
-        }
-      }
-    }
-
-    const updatedDeal = await updateDeal(deal);
-
     // also update the deal in hubspot:
+    const hsDeal = getHsDealPropsFromDeal(deal);
+    const updatedDeal = await updateDeal(deal);
     await updateHubspotDealProperties(hsDeal);
 
     return jsonResponse(updatedDeal);

@@ -26,6 +26,7 @@ import { isNull } from "lodash";
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
 export async function refreshAccessToken() {
+    "use server";   // TODO: Ensure this does not break docusign!!!
     const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
     const responseObj = {
@@ -119,7 +120,7 @@ const getSsnOrTin = (org: OrganizationWithFullMembersAndAddress, deal: DealWithI
     }
 }
 
-const getInvestingEntityName = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {   
+const getInvestingEntityName = (org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, user: UserWithAddress) => {
     switch (deal.investmentStats.ownershipType) {
         case DealOwnershipType.INDIVIDUAL:
         case DealOwnershipType.MARITAL:
@@ -145,10 +146,11 @@ const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
     }) as InitialHere;
 
     let basis = "init_verifier_networth";
-    if(deal.accreditationVerification?.basis === "INCOME") basis = "init_verifier_income";
-    if(deal.accreditationVerification?.basis === "OTHER") basis = "init_verifier_other";
+    if (deal.accreditationVerification?.basis === "INCOME") basis = "init_verifier_income";
+    if (deal.accreditationVerification?.basis === "OTHER") basis = "init_verifier_other";
     /* eslint-disable-next-line*/
     const VerificationBasisTab: InitialHere = docusign.InitialHere.constructFromObject({
+        // TODO: this is not yet hooked up to the deal.accreditationVerification
         tabLabel: basis, optional: isNull(deal.accreditationVerification),
     }) as InitialHere;
 
@@ -156,17 +158,17 @@ const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
 }
 
 const getSignerCheckboxTabs = (deal: DealWithInvestmentStatsAndVerification) => {
-       /**
-     * CHECKBOXES:
-     * verification_irs &&
-     * verification_w2
-     * verification_1099
-     * verification_1065
-     * verification_1040
-     * or
-     * verification_other
-     * 
-     */
+    /**
+  * CHECKBOXES:
+  * verification_irs &&
+  * verification_w2
+  * verification_1099
+  * verification_1065
+  * verification_1040
+  * or
+  * verification_other
+  * 
+  */
     let tabLabel = "verification_irs";
     switch (deal.accreditationVerification?.basis) {
         case VerificationBasis.OTHER:
@@ -188,28 +190,35 @@ const getSignerCompanyDetailsTabs = (org: OrganizationWithFullMembersAndAddress,
         tabLabel: "stateNotOrg", value: getAddress(org, deal, user)?.state ?? '',
         required: "true"
     }) as DSText;
+    console.log(deal.investmentStats.ownershipType)
+    switch (deal.investmentStats.ownershipType) {
+        case DealOwnershipType.INDIVIDUAL:
+        case DealOwnershipType.MARITAL:
+        case DealOwnershipType.OTHER:
+            console.log("getting individual details tabs")
+            return [stateNotOrgTab];
+        default:
+            console.log("getting company details tabs", org.address)
+            /* eslint-disable-next-line*/
+            const corporationStateTab: DSText = docusign.Text.constructFromObject({
+                tabLabel: "corporationState", value: getAddress(org, deal, user)?.state ?? '',
+                required: "true"
+            }) as DSText;
 
-    if(deal.investmentStats.ownershipType in [DealOwnershipType.INDIVIDUAL, DealOwnershipType.MARITAL, DealOwnershipType.OTHER]) return[stateNotOrgTab];
-    console.log("getting company details tabs", org.address)
-    /* eslint-disable-next-line*/
-    const corporationStateTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "corporationState", value: getAddress(org,deal, user)?.state ??'',
-        required: "true"
-    }) as DSText;
+            /* eslint-disable-next-line*/
+            const corporationCityTab: DSText = docusign.Text.constructFromObject({
+                tabLabel: "corporationCity", value: getAddress(org, deal, user)?.city ?? '',
+                required: "true"
+            }) as DSText;
 
-    /* eslint-disable-next-line*/
-    const corporationCityTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "corporationCity", value: getAddress(org,deal, user)?.city ?? '',
-        required: "true"
-    }) as DSText;
+            /* eslint-disable-next-line*/
+            const corporationFormationDateTab: DSText = docusign.Text.constructFromObject({
+                tabLabel: "corporationFormationDate", value: org.dateOfCreation?.toDateString() ?? '',
+                required: "true"
+            }) as DSText;
 
-    /* eslint-disable-next-line*/
-    const corporationFormationDateTab: DSText = docusign.Text.constructFromObject({
-        tabLabel: "corporationFormationDate", value: org.dateOfCreation?.toDateString() ?? '',
-        required: "true"
-    }) as DSText;
-
-    return [corporationStateTab, corporationCityTab, corporationFormationDateTab];
+            return [corporationStateTab, corporationCityTab, corporationFormationDateTab];
+    }
 }
 
 // https://developers.docusign.com/docs/esign-rest-api/how-to/request-signature-template-remote/
@@ -404,7 +413,7 @@ export function makeRecipientViewRequest(signer: User, returnUrl: string) {
     // we used to create the envelope.
     viewRequest.email = signer.email;
     viewRequest.userName = `${signer.firstName} ${signer.lastName}`;
-    viewRequest.clientUserId =`signer-${signer.id.toString()}`;
+    viewRequest.clientUserId = `signer-${signer.id.toString()}`;
 
     return viewRequest;
 }

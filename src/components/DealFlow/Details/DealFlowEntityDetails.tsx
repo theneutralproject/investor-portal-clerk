@@ -1,15 +1,22 @@
 import React, { useState, type ChangeEvent } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Autocomplete,
-} from "@mui/material";
+import { Box, Typography, TextField, Autocomplete } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";
 import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
+import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
+import DealFlowFooter from "../Shared/DealFlowFooter";
 
+const REQUIRED_DOCUMENTS = [
+  {
+    display: "Certificate of Formation",
+    key: "organization-certificate-of-formation",
+  },
+  {
+    display: "Operating Agreement",
+    key: "organization-operating-agreement",
+  },
+];
 interface FormData {
   name: string;
   tin: string;
@@ -62,63 +69,91 @@ const DealFlowEntityDetails: React.FC = () => {
     }
   };
 
+  const allRequiredDocumentsAreUploaded = () => {
+    const orgDocuments = organization?.document ?? [];
+    const requiredKeys = REQUIRED_DOCUMENTS.map((doc) => doc.key);
+
+    const hasAllRequired = requiredKeys.every((requiredKey) => {
+      const matchingDocs = orgDocuments.filter(
+        (doc) => doc.key === requiredKey
+      );
+      return matchingDocs.length > 0;
+    });
+
+    return hasAllRequired;
+  };
   return (
     <Box>
       <Typography variant="h5" gutterBottom>
         Ownership Information
       </Typography>
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Name of Entity"
-        name="name"
-        value={formData.name}
-        onChange={handleInputChange}
-        required
+      <Grid container spacing={2}>
+        <Grid size={6}>
+          <TextField
+            variant="standard"
+            fullWidth
+            margin="normal"
+            label="Name of Entity"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
+
+        <Grid size={6}>
+          <TextField
+            variant="standard"
+            fullWidth
+            margin="normal"
+            label="Tax Identification Number (TIN)"
+            name="tin"
+            value={formData.tin}
+            onChange={handleInputChange}
+          />
+        </Grid>
+
+        <Grid size={6}>
+          <TextField
+            variant="standard"
+            fullWidth
+            margin="normal"
+            label="Date of Creation"
+            name="dateOfCreation"
+            type="date"
+            value={formData.dateOfCreation}
+            onChange={handleInputChange}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
+
+        <Grid size={6}>
+          <Autocomplete
+            options={usStates}
+            renderInput={(params) => (
+              <TextField {...params} label="State" fullWidth />
+            )}
+            value={formData.juristication}
+            onChange={(_, newValue) =>
+              handleInputChange({
+                target: { name: "juristication", value: newValue ?? "" },
+              } as React.ChangeEvent<HTMLInputElement>)
+            }
+          />
+        </Grid>
+      </Grid>
+
+      <DealFlowDocumentUpload
+        documents={REQUIRED_DOCUMENTS}
+        type="organization"
       />
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Tax Identification Number (TIN)"
-        name="tin"
-        value={formData.tin}
-        onChange={handleInputChange}
+      <DealFlowFooter
+        onBack={() => null}
+        onContinue={handleContinue}
+        isContinueDisabled={!allRequiredDocumentsAreUploaded()}
       />
-
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Date of Creation"
-        name="dateOfCreation"
-        type="date"
-        value={formData.dateOfCreation}
-        onChange={handleInputChange}
-        InputLabelProps={{ shrink: true }}
-      />
-
-      <Autocomplete
-        options={usStates}
-        renderInput={(params) => (
-          <TextField {...params} label="State" fullWidth />
-        )}
-        value={formData.juristication}
-        onChange={(_, newValue) =>
-          handleInputChange({
-            target: { name: "juristication", value: newValue ?? "" },
-          } as React.ChangeEvent<HTMLInputElement>)
-        }
-      />
-
-      <Box mt={4} display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={() => null}>
-          Back
-        </Button>
-        <Button variant="contained" onClick={handleContinue}>
-          Continue
-        </Button>
-      </Box>
     </Box>
   );
 };

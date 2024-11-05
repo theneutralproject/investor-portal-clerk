@@ -5,11 +5,13 @@ import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 interface DealFlowFooterProps {
   onBack: () => void;
   onContinue: () => void;
+  isContinueDisabled?: boolean;
 }
 
 const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
   onBack,
   onContinue,
+  isContinueDisabled = false,
 }) => {
   const { isLoading } = useDealFlow();
 
@@ -21,7 +23,7 @@ const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
       <Button
         variant="contained"
         onClick={onContinue}
-        disabled={isLoading}
+        disabled={isLoading || isContinueDisabled}
         sx={{
           backgroundColor: "#f0b84a",
           color: "white",

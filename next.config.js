@@ -17,7 +17,7 @@ const config = {
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
-    serverComponentsExternalPackages: ['docusign-esign'],
+    serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],
   },
 };
 

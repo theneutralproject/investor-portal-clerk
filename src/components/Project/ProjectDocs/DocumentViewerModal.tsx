@@ -18,7 +18,7 @@ const DocumentViewerModal: React.FC<DocumentViewerModalProps> = ({
     <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
       <DialogTitle>Document Viewer</DialogTitle>
       <DialogContent>
-        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.4.120/build/pdf.worker.min.js">
+        <Worker workerUrl="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js">
           <Viewer fileUrl={fileUrl} />
         </Worker>
       </DialogContent>

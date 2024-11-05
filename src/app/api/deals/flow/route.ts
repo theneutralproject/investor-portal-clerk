@@ -1,6 +1,6 @@
 import { type NextRequest } from "next/server";
 import { currentUser } from "@clerk/nextjs";
-import { jsonResponse } from "@/libs/utils";
+import { errorResponse, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma";
 import { z } from "zod";
 import type { Organization } from "@prisma/client";
@@ -10,9 +10,6 @@ const QuerySchema = z.object({
   dealId: z.string().optional(),
 });
 
-const errorResponse = (message: string, status: number) =>
-  jsonResponse({ error: message }, status);
-
 async function fetchProject(slug: string) {
   return prisma.project.findUnique({
     where: { slug },
@@ -21,9 +18,7 @@ async function fetchProject(slug: string) {
       propertyStats: true,
       milestones: true,
       pictures: true,
-      documents: {
-        where: { documentType: "DOCUMENT" },
-      },
+      documents: true,
     },
   });
 }
@@ -39,7 +34,10 @@ async function fetchDeal(id: number) {
   });
 }
 
-async function checkUserAccess(_userId: number, _dealOrganization: Organization) {
+async function checkUserAccess(
+  _userId: number,
+  _dealOrganization: Organization
+) {
   return _dealOrganization.ownerId === _userId;
 }
 

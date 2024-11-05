@@ -31,13 +31,27 @@ export const LineDisplay = ({
 );
 
 const getInterestRate = (investmentStats: ProjectInvestmentStats) => {
-  if(investmentStats.interestRateMax !== investmentStats.interestRateMin) {
+  if (investmentStats.interestRateMax !== investmentStats.interestRateMin) {
     return `${investmentStats.interestRateMin}% - ${investmentStats.interestRateMax}%`;
   }
   else return `${investmentStats.interestRateMin}%`;
 }
 
-const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
+const getEquitySummaryBox = (data: ProjectWithStats) => {
+  if (data.id === 2) {
+    return (
+      <Grid item xs={12} sm={5.5}>
+        <Typography variant="body1">Debt Returns</Typography>
+        <LineDisplay name="Interest" value={`${getInterestRate(data.investmentStats)}`} />
+        <LineDisplay
+          name="Min. Investment"
+          value={`$${formatter.format(data.investmentStats.debtMinInvestment)}`}
+        />
+        <LineDisplay name="Term" value={`${data.investmentStats.debtTermMonths} months`} />
+        <LineDisplay name="Payment" value={`${data.investmentStats.debtPaymentFreq}`} />
+      </Grid>
+    );
+  }
   return (
     <Grid container spacing={2} sx={{ alignItems: "stretch", height: "100%" }}>
       <Grid item xs={12} sm={5.5}>
@@ -76,17 +90,21 @@ const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
       <Box sx={{ ml: 2 }}>
         <Typography variant="body2">
           {`*${data.investmentStats.equityPaymentFreq} distribution shall commence upon stabilization, defined as
-          95% occupied.`}
+            95% occupied.`}
         </Typography>
         <Typography variant="body2">
           **Equity investors receive a 10% preferred return.
         </Typography>
         <Typography variant="body2">
-          {`***${data.investmentStats.interestRateMax} for investment amounts above $${data.investmentStats.interestRateDollarThreshold/1000}k.`}
+          {`***${data.investmentStats.interestRateMax} for investment amounts above $${data.investmentStats.interestRateDollarThreshold / 1000}k.`}
         </Typography>
       </Box>
     </Grid>
   );
+}
+
+const InvestmentSummaryBox = ({ data }: { data: ProjectWithStats }) => {
+  return getEquitySummaryBox(data);
 };
 
 export default InvestmentSummaryBox;

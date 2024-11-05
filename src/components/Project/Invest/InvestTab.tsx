@@ -5,7 +5,7 @@ import DocumentCard from "../ProjectDocs/DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
-import { DocumentType, type Project } from "@prisma/client";
+import { DocumentType, User, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
 import { useDebounce } from "@/app/hooks/useDebounce";
@@ -14,11 +14,41 @@ import axios from "axios";
 import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
 import type { DocusignEnvelopeCreateSchema } from "@/libs/docusign/schema";
 import { DealWithInvestmentStats } from "@/libs/prisma";
+import { UserResource } from "@clerk/types";
 
-export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentStats }> = ({
-  project,
-  deal,
-}) => {
+export const createDocusignEnvelope = async (
+  envelopeId: string,
+  dealId: number,
+  user: UserResource | null | undefined
+) => {
+  const url = `/api/docusign`;
+  if (!user) {
+    console.log("!user");
+    return null;
+  }
+  const body: DocusignEnvelopeCreateSchema = {
+    dealId: dealId,
+    envelopeId: envelopeId,
+  };
+
+  const docusignResponse = await axios.post(url, body).catch((error) => {
+    if (error.response) {
+      console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:", error.response);
+    }
+  });
+  if (docusignResponse?.data?.consentUrl) {
+    console.log("must authenticate using consentUrl");
+    window.location.assign(docusignResponse.data.consentUrl);
+  }
+
+  if (docusignResponse?.data?.url) {
+    window.location.assign(docusignResponse.data.url);
+  }
+};
+export const InvestTab: React.FC<{
+  project: Project;
+  deal: DealWithInvestmentStats;
+}> = ({ project, deal }) => {
   const {
     isLoading,
     isError,
@@ -33,10 +63,12 @@ export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentSta
     documentEventMutation: any;
   } = useDocuments(project.id, 2, deal.investmentStats.financingType);
 
-
-  // Hubspot can only process 1 webhook request per minute. 
+  // Hubspot can only process 1 webhook request per minute.
   // In case the user accesses several docs in a short amount of time, we debounce the request for 75 sec
-  const updateHubspotDealDocs = useDebounce(updateHubspotDealDocsAccessed, 75000)
+  const updateHubspotDealDocs = useDebounce(
+    updateHubspotDealDocsAccessed,
+    75000
+  );
 
   const [modelOpenType, setModelOpenType] = useState("");
   const [currentDocument, setCurrentDocument] =
@@ -50,8 +82,11 @@ export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentSta
   const handleSignDocument = (document: DocumentWithCompletion) => {
     setCurrentDocument(document);
 
-    if (document?.documentType === DocumentType.DOCUSIGN && document.docusignTemplateId) {
-      createDocusignEnvelope(document.docusignTemplateId);
+    if (
+      document?.documentType === DocumentType.DOCUSIGN &&
+      document.docusignTemplateId
+    ) {
+      createDocusignEnvelope(document.docusignTemplateId, deal.id, user);
     } else {
       setModelOpenType("DOCUMENT");
     }
@@ -63,8 +98,17 @@ export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentSta
         documentId: document?.id,
         type: "DOWNLOAD",
       });
-      const documentNames = [...[document], ...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
-      updateHubspotDealDocs({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
+      const documentNames = [
+        ...[document],
+        ...data.filter((doc) => doc.completed),
+      ]
+        .map((doc) => doc.name)
+        .toString();
+      updateHubspotDealDocs({
+        dealId: parseInt(deal.hubspotId, 10),
+        dealStage: 2,
+        documentNames: documentNames,
+      });
     }
     window.open(document.link, "_blank");
   };
@@ -78,42 +122,22 @@ export const InvestTab: React.FC<{ project: Project; deal: DealWithInvestmentSta
       });
 
       // add current doc to list of already read docs and notify hubspot webhook about this event
-      const documentNames = [...[currentDocument], ...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
-      updateHubspotDealDocs({ dealId: parseInt(deal.hubspotId, 10), dealStage: 2, documentNames: documentNames });
+      const documentNames = [
+        ...[currentDocument],
+        ...data.filter((doc) => doc.completed),
+      ]
+        .map((doc) => doc?.name)
+        .toString();
+      updateHubspotDealDocs({
+        dealId: parseInt(deal.hubspotId, 10),
+        dealStage: 2,
+        documentNames: documentNames,
+      });
     }
   };
 
-
   const { user } = useUser();
   let renderCTA = () => <Box></Box>;
-
-  const createDocusignEnvelope = async (envelopeId: string) => {
-    const url = `/api/docusign`;
-    if (!user) {
-      console.log("!user")
-      return null;
-    }
-
-    const body: DocusignEnvelopeCreateSchema = {
-      dealId: deal.id,
-      envelopeId: envelopeId,
-    };
-
-    const docusignResponse = await axios.post(url, body).catch((error) => {
-      if (error.response) {
-        console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:", error.response)
-      }
-    })
-    if (docusignResponse?.data?.consentUrl) {
-      console.log("must authenticate using consentUrl")
-      window.location.assign(docusignResponse.data.consentUrl)
-    }
-
-    if (docusignResponse?.data?.url) {
-      window.location.assign(docusignResponse.data.url)
-    }
-
-  }
 
   if (isLoading) return <div>Loading documents...</div>;
   if (isError) return <div>Error fetching documents: {error?.message}</div>;

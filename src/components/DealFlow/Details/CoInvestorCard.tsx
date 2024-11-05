@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import React, { useState } from "react";
 import {
   Box,
@@ -185,7 +186,6 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
                   }
                 }}
                 size="small"
-                color="error"
                 sx={{ mr: 1 }}
               >
                 <DeleteIcon />
@@ -210,6 +210,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
           <Box display="flex" flexDirection="column" gap={2}>
             <Box display="flex" gap={2}>
               <TextField
+                variant="standard"
                 label="First Name"
                 value={coInvestor.user.firstName ?? ""}
                 onChange={(e) => handleChange("firstName", e.target.value)}
@@ -230,6 +231,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
                 required
               />
               <TextField
+                variant="standard"
                 label="Last Name"
                 value={coInvestor.user.lastName ?? ""}
                 onChange={(e) => handleChange("lastName", e.target.value)}
@@ -251,6 +253,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
               />
             </Box>
             <TextField
+              variant="standard"
               label="Email"
               value={coInvestor.user.email ?? ""}
               onChange={(e) => handleChange("email", e.target.value)}
@@ -264,6 +267,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
               required
             />
             <TextField
+              variant="standard"
               label="Phone Number"
               value={coInvestor.user.phoneNumber ?? ""}
               onChange={(e) => handleChange("phoneNumber", e.target.value)}
@@ -283,6 +287,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
               }
             />
             <TextField
+              variant="standard"
               label="Title"
               value={coInvestor.title ?? ""}
               onChange={(e) => handleChange("title", e.target.value)}
@@ -299,16 +304,14 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
         </CardContent>
         <CardActions>
           <Button
-            variant="outlined"
-            color="primary"
+            variant="grayCancel"
             onClick={() => onCancel(index)}
             disabled={readOnly || isRegisteredUser}
           >
             Cancel
           </Button>
           <Button
-            variant="contained"
-            color="primary"
+            variant="neutralBlack"
             onClick={() => onSave(index)}
             disabled={readOnly || isRegisteredUser || !isFormValid()}
           >

@@ -109,9 +109,10 @@ model AccreditationVerifier {
 model DealDocument {
   id     Int              @id @default(autoincrement())
   name   String
-  link   String
+  path   String
   type   DealDocumentType
   dealId Int
+  dateCreated DateTime @default(now())
   deal   Deal             @relation(fields: [dealId], references: [id])
 }
 
@@ -119,8 +120,10 @@ model DealDocument {
 model OrganizationDocument {
   id             Int          @id @default(autoincrement())
   name           String
-  link           String
+  path           String
+  key            String         @default("")
   organizationId Int
+  dateCreated DateTime @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
@@ -156,7 +159,6 @@ model ProjectPropertyStats {
 model ProjectInvestmentStats {
   id                          Int     @id @default(autoincrement())
   cUnitThresholdAmount        Float   @default(200000.0)
-  debtInterestRate            String  @default("")
   debtMinInvestment           Int     @default(5000)
   debtPaymentFreq             String  @default("quarterly")
   debtTermMonths              Int     @default(48)

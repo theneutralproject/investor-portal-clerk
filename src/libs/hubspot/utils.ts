@@ -1,8 +1,7 @@
 import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
-import { isError } from "lodash";
-import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema } from "./schema";
-import { type DealCreateSchema } from "../deal/schema";
+import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema, type HsDealCreateResponse } from "./schema";
+import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
@@ -52,10 +51,10 @@ export async function createHubspotContact(hubspotContact: HubspotContact) {
 };
 
 export async function updateHubspotContact(hubspotContact: HubspotContact) {
-  if(!hubspotContact.hubspotId) {
+  if (!hubspotContact.hubspotId) {
     return new Error("hubspotId is required to update a contact in hubspot")
   }
-  return await fetch(
+  const hsRes = await fetch(
     `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vid/${hubspotContact.hubspotId}/profile`,
     {
       method: "POST",
@@ -71,15 +70,17 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
       console.log("response", response);
       return new Error("unable to update hubspot contact");
     }
+    return { success: true };
   }).catch((fetchError) => {
     console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
     return new Error("unable to update hubspot contact")
   });
+  return hsRes;
 };
 
-export async function createHubspotDealForContact(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
+export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
-
+  console.log("properties", properties);
   const body = JSON.stringify({
     associations: {
       associatedVids: [
@@ -99,8 +100,8 @@ export async function createHubspotDealForContact(hubspotDeal: HubspotDealProper
       body,
     }
   )
-  /* eslint-disable-next-line */
-  const hsDealCreateRespBody = await resBody.json();
+  
+  const hsDealCreateRespBody = (await resBody.json()) as HsDealCreateResponse;
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
     return dealId;
@@ -115,38 +116,59 @@ export async function updateHubspotDealDocsAccessed(hsDealUpdateData: HsDealDocs
 }
 
 export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealUpdate) {
-  return await axios.put(`${process.env.BASE_URL}/api/deals/hubspot`, hsDealUpdateData);
+  console.log("hsDealUpdateData", hsDealUpdateData);
+  const body = JSON.stringify({
+    properties: hsDealUpdateData.properties
+  });
+  return await fetch(
+    `${process.env.HUBSPOT_API_BASE_URL}/deals/v1/deal/${hsDealUpdateData.hubspotDealId}`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    }
+  )
 }
 
 /* eslint-disable */
 export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
+  const properties = [
+    { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
+    { name: "investment_entity", value: getInvestmentEntity(projectName, dealData.financingType ?? DealFinancingType.equity) },
+    { name: "project_name", value: projectName },
+    { name: "amount", value: `${dealData.amount ?? 0}` },
+    { name: "transaction_id", value: dealData.transactionId! },
+    { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID }
+  ]
   switch (projectName) {
     case ProjectName["The Edison"]: {
       return {
-        properties: [
-          { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
+        properties: [...properties,
+        ...[
           { name: "dealstage", value: EdisonDealStages[dealData.dealStage ?? 1]?.value ?? "" },
-          { name: "investment_entity", value: getInvestmentEntity(projectName, dealData.financingType ?? DealFinancingType.equity) },
-          { name: "project_name", value: projectName },
-          { name: "amount", value: "0" },
           { name: "financing_type", value: dealData.financingType ?? "equity" },
-          { name: "transaction_id", value: dealData.transactionId! },
-          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID }
-        ]
+        ]]
       } as HubspotDealPropertiesCollection
     }
     case ProjectName["519 W Main"]: {
       return {
-        properties: [
-          { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
+        properties: [...properties,
+        ...[
           { name: "dealstage", value: _519WMainDealStages[dealData.dealStage ?? 1]?.value ?? "" },
-          { name: "investment_entity", value: getInvestmentEntity(projectName, dealData.financingType ?? DealFinancingType.equity) },
-          { name: "project_name", value: projectName },
-          { name: "amount", value: "0" },
           { name: "financing_type", value: dealData.financingType ?? "equity" },
-          { name: "transaction_id", value: dealData.transactionId! },
-          { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
-        ]
+        ]]
+      } as HubspotDealPropertiesCollection
+    }
+    case ProjectName["Bakers Place"]: {
+      return {
+        properties: [...properties,
+        ...[
+          { name: "dealstage", value: BakersPlaceDealStages[dealData.dealStage ?? 1]?.value ?? "" },
+          { name: "financing_type", value: dealData.financingType ?? "promissory_note_now" },
+        ]]
       } as HubspotDealPropertiesCollection
     }
     default: {
@@ -156,6 +178,18 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
   }
 }
 /* eslint-enable */
+
+export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
+  const { dealStage, hubspotId, investmentStats } = deal;
+  const retObj = {
+    hubspotDealId: parseInt(hubspotId, 10),
+    properties: []
+  } as HubspotDealUpdate;
+  if (dealStage) retObj.properties.push({ name: "dealstage", value: dealStage.toString() });
+  if (investmentStats?.amount) retObj.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
+  if (investmentStats?.financingType) retObj.properties.push({ name: "financing_type", value: investmentStats?.financingType });
+  return retObj;
+}
 
 export async function associateContactWithDealInHubspot(contactId: string, dealId: string) {
   const body = JSON.stringify({
@@ -240,7 +274,7 @@ export async function getFundingAmount(projectName: ProjectName) {
   let totalDeals = 100;
   while (dealsFetched < totalDeals) {
     const payload = getPayload(projectName)
-    if (isError(payload)) {
+    if (payload instanceof Error) {
       return 25000000;
     }
     payload.after = dealsFetched;
@@ -282,13 +316,13 @@ export function getDealStageInt(dealstage: string) {
   if (pos === -1) {
     pos = _519WMainDealStages.map(e => e.value).indexOf(dealstage);
   }
-
   return pos;
 }
 
 export function getProjectNameFromDealStage(dealstage: string) {
   if (EdisonDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["The Edison"];
   if (_519WMainDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["519 W Main"];
+  if (BakersPlaceDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["Bakers Place"];
   return new Error("project not yet supported");
 };
 
@@ -310,6 +344,15 @@ export const _519WMainDealStages = [
   { key: "fClosedLost", value: "146586774" }
 ];
 
+export const BakersPlaceDealStages = [
+  { key: "aQualified", value: "257595997" },
+  { key: "bAwareness", value: "257595998" },
+  { key: "cContractShared", value: "257595999" },
+  { key: "dContractSigned", value: "257596000" },
+  { key: "eFunded", value: "257596001" },
+  { key: "fClosedLost", value: "257596001" }
+]
+
 export enum ReferralSource {
   EVENT_MAILER = "event_mailer",
   INVESTOR_EVENT = "investor_event",
@@ -327,7 +370,6 @@ export enum ReferralSource {
   OTHER = "other"
 }
 
-
 export enum HSDealPropNames {
   dealstage = 'dealstage',
   amount = 'amount',
@@ -339,5 +381,3 @@ export enum DealToHubspotDealEnum {
   financingType = "financing_type",
   dealStage = "dealstage",
 };
-
-
