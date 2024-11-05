@@ -257,7 +257,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
         <Box sx={{ p: 2, bgcolor: "grey.50" }}>
           <Button
-            variant="neutralBlack"
+            variant="grayCancel"
             component="label"
             startIcon={<Upload size={18} />}
             size="small"

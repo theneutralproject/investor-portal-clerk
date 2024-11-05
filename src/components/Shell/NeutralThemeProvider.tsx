@@ -24,6 +24,7 @@ declare module "@mui/material/Button" {
     snowdayBlue: true;
     neutralBlack: true;
     neutralYellow: true;
+    grayCancel: true;
   }
 }
 
@@ -143,6 +144,24 @@ export const theme = createTheme({
             "&:disabled": {
               color: "#fff",
               backgroundColor: "#DFAF44",
+              opacity: 0.5,
+            },
+          },
+        },
+        {
+          props: { variant: "grayCancel" },
+          style: {
+            color: "#666",
+            backgroundColor: "transparent",
+            border: "1px solid #D1D5DB",
+            "&:hover": {
+              backgroundColor: "#F3F4F6",
+              border: "1px solid #D1D5DB",
+            },
+            "&:disabled": {
+              color: "#666",
+              backgroundColor: "transparent",
+              border: "1px solid #D1D5DB",
               opacity: 0.5,
             },
           },
