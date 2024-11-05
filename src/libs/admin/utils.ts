@@ -1,8 +1,10 @@
+'use server';
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import prisma, { DealWithOrgMembersAndProject } from "../prisma";
+import prisma, { type DealWithOrgMembersAndProject } from "../prisma";
 import { MembershipType, Role } from "@prisma/client";
-// import * as PdfParse from "pdf-parse";
+
+// eslint-disable-next-line
 const PdfParse = require("pdf-parse");
 /**
  * 
@@ -37,7 +39,9 @@ export async function getAdminFromrequest(request: NextRequest) {
 
 export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], file: File) {
     // match the file to the correct deal
-    const dataBuffer = Buffer.from(await file.arrayBuffer());
+    const arrayBuffer = await file.arrayBuffer();
+    const dataBuffer = Buffer.from(arrayBuffer);
+    // eslint-disable-next-line
     const { text } = (await PdfParse(dataBuffer)) as { text: string | null };
     if(!text) {
         return new Error("No text found in pdf");
@@ -66,7 +70,7 @@ export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], fi
             dealFound = true;
             matchingDeal = deal;
             console.log(`found a match for ${transactionId}`);
-            console.log(`\t-->words to match: ${wordsToMatch}\n`);
+            console.log(`\t-->words to match: ${wordsToMatch.toString()}\n`);
           }
     }
     return matchingDeal;
