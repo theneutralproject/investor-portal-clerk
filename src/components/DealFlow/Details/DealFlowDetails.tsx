@@ -141,7 +141,7 @@ const DealFlowDetails: React.FC = () => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, mx: "auto" }}>
+    <Box>
       <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
         Personal Details
       </Typography>

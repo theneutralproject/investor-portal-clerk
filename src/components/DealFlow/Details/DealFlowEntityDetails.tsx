@@ -1,5 +1,6 @@
 import React, { useState, type ChangeEvent } from "react";
 import { Box, Typography, TextField, Autocomplete } from "@mui/material";
+import Grid from "@mui/material/Grid2";
 import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";
 import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
@@ -87,48 +88,61 @@ const DealFlowEntityDetails: React.FC = () => {
         Ownership Information
       </Typography>
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Name of Entity"
-        name="name"
-        value={formData.name}
-        onChange={handleInputChange}
-        required
-      />
+      <Grid container spacing={2}>
+        <Grid size={6}>
+          <TextField
+            variant="standard"
+            fullWidth
+            margin="normal"
+            label="Name of Entity"
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            required
+          />
+        </Grid>
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Tax Identification Number (TIN)"
-        name="tin"
-        value={formData.tin}
-        onChange={handleInputChange}
-      />
+        <Grid size={6}>
+          <TextField
+            variant="standard"
+            fullWidth
+            margin="normal"
+            label="Tax Identification Number (TIN)"
+            name="tin"
+            value={formData.tin}
+            onChange={handleInputChange}
+          />
+        </Grid>
 
-      <TextField
-        fullWidth
-        margin="normal"
-        label="Date of Creation"
-        name="dateOfCreation"
-        type="date"
-        value={formData.dateOfCreation}
-        onChange={handleInputChange}
-        InputLabelProps={{ shrink: true }}
-      />
+        <Grid size={6}>
+          <TextField
+            variant="standard"
+            fullWidth
+            margin="normal"
+            label="Date of Creation"
+            name="dateOfCreation"
+            type="date"
+            value={formData.dateOfCreation}
+            onChange={handleInputChange}
+            InputLabelProps={{ shrink: true }}
+          />
+        </Grid>
 
-      <Autocomplete
-        options={usStates}
-        renderInput={(params) => (
-          <TextField {...params} label="State" fullWidth />
-        )}
-        value={formData.juristication}
-        onChange={(_, newValue) =>
-          handleInputChange({
-            target: { name: "juristication", value: newValue ?? "" },
-          } as React.ChangeEvent<HTMLInputElement>)
-        }
-      />
+        <Grid size={6}>
+          <Autocomplete
+            options={usStates}
+            renderInput={(params) => (
+              <TextField {...params} label="State" fullWidth />
+            )}
+            value={formData.juristication}
+            onChange={(_, newValue) =>
+              handleInputChange({
+                target: { name: "juristication", value: newValue ?? "" },
+              } as React.ChangeEvent<HTMLInputElement>)
+            }
+          />
+        </Grid>
+      </Grid>
 
       <DealFlowDocumentUpload
         documents={REQUIRED_DOCUMENTS}

@@ -58,13 +58,13 @@ const DealFlowCoInvestor: React.FC = () => {
         return prevMembers.map((member, i) =>
           i === index
             ? {
-              ...member,
-              ...(field === "title"
-                ? { title: value }
-                : {
-                  user: { ...member.user, [field]: value } as Partial<User>,
-                }),
-            }
+                ...member,
+                ...(field === "title"
+                  ? { title: value }
+                  : {
+                      user: { ...member.user, [field]: value } as Partial<User>,
+                    }),
+              }
             : member
         );
       });
@@ -161,7 +161,7 @@ const DealFlowCoInvestor: React.FC = () => {
 
       <Box mt={2}>
         <Button
-          variant="outlined"
+          variant="grayCancel"
           startIcon={<span>+</span>}
           onClick={handleAddCoInvestor}
         >
