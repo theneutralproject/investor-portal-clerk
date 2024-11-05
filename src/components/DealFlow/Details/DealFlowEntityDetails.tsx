@@ -1,10 +1,5 @@
 import React, { useState, type ChangeEvent } from "react";
-import {
-  Box,
-  Typography,
-  TextField,
-  Autocomplete,
-} from "@mui/material";
+import { Box, Typography, TextField, Autocomplete } from "@mui/material";
 import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";
 import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
@@ -135,7 +130,10 @@ const DealFlowEntityDetails: React.FC = () => {
         }
       />
 
-      <DealFlowDocumentUpload documents={REQUIRED_DOCUMENTS} />
+      <DealFlowDocumentUpload
+        documents={REQUIRED_DOCUMENTS}
+        type="organization"
+      />
 
       <DealFlowFooter
         onBack={() => null}

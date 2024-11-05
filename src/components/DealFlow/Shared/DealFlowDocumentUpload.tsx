@@ -12,9 +12,10 @@ import {
 } from "@mui/material";
 import { Upload, Check, X, FileText } from "lucide-react";
 import { useDealFlow } from "./DealFlowContext";
-import { type OrganizationDocument } from "@prisma/client";
+import { type OrganizationDocument, type DealDocument } from "@prisma/client";
 
 type UploadStatus = "uploading" | "success" | "error";
+type DocumentType = "organization" | "deal";
 
 interface Document {
   display: string;
@@ -23,6 +24,7 @@ interface Document {
 
 interface DocumentUploadProps {
   documents: Document[];
+  type: DocumentType;
 }
 
 interface FileUploadState {
@@ -32,11 +34,14 @@ interface FileUploadState {
 }
 
 type UploadState = Record<string, FileUploadState[]>;
+type DocumentTypes = OrganizationDocument | DealDocument;
 
 const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   documents,
+  type,
 }) => {
-  const { organization, deal, refetchOrganization } = useDealFlow();
+  const { organization, deal, refetchOrganization, refetchDeal } =
+    useDealFlow();
 
   const [uploadState, setUploadState] = useState<UploadState>(() => {
     const initial: UploadState = {};
@@ -80,6 +85,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
         // Wait for the state update to complete before refetching
         await Promise.resolve();
         await refetchOrganization();
+        await refetchDeal();
         resetUploadState();
       } catch (error) {
         setUploadState((prev) => ({
@@ -97,7 +103,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
         }));
       }
     },
-    [refetchOrganization, resetUploadState]
+    [refetchOrganization, refetchDeal, resetUploadState]
   );
 
   const handleFileSelect = useCallback(
@@ -129,7 +135,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       // Prepare form data
       const formData = new FormData();
       formData.append("file", file);
-      formData.append("type", "organization");
+      formData.append("type", type);
       formData.append("organizationId", organization.id.toString());
       formData.append("key", key);
       formData.append("dealId", deal.id.toString());
@@ -137,7 +143,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       // Start upload process
       void handleFileUpload(key, file, formData);
     },
-    [organization?.id, deal?.id, handleFileUpload]
+    [organization?.id, deal?.id, handleFileUpload, type]
   );
 
   const handleRemoveFile = useCallback((key: string, fileToRemove: File) => {
@@ -148,12 +154,16 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   }, []);
 
   const getExistingDocuments = useCallback(
-    (key: string): Partial<OrganizationDocument>[] => {
-      const docs =
-        organization?.document?.filter((doc) => doc.key === key) || [];
-      return docs;
+    (key: string): Partial<DocumentTypes>[] => {
+      if (type === "organization") {
+        return (organization?.document?.filter((doc) => doc.key === key) ||
+          []) as Partial<OrganizationDocument>[];
+      } else {
+        return (deal?.document?.filter((doc) => doc.type === key) ||
+          []) as Partial<DealDocument>[];
+      }
     },
-    [organization?.document]
+    [organization?.document, deal?.document, type]
   );
 
   const renderUploadStatus = useCallback((upload: FileUploadState) => {
@@ -179,7 +189,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   const renderDocumentSection = useCallback(
     (
       doc: Document,
-      existingDocs: Partial<OrganizationDocument>[],
+      existingDocs: Partial<DocumentTypes>[],
       currentUploads: FileUploadState[]
     ) => (
       <Paper key={doc.key} elevation={1} sx={{ mb: 2, overflow: "hidden" }}>
@@ -273,10 +283,6 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
   return (
     <Box sx={{ mt: 3 }}>
-      <Typography variant="h5" gutterBottom>
-        Documents
-      </Typography>
-
       <List sx={{ width: "100%" }}>
         {documents.map((doc) => {
           const existingDocs = getExistingDocuments(doc.key);

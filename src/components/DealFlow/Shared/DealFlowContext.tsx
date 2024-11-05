@@ -4,7 +4,7 @@ import {
   type OrganizationWithDocuments,
   type ProjectWithAllNestedData,
   type UserWithAddress,
-  type DealWithInvestmentStats,
+  type DealWithInvestmentStatsAndDocument,
   type MemberWithUser,
 } from "@/libs/prisma";
 import {
@@ -130,12 +130,14 @@ interface DealFlowContextType {
   projectSlug: string;
   dealId: string;
   project: ProjectWithAllNestedData;
-  deal: DealWithInvestmentStats;
+  deal: DealWithInvestmentStatsAndDocument;
   user: UserWithAddress;
   organization: OrganizationWithDocuments;
   isLoading: boolean;
   error: string | null;
-  updateDeal: (updatedDeal: Partial<DealWithInvestmentStats>) => Promise<void>;
+  updateDeal: (
+    updatedDeal: Partial<DealWithInvestmentStatsAndDocument>
+  ) => Promise<void>;
   createDeal: () => Promise<void>;
   updateUser: (updatedUser: Partial<UserWithAddress>) => Promise<void>;
   createOrganization: (
@@ -157,6 +159,7 @@ interface DealFlowContextType {
   ) => Promise<void>;
   deleteOrganizationMember: (memberId: number) => Promise<void>;
   refetchOrganization: () => Promise<void>;
+  refetchDeal: () => Promise<void>;
 }
 
 const DealFlowContext = createContext<DealFlowContextType | undefined>(
@@ -177,7 +180,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   initialStep,
 }) => {
   const [project, setProject] = useState<ProjectWithAllNestedData | null>(null);
-  const [deal, setDeal] = useState<DealWithInvestmentStats | null>(null);
+  const [deal, setDeal] = useState<DealWithInvestmentStatsAndDocument | null>(
+    null
+  );
   const [user, setUser] = useState<UserWithAddress | null>(null);
   const [organization, setOrganization] =
     useState<OrganizationWithDocuments | null>(null);
@@ -250,7 +255,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
         const dealData: {
           project: Project;
-          deal: DealWithInvestmentStats | null;
+          deal: DealWithInvestmentStatsAndDocument | null;
         } = await dealResponse.json();
         const userData: UserWithAddress = await userResponse.json();
 
@@ -285,7 +290,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   }, [projectSlug, dealId]);
 
   const updateDeal = async (
-    updatedDealData: Partial<DealWithInvestmentStats>
+    updatedDealData: Partial<DealWithInvestmentStatsAndDocument>
   ) => {
     if (!deal) return;
     setIsLoading(true);
@@ -296,7 +301,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     };
 
     try {
-      const { data } = await axios.put<DealWithInvestmentStats>(
+      const { data } = await axios.put<DealWithInvestmentStatsAndDocument>(
         `/api/deals`,
         updatedDeal
       );
@@ -415,6 +420,31 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       `/api/organizations/${organization.id}`
     );
     setOrganization(data as OrganizationWithDocuments);
+  };
+
+  const refetchDeal = async () => {
+    if (!deal || !project) return;
+    try {
+      const dealResponse = await fetch(
+        `/api/deals/flow?projectSlug=${encodeURIComponent(
+          project.slug
+        )}&dealId=${encodeURIComponent(deal.id)}`
+      );
+
+      if (!dealResponse.ok) {
+        throw new Error(`HTTP error! status: ${dealResponse.status}`);
+      }
+
+      const dealData: {
+        project: Project;
+        deal: DealWithInvestmentStatsAndDocument | null;
+      } = await dealResponse.json();
+
+      setDeal(dealData.deal);
+    } catch (error) {
+      console.error("Error fetching deal data:", error);
+      setError("Failed to load deal data. Please try again.");
+    }
   };
 
   const updateOrganization = async (
@@ -566,6 +596,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     deleteOrganizationMember,
     createVerification,
     refetchOrganization,
+    refetchDeal,
   };
 
   return (

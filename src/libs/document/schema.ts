@@ -8,34 +8,46 @@ const ACCEPTED_FILE_TYPES = [
   "image/jpeg",
 ];
 const MAX_FILE_SIZE = 4; // In MegaBytes
+
 const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
   const result = sizeInBytes / (1024 * 1024);
   return +result.toFixed(decimalsNum);
 };
 
-// Custom file validation that works in both browser and Node.js
-const fileSchema = z
-  .custom<File | Blob>((file) => {
-    // Check if it's a File or Blob
-    if (!(file instanceof Blob)) {
-      throw new Error("Required");
-    }
+// Helper function to check if we're on the client side
+const isClient = typeof window !== "undefined";
 
-    // Check file type
-    if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-      throw new Error(
-        `File type must be one of ${ACCEPTED_FILE_TYPES.join(", ")}`
-      );
-    }
+// Type guard to check if value is a File
+const isFile = (value: unknown): value is File => {
+  return isClient && value instanceof File;
+};
 
-    // Check file size
-    if (sizeInMB(file.size) > MAX_FILE_SIZE) {
-      throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
-    }
+// Modified file schema that works in both client and server contexts
+const fileSchema = z.custom<File | FormDataEntryValue>((file) => {
+  // If we're on the server, just validate it's present
+  if (!isClient) {
+    return file !== null && file !== undefined;
+  }
 
-    return true;
-  })
-  .transform((val) => val);
+  // Client-side validation
+  if (!isFile(file)) {
+    throw new Error("Required");
+  }
+
+  // Check file type
+  if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
+    throw new Error(
+      `File type must be one of ${ACCEPTED_FILE_TYPES.join(", ")}`
+    );
+  }
+
+  // Check file size
+  if (sizeInMB(file.size) > MAX_FILE_SIZE) {
+    throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
+  }
+
+  return true;
+});
 
 export const zPdfDocumentCreateSchema = z.object({
   dealId: z
