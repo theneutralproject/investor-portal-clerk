@@ -77,8 +77,7 @@ export default function Page({ params: { slug } }: PageProps) {
   useEffect(() => {
     if (user && queryParams.afterauth) {
       const { id, primaryEmailAddress, firstName, lastName } = user;
-      posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });// eslint-disable-next-line react-hooks/exhaustive-deps
     }
   }, [user, queryParams.afterauth])
 

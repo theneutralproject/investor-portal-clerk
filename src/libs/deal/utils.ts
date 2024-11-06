@@ -15,7 +15,6 @@ export async function updateDeal(
 ) {
     const { investmentStats, ...dealData } = updateDealData;
     let updatedStats: DealInvestmentStats | null | Error = null;
-    /* eslint-disable-next-line */
     const updatedDeal = await prisma.deal
         .update({
             where: { hubspotId: dealData.hubspotId },

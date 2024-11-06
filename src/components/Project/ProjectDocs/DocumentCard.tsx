@@ -120,6 +120,7 @@ const DocumentCard = ({
                 aria-label="sign document"
                 size="large"
                 onClick={() => {
+                  // eslint-disable-next-line
                   handleSignDocument && handleSignDocument(document);
                 }}
               >

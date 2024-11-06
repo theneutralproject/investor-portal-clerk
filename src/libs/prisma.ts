@@ -1,4 +1,3 @@
-/* eslint-disable import/no-mutable-exports */
 import {
   PrismaClient,
   type ProjectMilestones,

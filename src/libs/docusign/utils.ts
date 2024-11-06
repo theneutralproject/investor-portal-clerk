@@ -22,7 +22,7 @@ import { type SessionData, sessionOptions } from "../session/utils";
 import { toWords } from "number-to-words";
 import { isNull } from "lodash";
 
-/* eslint-disable-next-line*/
+// eslint-disable-next-line
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
 export async function refreshAccessToken() {

@@ -32,13 +32,12 @@
     }
   },
   "include": [
-    ".eslintrc.cjs",
+    "eslint.config.js",
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.cjs",
     "**/*.js",
     ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "documentation", "seedScripts", "playwright-report"]
+  "exclude": ["node_modules", "documentation", "seedScripts", "playwright-report", "e2e"]
 }

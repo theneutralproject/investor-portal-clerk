@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
 
     // only return deals for organizations (1) that the user is the owner of, or (2) that are completed, and the user is a member of its organization
-    return jsonResponse(deals.filter(deal => deal.dealStage === 5 || userOrgs.some(org => org.id === deal.organizationId && org.ownerId === dbUser.id))[0] ?? null);
+    return jsonResponse(deals.find(deal => deal.dealStage === 5 || userOrgs.some(org => org.id === deal.organizationId && org.ownerId === dbUser.id)) ?? null);
 
   } catch (error) {
     const errorMessage = (error as Error).message;

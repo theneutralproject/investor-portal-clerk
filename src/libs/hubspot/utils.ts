@@ -100,7 +100,7 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
       body,
     }
   )
-  
+
   const hsDealCreateRespBody = (await resBody.json()) as HsDealCreateResponse;
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
@@ -267,8 +267,6 @@ export async function getFundingAmount(projectName: ProjectName) {
     }
   }
 
-
-  /* eslint-disable-next-line */
   let totalAmountRaised = 0;
   let dealsFetched = 0;
   let totalDeals = 100;
@@ -320,9 +318,9 @@ export function getDealStageInt(dealstage: string) {
 }
 
 export function getProjectNameFromDealStage(dealstage: string) {
-  if (EdisonDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["The Edison"];
-  if (_519WMainDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["519 W Main"];
-  if (BakersPlaceDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["Bakers Place"];
+  if (EdisonDealStages.map(e => e.value).includes(dealstage)) return ProjectName["The Edison"];
+  if (_519WMainDealStages.map(e => e.value).includes(dealstage)) return ProjectName["519 W Main"];
+  if (BakersPlaceDealStages.map(e => e.value).includes(dealstage)) return ProjectName["Bakers Place"];
   return new Error("project not yet supported");
 };
 

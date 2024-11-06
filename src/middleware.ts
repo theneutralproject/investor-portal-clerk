@@ -8,7 +8,6 @@ export default authMiddleware({
     return publicRoutes.some((route) => req.nextUrl.pathname.includes(route));
   },
 
-  // eslint-disable-next-line consistent-return
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
       console.log("not logged in:", _req.url);

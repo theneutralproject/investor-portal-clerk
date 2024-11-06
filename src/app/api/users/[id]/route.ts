@@ -21,7 +21,8 @@ export async function PUT(request: NextRequest) {
         if (!userId || !isNumber(userId)) {
             throw new Error('userId is required in url');
         }
-    } catch (error: unknown) {
+    } catch (error) {
+        console.error(error)
         return jsonResponse({ error: `userId is required in url` }, 400);
     }
 

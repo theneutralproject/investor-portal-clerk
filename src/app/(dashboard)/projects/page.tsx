@@ -30,7 +30,6 @@ const Dashboard = () => {
     if (user && searchParams.get('afterauth')) {
       const { id, primaryEmailAddress, firstName, lastName } = user;
       posthog.identify(primaryEmailAddress?.toString(), { email: primaryEmailAddress?.toString(), firstname: firstName, lastname: lastName, id: id });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
     }
     if (searchParams.get('event') == "viewing_complete") {
       console.log("The user viewed the docusign doc")

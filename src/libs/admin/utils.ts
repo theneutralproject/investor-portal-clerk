@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma, { type DealWithOrgMembersAndProject } from "../prisma";
 import { MembershipType, Role } from "@prisma/client";
+import { getErrorMessage } from "../utils";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
@@ -31,8 +32,9 @@ export async function getAdminFromrequest(request: NextRequest) {
             throw new Error("Admin user not found");
         }
         return adminUser;
-    } catch (error) {
-        throw new Error("Invalid token");
+    } catch (err) {
+        console.error(getErrorMessage(err));
+        throw new Error(`Invalid token`);
     }
 }
 

@@ -12,6 +12,7 @@ export async function GET(request: NextRequest) {
 
     slug = queryParams.get("slug") ?? undefined;
   } catch (error) {
+    console.error(error);
     return new Response(JSON.stringify({ error: "Error fetching data" }), {
       status: 500,
       headers: { "Content-Type": "application/json" },

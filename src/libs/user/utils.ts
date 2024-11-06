@@ -13,7 +13,6 @@ import { decryptData } from "../encryption/utils";
  */
 export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: number): Promise<User> {
 
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { address, ...userData } = data;
 
     let deal: Deal | null = null;
