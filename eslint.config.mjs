@@ -1,4 +1,3 @@
-import typescriptEslint from "@typescript-eslint/eslint-plugin";
 import tsParser from "@typescript-eslint/parser";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,21 +20,18 @@ export default [...fixupConfigRules(compat.extends(
 )), ...fixupConfigRules({
     ignores: [
         ".seedScripts/**",
+        "./.next/**",
+        ".playwright-report/**",
+        ".e2e/**",
     ],
-    // plugins: {
-    //     "@typescript-eslint": typescriptEslint,
-    // },
-
     languageOptions: {
         parser: tsParser,
         ecmaVersion: 5,
         sourceType: "script",
-
         parserOptions: {
             project: true,
         },
     },
-
     rules: {
         "@typescript-eslint/array-type": "off",
         "@typescript-eslint/consistent-type-definitions": "off",

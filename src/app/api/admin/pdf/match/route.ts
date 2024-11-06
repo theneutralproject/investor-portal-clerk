@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
         }
     });
     // get the pdfs from the request
+    const postData = await request.formData();
+    console.log(postData);
     const { files } = zPdfBulkUploadSchema.parse(await request.formData());
 
     console.log(`Admin ${adminUser.email} uploaded ${files.length} files`);

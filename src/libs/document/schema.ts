@@ -89,7 +89,7 @@ export const zPdfBulkUploadSchema = z.object({
     files: z.array(z.instanceof(File)).nonempty().max(20).refine(
         (files) => files.every((file) => sizeInMB(file.size) <= MAX_FILE_SIZE && ACCEPTED_FILE_TYPES.includes(file.type)),
         {
-            message: "Item photo: Only .jpeg, .jpg, .png files of 2MB or less are accepted",
+            message: "PDF only, max 20 files, each file must be less than 4MB",
         }
     )
 });
