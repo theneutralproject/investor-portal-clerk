@@ -113,10 +113,19 @@ export const UserSchema = z.object({
   id: z.number().int(),
   clerkId: z.string().nullable(),
   email: z.string(),
+  /**
+   * @encrypted
+   */
   firstName: z.string(),
+  /**
+   * @encrypted
+   */
   lastName: z.string(),
   phoneNumber: z.string().nullable(),
   hubspotId: z.string(),
+  /**
+   * @encrypted?mode=strict
+   */
   ssn: z.string().nullable(),
   dateOfBirth: z.coerce.date().nullable(),
   userOrgId: z.number().int().nullable(),
@@ -169,8 +178,14 @@ export type DealInvestmentStats = z.infer<typeof DealInvestmentStatsSchema>
 export const OrganizationSchema = z.object({
   ownershipType: DealOwnershipTypeSchema,
   id: z.number().int(),
+  /**
+   * @encrypted
+   */
   name: z.string(),
   ownerId: z.number().int(),
+  /**
+   * @encrypted?mode=strict
+   */
   tin: z.string().nullable(),
   dateOfCreation: z.coerce.date().nullable(),
   juristication: z.string().nullable(),
@@ -216,7 +231,13 @@ export type AccreditationVerification = z.infer<typeof AccreditationVerification
 
 export const AccreditationVerifierSchema = z.object({
   id: z.number().int(),
+  /**
+   * @encrypted?mode=strict
+   */
   firstName: z.string(),
+  /**
+   * @encrypted?mode=strict
+   */
   lastName: z.string(),
   email: z.string(),
   title: z.string().nullable(),
@@ -983,12 +1004,36 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
     id: z.number().int(),
     clerkId: z.string(),
     email: z.string(),
+    ssn: z.string(),
     userOrgId: z.number().int()
   }),
   z.object({
     id: z.number().int(),
     clerkId: z.string(),
     email: z.string(),
+    ssn: z.string(),
+  }),
+  z.object({
+    id: z.number().int(),
+    clerkId: z.string(),
+    email: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    id: z.number().int(),
+    clerkId: z.string(),
+    email: z.string(),
+  }),
+  z.object({
+    id: z.number().int(),
+    clerkId: z.string(),
+    ssn: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    id: z.number().int(),
+    clerkId: z.string(),
+    ssn: z.string(),
   }),
   z.object({
     id: z.number().int(),
@@ -1002,6 +1047,17 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   z.object({
     id: z.number().int(),
     email: z.string(),
+    ssn: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    id: z.number().int(),
+    email: z.string(),
+    ssn: z.string(),
+  }),
+  z.object({
+    id: z.number().int(),
+    email: z.string(),
     userOrgId: z.number().int(),
   }),
   z.object({
@@ -1010,6 +1066,15 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   }),
   z.object({
     id: z.number().int(),
+    ssn: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    id: z.number().int(),
+    ssn: z.string(),
+  }),
+  z.object({
+    id: z.number().int(),
     userOrgId: z.number().int(),
   }),
   z.object({
@@ -1018,6 +1083,17 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   z.object({
     clerkId: z.string(),
     email: z.string(),
+    ssn: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    clerkId: z.string(),
+    email: z.string(),
+    ssn: z.string(),
+  }),
+  z.object({
+    clerkId: z.string(),
+    email: z.string(),
     userOrgId: z.number().int(),
   }),
   z.object({
@@ -1026,6 +1102,15 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   }),
   z.object({
     clerkId: z.string(),
+    ssn: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    clerkId: z.string(),
+    ssn: z.string(),
+  }),
+  z.object({
+    clerkId: z.string(),
     userOrgId: z.number().int(),
   }),
   z.object({
@@ -1033,10 +1118,26 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   }),
   z.object({
     email: z.string(),
+    ssn: z.string(),
     userOrgId: z.number().int(),
   }),
   z.object({
     email: z.string(),
+    ssn: z.string(),
+  }),
+  z.object({
+    email: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    email: z.string(),
+  }),
+  z.object({
+    ssn: z.string(),
+    userOrgId: z.number().int(),
+  }),
+  z.object({
+    ssn: z.string(),
   }),
   z.object({
     userOrgId: z.number().int(),
@@ -1046,6 +1147,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   id: z.number().int().optional(),
   clerkId: z.string().optional(),
   email: z.string().optional(),
+  ssn: z.string().optional(),
   userOrgId: z.number().int().optional(),
   AND: z.union([ z.lazy(() => UserWhereInputSchema),z.lazy(() => UserWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => UserWhereInputSchema).array().optional(),
@@ -1055,7 +1157,6 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   lastName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   phoneNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   hubspotId: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  ssn: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   dateOfBirth: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   referralSource: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),

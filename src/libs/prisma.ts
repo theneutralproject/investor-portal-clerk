@@ -18,20 +18,25 @@ import {
   type OrganizationDocument,
   type DealDocument,
 } from "@prisma/client";
+import { fieldEncryptionExtension } from 'prisma-field-encryption'
 
-let prisma: PrismaClient;
+let prismaClient: PrismaClient;
 
 if (process.env.NODE_ENV === "production") {
-  prisma = new PrismaClient();
+  prismaClient = new PrismaClient();
 } else {
   const globalWithPrisma = global as typeof globalThis & {
-    prisma: PrismaClient;
+    prismaClient: PrismaClient;
   };
-  if (!globalWithPrisma.prisma) {
-    globalWithPrisma.prisma = new PrismaClient();
+  if (!globalWithPrisma.prismaClient) {
+    globalWithPrisma.prismaClient = new PrismaClient();
   }
-  prisma = globalWithPrisma.prisma;
+  prismaClient = globalWithPrisma.prismaClient;
 }
+
+const prisma = prismaClient.$extends(
+  fieldEncryptionExtension()
+)
 
 export default prisma;
 

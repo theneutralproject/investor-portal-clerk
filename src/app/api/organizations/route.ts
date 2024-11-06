@@ -1,4 +1,3 @@
-import { encryptString } from "@/libs/encryption/utils";
 import { type OrganizationCreateSchema, zOrganizationCreateSchema } from "@/libs/organization/schema";
 import { sanitizeOrganization } from "@/libs/organization/utils";
 import prisma from "@/libs/prisma";
@@ -109,7 +108,7 @@ export async function POST(request: NextRequest) {
         name: getOrgName(),
         ownershipType: postData.ownershipType ?? DealOwnershipType.INDIVIDUAL,
         ownerId: dbUser.id,
-        tin: postData.tin ? encryptString(postData.tin.replace(/\D/g, "")) : null,
+        tin: postData.tin,// ? encryptString(postData.tin.replace(/\D/g, "")) : null,
         dateOfCreation: postData.dateOfCreation,
         juristication: postData.juristication,
         members: {

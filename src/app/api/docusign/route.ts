@@ -4,7 +4,6 @@ import { type DocusignEnvelopeCreateSchema, zDocusignEvelopeCreate } from '@/lib
 import { getErrorMessage, jsonResponse } from '@/libs/utils';
 import { refreshAccessToken, instantiateApiClient, makeEnvelope, makeRecipientViewRequest } from "@/libs/docusign/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { decryptData } from "@/libs/encryption/utils";
 
 export async function POST(req: Request) {
 
@@ -33,7 +32,6 @@ export async function POST(req: Request) {
             404
         );
     }
-    if (userWOrgsAndAddress.ssn) userWOrgsAndAddress.ssn = decryptData(userWOrgsAndAddress.ssn);
 
     let payload: DocusignEnvelopeCreateSchema;
     try {
@@ -66,8 +64,6 @@ export async function POST(req: Request) {
         console.error(`Deal with id ${payload.dealId} not found in user's organization`);
         return jsonResponse({ error: `Deal with id ${payload.dealId} not found in user's organization` }, 404);
     }
-
-    if (deal.organization.tin) deal.organization.tin = decryptData(deal.organization.tin);
 
     const accessTokenResponse = await refreshAccessToken();
     if (accessTokenResponse.consentUrl) {

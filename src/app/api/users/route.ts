@@ -4,7 +4,6 @@ import prisma from "@/libs/prisma";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { type ClerkUserUpdateSchema, type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
-import { encryptString } from "@/libs/encryption/utils";
 import { sanitizeUser } from "@/libs/user/utils";
 
 /**
@@ -96,7 +95,7 @@ export async function PUT(request: NextRequest) {
             if (presanitizedSSN.length !== 9) {
                 return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
             }
-            userData.ssn = encryptString(presanitizedSSN.replace(/\D/g, ""));
+            userData.ssn = presanitizedSSN;
         }
     }
 

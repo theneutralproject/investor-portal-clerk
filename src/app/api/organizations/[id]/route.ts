@@ -1,4 +1,3 @@
-import { encryptString } from "@/libs/encryption/utils";
 import { type OrganizationUpdateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
 import { sanitizeOrganization } from "@/libs/organization/utils";
 import prisma from "@/libs/prisma";
@@ -119,7 +118,7 @@ export async function PUT(request: NextRequest) {
                 if (presanitizedTIN.length !== 9) {
                     return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
                 }
-                orgData.tin = encryptString(presanitizedTIN);
+                orgData.tin = presanitizedTIN//encryptString(presanitizedTIN);
             }
         }
 

@@ -1,4 +1,3 @@
-import { encryptString } from "@/libs/encryption/utils";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma";
 import { type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
@@ -72,7 +71,7 @@ export async function PUT(request: NextRequest) {
     let hubspotNeedsUpdate = false;
     if (userUpdateData.email && userToUpdate.email !== userUpdateData.email) hubspotNeedsUpdate = true;
     if (userUpdateData.phoneNumber && userToUpdate.phoneNumber !== userUpdateData.phoneNumber) hubspotNeedsUpdate = true;
-    if (userUpdateData.firstName && userToUpdate.firstName!== userUpdateData.firstName) hubspotNeedsUpdate = true;
+    if (userUpdateData.firstName && userToUpdate.firstName !== userUpdateData.firstName) hubspotNeedsUpdate = true;
     if (userUpdateData.lastName && userToUpdate.lastName !== userUpdateData.lastName) hubspotNeedsUpdate = true;
     //  Check if hubspot needs to be updated
 
@@ -87,7 +86,7 @@ export async function PUT(request: NextRequest) {
         if (userUpdateData.email) {
             hsUserUpdateProps.push({ property: 'email', value: userUpdateData.email });
         }
-        if(userToUpdate.phoneNumber) {
+        if (userToUpdate.phoneNumber) {
             hsUserUpdateProps.push({ property: 'phone', value: userUpdateData.phoneNumber! });
         }
         try {
@@ -98,12 +97,11 @@ export async function PUT(request: NextRequest) {
     }
 
     if (userUpdateData.ssn && !userUpdateData.ssn.startsWith("***-**-")) {
-        // sanitize it (digits only) and encrypt SSN before storing it:
         const presanitizedSSN = userUpdateData.ssn.replace(/\D/g, "");
         if (presanitizedSSN.length !== 9) {
             return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
         }
-        userUpdateData.ssn = encryptString(userUpdateData.ssn.replace(/\D/g, ""));
+        userUpdateData.ssn = presanitizedSSN
     }
 
     if (address) {

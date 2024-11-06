@@ -16,11 +16,11 @@ model User {
   clerkId            String?         @unique
   role               Role            @default(USER)
   email              String          @unique
-  firstName          String
-  lastName           String
+  firstName          String /// @encrypted
+  lastName           String /// @encrypted
   phoneNumber        String?
   hubspotId          String
-  ssn                String?
+  ssn                String?         @unique /// @encrypted?mode=strict
   dateOfBirth        DateTime?
   userOrgId          Int?            @unique
   referralSource     String?
@@ -61,9 +61,9 @@ model DealInvestmentStats {
 
 model Organization {
   id             Int                    @id @default(autoincrement())
-  name           String
+  name           String /// @encrypted
   ownerId        Int
-  tin            String?
+  tin            String? /// @encrypted?mode=strict
   dateOfCreation DateTime?
   juristication  String?
   isPrimary      Boolean                @default(false) /// used to determine which organization is the primary individual one for the user
@@ -97,8 +97,8 @@ model AccreditationVerification {
 
 model AccreditationVerifier {
   id                        Int                        @id @default(autoincrement())
-  firstName                 String
-  lastName                  String
+  firstName                 String /// @encrypted?mode=strict
+  lastName                  String /// @encrypted?mode=strict
   email                     String
   title                     String?
   phoneNumber               String?
@@ -107,13 +107,13 @@ model AccreditationVerifier {
 
 /// deal specific documents such as tax forms, accreditation verification etc 
 model DealDocument {
-  id     Int              @id @default(autoincrement())
-  name   String
-  path   String
-  type   DealDocumentType
-  dealId Int
-  dateCreated DateTime @default(now())
-  deal   Deal             @relation(fields: [dealId], references: [id])
+  id          Int              @id @default(autoincrement())
+  name        String
+  path        String
+  type        DealDocumentType
+  dealId      Int
+  dateCreated DateTime         @default(now())
+  deal        Deal             @relation(fields: [dealId], references: [id])
 }
 
 /// used for business verification letters and such
@@ -121,9 +121,9 @@ model OrganizationDocument {
   id             Int          @id @default(autoincrement())
   name           String
   path           String
-  key            String         @default("")
+  key            String       @default("")
   organizationId Int
-  dateCreated DateTime @default(now())
+  dateCreated    DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])
 }
 
