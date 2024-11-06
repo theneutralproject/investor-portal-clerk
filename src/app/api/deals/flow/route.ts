@@ -3,12 +3,51 @@ import { currentUser } from "@clerk/nextjs";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma";
 import { z } from "zod";
-import type { Organization } from "@prisma/client";
+import type {
+  DealFinancingType,
+  DocumentEvent,
+  Organization,
+  User,
+} from "@prisma/client";
 
 const QuerySchema = z.object({
   projectSlug: z.string().min(1),
   dealId: z.string().optional(),
 });
+
+async function fetchProjectDocuments(
+  projectId: number,
+  financingType: DealFinancingType | null,
+  neutralUser: User | null
+) {
+  const documents = await prisma.projectDocument.findMany({
+    where: {
+      projectId: projectId,
+      ...(financingType
+        ? {
+            OR: [
+              { financingTypes: { has: financingType } },
+              { financingTypes: { equals: [] } },
+            ],
+          }
+        : { financingTypes: { equals: [] } }),
+    },
+    include: {
+      documentEvents: {
+        where: { userId: neutralUser?.id },
+      },
+    },
+  });
+
+  const results = documents.map((doc) => ({
+    ...doc,
+    completed: doc.documentEvents.some(
+      (event: DocumentEvent) => event.documentId === doc.id
+    ),
+  }));
+
+  return results;
+}
 
 async function fetchProject(slug: string) {
   return prisma.project.findUnique({
@@ -18,7 +57,6 @@ async function fetchProject(slug: string) {
       propertyStats: true,
       milestones: true,
       pictures: true,
-      documents: true,
     },
   });
 }
@@ -93,7 +131,19 @@ export async function GET(request: NextRequest) {
       return errorResponse("You do not have access to this deal", 403);
     }
 
-    return jsonResponse({ project, deal });
+    const documents = await fetchProjectDocuments(
+      project.id,
+      deal.investmentStats?.financingType ?? null,
+      dbUser
+    );
+
+    return jsonResponse({
+      project: {
+        ...project,
+        documents,
+      },
+      deal,
+    });
   } catch (error) {
     console.error("Error in GET /api/deal:", error);
     return errorResponse("Internal server error", 500);

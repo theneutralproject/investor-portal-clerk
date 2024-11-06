@@ -107,7 +107,10 @@ export async function POST(req: Request) {
         );
     }
 
-    const returnUrl = `${process.env.BASE_URL}/dealflow/${deal.project.slug}/${deal.id}/review`;
+    const documentTemplateId = payload.envelopeId;
+    const userId = userWOrgsAndAddress.id;
+
+    const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentTemplateId=${documentTemplateId}&userId=${userId}&dealId=${deal.id}`;
     // Create the recipient view for the Signing Ceremony
     const viewRequest = makeRecipientViewRequest(userWOrgsAndAddress, returnUrl);
     const viewRequestResponse = await envelopesApi.createRecipientView(process.env.DOCUSIGN_API_ACCOUNT_ID!, envelopeResponse.envelopeId!,
