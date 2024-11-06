@@ -20,7 +20,6 @@ async function fetchProjectDocuments(
   financingType: DealFinancingType | null,
   neutralUser: User | null
 ) {
-  console.log("fetching documents", projectId, financingType);
   const documents = await prisma.projectDocument.findMany({
     where: {
       projectId: projectId,

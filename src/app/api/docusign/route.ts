@@ -130,7 +130,7 @@ export async function POST(req: Request) {
     const documentId = projectDocument.id;
     const userId = userWOrgsAndAddress.id;
 
-    const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentId=${documentId}&userId=${userId}`;
+    const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentId=${documentId}&userId=${userId}&dealId=${deal.id}`;
     // Create the recipient view for the Signing Ceremony
     const viewRequest = makeRecipientViewRequest(userWOrgsAndAddress, returnUrl);
     const viewRequestResponse = await envelopesApi.createRecipientView(process.env.DOCUSIGN_API_ACCOUNT_ID!, envelopeResponse.envelopeId!,
