@@ -59,6 +59,13 @@ jobs:
           DOCUSIGN_INTEGRATION_KEY: ${{ secrets.DOCUSIGN_INTEGRATION_KEY }}
           DOCUSIGN_API_ACCOUNT_ID: ${{ secrets.DOCUSIGN_API_ACCOUNT_ID }}
           DOCUSIGN_RSA_PRIVATE_KEY: ${{ secrets.DOCUSIGN_RSA_PRIVATE_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_OAUTH_URL: ${{ secrets.GOOGLE_OAUTH_URL }}
+          GOOGLE_ACCESS_TOKEN_URL: ${{ secrets.GOOGLE_ACCESS_TOKEN_URL }}
+          GOOGLE_TOKEN_INFO_URL: ${{ secrets.GOOGLE_TOKEN_INFO_URL }}
+          GOOGLE_CALLBACK_URL_SUBDIRECTORY: ${{ secrets.GOOGLE_CALLBACK_URL_SUBDIRECTORY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}          
       run: DEBUG=pw:browser npx playwright test
     - uses: actions/upload-artifact@v4
       if: ${{ !cancelled() }}
