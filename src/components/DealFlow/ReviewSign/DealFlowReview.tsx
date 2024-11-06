@@ -17,7 +17,7 @@ import { createDocusignEnvelope } from "@/components/Project/Invest/InvestTab";
 interface DocumentItemProps {
   title: string;
   fileName: string;
-  status: "SIGNED" | "PENDING";
+  isCompleted: boolean;
   onSign?: () => void;
   index: number;
 }
@@ -25,7 +25,7 @@ interface DocumentItemProps {
 const DocumentItem: React.FC<DocumentItemProps> = ({
   title,
   fileName,
-  status,
+  isCompleted,
   onSign,
   index,
 }) => {
@@ -45,7 +45,7 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
         },
       }}
     >
-      {status === "SIGNED" ? (
+      {isCompleted ? (
         <CheckCircleIcon
           sx={{
             color: "success.main",
@@ -76,7 +76,7 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
           {fileName}
         </Typography>
       </Stack>
-      {status === "SIGNED" ? (
+      {isCompleted ? (
         <Typography variant="body2">Signed</Typography>
       ) : (
         <Button variant="neutralBlack" onClick={onSign}>
@@ -101,14 +101,6 @@ const DealFlowReview: React.FC = () => {
     }
   };
 
-  // Get the document events or status - This would need to be implemented based on your data structure
-  const getDocumentStatus = (documentId: number): "SIGNED" | "PENDING" => {
-    // Implement your logic to check if the document is signed
-    // This could be checking documentEvents or other data
-    //Randomly return signed for now
-    return Math.random() > 0.5 ? "SIGNED" : "PENDING";
-  };
-
   return (
     <Box sx={{ maxWidth: "800px", margin: "0 auto", p: 3 }}>
       <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
@@ -127,7 +119,7 @@ const DealFlowReview: React.FC = () => {
               key={doc.id}
               title={doc.name}
               fileName={doc.fileName}
-              status={getDocumentStatus(doc.id)}
+              isCompleted={doc.completed}
               onSign={() =>
                 doc.docusignTemplateId &&
                 handleSignDocument(doc.docusignTemplateId)

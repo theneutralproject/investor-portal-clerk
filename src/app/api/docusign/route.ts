@@ -107,7 +107,30 @@ export async function POST(req: Request) {
         );
     }
 
-    const returnUrl = `${process.env.BASE_URL}/dealflow/${deal.project.slug}/${deal.id}/review`;
+    // Find the project document
+    const projectDocument = await prisma.projectDocument.findFirst({
+        where: {
+            projectId: deal.project.id,
+            docusignTemplateId: payload.envelopeId,
+        },
+        include: {
+            project: true,
+        },
+    });
+
+    if (!projectDocument) {
+        return new Response(
+        JSON.stringify({ error: "Project document not found" }),
+        {
+            status: 404,
+            headers: { "Content-Type": "application/json" },
+        }
+        );
+    }
+    const documentId = projectDocument.id;
+    const userId = userWOrgsAndAddress.id;
+
+    const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentId=${documentId}&userId=${userId}`;
     // Create the recipient view for the Signing Ceremony
     const viewRequest = makeRecipientViewRequest(userWOrgsAndAddress, returnUrl);
     const viewRequestResponse = await envelopesApi.createRecipientView(process.env.DOCUSIGN_API_ACCOUNT_ID!, envelopeResponse.envelopeId!,
