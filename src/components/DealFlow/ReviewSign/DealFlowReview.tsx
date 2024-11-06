@@ -7,7 +7,6 @@ import {
   List,
   ListItem,
   Stack,
-  IconButton,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
@@ -119,6 +118,8 @@ const DealFlowReview: React.FC = () => {
               key={doc.id}
               title={doc.name}
               fileName={doc.fileName}
+              // @ts-expect-error -- type completed
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               isCompleted={doc.completed}
               onSign={() =>
                 doc.docusignTemplateId &&
