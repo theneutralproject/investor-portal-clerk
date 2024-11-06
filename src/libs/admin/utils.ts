@@ -43,6 +43,7 @@ export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], fi
     const dataBuffer = Buffer.from(arrayBuffer);
     // eslint-disable-next-line
     const { text } = (await PdfParse(dataBuffer)) as { text: string | null };
+    console.log(`text: ${text?.substring(0, 100)}`);
     if(!text) {
         return new Error("No text found in pdf");
     }
@@ -65,6 +66,7 @@ export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], fi
         }
         const { firstName, lastName, ssn } = owner.user;
         const wordsToMatch = [firstName, lastName, projectName, (ssn && ssn?.length > 4) ? ssn.slice(-4) : ""].map((w) => w?.toLowerCase() ?? "");
+        console.log(`\t-->words to match: ${wordsToMatch.toString()}`);
         const matchFound = wordsToMatch.every(word => text.toLowerCase().includes(word));
         if (matchFound) {
             dealFound = true;
@@ -72,6 +74,7 @@ export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], fi
             console.log(`found a match for ${transactionId}`);
             console.log(`\t-->words to match: ${wordsToMatch.toString()}\n`);
           }
+          i++;
     }
     return matchingDeal;
 }
