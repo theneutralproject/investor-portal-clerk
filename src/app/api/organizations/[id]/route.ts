@@ -118,7 +118,7 @@ export async function PUT(request: NextRequest) {
                 if (presanitizedTIN.length !== 9) {
                     return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
                 }
-                orgData.tin = presanitizedTIN//encryptString(presanitizedTIN);
+                orgData.tin = presanitizedTIN;
             }
         }
 

@@ -108,7 +108,7 @@ export async function POST(request: NextRequest) {
         name: getOrgName(),
         ownershipType: postData.ownershipType ?? DealOwnershipType.INDIVIDUAL,
         ownerId: dbUser.id,
-        tin: postData.tin,// ? encryptString(postData.tin.replace(/\D/g, "")) : null,
+        tin: postData.tin,
         dateOfCreation: postData.dateOfCreation,
         juristication: postData.juristication,
         members: {
