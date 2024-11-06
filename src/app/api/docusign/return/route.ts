@@ -3,10 +3,10 @@ import { DocumentEventType } from "@prisma/client";
 import prisma from "@/libs/prisma";
 
 interface DocuSignParams {
-  documentId: string;
+  documentTemplateId: string;
   userId: string;
   dealId: string;
-  event: string;
+  event: string; //From DocuSign "signing_complete" or "decline"
 }
 
 class ValidationError extends Error {
@@ -20,15 +20,20 @@ class ValidationError extends Error {
 function extractParams(request: NextRequest): DocuSignParams {
   const searchParams = request.nextUrl.searchParams;
   const params = {
-    documentId: searchParams.get("documentId"),
+    documentTemplateId: searchParams.get("documentTemplateId"),
     userId: searchParams.get("userId"),
     dealId: searchParams.get("dealId"),
     event: searchParams.get("event"),
   };
 
-  if (!params.documentId || !params.userId || !params.dealId || !params.event) {
+  if (
+    !params.documentTemplateId ||
+    !params.userId ||
+    !params.dealId ||
+    !params.event
+  ) {
     throw new ValidationError(
-      "Missing required parameters: documentId or userId or dealId or event"
+      "Missing required parameters: documentTemplateId or userId or dealId or event"
     );
   }
 
@@ -36,10 +41,10 @@ function extractParams(request: NextRequest): DocuSignParams {
 }
 
 // Fetch project document with validation
-async function getProjectDocument(documentId: string) {
-  const projectDocument = await prisma.projectDocument.findUnique({
+async function getProjectDocument(documentTemplateId: string) {
+  const projectDocument = await prisma.projectDocument.findFirst({
     where: {
-      id: parseInt(documentId),
+      docusignTemplateId: documentTemplateId,
     },
     include: {
       project: true,
@@ -54,12 +59,12 @@ async function getProjectDocument(documentId: string) {
 }
 
 // Create document event based on the event type
-async function createDocumentEvent(params: DocuSignParams) {
+async function createDocumentEvent(params: DocuSignParams, documentId: number) {
   if (params.event === "signing_complete") {
     await prisma.documentEvent.create({
       data: {
         userId: parseInt(params.userId),
-        documentId: parseInt(params.documentId),
+        documentId,
         date: new Date(),
         type: DocumentEventType.SIGN,
       },
@@ -101,10 +106,10 @@ export async function GET(request: NextRequest) {
     const params = extractParams(request);
 
     // Get project document
-    const projectDocument = await getProjectDocument(params.documentId);
+    const projectDocument = await getProjectDocument(params.documentTemplateId);
 
     // Create document event if applicable
-    await createDocumentEvent(params);
+    await createDocumentEvent(params, projectDocument.id);
 
     // Build and return redirect URL
     const redirectUrl = buildRedirectUrl(
