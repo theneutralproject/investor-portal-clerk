@@ -1,96 +1,16 @@
 import React from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  Button,
-  List,
-  ListItem,
-  Stack,
-} from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { Box, Typography, Card, List } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { useUser } from "@clerk/nextjs";
 import { createDocusignEnvelope } from "@/components/Project/Invest/InvestTab";
-
-interface DocumentItemProps {
-  title: string;
-  fileName: string;
-  isCompleted: boolean;
-  onSign?: () => void;
-  index: number;
-}
-
-const DocumentItem: React.FC<DocumentItemProps> = ({
-  title,
-  fileName,
-  isCompleted,
-  onSign,
-  index,
-}) => {
-  return (
-    <ListItem
-      disableGutters
-      sx={{
-        py: 2,
-        px: 3,
-        display: "flex",
-        alignItems: "center",
-        gap: 2,
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        "&:last-child": {
-          borderBottom: "none",
-        },
-      }}
-    >
-      {isCompleted ? (
-        <CheckCircleIcon
-          sx={{
-            color: "success.main",
-            width: 24,
-            height: 24,
-          }}
-        />
-      ) : (
-        <Box
-          sx={{
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            bgcolor: "grey.100",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            typography: "body2",
-            color: "text.secondary",
-          }}
-        >
-          {index}
-        </Box>
-      )}
-      <Stack direction="column" spacing={0.5} flex={1}>
-        <Typography variant="subtitle1">{title}</Typography>
-        <Typography variant="body2" color="text.secondary">
-          {fileName}
-        </Typography>
-      </Stack>
-      {isCompleted ? (
-        <Typography variant="body2">Signed</Typography>
-      ) : (
-        <Button variant="neutralBlack" onClick={onSign}>
-          REVIEW & SIGN
-        </Button>
-      )}
-    </ListItem>
-  );
-};
+import DealFlowFooter from "../Shared/DealFlowFooter";
+import DocumentItem from "@components/DealFlow/ReviewSign/DocumentItem";
+import ReviewingInvestment from "@components/DealFlow/ReviewSign/ReviewingInvestment";
 
 const DealFlowReview: React.FC = () => {
-  const { project, deal } = useDealFlow();
+  const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const { user } = useUser();
 
-  // Filter only DOCUSIGN type documents
   const docusignDocuments =
     project?.documents?.filter((doc) => doc.documentType === "DOCUSIGN") || [];
 
@@ -100,8 +20,25 @@ const DealFlowReview: React.FC = () => {
     }
   };
 
+  const toReviewScreen = async () => {
+    if (!deal) return;
+
+    await updateDeal(
+      {
+        ...deal,
+        dealStage: 3,
+      },
+      false
+    );
+    await refetchDeal();
+  };
+
+  if (deal.dealStage === 3) {
+    return <ReviewingInvestment />;
+  }
+
   return (
-    <Box sx={{ maxWidth: "800px", margin: "0 auto", p: 3 }}>
+    <Box sx={{ p: 3 }}>
       <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
         Review & Sign Documents
       </Typography>
@@ -130,6 +67,14 @@ const DealFlowReview: React.FC = () => {
           ))}
         </List>
       </Card>
+
+      <DealFlowFooter
+        onBack={() => null}
+        onContinue={toReviewScreen}
+        // @ts-expect-error -- type completed
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        isContinueDisabled={!docusignDocuments.every((doc) => doc.completed)}
+      />
     </Box>
   );
 };
