@@ -5,7 +5,6 @@ import prisma, { type UserWithAddress } from "../prisma";
 import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
 import { type Deal, MembershipType, type User } from "@prisma/client";
-import { decryptData } from "../encryption/utils";
 
 /**
  * creates a user in both hubspot and our DB
@@ -93,6 +92,6 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
 export function sanitizeUser(user: User | UserWithAddress) {
     return {
         ...user,
-        ssn: user.ssn ? `***-**-${decryptData(user.ssn).slice(-4)}` : null,
+        ssn: user.ssn ? `***-**-${user.ssn.slice(-4)}` : null,
     }
 }
