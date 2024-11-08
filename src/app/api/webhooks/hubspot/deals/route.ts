@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         }
       );
     }
-
+    console.log("payload", payload);
     const dealBody: DealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
       // investmentStats: {},
