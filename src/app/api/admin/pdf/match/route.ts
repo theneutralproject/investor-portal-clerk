@@ -1,4 +1,3 @@
-'use server';
 import { deleteAllFiles, getAdminFromrequest, matchDealWithPdf } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
