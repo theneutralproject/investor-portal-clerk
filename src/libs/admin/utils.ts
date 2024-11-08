@@ -1,7 +1,6 @@
-
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import prisma, { type DealWithFullOrgAndProject } from "../prisma";
+import prisma from "../prisma.server";
 import { type DealDocumentType, MembershipType, Role } from "@prisma/client";
 import { type MatchResponseObject, MatchConfidence } from "./schema";
 import { storageClient } from "../supabase";

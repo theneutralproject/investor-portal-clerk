@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { DocumentEventType } from "@prisma/client";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 
 interface DocuSignParams {
   documentTemplateId: string;

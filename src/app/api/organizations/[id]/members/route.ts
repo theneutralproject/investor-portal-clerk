@@ -1,5 +1,6 @@
+'use server';
 import { type OrganizationMemberCreateSchema, zOrganizationMemberCreateSchema } from "@/libs/organization/schema";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { createUserInDbAndHubspot, sanitizeUser } from "@/libs/user/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import type { User } from "@prisma/client";

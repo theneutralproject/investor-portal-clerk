@@ -18,6 +18,12 @@ const config = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],
+  }, 
+  webpack: (config) => {
+    config.externals.push({
+      'node:crypto': 'commonjs crypto',
+    });
+    return config;
   },
 };
 

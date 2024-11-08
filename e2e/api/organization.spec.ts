@@ -1,6 +1,7 @@
 import { AddressCreateSchema } from '@/libs/address/schema';
 import { OrganizationUpdateSchema } from '@/libs/organization/schema';
-import prisma, { OrganizationWithMembersAndAddress } from '@/libs/prisma';
+import prisma from '@/libs/prisma.server';
+import { OrganizationWithMembersAndAddress } from '@/libs/types';
 import { test, expect } from '@playwright/test';
 import { DealOwnershipType, Organization } from '@prisma/client';
 import { resetOrgInDb } from 'e2e/helpers';

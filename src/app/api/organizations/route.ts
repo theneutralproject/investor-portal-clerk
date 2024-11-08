@@ -1,7 +1,7 @@
-import { encryptString } from "@/libs/encryption/utils";
+'use server';
 import { type OrganizationCreateSchema, zOrganizationCreateSchema } from "@/libs/organization/schema";
 import { sanitizeOrganization } from "@/libs/organization/utils";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { DealOwnershipType, MembershipType } from "@prisma/client";
@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
         name: getOrgName(),
         ownershipType: postData.ownershipType ?? DealOwnershipType.INDIVIDUAL,
         ownerId: dbUser.id,
-        tin: postData.tin ? encryptString(postData.tin.replace(/\D/g, "")) : null,
+        tin: postData.tin,
         dateOfCreation: postData.dateOfCreation,
         juristication: postData.juristication,
         members: {

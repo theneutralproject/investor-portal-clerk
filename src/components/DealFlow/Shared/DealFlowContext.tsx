@@ -6,7 +6,7 @@ import {
   type UserWithAddress,
   type DealWithInvestmentStatsAndDocument,
   type MemberWithUser,
-} from "@/libs/prisma";
+} from "@/libs/types";
 import {
   DealOwnershipType,
   DealFinancingType,
@@ -32,6 +32,7 @@ import {
   type OrganizationMemberUpdateSchema,
 } from "@/libs/organization/schema";
 import DealFlowReview from "@components/DealFlow/ReviewSign/DealFlowReview";
+import DealFlowFund from "@components/DealFlow/Fund/DealFlowFund";
 import type { DealCreateSchema } from "@/libs/deal/schema";
 // Define the step types
 export type StepType =
@@ -112,7 +113,7 @@ export const steps: Step[] = [
     component: DealFlowReview,
     isMajor: true,
   },
-  { value: "fund", display: "Fund", isMajor: true },
+  { value: "fund", display: "Fund", component: DealFlowFund, isMajor: true },
 ];
 
 export const stepComponents = Object.fromEntries(
@@ -136,7 +137,8 @@ interface DealFlowContextType {
   isLoading: boolean;
   error: string | null;
   updateDeal: (
-    updatedDeal: Partial<DealWithInvestmentStatsAndDocument>
+    updatedDeal: Partial<DealWithInvestmentStatsAndDocument>,
+    incrementStep?: boolean
   ) => Promise<void>;
   createDeal: () => Promise<void>;
   updateUser: (updatedUser: Partial<UserWithAddress>) => Promise<void>;
@@ -290,7 +292,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   }, [projectSlug, dealId]);
 
   const updateDeal = async (
-    updatedDealData: Partial<DealWithInvestmentStatsAndDocument>
+    updatedDealData: Partial<DealWithInvestmentStatsAndDocument>,
+    incrementStep = true
   ) => {
     if (!deal) return;
     setIsLoading(true);
@@ -308,7 +311,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       setDeal(data);
 
       const nextStep = getNextStep(step);
-      if (nextStep) {
+      if (nextStep && incrementStep) {
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
       toast.success("Deal updated successfully");

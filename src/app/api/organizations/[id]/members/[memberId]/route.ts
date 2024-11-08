@@ -1,4 +1,5 @@
-import prisma from "@/libs/prisma";
+'use server';
+import prisma from "@/libs/prisma.server";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import type { NextRequest } from "next/server";
 import { getUserAndOrg } from "../helpers";

@@ -1,5 +1,5 @@
-import prisma from "@/libs/prisma";
-import { errorResponse, getErrorMessage } from "@/libs/utils";
+import prisma from "@/libs/prisma.server";
+import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);
   }
-
   const projects = await prisma.project
     .findMany({
       where: { slug: slug },
@@ -42,8 +41,5 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
-
-  return new Response(JSON.stringify(projects), {
-    headers: { "Content-Type": "application/json" },
-  });
+  return jsonResponse(projects);
 }

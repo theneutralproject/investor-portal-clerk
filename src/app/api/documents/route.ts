@@ -1,7 +1,8 @@
 import { createDocumentEntry, getFileDetails, uploadFile } from "@/libs/admin/utils";
 import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
-import prisma, { type UserWithOrganizations } from "@/libs/prisma";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
+import prisma from "@/libs/prisma.server";
+import type { UserWithOrganizations } from "@/libs/types";
 import { currentUser } from "@clerk/nextjs/server";
 import {
   DealDocumentType,

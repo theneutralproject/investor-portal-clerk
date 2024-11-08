@@ -16,7 +16,7 @@ import { type Project } from "@prisma/client";
 
 import { LineDisplay } from "../Overview/InvestmentSummaryBox";
 import { SetStateAction, useState } from "react";
-import { DealWithInvestmentStats } from "@/libs/prisma";
+import { DealWithInvestmentStats } from "@/libs/types";
 
 const routingNumbers = [
   {
