@@ -6,7 +6,6 @@ import type { NextRequest } from "next/server";
 import fs from 'fs/promises';
 import type { MatchResponseObject } from "@/libs/admin/schema";
 import prisma from "@/libs/prisma.server";
-import type { DealWithFullOrgAndProject } from "@/libs/types";
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -33,7 +32,7 @@ export async function POST(request: NextRequest) {
             },
             project: true,
         }
-    })) as DealWithFullOrgAndProject[]
+    }));
     console.log("Deals:", deals.length);
     try {
         const formData = await request.formData();

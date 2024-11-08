@@ -33,41 +33,42 @@ export async function POST(request: NextRequest) {
             project: true,
         }
     }))
-    console.log("Deals:", deals.length);
-    try {
-        const formData = await request.formData();
-        const { files } = zPdfBulkUploadSchema.parse(formData);
-        const storagePath = `./src/libs/admin/tempPdfFilesDir`;
+    return jsonResponse(deals);
+    // console.log("Deals:", deals.length);
+    // try {
+    //     const formData = await request.formData();
+    //     const { files } = zPdfBulkUploadSchema.parse(formData);
+    //     const storagePath = `./src/libs/admin/tempPdfFilesDir`;
 
-        console.log("Files:", files.length);
-        await deleteAllFiles(storagePath);
-        const retArr = [] as (MatchResponseObject | null)[];
-        for (const file of files) {
-            console.log(`File name: ${file.name}`);
-            const buffer = Buffer.from(await file.arrayBuffer());
-            try {
-                await fs.writeFile(`${storagePath}/${file.name}`, buffer);
-            }
-            catch (err) {
-                console.error(err);
-                return jsonResponse({ error: getErrorMessage(err) }, 500);
-            }
+    //     console.log("Files:", files.length);
+    //     await deleteAllFiles(storagePath);
+    //     const retArr = [] as (MatchResponseObject | null)[];
+    //     for (const file of files) {
+    //         console.log(`File name: ${file.name}`);
+    //         const buffer = Buffer.from(await file.arrayBuffer());
+    //         try {
+    //             await fs.writeFile(`${storagePath}/${file.name}`, buffer);
+    //         }
+    //         catch (err) {
+    //             console.error(err);
+    //             return jsonResponse({ error: getErrorMessage(err) }, 500);
+    //         }
 
-            // match the files to the correct deal
-            console.log("Matching file to deal");
-            const match = await matchDealWithPdf(deals, file);
-            // return an array of match results
-            if (isError(match)) {
-                console.error(getErrorMessage(match));
-                retArr.push();
-            }
-            else retArr.push(match);
-        };
+    //         // match the files to the correct deal
+    //         console.log("Matching file to deal");
+    //         const match = await matchDealWithPdf(deals, file);
+    //         // return an array of match results
+    //         if (isError(match)) {
+    //             console.error(getErrorMessage(match));
+    //             retArr.push();
+    //         }
+    //         else retArr.push(match);
+    //     };
 
-        return jsonResponse(retArr);
-    }
-    catch (err) {
-        console.error(err);
-        return jsonResponse({ error: getErrorMessage(err) }, 500);
-    }
+    //     return jsonResponse(retArr);
+    // }
+    // catch (err) {
+    //     console.error(err);
+    //     return jsonResponse({ error: getErrorMessage(err) }, 500);
+    // }
 }
