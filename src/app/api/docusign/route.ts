@@ -56,7 +56,7 @@ export async function POST(req: Request) {
         }, include: {
             investmentStats: true,
             accreditationVerification: { include: { verifier: true } },
-            organization: { include: { members: { include: { user: true } }, address: true } },
+            organization: { include: { members: { include: { user: { include: { address: true } } } }, address: true } },
             project: true
         }
     });

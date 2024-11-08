@@ -28,6 +28,8 @@ model User {
   address            Address?
   organizationMember Member[]
   organizationsOwned Organization[]  @relation(name: "userOrg")
+  DealDocumentUploaded         DealDocument[]
+  OrganizationDocumentUploaded OrganizationDocument[]
 }
 
 model Deal {
@@ -107,13 +109,16 @@ model AccreditationVerifier {
 
 /// deal specific documents such as tax forms, accreditation verification etc 
 model DealDocument {
-  id          Int              @id @default(autoincrement())
-  name        String
-  path        String
-  type        DealDocumentType
-  dealId      Int
-  dateCreated DateTime         @default(now())
-  deal        Deal             @relation(fields: [dealId], references: [id])
+  id           Int              @id @default(autoincrement())
+  name         String
+  path         String
+  type         DealDocumentType
+  dealId       Int
+  dateCreated  DateTime         @default(now())
+  deal         Deal             @relation(fields: [dealId], references: [id])
+  uploadedBy   User             @relation(fields: [uploadedById], references: [id])
+  uploadedById Int
+  taxYear      Int?
 }
 
 /// used for business verification letters and such
@@ -125,6 +130,8 @@ model OrganizationDocument {
   organizationId Int
   dateCreated    DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])
+  uploadedBy     User         @relation(fields: [uploadedById], references: [id])
+  uploadedById   Int
 }
 
 model Project {

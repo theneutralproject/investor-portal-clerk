@@ -45,7 +45,12 @@ export type DealWithInvestmentStats = Deal & {
 };
 
 export type DealWithOrgMembersAndProject = Deal & {
-  organization: OrganizationWithFullMembers;
+  organization: OrganizationWithFullMembers
+  project: Project;
+};
+
+export type DealWithFullOrgAndProject = Deal & {
+  organization: OrganizationWithFullMembersAndAddress & { address: Address };
   project: Project;
 };
 
@@ -76,10 +81,18 @@ export type OrganizationWithDocuments = OrganizationWithFullMembers & {
 };
 
 export type OrganizationWithFullMembersAndAddress = Organization & {
-  members: MemberWithUser[];
+  members: MemberWithFullUser[];
   address: Address | null;
 };
 
-export type MemberWithUser = Member & {
+export type MemberWithPartialUser = Member & {
   user: Partial<User>;
+};
+
+export type MemberWithUser = Member & {
+  user: User;
+};
+
+export type MemberWithFullUser = Member & {
+  user: User & { address: Address | null };
 };

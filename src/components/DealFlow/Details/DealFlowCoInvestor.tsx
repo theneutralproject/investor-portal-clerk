@@ -9,7 +9,7 @@ import {
   type UserCreateSchema,
   type UserUpdateSchema,
 } from "@/libs/user/schema";
-import type { MemberWithUser } from "@/libs/types";
+import type { MemberWithPartialUser, MemberWithUser } from "@/libs/types";
 
 const DealFlowCoInvestor: React.FC = () => {
   const {
@@ -21,7 +21,7 @@ const DealFlowCoInvestor: React.FC = () => {
     deleteOrganizationMember,
   } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
-  const [localMembers, setLocalMembers] = useState<Partial<MemberWithUser>[]>(
+  const [localMembers, setLocalMembers] = useState<Partial<MemberWithPartialUser>[]>(
     []
   );
 
@@ -36,7 +36,7 @@ const DealFlowCoInvestor: React.FC = () => {
   }, [organization?.members]);
 
   const handleAddCoInvestor = useCallback(() => {
-    const newMember: Partial<MemberWithUser> = {
+    const newMember: Partial<MemberWithPartialUser> = {
       type: MembershipType.COINVESTOR,
       title: "",
       user: {

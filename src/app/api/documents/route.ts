@@ -1,60 +1,19 @@
+import { createDocumentEntry, getFileDetails, uploadFile } from "@/libs/admin/utils";
 import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
+import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma.server";
-import { storageClient } from "@/libs/supabase";
 import type { UserWithOrganizations } from "@/libs/types";
-import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import {
+  DealDocumentType,
   DealFinancingType,
   type DocumentEvent,
-  DealDocumentType,
 } from "@prisma/client";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
-
-// Type definitions for file-like objects
-interface FileDetails {
-  name: string;
-  type: string;
-  size?: number;
-}
-
-interface FileWrapper {
-  name: string;
-  type: string;
-  size?: number;
-  arrayBuffer(): Promise<ArrayBuffer>;
-}
-
-// Helper function to determine if value is File-like
-function isFileLike(value: unknown): value is FileWrapper {
-  return (
-    value !== null &&
-    typeof value === "object" &&
-    "name" in value &&
-    "type" in value &&
-    typeof (value as FileWrapper).arrayBuffer === "function"
-  );
-}
-
-// Helper function to safely get file details
-function getFileDetails(file: FormDataEntryValue): FileDetails {
-  if (isFileLike(file)) {
-    return {
-      name: file.name,
-      type: file.type,
-      size: file.size,
-    };
-  }
-  // Fallback for non-File objects
-  return {
-    name: `upload-${Date.now()}`,
-    type: "application/octet-stream",
-  };
-}
 
 /**
  * 
@@ -99,11 +58,11 @@ export async function GET(request: NextRequest) {
         ...(dealStage ? { dealStage: dealStage } : {}),
         ...(isDealFinancingType
           ? {
-              OR: [
-                { financingTypes: { has: financingType as DealFinancingType } },
-                { financingTypes: { equals: [] } },
-              ],
-            }
+            OR: [
+              { financingTypes: { has: financingType as DealFinancingType } },
+              { financingTypes: { equals: [] } },
+            ],
+          }
           : { financingTypes: { equals: [] } }),
       },
       include: {
@@ -185,92 +144,6 @@ async function validateAccess(
   }
 }
 
-async function uploadFile(
-  file: FormDataEntryValue,
-  type: string,
-  id: number
-): Promise<string> {
-  const fileDetails = getFileDetails(file);
-  const fileName = `${
-    fileDetails.name || `upload-${Date.now()}`
-  }${getFileExtension(fileDetails.type)}`;
-
-  try {
-    let fileData: ArrayBuffer;
-    if (isFileLike(file)) {
-      fileData = await file.arrayBuffer();
-    } else if (typeof file === "string") {
-      // Handle string data if needed
-      fileData = new TextEncoder().encode(file).buffer;
-    } else {
-      throw new Error("Invalid file format");
-    }
-
-    const { data, error } = await storageClient
-      .from(`${type}-documents`)
-      .upload(`${type}-${id}/${fileName}`, fileData, {
-        contentType: fileDetails.type,
-      });
-
-    if (error) {
-      console.error("File upload error:", error);
-      throw new Error(`File upload failed: ${error.message}`);
-    }
-
-    if (!data?.path) {
-      throw new Error("No path returned from storage");
-    }
-
-    return data.path;
-  } catch (error) {
-    console.error("Error in uploadFile:", error);
-    throw error;
-  }
-}
-
-function getFileExtension(mimeType: string): string {
-  const extensions: Record<string, string> = {
-    "application/pdf": ".pdf",
-    "image/png": ".png",
-    "image/jpg": ".jpg",
-    "image/jpeg": ".jpg",
-  };
-  return extensions[mimeType] ?? "";
-}
-
-async function createDocumentEntry(
-  type: string,
-  id: number,
-  name: string,
-  path: string,
-  key: string
-) {
-  try {
-    if (type === "deal") {
-      return await prisma.dealDocument.create({
-        data: {
-          dealId: id,
-          name,
-          path,
-          type: DealDocumentType.VERIFICATION_ACCREDITATION,
-        },
-      });
-    } else {
-      return await prisma.organizationDocument.create({
-        data: {
-          organizationId: id,
-          name,
-          path,
-          key,
-        },
-      });
-    }
-  } catch (error) {
-    console.error("Error creating document entry:", error);
-    throw error;
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
     const dbUser = await validateUser();
@@ -327,7 +200,9 @@ export async function POST(request: NextRequest) {
       id,
       fileDetails.name,
       path,
-      key
+      key,
+      dbUser.id,
+      DealDocumentType.VERIFICATION_ACCREDITATION
     );
 
     return jsonResponse({
@@ -346,13 +221,6 @@ export async function POST(request: NextRequest) {
         400
       );
     }
-
-    return jsonResponse(
-      {
-        error:
-          error instanceof Error ? error.message : "Unknown error occurred",
-      },
-      500
-    );
+    return errorResponse(getErrorMessage(error), 500);
   }
 }
