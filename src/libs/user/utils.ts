@@ -1,4 +1,4 @@
-// import 'server-only';
+import 'server-only';
 import { isError } from "lodash";
 import type { HubspotContact } from "../hubspot/schema";
 import { associateContactWithDealInHubspot, createHubspotContact } from "../hubspot/utils";
