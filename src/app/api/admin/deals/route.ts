@@ -1,4 +1,4 @@
-import { createDocumentEntry, getAdminFromRequest, uploadFile } from "@/libs/admin/utils";
+import { createDocumentEntry, getAdminFromRequest, pdfTempStoragePath, uploadFile } from "@/libs/admin/utils";
 import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
@@ -93,10 +93,9 @@ export async function POST(request: NextRequest) {
         return errorResponse("Missing required dealId", 400);
     }
     // get PDF from temp storage
-    const storagePath = `./src/libs/admin/tempPdfFilesDir`;
     let pdfBuffer: Buffer;
     try {
-        pdfBuffer = await fs.readFile(`${storagePath}/${pdfName}`);
+        pdfBuffer = await fs.readFile(`${pdfTempStoragePath}/${pdfName}`);
     } catch (error) {
         console.error(error);
         return errorResponse(getErrorMessage(error), 500);
