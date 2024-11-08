@@ -12,7 +12,7 @@ import type { DealWithFullOrgAndProject } from "../types";
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
 
-export const pdfTempStoragePath = process.env.NODE_ENV === "production" ? "/env" : path.join(process.cwd(), 'src/libs/admin/tempPdfFilesDir');
+export const pdfTempStoragePath = process.env.NODE_ENV === "production" ? path.join(process.cwd(),"/env") : path.join(process.cwd(), 'src/libs/admin/tempPdfFilesDir');
 /**
  * 
  * @param request 
