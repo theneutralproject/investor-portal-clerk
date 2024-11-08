@@ -4,19 +4,17 @@ import prisma from "../prisma.server";
 import { type DealDocumentType, MembershipType, Role } from "@prisma/client";
 import { type MatchResponseObject, MatchConfidence } from "./schema";
 import { storageClient } from "../supabase";
-import fs from 'fs/promises';
-import path from "path";
-import { getErrorMessage } from "../utils";
-import { DealWithFullOrgAndProject } from "../types";
+import type { DealWithFullOrgAndProject } from "../types";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
+
 /**
  * 
  * @param request 
  * @returns an admin user if the jwt is valid
  */
-export async function getAdminFromrequest(request: NextRequest) {
+export async function getAdminFromRequest(request: NextRequest) {
     // get jwt from request headers
     const token = request.headers.get("Authorization");
     if (token) {
@@ -41,23 +39,15 @@ export async function getAdminFromrequest(request: NextRequest) {
     }
 }
 
-export async function deleteAllFiles(directory: string) {
-    try {
-        const files = await fs.readdir(directory);
-        for (const file of files) {
-            const filePath = path.join(directory, file);
-            const stats = await fs.stat(filePath);
-            if (stats.isFile()) {
-                await fs.unlink(filePath)
-                console.log(`Deleted: ${filePath}`);
-            }
-        }
-        return;
-    } catch (error) {
-        console.error(getErrorMessage(error));
-        return new Error(getErrorMessage(error));
+function calcConfidenceScore(matchCount: number): MatchConfidence {
+    if (matchCount >= 4) {
+        return MatchConfidence.HIGH;
+    } else if (matchCount >= 2.5) {
+        return MatchConfidence.MEDIUM;
+    } else {
+        return MatchConfidence.LOW;
     }
-};
+}
 
 export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file: File) {
     // match the file to the correct deal
@@ -70,17 +60,6 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     }
     let i = 0;
     let bestMatch: MatchResponseObject | null = null;
-
-    function getConfidence(matchCount: number): MatchConfidence {
-        if (matchCount >= 4) {
-            return MatchConfidence.HIGH;
-        } else if (matchCount >= 2.5) {
-            return MatchConfidence.MEDIUM;
-        } else {
-            return MatchConfidence.LOW;
-        }
-    }
-
     while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
@@ -88,6 +67,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             continue;
         }
 
+        // console.log(`Matching deal ${deal.transactionId}`);
         const { organization, transactionId, project: { name: projectName } } = deal;
         const orgMembers = organization.members;
         const owner = orgMembers.find((member) => member.type === MembershipType.OWNER);
@@ -136,7 +116,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                     deal,
                     owner: owner.user,
                     organization,
-                    confidence: getConfidence(matchScore),
+                    confidence: calcConfidenceScore(matchScore),
                     matchedWords
                 }
             }
@@ -252,7 +232,7 @@ export async function createDocumentEntry(
     console.log("Creating document entry:", { documentType, id, name, path, key, userId, dealDocumentType, taxYear });
     try {
         if (documentType === "deal") {
-            if(!dealDocumentType || !taxYear) {
+            if (!dealDocumentType || !taxYear) {
                 throw new Error("Missing required dealDocumentType field");
             }
             return await prisma.dealDocument.create({
