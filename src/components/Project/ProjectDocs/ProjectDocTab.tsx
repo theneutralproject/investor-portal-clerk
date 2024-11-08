@@ -11,7 +11,7 @@ import DocumentViewerModal from "./DocumentViewerModal";
 import { useState } from "react";
 import { useDebounce } from "@/app/hooks/useDebounce";
 import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
-import { DealWithInvestmentStats } from "@/libs/prisma";
+import { DealWithInvestmentStats } from "@/libs/types";
 
 export const ProjectDocTab: React.FC<{
   project: Project;

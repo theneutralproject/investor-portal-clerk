@@ -1,6 +1,5 @@
 /* eslint-disable import/no-mutable-exports */
 import {
-  PrismaClient,
   type ProjectMilestones,
   type Address,
   type ProjectPicture,
@@ -18,27 +17,6 @@ import {
   type OrganizationDocument,
   type DealDocument,
 } from "@prisma/client";
-import { fieldEncryptionExtension } from 'prisma-field-encryption'
-
-let prismaClient: PrismaClient;
-
-if (process.env.NODE_ENV === "production") {
-  prismaClient = new PrismaClient();
-} else {
-  const globalWithPrisma = global as typeof globalThis & {
-    prismaClient: PrismaClient;
-  };
-  if (!globalWithPrisma.prismaClient) {
-    globalWithPrisma.prismaClient = new PrismaClient();
-  }
-  prismaClient = globalWithPrisma.prismaClient;
-}
-
-const prisma = prismaClient.$extends(
-  fieldEncryptionExtension()
-)
-
-export default prisma;
 
 export type ProjectWithAllNestedData = Project & {
   pictures: ProjectPicture[];
@@ -67,7 +45,7 @@ export type DealWithInvestmentStats = Deal & {
 };
 
 export type DealWithOrgMembersAndProject = Deal & {
-  organization: OrganizationWithFullMembers 
+  organization: OrganizationWithFullMembers;
   project: Project;
 };
 

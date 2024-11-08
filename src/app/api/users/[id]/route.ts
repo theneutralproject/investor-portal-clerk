@@ -1,5 +1,6 @@
+'use server';
 import { updateHubspotContact } from "@/libs/hubspot/utils";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
 import { sanitizeUser } from "@/libs/user/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";

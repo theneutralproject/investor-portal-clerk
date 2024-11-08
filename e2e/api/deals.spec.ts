@@ -1,6 +1,6 @@
 
 import { DealCreateSchema } from '@/libs/deal/schema';
-import { DealWithInvestmentStats } from '@/libs/prisma';
+import { DealWithInvestmentStats } from '@/libs/types';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType, DealUnitType } from '@prisma/client';
 import { deleteDealInDbAndHubspot } from 'e2e/helpers';

@@ -6,7 +6,7 @@ import {
   type UserWithAddress,
   type DealWithInvestmentStatsAndDocument,
   type MemberWithUser,
-} from "@/libs/prisma";
+} from "@/libs/types";
 import {
   DealOwnershipType,
   DealFinancingType,

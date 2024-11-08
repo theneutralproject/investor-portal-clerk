@@ -16,7 +16,7 @@ import {
     type Checkbox
 } from "docusign-esign";
 import { DealOwnershipType, VerificationBasis, type Address, type User } from "@prisma/client";
-import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/prisma";
+import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/types";
 import { docusignOwnershipTypeEnum } from "./schema";
 import { type SessionData, sessionOptions } from "../session/utils";
 import { toWords } from "number-to-words";
@@ -26,7 +26,6 @@ import { isNull } from "lodash";
 const docusign = require("docusign-esign"); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
 export async function refreshAccessToken() {
-    "use server";   // TODO: Ensure this does not break docusign!!!
     const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
     const responseObj = {

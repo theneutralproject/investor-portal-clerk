@@ -5,11 +5,11 @@ import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import CoInvestorCard from "@components/DealFlow/Details/CoInvestorCard";
 import { useRouter } from "next/navigation";
 import { MembershipType, Role, type User } from "@prisma/client";
-import { type MemberWithUser } from "@/libs/prisma";
 import {
   type UserCreateSchema,
   type UserUpdateSchema,
 } from "@/libs/user/schema";
+import type { MemberWithUser } from "@/libs/types";
 
 const DealFlowCoInvestor: React.FC = () => {
   const {

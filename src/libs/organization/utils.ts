@@ -1,5 +1,5 @@
 import type { Organization } from "@prisma/client"
-import type { OrganizationWithFullMembers, OrganizationWithMembersAndAddress } from "../prisma"
+import type { OrganizationWithFullMembers, OrganizationWithMembersAndAddress } from "../types"
 
 export function sanitizeOrganization(organization: Organization | OrganizationWithMembersAndAddress) {
     return {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Typography, Divider, TextField } from "@mui/material";
 import { LineDisplay } from "./InvestmentSummaryBox";
 import CollapsibleCard from "./CollapsibleCard";
-import type { ProjectWithStats } from "@/libs/prisma";
+import type { ProjectWithStats } from "@/libs/types";
 
 const ProjectCalculator = ({ data }: { data: ProjectWithStats }) => {
   const [investment, setInvestment] = useState(100000);

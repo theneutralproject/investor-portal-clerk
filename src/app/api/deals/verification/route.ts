@@ -1,5 +1,6 @@
+'use server';
 import { type AccreditationVerificationCreateSchema, zAccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import type { AccreditationVerifier } from "@prisma/client";

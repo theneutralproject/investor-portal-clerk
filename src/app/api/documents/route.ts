@@ -1,6 +1,7 @@
 import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
-import prisma, { type UserWithOrganizations } from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { storageClient } from "@/libs/supabase";
+import type { UserWithOrganizations } from "@/libs/types";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import {

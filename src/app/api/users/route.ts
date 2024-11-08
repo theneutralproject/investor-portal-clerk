@@ -1,6 +1,7 @@
+'use server';
 import { clerkClient, currentUser } from "@clerk/nextjs/server";
 import { type NextRequest } from "next/server";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { type ClerkUserUpdateSchema, type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";

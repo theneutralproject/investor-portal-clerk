@@ -1,8 +1,9 @@
 'use server';
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import prisma, { type DealWithOrgMembersAndProject } from "../prisma";
+import prisma from "../prisma.server";
 import { MembershipType, Role } from "@prisma/client";
+import type { DealWithOrgMembersAndProject } from "../types";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");

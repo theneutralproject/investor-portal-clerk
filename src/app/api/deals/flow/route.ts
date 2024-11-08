@@ -1,7 +1,7 @@
+'use server';
 import { type NextRequest } from "next/server";
 import { currentUser } from "@clerk/nextjs";
 import { errorResponse, jsonResponse } from "@/libs/utils";
-import prisma from "@/libs/prisma";
 import { z } from "zod";
 import type {
   DealFinancingType,
@@ -9,6 +9,7 @@ import type {
   Organization,
   User,
 } from "@prisma/client";
+import prisma from "@/libs/prisma.server";
 
 const QuerySchema = z.object({
   projectSlug: z.string().min(1),

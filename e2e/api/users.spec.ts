@@ -1,5 +1,6 @@
 import { AddressCreateSchema } from '@/libs/address/schema';
-import prisma, { UserWithAddress } from '@/libs/prisma';
+import prisma from '@/libs/prisma.server';
+import { UserWithAddress } from '@/libs/types';
 import { test, expect } from '@playwright/test';
 
 

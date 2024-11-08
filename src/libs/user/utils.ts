@@ -1,10 +1,12 @@
+import 'server-only';
 import { isError } from "lodash";
 import type { HubspotContact } from "../hubspot/schema";
 import { associateContactWithDealInHubspot, createHubspotContact } from "../hubspot/utils";
-import prisma, { type UserWithAddress } from "../prisma";
+import prisma from "../prisma.server";
 import type { UserCreateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
 import { type Deal, MembershipType, type User } from "@prisma/client";
+import type { UserWithAddress } from "../types";
 
 /**
  * creates a user in both hubspot and our DB

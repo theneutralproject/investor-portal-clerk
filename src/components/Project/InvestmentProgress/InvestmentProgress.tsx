@@ -1,3 +1,4 @@
+"use client";
 import {
   Card,
   CardContent,
@@ -16,7 +17,6 @@ import { useRouter } from "next/navigation";
 import axios from "axios";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type { DealCreateSchema } from "@/libs/deal/schema";
-import { updateDeal } from "@/libs/deal/utils";
 
 const INVESTMENT_STEPS = [
   "Schedule a Call with an Advisor",
@@ -46,7 +46,7 @@ const InvestmentProgress: React.FC<{
 
   const updateDealMutation = useMutation({
     mutationFn: (updateData: { hubspotId: string; dealStage: number }) =>
-      updateDeal(updateData),
+      axios.put(`/api/deals`, updateData),
     onSuccess: () => {
       void queryClient.invalidateQueries({
         queryKey: ["deal", project.id.toString()],

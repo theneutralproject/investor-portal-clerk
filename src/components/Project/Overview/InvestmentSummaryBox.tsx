@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Grid, Typography, Divider } from "@mui/material";
 import { type Decimal } from "@prisma/client/runtime/library";
-import type { ProjectWithStats } from "@/libs/prisma";
+import type { ProjectWithStats } from "@/libs/types";
 import type { ProjectInvestmentStats } from "@prisma/client";
 
 const formatter = Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });

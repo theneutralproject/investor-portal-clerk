@@ -1,7 +1,8 @@
+'use server';
 import type { DealUpdateSchema } from "@/libs/deal/schema";
-import { updateDeal } from "@/libs/deal/utils";
+import { updateDeal } from "@/libs/deal/utils.server";
 import { HSDealPropNames, getDealStageInt, getProjectNameFromDealStage, getFundingAmount } from "@/libs/hubspot/utils";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { getErrorMessage } from "@/libs/utils";
 import { DealFinancingType, type Deal } from "@prisma/client";
 import { isError } from "lodash";

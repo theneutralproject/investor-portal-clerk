@@ -1,5 +1,6 @@
+'use server';
 import type { DocumentEventCreateSchema } from "@/libs/document/schema";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { currentUser } from "@clerk/nextjs";
 import type { NextRequest } from "next/server";
 

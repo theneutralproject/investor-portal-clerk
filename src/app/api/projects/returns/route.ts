@@ -1,4 +1,5 @@
-import prisma from '@/libs/prisma';
+'use server';
+import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils';
 import { DealFinancingType } from '@prisma/client';
 import { type NextRequest } from 'next/server';
