@@ -6,7 +6,6 @@ import type { NextRequest } from "next/server";
 import fs from 'fs/promises';
 import type { MatchResponseObject } from "@/libs/admin/schema";
 import prisma from "@/libs/prisma.server";
-import path from "path";
 
 /**
  * Admin can upload up to 20 PDFs at a time
