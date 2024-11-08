@@ -1,4 +1,4 @@
-import 'server-only';
+// import 'server-only';
 import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import { isError } from "lodash";
 import type { DealUpdateSchema } from "./schema";

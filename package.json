@@ -15,7 +15,7 @@
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "npx playwright test --ui"
+    "test:e2e": "NODE_ENV=CI npx playwright test"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.31.5",

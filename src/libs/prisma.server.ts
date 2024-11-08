@@ -1,6 +1,3 @@
-import "server-only";
-
-/* eslint-disable import/no-mutable-exports */
 import { PrismaClient } from "@prisma/client";
 import { fieldEncryptionExtension } from "prisma-field-encryption";
 
