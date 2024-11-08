@@ -1,4 +1,4 @@
-import { deleteAllFiles, getAdminFromrequest, matchDealWithPdf } from "@/libs/admin/utils";
+import { deleteAllFiles, getAdminFromrequest, matchDealWithPdf, pdfTempStoragePath } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
@@ -6,6 +6,7 @@ import type { NextRequest } from "next/server";
 import fs from 'fs/promises';
 import type { MatchResponseObject } from "@/libs/admin/schema";
 import prisma from "@/libs/prisma.server";
+import path from "path";
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -33,15 +34,11 @@ export async function POST(request: NextRequest) {
             project: true,
         }
     }))
-    console.log("Deals:", deals.length);
     try {
         const formData = await request.formData();
         const { files } = zPdfBulkUploadSchema.parse(formData);
-        const storagePath = `./src/libs/admin/tempPdfFilesDir`;
 
-        console.log("Files:", files.length);
-        console.log(storagePath);
-        const deleteResult = await deleteAllFiles(storagePath);
+        const deleteResult = await deleteAllFiles(pdfTempStoragePath);
         if(isError(deleteResult)) {
             console.error(getErrorMessage(deleteResult));
             return jsonResponse({ error: getErrorMessage(deleteResult) }, 500);
@@ -51,7 +48,7 @@ export async function POST(request: NextRequest) {
             console.log(`File name: ${file.name}`);
             const buffer = Buffer.from(await file.arrayBuffer());
             try {
-                await fs.writeFile(`${storagePath}/${file.name}`, buffer);
+                await fs.writeFile(`${pdfTempStoragePath}/${file.name}`, buffer);
             }
             catch (err) {
                 console.error(err);

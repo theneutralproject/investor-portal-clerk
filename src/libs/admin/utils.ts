@@ -9,6 +9,8 @@ import path from "path";
 import { getErrorMessage } from "../utils";
 import { DealWithFullOrgAndProject } from "../types";
 
+export const pdfTempStoragePath = path.join(process.cwd(), 'src/libs/admin/tempPdfFilesDir');
+
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
 /**
@@ -81,7 +83,6 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     }
     let i = 0;
     let bestMatch: MatchResponseObject | null = null;
-console.log(text);
     while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
