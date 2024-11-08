@@ -1,5 +1,6 @@
+'use server';
 import { isError } from "lodash";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { type DocusignEnvelopeCreateSchema, zDocusignEvelopeCreate } from '@/libs/docusign/schema';
 import { getErrorMessage, jsonResponse } from '@/libs/utils';
 import { refreshAccessToken, instantiateApiClient, makeEnvelope, makeRecipientViewRequest } from "@/libs/docusign/utils";

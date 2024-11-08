@@ -17,7 +17,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { MembershipType, type User } from "@prisma/client";
-import { type MemberWithUser } from "@/libs/prisma";
+import type { MemberWithUser } from "@/libs/types";
+
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),

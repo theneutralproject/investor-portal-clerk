@@ -14,13 +14,13 @@ import InvestmentProgress from "@/components/Project/InvestmentProgress/Investme
 import { OverviewTab } from "@/components/Project/Overview/OverviewTab";
 import SuccessfulInvestor from "@/components/Project/InvestmentProgress/SuccessfulInvestor";
 import { FundTab } from "@/components/Project/Fund/FundTab";
-import type { DealWithInvestmentStats, ProjectWithAllNestedData } from "@/libs/prisma";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useSearchParams } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import posthog from "posthog-js";
 import type { DealUpdateSchema, DealCreateSchema } from "@/libs/deal/schema";
+import type { ProjectWithAllNestedData, DealWithInvestmentStats } from "@/libs/types";
 
 export type PageProps = {
   params: {

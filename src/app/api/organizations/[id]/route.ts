@@ -1,6 +1,7 @@
+'use server';
 import { type OrganizationUpdateSchema, zOrganizationUpdateSchema } from "@/libs/organization/schema";
 import { sanitizeOrganization } from "@/libs/organization/utils";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { DealOwnershipType } from "@prisma/client";

@@ -8,8 +8,7 @@ import { toast } from "react-toastify";
 
 import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
 import { useUser } from "@clerk/nextjs";
-
-import { type ProjectWithAllNestedData } from "@/libs/prisma";
+import type { ProjectWithAllNestedData } from "@/libs/types";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { useEffect } from "react";
 import posthog from "posthog-js";

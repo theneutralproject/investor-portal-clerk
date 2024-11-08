@@ -1,9 +1,10 @@
+'use server-only';
 import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import { isError } from "lodash";
 import { ProjectName } from "../schema";
 import type { DealUpdateSchema } from "./schema";
 import { getEquityStatsFromProject } from "../project/utils";
-import prisma from "../prisma";
+import prisma from "../prisma.server";
 
 /**
  * Updates a deal in the database

@@ -13,7 +13,7 @@ import { useUser } from "@clerk/nextjs";
 import axios from "axios";
 import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
 import type { DocusignEnvelopeCreateSchema } from "@/libs/docusign/schema";
-import { DealWithInvestmentStats } from "@/libs/prisma";
+import { DealWithInvestmentStats } from "@/libs/types";
 import { UserResource } from "@clerk/types";
 
 export const createDocusignEnvelope = async (

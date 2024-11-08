@@ -16,7 +16,7 @@ import {
     type Checkbox
 } from "docusign-esign";
 import { DealOwnershipType, VerificationBasis, type Address, type User } from "@prisma/client";
-import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/prisma";
+import type { DealWithInvestmentStatsAndVerification, OrganizationWithFullMembersAndAddress, UserWithAddress } from "@/libs/types";
 import { docusignOwnershipTypeEnum } from "./schema";
 import { type SessionData, sessionOptions } from "../session/utils";
 import { toWords } from "number-to-words";

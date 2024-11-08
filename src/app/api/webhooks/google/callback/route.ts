@@ -1,4 +1,5 @@
-import prisma from "@/libs/prisma";
+'use server';
+import prisma from "@/libs/prisma.server";
 import { type SessionData, sessionOptions } from "@/libs/session/utils";
 import { jsonResponse } from "@/libs/utils";
 import { Role } from "@prisma/client";

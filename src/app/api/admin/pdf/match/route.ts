@@ -5,7 +5,8 @@ import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
 import fs from 'fs';
-import prisma, { type DealWithOrgMembersAndProject } from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
+import { DealWithOrgMembersAndProject } from "@/libs/types";
 
 /**
  * Admin can upload up to 20 PDFs at a time
