@@ -5,7 +5,7 @@ import DocumentCard from "../ProjectDocs/DocumentCard";
 import useDocuments, {
   type DocumentWithCompletion,
 } from "@/app/hooks/useDocuments";
-import { DocumentType, User, type Project } from "@prisma/client";
+import { DocumentType, type Project } from "@prisma/client";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
 import { useDebounce } from "@/app/hooks/useDebounce";

@@ -1,4 +1,3 @@
-'use server';
 import prisma from "@/libs/prisma.server";
 import { currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
@@ -12,8 +11,9 @@ import {
 } from "../../../libs/deal/schema";
 import { initDealPropsForProject, createHubspotDeal, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
-import { getInvestmentEntity, updateDeal } from "@/libs/deal/utils";
+import { updateDeal } from "@/libs/deal/utils.server";
 import { getEquityStatsFromProject } from "@/libs/project/utils";
+import { getInvestmentEntity } from "@/libs/deal/utils";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;

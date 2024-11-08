@@ -1,4 +1,3 @@
-"use server";
 import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { type NextRequest } from "next/server";
@@ -19,7 +18,6 @@ export async function GET(request: NextRequest) {
       headers: { "Content-Type": "application/json" },
     });
   }
-console.log(slug)
   const projects = await prisma.project
     .findMany({
       where: { slug: slug },
@@ -46,6 +44,5 @@ console.log(slug)
       headers: { "Content-Type": "application/json" },
     });
   }
-console.log(projects)
   return jsonResponse(projects);
 }

@@ -1,4 +1,3 @@
-'use server';
 import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
 import prisma from "@/libs/prisma.server";
 import { storageClient } from "@/libs/supabase";

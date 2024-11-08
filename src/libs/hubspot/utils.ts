@@ -1,4 +1,3 @@
-"use server-only";
 import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
 import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema, type HsDealCreateResponse } from "./schema";
