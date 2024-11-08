@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         return errorResponse("Missing required dealId", 400);
     }
     const newPath = `deal/${dealId}/${pdfName}`;
-    const { error } = await storageClient.from(`deal-documents`).move(`tempStorage/${pdfName}`, newPath);
+    const { error } = await storageClient.from(`deal-documents`).move(`tempPdfStorage/${pdfName}`, newPath);
     if (error) {
         console.error("unable to move file to temp storage:");
         console.error(getErrorMessage(error));
