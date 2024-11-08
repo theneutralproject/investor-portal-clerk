@@ -7,7 +7,7 @@ import type { NextRequest } from "next/server";
 import fs from 'fs/promises';
 import type { MatchResponseObject } from "@/libs/admin/schema";
 import prisma from "@/libs/prisma.server";
-import type { DealWithOrgMembersAndProject } from "@/libs/types";
+import type { DealWithFullOrgAndProject } from "@/libs/types";
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
             },
             project: true,
         }
-    })) as DealWithOrgMembersAndProject[]
+    })) as DealWithFullOrgAndProject[]
     try {
         const formData = await request.formData();
         const { files } = zPdfBulkUploadSchema.parse(formData);

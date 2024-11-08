@@ -7,6 +7,7 @@ import { storageClient } from "../supabase";
 import fs from 'fs/promises';
 import path from "path";
 import { getErrorMessage } from "../utils";
+import { DealWithFullOrgAndProject } from "../types";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");

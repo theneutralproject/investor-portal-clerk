@@ -1,5 +1,5 @@
 import { createDocumentEntry, getAdminFromrequest, uploadFile } from "@/libs/admin/utils";
-import prisma from "@/libs/prisma";
+import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
