@@ -1,4 +1,4 @@
-import { deleteAllFiles, getAdminFromRequest, matchDealWithPdf, pdfTempStoragePath, pdfTempStoragePath2 } from "@/libs/admin/utils";
+import { deleteAllFiles, getAdminFromRequest, matchDealWithPdf, pdfTempStoragePath } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
@@ -40,13 +40,7 @@ export async function POST(request: NextRequest) {
         const deleteResult = await deleteAllFiles(pdfTempStoragePath);
         if (isError(deleteResult)) {
             console.error(getErrorMessage(deleteResult));
-            // return jsonResponse({ error: getErrorMessage(deleteResult) }, 500);
-
-            const deleteResult2 = await deleteAllFiles(pdfTempStoragePath2);
-            if (isError(deleteResult2)) {
-                console.error(getErrorMessage(deleteResult2));
-                return jsonResponse({ error: getErrorMessage(deleteResult2) }, 500);
-            }
+            return jsonResponse({ error: getErrorMessage(deleteResult) }, 500);
         }
         const retArr = [] as (MatchResponseObject | null)[];
         for (const file of files) {
