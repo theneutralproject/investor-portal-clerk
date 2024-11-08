@@ -1,4 +1,4 @@
-import { DealFinancingType } from "@prisma/client";
+import type { DealFinancingType } from "@prisma/client";
 import { ProjectName } from "../schema";
 
 const InvestmentEntity = {
