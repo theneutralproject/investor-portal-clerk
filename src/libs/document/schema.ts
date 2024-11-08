@@ -86,13 +86,15 @@ export type DocumentEventCreateSchema = z.infer<
   typeof zDocumentEventCreateSchema
 >;
 
+const zodPdfDocumentSchema = z.instanceof(File)
+
 export const zPdfBulkUploadSchema = zfd.formData({
-  files: z.array(z.instanceof(File)).nonempty().max(20).refine(
-      (files) => files.every((file) => sizeInMB(file.size) <= MAX_FILE_SIZE && ACCEPTED_FILE_TYPES.includes(file.type)),
-      {
-          message: "Item photo: Only .jpeg, .jpg, .png files of 2MB or less are accepted",
-      }
-  )
+  files: z.array(zodPdfDocumentSchema).nonempty().max(20).refine(
+    (files) => files.every((file) => sizeInMB(file.size) <= MAX_FILE_SIZE && file.type === "application/pdf"),
+    {
+      message: "Only PDF files are allowed and each file must be less than 4MB",
+    })
+
 });
 
 export type PdfBulkUploadSchema = z.infer<typeof zPdfBulkUploadSchema>;

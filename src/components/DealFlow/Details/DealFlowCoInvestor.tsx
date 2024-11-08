@@ -5,7 +5,7 @@ import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import CoInvestorCard from "@components/DealFlow/Details/CoInvestorCard";
 import { useRouter } from "next/navigation";
 import { MembershipType, Role, type User } from "@prisma/client";
-import { type MemberWithUser } from "@/libs/prisma";
+import type { MemberWithUser, MemberWithPartialUser } from "@/libs/prisma";
 import {
   type UserCreateSchema,
   type UserUpdateSchema,
@@ -21,7 +21,7 @@ const DealFlowCoInvestor: React.FC = () => {
     deleteOrganizationMember,
   } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
-  const [localMembers, setLocalMembers] = useState<Partial<MemberWithUser>[]>(
+  const [localMembers, setLocalMembers] = useState<Partial<MemberWithPartialUser>[]>(
     []
   );
 
@@ -36,7 +36,7 @@ const DealFlowCoInvestor: React.FC = () => {
   }, [organization?.members]);
 
   const handleAddCoInvestor = useCallback(() => {
-    const newMember: Partial<MemberWithUser> = {
+    const newMember: Partial<MemberWithPartialUser> = {
       type: MembershipType.COINVESTOR,
       title: "",
       user: {

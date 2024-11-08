@@ -12,22 +12,24 @@ datasource db {
 }
 
 model User {
-  id                 Int             @id @default(autoincrement())
-  clerkId            String?         @unique
-  role               Role            @default(USER)
-  email              String          @unique
-  firstName          String
-  lastName           String
-  phoneNumber        String?
-  hubspotId          String
-  ssn                String?
-  dateOfBirth        DateTime?
-  userOrgId          Int?            @unique
-  referralSource     String?
-  documentEvents     DocumentEvent[]
-  address            Address?
-  organizationMember Member[]
-  organizationsOwned Organization[]  @relation(name: "userOrg")
+  id                   Int                    @id @default(autoincrement())
+  clerkId              String?                @unique
+  role                 Role                   @default(USER)
+  email                String                 @unique
+  firstName            String
+  lastName             String
+  phoneNumber          String?
+  hubspotId            String
+  ssn                  String?
+  dateOfBirth          DateTime?
+  userOrgId            Int?                   @unique
+  referralSource       String?
+  documentEvents       DocumentEvent[]
+  address              Address?
+  organizationMember   Member[]
+  organizationsOwned   Organization[]         @relation(name: "userOrg")
+  DealDocumentUploaded         DealDocument[]
+  OrganizationDocumentUploaded OrganizationDocument[]
 }
 
 model Deal {
@@ -107,13 +109,16 @@ model AccreditationVerifier {
 
 /// deal specific documents such as tax forms, accreditation verification etc 
 model DealDocument {
-  id     Int              @id @default(autoincrement())
-  name   String
-  path   String
-  type   DealDocumentType
-  dealId Int
-  dateCreated DateTime @default(now())
-  deal   Deal             @relation(fields: [dealId], references: [id])
+  id           Int              @id @default(autoincrement())
+  name         String
+  path         String
+  type         DealDocumentType
+  dealId       Int
+  dateCreated  DateTime         @default(now())
+  deal         Deal             @relation(fields: [dealId], references: [id])
+  uploadedBy   User             @relation(fields: [uploadedById], references: [id])
+  uploadedById Int
+  taxYear      Int?
 }
 
 /// used for business verification letters and such
@@ -121,10 +126,12 @@ model OrganizationDocument {
   id             Int          @id @default(autoincrement())
   name           String
   path           String
-  key            String         @default("")
+  key            String       @default("")
   organizationId Int
-  dateCreated DateTime @default(now())
+  dateCreated    DateTime     @default(now())
   organization   Organization @relation(fields: [organizationId], references: [id])
+  uploadedBy     User         @relation(fields: [uploadedById], references: [id])
+  uploadedById   Int
 }
 
 model Project {

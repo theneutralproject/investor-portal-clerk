@@ -1,11 +1,12 @@
 'use server';
-import { getAdminFromrequest, matchDealWithPdf } from "@/libs/admin/utils";
+import { deleteAllFiles, getAdminFromrequest, matchDealWithPdf } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import fs from 'fs';
-import prisma, { type DealWithOrgMembersAndProject } from "@/libs/prisma";
+import fs from 'fs/promises';
+import prisma, { type DealWithFullOrgAndProject } from "@/libs/prisma";
+import type { MatchResponseObject } from "@/libs/admin/schema";
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -20,47 +21,43 @@ export async function POST(request: NextRequest) {
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
     // get all deals
-    const deals = await prisma.deal.findMany({
+    const deals = (await prisma.deal.findMany({
         include: {
             organization: {
                 include: {
-                    members: { include: { user: true } }
+                    members: { include: { user: { include: { address: true } } } },
+                    address: true
                 }
             },
             project: true,
         }
-    });
-    // get the pdfs from the request
+    })) as DealWithFullOrgAndProject[]
     try {
-        console.log('Admin user:', adminUser.email);
         const formData = await request.formData();
-        console.log(formData);
-
-
         const { files } = zPdfBulkUploadSchema.parse(formData);
-
-        console.log(`Admin ${adminUser.email} uploaded ${files.length} files`);
         const storagePath = `./src/libs/admin/tempPdfFilesDir`;
-        const retArr = [] as (DealWithOrgMembersAndProject | null)[];
+
+        await deleteAllFiles(storagePath);
+        const retArr = [] as (MatchResponseObject | null)[];
         for (const file of files) {
             console.log(`File name: ${file.name}`);
             const buffer = Buffer.from(await file.arrayBuffer());
-            // fs.writeFileSync(`${storagePath}/${file.name}`, buffer);
-            fs.writeFile(`${storagePath}/${file.name}`, buffer, (err: NodeJS.ErrnoException | null) => {
-                if (err) {
-                    console.error(err);
-                    return jsonResponse({ error: getErrorMessage(err) }, 500);
-                }
-            });
+            try {
+                await fs.writeFile(`${storagePath}/${file.name}`, buffer);
+            }
+            catch (err) {
+                console.error(err);
+                return jsonResponse({ error: getErrorMessage(err) }, 500);
+            }
 
             // match the files to the correct deal
-            const matchingDeal = await matchDealWithPdf(deals, file);
+            const match = await matchDealWithPdf(deals, file);
             // return an array of match results
-            if (isError(matchingDeal)) {
-                console.error(getErrorMessage(matchingDeal));
+            if (isError(match)) {
+                console.error(getErrorMessage(match));
                 retArr.push();
             }
-            else retArr.push(matchingDeal);
+            else retArr.push(match);
         };
 
         return jsonResponse(retArr);

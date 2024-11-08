@@ -1,8 +1,13 @@
-'use server';
+
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
-import prisma, { type DealWithOrgMembersAndProject } from "../prisma";
-import { MembershipType, Role } from "@prisma/client";
+import prisma, { type DealWithFullOrgAndProject } from "../prisma";
+import { type DealDocumentType, MembershipType, Role } from "@prisma/client";
+import { type MatchResponseObject, MatchConfidence } from "./schema";
+import { storageClient } from "../supabase";
+import fs from 'fs/promises';
+import path from "path";
+import { getErrorMessage } from "../utils";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
@@ -32,25 +37,51 @@ export async function getAdminFromrequest(request: NextRequest) {
         }
         return adminUser;
     } catch (error) {
-        throw new Error("Invalid token");
+        return new Error("Invalid or Expired token");
     }
 }
 
+export async function deleteAllFiles(directory: string) {
+    try {
+        const files = await fs.readdir(directory);
+        for (const file of files) {
+            const filePath = path.join(directory, file);
+            const stats = await fs.stat(filePath);
+            if (stats.isFile()) {
+                await fs.unlink(filePath)
+                console.log(`Deleted: ${filePath}`);
+            }
+        }
+        return;
+    } catch (error) {
+        console.error(getErrorMessage(error));
+        return new Error(getErrorMessage(error));
+    }
+};
 
-export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], file: File) {
+export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file: File) {
     // match the file to the correct deal
     const arrayBuffer = await file.arrayBuffer();
     const dataBuffer = Buffer.from(arrayBuffer);
     // eslint-disable-next-line
     const { text } = (await PdfParse(dataBuffer)) as { text: string | null };
-    console.log(`text: ${text?.substring(0, 100)}`);
-    if(!text) {
+    if (!text) {
         return new Error("No text found in pdf");
     }
     let i = 0;
-    let dealFound = false;
-    let matchingDeal: DealWithOrgMembersAndProject | null = null;
-    while (!dealFound && i < deals.length) {
+    let bestMatch: MatchResponseObject | null = null;
+
+    function getConfidence(matchCount: number): MatchConfidence {
+        if (matchCount >= 4) {
+            return MatchConfidence.HIGH;
+        } else if (matchCount >= 2.5) {
+            return MatchConfidence.MEDIUM;
+        } else {
+            return MatchConfidence.LOW;
+        }
+    }
+
+    while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
             i++;
@@ -60,21 +91,193 @@ export async function matchDealWithPdf(deals: DealWithOrgMembersAndProject[], fi
         const { organization, transactionId, project: { name: projectName } } = deal;
         const orgMembers = organization.members;
         const owner = orgMembers.find((member) => member.type === MembershipType.OWNER);
-        if (!owner) {
+        if (!owner || !owner.user) {
             i++;
             continue;
         }
-        const { firstName, lastName, ssn } = owner.user;
-        const wordsToMatch = [firstName, lastName, projectName, (ssn && ssn?.length > 4) ? ssn.slice(-4) : ""].map((w) => w?.toLowerCase() ?? "");
-        console.log(`\t-->words to match: ${wordsToMatch.toString()}`);
-        const matchFound = wordsToMatch.every(word => text.toLowerCase().includes(word));
-        if (matchFound) {
-            dealFound = true;
-            matchingDeal = deal;
-            console.log(`found a match for ${transactionId}`);
-            console.log(`\t-->words to match: ${wordsToMatch.toString()}\n`);
-          }
-          i++;
+        const wordScoreTuple = [] as [string, number][];
+        const { firstName, lastName, ssn, address } = owner.user;
+        wordScoreTuple.push([firstName.toLowerCase(), 1]);
+        wordScoreTuple.push([lastName.toLowerCase(), 1]);
+        wordScoreTuple.push([`${firstName} ${lastName}`.toLowerCase(), 2]);
+        wordScoreTuple.push([projectName.toLowerCase(), .5]);
+        wordScoreTuple.push([transactionId.toLowerCase(), 1]);
+        wordScoreTuple.push([organization.name.toLowerCase(), 1]);
+        if (ssn) {
+            wordScoreTuple.push([ssn.slice(-4), .8]);
+        }
+        if (address) {
+            wordScoreTuple.push([address.street.toLowerCase(), .5]);
+            wordScoreTuple.push([address.city.toLowerCase(), .3]);
+            wordScoreTuple.push([address.zipcode.toLowerCase(), .3]);
+        }
+        if (organization.address) {
+            wordScoreTuple.push([organization.address.street.toLowerCase(), .5]);
+            wordScoreTuple.push([organization.address.city.toLowerCase(), .3]);
+            wordScoreTuple.push([organization.address.zipcode.toLowerCase(), .3]);
+        }
+        if (organization.tin) {
+            wordScoreTuple.push([organization.tin, .8]);
+        }
+        let matchScore = 0.0;
+        const matchedWords = [] as string[];
+        wordScoreTuple.forEach(([word, score]) => {
+            if (text.toLowerCase().includes(word)) {
+                matchScore += score;
+                matchedWords.push(word);
+                console.log(`found match for ${word}`);
+            }
+        });
+        if (matchScore >= 2) {
+            if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
+                console.log(`\t-->best match so far: ${transactionId}`);
+                bestMatch = {
+                    pdfName: file.name,
+                    deal,
+                    owner: owner.user,
+                    organization,
+                    confidence: getConfidence(matchScore),
+                    matchedWords
+                }
+            }
+        }
+        i++;
     }
-    return matchingDeal;
+    return bestMatch;
+}
+
+// Type definitions for file-like objects
+interface FileDetails {
+    name: string;
+    type: string;
+    size?: number;
+}
+
+interface FileWrapper {
+    name: string;
+    type: string;
+    size?: number;
+    arrayBuffer(): Promise<ArrayBuffer>;
+}
+
+// Helper function to determine if value is File-like
+function isFileLike(value: unknown): value is FileWrapper {
+    return (
+        value !== null &&
+        typeof value === "object" &&
+        "name" in value &&
+        "type" in value &&
+        typeof (value as FileWrapper).arrayBuffer === "function"
+    );
+}
+
+// Helper function to safely get file details
+export function getFileDetails(file: FormDataEntryValue): FileDetails {
+    if (isFileLike(file)) {
+        return {
+            name: file.name,
+            type: file.type,
+            size: file.size,
+        };
+    }
+    // Fallback for non-File objects
+    return {
+        name: `upload-${Date.now()}`,
+        type: "application/octet-stream",
+    };
+}
+
+export function getFileExtension(mimeType: string): string {
+    const extensions: Record<string, string> = {
+        "application/pdf": ".pdf",
+        "image/png": ".png",
+        "image/jpg": ".jpg",
+        "image/jpeg": ".jpg",
+    };
+    return extensions[mimeType] ?? "";
+}
+
+export async function uploadFile(
+    file: FormDataEntryValue,
+    type: string,
+    id: number
+): Promise<string> {
+    const fileDetails = getFileDetails(file);
+    const fileName = `${fileDetails.name || `upload-${Date.now()}`
+        }${getFileExtension(fileDetails.type)}`;
+
+    try {
+        let fileData: ArrayBuffer;
+        if (isFileLike(file)) {
+            fileData = await file.arrayBuffer();
+        } else if (typeof file === "string") {
+            // Handle string data if needed
+            fileData = new TextEncoder().encode(file).buffer;
+        } else {
+            throw new Error("Invalid file format");
+        }
+
+        const { data, error } = await storageClient
+            .from(`${type}-documents`)
+            .upload(`${type}-${id}/${fileName}`, fileData, {
+                contentType: fileDetails.type,
+            });
+
+        if (error) {
+            console.error("File upload error:", error);
+            throw new Error(`File upload failed: ${error.message}`);
+        }
+
+        if (!data?.path) {
+            throw new Error("No path returned from storage");
+        }
+
+        return data.path;
+    } catch (error) {
+        console.error("Error in uploadFile:", error);
+        throw error;
+    }
+};
+
+export async function createDocumentEntry(
+    documentType: string,
+    id: number,
+    name: string,
+    path: string,
+    key: string,
+    userId: number,
+    dealDocumentType?: DealDocumentType,
+    taxYear?: number
+) {
+    console.log("Creating document entry:", { documentType, id, name, path, key, userId, dealDocumentType, taxYear });
+    try {
+        if (documentType === "deal") {
+            if(!dealDocumentType || !taxYear) {
+                throw new Error("Missing required dealDocumentType field");
+            }
+            return await prisma.dealDocument.create({
+                data: {
+                    dealId: id,
+                    name,
+                    path,
+                    type: dealDocumentType,
+                    uploadedById: userId,
+                    taxYear,
+                },
+            });
+        } else {
+            return await prisma.organizationDocument.create({
+                data: {
+                    organizationId: id,
+                    name,
+                    path,
+                    key,
+                    uploadedById: userId,
+                },
+            });
+        }
+    } catch (error) {
+        console.error("Error creating document entry:", error);
+        throw error;
+    }
 }

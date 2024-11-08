@@ -1,4 +1,5 @@
 import prisma from "@/libs/prisma";
+import { errorResponse, getErrorMessage } from "@/libs/utils";
 import { type NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -12,10 +13,7 @@ export async function GET(request: NextRequest) {
 
     slug = queryParams.get("slug") ?? undefined;
   } catch (error) {
-    return new Response(JSON.stringify({ error: "Error fetching data" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return errorResponse(getErrorMessage(error), 500);
   }
 
   const projects = await prisma.project
