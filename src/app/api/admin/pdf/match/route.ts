@@ -24,6 +24,7 @@ export async function POST(request: NextRequest) {
     console.log("Admin user", adminUser);
     // get all deals
     const deals = (await prisma.deal.findMany({
+        take: 10,
         include: {
             organization: {
                 include: {
