@@ -50,7 +50,7 @@ export type DealWithOrgMembersAndProject = Deal & {
 };
 
 export type DealWithFullOrgAndProject = Deal & {
-  organization: OrganizationWithFullMembersAndAddress & { address: Address };
+  organization: OrganizationWithFullMembersAndAddress & { address: Address | null };
   project: Project;
 };
 
@@ -69,7 +69,7 @@ export type DealWithInvestmentStatsAndVerification = DealWithInvestmentStats & {
 
 export type OrganizationWithMembersAndAddress = Organization & {
   members: Member[];
-  address: Address;
+  address: Address | null;
 };
 
 export type OrganizationWithFullMembers = Organization & {

@@ -81,7 +81,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     }
     let i = 0;
     let bestMatch: MatchResponseObject | null = null;
-
+console.log(text);
     while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
