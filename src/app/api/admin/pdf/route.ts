@@ -41,11 +41,11 @@ export async function POST(request: NextRequest) {
 
         console.log("Files:", files.length);
         console.log(storagePath);
-        const deleteResult = await deleteAllFiles(storagePath);
-        if(isError(deleteResult)) {
-            console.error(getErrorMessage(deleteResult));
-            return jsonResponse({ error: getErrorMessage(deleteResult) }, 500);
-        }
+        // const deleteResult = await deleteAllFiles(storagePath);
+        // if(isError(deleteResult)) {
+        //     console.error(getErrorMessage(deleteResult));
+        //     return jsonResponse({ error: getErrorMessage(deleteResult) }, 500);
+        // }
         const retArr = [] as (MatchResponseObject | null)[];
         for (const file of files) {
             console.log(`File name: ${file.name}`);
