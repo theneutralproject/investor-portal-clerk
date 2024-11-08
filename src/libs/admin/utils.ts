@@ -4,15 +4,11 @@ import prisma from "../prisma.server";
 import { type DealDocumentType, MembershipType, Role } from "@prisma/client";
 import { type MatchResponseObject, MatchConfidence } from "./schema";
 import { storageClient } from "../supabase";
-import fs from 'fs/promises';
-import path from "path";
-import { getErrorMessage } from "../utils";
 import type { DealWithFullOrgAndProject } from "../types";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
 
-export const pdfTempStoragePath = process.env.NODE_ENV === "production" ? path.join(process.cwd(),"/env") : path.join(process.cwd(), 'src/libs/admin/tempPdfFilesDir');
 /**
  * 
  * @param request 
@@ -42,25 +38,6 @@ export async function getAdminFromRequest(request: NextRequest) {
         return new Error("Invalid or Expired token");
     }
 }
-
-export async function deleteAllFiles(directory: string) {
-    try {
-        const files = await fs.readdir(directory);
-        for (const file of files) {
-            const filePath = path.join(directory, file);
-            const stats = await fs.stat(filePath);
-            if (stats.isFile()) {
-                await fs.unlink(filePath)
-                console.log(`Deleted: ${filePath}`);
-            }
-        }
-        return;
-    } catch (error) {
-        console.error(getErrorMessage(error));
-        return new Error(getErrorMessage(error));
-    }
-};
-
 
 function calcConfidenceScore(matchCount: number): MatchConfidence {
     if (matchCount >= 4) {

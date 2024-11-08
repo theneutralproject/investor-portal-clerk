@@ -1,11 +1,11 @@
-import { deleteAllFiles, getAdminFromRequest, matchDealWithPdf, pdfTempStoragePath } from "@/libs/admin/utils";
+import {  getAdminFromRequest, matchDealWithPdf } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import fs from 'fs/promises';
 import type { MatchResponseObject } from "@/libs/admin/schema";
 import prisma from "@/libs/prisma.server";
+import { storageClient } from "@/libs/supabase";
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -19,10 +19,9 @@ export async function POST(request: NextRequest) {
         console.error(getErrorMessage(adminUser));
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
-    console.log("Admin user", adminUser);
+    
     // get all deals
     const deals = (await prisma.deal.findMany({
-        take: 10,
         include: {
             organization: {
                 include: {
@@ -36,23 +35,35 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const { files } = zPdfBulkUploadSchema.parse(formData);
-
-        const deleteResult = await deleteAllFiles(pdfTempStoragePath);
-        if(isError(deleteResult)) {
-            console.error(getErrorMessage(deleteResult));
-            return jsonResponse({ error: getErrorMessage(deleteResult) }, 500);
+        const {data, error } = await storageClient.from(`deal-documents`).list('tempPdfStorage');
+        if (isError(error)) {
+            console.error(getErrorMessage(error));
         }
+        if(data?.length) {
+            console.log("Deleting all files in tempPdfStorage folder");
+            console.log(data.map(file => file.name));
+            const deleteResult = await storageClient.from(`deal-documents`).remove(data.map(file => `tempPdfStorage/${file.name}`));
+            if (deleteResult.error) {
+                console.error("COULD NOT DELETE:")
+                console.error(getErrorMessage(deleteResult.error));
+                return jsonResponse({ error: getErrorMessage(deleteResult.error) }, 500);
+            }
+        }
+
         const retArr = [] as (MatchResponseObject | null)[];
         for (const file of files) {
+            const { error } = await storageClient
+            .from(`deal-documents`)
+            .upload(`tempPdfStorage/${file.name}`, file, {
+                contentType: file.type
+            });
+            if(error) {
+                console.error("unable to upload file to temp storage:");
+                console.error(error.message);
+                console.error(error);
+                return jsonResponse({ error: getErrorMessage(error) }, 500);
+            }
             console.log(`File name: ${file.name}`);
-            const buffer = Buffer.from(await file.arrayBuffer());
-            try {
-                await fs.writeFile(`${pdfTempStoragePath}/${file.name}`, buffer);
-            }
-            catch (err) {
-                console.error(err);
-                return jsonResponse({ error: getErrorMessage(err) }, 500);
-            }
 
             // match the files to the correct deal
             console.log("Matching file to deal");

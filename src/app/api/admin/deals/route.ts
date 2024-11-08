@@ -1,10 +1,10 @@
-import { createDocumentEntry, getAdminFromRequest, pdfTempStoragePath, uploadFile } from "@/libs/admin/utils";
+import { createDocumentEntry, getAdminFromRequest } from "@/libs/admin/utils";
 import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import fs from 'fs/promises';
 import { DealDocumentType } from "@prisma/client";
+import { storageClient } from "@/libs/supabase";
 
 // get deals by first and last name and project name
 export async function GET(request: NextRequest) {
@@ -92,24 +92,15 @@ export async function POST(request: NextRequest) {
     if (!dealId) {
         return errorResponse("Missing required dealId", 400);
     }
-    // get PDF from temp storage
-    let pdfBuffer: Buffer;
-    try {
-        pdfBuffer = await fs.readFile(`${pdfTempStoragePath}/${pdfName}`);
-    } catch (error) {
-        console.error(error);
-        return errorResponse(getErrorMessage(error), 500);
-    }
-    const file = new File([pdfBuffer], pdfName.replace(".pdf", ""), { type: "application/pdf" });
-    let path = ""
-    try {
-        path = await uploadFile(file, "deal", dealId);
-    } catch (error) {
-        console.error(error);
-        return errorResponse(getErrorMessage(error), 500);
+    const newPath = `deal/${dealId}/${pdfName}`;
+    const { error } = await storageClient.from(`deal-documents`).move(`tempStorage/${pdfName}`, newPath);
+    if (error) {
+        console.error("unable to move file to temp storage:");
+        console.error(getErrorMessage(error));
+        return jsonResponse({ error: getErrorMessage(error) }, 500);
     }
     try {
-        const newDocEntry = await createDocumentEntry("deal", dealId, pdfName, path, "", adminUser.id, DealDocumentType.K1, taxYear);
+        const newDocEntry = await createDocumentEntry("deal", dealId, pdfName, newPath, "", adminUser.id, DealDocumentType.K1, taxYear);
 
         return jsonResponse({
             success: true,
