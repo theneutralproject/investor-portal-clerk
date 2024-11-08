@@ -59,6 +59,17 @@ export async function deleteAllFiles(directory: string) {
     }
 };
 
+
+function calcConfidenceScore(matchCount: number): MatchConfidence {
+    if (matchCount >= 4) {
+        return MatchConfidence.HIGH;
+    } else if (matchCount >= 2.5) {
+        return MatchConfidence.MEDIUM;
+    } else {
+        return MatchConfidence.LOW;
+    }
+}
+
 export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file: File) {
     // match the file to the correct deal
     const arrayBuffer = await file.arrayBuffer();
@@ -71,16 +82,6 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     let i = 0;
     let bestMatch: MatchResponseObject | null = null;
 
-    function getConfidence(matchCount: number): MatchConfidence {
-        if (matchCount >= 4) {
-            return MatchConfidence.HIGH;
-        } else if (matchCount >= 2.5) {
-            return MatchConfidence.MEDIUM;
-        } else {
-            return MatchConfidence.LOW;
-        }
-    }
-
     while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
@@ -88,6 +89,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             continue;
         }
 
+        console.log(`Matching deal ${deal.transactionId}`);
         const { organization, transactionId, project: { name: projectName } } = deal;
         const orgMembers = organization.members;
         const owner = orgMembers.find((member) => member.type === MembershipType.OWNER);
@@ -136,7 +138,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                     deal,
                     owner: owner.user,
                     organization,
-                    confidence: getConfidence(matchScore),
+                    confidence: calcConfidenceScore(matchScore),
                     matchedWords
                 }
             }

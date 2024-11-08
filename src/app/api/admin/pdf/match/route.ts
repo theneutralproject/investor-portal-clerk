@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
         console.error(getErrorMessage(adminUser));
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
+    console.log("Admin user", adminUser);
     // get all deals
     const deals = (await prisma.deal.findMany({
         include: {
@@ -33,11 +34,13 @@ export async function POST(request: NextRequest) {
             project: true,
         }
     })) as DealWithFullOrgAndProject[]
+    console.log("Deals:", deals.length);
     try {
         const formData = await request.formData();
         const { files } = zPdfBulkUploadSchema.parse(formData);
         const storagePath = `./src/libs/admin/tempPdfFilesDir`;
 
+        console.log("Files:", files.length);
         await deleteAllFiles(storagePath);
         const retArr = [] as (MatchResponseObject | null)[];
         for (const file of files) {
@@ -52,6 +55,7 @@ export async function POST(request: NextRequest) {
             }
 
             // match the files to the correct deal
+            console.log("Matching file to deal");
             const match = await matchDealWithPdf(deals, file);
             // return an array of match results
             if (isError(match)) {
