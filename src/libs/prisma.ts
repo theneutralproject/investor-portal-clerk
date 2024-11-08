@@ -18,25 +18,34 @@ import {
   type OrganizationDocument,
   type DealDocument,
 } from "@prisma/client";
-import { fieldEncryptionExtension } from 'prisma-field-encryption'
 
-let prismaClient: PrismaClient;
-
-if (process.env.NODE_ENV === "production") {
-  prismaClient = new PrismaClient();
-} else {
-  const globalWithPrisma = global as typeof globalThis & {
-    prismaClient: PrismaClient;
-  };
-  if (!globalWithPrisma.prismaClient) {
-    globalWithPrisma.prismaClient = new PrismaClient();
-  }
-  prismaClient = globalWithPrisma.prismaClient;
+// Declare module augmentation for global scope
+declare global {
+  // eslint-disable-next-line no-var
+  var prismaClient: PrismaClient | undefined;
 }
 
-const prisma = prismaClient.$extends(
-  fieldEncryptionExtension()
-)
+// Initialize as undefined to allow proper typing
+let prisma: PrismaClient | null = null;
+
+if (typeof window === "undefined") {
+  // Dynamic imports for server-side only
+  const { PrismaClient } = require("@prisma/client") as {
+    PrismaClient: new () => PrismaClient;
+  };
+  const { fieldEncryptionExtension } = require("prisma-field-encryption");
+
+  if (process.env.NODE_ENV === "production") {
+    prisma = new PrismaClient().$extends(fieldEncryptionExtension());
+  } else {
+    if (!global.prismaClient) {
+      global.prismaClient = new PrismaClient().$extends(
+        fieldEncryptionExtension()
+      );
+    }
+    prisma = global.prismaClient;
+  }
+}
 
 export default prisma;
 
@@ -67,7 +76,7 @@ export type DealWithInvestmentStats = Deal & {
 };
 
 export type DealWithOrgMembersAndProject = Deal & {
-  organization: OrganizationWithFullMembers 
+  organization: OrganizationWithFullMembers;
   project: Project;
 };
 
