@@ -1,4 +1,4 @@
-import { deleteAllFiles, getAdminFromrequest, matchDealWithPdf, pdfTempStoragePath } from "@/libs/admin/utils";
+import { deleteAllFiles, getAdminFromRequest, matchDealWithPdf, pdfTempStoragePath } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
@@ -15,7 +15,7 @@ import path from "path";
  */
 export async function POST(request: NextRequest) {
     // check if they are an admin user by checkingthe auth token
-    const adminUser = await getAdminFromrequest(request);
+    const adminUser = await getAdminFromRequest(request);
     if (isError(adminUser)) {
         console.error(getErrorMessage(adminUser));
         return jsonResponse(getErrorMessage(adminUser), 401);

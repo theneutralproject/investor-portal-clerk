@@ -9,16 +9,18 @@ import path from "path";
 import { getErrorMessage } from "../utils";
 import { DealWithFullOrgAndProject } from "../types";
 
-export const pdfTempStoragePath = path.join(process.cwd(), 'src/libs/admin/tempPdfFilesDir');
-
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
+
+
+export const pdfTempStoragePath = path.join(process.cwd(), '/libs/admin/tempPdfFilesDir');
+export const pdfTempStoragePath2 = path.resolve("src/libs/admin/tempPdfFilesDir");
 /**
  * 
  * @param request 
  * @returns an admin user if the jwt is valid
  */
-export async function getAdminFromrequest(request: NextRequest) {
+export async function getAdminFromRequest(request: NextRequest) {
     // get jwt from request headers
     const token = request.headers.get("Authorization");
     if (token) {
@@ -90,7 +92,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             continue;
         }
 
-        console.log(`Matching deal ${deal.transactionId}`);
+        // console.log(`Matching deal ${deal.transactionId}`);
         const { organization, transactionId, project: { name: projectName } } = deal;
         const orgMembers = organization.members;
         const owner = orgMembers.find((member) => member.type === MembershipType.OWNER);
@@ -255,7 +257,7 @@ export async function createDocumentEntry(
     console.log("Creating document entry:", { documentType, id, name, path, key, userId, dealDocumentType, taxYear });
     try {
         if (documentType === "deal") {
-            if(!dealDocumentType || !taxYear) {
+            if (!dealDocumentType || !taxYear) {
                 throw new Error("Missing required dealDocumentType field");
             }
             return await prisma.dealDocument.create({

@@ -1,4 +1,4 @@
-import { createDocumentEntry, getAdminFromrequest, uploadFile } from "@/libs/admin/utils";
+import { createDocumentEntry, getAdminFromRequest, uploadFile } from "@/libs/admin/utils";
 import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
@@ -8,7 +8,7 @@ import { DealDocumentType } from "@prisma/client";
 
 // get deals by first and last name and project name
 export async function GET(request: NextRequest) {
-    const adminUser = await getAdminFromrequest(request);
+    const adminUser = await getAdminFromRequest(request);
     if (isError(adminUser)) {
         console.error(getErrorMessage(adminUser));
         return errorResponse(getErrorMessage(adminUser), 401);
@@ -81,7 +81,7 @@ export async function GET(request: NextRequest) {
  * @returns 
  */
 export async function POST(request: NextRequest) {
-    const adminUser = await getAdminFromrequest(request);
+    const adminUser = await getAdminFromRequest(request);
     if (isError(adminUser)) {
         console.error(getErrorMessage(adminUser));
         return errorResponse(getErrorMessage(adminUser), 401);
