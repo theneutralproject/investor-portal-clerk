@@ -24,6 +24,7 @@ const DealFlowSidebar = () => {
         height: "100%",
         display: "flex",
         flexDirection: "column",
+        minHeight: "calc(100vh - 64px)",
       }}
     >
       <Box>
