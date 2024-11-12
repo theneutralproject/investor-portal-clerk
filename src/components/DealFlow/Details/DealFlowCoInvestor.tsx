@@ -10,6 +10,7 @@ import {
   type UserUpdateSchema,
 } from "@/libs/user/schema";
 import type { MemberWithPartialUser, MemberWithUser } from "@/libs/types";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const DealFlowCoInvestor: React.FC = () => {
   const {
@@ -21,12 +22,9 @@ const DealFlowCoInvestor: React.FC = () => {
     deleteOrganizationMember,
   } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
-  const [localMembers, setLocalMembers] = useState<Partial<MemberWithPartialUser>[]>(
-    []
-  );
-
-  console.log("localMembers", localMembers);
-  console.log("organization", organization);
+  const [localMembers, setLocalMembers] = useState<
+    Partial<MemberWithPartialUser>[]
+  >([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -137,13 +135,7 @@ const DealFlowCoInvestor: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Investment Details
-      </Typography>
-
-      <Box my={2}>
-        <Typography variant="body1">Add Investors</Typography>
-      </Box>
+      <DealFlowTitle title="Add Co-Investors" />
 
       {localMembers.map((coInvestor, index) => (
         <CoInvestorCard
@@ -159,17 +151,17 @@ const DealFlowCoInvestor: React.FC = () => {
         />
       ))}
 
-      <Box mt={2}>
-        <Button
-          variant="grayCancel"
-          startIcon={<span>+</span>}
-          onClick={handleAddCoInvestor}
-        >
-          ADD CO-INVESTOR
-        </Button>
-      </Box>
-
-      <Divider sx={{ my: 4 }} />
+      {expandedCards.length === 0 && (
+        <Box mt={2}>
+          <Button
+            variant="grayPill"
+            startIcon={<span>+</span>}
+            onClick={handleAddCoInvestor}
+          >
+            ADD CO-INVESTOR
+          </Button>
+        </Box>
+      )}
 
       <DealFlowFooter onBack={() => null} onContinue={nextRoute} />
     </Box>

@@ -65,9 +65,9 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
         </Typography>
       </Stack>
       {isCompleted ? (
-        <Typography variant="body2">Signed</Typography>
+        <Button variant="grayPill">SIGNED</Button>
       ) : (
-        <Button variant="neutralBlack" onClick={onSign}>
+        <Button variant="blackPill" onClick={onSign}>
           REVIEW & SIGN
         </Button>
       )}

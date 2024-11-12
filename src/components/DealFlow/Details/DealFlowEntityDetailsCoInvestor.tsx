@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const DealFlowEntityDetailsCoInvestor: React.FC = () => {
   const router = useRouter();
@@ -32,9 +33,7 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Get Started
-      </Typography>
+      <DealFlowTitle title="Investment Information" />
       <Typography variant="body1" paragraph>
         Would you like to add a co-investor?
       </Typography>
@@ -54,11 +53,8 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
               onClick={() => setHasCoInvestors(option.value)}
               sx={{
                 cursor: "pointer",
-                border:
-                  hasCoInvestors === option.value
-                    ? "2px solid #1976d2"
-                    : "none",
-                "&:hover": { boxShadow: 3 },
+                boxShadow: 0,
+                "&:hover": { boxShadow: 1 },
               }}
             >
               <CardContent>

@@ -20,6 +20,7 @@ import { InvestmentStatsDisplay } from "./DealFlowUI";
 import { useReturnsData } from "./useReturnsData";
 import { useInvestmentStats } from "./useInvestmentStats";
 import { type ViewMode } from "./dealFlow.types";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
 const MIN_INVESTMENT = 5000;
@@ -115,96 +116,90 @@ const DealFlowAmount: React.FC = () => {
   }, [viewMode]);
 
   return (
-    <Card sx={{ width: "100%", border: "none", boxShadow: "none" }}>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Investment Amount
+    <Box>
+      <DealFlowTitle title="Enter Investment Amount" />
+
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <TextField
+          fullWidth
+          type="number"
+          value={amount}
+          onChange={handleAmountChange}
+          error={!!validationError}
+          helperText={validationError}
+          InputProps={{
+            startAdornment: <InputAdornment position="start">$</InputAdornment>,
+          }}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "white",
+            },
+          }}
+        />
+
+        <QuickSelectChips
+          amounts={QUICK_SELECT_AMOUNTS}
+          selectedAmount={amount}
+          onSelect={setAmount}
+        />
+
+        <Typography variant="caption" color="text.secondary">
+          Minimum: ${MIN_INVESTMENT.toLocaleString()}
         </Typography>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <TextField
-            fullWidth
-            type="number"
-            value={amount}
-            onChange={handleAmountChange}
-            error={!!validationError}
-            helperText={validationError}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">$</InputAdornment>
-              ),
-            }}
+        {isLoading ? (
+          <Box
             sx={{
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "white",
-              },
+              height: 200,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
             }}
-          />
-
-          <QuickSelectChips
-            amounts={QUICK_SELECT_AMOUNTS}
-            selectedAmount={amount}
-            onSelect={setAmount}
-          />
-
-          <Typography variant="caption" color="text.secondary">
-            Minimum: ${MIN_INVESTMENT.toLocaleString()}
-          </Typography>
-
-          {isLoading ? (
+          >
+            <CircularProgress />
+          </Box>
+        ) : error ? (
+          <Alert severity="error" sx={{ height: 200 }}>
+            {error}
+          </Alert>
+        ) : (
+          <>
             <Box
               sx={{
-                height: 200,
                 display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
-                justifyContent: "center",
+                mt: 2,
               }}
             >
-              <CircularProgress />
-            </Box>
-          ) : error ? (
-            <Alert severity="error" sx={{ height: 200 }}>
-              {error}
-            </Alert>
-          ) : (
-            <>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  mt: 2,
-                }}
+              <Typography variant="h6">Projected Returns</Typography>
+              <ToggleButtonGroup
+                value={viewMode}
+                exclusive
+                onChange={handleViewModeChange}
+                size="small"
               >
-                <Typography variant="h6">Projected Returns</Typography>
-                <ToggleButtonGroup
-                  value={viewMode}
-                  exclusive
-                  onChange={handleViewModeChange}
-                  size="small"
-                >
-                  <ToggleButton value="distribution">Distribution</ToggleButton>
-                  <ToggleButton value="multiple">Multiple</ToggleButton>
-                </ToggleButtonGroup>
-              </Box>
+                <ToggleButton value="distribution">Distribution</ToggleButton>
+                <ToggleButton value="multiple">Multiple</ToggleButton>
+              </ToggleButtonGroup>
+            </Box>
 
-              {/* @ts-expect-error chart types */}
-              <ReturnsChart data={projectedReturns} config={chartConfig} />
+            {/* @ts-expect-error chart types */}
+            <ReturnsChart data={projectedReturns} config={chartConfig} />
 
-              {investmentStats && (
-                <InvestmentStatsDisplay
-                  stats={investmentStats}
-                  returnsData={returnsData}
-                  dealInvestmentStats={deal.investmentStats}
-                />
-              )}
-            </>
-          )}
-        </Box>
+            {investmentStats && (
+              <InvestmentStatsDisplay
+                stats={investmentStats}
+                returnsData={returnsData}
+                dealInvestmentStats={deal.investmentStats}
+              />
+            )}
+          </>
+        )}
+      </Box>
 
-        <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
-      </CardContent>
-    </Card>
+      <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
+    </Box>
   );
 };
 

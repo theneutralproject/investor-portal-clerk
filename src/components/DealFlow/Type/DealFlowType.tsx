@@ -11,6 +11,7 @@ import { DealFinancingType } from "@prisma/client";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { useRouter } from "next/navigation";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const DealFlowType: React.FC = () => {
   const router = useRouter();
@@ -56,10 +57,8 @@ const DealFlowType: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "auto", padding: 2 }}>
-      <Typography variant="h5" gutterBottom>
-        Choose Investment Type
-      </Typography>
+    <Box>
+      <DealFlowTitle title="Choose Investment Type" />
       <RadioGroup
         aria-label="financing-type"
         name="financing-type"
