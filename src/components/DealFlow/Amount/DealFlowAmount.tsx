@@ -19,10 +19,9 @@ import { useReturnsData } from "./useReturnsData";
 import { useInvestmentStats } from "./useInvestmentStats";
 import { type ViewMode } from "./dealFlow.types";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import { DealFinancingType } from "@prisma/client";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
-const MIN_INVESTMENT = 5000;
-const MAX_INVESTMENT = 10_000_000;
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -30,6 +29,8 @@ const DealFlowAmount: React.FC = () => {
     deal?.investmentStats?.amount ?? 100000
   );
   const [viewMode, setViewMode] = useState<ViewMode>("distribution");
+  const MIN_INVESTMENT = deal?.investmentStats?.financingType === DealFinancingType.equity ? project?.investmentStats?.equityMinInvestment ?? 5000 : project?.investmentStats?.debtMinInvestment ?? 5000;
+  const MAX_INVESTMENT = 10_000_000;
 
   const { returnsData, isLoading, error } = useReturnsData({
     projectId: project?.id,
@@ -55,6 +56,7 @@ const DealFlowAmount: React.FC = () => {
       investmentMultiple: dataPoint.investmentMultiple,
       totalGrossReturn: dataPoint.totalGrossReturn,
       totalNetReturn: dataPoint.totalNetReturn,
+      accruedPreferredReturn: dataPoint.accruedPreferredReturn,
     }));
   }, [returnsData]);
 
