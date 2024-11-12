@@ -19,7 +19,7 @@ const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
 const isClient = typeof window !== "undefined";
 
 // Type guard to check if value is a File
-const isFile = (value: unknown): value is File => {
+export const isFile = (value: unknown): value is File => {
   return isClient && value instanceof File;
 };
 
