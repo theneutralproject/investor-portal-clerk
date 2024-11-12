@@ -142,7 +142,7 @@ export function getDebtPayoutSchedule(
             investmentMultiple: roundTo(investmentMultiple, 4),
             totalGrossReturn: roundTo(totalGrossReturn, 2),
             totalNetReturn: roundTo(totalNetReturn, 2),
-            interestRateOrIrr: interestRate
+            interestRateOrIrr: interestRate,
         };
 
         debtPayoutSchedule.push(entry);
@@ -162,7 +162,8 @@ export function getEquityPayoutSchedule(
     projectMilestones: ProjectMilestones,
     equityMilestones: MilestoneType[],
     shareOfEquity: number,
-    unitType: DealUnitType
+    unitType: DealUnitType,
+    preferredReturn: number
 ): ReturnsDateObject[] {
     const closingDate = projectMilestones.financialClosing;
     let date = closingDate.getUTCDate() !== 1 ? startOfMonth(closingDate) : closingDate;
@@ -178,7 +179,8 @@ export function getEquityPayoutSchedule(
         investmentMultiple: 1,
         totalGrossReturn: 0,
         totalNetReturn: 0,
-        interestRateOrIrr: 0
+        interestRateOrIrr: 0,
+        accruedPreferredReturn: 0,
     }
     return equityMilestones.reduce<ReturnsDateObject[]>((schedule, em, index) => {
         if (!em) {
@@ -198,6 +200,7 @@ export function getEquityPayoutSchedule(
         const multiple = distributionAmount / amount;
         const investmentMultiple = cumulativeDistribution / amount;
         const irr = (investmentMultiple - 1) / (index / 12);
+        const accruedPreferredReturn = amount * preferredReturn * (index / 12);
 
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
@@ -210,7 +213,8 @@ export function getEquityPayoutSchedule(
             investmentMultiple: Number(investmentMultiple.toFixed(4)),
             totalGrossReturn: Number(totalGrossReturn.toFixed(2)),
             totalNetReturn: Number(totalNetReturn.toFixed(2)),
-            interestRateOrIrr: Number(irr.toFixed(3))
+            interestRateOrIrr: Number(irr.toFixed(3)),
+            accruedPreferredReturn: Number(accruedPreferredReturn.toFixed(2)),
         });
         previousEntry = schedule[schedule.length - 1];
 
