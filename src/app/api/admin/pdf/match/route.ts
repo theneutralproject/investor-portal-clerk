@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        const retArr = [] as (MatchResponseObject | null)[];
+        const retArr = [] as (MatchResponseObject)[];
         for (const file of files) {
             const { error } = await storageClient
             .from(`deal-documents`)
@@ -63,17 +63,10 @@ export async function POST(request: NextRequest) {
                 console.error(error);
                 return jsonResponse({ error: getErrorMessage(error) }, 500);
             }
-            console.log(`File name: ${file.name}`);
 
             // match the files to the correct deal
-            console.log("Matching file to deal");
             const match = await matchDealWithPdf(deals, file);
-            // return an array of match results
-            if (isError(match)) {
-                console.error(getErrorMessage(match));
-                retArr.push();
-            }
-            else retArr.push(match);
+            retArr.push(match);
         };
 
         return jsonResponse(retArr);

@@ -4,9 +4,10 @@ import type { Deal, User, Organization } from "@prisma/client";
 
 
 export enum MatchConfidence {
-    HIGH = "HIGH",  // three or more points matched
-    MEDIUM = "MEDIUM", // two points matched
-    LOW = "LOW" // one point matched
+    HIGH = "HIGH",
+    MEDIUM = "MEDIUM",
+    LOW = "LOW",
+    NONE="NONE"
 }
 export type MatchResponseObject = {
     pdfName: string;

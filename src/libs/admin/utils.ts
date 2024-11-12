@@ -44,9 +44,10 @@ function calcConfidenceScore(matchCount: number): MatchConfidence {
         return MatchConfidence.HIGH;
     } else if (matchCount >= 2.5) {
         return MatchConfidence.MEDIUM;
-    } else {
+    } else if (matchCount >= 1) {
         return MatchConfidence.LOW;
     }
+    else return MatchConfidence.NONE;
 }
 
 export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file: File) {
@@ -54,12 +55,13 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     const arrayBuffer = await file.arrayBuffer();
     const dataBuffer = Buffer.from(arrayBuffer);
     // eslint-disable-next-line
-    const { text } = (await PdfParse(dataBuffer)) as { text: string | null };
-    if (!text) {
-        return new Error("No text found in pdf");
-    }
+    const { text } = (await PdfParse(dataBuffer)) as { text: string };
     let i = 0;
-    let bestMatch: MatchResponseObject | null = null;
+    let bestMatch: MatchResponseObject = {
+        pdfName: file.name,
+        confidence: MatchConfidence.NONE,
+        matchedWords: []
+    }
     while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
