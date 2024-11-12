@@ -9,5 +9,6 @@ export const zReturnsDateObjectSchema = z.object({
     totalGrossReturn: z.number(),
     totalNetReturn: z.number(),
     interestRateOrIrr: z.number(),
+    accruedPreferredReturn : z.number().optional(),
 });
 export type ReturnsDateObject = z.infer<typeof zReturnsDateObjectSchema>;

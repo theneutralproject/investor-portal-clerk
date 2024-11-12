@@ -65,7 +65,7 @@ const getEquitySummaryBox = (data: ProjectWithStats) => {
         <LineDisplay name="Distribution" value={`${data.investmentStats.equityPaymentFreq}*`} />
         <LineDisplay
           name="Preferred Return"
-          value={`${data.investmentStats.preferredReturn}**`}
+          value={`${data.investmentStats.preferredReturn*100}%**`}
         />
       </Grid>
       <Grid

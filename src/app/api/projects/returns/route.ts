@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
             return jsonResponse({ message: equityDetails.message }, 400);
         }
         const { unitType, shareOfEquity, equityMilestones } = equityDetails;
-        const equityPayoutSchedule = getEquityPayoutSchedule(amount, milestones, equityMilestones, shareOfEquity, unitType);
+        const equityPayoutSchedule = getEquityPayoutSchedule(amount, milestones, equityMilestones, shareOfEquity, unitType, investmentStats.preferredReturn);
         return jsonResponse(equityPayoutSchedule);
     }
     return jsonResponse({ message: 'Financing type not supported' }, 400);

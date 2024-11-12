@@ -12,22 +12,22 @@ datasource db {
 }
 
 model User {
-  id                 Int             @id @default(autoincrement())
-  clerkId            String?         @unique
-  role               Role            @default(USER)
-  email              String          @unique
-  firstName          String /// @encrypted
-  lastName           String /// @encrypted
-  phoneNumber        String?
-  hubspotId          String
-  ssn                String?         @unique /// @encrypted?mode=strict
-  dateOfBirth        DateTime?
-  userOrgId          Int?            @unique
-  referralSource     String?
-  documentEvents     DocumentEvent[]
-  address            Address?
-  organizationMember Member[]
-  organizationsOwned Organization[]  @relation(name: "userOrg")
+  id                           Int                    @id @default(autoincrement())
+  clerkId                      String?                @unique
+  role                         Role                   @default(USER)
+  email                        String                 @unique
+  firstName                    String /// @encrypted
+  lastName                     String /// @encrypted
+  phoneNumber                  String?
+  hubspotId                    String
+  ssn                          String?                @unique /// @encrypted?mode=strict
+  dateOfBirth                  DateTime?
+  userOrgId                    Int?                   @unique
+  referralSource               String?
+  documentEvents               DocumentEvent[]
+  address                      Address?
+  organizationMember           Member[]
+  organizationsOwned           Organization[]         @relation(name: "userOrg")
   DealDocumentUploaded         DealDocument[]
   OrganizationDocumentUploaded OrganizationDocument[]
 }
@@ -173,7 +173,7 @@ model ProjectInvestmentStats {
   equityMinInvestment         Int     @default(5000)
   equityPaymentFreq           String  @default("quarterly")
   equityTermMonths            Int     @default(60)
-  preferredReturn             String  @default("")
+  preferredReturn             Float   @default(0.1)
   investmentGoal              Float   @default(0.0)
   investmentRaised            Float   @default(0.0)
   interestRateMin             Float   @default(10.0)
