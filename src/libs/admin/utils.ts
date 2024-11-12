@@ -40,11 +40,11 @@ export async function getAdminFromRequest(request: NextRequest) {
 }
 
 function calcConfidenceScore(matchCount: number): MatchConfidence {
-    if (matchCount >= 4) {
+    if (matchCount >= 4.5) {
         return MatchConfidence.HIGH;
-    } else if (matchCount >= 2.5) {
+    } else if (matchCount >= 3) {
         return MatchConfidence.MEDIUM;
-    } else if (matchCount >= 1) {
+    } else if (matchCount >= 2) {
         return MatchConfidence.LOW;
     }
     else return MatchConfidence.NONE;
@@ -60,7 +60,8 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     let bestMatch: MatchResponseObject = {
         pdfName: file.name,
         confidence: MatchConfidence.NONE,
-        matchedWords: []
+        matchedWords: [],
+        matchScore: 0
     }
     while (i < deals.length) {
         const deal = deals[i];
@@ -79,14 +80,16 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
         }
         const wordScoreTuple = [] as [string, number][];
         const { firstName, lastName, ssn, address } = owner.user;
+        console.log("SSN", ssn);
         wordScoreTuple.push([firstName.toLowerCase(), 1]);
         wordScoreTuple.push([lastName.toLowerCase(), 1]);
         wordScoreTuple.push([`${firstName} ${lastName}`.toLowerCase(), 2]);
         wordScoreTuple.push([projectName.toLowerCase(), .5]);
         wordScoreTuple.push([transactionId.toLowerCase(), 1]);
-        wordScoreTuple.push([organization.name.toLowerCase(), 1]);
+        wordScoreTuple.push([organization.name.toLowerCase(), 2]);
         if (ssn) {
             wordScoreTuple.push([ssn.slice(-4), .8]);
+            wordScoreTuple.push([ssn, 3]);
         }
         if (address) {
             wordScoreTuple.push([address.street.toLowerCase(), .5]);
@@ -99,16 +102,25 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             wordScoreTuple.push([organization.address.zipcode.toLowerCase(), .3]);
         }
         if (organization.tin) {
-            wordScoreTuple.push([organization.tin, .8]);
+            wordScoreTuple.push([organization.tin.slice(-4), .8]);
+            wordScoreTuple.push([organization.tin, 3]);
         }
         let matchScore = 0.0;
         const matchedWords = [] as string[];
         wordScoreTuple.forEach(([word, score]) => {
+            if(word.length < 3) return; // skip short words
+            // const numMatches = text.toLowerCase().split(word).length - 1;
+            // if (numMatches > 0) {
+            //     matchScore += numMatches * score;
+            //     matchedWords.push(word);
+            //     console.log(`found match for ${word}`);
+            // }
             if (text.toLowerCase().includes(word)) {
                 matchScore += score;
                 matchedWords.push(word);
                 console.log(`found match for ${word}`);
             }
+
         });
         if (matchScore >= 2) {
             if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
@@ -119,7 +131,8 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                     owner: owner.user,
                     organization,
                     confidence: calcConfidenceScore(matchScore),
-                    matchedWords
+                    matchedWords,
+                    matchScore
                 }
             }
         }

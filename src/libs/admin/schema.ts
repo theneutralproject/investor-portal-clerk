@@ -17,4 +17,5 @@ export type MatchResponseObject = {
     organization?: Organization;
     confidence: MatchConfidence;
     matchedWords: string[];
+    matchScore: number;
 }
