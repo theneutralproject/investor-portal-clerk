@@ -54,8 +54,10 @@ export async function POST(request: NextRequest) {
         for (const file of files) {
             const { error } = await storageClient
             .from(`deal-documents`)
-            .upload(`tempPdfStorage/${file.name}`, file, {
-                contentType: file.type
+            .upload(`tempPdfStorage/${file.name as string}`, file, {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                // @ts-expect-error type issue
+                contentType: file.type as string
             });
             if(error) {
                 console.error("unable to upload file to temp storage:");
