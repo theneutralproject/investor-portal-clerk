@@ -76,7 +76,7 @@ const DealFlowSidebar = () => {
                 <Chip
                   label={
                     deal.investmentStats.financingType ===
-                    DealFinancingType.equity
+                      DealFinancingType.equity
                       ? "Equity"
                       : "Debt"
                   }
@@ -138,7 +138,7 @@ const DealFlowSidebar = () => {
             Chat
           </Button>
           <Typography variant="body2" color="text.secondary">
-            (555) 555-5555
+            (608) 205-8336
           </Typography>
         </Box>
       </Box>

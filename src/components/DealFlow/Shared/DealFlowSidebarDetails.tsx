@@ -67,9 +67,9 @@ const DealFlowSidebarDetails: React.FC = () => {
       {/* User Details */}
       <Stack spacing={0.5}>
         <Typography variant="body2">{`${firstName} ${lastName}`}</Typography>
-        <Typography variant="body2">{email}</Typography>
         <Typography variant="body2">{formatAddress(address)}</Typography>
         <Typography variant="body2">{phoneNumber}</Typography>
+        <Typography variant="body2">{email}</Typography>
       </Stack>
 
       <Divider />
