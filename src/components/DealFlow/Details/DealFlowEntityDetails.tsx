@@ -1,5 +1,5 @@
 import React, { useState, type ChangeEvent } from "react";
-import { Box, Typography, TextField, Autocomplete } from "@mui/material";
+import { Box, TextField, Autocomplete } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";

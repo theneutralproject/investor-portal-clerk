@@ -2,8 +2,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   TextField,
   InputAdornment,

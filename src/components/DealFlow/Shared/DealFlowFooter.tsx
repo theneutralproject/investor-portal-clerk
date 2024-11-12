@@ -9,7 +9,6 @@ interface DealFlowFooterProps {
 }
 
 const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
-  onBack,
   onContinue,
   isContinueDisabled = false,
 }) => {

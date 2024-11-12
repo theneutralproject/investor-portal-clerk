@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Box, Typography, Button, Divider } from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import CoInvestorCard from "@components/DealFlow/Details/CoInvestorCard";
