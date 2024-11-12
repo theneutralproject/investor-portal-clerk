@@ -40,7 +40,7 @@ export async function getAdminFromRequest(request: NextRequest) {
 }
 
 function calcConfidenceScore(matchCount: number): MatchConfidence {
-    if (matchCount >= 4.5) {
+    if (matchCount >= 6.5) {
         return MatchConfidence.HIGH;
     } else if (matchCount >= 3) {
         return MatchConfidence.MEDIUM;
@@ -83,7 +83,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
         wordScoreTuple.push([firstName.toLowerCase(), 1]);
         wordScoreTuple.push([lastName.toLowerCase(), 1]);
         wordScoreTuple.push([`${firstName} ${lastName}`.toLowerCase(), 2]);
-        wordScoreTuple.push([projectName.toLowerCase(), .5]);
+        wordScoreTuple.push([projectName.toLowerCase(), 2]);
         wordScoreTuple.push([transactionId.toLowerCase(), 1]);
         wordScoreTuple.push([organization.name.toLowerCase(), 2]);
         if (ssn) {
@@ -121,7 +121,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             }
 
         });
-        if (matchScore >= 2) {
+        if (matchScore >= 3) {
             if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
                 console.log(`\t-->best match so far: ${transactionId}`);
                 bestMatch = {
