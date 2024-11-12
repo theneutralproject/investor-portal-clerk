@@ -80,7 +80,6 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
         }
         const wordScoreTuple = [] as [string, number][];
         const { firstName, lastName, ssn, address } = owner.user;
-        console.log("SSN", ssn);
         wordScoreTuple.push([firstName.toLowerCase(), 1]);
         wordScoreTuple.push([lastName.toLowerCase(), 1]);
         wordScoreTuple.push([`${firstName} ${lastName}`.toLowerCase(), 2]);
