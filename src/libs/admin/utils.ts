@@ -126,9 +126,18 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                 console.log(`\t-->best match so far: ${transactionId}`);
                 bestMatch = {
                     pdfName: file.name,
-                    deal,
+                    deal: {
+                        id: deal.id,
+                        transactionId,
+                        organizationId: organization.id,
+                        projectId: deal.project.id,
+                        dealStage: deal.dealStage,
+                        hubspotId: deal.hubspotId,
+                        investmentEntity: deal.investmentEntity,
+                    },
                     owner: owner.user,
                     organization,
+                    projectName,
                     confidence: calcConfidenceScore(matchScore),
                     matchedWords,
                     matchScore

@@ -15,6 +15,7 @@ export type MatchResponseObject = {
     error?: string;
     owner?: User;
     organization?: Organization;
+    projectName?: string;
     confidence: MatchConfidence;
     matchedWords: string[];
     matchScore: number;
