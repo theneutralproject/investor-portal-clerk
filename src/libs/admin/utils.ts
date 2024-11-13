@@ -134,6 +134,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                         dealStage: deal.dealStage,
                         hubspotId: deal.hubspotId,
                         investmentEntity: deal.investmentEntity,
+                        closingDate: deal.closingDate,
                     },
                     owner: owner.user,
                     organization,
