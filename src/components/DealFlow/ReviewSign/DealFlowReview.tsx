@@ -6,6 +6,7 @@ import { createDocusignEnvelope } from "@/components/Project/Invest/InvestTab";
 import DealFlowFooter from "../Shared/DealFlowFooter";
 import DocumentItem from "@components/DealFlow/ReviewSign/DocumentItem";
 import ReviewingInvestment from "@components/DealFlow/ReviewSign/ReviewingInvestment";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
@@ -39,9 +40,7 @@ const DealFlowReview: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        Review & Sign Documents
-      </Typography>
+      <DealFlowTitle title="Review and Sign Documents" />
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         Once signed, our team will review and countersign these documents to

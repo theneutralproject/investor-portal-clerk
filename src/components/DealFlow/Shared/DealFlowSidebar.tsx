@@ -1,11 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React from "react";
-import { Typography, Box, Button, Divider, Chip } from "@mui/material";
+import { Typography, Box, Divider, Chip } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { DealFinancingType } from "@prisma/client";
-
+import Image from "next/image";
+import DealFlowSidebarDetails from "./DealFlowSidebarDetails";
+import ChatInterface from "@/components/ChatInterface";
 const DealFlowSidebar = () => {
-  const { project, deal } = useDealFlow();
+  const { project, deal, organization, user } = useDealFlow();
+  console.log(deal);
+  console.log(organization);
+  console.log(user);
 
   const projectPicture = project?.pictures?.find(
     (picture) => picture.type === "HEADER"
@@ -24,6 +29,7 @@ const DealFlowSidebar = () => {
         height: "100%",
         display: "flex",
         flexDirection: "column",
+        minHeight: "calc(100vh - 64px)",
       }}
     >
       <Box>
@@ -90,43 +96,45 @@ const DealFlowSidebar = () => {
         )}
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      <DealFlowSidebarDetails />
 
       <Box sx={{ mt: "auto" }}>
-        <Typography
-          variant="subtitle1"
-          gutterBottom
-          sx={{ fontWeight: "bold" }}
-        >
-          Questions?
-        </Typography>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
-          <Box
-            component="img"
-            src="https://placehold.co/40x40"
-            alt="Support"
-            sx={{ width: 40, height: 40, mr: 2, borderRadius: "50%" }}
+        <Divider sx={{ my: 2 }} />
+
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
+          <Image
+            width="40"
+            height="40"
+            src="/StormAvatar.png"
+            alt="Support Avatar"
           />
-          <Typography variant="body2" color="text.secondary">
-            Give us a call or chat anytime - we will answer any questions you
-            have
-          </Typography>
+          <Box sx={{ flex: 1 }}>
+            <Typography
+              variant="subtitle1"
+              gutterBottom
+              sx={{ fontWeight: "bold" }}
+            >
+              Questions?
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Give us a call or chat anytime - we will answer any questions you
+              have
+            </Typography>
+          </Box>
         </Box>
-        <Button
-          variant="outlined"
-          fullWidth
+        <Box
           sx={{
-            mb: 1,
-            textTransform: "uppercase",
-            borderColor: "#1976d2",
-            color: "#1976d2",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
           }}
         >
-          Chat
-        </Button>
-        <Typography variant="body2" align="center" color="text.secondary">
-          (555) 555-5555
-        </Typography>
+          <ChatInterface type="DEALFLOW_BUTTON" />
+          <Typography variant="body2" color="text.secondary">
+            (608) 205-8336
+          </Typography>
+        </Box>
       </Box>
     </Box>
   );

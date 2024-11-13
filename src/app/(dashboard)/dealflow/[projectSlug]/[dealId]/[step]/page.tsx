@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useParams } from "next/navigation";
-import { Grid } from "@mui/material";
+import { Box } from "@mui/material";
 import DealFlowContainer from "@/components/DealFlow/Shared/DealFlowContainer";
 import {
   DealFlowProvider,
@@ -9,6 +9,7 @@ import {
 } from "@/components/DealFlow/Shared/DealFlowContext";
 import DealFlowHeader from "@/components/DealFlow/Shared/DealFlowHeader";
 import DealFlowSidebar from "@/components/DealFlow/Shared/DealFlowSidebar";
+import Grid from "@mui/material/Grid2";
 
 const DealFlow = () => {
   const { projectSlug, dealId, step } = useParams();
@@ -23,19 +24,41 @@ const DealFlow = () => {
       dealId={dealId as string}
       initialStep={step as StepType}
     >
-      <Grid
-        container
-        spacing={2}
-        sx={{ backgroundColor: "white", height: "100%" }}
+      <Box
+        sx={{
+          bgcolor: "background.paper",
+          height: "100%",
+          width: "100%",
+          minHeight: "calc(100vh - 80px)",
+        }}
       >
-        <Grid item xs={12} md={9}>
-          <DealFlowHeader />
-          <DealFlowContainer />
+        <Grid container spacing={3}>
+          <Grid size={9} display="flex" justifyContent="center">
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: 800,
+                py: 2,
+              }}
+            >
+              <DealFlowHeader />
+              <DealFlowContainer />
+            </Box>
+          </Grid>
+
+          <Grid size={3} display="flex" justifyContent="flex-end">
+            <Box
+              sx={{
+                width: "100%",
+                maxWidth: 450,
+                height: "100%",
+              }}
+            >
+              <DealFlowSidebar />
+            </Box>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={3}>
-          <DealFlowSidebar />
-        </Grid>
-      </Grid>
+      </Box>
     </DealFlowProvider>
   );
 };

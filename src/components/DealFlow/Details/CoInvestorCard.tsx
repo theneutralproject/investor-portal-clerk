@@ -19,9 +19,9 @@ import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
 import { MembershipType, type User } from "@prisma/client";
 import type { MemberWithUser } from "@/libs/types";
 
-
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
+  boxShadow: "none",
 }));
 
 const ExpandableHeader = styled(Box)(({ theme }) => ({
@@ -149,7 +149,9 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
         display="flex"
         justifyContent="space-between"
         alignItems="center"
-        onClick={() => onExpand(index)}
+        onClick={() => {
+          if (!readOnly) onExpand(index);
+        }}
       >
         <Box>
           <Typography variant="overline" display="block" gutterBottom>
@@ -303,16 +305,16 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             />
           </Box>
         </CardContent>
-        <CardActions>
+        <CardActions sx={{ justifyContent: "flex-end", mb: 1 }}>
           <Button
-            variant="grayCancel"
+            variant="grayPill"
             onClick={() => onCancel(index)}
             disabled={readOnly || isRegisteredUser}
           >
             Cancel
           </Button>
           <Button
-            variant="neutralBlack"
+            variant="blackPill"
             onClick={() => onSave(index)}
             disabled={readOnly || isRegisteredUser || !isFormValid()}
           >

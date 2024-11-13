@@ -1,19 +1,12 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  RadioGroup,
-  Card,
-  CardContent,
-  Link,
-} from "@mui/material";
+import { Box, Typography, RadioGroup, Card, CardContent } from "@mui/material";
 import { DealFinancingType } from "@prisma/client";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import { useRouter } from "next/navigation";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import { MODAL_KEYS } from "../Shared/Modal/DealFlowLearnMoreModal";
 
 const DealFlowType: React.FC = () => {
-  const router = useRouter();
   const { deal, updateDeal } = useDealFlow();
   const [financingType, setFinancingType] = useState<DealFinancingType>(
     deal?.investmentStats?.financingType ?? DealFinancingType.equity
@@ -35,11 +28,6 @@ const DealFlowType: React.FC = () => {
     });
   };
 
-  const handleLearnMore = (e: React.MouseEvent) => {
-    e.preventDefault();
-    router.push("/learn#11");
-  };
-
   const investmentTypes = [
     {
       type: DealFinancingType.equity,
@@ -56,10 +44,11 @@ const DealFlowType: React.FC = () => {
   ];
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "auto", padding: 2 }}>
-      <Typography variant="h5" gutterBottom>
-        Choose Investment Type
-      </Typography>
+    <Box>
+      <DealFlowTitle
+        title="Choose Investment Type"
+        modalKey={MODAL_KEYS.CHOOSE_INVESTMENT_TYPE}
+      />
       <RadioGroup
         aria-label="financing-type"
         name="financing-type"
@@ -111,25 +100,6 @@ const DealFlowType: React.FC = () => {
           ))}
         </Box>
       </RadioGroup>
-
-      <Box sx={{ textAlign: "center", mt: 2, mb: 2 }}>
-        <Typography variant="body2">Not sure which to choose?</Typography>
-        <Link
-          href="/learn#11"
-          onClick={handleLearnMore}
-          underline="hover"
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{
-            cursor: "pointer",
-            color: "black",
-            textDecoration: "underline",
-            fontSize: 14,
-          }}
-        >
-          Learn More
-        </Link>
-      </Box>
 
       <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
     </Box>

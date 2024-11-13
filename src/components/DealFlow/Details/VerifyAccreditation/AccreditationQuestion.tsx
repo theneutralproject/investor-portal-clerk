@@ -35,7 +35,10 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
     <Accordion
       expanded={expanded}
       onChange={() => onToggle(question.id)}
-      sx={{ boxShadow: 0 }}
+      sx={{
+        boxShadow: 0,
+        "&:before": { display: "none" },
+      }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
         <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
@@ -48,9 +51,6 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        <Typography variant="body2" gutterBottom>
-          {question.subtitle}
-        </Typography>
         <RadioGroup
           aria-label={question.id}
           name={question.id}

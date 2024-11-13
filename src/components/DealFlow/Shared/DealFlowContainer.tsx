@@ -35,7 +35,6 @@ const DealFlowContainer: React.FC = () => {
         p: 3,
         boxShadow: "unset",
         backgroundColor: "unset",
-        maxWidth: "1200px",
         margin: "0 auto",
       }}
     >

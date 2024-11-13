@@ -1,15 +1,14 @@
 import React from "react";
 import { Box, Typography, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const ReviewingInvestment: React.FC = () => {
   const router = useRouter();
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        We&apos;re Reviewing Your Documents
-      </Typography>
+      <DealFlowTitle title="We're Reviewing Your Documents" />
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         You&apos;ll hear from our team shortly about transferring the funds.

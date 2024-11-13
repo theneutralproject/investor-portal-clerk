@@ -7,6 +7,7 @@ import {
   Autocomplete,
   Card,
   CardContent,
+  Tooltip,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { zUserUpdateSchema, type UserUpdateSchema } from "@/libs/user/schema";
@@ -15,8 +16,9 @@ import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { usStates } from "@components/DealFlow/Helpers/DealFlowHelpers";
 import { formatDate } from "@components/DealFlow/Details/DealFlowEntityDetails";
 import { type Address } from "@prisma/client";
-
+import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const EncryptionCard = () => {
   return (
@@ -142,9 +144,7 @@ const DealFlowDetails: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-        Personal Details
-      </Typography>
+      <DealFlowTitle title="Personal Details" />
       <Grid container spacing={2}>
         {/* Personal Information Section */}
         <Grid size={6}>
@@ -238,14 +238,44 @@ const DealFlowDetails: React.FC = () => {
           />
         </Grid>
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Country"
-            name="country"
-            value="United States"
-            disabled
-          />
+          <Tooltip
+            slotProps={{
+              popper: {
+                sx: {
+                  ".MuiTooltip-tooltip": {
+                    backgroundColor: "#ffffff",
+                    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
+                  },
+                },
+              },
+            }}
+            title={
+              <Typography variant="body2">
+                If you are investing from abroad, please get in touch with us{" "}
+                <a
+                  href="https://neutral.us/contact"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "inherit", textDecoration: "underline" }}
+                >
+                  here
+                </a>
+              </Typography>
+            }
+            placement="right"
+          >
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <TextField
+                fullWidth
+                variant="standard"
+                label="Country"
+                name="country"
+                value="United States"
+                disabled
+              />
+              <InfoIcon color="disabled" fontSize="small" />
+            </Box>
+          </Tooltip>
         </Grid>
 
         {/* Additional Information Section */}

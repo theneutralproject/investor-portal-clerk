@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Button } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-
+import { useRouter } from "next/navigation";
 interface DealFlowFooterProps {
   onBack: () => void;
   onContinue: () => void;
@@ -9,16 +9,22 @@ interface DealFlowFooterProps {
 }
 
 const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
-  onBack,
   onContinue,
   isContinueDisabled = false,
 }) => {
   const { isLoading } = useDealFlow();
+  const router = useRouter();
 
   return (
-    <Box sx={{ display: "flex", justifyContent: "space-between", mt: 2 }}>
-      <Button variant="contained" onClick={onBack} disabled={true}>
-        Back
+    <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
+      <Button
+        variant="text"
+        onClick={() => router.push("/projects")}
+        sx={{
+          color: "#00000061",
+        }}
+      >
+        FINISH LATER
       </Button>
       <Button
         variant="contained"
