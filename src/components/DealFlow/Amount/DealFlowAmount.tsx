@@ -1,4 +1,3 @@
-// components/DealFlowAmount.tsx
 import React, { useState, useMemo, useCallback } from "react";
 import {
   Box,
@@ -7,28 +6,36 @@ import {
   InputAdornment,
   CircularProgress,
   Alert,
-  ToggleButtonGroup,
-  ToggleButton,
 } from "@mui/material";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { QuickSelectChips } from "./DealFlowUI";
-import { ReturnsChart } from "./DealFlowUI";
 import { InvestmentStatsDisplay } from "./DealFlowUI";
 import { useReturnsData } from "./useReturnsData";
 import { useInvestmentStats } from "./useInvestmentStats";
-import { type ViewMode } from "./dealFlow.types";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { DealFinancingType } from "@prisma/client";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
+const ACCRUED_RETURN_COLOR = "#4d82f4";
+const GROSS_RETURN_COLOR = "#e84934";
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
   const [amount, setAmount] = useState<number>(
     deal?.investmentStats?.amount ?? 100000
   );
-  const [viewMode, setViewMode] = useState<ViewMode>("distribution");
+
   const MIN_INVESTMENT =
     deal?.investmentStats?.financingType === DealFinancingType.equity
       ? project?.investmentStats?.equityMinInvestment ?? 5000
@@ -49,38 +56,30 @@ const DealFlowAmount: React.FC = () => {
       amount < MIN_INVESTMENT
         ? `Minimum investment amount is $${MIN_INVESTMENT.toLocaleString()}`
         : "",
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [amount]
+    [amount, MIN_INVESTMENT]
   );
 
-  const projectedReturns = useMemo(() => {
-    return returnsData.map((dataPoint) => ({
-      year: dataPoint.date.getFullYear(),
-      cumulativeDistribution: dataPoint.cumulativeDistribution,
-      investmentMultiple: dataPoint.investmentMultiple,
-      totalGrossReturn: dataPoint.totalGrossReturn,
-      totalNetReturn: dataPoint.totalNetReturn,
-      accruedPreferredReturn: dataPoint.accruedPreferredReturn,
-    }));
+  const chartData = useMemo(() => {
+    return returnsData.map((dataPoint) => {
+      const date = new Date(dataPoint.date);
+      const quarter = Math.floor(date.getMonth() / 3) + 1;
+      const year = date.getFullYear().toString().slice(2);
+      return {
+        date: `Q${quarter} '${year}`,
+        accruedPreferredReturn: dataPoint.accruedPreferredReturn,
+        totalGrossReturn: dataPoint.totalGrossReturn,
+        fullDate: date,
+      };
+    });
   }, [returnsData]);
 
   const handleAmountChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newAmount = Number(event.target.value);
-
       if (newAmount > MAX_INVESTMENT) {
         setAmount(MAX_INVESTMENT);
       } else {
         setAmount(newAmount);
-      }
-    },
-    []
-  );
-
-  const handleViewModeChange = useCallback(
-    (event: React.MouseEvent<HTMLElement>, newMode: ViewMode) => {
-      if (newMode !== null) {
-        setViewMode(newMode);
       }
     },
     []
@@ -98,26 +97,33 @@ const DealFlowAmount: React.FC = () => {
     });
   };
 
-  const chartConfig = useMemo(() => {
-    if (viewMode === "distribution") {
-      return {
-        dataKey: "cumulativeDistribution",
-        yAxisFormatter: (value: number) => `$${value.toLocaleString()}`,
-        tooltipFormatter: (value: number) => [
-          `$${value.toLocaleString()}`,
-          "Cumulative Distribution",
-        ],
-      };
+  const formatCurrency = (value: number) => `$${value.toLocaleString()}`;
+
+  const customTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <Box
+          sx={{
+            backgroundColor: "white",
+            p: 2,
+            border: "1px solid #ccc",
+            borderRadius: 1,
+          }}
+        >
+          <Typography variant="subtitle2">{label}</Typography>
+          {payload.map((entry: any, index: number) => (
+            <Typography key={index} variant="body2" sx={{ color: entry.color }}>
+              {entry.dataKey === "totalGrossReturn"
+                ? "Cumulative Investor Return: "
+                : "Investor Accrued Preferred Return: "}
+              {formatCurrency(entry.value)}
+            </Typography>
+          ))}
+        </Box>
+      );
     }
-    return {
-      dataKey: "investmentMultiple",
-      yAxisFormatter: (value: number) => `${value.toFixed(1)}x`,
-      tooltipFormatter: (value: number) => [
-        `${value.toFixed(2)}x`,
-        "Cumulative Multiple",
-      ],
-    };
-  }, [viewMode]);
+    return null;
+  };
 
   return (
     <Box>
@@ -154,7 +160,7 @@ const DealFlowAmount: React.FC = () => {
         {isLoading ? (
           <Box
             sx={{
-              height: 200,
+              height: 400,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -163,33 +169,54 @@ const DealFlowAmount: React.FC = () => {
             <CircularProgress />
           </Box>
         ) : error ? (
-          <Alert severity="error" sx={{ height: 200 }}>
+          <Alert severity="error" sx={{ height: 400 }}>
             {error}
           </Alert>
         ) : (
           <>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                mt: 2,
-              }}
-            >
-              <Typography variant="h6">Projected Returns</Typography>
-              <ToggleButtonGroup
-                value={viewMode}
-                exclusive
-                onChange={handleViewModeChange}
-                size="small"
-              >
-                <ToggleButton value="distribution">Distribution</ToggleButton>
-                <ToggleButton value="multiple">Multiple</ToggleButton>
-              </ToggleButtonGroup>
-            </Box>
+            <Typography variant="h6" sx={{ mt: 2 }}>
+              Investor Returns
+            </Typography>
 
-            {/* @ts-expect-error chart types */}
-            <ReturnsChart data={projectedReturns} config={chartConfig} />
+            <Box sx={{ width: "100%", height: 400 }}>
+              <ResponsiveContainer>
+                <AreaChart
+                  data={chartData}
+                  margin={{
+                    top: 10,
+                    right: 30,
+                    left: 60,
+                    bottom: 0,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="date" />
+                  <YAxis
+                    tickFormatter={formatCurrency}
+                    width={60}
+                    tickMargin={5}
+                  />
+                  <Tooltip content={customTooltip} />
+                  <Legend />
+                  <Area
+                    type="monotone"
+                    dataKey="accruedPreferredReturn"
+                    stackId="1"
+                    stroke={ACCRUED_RETURN_COLOR}
+                    fill={ACCRUED_RETURN_COLOR}
+                    name="Investor Accrued Preferred Return"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="totalGrossReturn"
+                    stackId="1"
+                    stroke={GROSS_RETURN_COLOR}
+                    fill={GROSS_RETURN_COLOR}
+                    name="Cumulative Investor Return"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </Box>
 
             {investmentStats && (
               <InvestmentStatsDisplay
