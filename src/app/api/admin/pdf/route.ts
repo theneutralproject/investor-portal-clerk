@@ -1,13 +1,9 @@
 import { getAdminFromRequest, matchDealWithPdf } from "@/libs/admin/utils";
-import {
-  PdfBulkUploadSchema,
-  zPdfBulkUploadSchema,
-} from "@/libs/document/schema";
+import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
 import type { MatchResponseObject } from "@/libs/admin/schema";
-import { Deal, Organization, Project, User, Address } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
 import { storageClient } from "@/libs/supabase";
 import { type DealWithFullOrgAndProject } from "@/libs/types";

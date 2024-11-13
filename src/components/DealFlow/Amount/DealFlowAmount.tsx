@@ -29,7 +29,10 @@ const DealFlowAmount: React.FC = () => {
     deal?.investmentStats?.amount ?? 100000
   );
   const [viewMode, setViewMode] = useState<ViewMode>("distribution");
-  const MIN_INVESTMENT = deal?.investmentStats?.financingType === DealFinancingType.equity ? project?.investmentStats?.equityMinInvestment ?? 5000 : project?.investmentStats?.debtMinInvestment ?? 5000;
+  const MIN_INVESTMENT =
+    deal?.investmentStats?.financingType === DealFinancingType.equity
+      ? project?.investmentStats?.equityMinInvestment ?? 5000
+      : project?.investmentStats?.debtMinInvestment ?? 5000;
   const MAX_INVESTMENT = 10_000_000;
 
   const { returnsData, isLoading, error } = useReturnsData({
@@ -46,6 +49,7 @@ const DealFlowAmount: React.FC = () => {
       amount < MIN_INVESTMENT
         ? `Minimum investment amount is $${MIN_INVESTMENT.toLocaleString()}`
         : "",
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [amount]
   );
 

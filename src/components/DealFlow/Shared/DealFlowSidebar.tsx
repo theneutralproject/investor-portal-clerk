@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React from "react";
-import { Typography, Box, Button, Divider, Chip } from "@mui/material";
+import { Typography, Box, Divider, Chip } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { DealFinancingType } from "@prisma/client";
 import Image from "next/image";
 import DealFlowSidebarDetails from "./DealFlowSidebarDetails";
+import ChatInterface from "@/components/ChatInterface";
 const DealFlowSidebar = () => {
   const { project, deal, organization, user } = useDealFlow();
   console.log(deal);
@@ -76,7 +77,7 @@ const DealFlowSidebar = () => {
                 <Chip
                   label={
                     deal.investmentStats.financingType ===
-                      DealFinancingType.equity
+                    DealFinancingType.equity
                       ? "Equity"
                       : "Debt"
                   }
@@ -129,14 +130,7 @@ const DealFlowSidebar = () => {
             gap: 2,
           }}
         >
-          <Button
-            variant="grayPill"
-            sx={{
-              textTransform: "uppercase",
-            }}
-          >
-            Chat
-          </Button>
+          <ChatInterface type="DEALFLOW_BUTTON" />
           <Typography variant="body2" color="text.secondary">
             (608) 205-8336
           </Typography>

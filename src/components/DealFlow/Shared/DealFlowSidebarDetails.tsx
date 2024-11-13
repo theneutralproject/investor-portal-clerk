@@ -27,15 +27,21 @@ interface IconTextProps {
 const IconText: React.FC<IconTextProps> = ({ icon, text, caption, sx }) => (
   <Stack direction="row" alignItems="center" spacing={1} sx={sx}>
     {React.cloneElement(icon as React.ReactElement, {
-      sx: { color: "text.secondary" },
+      sx: { color: "#0000004D" },
     })}
     <Box>
       {caption && (
-        <Typography variant="caption" display="block">
+        <Typography
+          variant="caption"
+          display="block"
+          sx={{ color: "#00000099" }}
+        >
           {caption}
         </Typography>
       )}
-      <Typography variant="body2">{text}</Typography>
+      <Typography variant="body2" sx={{ color: "#000000DE" }}>
+        {text}
+      </Typography>
     </Box>
   </Stack>
 );
@@ -62,14 +68,31 @@ const DealFlowSidebarDetails: React.FC = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant="body1">Details</Typography>
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: "#000000DE",
+          fontSize: "14px",
+          fontWeight: 600,
+        }}
+      >
+        Details
+      </Typography>
 
       {/* User Details */}
-      <Stack spacing={0.5}>
-        <Typography variant="body2">{`${firstName} ${lastName}`}</Typography>
-        <Typography variant="body2">{formatAddress(address)}</Typography>
-        <Typography variant="body2">{phoneNumber}</Typography>
-        <Typography variant="body2">{email}</Typography>
+      <Stack sx={{ marginTop: "10px !important", p: 0 }} spacing={0.4}>
+        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+          {`${firstName} ${lastName}`}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+          {formatAddress(address)}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+          {phoneNumber}
+        </Typography>
+        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+          {email}
+        </Typography>
       </Stack>
 
       <Divider />
