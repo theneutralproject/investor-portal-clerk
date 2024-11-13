@@ -15,7 +15,7 @@ import {
   type AccreditationVerification,
 } from "@prisma/client";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import DealFlowGetStarted from "@components/DealFlow/GetStarted/DealFlowGetStarted";
@@ -56,6 +56,7 @@ interface Step {
   isMajor?: boolean;
   majorParent?: StepType;
   progress: number;
+  requiredDealStage?: number;
 }
 
 // Create the steps array with type safety
@@ -135,6 +136,7 @@ export const steps: Step[] = [
     component: DealFlowFund,
     isMajor: true,
     progress: 100,
+    requiredDealStage: 5,
   },
 ];
 
@@ -253,7 +255,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [step, setStep] = useState<StepType>(initialStep);
   const router = useRouter();
-
+  const pathname = usePathname();
   const getNextStep = (currentStep: StepType): StepType | null => {
     const currentIndex = steps.findIndex((s) => s.value === currentStep);
 
@@ -293,6 +295,46 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     return nextStep;
   };
+
+  // Add route validation effect
+  useEffect(() => {
+    if (!deal || !pathname) return;
+
+    // Extract the current step from the pathname
+    const pathParts = pathname.split("/");
+    const currentRouteStep = pathParts[pathParts.length - 1] as StepType;
+
+    // Find step info for the current route
+    const currentStepInfo = steps.find((s) => s.value === currentRouteStep);
+    if (!currentStepInfo) return;
+
+    // If this step has a required deal stage
+    if (currentStepInfo.requiredDealStage !== undefined) {
+      if (deal.dealStage < currentStepInfo.requiredDealStage) {
+        // Find the last valid step based on deal stage
+        const lastValidStep = steps
+          .filter(
+            (s) =>
+              s.requiredDealStage === undefined ||
+              deal.dealStage >= s.requiredDealStage
+          )
+          .slice(-1)[0];
+
+        if (lastValidStep) {
+          // Only redirect if we're not already on the last valid step
+          if (lastValidStep.value !== currentRouteStep) {
+            router.push(
+              `/dealflow/${projectSlug}/${dealId}/${lastValidStep.value}`
+            );
+            toast.error("Please complete previous steps first");
+          }
+        } else {
+          router.push(`/dealflow/${projectSlug}/${dealId}`);
+          toast.error("Invalid deal stage for this step");
+        }
+      }
+    }
+  }, [pathname, deal, projectSlug, dealId, router]);
 
   useEffect(() => {
     const fetchData = async () => {
