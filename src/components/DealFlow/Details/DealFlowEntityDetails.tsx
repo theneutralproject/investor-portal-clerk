@@ -1,11 +1,12 @@
 import React, { useState, type ChangeEvent } from "react";
-import { Box, Typography, TextField, Autocomplete } from "@mui/material";
+import { Box, TextField, Autocomplete } from "@mui/material";
 import Grid from "@mui/material/Grid2";
 import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
 import { useRouter } from "next/navigation";
 import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
 import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
 import DealFlowFooter from "../Shared/DealFlowFooter";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const REQUIRED_DOCUMENTS = [
   {
@@ -84,9 +85,7 @@ const DealFlowEntityDetails: React.FC = () => {
   };
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Ownership Information
-      </Typography>
+      <DealFlowTitle title="Ownership Information" />
 
       <Grid container spacing={2}>
         <Grid size={6}>
@@ -132,7 +131,18 @@ const DealFlowEntityDetails: React.FC = () => {
           <Autocomplete
             options={usStates}
             renderInput={(params) => (
-              <TextField {...params} label="State" fullWidth />
+              <TextField
+                {...params}
+                label="Jurisdiction of Registration"
+                fullWidth
+                variant="standard"
+                margin="normal" // Add this to match other fields
+                slotProps={{
+                  inputLabel: {
+                    shrink: true,
+                  },
+                }}
+              />
             )}
             value={formData.juristication}
             onChange={(_, newValue) =>

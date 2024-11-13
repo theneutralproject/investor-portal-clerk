@@ -17,6 +17,7 @@ import { formatDate } from "@components/DealFlow/Details/DealFlowEntityDetails";
 import { type Address } from "@prisma/client";
 
 import LockIcon from "@mui/icons-material/Lock";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const EncryptionCard = () => {
   return (
@@ -142,9 +143,7 @@ const DealFlowDetails: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom sx={{ mb: 2 }}>
-        Personal Details
-      </Typography>
+      <DealFlowTitle title="Personal Details" />
       <Grid container spacing={2}>
         {/* Personal Information Section */}
         <Grid size={6}>

@@ -21,6 +21,7 @@ import {
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "../Shared/DealFlowFooter";
 import PaymentProcessing from "./PaymentProcessing";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 const DealFlowFund: React.FC = () => {
   const { project, deal } = useDealFlow();
   const [copied, setCopied] = useState<string | null>(null);
@@ -114,9 +115,7 @@ const DealFlowFund: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        Fund Your Investment
-      </Typography>
+      <DealFlowTitle title="Fund Your Investment" />
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         As the final step, provide the bank account you&apos;d like to use to

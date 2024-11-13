@@ -25,6 +25,8 @@ declare module "@mui/material/Button" {
     neutralBlack: true;
     neutralYellow: true;
     grayCancel: true;
+    grayPill: true;
+    blackPill: true;
   }
 }
 
@@ -163,6 +165,47 @@ export const theme = createTheme({
               backgroundColor: "transparent",
               border: "1px solid #D1D5DB",
               opacity: 0.5,
+            },
+          },
+        },
+        {
+          props: { variant: "grayPill" },
+          style: {
+            color: "#00000099",
+            backgroundColor: "transparent",
+            border: "1px solid rgba(0, 0, 0, 0.12)",
+            fontSize: "13px",
+            borderRadius: "24px",
+            padding: "4px 14px",
+            "&:hover": {
+              backgroundColor: "#F3F4F6",
+              border: "1px solid #D1D5DB",
+            },
+            "&:disabled": {
+              color: "#666",
+              backgroundColor: "transparent",
+              border: "1px solid #D1D5DB",
+              opacity: 0.5,
+            },
+          },
+        },
+        {
+          props: { variant: "blackPill" },
+          style: {
+            color: "#fff",
+            backgroundColor: "#000",
+            border: "1px solid rgba(0, 0, 0, 0.12)",
+            fontSize: "13px",
+            borderRadius: "24px",
+            padding: "4px 14px",
+            "&:hover": {
+              backgroundColor: "#1E2B31",
+              border: "1px solid #D1D5DB",
+            },
+            "&:disabled": {
+              color: "#00000061",
+              backgroundColor: "#0000001F",
+              border: "none !important",
             },
           },
         },

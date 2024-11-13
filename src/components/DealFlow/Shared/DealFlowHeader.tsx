@@ -14,11 +14,10 @@ import {
 } from "@components/DealFlow/Shared/DealFlowContext";
 
 const DealFlowHeader = () => {
-  const { step } = useDealFlow();
+  const { step, project } = useDealFlow();
 
   // Find the current step object
   const currentStepObj = steps.find((stepObj) => stepObj.value === step);
-  console.log(currentStepObj);
 
   // Get the majorParent of the current step
   const majorParent = currentStepObj?.majorParent ?? step;
@@ -36,8 +35,9 @@ const DealFlowHeader = () => {
       sx={{ boxShadow: "unset", backgroundColor: "unset" }}
     >
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          The Edison / Invest
+        <Typography variant="body1" sx={{ flexGrow: 1, color: "#00000099" }}>
+          {project?.name || "Neutral"}
+          <span style={{ color: "#000000DE" }}> / Invest</span>
         </Typography>
       </Toolbar>
       <Stepper activeStep={activeStepIndex} alternativeLabel>

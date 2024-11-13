@@ -10,6 +10,7 @@ import { DealOwnershipType } from "@prisma/client";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { useRouter } from "next/navigation";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 const DealFlowDetailsOwnershipType: React.FC = () => {
   const { deal, updateDeal, createOrganization, project } = useDealFlow();
   const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
@@ -61,12 +62,7 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h5" gutterBottom>
-        Investment Details
-      </Typography>
-      <Typography variant="body1" gutterBottom>
-        Ownership Type
-      </Typography>
+      <DealFlowTitle title="Investment Details" />
       <Typography variant="body2" gutterBottom>
         How are you investing?
       </Typography>

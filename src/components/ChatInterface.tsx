@@ -27,6 +27,12 @@ const ChatInterface = ({ type }: { type: string }) => {
           <ChatIcon sx={{ color: "white" }} />
         </Fab>
       );
+    } else if (type === "DEALFLOW_BUTTON") {
+      return (
+        <Button variant="grayPill" onClick={handleOpen}>
+          Chat
+        </Button>
+      );
     } else {
       return (
         <Button variant="neutralBlack" onClick={handleOpen}>

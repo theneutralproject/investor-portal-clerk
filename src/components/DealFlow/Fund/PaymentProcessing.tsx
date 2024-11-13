@@ -15,6 +15,7 @@ import {
 import CheckIcon from "@mui/icons-material/Check";
 import { styled } from "@mui/material/styles";
 import ShareOnSocial from "./ShareOnSocial";
+import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 
 const bulletPoints = [
   "Priority project construction updates",
@@ -40,9 +41,7 @@ const PaymentProcessing: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
-        We&apos;re Processing Your Payment
-      </Typography>
+      <DealFlowTitle title="We're Processing Your Payment" />
 
       <Typography variant="body2" gutterBottom sx={{ mb: 1 }}>
         After we&apos;ve received your funds we&apos;ll update your account to

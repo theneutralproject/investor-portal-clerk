@@ -21,6 +21,7 @@ import {
   type AccreditationVerifier,
 } from "@prisma/client";
 import type { AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
+import DealFlowTitle from "../../Shared/DealFlowTitle";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
   const router = useRouter();
@@ -198,6 +199,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
   return (
     <Box>
+      <DealFlowTitle title="Accreditation Verification" />
       {visibleQuestions.map((question) => (
         <AccreditationQuestion
           key={question.id}
