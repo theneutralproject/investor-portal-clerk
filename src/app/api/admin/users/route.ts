@@ -5,7 +5,6 @@ import type { NextRequest } from "next/server";
 
 // test route to get user if correct jwt is provided
 export async function GET(request: NextRequest) {
-    console.log("print this pls");
     const adminUser = await getAdminFromRequest(request);
     if(isError(adminUser)) {
         console.error(getErrorMessage(adminUser));
