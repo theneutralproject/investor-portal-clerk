@@ -1,14 +1,7 @@
 // TODO: Fully hook up verification submission to the backend and ensure that no partial verifier information is submitted
 import React, { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import {
-  Box,
-  Typography,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { Box, Typography } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import AccreditationQuestion from "@/components/DealFlow/Details/VerifyAccreditation/AccreditationQuestion";
@@ -22,6 +15,7 @@ import {
 } from "@prisma/client";
 import type { AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
 import DealFlowTitle from "../../Shared/DealFlowTitle";
+import { MODAL_KEYS } from "../../Shared/Modal/DealFlowLearnMoreModal";
 
 const DealFlowVerifyAccreditation: React.FC = () => {
   const router = useRouter();
@@ -199,7 +193,10 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
   return (
     <Box>
-      <DealFlowTitle title="Accreditation Verification" />
+      <DealFlowTitle
+        title="Accreditation Verification"
+        modalKey={MODAL_KEYS.VERIFY_ACCREDITATION}
+      />
       {visibleQuestions.map((question) => (
         <AccreditationQuestion
           key={question.id}
@@ -219,57 +216,6 @@ const DealFlowVerifyAccreditation: React.FC = () => {
           {renderVerificationContent()}
         </Box>
       )}
-
-      <Accordion
-        sx={{
-          mt: 5,
-          border: "1px solid #e0e0e0",
-          borderRadius: 1,
-          boxShadow: 0,
-        }}
-        disableGutters
-      >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="body1">
-            How can I prove I&apos;m an accredited investor?
-          </Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Typography variant="body2" paragraph>
-            If you invest in a publicly fundraising fund, you will need to
-            provide documentation to verify your status as an accredited
-            investor under US securities law. The documentation you provide
-            depends on the basis on which you are accredited. You can accredit
-            based on either:
-          </Typography>
-          <Typography variant="body2" component="ul" sx={{ pl: 2 }}>
-            <li>
-              Income: $200,000 USD ($300,000 USD together with a spouse) in each
-              of the last 2 years.
-            </li>
-            <li>
-              Net Worth: Net worth over $1,000,000 USD, individually or together
-              with a spouse - excluding the value of your primary residence.
-            </li>
-            <li>
-              Verification by Licensed Professional: You can provide a letter
-              from one of the following licensed third-party verifiers: CPAs,
-              Attorneys, or licensed professionals holding either FINRA Series
-              7, 65, or 82 licenses.
-            </li>
-            <li>
-              Series 7, Series 65, or Series 82 License Documentation: If you
-              are accredited based on holding a Series 7, Series 65, or Series
-              82 license, you must prove you hold this license and are in good
-              standing.
-            </li>
-          </Typography>
-          <Typography variant="body2" sx={{ mt: 1, fontStyle: "italic" }}>
-            All accreditation documents you submit will remain confidential and
-            will be solely used for verification purposes.
-          </Typography>
-        </AccordionDetails>
-      </Accordion>
 
       <DealFlowFooter
         onBack={() => null}
