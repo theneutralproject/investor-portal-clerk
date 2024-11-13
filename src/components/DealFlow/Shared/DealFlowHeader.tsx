@@ -6,15 +6,23 @@ import {
   Stepper,
   Step,
   StepLabel,
+  LinearProgress,
+  Box,
 } from "@mui/material";
 import {
   MAJOR_STEPS,
   steps,
   useDealFlow,
+  calculateDealProgress,
 } from "@components/DealFlow/Shared/DealFlowContext";
 
 const DealFlowHeader = () => {
-  const { step, project } = useDealFlow();
+  const { step, project, deal } = useDealFlow();
+
+  const progress = calculateDealProgress(
+    step,
+    deal?.investmentStats?.ownershipType
+  );
 
   // Find the current step object
   const currentStepObj = steps.find((stepObj) => stepObj.value === step);
@@ -65,6 +73,19 @@ const DealFlowHeader = () => {
           </Step>
         ))}
       </Stepper>
+
+      <Box sx={{ mt: 5, padding: "0 16px" }}>
+        <LinearProgress
+          variant="determinate"
+          value={progress}
+          sx={{
+            backgroundColor: "#adc6b1",
+            "& .MuiLinearProgress-bar": {
+              backgroundColor: "#31713D",
+            },
+          }}
+        />
+      </Box>
     </AppBar>
   );
 };

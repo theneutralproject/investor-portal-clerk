@@ -55,6 +55,7 @@ interface Step {
   component?: React.ComponentType;
   isMajor?: boolean;
   majorParent?: StepType;
+  progress: number;
 }
 
 // Create the steps array with type safety
@@ -63,57 +64,78 @@ export const steps: Step[] = [
     value: "get-started",
     display: "Get Started",
     component: DealFlowGetStarted,
+    progress: 0,
   },
-  { value: "type", display: "Type", component: DealFlowType, isMajor: true },
+  {
+    value: "type",
+    display: "Type",
+    component: DealFlowType,
+    isMajor: true,
+    progress: 10,
+  },
   {
     value: "amount",
     display: "Amount",
     component: DealFlowAmount,
     isMajor: true,
+    progress: 20,
   },
   {
     value: "details",
     display: "Details",
     component: DealFlowDetails,
     isMajor: true,
+    progress: 30,
   },
   {
     value: "details-ownership-type",
     display: "Ownership Type",
     component: DealFlowDetailsOwnershipType,
     majorParent: "details",
+    progress: 40,
   },
   {
     value: "co-investor",
     display: "Co-Investor",
     component: DealFlowCoInvestor,
     majorParent: "details",
+    progress: 50,
   },
   {
     value: "entity-details",
     display: "Entity Details",
     component: DealFlowEntityDetails,
     majorParent: "details",
+    progress: 50,
   },
   {
     value: "entity-details-co-investor",
     display: "Entity Details (Co-Investor)",
     component: DealFlowEntityDetailsCoInvestor,
     majorParent: "details",
+    progress: 60,
   },
   {
     value: "verify-accreditation",
     display: "Verify Accreditation",
     component: DealFlowVerifyAccreditation,
     majorParent: "details",
+    progress: 70,
   },
   {
     value: "review",
     display: "Review & Sign",
     component: DealFlowReview,
     isMajor: true,
+    progress: 90,
   },
-  { value: "fund", display: "Fund", component: DealFlowFund, isMajor: true },
+  {
+    value: "fund",
+    display: "Fund",
+    component: DealFlowFund,
+    isMajor: true,
+    progress: 100,
+  },
 ];
 
 export const stepComponents = Object.fromEntries(
@@ -125,6 +147,44 @@ export const stepComponents = Object.fromEntries(
 export const MAJOR_STEPS = steps.filter((step) => step.isMajor);
 
 export const stepValues: StepType[] = steps.map((step) => step.value);
+
+export const calculateDealProgress = (
+  currentStep: StepType,
+  ownershipType: DealOwnershipType | undefined
+): number => {
+  // Find current step info
+  const currentStepInfo = steps.find((s) => s.value === currentStep);
+  if (!currentStepInfo) return 0;
+
+  // Handle optional paths based on ownership type
+  if (currentStepInfo.majorParent === "details") {
+    const entityDetailsRequired =
+      ownershipType &&
+      ["CORPORATION", "COMMON", "OTHER", "TRUST"].includes(
+        ownershipType as string
+      );
+
+    const coInvestorRequired =
+      ownershipType &&
+      ["PARTNERSHIP", "MARITAL", "JOINT"].includes(ownershipType as string);
+
+    // Skip entity-details progress if not required
+    if (currentStepInfo.value === "entity-details" && !entityDetailsRequired) {
+      return (
+        steps.find((s) => s.value === "verify-accreditation")?.progress ?? 0
+      );
+    }
+
+    // Skip co-investor progress if not required
+    if (currentStepInfo.value === "co-investor" && !coInvestorRequired) {
+      return (
+        steps.find((s) => s.value === "verify-accreditation")?.progress ?? 0
+      );
+    }
+  }
+
+  return currentStepInfo.progress;
+};
 
 interface DealFlowContextType {
   step: StepType;

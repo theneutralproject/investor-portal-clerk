@@ -12,7 +12,7 @@ interface DealFlowTitleProps {
 
 const DealFlowTitle: React.FC<DealFlowTitleProps> = ({ title, modalKey }) => {
   return (
-    <Box sx={{ mt: 2 }}>
+    <Box sx={{ mt: 1 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center">
         <Typography variant="h5" sx={{ fontWeight: 500, color: "#000000DE" }}>
           {title}
