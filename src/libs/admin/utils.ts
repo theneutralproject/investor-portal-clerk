@@ -40,13 +40,14 @@ export async function getAdminFromRequest(request: NextRequest) {
 }
 
 function calcConfidenceScore(matchCount: number): MatchConfidence {
-    if (matchCount >= 4) {
+    if (matchCount >= 6.5) {
         return MatchConfidence.HIGH;
-    } else if (matchCount >= 2.5) {
+    } else if (matchCount >= 3) {
         return MatchConfidence.MEDIUM;
-    } else {
+    } else if (matchCount >= 2) {
         return MatchConfidence.LOW;
     }
+    else return MatchConfidence.NONE;
 }
 
 export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file: File) {
@@ -54,12 +55,14 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
     const arrayBuffer = await file.arrayBuffer();
     const dataBuffer = Buffer.from(arrayBuffer);
     // eslint-disable-next-line
-    const { text } = (await PdfParse(dataBuffer)) as { text: string | null };
-    if (!text) {
-        return new Error("No text found in pdf");
-    }
+    const { text } = (await PdfParse(dataBuffer)) as { text: string };
     let i = 0;
-    let bestMatch: MatchResponseObject | null = null;
+    let bestMatch: MatchResponseObject = {
+        pdfName: file.name,
+        confidence: MatchConfidence.NONE,
+        matchedWords: [],
+        matchScore: 0
+    }
     while (i < deals.length) {
         const deal = deals[i];
         if (!deal) {
@@ -80,11 +83,12 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
         wordScoreTuple.push([firstName.toLowerCase(), 1]);
         wordScoreTuple.push([lastName.toLowerCase(), 1]);
         wordScoreTuple.push([`${firstName} ${lastName}`.toLowerCase(), 2]);
-        wordScoreTuple.push([projectName.toLowerCase(), .5]);
+        wordScoreTuple.push([projectName.toLowerCase(), 2]);
         wordScoreTuple.push([transactionId.toLowerCase(), 1]);
-        wordScoreTuple.push([organization.name.toLowerCase(), 1]);
+        wordScoreTuple.push([organization.name.toLowerCase(), 2]);
         if (ssn) {
             wordScoreTuple.push([ssn.slice(-4), .8]);
+            wordScoreTuple.push([ssn, 3]);
         }
         if (address) {
             wordScoreTuple.push([address.street.toLowerCase(), .5]);
@@ -97,27 +101,46 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             wordScoreTuple.push([organization.address.zipcode.toLowerCase(), .3]);
         }
         if (organization.tin) {
-            wordScoreTuple.push([organization.tin, .8]);
+            wordScoreTuple.push([organization.tin.slice(-4), .8]);
+            wordScoreTuple.push([organization.tin, 3]);
         }
         let matchScore = 0.0;
         const matchedWords = [] as string[];
         wordScoreTuple.forEach(([word, score]) => {
+            if(word.length < 3) return; // skip short words
+            // const numMatches = text.toLowerCase().split(word).length - 1;
+            // if (numMatches > 0) {
+            //     matchScore += numMatches * score;
+            //     matchedWords.push(word);
+            //     console.log(`found match for ${word}`);
+            // }
             if (text.toLowerCase().includes(word)) {
                 matchScore += score;
                 matchedWords.push(word);
                 console.log(`found match for ${word}`);
             }
+
         });
-        if (matchScore >= 2) {
+        if (matchScore >= 3) {
             if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
                 console.log(`\t-->best match so far: ${transactionId}`);
                 bestMatch = {
                     pdfName: file.name,
-                    deal,
+                    deal: {
+                        id: deal.id,
+                        transactionId,
+                        organizationId: organization.id,
+                        projectId: deal.project.id,
+                        dealStage: deal.dealStage,
+                        hubspotId: deal.hubspotId,
+                        investmentEntity: deal.investmentEntity,
+                    },
                     owner: owner.user,
                     organization,
+                    projectName,
                     confidence: calcConfidenceScore(matchScore),
-                    matchedWords
+                    matchedWords,
+                    matchScore
                 }
             }
         }
