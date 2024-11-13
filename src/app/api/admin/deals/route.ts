@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
         include: { organizationsOwned: true }
     });
     
-    if (!owners || !owners.length) {
+    if (!owners?.length) {
         return errorResponse(`User with email containing ${email} not found`, 404);
     }
     const ownerOrgIds = owners.map(owner => owner.organizationsOwned.map(org => org.id)).flat();
