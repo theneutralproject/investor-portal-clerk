@@ -46,6 +46,7 @@ model Deal {
   document                  DealDocument[]
   investmentStats           DealInvestmentStats?
   accreditationVerification AccreditationVerification?
+  closingDate               DateTime?
 }
 
 model DealInvestmentStats {
@@ -135,22 +136,23 @@ model OrganizationDocument {
 }
 
 model Project {
-  id                Int                     @id @default(autoincrement())
-  name              String                  @unique
-  location          String
-  tags              String                  @default("")
-  status            Status                  @default(ACTIVE)
-  description       String
-  marketHighlights  String                  @default("")
-  youtubeUrl        String                  @default("")
-  slug              String                  @unique
-  equityReturnsFile String?
-  deals             Deal[]
-  documents         ProjectDocument[]
-  investmentStats   ProjectInvestmentStats?
-  milestones        ProjectMilestones?
-  pictures          ProjectPicture[]
-  propertyStats     ProjectPropertyStats?
+  id                 Int                     @id @default(autoincrement())
+  name               String                  @unique
+  location           String
+  tags               String                  @default("")
+  status             Status                  @default(ACTIVE)
+  description        String
+  marketHighlights   String                  @default("")
+  youtubeUrl         String                  @default("")
+  slug               String                  @unique
+  equityReturnsFile  String?
+  deals              Deal[]
+  documents          ProjectDocument[]
+  investmentStats    ProjectInvestmentStats?
+  milestones         ProjectMilestones?
+  pictures           ProjectPicture[]
+  propertyStats      ProjectPropertyStats?
+  ProjectPaymentInfo ProjectPaymentInfo[]
 }
 
 model ProjectPropertyStats {
@@ -184,6 +186,15 @@ model ProjectInvestmentStats {
   totalAUnitReturn            Float   @default(0.0)
   totalCUnitReturn            Float   @default(0.0)
   project                     Project @relation(fields: [projectId], references: [id])
+}
+
+model ProjectPaymentInfo {
+  id               Int     @id @default(autoincrement())
+  projectId        Int
+  investmentEntity String
+  accountNumber    String /// @encrypted
+  routingNumber    String /// @encrypted
+  project          Project @relation(fields: [projectId], references: [id])
 }
 
 model ProjectMilestones {
