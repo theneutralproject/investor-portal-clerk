@@ -27,8 +27,8 @@ import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { DealFinancingType } from "@prisma/client";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
-const ACCRUED_RETURN_COLOR = "#4d82f4";
-const GROSS_RETURN_COLOR = "#e84934";
+const ACCRUED_RETURN_COLOR = "#8b9da5";
+const GROSS_RETURN_COLOR = "#cff4c8";
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -99,8 +99,18 @@ const DealFlowAmount: React.FC = () => {
 
   const formatCurrency = (value: number) => `$${value.toLocaleString()}`;
 
-  const customTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+  interface TooltipProps {
+    active?: boolean;
+    payload?: {
+      dataKey: string;
+      value: number;
+      color: string;
+    }[];
+    label?: string;
+  }
+
+  const customTooltip = ({ active, payload, label }: TooltipProps) => {
+    if (active && payload?.length) {
       return (
         <Box
           sx={{
@@ -111,7 +121,7 @@ const DealFlowAmount: React.FC = () => {
           }}
         >
           <Typography variant="subtitle2">{label}</Typography>
-          {payload.map((entry: any, index: number) => (
+          {payload.map((entry, index) => (
             <Typography key={index} variant="body2" sx={{ color: entry.color }}>
               {entry.dataKey === "totalGrossReturn"
                 ? "Cumulative Investor Return: "
