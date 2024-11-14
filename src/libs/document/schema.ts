@@ -7,7 +7,8 @@ const ACCEPTED_FILE_TYPES = [
   "image/png",
   "image/jpg",
   "image/jpeg",
-];
+] as const;
+
 const MAX_FILE_SIZE = 4; // In MegaBytes
 
 const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
@@ -15,41 +16,58 @@ const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
   return +result.toFixed(decimalsNum);
 };
 
-// Helper function to check if we're on the client side
+// Refined type guards and validation
 const isClient = typeof window !== "undefined";
-
-// Type guard to check if value is a File
-export const isFile = (value: unknown): value is File => {
-  return isClient && value instanceof File;
+const hasFileProperties = (
+  value: unknown
+): value is { size: number; type: string } => {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "size" in value &&
+    "type" in value &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access , @typescript-eslint/no-explicit-any
+    typeof (value as any).size === "number" &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access , @typescript-eslint/no-explicit-any
+    typeof (value as any).type === "string"
+  );
 };
 
-// Modified file schema that works in both client and server contexts
-const fileSchema = z.custom<File | FormDataEntryValue>((file) => {
-  // If we're on the server, just validate it's present
-  if (!isClient) {
-    return file !== null && file !== undefined;
-  }
+// Generic file validation schema that works in both client and server contexts
+const createFileSchema = () =>
+  z.custom<File | FormDataEntryValue>((file) => {
+    if (!file) {
+      throw new Error("File is required");
+    }
 
-  // Client-side validation
-  if (!isFile(file)) {
-    throw new Error("Required");
-  }
+    // Skip detailed validation on server side
+    if (!isClient) {
+      return hasFileProperties(file);
+    }
 
-  // Check file type
-  if (!ACCEPTED_FILE_TYPES.includes(file.type)) {
-    throw new Error(
-      `File type must be one of ${ACCEPTED_FILE_TYPES.join(", ")}`
-    );
-  }
+    // Client-side validation
+    if (!(file instanceof File)) {
+      throw new Error("Invalid file type");
+    }
 
-  // Check file size
-  if (sizeInMB(file.size) > MAX_FILE_SIZE) {
-    throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
-  }
+    if (
+      !ACCEPTED_FILE_TYPES.includes(
+        file.type as (typeof ACCEPTED_FILE_TYPES)[number]
+      )
+    ) {
+      throw new Error(
+        `File type must be one of ${ACCEPTED_FILE_TYPES.join(", ")}`
+      );
+    }
 
-  return true;
-});
+    if (sizeInMB(file.size) > MAX_FILE_SIZE) {
+      throw new Error(`File size must be less than ${MAX_FILE_SIZE}MB`);
+    }
 
+    return true;
+  });
+
+// Schema for creating a single document
 export const zPdfDocumentCreateSchema = z.object({
   dealId: z
     .union([z.string(), z.number()])
@@ -70,12 +88,13 @@ export const zPdfDocumentCreateSchema = z.object({
   type: z.string().refine((val) => ["organization", "deal"].includes(val), {
     message: "Type must be either 'organization' or 'deal'",
   }),
-  file: fileSchema,
+  file: createFileSchema(),
   key: z.string(),
 });
 
 export type PdfDocumentCreateSchema = z.infer<typeof zPdfDocumentCreateSchema>;
 
+// Schema for document events
 export const zDocumentEventCreateSchema = z.object({
   documentId: z.number().int(),
   projectId: z.number().int(),
@@ -86,14 +105,34 @@ export type DocumentEventCreateSchema = z.infer<
   typeof zDocumentEventCreateSchema
 >;
 
-const zodPdfDocumentSchema = z.instanceof(File)
+// Schema for bulk file uploads
 export const zPdfBulkUploadSchema = zfd.formData({
-  files: z.array(zodPdfDocumentSchema).nonempty().max(20).refine(
-    (files) => files.every((file) => sizeInMB(file.size) <= MAX_FILE_SIZE && file.type === "application/pdf"),
-    {
-      message: "Only PDF files are allowed and each file must be less than 4MB",
-    })
-
+  files: z
+    .array(createFileSchema())
+    .nonempty()
+    .max(20)
+    .refine(
+      (files) => {
+        return files.every((file) => {
+          if (!hasFileProperties(file)) return false;
+          return (
+            sizeInMB(file.size) <= MAX_FILE_SIZE &&
+            file.type === "application/pdf"
+          );
+        });
+      },
+      {
+        message:
+          "Only PDF files are allowed and each file must be less than 4MB",
+      }
+    ),
 });
 
 export type PdfBulkUploadSchema = z.infer<typeof zPdfBulkUploadSchema>;
+
+// Export constants and utilities for reuse
+export const FILE_VALIDATION = {
+  ACCEPTED_FILE_TYPES,
+  MAX_FILE_SIZE,
+  sizeInMB,
+};
