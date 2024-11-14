@@ -48,7 +48,7 @@ const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
   const mailTo =
     foundPaymentInfo.investmentEntity !== "Not Available"
       ? `${foundPaymentInfo.investmentEntity}\nAttn: Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703`
-      : "Address Not Available";
+      : "Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703";
 
   return {
     companyName: foundPaymentInfo.investmentEntity,
