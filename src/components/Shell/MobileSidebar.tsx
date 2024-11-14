@@ -1,5 +1,3 @@
-/* eslint-disable */
-//@ts-nocheck
 import React, { useState } from "react";
 import {
   IconButton,
@@ -21,7 +19,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useClerk } from "@clerk/nextjs";
 import posthog from "posthog-js";
 
-const MobileSidebar = (props) => {
+const MobileSidebar = (props: { children: React.ReactNode }) => {
   const { signOut } = useClerk();
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
@@ -66,7 +64,7 @@ const MobileSidebar = (props) => {
           sx={{
             boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
             border: "none !important",
-            backgroundColor: "black"
+            backgroundColor: "black",
           }}
         >
           <IconButton
@@ -112,9 +110,7 @@ const MobileSidebar = (props) => {
                 handleClick(route.path);
               }}
               sx={{
-                backgroundColor: isActiveRoute(route.path)
-                  ? "gray"
-                  : "black",
+                backgroundColor: isActiveRoute(route.path) ? "gray" : "black",
               }}
             >
               <ListItemIcon
@@ -145,7 +141,6 @@ const MobileSidebar = (props) => {
               key: "signout",
               label: "Sign Out",
               icon: <LogoutIcon />,
-              path: "/signout",
               onClick: () => handleSignOut(),
             }}
           />

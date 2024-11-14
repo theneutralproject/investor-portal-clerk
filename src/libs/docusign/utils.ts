@@ -63,7 +63,6 @@ export async function refreshAccessToken() {
                 }
             })
 
-        /* eslint-disable */
         if (results.body.consentUrl) {
             responseObj.consentUrl = results.body.consentUrl
         }

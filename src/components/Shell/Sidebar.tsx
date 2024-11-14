@@ -1,28 +1,21 @@
 "use client";
 
-/* eslint-disable */
-//@ts-nocheck
-
 import CopyrightIcon from "@mui/icons-material/Copyright";
 import HomeIcon from "@mui/icons-material/Home";
 import MessageIcon from "@mui/icons-material/Message";
 import InfoIcon from "@mui/icons-material/Info";
 import DescriptionIcon from "@mui/icons-material/Description";
-import HelpIcon from "@mui/icons-material/Help";
 import {
   Button,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Typography,
   useMediaQuery,
 } from "@mui/material";
 import type { AppBarProps as MuiAppBarProps } from "@mui/material/AppBar";
 import MuiAppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Container from "@mui/material/Container";
-import MuiDrawer from "@mui/material/Drawer";
-import List from "@mui/material/List";
 import { styled } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Image from "next/image";
@@ -31,9 +24,7 @@ import * as React from "react";
 
 import { theme } from "./NeutralThemeProvider";
 import UserAvatar from "./UserAvatar";
-import NeutralBreadcrumbs from "./NeutralBreadcrumbs";
 import MobileSidebar from "./MobileSidebar";
-import router from "next/router";
 
 export const ROUTES = [
   {
@@ -66,8 +57,14 @@ export const buttonItems = [
     icon: <CopyrightIcon />,
   },
 ];
+interface ListItemProps {
+  key: string;
+  label: string;
+  icon: React.ReactNode;
+  onClick?: () => void;
+}
 
-export const ListItem = ({ item }: { item: any }) => (
+export const ListItem = ({ item }: { item: ListItemProps }) => (
   <ListItemButton key={item.key} onClick={item.onClick}>
     <ListItemIcon sx={{ color: "#e2e4e4", minWidth: "40px" }}>
       {item.icon}
@@ -77,7 +74,6 @@ export const ListItem = ({ item }: { item: any }) => (
 );
 
 const drawerWidth = 240;
-const mobileDrawerWidth = 56;
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -99,37 +95,6 @@ const AppBar = styled(MuiAppBar, {
       duration: theme.transitions.duration.enteringScreen,
     }),
   }),
-}));
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ open }) => ({
-  "& .MuiDrawer-paper": {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    boxSizing: "border-box",
-    ...(!open && {
-      overflowX: "hidden",
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up("md")]: {
-        width: theme.spacing(9),
-      },
-    }),
-  },
-  [theme.breakpoints.down("md")]: {
-    "& .MuiDrawer-paper": {
-      width: mobileDrawerWidth,
-    },
-  },
 }));
 
 export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
