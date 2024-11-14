@@ -22,9 +22,44 @@ import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import DealFlowFooter from "../Shared/DealFlowFooter";
 import PaymentProcessing from "./PaymentProcessing";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import { type Deal } from "@prisma/client";
+import { type ProjectWithAllNestedData } from "@/libs/types";
+
+const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
+  const defaultPaymentInfo = {
+    investmentEntity: "Not Available",
+    accountNumber: "Not Available",
+    routingNumber: "Not Available",
+    mailTo: "Not Available",
+    companyName: "Not Available",
+  };
+
+  if (!project || !deal) {
+    return defaultPaymentInfo;
+  }
+
+  const foundPaymentInfo =
+    project?.projectPaymentInfo?.find(
+      (info) =>
+        deal?.investmentEntity &&
+        info.investmentEntity === deal.investmentEntity
+    ) ?? defaultPaymentInfo;
+
+  const mailTo =
+    foundPaymentInfo.investmentEntity !== "Not Available"
+      ? `${foundPaymentInfo.investmentEntity}\nAttn: Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703`
+      : "Address Not Available";
+
+  return {
+    companyName: foundPaymentInfo.investmentEntity,
+    mailTo,
+    accountNumber: foundPaymentInfo.accountNumber,
+    routingNumber: foundPaymentInfo.routingNumber,
+  };
+};
+
 const DealFlowFund: React.FC = () => {
   const { project, deal } = useDealFlow();
-  console.log(project);
   const [copied, setCopied] = useState<string | null>(null);
   const [showProcessing, setShowProcessing] = useState(false);
   const [expandedSections, setExpandedSections] = useState<
@@ -35,15 +70,11 @@ const DealFlowFund: React.FC = () => {
     wire: false,
   });
 
-  const investmentAmount = deal?.investmentStats?.amount;
-  const companyName = project?.name;
-  const mailTo =
-    "The Edison Project LLC\nAttn: Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703";
-
-  const wireDetails = {
-    accountNumber: "1234567890",
-    routingNumber: "021000021",
-  };
+  const { routingNumber, accountNumber, mailTo, companyName } = getPaymentInfo(
+    project,
+    deal
+  );
+  const investmentAmount = deal?.investmentStats?.amount ?? 0;
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -233,16 +264,8 @@ const DealFlowFund: React.FC = () => {
                   "Amount",
                   `$${investmentAmount.toLocaleString()}`
                 )}
-                {renderDetailRow(
-                  "Account Number",
-                  wireDetails.accountNumber,
-                  true
-                )}
-                {renderDetailRow(
-                  "Routing Number",
-                  wireDetails.routingNumber,
-                  true
-                )}
+                {renderDetailRow("Account Number", accountNumber, true)}
+                {renderDetailRow("Routing Number", routingNumber, true)}
               </Stack>
             </Box>
           </Collapse>
