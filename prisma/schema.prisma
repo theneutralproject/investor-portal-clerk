@@ -152,7 +152,7 @@ model Project {
   milestones         ProjectMilestones?
   pictures           ProjectPicture[]
   propertyStats      ProjectPropertyStats?
-  ProjectPaymentInfo ProjectPaymentInfo[]
+  projectPaymentInfo ProjectPaymentInfo[]
 }
 
 model ProjectPropertyStats {

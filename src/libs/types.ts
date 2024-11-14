@@ -16,6 +16,7 @@ import {
   type ProjectDocument,
   type OrganizationDocument,
   type DealDocument,
+  type ProjectPaymentInfo,
 } from "@prisma/client";
 
 export type ProjectWithAllNestedData = Project & {
@@ -24,6 +25,7 @@ export type ProjectWithAllNestedData = Project & {
   investmentStats: ProjectInvestmentStats;
   propertyStats: ProjectPropertyStats;
   documents: ProjectDocument[];
+  projectPaymentInfo: ProjectPaymentInfo[];
 };
 
 export type ProjectWithStats = Project & {
@@ -45,12 +47,14 @@ export type DealWithInvestmentStats = Deal & {
 };
 
 export type DealWithOrgMembersAndProject = Deal & {
-  organization: OrganizationWithFullMembers
+  organization: OrganizationWithFullMembers;
   project: Project;
 };
 
 export type DealWithFullOrgAndProject = Deal & {
-  organization: OrganizationWithFullMembersAndAddress & { address: Address | null };
+  organization: OrganizationWithFullMembersAndAddress & {
+    address: Address | null;
+  };
   project: Project;
 };
 

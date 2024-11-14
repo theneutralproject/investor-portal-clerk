@@ -761,7 +761,7 @@ export const ProjectIncludeSchema: z.ZodType<Prisma.ProjectInclude> = z.object({
   milestones: z.union([z.boolean(),z.lazy(() => ProjectMilestonesArgsSchema)]).optional(),
   pictures: z.union([z.boolean(),z.lazy(() => ProjectPictureFindManyArgsSchema)]).optional(),
   propertyStats: z.union([z.boolean(),z.lazy(() => ProjectPropertyStatsArgsSchema)]).optional(),
-  ProjectPaymentInfo: z.union([z.boolean(),z.lazy(() => ProjectPaymentInfoFindManyArgsSchema)]).optional(),
+  projectPaymentInfo: z.union([z.boolean(),z.lazy(() => ProjectPaymentInfoFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ProjectCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -778,7 +778,7 @@ export const ProjectCountOutputTypeSelectSchema: z.ZodType<Prisma.ProjectCountOu
   deals: z.boolean().optional(),
   documents: z.boolean().optional(),
   pictures: z.boolean().optional(),
-  ProjectPaymentInfo: z.boolean().optional(),
+  projectPaymentInfo: z.boolean().optional(),
 }).strict();
 
 export const ProjectSelectSchema: z.ZodType<Prisma.ProjectSelect> = z.object({
@@ -798,7 +798,7 @@ export const ProjectSelectSchema: z.ZodType<Prisma.ProjectSelect> = z.object({
   milestones: z.union([z.boolean(),z.lazy(() => ProjectMilestonesArgsSchema)]).optional(),
   pictures: z.union([z.boolean(),z.lazy(() => ProjectPictureFindManyArgsSchema)]).optional(),
   propertyStats: z.union([z.boolean(),z.lazy(() => ProjectPropertyStatsArgsSchema)]).optional(),
-  ProjectPaymentInfo: z.union([z.boolean(),z.lazy(() => ProjectPaymentInfoFindManyArgsSchema)]).optional(),
+  projectPaymentInfo: z.union([z.boolean(),z.lazy(() => ProjectPaymentInfoFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ProjectCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1932,7 +1932,7 @@ export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.ob
   milestones: z.union([ z.lazy(() => ProjectMilestonesNullableRelationFilterSchema),z.lazy(() => ProjectMilestonesWhereInputSchema) ]).optional().nullable(),
   pictures: z.lazy(() => ProjectPictureListRelationFilterSchema).optional(),
   propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional()
 }).strict();
 
 export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrderByWithRelationInput> = z.object({
@@ -1952,7 +1952,7 @@ export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrde
   milestones: z.lazy(() => ProjectMilestonesOrderByWithRelationInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureOrderByRelationAggregateInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsOrderByWithRelationInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoOrderByRelationAggregateInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueInput> = z.union([
@@ -2003,7 +2003,7 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
   milestones: z.union([ z.lazy(() => ProjectMilestonesNullableRelationFilterSchema),z.lazy(() => ProjectMilestonesWhereInputSchema) ]).optional().nullable(),
   pictures: z.lazy(() => ProjectPictureListRelationFilterSchema).optional(),
   propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional()
 }).strict());
 
 export const ProjectOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectOrderByWithAggregationInput> = z.object({
@@ -3434,7 +3434,7 @@ export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateInput> = z.object({
@@ -3454,7 +3454,7 @@ export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUnchecke
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.object({
@@ -3473,7 +3473,7 @@ export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateInput> = z.object({
@@ -3493,7 +3493,7 @@ export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUnchecke
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInput> = z.object({
@@ -7668,7 +7668,7 @@ export const ProjectCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreat
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutDealsInput> = z.object({
@@ -7687,7 +7687,7 @@ export const ProjectUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.Pro
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutDealsInput> = z.object({
@@ -7832,7 +7832,7 @@ export const ProjectUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUpdat
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutDealsInput> = z.object({
@@ -7851,7 +7851,7 @@ export const ProjectUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.Pro
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const DealDocumentUpsertWithWhereUniqueWithoutDealInputSchema: z.ZodType<Prisma.DealDocumentUpsertWithWhereUniqueWithoutDealInput> = z.object({
@@ -9385,7 +9385,7 @@ export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutPropertyStatsInput> = z.object({
@@ -9404,7 +9404,7 @@ export const ProjectUncheckedCreateWithoutPropertyStatsInputSchema: z.ZodType<Pr
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutPropertyStatsInput> = z.object({
@@ -9438,7 +9438,7 @@ export const ProjectUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutPropertyStatsInput> = z.object({
@@ -9457,7 +9457,7 @@ export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Pr
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutInvestmentStatsInput> = z.object({
@@ -9475,7 +9475,7 @@ export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutInvestmentStatsInput> = z.object({
@@ -9494,7 +9494,7 @@ export const ProjectUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutInvestmentStatsInput> = z.object({
@@ -9528,7 +9528,7 @@ export const ProjectUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutInvestmentStatsInput> = z.object({
@@ -9547,7 +9547,7 @@ export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectCreateWithoutProjectPaymentInfoInput> = z.object({
@@ -9655,7 +9655,7 @@ export const ProjectCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutMilestonesInput> = z.object({
@@ -9674,7 +9674,7 @@ export const ProjectUncheckedCreateWithoutMilestonesInputSchema: z.ZodType<Prism
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutMilestonesInput> = z.object({
@@ -9708,7 +9708,7 @@ export const ProjectUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutMilestonesInput> = z.object({
@@ -9727,7 +9727,7 @@ export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prism
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPicturesInput> = z.object({
@@ -9745,7 +9745,7 @@ export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCr
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutPicturesInput> = z.object({
@@ -9764,7 +9764,7 @@ export const ProjectUncheckedCreateWithoutPicturesInputSchema: z.ZodType<Prisma.
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutPicturesInput> = z.object({
@@ -9798,7 +9798,7 @@ export const ProjectUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUp
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutPicturesInput> = z.object({
@@ -9817,7 +9817,7 @@ export const ProjectUncheckedUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const DocumentEventCreateWithoutDocumentInputSchema: z.ZodType<Prisma.DocumentEventCreateWithoutDocumentInput> = z.object({
@@ -9858,7 +9858,7 @@ export const ProjectCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectC
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutDocumentsInput> = z.object({
@@ -9877,7 +9877,7 @@ export const ProjectUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutDocumentsInput> = z.object({
@@ -9927,7 +9927,7 @@ export const ProjectUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectU
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutDocumentsInput> = z.object({
@@ -9946,7 +9946,7 @@ export const ProjectUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
 }).strict();
 
 export const ProjectDocumentCreateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.ProjectDocumentCreateWithoutDocumentEventsInput> = z.object({

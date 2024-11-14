@@ -24,6 +24,7 @@ import PaymentProcessing from "./PaymentProcessing";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 const DealFlowFund: React.FC = () => {
   const { project, deal } = useDealFlow();
+  console.log(project);
   const [copied, setCopied] = useState<string | null>(null);
   const [showProcessing, setShowProcessing] = useState(false);
   const [expandedSections, setExpandedSections] = useState<

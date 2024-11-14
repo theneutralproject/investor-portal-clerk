@@ -1,4 +1,4 @@
-'use server';
+"use server";
 import { type NextRequest } from "next/server";
 import { currentUser } from "@clerk/nextjs";
 import { errorResponse, jsonResponse } from "@/libs/utils";
@@ -58,6 +58,7 @@ async function fetchProject(slug: string) {
       propertyStats: true,
       milestones: true,
       pictures: true,
+      projectPaymentInfo: true,
     },
   });
 }
