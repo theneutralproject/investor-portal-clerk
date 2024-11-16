@@ -21,10 +21,12 @@ export const ProjectDocTab: React.FC<{
   const [currentDocument, setCurrentDocument] =
     useState<DocumentWithCompletion>();
 
-
-  // Hubspot can only process 1 webhook request per minute. 
+  // Hubspot can only process 1 webhook request per minute.
   // In case the user accesses several docs in a short amount of time, we debounce the request for 75 sec
-  const updateHubspotDealDocs = useDebounce(updateHubspotDealDocsAccessed, 75000)
+  const updateHubspotDealDocs = useDebounce(
+    updateHubspotDealDocsAccessed,
+    75000
+  );
 
   const {
     isLoading,
@@ -53,10 +55,19 @@ export const ProjectDocTab: React.FC<{
       documentEventMutation.mutate({
         documentId: document?.id,
         type: "DOWNLOAD",
-      })
+      });
       // add current doc to list of already read docs and notify hubspot webhook about this event
-      const documentNames = [...[document],...data.filter(doc => doc.completed)].map(doc => doc.name).toString();
-      updateHubspotDealDocs({ dealId: parseInt(deal.hubspotId, 10), dealStage: 1, documentNames: documentNames });
+      const documentNames = [
+        ...[document],
+        ...data.filter((doc) => doc.completed),
+      ]
+        .map((doc) => doc.name)
+        .toString();
+      updateHubspotDealDocs({
+        dealId: parseInt(deal.hubspotId, 10),
+        dealStage: 1,
+        documentNames: documentNames,
+      });
     }
     window.open(document.link, "_blank");
   };
@@ -71,8 +82,17 @@ export const ProjectDocTab: React.FC<{
       });
 
       // add current doc to list of already read docs and notify hubspot webhook about this event
-      const documentNames = [...[currentDocument],...data.filter(doc => doc.completed)].map(doc => doc?.name).toString();
-      updateHubspotDealDocs({ dealId: parseInt(deal.hubspotId, 10), dealStage: 1, documentNames: documentNames });
+      const documentNames = [
+        ...[currentDocument],
+        ...data.filter((doc) => doc.completed),
+      ]
+        .map((doc) => doc?.name)
+        .toString();
+      updateHubspotDealDocs({
+        dealId: parseInt(deal.hubspotId, 10),
+        dealStage: 1,
+        documentNames: documentNames,
+      });
     }
   };
 
@@ -88,11 +108,13 @@ export const ProjectDocTab: React.FC<{
             handleDownloadDocument={handleDownloadDocument}
           />
         ))}
-        <DocumentViewerModal
-          open={openModal}
-          onClose={handleCloseModal}
-          fileUrl={currentDocument?.link ?? ""}
-        />
+        {currentDocument?.link && (
+          <DocumentViewerModal
+            open={openModal}
+            onClose={handleCloseModal}
+            fileUrl={currentDocument.link}
+          />
+        )}
       </CardContent>
     </Card>
   );

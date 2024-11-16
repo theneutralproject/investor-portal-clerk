@@ -7,10 +7,7 @@ import Image from "next/image";
 import DealFlowSidebarDetails from "./DealFlowSidebarDetails";
 import ChatInterface from "@/components/ChatInterface";
 const DealFlowSidebar = () => {
-  const { project, deal, organization, user } = useDealFlow();
-  console.log(deal);
-  console.log(organization);
-  console.log(user);
+  const { project, deal } = useDealFlow();
 
   const projectPicture = project?.pictures?.find(
     (picture) => picture.type === "HEADER"

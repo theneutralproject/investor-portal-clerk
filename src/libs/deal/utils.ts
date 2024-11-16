@@ -15,9 +15,9 @@ const InvestmentEntity = {
         promissory_to_equity: "Vanilla 301 LLC",
     },
     "Bakers Place": {
-        equity: "Bakers Place Investment LLC",
+        equity: "Bakers Place, LLC",
         promissory_note_now: "Bakers Place Investment LLC",
-        promissory_note_at_closing: "Bakers Place Investment LLC",
+        promissory_note_at_closing: "Bakers Place, LLC",
         promissory_to_equity: "Bakers Place Investment LLC",
     },
 };

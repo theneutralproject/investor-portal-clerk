@@ -166,11 +166,13 @@ export const InvestTab: React.FC<{
             />
           ))}
 
-          <DocumentViewerModal
-            open={modelOpenType === "DOCUMENT"}
-            onClose={handleCloseModal}
-            fileUrl={currentDocument?.link ?? ""}
-          />
+          {currentDocument?.link && (
+            <DocumentViewerModal
+              open={modelOpenType === "DOCUMENT"}
+              onClose={handleCloseModal}
+              fileUrl={currentDocument.link}
+            />
+          )}
         </CardContent>
       </Card>
       {renderCTA()}

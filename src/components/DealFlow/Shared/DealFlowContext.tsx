@@ -15,7 +15,7 @@ import {
   type AccreditationVerification,
 } from "@prisma/client";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { toast } from "react-toastify";
 import DealFlowGetStarted from "@components/DealFlow/GetStarted/DealFlowGetStarted";
@@ -55,6 +55,8 @@ interface Step {
   component?: React.ComponentType;
   isMajor?: boolean;
   majorParent?: StepType;
+  progress: number;
+  requiredDealStage?: number;
 }
 
 // Create the steps array with type safety
@@ -63,57 +65,79 @@ export const steps: Step[] = [
     value: "get-started",
     display: "Get Started",
     component: DealFlowGetStarted,
+    progress: 0,
   },
-  { value: "type", display: "Type", component: DealFlowType, isMajor: true },
+  {
+    value: "type",
+    display: "Type",
+    component: DealFlowType,
+    isMajor: true,
+    progress: 10,
+  },
   {
     value: "amount",
     display: "Amount",
     component: DealFlowAmount,
     isMajor: true,
+    progress: 20,
   },
   {
     value: "details",
     display: "Details",
     component: DealFlowDetails,
     isMajor: true,
+    progress: 30,
   },
   {
     value: "details-ownership-type",
     display: "Ownership Type",
     component: DealFlowDetailsOwnershipType,
     majorParent: "details",
+    progress: 40,
   },
   {
     value: "co-investor",
     display: "Co-Investor",
     component: DealFlowCoInvestor,
     majorParent: "details",
+    progress: 50,
   },
   {
     value: "entity-details",
     display: "Entity Details",
     component: DealFlowEntityDetails,
     majorParent: "details",
+    progress: 60,
   },
   {
     value: "entity-details-co-investor",
     display: "Entity Details (Co-Investor)",
     component: DealFlowEntityDetailsCoInvestor,
     majorParent: "details",
+    progress: 70,
   },
   {
     value: "verify-accreditation",
     display: "Verify Accreditation",
     component: DealFlowVerifyAccreditation,
     majorParent: "details",
+    progress: 80,
   },
   {
     value: "review",
     display: "Review & Sign",
     component: DealFlowReview,
     isMajor: true,
+    progress: 90,
   },
-  { value: "fund", display: "Fund", component: DealFlowFund, isMajor: true },
+  {
+    value: "fund",
+    display: "Fund",
+    component: DealFlowFund,
+    isMajor: true,
+    progress: 100,
+    requiredDealStage: 5,
+  },
 ];
 
 export const stepComponents = Object.fromEntries(
@@ -125,6 +149,44 @@ export const stepComponents = Object.fromEntries(
 export const MAJOR_STEPS = steps.filter((step) => step.isMajor);
 
 export const stepValues: StepType[] = steps.map((step) => step.value);
+
+export const calculateDealProgress = (
+  currentStep: StepType,
+  ownershipType: DealOwnershipType | undefined
+): number => {
+  // Find current step info
+  const currentStepInfo = steps.find((s) => s.value === currentStep);
+  if (!currentStepInfo) return 0;
+
+  // Handle optional paths based on ownership type
+  if (currentStepInfo.majorParent === "details") {
+    const entityDetailsRequired =
+      ownershipType &&
+      ["CORPORATION", "COMMON", "OTHER", "TRUST"].includes(
+        ownershipType as string
+      );
+
+    const coInvestorRequired =
+      ownershipType &&
+      ["PARTNERSHIP", "MARITAL", "JOINT"].includes(ownershipType as string);
+
+    // Skip entity-details progress if not required
+    if (currentStepInfo.value === "entity-details" && !entityDetailsRequired) {
+      return (
+        steps.find((s) => s.value === "verify-accreditation")?.progress ?? 0
+      );
+    }
+
+    // Skip co-investor progress if not required
+    if (currentStepInfo.value === "co-investor" && !coInvestorRequired) {
+      return (
+        steps.find((s) => s.value === "verify-accreditation")?.progress ?? 0
+      );
+    }
+  }
+
+  return currentStepInfo.progress;
+};
 
 interface DealFlowContextType {
   step: StepType;
@@ -193,7 +255,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [step, setStep] = useState<StepType>(initialStep);
   const router = useRouter();
-
+  const pathname = usePathname();
   const getNextStep = (currentStep: StepType): StepType | null => {
     const currentIndex = steps.findIndex((s) => s.value === currentStep);
 
@@ -233,6 +295,46 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     return nextStep;
   };
+
+  // Add route validation effect
+  useEffect(() => {
+    if (!deal || !pathname) return;
+
+    // Extract the current step from the pathname
+    const pathParts = pathname.split("/");
+    const currentRouteStep = pathParts[pathParts.length - 1] as StepType;
+
+    // Find step info for the current route
+    const currentStepInfo = steps.find((s) => s.value === currentRouteStep);
+    if (!currentStepInfo) return;
+
+    // If this step has a required deal stage
+    if (currentStepInfo.requiredDealStage !== undefined) {
+      if (deal.dealStage < currentStepInfo.requiredDealStage) {
+        // Find the last valid step based on deal stage
+        const lastValidStep = steps
+          .filter(
+            (s) =>
+              s.requiredDealStage === undefined ||
+              deal.dealStage >= s.requiredDealStage
+          )
+          .slice(-1)[0];
+
+        if (lastValidStep) {
+          // Only redirect if we're not already on the last valid step
+          if (lastValidStep.value !== currentRouteStep) {
+            router.push(
+              `/dealflow/${projectSlug}/${dealId}/${lastValidStep.value}`
+            );
+            toast.error("Please complete previous steps first");
+          }
+        } else {
+          router.push(`/dealflow/${projectSlug}/${dealId}`);
+          toast.error("Invalid deal stage for this step");
+        }
+      }
+    }
+  }, [pathname, deal, projectSlug, dealId, router]);
 
   useEffect(() => {
     const fetchData = async () => {
