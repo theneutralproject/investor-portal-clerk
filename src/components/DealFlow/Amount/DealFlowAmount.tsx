@@ -27,8 +27,8 @@ import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { DealFinancingType } from "@prisma/client";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
-const ACCRUED_RETURN_COLOR = "#8b9da5";
-const GROSS_RETURN_COLOR = "#cff4c8";
+const ACCRUED_RETURN_COLOR = "#8f9ca2";
+const GROSS_RETURN_COLOR = "#3e6f42";
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -206,6 +206,7 @@ const DealFlowAmount: React.FC = () => {
                     width={60}
                     tickMargin={5}
                   />
+                  {/* @ts-expect-error type error */}
                   <Tooltip content={customTooltip} />
                   <Legend />
                   <Area
@@ -219,7 +220,7 @@ const DealFlowAmount: React.FC = () => {
                   <Area
                     type="monotone"
                     dataKey="totalGrossReturn"
-                    stackId="1"
+                    stackId="2"
                     stroke={GROSS_RETURN_COLOR}
                     fill={GROSS_RETURN_COLOR}
                     name="Cumulative Investor Return"
