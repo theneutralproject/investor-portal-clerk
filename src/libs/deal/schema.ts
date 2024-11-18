@@ -22,7 +22,8 @@ export const zDealUpdateSchema = z.object({
   organizationId: z.number().optional(),
   dealStage: z.number().optional(),
   accreditationVerifierId: z.number().optional().nullable(),
-  investmentStats: zDealInvestmentStatsUpdateSchema.optional()
+  investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
+  closingDate: z.date().optional(),
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
