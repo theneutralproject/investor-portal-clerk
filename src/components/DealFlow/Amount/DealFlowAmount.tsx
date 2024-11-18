@@ -27,7 +27,7 @@ import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { DealFinancingType } from "@prisma/client";
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
-const ACCRUED_RETURN_COLOR = "#8f9ca2";
+const ACCRUED_RETURN_COLOR = "#d7b15c";
 const GROSS_RETURN_COLOR = "#3e6f42";
 
 const DealFlowAmount: React.FC = () => {
@@ -211,19 +211,21 @@ const DealFlowAmount: React.FC = () => {
                   <Legend />
                   <Area
                     type="monotone"
-                    dataKey="accruedPreferredReturn"
-                    stackId="1"
-                    stroke={ACCRUED_RETURN_COLOR}
-                    fill={ACCRUED_RETURN_COLOR}
-                    name="Investor Accrued Preferred Return"
-                  />
-                  <Area
-                    type="monotone"
                     dataKey="totalGrossReturn"
-                    stackId="2"
+                    stackId="1"
                     stroke={GROSS_RETURN_COLOR}
                     fill={GROSS_RETURN_COLOR}
                     name="Cumulative Investor Return"
+                    fillOpacity={1}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="accruedPreferredReturn"
+                    stackId="2"
+                    stroke={ACCRUED_RETURN_COLOR}
+                    fill={ACCRUED_RETURN_COLOR}
+                    name="Investor Accrued Preferred Return"
+                    fillOpacity={1}
                   />
                 </AreaChart>
               </ResponsiveContainer>
