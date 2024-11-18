@@ -50,7 +50,7 @@ const DealFlowHeader = () => {
       </Toolbar>
       <Stepper activeStep={activeStepIndex} alternativeLabel>
         {MAJOR_STEPS.map((stepObj, index) => (
-          <Step key={stepObj.value}>
+          <Step key={stepObj.value} sx={{ m: 0, p: 0 }}>
             <StepLabel
               StepIconProps={{
                 active: majorParent === stepObj.value,

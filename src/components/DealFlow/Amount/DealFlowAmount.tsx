@@ -142,9 +142,14 @@ const DealFlowAmount: React.FC = () => {
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
         <TextField
           fullWidth
-          type="number"
-          value={amount}
-          onChange={handleAmountChange}
+          type="text"
+          value={amount.toLocaleString()}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^0-9]/g, "");
+            handleAmountChange({
+              target: { value },
+            } as React.ChangeEvent<HTMLInputElement>);
+          }}
           error={!!validationError}
           helperText={validationError}
           InputProps={{

@@ -23,7 +23,6 @@ const DealFlowSidebar = () => {
       sx={{
         p: 2,
         backgroundColor: "#f4f5f7",
-        height: "100%",
         display: "flex",
         flexDirection: "column",
         minHeight: "calc(100vh - 64px)",
@@ -98,13 +97,22 @@ const DealFlowSidebar = () => {
       <Box sx={{ mt: "auto" }}>
         <Divider sx={{ my: 2 }} />
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-          <Image
-            width="40"
-            height="40"
-            src="/StormAvatar.png"
-            alt="Support Avatar"
-          />
+        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Image
+              width="40"
+              height="40"
+              src="/StormAvatar.png"
+              alt="Support Avatar"
+            />
+          </Box>
+
           <Box sx={{ flex: 1 }}>
             <Typography
               variant="subtitle1"
@@ -117,20 +125,20 @@ const DealFlowSidebar = () => {
               Give us a call or chat anytime - we will answer any questions you
               have
             </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                mt: 1,
+              }}
+            >
+              <ChatInterface type="DEALFLOW_BUTTON" />
+              <Typography variant="body2" color="text.secondary">
+                (608) 205-8336
+              </Typography>
+            </Box>
           </Box>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
-          }}
-        >
-          <ChatInterface type="DEALFLOW_BUTTON" />
-          <Typography variant="body2" color="text.secondary">
-            (608) 205-8336
-          </Typography>
         </Box>
       </Box>
     </Box>

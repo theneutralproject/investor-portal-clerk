@@ -35,7 +35,21 @@ export const QuickSelectChips: React.FC<QuickSelectChipsProps> = ({
         onClick={() => onSelect(value)}
         color={selectedAmount === value ? "primary" : "default"}
         variant={selectedAmount === value ? "filled" : "outlined"}
-        sx={{ flex: 1 }}
+        sx={{
+          flex: 1,
+          "&:hover": {
+            backgroundColor: "#e0e0e0",
+          },
+          "&:focus": {
+            backgroundColor: "black",
+          },
+          "&:active": {
+            backgroundColor: "black",
+          },
+          ...(selectedAmount === value
+            ? { backgroundColor: "black", color: "white" }
+            : {}),
+        }}
       />
     ))}
   </Box>
@@ -81,13 +95,13 @@ export const ReturnsChart: React.FC<ReturnsChartProps> = ({ data, config }) => (
 interface InvestmentStatsDisplayProps {
   stats: InvestmentStats;
   returnsData: ReturnsDateObject[];
-  dealInvestmentStats: DealInvestmentStats
+  dealInvestmentStats: DealInvestmentStats;
 }
 
 export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
   stats,
   returnsData,
-  dealInvestmentStats
+  dealInvestmentStats,
 }) => (
   <Box
     sx={{
@@ -115,7 +129,12 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
       })()}{" "}
       Months
     </Typography>
-    <Typography>{dealInvestmentStats.financingType === DealFinancingType.equity ? "IRR" : "Interest Rate"}: {stats.interestRateOrIrr * 100}%</Typography>
+    <Typography>
+      {dealInvestmentStats.financingType === DealFinancingType.equity
+        ? "IRR"
+        : "Interest Rate"}
+      : {stats.interestRateOrIrr * 100}%
+    </Typography>
     <Typography>MOIC: {stats.investmentMultiple.toFixed(2)}X</Typography>
     <Typography>
       Gross Return: ${stats.totalGrossReturn.toLocaleString()}

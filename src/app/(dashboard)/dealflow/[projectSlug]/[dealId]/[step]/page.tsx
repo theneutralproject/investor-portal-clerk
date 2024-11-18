@@ -51,7 +51,10 @@ const DealFlow = () => {
               sx={{
                 width: "100%",
                 maxWidth: 450,
-                height: "100%",
+                height: "100vh",
+                position: "sticky",
+                top: 0,
+                backgroundColor: "#f4f5f7",
               }}
             >
               <DealFlowSidebar />
