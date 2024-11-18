@@ -38,6 +38,9 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
       sx={{
         boxShadow: 0,
         "&:before": { display: "none" },
+        mt: 2,
+        border: "1px solid #e0e0e0",
+        borderRadius: 1,
       }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>

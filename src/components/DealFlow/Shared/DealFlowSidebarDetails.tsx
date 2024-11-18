@@ -62,7 +62,9 @@ const DealFlowSidebarDetails: React.FC = () => {
 
   const formatAddress = (addr: typeof address) => {
     if (!addr) return "";
+
     const { street, city, state, zipcode } = addr;
+    if (!street || !city || !state || !zipcode) return "";
     return `${street}, ${city}, ${state} ${zipcode}`;
   };
 

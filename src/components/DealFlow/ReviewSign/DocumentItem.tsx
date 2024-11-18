@@ -1,6 +1,14 @@
-import React from "react";
-import { Box, Typography, Button, ListItem, Stack } from "@mui/material";
+import React, { useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  ListItem,
+  Stack,
+  CircularProgress,
+} from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { toast } from "react-toastify";
 
 interface DocumentItemProps {
   title: string;
@@ -17,6 +25,14 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
   onSign,
   index,
 }) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleClick = () => {
+    setIsLoading(true);
+    toast.success("Generating document...");
+    onSign?.();
+  };
+
   return (
     <ListItem
       disableGutters
@@ -67,8 +83,15 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
       {isCompleted ? (
         <Button variant="grayPill">SIGNED</Button>
       ) : (
-        <Button variant="blackPill" onClick={onSign}>
-          REVIEW & SIGN
+        <Button
+          variant="blackPill"
+          onClick={handleClick}
+          disabled={isLoading}
+          startIcon={
+            isLoading ? <CircularProgress size={20} color="inherit" /> : null
+          }
+        >
+          {isLoading ? "GENERATING..." : "REVIEW & SIGN"}
         </Button>
       )}
     </ListItem>
