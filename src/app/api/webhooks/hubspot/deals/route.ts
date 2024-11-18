@@ -18,7 +18,7 @@ const arrHubspotWHRes = z.array(hubspotWHDealRes);
 
 /* 
     this webhook is called when a deal property is changed in hubspot 
-    [dealstage, amount, investment_entity, dealname, dealtype, financing_type]
+    [dealstage, amount, investment_entity, dealname, dealtype, financing_type, closedate]
 **/
 export async function POST(req: Request) {
   try {
@@ -75,6 +75,10 @@ export async function POST(req: Request) {
               ? (payload.propertyValue as keyof typeof DealFinancingType)
               : "equity"
         };
+        break;
+      case HSDealPropNames.closedate.toString():
+        dealBody.closingDate = new Date(payload.propertyValue);
+        break;
     }
 
     if (updateProjectFunding) {

@@ -15,6 +15,21 @@ export async function updateDeal(
 ) {
     const { investmentStats, ...dealData } = updateDealData;
     let updatedStats: DealInvestmentStats | null | Error = null;
+    const existingDeal = await prisma.deal.findUnique({
+        where: { hubspotId: dealData.hubspotId },
+    });
+    if (existingDeal === null) {
+        console.error(
+            `Failed to find deal with hubspot id ${dealData.hubspotId}.`
+        );
+        return Error("The deal does not exist in the database");
+    }
+
+    if (dealData.dealStage === 5) {
+        console.error("Completed Deals cannot be updated");
+        return Error("Completed Deals cannot be updated");
+    }
+
     /* eslint-disable-next-line */
     const updatedDeal = await prisma.deal
         .update({
@@ -78,7 +93,7 @@ export async function updateDeal(
                 return Error("Failed to update deal with hubspot data");
             });
     }
-    if(isError(updatedStats)) return updatedStats;
+    if (isError(updatedStats)) return updatedStats;
     updatedDeal.investmentStats = updatedStats;
     return updatedDeal;
 };

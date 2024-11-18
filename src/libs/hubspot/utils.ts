@@ -374,6 +374,7 @@ export enum HSDealPropNames {
   dealstage = 'dealstage',
   amount = 'amount',
   financing_type = 'financing_type',
+  closedate = 'closedate',
 };
 
 export enum DealToHubspotDealEnum {
