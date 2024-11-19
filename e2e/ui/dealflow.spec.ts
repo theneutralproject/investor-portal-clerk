@@ -29,6 +29,7 @@ test.describe("dealflow logic tests", () => {
 
     // Extract and store the deal ID from the URL for future tests
     const url = page.url();
+    // @ts-expect-error - dealId is defined in the next line
     dealId = url.split("/edison/")[1].split("/type")[0];
 
     // Verify we're on the correct page
