@@ -221,7 +221,7 @@ const getSignerCompanyDetailsTabs = (org: OrganizationWithFullMembersAndAddress,
 }
 
 // https://developers.docusign.com/docs/esign-rest-api/how-to/request-signature-template-remote/
-export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, signer: UserWithAddress) {
+export function makeEnvelopeDefinition(templateId: string, org: OrganizationWithFullMembersAndAddress, deal: DealWithInvestmentStatsAndVerification, signer: UserWithAddress) {
     const coSigners = org.members.filter(m => m.userId !== org.ownerId).map(m => m.user as UserWithAddress);
     const accreditationVerifier = deal.accreditationVerification?.verifier;
 
@@ -232,7 +232,7 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
 
     /* eslint-disable-next-line*/
     const env: EnvelopeDefinition = new docusign.EnvelopeDefinition() as EnvelopeDefinition;
-    env.templateId = envelopeId;
+    env.templateId = templateId;
 
     // SHARED TABS
 
@@ -262,6 +262,11 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
     }) as DSText;
 
     /* eslint-disable-next-line*/
+    const interestSpelledOutTab: DSText = docusign.Text.constructFromObject({
+        tabLabel: "interestSpelledOut", value: amount >= 250000 ? `Twelve Percent` : `Ten Percent`,
+    }) as DSText;
+
+    /* eslint-disable-next-line*/
     const investingEntityNameTab: DSText = docusign.Text.constructFromObject({
         tabLabel: "investingEntityName", value: investingEntityName,
     }) as DSText;
@@ -272,7 +277,8 @@ export function makeEnvelope(envelopeId: string, org: OrganizationWithFullMember
         investingEntityNameTab,
         numberAUnitsTab,
         numberCUnitsTab,
-        interestTab
+        interestTab,
+        interestSpelledOutTab,
     ];
 
     /* eslint-disable-next-line*/
@@ -427,4 +433,24 @@ export function getOwnershipTypeFromDeal(ownershipType: DealOwnershipType) {
         case DealOwnershipType.MARITAL: return docusignOwnershipTypeEnum.Marital;
         default: return docusignOwnershipTypeEnum.Other;
     }
+}
+
+export async function getEnvelopeAsPdfFileBuffer(envelopesApi: EnvelopesApi, envelopeId: string, fileName: string) {
+    // https://developers.docusign.com/docs/esign-rest-api/reference/envelopes/envelopedocuments/get/
+    // returns all documents in the envelope as a single combined PDF
+    const envelopeAsBase64String = await envelopesApi.getDocument(
+        process.env.DOCUSIGN_API_ACCOUNT_ID!,
+        envelopeId,
+        "combined",
+        { certificate: "false" }
+    );
+ const mimeType = 'application/pdf'
+    const blob = new Blob([envelopeAsBase64String], { type: mimeType });
+
+// Create a File from the Blob
+const file = new File([blob], fileName, { type: mimeType });
+
+      return file
+    // return Buffer.from(envelopeAsBase64String, 'base64');
+    // return envelopeAsBase64String
 }

@@ -30,6 +30,7 @@ model User {
   organizationsOwned           Organization[]         @relation(name: "userOrg")
   DealDocumentUploaded         DealDocument[]
   OrganizationDocumentUploaded OrganizationDocument[]
+  DocusignEvent                DocusignEvent[]
 }
 
 model Deal {
@@ -47,6 +48,8 @@ model Deal {
   investmentStats           DealInvestmentStats?
   accreditationVerification AccreditationVerification?
   closingDate               DateTime?
+  signaturesCompletedDate                DateTime?
+  DocusignEvent             DocusignEvent[]
 }
 
 model DealInvestmentStats {
@@ -251,6 +254,19 @@ model DocumentEvent {
   user       User              @relation(fields: [userId], references: [id])
 }
 
+model DocusignEvent {
+  id                 Int       @id @default(autoincrement())
+  envelopeId         String    @unique
+  templateId         String
+  userId             Int
+  dealId             Int
+  dateSent           DateTime?
+  dateCompleted      DateTime?
+  signatureCompleted Boolean   @default(false)
+  user               User      @relation(fields: [userId], references: [id])
+  deal               Deal      @relation(fields: [dealId], references: [id])
+}
+
 model Address {
   id             Int           @id @default(autoincrement())
   street         String
@@ -267,6 +283,7 @@ model Address {
 enum DealDocumentType {
   K1
   VERIFICATION_ACCREDITATION
+  INVESTMENT_DOCUMENT
 }
 
 /// Role is not yet used

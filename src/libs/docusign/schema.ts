@@ -12,7 +12,7 @@ export enum docusignOwnershipTypeEnum {
 };
 
 export const zDocusignEvelopeCreate = z.object({
-  envelopeId: z.string(),
+  templateId: z.string(),
   dealId: z.number().int(),
 });
 

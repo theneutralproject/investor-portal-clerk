@@ -404,7 +404,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       ...deal,
       ...updatedDealData,
     };
-
+console.log(updatedDeal)
     try {
       const { data } = await axios.put<DealWithInvestmentStatsAndDocument>(
         `/api/deals`,
