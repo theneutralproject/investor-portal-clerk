@@ -365,13 +365,12 @@ export function makeEnvelopeDefinition(templateId: string, org: OrganizationWith
         roleName: 'Signer',
     }) as TemplateRole;
 
-    // TODO: Dont hardcode this
     /* eslint-disable-next-line*/
     const neutralSignerRole: TemplateRole = docusign.TemplateRole.constructFromObject({
-        email: "jonatan@neutral.us",
+        email: "nate@neutral.us",
         name: "Nate Helbach",
         tabs: neutralSignerTabs,
-        clientUserId: "jonatan@neutral.us",
+        clientUserId: "nate@neutral.us",
         roleName: 'Neutral Signer',
     }) as TemplateRole;
 
