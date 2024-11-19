@@ -256,7 +256,7 @@ export async function createDocumentEntry(
     console.log("Creating document entry:", { documentType, id, name, path, key, userId, dealDocumentType, taxYear });
     try {
         if (documentType === "deal") {
-            if (!dealDocumentType || !taxYear) {
+            if (!dealDocumentType) {
                 throw new Error("Missing required dealDocumentType field");
             }
             return await prisma.dealDocument.create({

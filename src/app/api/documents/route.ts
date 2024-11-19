@@ -1,14 +1,14 @@
-import { createDocumentEntry, getFileDetails, uploadFile } from "@/libs/admin/utils";
+import {
+  createDocumentEntry,
+  getFileDetails,
+  uploadFile,
+} from "@/libs/admin/utils";
 import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma.server";
 import type { UserWithOrganizations } from "@/libs/types";
 import { currentUser } from "@clerk/nextjs/server";
-import {
-  DealDocumentType,
-  DealFinancingType,
-  type DocumentEvent,
-} from "@prisma/client";
+import { DealFinancingType, type DocumentEvent } from "@prisma/client";
 import { type NextRequest } from "next/server";
 import { z } from "zod";
 
@@ -16,9 +16,9 @@ export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
 /**
- * 
+ *
  * @param request Get documents for a project
- * @returns 
+ * @returns
  */
 export async function GET(request: NextRequest) {
   try {
@@ -58,11 +58,11 @@ export async function GET(request: NextRequest) {
         ...(dealStage ? { dealStage: dealStage } : {}),
         ...(isDealFinancingType
           ? {
-            OR: [
-              { financingTypes: { has: financingType as DealFinancingType } },
-              { financingTypes: { equals: [] } },
-            ],
-          }
+              OR: [
+                { financingTypes: { has: financingType as DealFinancingType } },
+                { financingTypes: { equals: [] } },
+              ],
+            }
           : { financingTypes: { equals: [] } }),
       },
       include: {
@@ -156,6 +156,7 @@ export async function POST(request: NextRequest) {
       dealId: formData.get("dealId"),
       key: formData.get("key"),
       hasFile: formData.has("file"),
+      dealDocumentType: formData.get("dealDocumentType"),
     });
 
     const dataToValidate = {
@@ -164,6 +165,7 @@ export async function POST(request: NextRequest) {
       dealId: formData.get("dealId"),
       key: formData.get("key"),
       file: formData.get("file"),
+      dealDocumentType: formData.get("dealDocumentType"),
     };
 
     const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
@@ -179,7 +181,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { type, organizationId, dealId, file, key } = validationResult.data;
+    const { type, organizationId, dealId, file, key, dealDocumentType } =
+      validationResult.data;
 
     const id = type === "deal" ? dealId : organizationId;
     if (!id) {
@@ -202,7 +205,7 @@ export async function POST(request: NextRequest) {
       path,
       key,
       dbUser.id,
-      DealDocumentType.VERIFICATION_ACCREDITATION
+      dealDocumentType
     );
 
     return jsonResponse({
