@@ -49,3 +49,14 @@ export async function deleteDealInDbAndHubspot(deal: Deal) {
   console.log("finished deleting deal in db and hubspot");
   return;
 }
+
+export async function clearAllTestData() {
+  const testUser = await prisma.user.findFirst({ where: { email: `${process.env.E2E_CLERK_USER_USERNAME}` } });
+  if (!testUser) { throw new Error("test user not found in db"); }
+  //Find all orgs owned by the test user
+  const orgs = await prisma.organization.findMany({ where: { ownerId: testUser.id } });
+  //Delete all deals associated with each org
+  for (const org of orgs) {
+    await prisma.deal.deleteMany({ where: { organizationId: org.id } });
+  }
+}
