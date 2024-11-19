@@ -95,7 +95,8 @@
     "next-test-api-route-handler": "^4.0.7",
     "prisma": "^5.21.1",
     "tsx": "^4.19.1",
-    "typescript": "^5.4.2"
+    "typescript": "^5.4.2",
+    "wait-on": "^8.0.1"
   },
   "ct3aMetadata": {
     "initVersion": "7.30.1"
