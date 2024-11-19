@@ -2,6 +2,8 @@
 import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs";
+import { DealDocumentType } from "@prisma/client";
+import { includes } from "lodash";
 
 /**
  * 
@@ -38,7 +40,20 @@ export async function GET() {
             },
         });
 
-        return jsonResponse(dealDocuments);
+        const taxDocuments = dealDocuments.filter((doc) => doc.type === DealDocumentType.K1);
+        const projects = await prisma.project.findMany();
+        const investmentDocuments = dealDocuments.filter((doc) => doc.type === DealDocumentType.INVESTMENT_DOCUMENT).map((doc) => {
+            const deal = userDeals.find((d) => d.id === doc.dealId);
+            if (!deal) {
+                return doc;
+            }
+            return {
+                ...doc,
+                projectName: projects.find((p) => p.id === deal.projectId)?.name,
+            };
+        });
+
+        return jsonResponse({taxDocuments, investmentDocuments});
 
 
     } catch (error) {
