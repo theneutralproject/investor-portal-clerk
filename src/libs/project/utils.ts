@@ -78,14 +78,8 @@ export async function getEquityStatsFromProject(amount: number, equityReturnsFil
         shareOfEquity = -amount / firstMilestone.aUnitReturns;
     }
 
-    console.log('unitType', unitType);
-    console.log('numberCUnits', numberCUnits);
-    console.log('numberAUnits', numberAUnits);
-    console.log('shareOfEquity', shareOfEquity);
-
     return { unitType, numberCUnits, numberAUnits, shareOfEquity, equityMilestones };
 }
-
 
 export function getDebtPayoutSchedule(
     amount: number,

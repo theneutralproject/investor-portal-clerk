@@ -3,7 +3,7 @@ import { isError } from "lodash";
 import prisma from "@/libs/prisma.server";
 import { type DocusignEnvelopeCreateSchema, zDocusignEvelopeCreate } from '@/libs/docusign/schema';
 import { getErrorMessage, jsonResponse } from '@/libs/utils';
-import { refreshAccessToken, instantiateApiClient, makeEnvelope, makeRecipientViewRequest } from "@/libs/docusign/utils";
+import { refreshAccessToken, instantiateApiClient, makeEnvelopeDefinition, makeRecipientViewRequest } from "@/libs/docusign/utils";
 import { currentUser } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
@@ -79,8 +79,8 @@ export async function POST(req: Request) {
     }
 
     const envelopesApi = await instantiateApiClient(accessTokenResponse.accessToken)
-    const envelope = makeEnvelope(
-        payload.envelopeId,
+    const envelope = makeEnvelopeDefinition(
+        payload.templateId,
         deal.organization,
         { ...deal, accreditationVerification: deal.accreditationVerification, investmentStats: deal.investmentStats },
         userWOrgsAndAddress
@@ -104,7 +104,7 @@ export async function POST(req: Request) {
         );
     }
 
-    const documentTemplateId = payload.envelopeId;
+    const documentTemplateId = payload.templateId;
     const userId = userWOrgsAndAddress.id;
 
     const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentTemplateId=${documentTemplateId}&userId=${userId}&dealId=${deal.id}`;
@@ -127,6 +127,16 @@ export async function POST(req: Request) {
             }
         );
     }
+    // store docusignEvent:
+    await prisma.docusignEvent.create({
+        data: {
+            envelopeId: envelopeResponse.envelopeId!,
+            templateId: documentTemplateId,
+            dealId: deal.id,
+            userId: userWOrgsAndAddress.id,
+            dateSent: new Date(),
+        }
+    });
 
     return new Response(
         JSON.stringify(viewRequestResponse),

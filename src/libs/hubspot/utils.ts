@@ -180,7 +180,7 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 /* eslint-enable */
 
 export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
-  const { dealStage, hubspotId, investmentStats } = deal;
+  const { dealStage, hubspotId, investmentStats, signaturesCompletedDate } = deal;
   const retObj = {
     hubspotDealId: parseInt(hubspotId, 10),
     properties: []
@@ -188,6 +188,7 @@ export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
   if (dealStage) retObj.properties.push({ name: "dealstage", value: dealStage.toString() });
   if (investmentStats?.amount) retObj.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
   if (investmentStats?.financingType) retObj.properties.push({ name: "financing_type", value: investmentStats?.financingType });
+  if(signaturesCompletedDate) retObj.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
   return retObj;
 }
 

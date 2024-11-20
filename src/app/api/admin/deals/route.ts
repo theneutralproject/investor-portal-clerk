@@ -3,7 +3,7 @@ import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import { DealDocumentType, Prisma } from "@prisma/client";
+import { DealDocumentType } from "@prisma/client";
 import { storageClient } from "@/libs/supabase";
 
 // get deals by email and project name OR with dealdocument
@@ -111,7 +111,7 @@ export async function POST(request: NextRequest) {
     if (!dealId) {
         return errorResponse("Missing required dealId", 400);
     }
-    const newPath = `deal/${dealId}/${pdfName}`;
+    const newPath = `deal-${dealId}/${pdfName}`;
     const { error } = await storageClient.from(`deal-documents`).move(`tempPdfStorage/${pdfName}`, newPath);
     if (error) {
         console.error("unable to move file to temp storage:");
