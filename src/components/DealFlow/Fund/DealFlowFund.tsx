@@ -26,7 +26,6 @@ import { type Deal } from "@prisma/client";
 import { type ProjectWithAllNestedData } from "@/libs/types";
 import PlaidLinkClass from "./PlaidLink";
 
-
 const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
   const defaultPaymentInfo = {
     investmentEntity: "Not Available",
@@ -189,14 +188,6 @@ const DealFlowFund: React.FC = () => {
               funds.
             </Typography>
             <PlaidLinkClass />
-            <Button
-              variant="neutralBlack"
-              onClick={handlePlaidConnection}
-              startIcon={<BankIcon sx={{ color: "white" }} />}
-              fullWidth
-            >
-              Connect to Bank
-            </Button>
           </Collapse>
         </CardContent>
       </Card>

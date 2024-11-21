@@ -51,13 +51,37 @@ class PlaidLinkClass extends React.Component<Props, State> {
         return (
             <PlaidLink
                 className="CustomButton"
-                style={{ padding: '20px', fontSize: '16px', cursor: 'pointer' }}
+                style={{
+                    padding: '8px',
+                    fontSize: '16px',
+                    cursor: 'pointer',
+                    backgroundColor: '#000',
+                    color: '#fff',
+                    border: 'none',
+                    borderRadius: '4px',
+                    width: '100%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                }}
                 token={this.state.token}
                 onSuccess={this.onSuccess}
                 onEvent={this.onEvent}
                 onExit={this.onExit}
             >
-                Link your bank account
+                <svg 
+                    width="24" 
+                    height="24" 
+                    viewBox="0 0 24 24"
+                    style={{color: 'white'}}
+                >
+                    <path 
+                        fill="currentColor" 
+                        d="M4 10v7h3v-7H4zm6 0v7h3v-7h-3zM2 22h19v-3H2v3zm14-12v7h3v-7h-3zm-4.5-9L2 6v2h19V6l-9.5-5z"
+                    />
+                </svg>
+                Connect Bank Account
             </PlaidLink>
         );
     }
