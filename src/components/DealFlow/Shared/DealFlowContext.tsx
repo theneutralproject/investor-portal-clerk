@@ -136,7 +136,7 @@ export const steps: Step[] = [
     component: DealFlowFund,
     isMajor: true,
     progress: 100,
-    requiredDealStage: 5,
+    requiredDealStage: 4,
   },
 ];
 
