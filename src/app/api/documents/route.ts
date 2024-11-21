@@ -65,6 +65,7 @@ async function validateUser() {
         dealId: formData.get("dealId"),
         key: formData.get("key"),
         hasFile: formData.has("file"),
+        dealDocumentType: formData.get("dealDocumentType"),
       });
   
       const dataToValidate = {
@@ -73,6 +74,7 @@ async function validateUser() {
         dealId: formData.get("dealId"),
         key: formData.get("key"),
         file: formData.get("file"),
+        dealDocumentType: formData.get("dealDocumentType"),
       };
   
       const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
@@ -88,7 +90,7 @@ async function validateUser() {
         );
       }
   
-      const { type, organizationId, dealId, file, key } = validationResult.data;
+      const { type, organizationId, dealId, file, key, dealDocumentType } = validationResult.data;
   
       const id = type === "deal" ? dealId : organizationId;
       if (!id) {
@@ -111,7 +113,7 @@ async function validateUser() {
         path,
         key,
         dbUser.id,
-        DealDocumentType.VERIFICATION_ACCREDITATION
+        dealDocumentType
       );
   
       return jsonResponse({
