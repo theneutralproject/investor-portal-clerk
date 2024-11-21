@@ -24,6 +24,8 @@ import PaymentProcessing from "./PaymentProcessing";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { type Deal } from "@prisma/client";
 import { type ProjectWithAllNestedData } from "@/libs/types";
+import PlaidLinkClass from "./PlaidLink";
+
 
 const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
   const defaultPaymentInfo = {
@@ -186,7 +188,7 @@ const DealFlowFund: React.FC = () => {
               industry standard for connecting to bank accounts and transferring
               funds.
             </Typography>
-
+            <PlaidLinkClass />
             <Button
               variant="neutralBlack"
               onClick={handlePlaidConnection}

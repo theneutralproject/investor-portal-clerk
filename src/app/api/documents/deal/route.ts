@@ -3,7 +3,6 @@ import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs";
 import { DealDocumentType } from "@prisma/client";
-import { includes } from "lodash";
 
 /**
  * 

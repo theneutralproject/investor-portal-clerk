@@ -362,7 +362,6 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
           deal: DealWithInvestmentStatsAndDocument | null;
         } = await dealResponse.json();
         const userData: UserWithAddress = await userResponse.json();
-
         setProject(dealData.project as ProjectWithAllNestedData);
         setDeal(dealData.deal);
         setUser(userData);
@@ -399,12 +398,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   ) => {
     if (!deal) return;
     setIsLoading(true);
-
-    const updatedDeal = {
-      ...deal,
-      ...updatedDealData,
-    };
-console.log(updatedDeal)
+    // Remove signaturesCompletedDate from updatedDealData because it was formatted as a string
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { signaturesCompletedDate, ...updatedDeal } = updatedDealData;
     try {
       const { data } = await axios.put<DealWithInvestmentStatsAndDocument>(
         `/api/deals`,
