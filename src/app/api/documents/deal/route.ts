@@ -1,66 +1,142 @@
-'use server';
+"use server";
+import {
+  uploadFile,
+  getFileDetails,
+  createDocumentEntry,
+} from "@/libs/admin/utils";
+import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
 import prisma from "@/libs/prisma.server";
-import { jsonResponse } from "@/libs/utils";
+import type { UserWithOrganizations } from "@/libs/types";
+import { jsonResponse, errorResponse, getErrorMessage } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs";
 import { DealDocumentType } from "@prisma/client";
-import { includes } from "lodash";
+import type { NextRequest } from "next/server";
+import { z } from "zod";
 
-/**
- * 
- * @param request Get documents for a deal
- * @returns 
- */
-export async function GET() {
-    try {
-        const user = await currentUser();
-        if (!user) {
-            return new Response(JSON.stringify({ error: "User not found" }), {
-                status: 404,
-                headers: { "Content-Type": "application/json" },
-            });
-        }
+async function validateUser() {
+  const user = await currentUser();
+  if (!user) {
+    throw new Error("User not found");
+  }
 
-        const { id } = user;
-        const neutralUser = await prisma.user.findUnique({
-            where: { clerkId: id },
-            include: { organizationMember: true },
-        });
+  const dbUser = (await prisma.user.findUnique({
+    where: { clerkId: user.id },
+    include: { organizationsOwned: true },
+  })) as UserWithOrganizations;
 
+  if (!dbUser) {
+    throw new Error(`User record with clerkid ${user.id} not found in prisma`);
+  }
 
-        const userDeals = await prisma.deal.findMany({
-            where: {
-                organizationId: { in: neutralUser?.organizationMember.map((om) => om.organizationId) },
-            },
-        });
+  return dbUser;
+}
 
-        // for these deals, get the documents
-        const dealDocuments = await prisma.dealDocument.findMany({
-            where: {
-                dealId: { in: userDeals.map((deal) => deal.id) },
-            },
-        });
-
-        const taxDocuments = dealDocuments.filter((doc) => doc.type === DealDocumentType.K1);
-        const projects = await prisma.project.findMany();
-        const investmentDocuments = dealDocuments.filter((doc) => doc.type === DealDocumentType.INVESTMENT_DOCUMENT).map((doc) => {
-            const deal = userDeals.find((d) => d.id === doc.dealId);
-            if (!deal) {
-                return doc;
-            }
-            return {
-                ...doc,
-                projectName: projects.find((p) => p.id === deal.projectId)?.name,
-            };
-        });
-
-        return jsonResponse({taxDocuments, investmentDocuments});
-
-
-    } catch (error) {
-        console.error("Error getting deal documents: ", error);
-        return new Response(JSON.stringify({ error: "Error getting deal documents" }), {
-            status: 500,
-            headers: { "Content-Type": "application/json" },
-        });
+async function validateAccess(
+  dbUser: UserWithOrganizations,
+  type: string,
+  id: number
+) {
+  if (type === "deal") {
+    const deal = await prisma.deal.findUnique({ where: { id } });
+    if (!deal) {
+      throw new Error("Deal not found");
     }
+    if (
+      !dbUser.organizationsOwned.some((org) => org.id === deal.organizationId)
+    ) {
+      throw new Error(
+        "You are not the owner of the organization that the deal belongs to"
+      );
+    }
+  } else {
+    if (!dbUser.organizationsOwned.some((org) => org.id === id)) {
+      throw new Error(
+        "You are not the owner of the organization you are trying to upload a document for"
+      );
+    }
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    const dbUser = await validateUser();
+    const formData = await request.formData();
+
+    console.log("Received form data:", {
+      keys: Array.from(formData.keys()),
+      type: formData.get("type"),
+      organizationId: formData.get("organizationId"),
+      dealId: formData.get("dealId"),
+      key: formData.get("key"),
+      hasFile: formData.has("file"),
+      dealDocumentType: formData.get("dealDocumentType"),
+    });
+
+    const dataToValidate = {
+      type: formData.get("type"),
+      organizationId: formData.get("organizationId"),
+      dealId: formData.get("dealId"),
+      key: formData.get("key"),
+      file: formData.get("file"),
+      dealDocumentType: formData.get("dealDocumentType"),
+    };
+
+    const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
+
+    if (!validationResult.success) {
+      console.error("Validation errors:", validationResult.error);
+      return jsonResponse(
+        {
+          error: "Validation failed",
+          details: validationResult.error.format(),
+        },
+        400
+      );
+    }
+
+    const { type, organizationId, dealId, file, key, dealDocumentType } =
+      validationResult.data;
+
+    const id = type === "deal" ? dealId : organizationId;
+    if (!id) {
+      return jsonResponse(
+        {
+          error: `${type === "deal" ? "Deal" : "Organization"} ID is required`,
+        },
+        400
+      );
+    }
+
+    await validateAccess(dbUser, type, id);
+    const path = await uploadFile(file, type, id);
+
+    const fileDetails = getFileDetails(file);
+    const newDocEntry = await createDocumentEntry(
+      type,
+      id,
+      fileDetails.name,
+      path,
+      key,
+      dbUser.id,
+      dealDocumentType
+    );
+
+    return jsonResponse({
+      success: true,
+      document: newDocEntry,
+    });
+  } catch (error) {
+    console.error("Error processing upload:", error);
+
+    if (error instanceof z.ZodError) {
+      return jsonResponse(
+        {
+          error: "Invalid data format",
+          details: error.errors,
+        },
+        400
+      );
+    }
+    return errorResponse(getErrorMessage(error), 500);
+  }
 }
