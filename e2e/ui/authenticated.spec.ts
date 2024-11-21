@@ -1,11 +1,11 @@
-// import { test } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-// test.describe("authentication tests", () => {
-//   // by default, the user is already signed in thanks to the global setup
-//   test("already signed in", async ({ page }) => {
-//     await page.goto("/projects", { waitUntil: "domcontentloaded" });
+test.describe("authentication view tests", () => {
+  test("Can view projects page and load project data", async ({ page }) => {
+    await page.goto("/projects", { waitUntil: "domcontentloaded" });
 
-//     await page.getByText('All Projects');
-//     await page.getByText('The Edison');
-//   });
-// });
+    await expect(page.getByText("All Projects")).toBeVisible();
+    await expect(page.getByText("The Edison")).toBeVisible();
+    await expect(page.getByText("Welcome, User")).toBeVisible();
+  });
+});

@@ -22,7 +22,7 @@ const useDocuments = (
 
   // Query function for fetching all documents within a project
   const fetchDocuments = async () => {
-    const url = `/api/documents?projectId=${projectId}&dealStage=${dealStageCheck}&financingType=${financingType}`;
+    const url = `/api/documents/project?projectId=${projectId}&dealStage=${dealStageCheck}&financingType=${financingType}`;
     const response = await axios.get(url);
     return response.data;
   };

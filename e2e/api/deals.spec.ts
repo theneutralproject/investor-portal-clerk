@@ -3,7 +3,7 @@ import { DealCreateSchema } from '@/libs/deal/schema';
 import { DealWithInvestmentStats } from '@/libs/types';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType, DealUnitType } from '@prisma/client';
-import { deleteDealInDbAndHubspot } from 'e2e/helpers';
+import { clearAllTestData, deleteDealInDbAndHubspot } from 'e2e/helpers';
 
 test.describe("api/deals test", () => {
     let testDeal: Deal | null = null;
@@ -17,6 +17,7 @@ test.describe("api/deals test", () => {
         amount: 5555,
     };
     test.beforeAll(async ({ request }) => {
+        await clearAllTestData();
         // create a deal
         const response = await request.post('/api/deals', { data: testDealData });
         testDeal = await JSON.parse(await response.text());

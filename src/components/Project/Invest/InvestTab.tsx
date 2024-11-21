@@ -28,7 +28,7 @@ export const createDocusignEnvelope = async (
   }
   const body: DocusignEnvelopeCreateSchema = {
     dealId: dealId,
-    envelopeId: envelopeId,
+    templateId: envelopeId,
   };
 
   const docusignResponse = await axios.post(url, body).catch((error) => {

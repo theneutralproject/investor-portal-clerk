@@ -1,7 +1,7 @@
 import type { NextRequest } from "next/server";
 import jwt from "jsonwebtoken";
 import prisma from "../prisma.server";
-import { type DealDocumentType, MembershipType, Role } from "@prisma/client";
+import { DealDocumentType, MembershipType, Role } from "@prisma/client";
 import { type MatchResponseObject, MatchConfidence } from "./schema";
 import { storageClient } from "../supabase";
 import type { DealWithFullOrgAndProject } from "../types";
@@ -107,7 +107,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
         let matchScore = 0.0;
         const matchedWords = [] as string[];
         wordScoreTuple.forEach(([word, score]) => {
-            if(word.length < 3) return; // skip short words
+            if (word.length < 3) return; // skip short words
             // const numMatches = text.toLowerCase().split(word).length - 1;
             // if (numMatches > 0) {
             //     matchScore += numMatches * score;
@@ -135,6 +135,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                         hubspotId: deal.hubspotId,
                         investmentEntity: deal.investmentEntity,
                         closingDate: deal.closingDate,
+                        signaturesCompletedDate: deal.signaturesCompletedDate,
                     },
                     owner: owner.user,
                     organization,
@@ -204,11 +205,13 @@ export function getFileExtension(mimeType: string): string {
 export async function uploadFile(
     file: FormDataEntryValue,
     type: string,
-    id: number
+    dealOrOrgId: number
 ): Promise<string> {
     const fileDetails = getFileDetails(file);
-    const fileName = `${fileDetails.name || `upload-${Date.now()}`
-        }${getFileExtension(fileDetails.type)}`;
+    let fileName = `${fileDetails.name || `upload-${Date.now()}`}`;
+    if(!fileName.toLowerCase().endsWith(".pdf")) {
+        fileName += ".pdf";
+    }
 
     try {
         let fileData: ArrayBuffer;
@@ -220,10 +223,14 @@ export async function uploadFile(
         } else {
             throw new Error("Invalid file format");
         }
-
+console.log("uploading file to storage");
+console.log("type", type);
+console.log("dealOrOrgId", dealOrOrgId);
+console.log("fileName", fileName);
+console.log("type", fileDetails.type);
         const { data, error } = await storageClient
             .from(`${type}-documents`)
-            .upload(`${type}-${id}/${fileName}`, fileData, {
+            .upload(`${type}-${dealOrOrgId}/${fileName}`, fileData, {
                 contentType: fileDetails.type,
             });
 
@@ -258,6 +265,9 @@ export async function createDocumentEntry(
         if (documentType === "deal") {
             if (!dealDocumentType) {
                 throw new Error("Missing required dealDocumentType field");
+            }
+            if(dealDocumentType === DealDocumentType.K1 && !taxYear) {
+                throw new Error("Missing required taxYear field for K1 document");
             }
             return await prisma.dealDocument.create({
                 data: {

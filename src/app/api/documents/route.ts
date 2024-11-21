@@ -1,15 +1,19 @@
 import {
-  createDocumentEntry,
-  getFileDetails,
   uploadFile,
+  getFileDetails,
+  createDocumentEntry,
 } from "@/libs/admin/utils";
 import { zPdfDocumentCreateSchema } from "@/libs/document/schema";
-import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma.server";
 import type { UserWithOrganizations } from "@/libs/types";
-import { currentUser } from "@clerk/nextjs/server";
-import { DealFinancingType, type DocumentEvent } from "@prisma/client";
-import { type NextRequest } from "next/server";
+import { jsonResponse, errorResponse, getErrorMessage } from "@/libs/utils";
+import { currentUser } from "@clerk/nextjs";
+import {
+  DealDocumentType,
+  DealFinancingType,
+  DocumentEvent,
+} from "@prisma/client";
+import type { NextRequest } from "next/server";
 import { z } from "zod";
 
 export const dynamic = "force-dynamic";
@@ -205,7 +209,7 @@ export async function POST(request: NextRequest) {
       path,
       key,
       dbUser.id,
-      dealDocumentType
+      dealDocumentType as DealDocumentType
     );
 
     return jsonResponse({

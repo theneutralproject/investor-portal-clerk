@@ -12,14 +12,13 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
 }) => {
   let uploadInstructions = "";
   let documentList: string[] = [];
-  let dealDocumentType: DealDocumentType =
+  const dealDocumentType: DealDocumentType =
     DealDocumentType.VERIFICATION_ACCREDITATION;
 
   if (accreditationType?.includes("income")) {
     uploadInstructions =
       "Upload one of the following documents for each of the last two years to verify accreditation:";
     documentList = ["K1", "W2", "1099", "1040"];
-    dealDocumentType = DealDocumentType.K1;
   } else if (accreditationType?.includes("net worth")) {
     uploadInstructions = "Upload one of the following to verify accreditation:";
     documentList = [
@@ -27,12 +26,9 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
       "Brokerage statement",
       "Certificate of deposit",
     ];
-    dealDocumentType = DealDocumentType.VERIFICATION_ACCREDITATION;
   } else if (accreditationType?.includes("professional license")) {
     uploadInstructions =
       "Upload documents to prove you hold a license and are in good standing.";
-
-    dealDocumentType = DealDocumentType.VERIFICATION_ACCREDITATION;
   }
 
   return (

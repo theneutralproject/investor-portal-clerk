@@ -25,7 +25,7 @@ export async function updateDeal(
         return Error("The deal does not exist in the database");
     }
 
-    if (dealData.dealStage === 5) {
+    if (existingDeal.dealStage === 5) {
         console.error("Completed Deals cannot be updated");
         return Error("Completed Deals cannot be updated");
     }
