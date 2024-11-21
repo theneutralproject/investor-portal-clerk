@@ -212,7 +212,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
           flexGrow: 1,
           height: "100vh",
           overflow: "auto",
-          backgroundColor: "white",
+          backgroundColor: "#f5f5f5",
         }}
       >
         <Toolbar />
