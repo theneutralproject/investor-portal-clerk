@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Button,
   Stack,
   Alert,
   IconButton,
@@ -88,11 +87,6 @@ const DealFlowFund: React.FC = () => {
     void navigator.clipboard.writeText(text);
     setCopied(field);
     setTimeout(() => setCopied(null), 2000);
-  };
-
-  const handlePlaidConnection = async () => {
-    // Implement Plaid connection logic here
-    console.log("Connecting to Plaid...");
   };
 
   const toProcessingScreen = async () => {
@@ -187,7 +181,7 @@ const DealFlowFund: React.FC = () => {
               industry standard for connecting to bank accounts and transferring
               funds.
             </Typography>
-            <PlaidLinkClass />
+            <PlaidLinkClass dealId={deal.id} />
           </Collapse>
         </CardContent>
       </Card>
