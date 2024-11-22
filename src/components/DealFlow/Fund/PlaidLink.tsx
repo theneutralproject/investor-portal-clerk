@@ -38,7 +38,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
     onSuccess: PlaidLinkOnSuccess = async (publicToken, metadata) => {
         const fullMetadata = metadata as PlaidLinkOnSuccessMetadata & { account_id: string };
         // https://plaid.com/docs/api/tokens/#token-exchange-flow 
-        const res = await axios.post('/api/finix/transaction ', {
+        const res = await axios.post('/api/finix/transaction', {
             plaid_public_token: publicToken,
             plaid_account_id: fullMetadata.account_id,
             type: "PLAID_PROCESSOR_TOKEN",

@@ -150,7 +150,9 @@ const DealFlowFund: React.FC = () => {
         Neutral does not store your banking information.
       </Typography>
 
-      {/* Plaid Connection Section */}
+      {/** Plaid Connection Section
+       * TODO: Only show if process.env.FINIX_MAX_TRANSACTION_AMOUNT! is less than the deal amount 
+      */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Stack

@@ -18,6 +18,7 @@ const config = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],
+    swcMinify: false, /**to support react-pdf */
   }, 
   webpack: (config) => {
     config.externals.push({

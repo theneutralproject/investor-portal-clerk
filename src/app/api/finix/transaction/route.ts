@@ -3,9 +3,11 @@ import { updateDeal } from "@/libs/deal/utils.server";
 import prisma from "@/libs/prisma.server";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
+import { isError } from "lodash";
 import type { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
+    console.log('BEGIN Finix Transaction\n\n');
     const user = await currentUser();
     if (!user) {
         return errorResponse('User not found', 404);
@@ -15,6 +17,7 @@ export async function POST(request: NextRequest) {
     if (!(body.plaid_public_token || body.plaid_account_id || !body.dealId)) {
         return errorResponse('plaid_public_token and plaid_account_id are required', 400);
     }
+    console.log("1");
     // get plaid exhange token
     const plaidTokenResponse = await fetch(`${process.env.FINIX_BASE_URL!}/third_party_tokens`, {
         method: 'POST',
@@ -29,6 +32,7 @@ export async function POST(request: NextRequest) {
             type: "PLAID_PROCESSOR_TOKEN"
         })
     });
+    console.log("2");
     const { token: third_party_token } = (await plaidTokenResponse.json()) as { token: string, type: string };
 
     const dbUser = await prisma.user.findUnique({
@@ -37,6 +41,7 @@ export async function POST(request: NextRequest) {
     if (!dbUser) {
         return errorResponse('User not found', 404);
     }
+    console.log("3");
     // get customer identity
     const identityResponse = await fetch(`${process.env.FINIX_BASE_URL!}/identities`, {
         method: 'POST',
@@ -55,7 +60,7 @@ export async function POST(request: NextRequest) {
         })
     });
     const { id: identity } = (await identityResponse.json()) as { id: string };
-
+console.log("4", identity);
     // create finix payment instrument for customer
     const paymentInstrumentResponse = await fetch(`${process.env.FINIX_BASE_URL!}/payment_instruments`, {
         method: 'POST',
@@ -71,6 +76,7 @@ export async function POST(request: NextRequest) {
             type: "BANK_ACCOUNT"
         })
     });
+    console.log("5");
     // https://finix.com/docs/guides/payments/online-payments/getting-started/adding-bank-accounts-with-plaid/#step-4-create-a-finix-payment-instrument
     const paymentInstrumentResponseData = (await paymentInstrumentResponse.json()) as { id: string, application: string, currency: string, third_party: string, type: string, bank_account_validation_check: string, instrument_type: string };
     const { id: buyerId } = paymentInstrumentResponseData;
@@ -88,8 +94,10 @@ export async function POST(request: NextRequest) {
         return errorResponse('Deal not found', 404);
     }
     const { slug, name: projectName } = deal.project;
+    console.log(slug, projectName);
     const merchantId = process.env[`FINIX_MERCHANT_ID_${slug.toUpperCase()}`]!;
-
+    console.log("buyerId", buyerId);
+console.log("merchantId", merchantId);
     // transfer money to Finix merchant
     const achTransferResponse = await fetch(`${process.env.FINIX_BASE_URL!}/transfers`, {
         method: 'POST',
@@ -99,7 +107,7 @@ export async function POST(request: NextRequest) {
             'Authorization': 'Basic ' + Buffer.from(`${process.env.FINIX_USERNAME!}:${process.env.FINIX_PASSWORD!}`).toString('base64')
         },
         body: JSON.stringify({
-            amount: deal.investmentStats.amount,
+            amount: deal.investmentStats.amount * 100,
             currency: "USD",
             fee: 0,
             merchant: merchantId,
@@ -111,9 +119,18 @@ export async function POST(request: NextRequest) {
         })
     });
 
-    const achTransferResponseData = await achTransferResponse.json() as { type: string, state: string, id: string }
+    const achTransferResponseData = await achTransferResponse.json() as { type?: string, state?: string, id?: string, _embedded?: { errors: { message: string }[] } };
     console.log(achTransferResponseData)
-    if (achTransferResponseData.state.toUpperCase() === 'SUCCEEDED') {
+    if(isError(achTransferResponseData)) {
+        console.error(achTransferResponseData);
+        return errorResponse('Error transferring money', 500);
+    }
+    if(!achTransferResponseData.state && achTransferResponseData._embedded) {
+        console.error(achTransferResponseData._embedded.errors);
+        return errorResponse(achTransferResponseData._embedded.errors[0]?.message ?? "The ACH transfer failed. Please contact your Neutral Representative", 500);
+    }
+
+    if (achTransferResponseData.state?.toUpperCase() === 'SUCCEEDED') {
         await updateDeal({
             hubspotId: deal.hubspotId,
             dealStage: 5,
@@ -121,7 +138,7 @@ export async function POST(request: NextRequest) {
         });
         return jsonResponse({ message: 'The ACH transfer was successful' });
     }
-    else if (achTransferResponseData.state.toUpperCase() === 'FAILED') {
+    else if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
         return errorResponse('The ACH transfer failed. Please contact your Neutral Representative', 400);
     }
     else {
