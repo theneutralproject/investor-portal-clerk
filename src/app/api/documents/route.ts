@@ -5,7 +5,6 @@ import prisma from "@/libs/prisma.server";
 import type { UserWithOrganizations } from "@/libs/types";
 import { jsonResponse, errorResponse, getErrorMessage } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs";
-import { DealDocumentType } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { z } from "zod";
 
