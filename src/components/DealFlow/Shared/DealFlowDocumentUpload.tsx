@@ -12,7 +12,11 @@ import {
 } from "@mui/material";
 import { Upload, Check, X, FileText } from "lucide-react";
 import { useDealFlow } from "./DealFlowContext";
-import { type OrganizationDocument, type DealDocument } from "@prisma/client";
+import {
+  type OrganizationDocument,
+  type DealDocument,
+  type DealDocumentType,
+} from "@prisma/client";
 
 type UploadStatus = "uploading" | "success" | "error";
 type DocumentType = "organization" | "deal";
@@ -25,6 +29,7 @@ interface Document {
 interface DocumentUploadProps {
   documents: Document[];
   type: DocumentType;
+  dealDocumentType?: DealDocumentType;
 }
 
 interface FileUploadState {
@@ -39,6 +44,7 @@ type DocumentTypes = OrganizationDocument | DealDocument;
 const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   documents,
   type,
+  dealDocumentType,
 }) => {
   const { organization, deal, refetchOrganization, refetchDeal } =
     useDealFlow();
@@ -139,7 +145,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       formData.append("organizationId", organization.id.toString());
       formData.append("key", key);
       formData.append("dealId", deal.id.toString());
-
+      formData.append("dealDocumentType", dealDocumentType ?? "");
       // Start upload process
       void handleFileUpload(key, file, formData);
     },

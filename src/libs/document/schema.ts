@@ -1,4 +1,4 @@
-import { DocumentEventType } from "@prisma/client";
+import { DealDocumentType, DocumentEventType } from "@prisma/client";
 import { z } from "zod";
 import * as zfd from "zod-form-data";
 
@@ -90,6 +90,7 @@ export const zPdfDocumentCreateSchema = z.object({
   }),
   file: createFileSchema(),
   key: z.string(),
+  dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
 });
 
 export type PdfDocumentCreateSchema = z.infer<typeof zPdfDocumentCreateSchema>;

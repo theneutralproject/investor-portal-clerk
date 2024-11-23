@@ -1,6 +1,7 @@
 import React from "react";
 import { Box, Typography } from "@mui/material";
 import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
+import { DealDocumentType } from "@prisma/client";
 
 interface UploadDocumentContentProps {
   accreditationType: string;
@@ -11,6 +12,8 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
 }) => {
   let uploadInstructions = "";
   let documentList: string[] = [];
+  const dealDocumentType: DealDocumentType =
+    DealDocumentType.VERIFICATION_ACCREDITATION;
 
   if (accreditationType?.includes("income")) {
     uploadInstructions =
@@ -56,6 +59,7 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
             key: "VERIFICATION_ACCREDITATION",
           },
         ]}
+        dealDocumentType={dealDocumentType}
       />
     </Box>
   );
