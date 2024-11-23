@@ -7,6 +7,7 @@ import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
 import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
 import DealFlowFooter from "../Shared/DealFlowFooter";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import { DealDocumentType } from "@prisma/client";
 
 const REQUIRED_DOCUMENTS = [
   {
@@ -157,6 +158,7 @@ const DealFlowEntityDetails: React.FC = () => {
       <DealFlowDocumentUpload
         documents={REQUIRED_DOCUMENTS}
         type="organization"
+        dealDocumentType={DealDocumentType.INVESTMENT_DOCUMENT}
       />
 
       <DealFlowFooter
