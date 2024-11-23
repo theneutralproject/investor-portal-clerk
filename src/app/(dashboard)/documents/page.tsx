@@ -40,6 +40,26 @@ interface DocumentsResponse {
   investmentDocuments: Document[];
 }
 
+const handleDownload = async (downloadUrl: string, fileName: string) => {
+  try {
+    const response = await fetch(downloadUrl);
+    if (!response.ok) throw new Error("Download failed");
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", fileName);
+    document.body.appendChild(link);
+    link.click();
+    link.parentNode?.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  } catch (error) {
+    console.error("Download error:", error);
+    alert("Failed to download the file. Please try again.");
+  }
+};
+
 const DocumentList = ({
   documents,
   isLoading,
@@ -107,7 +127,7 @@ const DocumentList = ({
             <Typography
               variant="h6"
               sx={{
-                fontWeight: 600, // Make year bold
+                fontWeight: 600,
               }}
             >
               {year}
@@ -136,9 +156,9 @@ const DocumentList = ({
                         variant="grayPill"
                         size="small"
                         startIcon={<FileDownloadIcon />}
-                        href={doc.downloadUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                        onClick={() =>
+                          handleDownload(doc.downloadUrl, doc.name)
+                        }
                       >
                         Download
                       </Button>

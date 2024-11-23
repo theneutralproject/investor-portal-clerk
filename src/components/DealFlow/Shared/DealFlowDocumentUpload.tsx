@@ -149,7 +149,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       // Start upload process
       void handleFileUpload(key, file, formData);
     },
-    [organization?.id, deal?.id, handleFileUpload, type]
+    [organization?.id, deal?.id, handleFileUpload, type, dealDocumentType]
   );
 
   const handleRemoveFile = useCallback((key: string, fileToRemove: File) => {
