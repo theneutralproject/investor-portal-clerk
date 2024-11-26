@@ -2,14 +2,17 @@ import { authMiddleware, redirectToSignUp } from "@clerk/nextjs";
 import { type NextRequest } from "next/server";
 
 export default authMiddleware({
-  ignoredRoutes: ["/api/webhooks/(.*)", "/api/admin/(.*)", "/api/docusign/return"],
+  ignoredRoutes: [
+    "/api/webhooks/(.*)", 
+    "/api/admin/(.*)", 
+    "/api/docusign/return", 
+    "/api/finix/webhooks", 
+    "api/clerk"
+  ],
   publicRoutes: (req: NextRequest) => {
     const publicRoutes = [
       "/terms",
       "/support",
-      "/api/clerk",
-      "/api/admin/(.*)",
-      "/api/docusign/return",
     ];
 
     // Use exact path matching or proper pattern matching

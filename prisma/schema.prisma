@@ -48,7 +48,7 @@ model Deal {
   investmentStats           DealInvestmentStats?
   accreditationVerification AccreditationVerification?
   closingDate               DateTime?
-  signaturesCompletedDate                DateTime?
+  signaturesCompletedDate   DateTime?
   DocusignEvent             DocusignEvent[]
 }
 
