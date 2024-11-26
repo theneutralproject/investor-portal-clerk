@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
             }, true);
         } catch (error) {
             console.error("unable to set deal stage to 5", error);
-            return errorResponse('The ACH transfer was NOT successful', 500);
+            // return errorResponse('The ACH transfer was NOT successful', 500);
         }
         return jsonResponse({ message: 'The ACH transfer was successful' });
     }

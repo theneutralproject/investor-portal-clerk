@@ -1,7 +1,6 @@
 import { createDocumentEntry } from "@/libs/admin/utils";
 import { updateDeal } from "@/libs/deal/utils.server";
 import { getEnvelopeAsPdfFileBuffer, instantiateApiClient, refreshAccessToken } from "@/libs/docusign/utils";
-import { getHsDealPropsFromDeal, updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { DocumentType, DealDocumentType } from "@prisma/client";

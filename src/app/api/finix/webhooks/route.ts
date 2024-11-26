@@ -1,6 +1,5 @@
-import { DealUpdateSchema } from "@/libs/deal/schema";
+import type { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils.server";
-import { getHsDealPropsFromDeal, updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import type { NextRequest } from "next/server";
 
