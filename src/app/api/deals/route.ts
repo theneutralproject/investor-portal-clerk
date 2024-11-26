@@ -236,7 +236,7 @@ export async function PUT(request: NextRequest) {
     }
     // also update the deal in hubspot:
     const hsDeal = getHsDealPropsFromDeal(deal);
-    const updatedDeal = await updateDeal(deal);
+    const updatedDeal = await updateDeal(deal, true);
     await updateHubspotDealProperties(hsDeal);
 
     return jsonResponse(updatedDeal);

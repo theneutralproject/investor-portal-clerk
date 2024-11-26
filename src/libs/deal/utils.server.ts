@@ -4,14 +4,16 @@ import { isError } from "lodash";
 import type { DealUpdateSchema } from "./schema";
 import { getEquityStatsFromProject } from "../project/utils";
 import prisma from "../prisma.server";
+import { getHsDealPropsFromDeal, updateHubspotDealProperties } from '../hubspot/utils';
 
 /**
- * Updates a deal in the database
+ * Updates a deal in the database and in Hubspot
  * @param {DealUpdateSchema} updateDealData - The data of the deal to update
  * @returns {Promise<Deal | Error>} The updated deal or an error
  */
 export async function updateDeal(
-    updateDealData: DealUpdateSchema /**dealData includes fields for both Deal and DealInvestmentStats */
+    updateDealData: DealUpdateSchema /**dealData includes fields for both Deal and DealInvestmentStats */,
+    updateHubspot = false
 ) {
     const { investmentStats, ...dealData } = updateDealData;
     let updatedStats: DealInvestmentStats | null | Error = null;
@@ -94,6 +96,16 @@ export async function updateDeal(
             });
     }
     if (isError(updatedStats)) return updatedStats;
+
+    if (updateHubspot) {
+        try {
+            const hsDeal = getHsDealPropsFromDeal(updateDealData);
+            await updateHubspotDealProperties(hsDeal);
+        } catch (error) {
+            console.error("Failed to update deal in Hubspot", error);
+        }
+    }
+
     updatedDeal.investmentStats = updatedStats;
     return updatedDeal;
 };

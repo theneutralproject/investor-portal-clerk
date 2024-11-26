@@ -49,6 +49,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
             console.log(message);
             toast.success(message);
             // TODO: show success message: https://linear.app/neutralus/issue/NTRL-183/ux-revise-ach-payment-step
+            // TODO: disable the button to avoid multiple clicks
         }
         else {
             const message = getErrorMessage(res.data);

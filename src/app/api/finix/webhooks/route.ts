@@ -1,4 +1,6 @@
+import { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils.server";
+import { getHsDealPropsFromDeal, updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import type { NextRequest } from "next/server";
 
@@ -42,7 +44,6 @@ export async function POST(request: NextRequest) {
                     id: string | null,
                     failure_message: string | null,
                     failure_code: string | null,
-                    trace_id: string | null,
                     source: string | null,
                     state: string | null,
                     amount: number | null,
@@ -60,27 +61,24 @@ export async function POST(request: NextRequest) {
 
     if (body._embedded.transfers.length > 0) {
         const transfer = body._embedded.transfers[0];
-        if(transfer.subtype !== 'API') {
-            console.log('ignoring the Webhook because the subtype is not "API":', transfer);
-            return jsonResponse({ message: 'ignoring the Webhook' });
-        }
-        if (!transfer.trace_id) {
-            console.log('ignoring the Webhook because the trace_id is missing:', transfer);
+        if (transfer.subtype !== 'API') {
+            console.log('ignoring the Webhook because the subtype is not "API"');
             return jsonResponse({ message: 'ignoring the Webhook' });
         }
         if (transfer.state?.toUpperCase() === 'SUCCEEDED') {
             console.log('Processing Transfer Succeeded Webhook: ', transfer);
             const { dealHubspotId } = transfer.tags;
-            if(!dealHubspotId) {
+            if (!dealHubspotId) {
                 console.error('The ACH transfer was NOT successful because the tags were missing', transfer.tags);
                 return errorResponse('The ACH transfer was NOT successful because the tags were missing', 500);
             }
             try {
-                await updateDeal({
+                const dealData = {
                     hubspotId: dealHubspotId,
-                    dealStage: 5,
-                    closingDate: new Date()
-                });
+                    dealstage: 5,
+                    closingDate: new Date(Date.now())
+                } as DealUpdateSchema
+                await updateDeal(dealData, true);
             } catch (error) {
                 console.error("unable to set deal stage to 5 in webhook route", error);
                 return errorResponse('The ACH transfer was NOT successful', 500);

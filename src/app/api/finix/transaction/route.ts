@@ -108,7 +108,8 @@ export async function POST(request: NextRequest) {
                 transaction_id: deal.transactionId,
                 dealHubspotId: deal.hubspotId,
                 project: projectName
-            }
+            },
+            idempotency_id: deal.transactionId
         })
     });
 
@@ -129,7 +130,7 @@ export async function POST(request: NextRequest) {
                 hubspotId: deal.hubspotId,
                 dealStage: 5,
                 closingDate: new Date(Date.now())
-            });
+            }, true);
         } catch (error) {
             console.error("unable to set deal stage to 5", error);
             return errorResponse('The ACH transfer was NOT successful', 500);
