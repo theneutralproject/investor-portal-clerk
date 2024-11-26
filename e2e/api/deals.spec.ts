@@ -90,10 +90,12 @@ test.describe("api/deals test", () => {
         expect(body.dealStage).toBe(1);
     });
 
-    test.afterAll(async () => {
+    test.afterEach(async () => {
         if (testDeal) {
             await deleteDealInDbAndHubspot(testDeal);
             testDeal = null;
+        } else {
+            console.error("testDeal is null - skipping cleanup");
         }
         if (secondDeal) {
             await deleteDealInDbAndHubspot(secondDeal);

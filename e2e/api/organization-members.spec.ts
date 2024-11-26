@@ -73,7 +73,6 @@ test.describe("api/organizations/members test", () => {
             }
         });
         const putResponseBody = await JSON.parse(await updateResponse.text());
-        console.log(putResponseBody);
         expect(putResponseBody.user.email).toBe('updatedEmail@test-email.org');
         expect(putResponseBody.user.firstName).toBe(memberData.user.firstName);
         expect(updateResponse.status()).toBe(200);

@@ -3,9 +3,10 @@ import { APIRequestContext } from '@playwright/test';
 import prisma from "@/libs/prisma.server";
 import { OrganizationWithMembersAndAddress } from "@/libs/types";
 
-async function deleteHubspotDeal(dealId: string) {
+async function deleteHubspotDeal(hubspotId: string) {
+  console.log("begin deleting hubspot deal", hubspotId);
   return fetch(
-    `${process.env.HUBSPOT_API_BASE_URL}/crm/v3/objects/deals/${dealId}`,
+    `${process.env.HUBSPOT_API_BASE_URL}/crm/v3/objects/deals/${hubspotId}`,
     {
       method: "DELETE",
       headers: {
