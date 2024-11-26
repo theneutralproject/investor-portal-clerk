@@ -119,7 +119,7 @@ export async function POST(req: Request) {
       }
     }
 
-    const updatedDeal: Deal | Error = await updateDeal(dealBody);
+    const updatedDeal: Deal | Error = await updateDeal(dealBody, false);
     if (isError(updatedDeal)) {
       console.error("Error updateDeal response:\n", updateDeal.toString());
       console.log(`Deal with HS ID ${dealBody.hubspotId} does not exist and was likely manually created in HS`);

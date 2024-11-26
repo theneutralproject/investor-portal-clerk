@@ -181,15 +181,15 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 
 export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
   const { dealStage, hubspotId, investmentStats, signaturesCompletedDate } = deal;
-  const retObj = {
+  const hsReturnObject = {
     hubspotDealId: parseInt(hubspotId, 10),
     properties: []
   } as HubspotDealUpdate;
-  if (dealStage) retObj.properties.push({ name: "dealstage", value: dealStage.toString() });
-  if (investmentStats?.amount) retObj.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
-  if (investmentStats?.financingType) retObj.properties.push({ name: "financing_type", value: investmentStats?.financingType });
-  if(signaturesCompletedDate) retObj.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
-  return retObj;
+  if (dealStage) hsReturnObject.properties.push({ name: "dealstage", value: dealStage.toString() });
+  if (investmentStats?.amount) hsReturnObject.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
+  if (investmentStats?.financingType) hsReturnObject.properties.push({ name: "financing_type", value: investmentStats?.financingType });
+  if(signaturesCompletedDate) hsReturnObject.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
+  return hsReturnObject;
 }
 
 export async function associateContactWithDealInHubspot(contactId: string, dealId: string) {

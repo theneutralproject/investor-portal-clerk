@@ -1,7 +1,6 @@
 import { createDocumentEntry } from "@/libs/admin/utils";
 import { updateDeal } from "@/libs/deal/utils.server";
 import { getEnvelopeAsPdfFileBuffer, instantiateApiClient, refreshAccessToken } from "@/libs/docusign/utils";
-import { getHsDealPropsFromDeal, updateHubspotDealProperties } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { DocumentType, DealDocumentType } from "@prisma/client";
@@ -61,9 +60,6 @@ export async function POST(req: NextRequest) {
             // update deal and hubspot
             const dealData = { hubspotId: deal.hubspotId, signaturesCompletedDate: dealEvent.dateCompleted ?? new Date() }
             await updateDeal(dealData);
-            const hsDeal = getHsDealPropsFromDeal(dealData);
-            await updateHubspotDealProperties(hsDeal);
-
 
             // get documentName from projectdocs
             const projectDoc = await prisma.projectDocument.findFirst({

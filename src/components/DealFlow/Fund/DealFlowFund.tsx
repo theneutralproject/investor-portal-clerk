@@ -4,7 +4,6 @@ import {
   Typography,
   Card,
   CardContent,
-  Button,
   Stack,
   Alert,
   IconButton,
@@ -24,6 +23,7 @@ import PaymentProcessing from "./PaymentProcessing";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { type Deal } from "@prisma/client";
 import { type ProjectWithAllNestedData } from "@/libs/types";
+import PlaidLinkClass from "./PlaidLink";
 
 const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
   const defaultPaymentInfo = {
@@ -89,11 +89,6 @@ const DealFlowFund: React.FC = () => {
     setTimeout(() => setCopied(null), 2000);
   };
 
-  const handlePlaidConnection = async () => {
-    // Implement Plaid connection logic here
-    console.log("Connecting to Plaid...");
-  };
-
   const toProcessingScreen = async () => {
     setShowProcessing(true);
   };
@@ -155,7 +150,9 @@ const DealFlowFund: React.FC = () => {
         Neutral does not store your banking information.
       </Typography>
 
-      {/* Plaid Connection Section */}
+      {/** Plaid Connection Section
+       * TODO: Only show if process.env.FINIX_MAX_TRANSACTION_AMOUNT! is less than the deal amount 
+      */}
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Stack
@@ -186,15 +183,7 @@ const DealFlowFund: React.FC = () => {
               industry standard for connecting to bank accounts and transferring
               funds.
             </Typography>
-
-            <Button
-              variant="neutralBlack"
-              onClick={handlePlaidConnection}
-              startIcon={<BankIcon sx={{ color: "white" }} />}
-              fullWidth
-            >
-              Connect to Bank
-            </Button>
+            <PlaidLinkClass dealId={deal.id} />
           </Collapse>
         </CardContent>
       </Card>

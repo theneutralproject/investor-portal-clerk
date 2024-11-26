@@ -10,7 +10,6 @@ export const zDealInvestmentStatsUpdateSchema = z.object({
   numberAUnits: z.number().min(0).optional(),
   numberCUnits: z.number().min(0).optional(),
   shareOfEquity: z.number().min(0).optional(),
-
 });
 
 export type DealInvestmentStatsUpdateSchema = z.infer<typeof zDealInvestmentStatsUpdateSchema>;
@@ -25,7 +24,6 @@ export const zDealUpdateSchema = z.object({
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
-
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
