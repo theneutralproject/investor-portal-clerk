@@ -15,7 +15,6 @@ test.describe("api/organizations tests", () => {
             testOrg = await resetOrgInDb(request)
         });
         test('Get all organizations returns an array with one org', async ({ request }) => {
-            console.log(testOrg);
             console.log("running get all orgs test");
             const response = await request.get('/api/organizations');
             expect(response.status()).toBe(200);
@@ -23,7 +22,6 @@ test.describe("api/organizations tests", () => {
             expect(response.headers()['content-type']).toBe('application/json');
             expect(body).toHaveLength(1);
             const org = body[0] as Organization;
-            console.log("org", org)
             expect(org).toHaveProperty('name');
             expect(org.name).toContain('Tester');
             expect(org.ownershipType).toBe(DealOwnershipType.INDIVIDUAL);
@@ -171,9 +169,7 @@ test.describe("api/organizations tests", () => {
                     juristication: 'US'
                 }
             })
-            console.log("response", await (response.text()));
             const body = await JSON.parse(await response.text()) as Organization | null;
-            console.log("new org", body);
             if (!body) {
                 console.error("new org is null - skipping test");
                 return
@@ -196,7 +192,6 @@ test.describe("api/organizations tests", () => {
             })
 
             const body = await JSON.parse(await response.text()) as Organization;
-            console.log(body);
             orgId = body.id;
             expect(response.status()).toBe(201);
             expect(response.headers()['content-type']).toBe('application/json');
