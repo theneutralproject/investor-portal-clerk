@@ -25,7 +25,6 @@ export async function POST(request: NextRequest) {
     if (!(body.plaid_public_token || body.plaid_account_id || !body.dealId)) {
         return errorResponse('plaid_public_token and plaid_account_id are required', 400);
     }
-    // get plaid exhange token
     try {
         const third_party_token = await getPlaidToken(body.plaid_public_token, body.plaid_account_id);
         const identity = await getIdentity(user);
@@ -73,7 +72,6 @@ export async function POST(request: NextRequest) {
                 }, true);
             } catch (error) {
                 console.error("unable to set deal stage to 5", error);
-                // return errorResponse('The ACH transfer was NOT successful', 500);
             }
             return jsonResponse({ message: 'The ACH transfer was successful' });
         }
@@ -173,5 +171,4 @@ async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId
     });
 
     return await achTransferResponse.json() as { type?: string, state?: string, id?: string, trace_id: string, failure_code: string, failure_message: string, _embedded?: { errors: { message: string }[] } };
-    // console.log(achTransferResponseData)
 }
