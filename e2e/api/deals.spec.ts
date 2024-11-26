@@ -94,6 +94,8 @@ test.describe("api/deals test", () => {
         if (testDeal) {
             await deleteDealInDbAndHubspot(testDeal);
             testDeal = null;
+        } else {
+            console.error("testDeal is null - skipping cleanup");
         }
         if (secondDeal) {
             await deleteDealInDbAndHubspot(secondDeal);
