@@ -10,6 +10,7 @@ import {
   styled,
   Divider,
 } from "@mui/material";
+import Image from "next/image";
 
 const StyledButton = styled(Button)(({ theme }) => ({
   borderRadius: "20px",
@@ -47,13 +48,7 @@ const Questions: React.FC<QuestionsProps> = ({
         <Divider sx={{ mb: 2 }} />
 
         <Stack direction="row" spacing={2} alignItems="center" sx={{ mb: 3 }}>
-          <Avatar
-            src={avatarSrc}
-            sx={{
-              width: 40,
-              height: 40,
-            }}
-          />
+          <Image width="40" height="40" src={"/StormAvatar.png"} alt={""} />
           <Typography
             variant="subtitle2"
             fontSize="12px"

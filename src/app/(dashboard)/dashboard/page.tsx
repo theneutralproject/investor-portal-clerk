@@ -17,7 +17,7 @@ import { useUser } from "@clerk/nextjs";
 const DashboardPage = () => {
   const { user } = useUser();
 
-  const loggedIn = false;
+  const loggedIn = !!user;
 
   const { isLoading, data } = useQuery<ProjectWithAllNestedData[], Error>({
     queryKey: ["project", "all"],
@@ -34,7 +34,7 @@ const DashboardPage = () => {
     : "Welcome to Neutral";
   return (
     <Box>
-      <DashboardPageBanner background="/learnBanner.png" headline={headline} />
+      <DashboardPageBanner background="/DashboardHeader.jpeg" headline={headline} />
       <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid size={8} display="flex" justifyContent="center">
           <Box sx={{ width: "100%" }}>

@@ -12,11 +12,11 @@ import {
 } from "@mui/material";
 import { type ProjectWithAllNestedData } from "@/libs/types";
 
-// Styled components
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   padding: theme.spacing(3),
   boxShadow: "none",
+  transition: "box-shadow 0.2s",
   "&:hover": {
     boxShadow: theme.shadows[4],
   },
@@ -46,9 +46,16 @@ interface DashboardProjectsProps {
 }
 
 const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
-  const formatNumber = (num: number) => {
-    return num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
+  const formatNumber = (num: number) =>
+    num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
+
+  const getHeaderImage = (pictures: ProjectWithAllNestedData["pictures"]) => {
+    const headerImage = pictures.find((pic) => pic.type === "HEADER")?.url;
+    return headerImage ?? pictures[0]?.url;
   };
+
+  const calculateFundingProgress = (raised: number, goal: number) =>
+    Math.min((raised / goal) * 100, 100);
 
   return (
     <Card sx={{ borderRadius: "8px", mt: 2 }}>
@@ -59,13 +66,11 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
         <Divider sx={{ mb: 2 }} />
 
         {projects.map((project) => {
-          const headerImage = project.pictures.find(
-            (pic) => pic.type === "HEADER"
-          )?.url;
-          const fundingProgress =
-            (project.investmentStats.investmentRaised /
-              project.investmentStats.investmentGoal) *
-            100;
+          const headerImage = getHeaderImage(project.pictures);
+          const fundingProgress = calculateFundingProgress(
+            project.investmentStats.investmentRaised,
+            project.investmentStats.investmentGoal
+          );
 
           return (
             <StyledCard key={project.id} elevation={1}>
@@ -149,7 +154,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
 
                   <LinearProgress
                     variant="determinate"
-                    value={fundingProgress > 100 ? 100 : fundingProgress}
+                    value={fundingProgress}
                     sx={{
                       height: 4,
                       borderRadius: 2,
