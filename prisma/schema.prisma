@@ -49,6 +49,9 @@ model Deal {
   accreditationVerification AccreditationVerification?
   closingDate               DateTime?
   signaturesCompletedDate   DateTime?
+  dateFundsSent             DateTime?
+  paymentMethod             PaymentMethod?
+  paymentReferenceId        String?
   DocusignEvent             DocusignEvent[]
 }
 
@@ -356,4 +359,10 @@ enum VerificationBasis {
 enum VerificationMethod {
   SELF
   THIRD_PARTY
+}
+
+enum PaymentMethod {
+  ACH
+  WIRE
+  CHECK
 }

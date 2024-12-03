@@ -4,7 +4,7 @@ import prisma from "@/libs/prisma.server";
 import { DealWithInvestmentStats } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { User } from "@prisma/client";
+import { PaymentMethod, User } from "@prisma/client";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
 
@@ -56,21 +56,25 @@ export async function POST(request: NextRequest) {
         // transfer money to Finix merchant
         const achTransferResponseData = await initializeFinixTransfer({ ...dealData, investmentStats }, merchantId, buyerId, projectName);
         if (isError(achTransferResponseData)) {
+            console.error("Error transferring money 1:");
             console.error(achTransferResponseData);
-            return errorResponse('Error transferring money', 500);
+            return errorResponse('Error transferring money 1', 500);
         }
 
         if (!achTransferResponseData.state && achTransferResponseData._embedded) {
             console.error(achTransferResponseData._embedded.errors);
             return errorResponse(achTransferResponseData._embedded.errors[0]?.message ?? "The ACH transfer failed. Please contact your Neutral Representative", 500);
         }
-
+        
         if (achTransferResponseData.state?.toUpperCase() === 'SUCCEEDED') {
             try {
                 await updateDeal({
                     hubspotId: deal.hubspotId,
                     dealStage: 5,
-                    closingDate: new Date(Date.now())
+                    closingDate: new Date(Date.now()),
+                    dateFundsSent: new Date(Date.now()),
+                    paymentMethod: PaymentMethod.ACH,
+                    paymentReferenceId: achTransferResponseData.id
                 }, true);
             } catch (error) {
                 console.error("unable to set deal stage to 5", error);
@@ -80,11 +84,23 @@ export async function POST(request: NextRequest) {
         else if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
             return errorResponse('The ACH transfer failed. Please contact your Neutral Representative', 400);
         }
+        else {
+            try {
+                await updateDeal({
+                    hubspotId: deal.hubspotId,
+                    dateFundsSent: new Date(Date.now()),
+                    paymentMethod: PaymentMethod.ACH,
+                    paymentReferenceId: achTransferResponseData.id
+                }, false); // update the deal without updating hubspot
+            } catch (error) {
+                console.error("unable to save ach payment", error);
+            }
+            return jsonResponse({ message: 'The ACH transfer is pending' });
+        }
 
-        return jsonResponse({ message: 'The ACH transfer is pending' });
     } catch (error) {
-        console.error("Finix transaction error", error);
-        return errorResponse('Error transferring money', 500);
+        console.error("Finix transaction error 2", error);
+        return errorResponse('Error transferring money 2', 500);
     }
 }
 

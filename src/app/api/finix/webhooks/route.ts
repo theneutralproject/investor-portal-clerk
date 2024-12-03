@@ -1,6 +1,7 @@
 import type { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils.server";
 import { errorResponse, jsonResponse } from "@/libs/utils";
+import { PaymentMethod } from "@prisma/client";
 import type { NextRequest } from "next/server";
 
 function validateAuthHeader(request: NextRequest) {
@@ -29,7 +30,7 @@ function validateAuthHeader(request: NextRequest) {
 
 // FINIX sends multiple webhook events for the same transaction - the subtype differs
 export async function POST(request: NextRequest) {
-    console.log('\n\nBEGIN Finix Webhook:');
+    console.log('\nBEGIN Finix Webhook:');
     const { valid, message } = validateAuthHeader(request);
 
     if (!valid) {
@@ -71,11 +72,15 @@ export async function POST(request: NextRequest) {
                 console.error('The ACH transfer was NOT successful because the tags were missing', transfer.tags);
                 return errorResponse('The ACH transfer was NOT successful because the tags were missing', 500);
             }
+            
             try {
                 const dealData = {
                     hubspotId: dealHubspotId,
                     dealStage: 5,
-                    closingDate: new Date(Date.now())
+                    closingDate: new Date(Date.now()),
+                    dateFundsSent: new Date(Date.now()),
+                    paymentMethod: PaymentMethod.ACH,
+                    paymentReferenceId: transfer.id,
                 } as DealUpdateSchema
                 await updateDeal(dealData, true);
             } catch (error) {
@@ -85,7 +90,7 @@ export async function POST(request: NextRequest) {
             return jsonResponse({ message: 'The ACH transfer was successful' });
         }
     }
-    console.log('Webhook not processed due to missing transfer data or because transaction was CANCELLED');
-    console.log(body)
+    console.error('Webhook not processed due to missing transfer data or because transaction was CANCELLED:');
+    console.error(body)
     return jsonResponse({ message: 'Webhook not processed' });
 }
