@@ -136,6 +136,9 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
                         investmentEntity: deal.investmentEntity,
                         closingDate: deal.closingDate,
                         signaturesCompletedDate: deal.signaturesCompletedDate,
+                        dateFundsSent: deal.dateFundsSent,
+                        paymentMethod: deal.paymentMethod,
+                        paymentReferenceId: deal.paymentReferenceId,
                     },
                     owner: owner.user,
                     organization,
@@ -209,7 +212,7 @@ export async function uploadFile(
 ): Promise<string> {
     const fileDetails = getFileDetails(file);
     let fileName = `${fileDetails.name || `upload-${Date.now()}`}`;
-    if(!fileName.toLowerCase().endsWith(".pdf")) {
+    if (!fileName.toLowerCase().endsWith(".pdf")) {
         fileName += ".pdf";
     }
 
@@ -223,11 +226,11 @@ export async function uploadFile(
         } else {
             throw new Error("Invalid file format");
         }
-console.log("uploading file to storage");
-console.log("type", type);
-console.log("dealOrOrgId", dealOrOrgId);
-console.log("fileName", fileName);
-console.log("type", fileDetails.type);
+        console.log("uploading file to storage");
+        console.log("type", type);
+        console.log("dealOrOrgId", dealOrOrgId);
+        console.log("fileName", fileName);
+        console.log("type", fileDetails.type);
         const { data, error } = await storageClient
             .from(`${type}-documents`)
             .upload(`${type}-${dealOrOrgId}/${fileName}`, fileData, {
@@ -266,7 +269,7 @@ export async function createDocumentEntry(
             if (!dealDocumentType) {
                 throw new Error("Missing required dealDocumentType field");
             }
-            if(dealDocumentType === DealDocumentType.K1 && !taxYear) {
+            if (dealDocumentType === DealDocumentType.K1 && !taxYear) {
                 throw new Error("Missing required taxYear field for K1 document");
             }
             return await prisma.dealDocument.create({
