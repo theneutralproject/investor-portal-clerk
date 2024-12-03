@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
             try {
                 const dealData = {
                     hubspotId: dealHubspotId,
-                    dealstage: 5,
+                    dealStage: 5,
                     closingDate: new Date(Date.now())
                 } as DealUpdateSchema
                 await updateDeal(dealData, true);

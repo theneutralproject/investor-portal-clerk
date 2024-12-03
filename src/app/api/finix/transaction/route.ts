@@ -59,6 +59,7 @@ export async function POST(request: NextRequest) {
             console.error(achTransferResponseData);
             return errorResponse('Error transferring money', 500);
         }
+
         if (!achTransferResponseData.state && achTransferResponseData._embedded) {
             console.error(achTransferResponseData._embedded.errors);
             return errorResponse(achTransferResponseData._embedded.errors[0]?.message ?? "The ACH transfer failed. Please contact your Neutral Representative", 500);
@@ -79,14 +80,13 @@ export async function POST(request: NextRequest) {
         else if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
             return errorResponse('The ACH transfer failed. Please contact your Neutral Representative', 400);
         }
+
         return jsonResponse({ message: 'The ACH transfer is pending' });
     } catch (error) {
-        console.error(error);
+        console.error("Finix transaction error", error);
         return errorResponse('Error transferring money', 500);
     }
 }
-
-
 
 async function getPlaidToken(plaid_public_token: string, plaid_account_id: string) {
     const plaidTokenResponse = await fetch(`${process.env.FINIX_BASE_URL!}/third_party_tokens`, {
@@ -146,8 +146,8 @@ async function getBuyerId(identity: string, third_party_token: string) {
     return paymentInstrumentResponseData.id;
 }
 
+// transfer with fraud protection and idempotency id
 async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId: string, buyerId: string, projectName: string) {
-
     const amountInCents = deal.investmentStats.amount * (process.env.NODE_ENV === "production" ? 100 : 1);
     const achTransferResponse = await fetch(`${process.env.FINIX_BASE_URL!}/transfers`, {
         method: 'POST',
@@ -163,11 +163,12 @@ async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId
             merchant: merchantId,
             source: buyerId,
             tags: {
-                transaction_id: deal.transactionId,
+                transactionId: deal.transactionId,
                 dealHubspotId: deal.hubspotId,
                 project: projectName
             },
-            idempotency_id: deal.transactionId
+            idempotency_id: deal.transactionId,
+            fraud_session_id: deal.transactionId,
         })
     });
 

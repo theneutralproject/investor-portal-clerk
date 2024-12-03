@@ -13,7 +13,7 @@ import {
 import { toast } from 'react-toastify';
 
 
-interface Props { 
+interface Props {
     dealId: number;
 }
 interface State {
@@ -43,18 +43,20 @@ class PlaidLinkClass extends React.Component<Props, State> {
             plaid_account_id: fullMetadata.account_id,
             type: "PLAID_PROCESSOR_TOKEN",
             dealId: this.props.dealId
-        });
-        if(res.status === 200) {
-            const {message} = res.data;
+        })
+            .catch((error) => {
+                console.error("Finix transaction error", error);
+                const errorMessage = error.response.data.error;
+                toast.error(errorMessage);
+                return error.response;
+            });
+
+        if (res.status === 200) {
+            const { message } = res.data;
             console.log(message);
             toast.success(message);
             // TODO: show success message: https://linear.app/neutralus/issue/NTRL-183/ux-revise-ach-payment-step
             // TODO: disable the button to avoid multiple clicks
-        }
-        else {
-            const message = getErrorMessage(res.data);
-            console.log(message);
-            toast.error(message);
         }
 
     };
