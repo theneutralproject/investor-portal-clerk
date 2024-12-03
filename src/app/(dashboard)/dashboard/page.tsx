@@ -6,25 +6,48 @@ import DashboardPageBanner from "@/components/Dashboard/DashboardPageBanner";
 import DashboardPortfolio from "@/components/Dashboard/DashboardPortfolio";
 import Grid from "@mui/material/Grid2";
 import InvestingWithNeutral from "@/components/Dashboard/InvestingWithNeutral";
+import Questions from "@/components/Dashboard/Questions";
+import CreateAccount from "@/components/Dashboard/CreateAccount";
+import axios from "axios";
+import { useQuery } from "@tanstack/react-query";
+import type { ProjectWithAllNestedData } from "@/libs/types";
+import DashboardProjects from "@/components/Dashboard/DashboardProjects";
+import { useUser } from "@clerk/nextjs";
 
 const DashboardPage = () => {
-  const loggedIn = true;
+  const { user } = useUser();
+
+  const loggedIn = false;
+
+  const { isLoading, data } = useQuery<ProjectWithAllNestedData[], Error>({
+    queryKey: ["project", "all"],
+    queryFn: () =>
+      axios
+        .get<ProjectWithAllNestedData[]>("/api/projects")
+        .then((res) => res.data),
+  });
+
+  if (isLoading) return <div>Loading...</div>;
+
+  const headline = loggedIn
+    ? `Welcome to Neutral, ${user?.firstName}`
+    : "Welcome to Neutral";
   return (
     <Box>
-      <DashboardPageBanner
-        background="/learnBanner.png"
-        headline="Welcome to Neutral, Brent"
-      />
+      <DashboardPageBanner background="/learnBanner.png" headline={headline} />
       <Grid container spacing={2} sx={{ mt: 2 }}>
         <Grid size={8} display="flex" justifyContent="center">
           <Box sx={{ width: "100%" }}>
             <DashboardPortfolio loggedIn={loggedIn} />
+            <DashboardProjects projects={data ?? []} />
           </Box>
         </Grid>
 
         <Grid size={4} display="flex" justifyContent="flex-end">
           <Box sx={{ width: "100%" }}>
+            {!loggedIn && <CreateAccount />}
             <InvestingWithNeutral />
+            <Questions />
           </Box>
         </Grid>
       </Grid>

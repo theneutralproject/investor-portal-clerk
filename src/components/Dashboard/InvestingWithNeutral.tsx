@@ -37,7 +37,7 @@ const InvestingWithNeutral: React.FC = () => {
       </Box>
 
       <CardContent sx={{ p: "0 20px" }}>
-        <Typography variant="subtitle2" color="text.secondary">
+        <Typography variant="subtitle2" fontSize="12px" color="text.secondary">
           Learn about Neutral, this platform, and how to get started investing
           in sustainable real estate.
         </Typography>

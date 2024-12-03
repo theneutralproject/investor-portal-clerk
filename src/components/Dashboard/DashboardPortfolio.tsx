@@ -8,6 +8,8 @@ import {
   useTheme,
   Paper,
   Divider,
+  Button,
+  Stack,
 } from "@mui/material";
 import {
   LineChart,
@@ -50,7 +52,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   ];
 
   return (
-    <Card sx={{ borderRadius: "8px" }}>
+    <Card sx={{ borderRadius: "8px", position: "relative" }}>
       <CardContent>
         <Typography
           variant="body1"
@@ -114,24 +116,55 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
           </ResponsiveContainer>
         </Box>
 
-        {chartData.every((data) => data.value === 0) && (
-          <Paper
-            elevation={0}
+        {!loggedIn && (
+          <Box
             sx={{
-              p: 4,
-              textAlign: "center",
-              backgroundColor: theme.palette.grey[50],
-              mt: 3,
-              borderRadius: 2,
+              position: "absolute",
+              top: 80,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(255, 255, 255, 0.6)",
+              backdropFilter: "blur(4px)",
+              borderRadius: "8px",
             }}
           >
-            <Typography variant="h6">
-              You don&apos;t have any investments
-            </Typography>
-            <Typography color="text.secondary">
-              Browse active projects below to get started
-            </Typography>
-          </Paper>
+            <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
+              <Typography variant="body1" align="center" fontWeight="500">
+                Invest in Tomorrow, Today
+              </Typography>
+              <Typography
+                variant="subtitle2"
+                align="center"
+                color="text.secondary"
+              >
+                We believe in the power of thoughtful investment to positively
+                impact your portfolio and the planet. Explore the projects below
+                to discover innovative, sustainable, and regenerative
+                development solutions. Sign in or create your account to get
+                started.
+              </Typography>
+              <Stack direction="row" spacing={2}>
+                <Button variant="neutralYellow">CREATE ACCOUNT</Button>
+                <Button
+                  variant="text"
+                  sx={{
+                    borderColor: "text.primary",
+                    color: "text.primary",
+                    "&:hover": {
+                      borderColor: "text.primary",
+                      bgcolor: "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
+                >
+                  SIGN IN
+                </Button>
+              </Stack>
+            </Stack>
+          </Box>
         )}
       </CardContent>
     </Card>
