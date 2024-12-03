@@ -33,8 +33,12 @@ export const createDocusignEnvelope = async (
 
   const docusignResponse = await axios.post(url, body).catch((error) => {
     if (error.response) {
-      console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:", error.response);
+      console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n", error.response);
     }
+    else{
+      console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n", error);
+    }
+    return error;
   });
   if (docusignResponse?.data?.consentUrl) {
     console.log("must authenticate using consentUrl");

@@ -146,7 +146,7 @@ const DealFlowFund: React.FC = () => {
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         As the final step, provide the bank account you&apos;d like to use to
-        fund your investment. All information and transactions are encrypted and
+        fund your investment. All information and transactions are encrypted, and
         Neutral does not store your banking information.
       </Typography>
 
