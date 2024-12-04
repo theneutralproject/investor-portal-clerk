@@ -64,7 +64,9 @@ const DashboardPage = () => {
         <Grid size={4} display="flex" justifyContent="flex-end">
           <Box sx={{ width: "100%" }}>
             {!loggedIn && <CreateAccount />}
-            <CompleteInvestment deals={dealsData ?? []} />
+            {dealsData && dealsData.length > 0 && (
+              <CompleteInvestment deals={dealsData} />
+            )}
             <InvestingWithNeutral />
             <Questions />
           </Box>
