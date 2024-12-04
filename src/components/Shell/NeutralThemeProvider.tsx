@@ -114,6 +114,13 @@ export const theme = createTheme({
     },
   },
   components: {
+    MuiGrid2: {
+      styleOverrides: {
+        root: {
+          backgroundColor: "white",
+        },
+      },
+    },
     MuiButton: {
       variants: [
         {

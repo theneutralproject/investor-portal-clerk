@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Chip, Typography } from "@mui/material";
+import { Box, Chip, styled, Typography } from "@mui/material";
 import {
   AreaChart,
   Area,
@@ -97,47 +97,76 @@ interface InvestmentStatsDisplayProps {
   returnsData: ReturnsDateObject[];
   dealInvestmentStats: DealInvestmentStats;
 }
+const StyledOuterBox = styled(Box)({
+  marginTop: 3,
+  display: "flex",
+  flexDirection: "column",
+  gap: 4,
+  padding: "10px 40px",
+});
+
+const StyledStatRow = styled(Box)({
+  display: "flex",
+  justifyContent: "space-between",
+  width: "100%",
+  alignItems: "center",
+});
+
+const StyledLabel = styled(Typography)({
+  variant: "body2",
+});
+
+const StyledValue = styled(Typography)({
+  variant: "body1",
+  fontWeight: 500,
+});
 
 export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
   stats,
   returnsData,
   dealInvestmentStats,
 }) => (
-  <Box
-    sx={{
-      mt: 3,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      gap: 1,
-    }}
-  >
-    <Typography>
-      Investment Term:{" "}
-      {(() => {
-        if (returnsData.length < 2) return "N/A";
+  <StyledOuterBox>
+    <StyledStatRow>
+      <StyledLabel>Investment Term:</StyledLabel>
+      <StyledValue>
+        {(() => {
+          if (returnsData.length < 2) return "N/A";
 
-        const lastDate =
-          returnsData[returnsData.length - 1]?.date ?? new Date();
-        const firstDate = returnsData[0]?.date ?? new Date();
-        const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
+          const lastDate =
+            returnsData[returnsData.length - 1]?.date ?? new Date();
+          const firstDate = returnsData[0]?.date ?? new Date();
+          const MS_PER_MONTH = 1000 * 60 * 60 * 24 * 30;
 
-        const monthsDiff = Math.floor(
-          (lastDate.getTime() - firstDate.getTime()) / MS_PER_MONTH
-        );
-        return monthsDiff + 1;
-      })()}{" "}
-      Months
-    </Typography>
-    <Typography>
-      {dealInvestmentStats.financingType === DealFinancingType.equity
-        ? "IRR"
-        : "Interest Rate"}
-      : {stats.interestRateOrIrr * 100}%
-    </Typography>
-    <Typography>MOIC: {stats.investmentMultiple.toFixed(2)}X</Typography>
-    <Typography>
-      Gross Return: ${stats.totalGrossReturn.toLocaleString()}
-    </Typography>
-  </Box>
+          const monthsDiff = Math.floor(
+            (lastDate.getTime() - firstDate.getTime()) / MS_PER_MONTH
+          );
+          return monthsDiff + 1;
+        })()}{" "}
+        Months
+      </StyledValue>
+    </StyledStatRow>
+
+    <StyledStatRow>
+      <StyledLabel>
+        {dealInvestmentStats.financingType === DealFinancingType.equity
+          ? "IRR"
+          : "Interest Rate"}
+        :
+      </StyledLabel>
+      <StyledValue>{stats.interestRateOrIrr * 100}%</StyledValue>
+    </StyledStatRow>
+
+    <StyledStatRow>
+      <StyledLabel>MOIC:</StyledLabel>
+      <StyledValue>{stats.investmentMultiple.toFixed(2)}X</StyledValue>
+    </StyledStatRow>
+
+    <StyledStatRow sx={{ mt: 2 }}>
+      <StyledLabel>Gross Return:</StyledLabel>
+      <StyledValue fontSize={20}>
+        ${stats.totalGrossReturn.toLocaleString()}
+      </StyledValue>
+    </StyledStatRow>
+  </StyledOuterBox>
 );
