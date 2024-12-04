@@ -31,9 +31,7 @@ import * as React from "react";
 
 import { theme } from "./NeutralThemeProvider";
 import UserAvatar from "./UserAvatar";
-import NeutralBreadcrumbs from "./NeutralBreadcrumbs";
 import MobileSidebar from "./MobileSidebar";
-import router from "next/router";
 
 export const ROUTES = [
   {
@@ -77,7 +75,6 @@ export const ListItem = ({ item }: { item: any }) => (
 );
 
 const drawerWidth = 240;
-const mobileDrawerWidth = 56;
 
 interface AppBarProps extends MuiAppBarProps {
   open?: boolean;
@@ -99,37 +96,6 @@ const AppBar = styled(MuiAppBar, {
       duration: theme.transitions.duration.enteringScreen,
     }),
   }),
-}));
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== "open",
-})(({ open }) => ({
-  "& .MuiDrawer-paper": {
-    position: "relative",
-    whiteSpace: "nowrap",
-    width: drawerWidth,
-    transition: theme.transitions.create("width", {
-      easing: theme.transitions.easing.sharp,
-      duration: theme.transitions.duration.enteringScreen,
-    }),
-    boxSizing: "border-box",
-    ...(!open && {
-      overflowX: "hidden",
-      transition: theme.transitions.create("width", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen,
-      }),
-      width: theme.spacing(7),
-      [theme.breakpoints.up("md")]: {
-        width: theme.spacing(9),
-      },
-    }),
-  },
-  [theme.breakpoints.down("md")]: {
-    "& .MuiDrawer-paper": {
-      width: mobileDrawerWidth,
-    },
-  },
 }));
 
 export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
@@ -171,37 +137,46 @@ export default function Sidebar(props: { children: React.ReactNode }) {
           />
 
           <Box sx={{ display: "flex", alignItems: "center", ml: "50px" }}>
-            {ROUTES.map((route) => (
-              <Button
-                key={route.name}
-                onClick={() => router.push(route.path)}
-                sx={{
-                  borderRadius: "15px",
-                  padding: "5px 10px",
+            {ROUTES.map((route) => {
+              //Logic to display based on logged in state (TODO when dashboard finalized)
+              return (
+                <Button
+                  key={route.name}
+                  onClick={() => router.push(route.path)}
+                  sx={{
+                    borderRadius: "15px",
+                    padding: "5px 10px",
 
-                  color: isActiveRoute(route.path)
-                    ? "white"
-                    : "rgba(255, 255, 255, 0.66)",
-                  backgroundColor: isActiveRoute(route.path)
-                    ? "rgba(255,255,255,0.2)"
-                    : "transparent",
-                  "&:hover": {
+                    color: isActiveRoute(route.path)
+                      ? "white"
+                      : "rgba(255, 255, 255, 0.66)",
                     backgroundColor: isActiveRoute(route.path)
-                      ? "rgba(255,255,255,0.3)"
-                      : "rgba(255,255,255,0.1)",
-                  },
-                  fontSize: "14px",
-                  mr: "10px",
-                  textTransform: "capitalize",
-                }}
-              >
-                {route.name.charAt(0).toUpperCase() +
-                  route.name.slice(1).toLowerCase()}
-              </Button>
-            ))}
+                      ? "rgba(255,255,255,0.2)"
+                      : "transparent",
+                    "&:hover": {
+                      backgroundColor: isActiveRoute(route.path)
+                        ? "rgba(255,255,255,0.3)"
+                        : "rgba(255,255,255,0.1)",
+                    },
+                    fontSize: "14px",
+                    mr: "10px",
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {route.name.charAt(0).toUpperCase() +
+                    route.name.slice(1).toLowerCase()}
+                </Button>
+              );
+            })}
           </Box>
 
-          <Box sx={{ alignSelf: "flex-end", ml: "auto", display: "flex" }}>
+          <Box
+            sx={{
+              ml: "auto",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
             <UserAvatar />
           </Box>
         </Toolbar>
