@@ -26,12 +26,10 @@ const StyledButton = styled(Button)(({ theme }) => ({
 
 interface QuestionsProps {
   phoneNumber?: string;
-  avatarSrc?: string;
 }
 
 const Questions: React.FC<QuestionsProps> = ({
-  phoneNumber = "(555) 555-5555",
-  avatarSrc = "/path/to/default/avatar.jpg",
+  phoneNumber = "(608) 205-8336",
 }) => {
   return (
     <Card sx={{ borderRadius: "8px", mt: 2 }}>

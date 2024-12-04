@@ -55,7 +55,7 @@ export type DealWithFullOrgAndProject = Deal & {
   organization: OrganizationWithFullMembersAndAddress & {
     address: Address | null;
   };
-  project: Project;
+  project: ProjectWithAllNestedData;
 };
 
 export type DealWithInvestmentStatsAndDocument = DealWithInvestmentStats & {
