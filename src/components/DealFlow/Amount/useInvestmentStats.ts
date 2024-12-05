@@ -12,7 +12,7 @@ export const useInvestmentStats = (
     const firstDataPoint = returnsData[0];
     if (!lastDataPoint || !firstDataPoint) return null;
     return {
-      interestRateOrIrr: lastDataPoint.interestRateOrIrr,
+      interestRateOrIrrPerc: lastDataPoint.interestRateOrIrrPerc,
       investmentMultiple: lastDataPoint.investmentMultiple,
       totalGrossReturn: lastDataPoint.totalGrossReturn,
       totalNetReturn: lastDataPoint.totalNetReturn,

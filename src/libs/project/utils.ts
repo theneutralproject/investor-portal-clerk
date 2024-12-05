@@ -84,10 +84,10 @@ export async function getEquityStatsFromProject(amount: number, equityReturnsFil
 export function getDebtPayoutSchedule(
     amount: number,
     investmentStats: ProjectInvestmentStats,
-    milestones: ProjectMilestones
+    closingDate: Date
 ): ReturnsDateObject[] {
     // Initialize closing date logic
-    const closingDate = milestones.financialClosing;
+    // const closingDate = milestones.financialClosing;
     let date = closingDate;
     if (closingDate.getUTCDate() !== 1) {
         date = startOfMonth(closingDate);
@@ -102,18 +102,36 @@ export function getDebtPayoutSchedule(
     let cumulativeDistribution = 0;
     let investmentMultiple = 0;
 
-    for (let i = 1; i <= investmentStats.debtTermMonths; i++) {
+    let distributionDivisor = 4;
+    let paymentFreq = investmentStats.debtPaymentFreqMonths; //default to every 3 months
+    console.log("paymentFreq", paymentFreq);
+    if(paymentFreq === 0) {
+        // one time payment at the end of the term
+        paymentFreq = investmentStats.debtTermMonthsMax;
+        distributionDivisor = 1;
+    }
+    
+    for (let i = 1; i <= investmentStats.debtTermMonthsMax; i++) {
         // Move to next month
         date = startOfMonth(add(date, { months: 1 }));
 
-        // Calculate distribution amount (quarterly interest payments)
+        // Calculate distribution amount based on payment frequency
         let distributionAmount = 0;
-        if (i % 3 === 0 && i !== 0) {
-            distributionAmount = (amount * interestRate / 100) / 4;
+        if (i % paymentFreq === 0 && i !== 0) {
+            if(paymentFreq === investmentStats.debtTermMonthsMax) {
+                // onetime payment at the end of the term:
+                distributionAmount = amount * interestRate/100 * investmentStats.debtTermMonthsMax / 12;
+                console.log('onetime payment', distributionAmount);
+            }
+            else {
+                distributionAmount = (amount * interestRate / 100) / distributionDivisor;
+                console.log('monthly payment', distributionAmount);
+            }
         }
 
         // Handle final payment (principal + interest)
-        if (i === investmentStats.debtTermMonths) {
+        if (i === investmentStats.debtTermMonthsMax) {
+            console.log('final payment', distributionAmount);
             distributionAmount += amount;
         }
 
@@ -136,12 +154,12 @@ export function getDebtPayoutSchedule(
             investmentMultiple: roundTo(investmentMultiple, 4),
             totalGrossReturn: roundTo(totalGrossReturn, 2),
             totalNetReturn: roundTo(totalNetReturn, 2),
-            interestRateOrIrr: interestRate,
+            interestRateOrIrrPerc: interestRate,
         };
 
         debtPayoutSchedule.push(entry);
     }
-
+// console.log(debtPayoutSchedule);
     return debtPayoutSchedule;
 }
 
@@ -173,7 +191,7 @@ export function getEquityPayoutSchedule(
         investmentMultiple: 1,
         totalGrossReturn: 0,
         totalNetReturn: 0,
-        interestRateOrIrr: 0,
+        interestRateOrIrrPerc: 0,
         accruedPreferredReturn: 0,
     }
     return equityMilestones.reduce<ReturnsDateObject[]>((schedule, em, index) => {
@@ -195,7 +213,6 @@ export function getEquityPayoutSchedule(
         const investmentMultiple = cumulativeDistribution / amount;
         const irr = (investmentMultiple - 1) / (index / 12);
         const accruedPreferredReturn = amount * preferredReturn * (index / 12);
-
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
         const totalNetReturn = cumulativeDistribution - amount;
@@ -207,11 +224,11 @@ export function getEquityPayoutSchedule(
             investmentMultiple: Number(investmentMultiple.toFixed(4)),
             totalGrossReturn: Number(totalGrossReturn.toFixed(2)),
             totalNetReturn: Number(totalNetReturn.toFixed(2)),
-            interestRateOrIrr: Number(irr.toFixed(3)),
+            interestRateOrIrrPerc: Number((irr * 100).toFixed(2)),
             accruedPreferredReturn: Number(accruedPreferredReturn.toFixed(2)),
         });
         previousEntry = schedule[schedule.length - 1];
-
+console.log(schedule[schedule.length - 1]);
         return schedule;
     }, []);
 }

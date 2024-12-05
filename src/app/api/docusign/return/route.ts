@@ -1,3 +1,4 @@
+'use server';
 import type { NextRequest } from "next/server";
 import { DocumentEventType } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
