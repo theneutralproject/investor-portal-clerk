@@ -58,7 +58,25 @@ const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
   };
 };
 
+const getMerchantId = (projectSlug: string) => {
+  switch (projectSlug) {
+    case "edison":
+      return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON!;
+      break;
+    case "bakers":
+      return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS!;
+      break;
+    case "519":
+      return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_519!;
+      break;
+    default:
+      throw new Error("Invalid project slug");
+  }
+
+}
+
 const DealFlowFund: React.FC = () => {
+
   const { project, deal } = useDealFlow();
   const [copied, setCopied] = useState<string | null>(null);
   const [showProcessing, setShowProcessing] = useState(false);
@@ -75,6 +93,7 @@ const DealFlowFund: React.FC = () => {
     deal
   );
   const investmentAmount = deal?.investmentStats?.amount ?? 0;
+  const merchantId = getMerchantId(project.slug);
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -183,7 +202,7 @@ const DealFlowFund: React.FC = () => {
               industry standard for connecting to bank accounts and transferring
               funds.
             </Typography>
-            <PlaidLinkClass dealId={deal.id} />
+            <PlaidLinkClass dealId={deal.id} merchantId={merchantId} />
           </Collapse>
         </CardContent>
       </Card>

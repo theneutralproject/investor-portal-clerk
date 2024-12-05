@@ -24,7 +24,6 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   const [expandedQuestion, setExpandedQuestion] = useState<string | null>(
     "accreditation"
   );
-  console.log(answers);
   const [verifierInfo, setVerifierInfo] = useState<
     Partial<AccreditationVerifier>
   >({
