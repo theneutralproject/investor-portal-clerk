@@ -2,13 +2,9 @@ import React from "react";
 import {
   Card,
   CardContent,
-  CardMedia,
   Typography,
   Box,
-  IconButton,
-  styled,
 } from "@mui/material";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import Divider from "@mui/material/Divider";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";

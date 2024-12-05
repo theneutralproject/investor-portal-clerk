@@ -8,7 +8,7 @@ export interface ProjectedReturn {
 }
 
 export interface InvestmentStats {
-  interestRateOrIrr: number;
+  interestRateOrIrrPerc: number;
   investmentMultiple: number;
   totalGrossReturn: number;
   totalNetReturn: number;

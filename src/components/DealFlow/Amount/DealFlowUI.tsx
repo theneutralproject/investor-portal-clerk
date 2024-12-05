@@ -154,7 +154,7 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
           : "Interest Rate"}
         :
       </StyledLabel>
-      <StyledValue>{stats.interestRateOrIrr * 100}%</StyledValue>
+      <StyledValue>{stats.interestRateOrIrrPerc}%</StyledValue>
     </StyledStatRow>
 
     <StyledStatRow>

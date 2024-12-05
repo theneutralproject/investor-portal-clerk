@@ -176,10 +176,13 @@ model ProjectInvestmentStats {
   cUnitThresholdAmount        Float   @default(200000.0)
   debtMinInvestment           Int     @default(5000)
   debtPaymentFreq             String  @default("quarterly")
-  debtTermMonths              Int     @default(48)
+  debtPaymentFreqMonths       Int     @default(3)
+  debtTermMonthsMax           Int     @default(48)
+  debtTermMonthsMin           Int     @default(48)
   equityIRR                   Float   @default(0.0)
   equityMinInvestment         Int     @default(5000)
   equityPaymentFreq           String  @default("quarterly")
+  equityPaymentFreqMonths     Int     @default(3)
   equityTermMonths            Int     @default(60)
   preferredReturn             Float   @default(0.1)
   investmentGoal              Float   @default(0.0)
@@ -191,6 +194,8 @@ model ProjectInvestmentStats {
   targetEquityMultiple        Float   @default(0.0)
   totalAUnitReturn            Float   @default(0.0)
   totalCUnitReturn            Float   @default(0.0)
+  boolEquity                  Boolean @default(true) /// if the project is offering equity
+  boolDebt                    Boolean @default(true) /// if the project is offering debt
   project                     Project @relation(fields: [projectId], references: [id])
 }
 
@@ -289,7 +294,6 @@ enum DealDocumentType {
   INVESTMENT_DOCUMENT
 }
 
-/// Role is not yet used
 enum Role {
   ADMIN
   USER

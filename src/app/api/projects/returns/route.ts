@@ -10,9 +10,10 @@ type RequestBody = {
     projectId: number;
     amount: number;
     financingType: DealFinancingType;
+    closingDate?: Date;
 };
 export async function POST(request: NextRequest) {
-    const { projectId, amount, financingType } = (await request.json()) as RequestBody;
+    const { projectId, amount, financingType, closingDate } = (await request.json()) as RequestBody;
 
     if (!projectId || !amount || !financingType) {
         return jsonResponse({ message: 'Missing required fields' }, 400);
@@ -37,12 +38,19 @@ export async function POST(request: NextRequest) {
         return jsonResponse({ message: 'Project equity returns file not found' }, 404);
     }
 
+    // for closed deals, use the closing date as the start date. Otherwise, use today's date, if the project already officially closed
+    let startDate = closingDate ?? milestones.financialClosing;
+    if (startDate < new Date()) {
+        startDate = new Date();
+    }
+
+
     // debt financing
     if (financingType === DealFinancingType.promissory_note_now) {
         if (amount < investmentStats.debtMinInvestment) {
             return jsonResponse({ message: `The minimum investment amount for this project is $${investmentStats.debtMinInvestment.toLocaleString()}` }, 400);
         }
-        const payoutSchedule = getDebtPayoutSchedule(amount, investmentStats, milestones);
+        const payoutSchedule = getDebtPayoutSchedule(amount, investmentStats, startDate);
         return jsonResponse(payoutSchedule);
     }
 

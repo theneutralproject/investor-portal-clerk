@@ -34,7 +34,7 @@ export const ProjectScalarFieldEnumSchema = z.enum(['id','name','location','tags
 
 export const ProjectPropertyStatsScalarFieldEnumSchema = z.enum(['id','avgRent','avgUnitSize','commercialSqFt','numUnits','projectId']);
 
-export const ProjectInvestmentStatsScalarFieldEnumSchema = z.enum(['id','cUnitThresholdAmount','debtMinInvestment','debtPaymentFreq','debtTermMonths','equityIRR','equityMinInvestment','equityPaymentFreq','equityTermMonths','preferredReturn','investmentGoal','investmentRaised','interestRateMin','interestRateMax','interestRateDollarThreshold','projectId','targetEquityMultiple','totalAUnitReturn','totalCUnitReturn']);
+export const ProjectInvestmentStatsScalarFieldEnumSchema = z.enum(['id','cUnitThresholdAmount','debtMinInvestment','debtPaymentFreq','debtPaymentFreqMonths','debtTermMonthsMax','debtTermMonthsMin','equityIRR','equityMinInvestment','equityPaymentFreq','equityPaymentFreqMonths','equityTermMonths','preferredReturn','investmentGoal','investmentRaised','interestRateMin','interestRateMax','interestRateDollarThreshold','projectId','targetEquityMultiple','totalAUnitReturn','totalCUnitReturn','boolEquity','boolDebt']);
 
 export const ProjectPaymentInfoScalarFieldEnumSchema = z.enum(['id','projectId','investmentEntity','accountNumber','routingNumber']);
 
@@ -341,10 +341,13 @@ export const ProjectInvestmentStatsSchema = z.object({
   cUnitThresholdAmount: z.number(),
   debtMinInvestment: z.number().int(),
   debtPaymentFreq: z.string(),
-  debtTermMonths: z.number().int(),
+  debtPaymentFreqMonths: z.number().int(),
+  debtTermMonthsMax: z.number().int(),
+  debtTermMonthsMin: z.number().int(),
   equityIRR: z.number(),
   equityMinInvestment: z.number().int(),
   equityPaymentFreq: z.string(),
+  equityPaymentFreqMonths: z.number().int(),
   equityTermMonths: z.number().int(),
   preferredReturn: z.number(),
   investmentGoal: z.number(),
@@ -356,6 +359,14 @@ export const ProjectInvestmentStatsSchema = z.object({
   targetEquityMultiple: z.number(),
   totalAUnitReturn: z.number(),
   totalCUnitReturn: z.number(),
+  /**
+   * if the project is offering equity
+   */
+  boolEquity: z.boolean(),
+  /**
+   * if the project is offering debt
+   */
+  boolDebt: z.boolean(),
 })
 
 export type ProjectInvestmentStats = z.infer<typeof ProjectInvestmentStatsSchema>
@@ -878,10 +889,13 @@ export const ProjectInvestmentStatsSelectSchema: z.ZodType<Prisma.ProjectInvestm
   cUnitThresholdAmount: z.boolean().optional(),
   debtMinInvestment: z.boolean().optional(),
   debtPaymentFreq: z.boolean().optional(),
-  debtTermMonths: z.boolean().optional(),
+  debtPaymentFreqMonths: z.boolean().optional(),
+  debtTermMonthsMax: z.boolean().optional(),
+  debtTermMonthsMin: z.boolean().optional(),
   equityIRR: z.boolean().optional(),
   equityMinInvestment: z.boolean().optional(),
   equityPaymentFreq: z.boolean().optional(),
+  equityPaymentFreqMonths: z.boolean().optional(),
   equityTermMonths: z.boolean().optional(),
   preferredReturn: z.boolean().optional(),
   investmentGoal: z.boolean().optional(),
@@ -893,6 +907,8 @@ export const ProjectInvestmentStatsSelectSchema: z.ZodType<Prisma.ProjectInvestm
   targetEquityMultiple: z.boolean().optional(),
   totalAUnitReturn: z.boolean().optional(),
   totalCUnitReturn: z.boolean().optional(),
+  boolEquity: z.boolean().optional(),
+  boolDebt: z.boolean().optional(),
   project: z.union([z.boolean(),z.lazy(() => ProjectArgsSchema)]).optional(),
 }).strict()
 
@@ -2211,10 +2227,13 @@ export const ProjectInvestmentStatsWhereInputSchema: z.ZodType<Prisma.ProjectInv
   cUnitThresholdAmount: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   debtMinInvestment: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   debtPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  debtTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMax: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMin: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   equityIRR: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   equityMinInvestment: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   equityPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   equityTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   preferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
@@ -2226,6 +2245,8 @@ export const ProjectInvestmentStatsWhereInputSchema: z.ZodType<Prisma.ProjectInv
   targetEquityMultiple: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   totalAUnitReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   totalCUnitReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  boolEquity: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  boolDebt: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
@@ -2234,10 +2255,13 @@ export const ProjectInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Pri
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -2249,6 +2273,8 @@ export const ProjectInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Pri
   targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   totalAUnitReturn: z.lazy(() => SortOrderSchema).optional(),
   totalCUnitReturn: z.lazy(() => SortOrderSchema).optional(),
+  boolEquity: z.lazy(() => SortOrderSchema).optional(),
+  boolDebt: z.lazy(() => SortOrderSchema).optional(),
   project: z.lazy(() => ProjectOrderByWithRelationInputSchema).optional()
 }).strict();
 
@@ -2273,10 +2299,13 @@ export const ProjectInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.Proj
   cUnitThresholdAmount: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   debtMinInvestment: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   debtPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  debtTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  debtTermMonthsMax: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  debtTermMonthsMin: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   equityIRR: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   equityMinInvestment: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   equityPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   equityTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   preferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
@@ -2287,6 +2316,8 @@ export const ProjectInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.Proj
   targetEquityMultiple: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   totalAUnitReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   totalCUnitReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  boolEquity: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  boolDebt: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
@@ -2295,10 +2326,13 @@ export const ProjectInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -2310,6 +2344,8 @@ export const ProjectInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<
   targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   totalAUnitReturn: z.lazy(() => SortOrderSchema).optional(),
   totalCUnitReturn: z.lazy(() => SortOrderSchema).optional(),
+  boolEquity: z.lazy(() => SortOrderSchema).optional(),
+  boolDebt: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ProjectInvestmentStatsCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => ProjectInvestmentStatsAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ProjectInvestmentStatsMaxOrderByAggregateInputSchema).optional(),
@@ -2325,10 +2361,13 @@ export const ProjectInvestmentStatsScalarWhereWithAggregatesInputSchema: z.ZodTy
   cUnitThresholdAmount: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   debtMinInvestment: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   debtPaymentFreq: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  debtTermMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMax: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMin: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   equityIRR: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   equityMinInvestment: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   equityPaymentFreq: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   equityTermMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   preferredReturn: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
@@ -2340,6 +2379,8 @@ export const ProjectInvestmentStatsScalarWhereWithAggregatesInputSchema: z.ZodTy
   targetEquityMultiple: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   totalAUnitReturn: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   totalCUnitReturn: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  boolEquity: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  boolDebt: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const ProjectPaymentInfoWhereInputSchema: z.ZodType<Prisma.ProjectPaymentInfoWhereInput> = z.object({
@@ -3809,10 +3850,13 @@ export const ProjectInvestmentStatsCreateInputSchema: z.ZodType<Prisma.ProjectIn
   cUnitThresholdAmount: z.number().optional(),
   debtMinInvestment: z.number().int().optional(),
   debtPaymentFreq: z.string().optional(),
-  debtTermMonths: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
   equityIRR: z.number().optional(),
   equityMinInvestment: z.number().int().optional(),
   equityPaymentFreq: z.string().optional(),
+  equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
@@ -3823,6 +3867,8 @@ export const ProjectInvestmentStatsCreateInputSchema: z.ZodType<Prisma.ProjectIn
   targetEquityMultiple: z.number().optional(),
   totalAUnitReturn: z.number().optional(),
   totalCUnitReturn: z.number().optional(),
+  boolEquity: z.boolean().optional(),
+  boolDebt: z.boolean().optional(),
   project: z.lazy(() => ProjectCreateNestedOneWithoutInvestmentStatsInputSchema)
 }).strict();
 
@@ -3831,10 +3877,13 @@ export const ProjectInvestmentStatsUncheckedCreateInputSchema: z.ZodType<Prisma.
   cUnitThresholdAmount: z.number().optional(),
   debtMinInvestment: z.number().int().optional(),
   debtPaymentFreq: z.string().optional(),
-  debtTermMonths: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
   equityIRR: z.number().optional(),
   equityMinInvestment: z.number().int().optional(),
   equityPaymentFreq: z.string().optional(),
+  equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
@@ -3845,17 +3894,22 @@ export const ProjectInvestmentStatsUncheckedCreateInputSchema: z.ZodType<Prisma.
   projectId: z.number().int(),
   targetEquityMultiple: z.number().optional(),
   totalAUnitReturn: z.number().optional(),
-  totalCUnitReturn: z.number().optional()
+  totalCUnitReturn: z.number().optional(),
+  boolEquity: z.boolean().optional(),
+  boolDebt: z.boolean().optional()
 }).strict();
 
 export const ProjectInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUpdateInput> = z.object({
   cUnitThresholdAmount: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   debtMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  debtTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityIRR: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   equityMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3866,6 +3920,8 @@ export const ProjectInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.ProjectIn
   targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalAUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalCUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  boolEquity: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  boolDebt: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   project: z.lazy(() => ProjectUpdateOneRequiredWithoutInvestmentStatsNestedInputSchema).optional()
 }).strict();
 
@@ -3874,10 +3930,13 @@ export const ProjectInvestmentStatsUncheckedUpdateInputSchema: z.ZodType<Prisma.
   cUnitThresholdAmount: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   debtMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  debtTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityIRR: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   equityMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3889,6 +3948,8 @@ export const ProjectInvestmentStatsUncheckedUpdateInputSchema: z.ZodType<Prisma.
   targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalAUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalCUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  boolEquity: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  boolDebt: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsCreateManyInput> = z.object({
@@ -3896,10 +3957,13 @@ export const ProjectInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.Proje
   cUnitThresholdAmount: z.number().optional(),
   debtMinInvestment: z.number().int().optional(),
   debtPaymentFreq: z.string().optional(),
-  debtTermMonths: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
   equityIRR: z.number().optional(),
   equityMinInvestment: z.number().int().optional(),
   equityPaymentFreq: z.string().optional(),
+  equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
@@ -3910,17 +3974,22 @@ export const ProjectInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.Proje
   projectId: z.number().int(),
   targetEquityMultiple: z.number().optional(),
   totalAUnitReturn: z.number().optional(),
-  totalCUnitReturn: z.number().optional()
+  totalCUnitReturn: z.number().optional(),
+  boolEquity: z.boolean().optional(),
+  boolDebt: z.boolean().optional()
 }).strict();
 
 export const ProjectInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUpdateManyMutationInput> = z.object({
   cUnitThresholdAmount: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   debtMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  debtTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityIRR: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   equityMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3931,6 +4000,8 @@ export const ProjectInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Pris
   targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalAUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalCUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  boolEquity: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  boolDebt: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUncheckedUpdateManyInput> = z.object({
@@ -3938,10 +4009,13 @@ export const ProjectInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Pri
   cUnitThresholdAmount: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   debtMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  debtTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityIRR: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   equityMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3953,6 +4027,8 @@ export const ProjectInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Pri
   targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalAUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalCUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  boolEquity: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  boolDebt: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectPaymentInfoCreateInputSchema: z.ZodType<Prisma.ProjectPaymentInfoCreateInput> = z.object({
@@ -5497,10 +5573,13 @@ export const ProjectInvestmentStatsCountOrderByAggregateInputSchema: z.ZodType<P
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -5511,16 +5590,21 @@ export const ProjectInvestmentStatsCountOrderByAggregateInputSchema: z.ZodType<P
   projectId: z.lazy(() => SortOrderSchema).optional(),
   targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   totalAUnitReturn: z.lazy(() => SortOrderSchema).optional(),
-  totalCUnitReturn: z.lazy(() => SortOrderSchema).optional()
+  totalCUnitReturn: z.lazy(() => SortOrderSchema).optional(),
+  boolEquity: z.lazy(() => SortOrderSchema).optional(),
+  boolDebt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ProjectInvestmentStatsAvgOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsAvgOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -5539,10 +5623,13 @@ export const ProjectInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Pri
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -5553,7 +5640,9 @@ export const ProjectInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Pri
   projectId: z.lazy(() => SortOrderSchema).optional(),
   targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   totalAUnitReturn: z.lazy(() => SortOrderSchema).optional(),
-  totalCUnitReturn: z.lazy(() => SortOrderSchema).optional()
+  totalCUnitReturn: z.lazy(() => SortOrderSchema).optional(),
+  boolEquity: z.lazy(() => SortOrderSchema).optional(),
+  boolDebt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ProjectInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsMinOrderByAggregateInput> = z.object({
@@ -5561,10 +5650,13 @@ export const ProjectInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Pri
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -5575,16 +5667,21 @@ export const ProjectInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Pri
   projectId: z.lazy(() => SortOrderSchema).optional(),
   targetEquityMultiple: z.lazy(() => SortOrderSchema).optional(),
   totalAUnitReturn: z.lazy(() => SortOrderSchema).optional(),
-  totalCUnitReturn: z.lazy(() => SortOrderSchema).optional()
+  totalCUnitReturn: z.lazy(() => SortOrderSchema).optional(),
+  boolEquity: z.lazy(() => SortOrderSchema).optional(),
+  boolDebt: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ProjectInvestmentStatsSumOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsSumOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   cUnitThresholdAmount: z.lazy(() => SortOrderSchema).optional(),
   debtMinInvestment: z.lazy(() => SortOrderSchema).optional(),
-  debtTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
   equityIRR: z.lazy(() => SortOrderSchema).optional(),
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
+  equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
   preferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
@@ -9712,10 +9809,13 @@ export const ProjectInvestmentStatsCreateWithoutProjectInputSchema: z.ZodType<Pr
   cUnitThresholdAmount: z.number().optional(),
   debtMinInvestment: z.number().int().optional(),
   debtPaymentFreq: z.string().optional(),
-  debtTermMonths: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
   equityIRR: z.number().optional(),
   equityMinInvestment: z.number().int().optional(),
   equityPaymentFreq: z.string().optional(),
+  equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
@@ -9725,7 +9825,9 @@ export const ProjectInvestmentStatsCreateWithoutProjectInputSchema: z.ZodType<Pr
   interestRateDollarThreshold: z.number().optional(),
   targetEquityMultiple: z.number().optional(),
   totalAUnitReturn: z.number().optional(),
-  totalCUnitReturn: z.number().optional()
+  totalCUnitReturn: z.number().optional(),
+  boolEquity: z.boolean().optional(),
+  boolDebt: z.boolean().optional()
 }).strict();
 
 export const ProjectInvestmentStatsUncheckedCreateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUncheckedCreateWithoutProjectInput> = z.object({
@@ -9733,10 +9835,13 @@ export const ProjectInvestmentStatsUncheckedCreateWithoutProjectInputSchema: z.Z
   cUnitThresholdAmount: z.number().optional(),
   debtMinInvestment: z.number().int().optional(),
   debtPaymentFreq: z.string().optional(),
-  debtTermMonths: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
   equityIRR: z.number().optional(),
   equityMinInvestment: z.number().int().optional(),
   equityPaymentFreq: z.string().optional(),
+  equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
   preferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
@@ -9746,7 +9851,9 @@ export const ProjectInvestmentStatsUncheckedCreateWithoutProjectInputSchema: z.Z
   interestRateDollarThreshold: z.number().optional(),
   targetEquityMultiple: z.number().optional(),
   totalAUnitReturn: z.number().optional(),
-  totalCUnitReturn: z.number().optional()
+  totalCUnitReturn: z.number().optional(),
+  boolEquity: z.boolean().optional(),
+  boolDebt: z.boolean().optional()
 }).strict();
 
 export const ProjectInvestmentStatsCreateOrConnectWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsCreateOrConnectWithoutProjectInput> = z.object({
@@ -9917,10 +10024,13 @@ export const ProjectInvestmentStatsUpdateWithoutProjectInputSchema: z.ZodType<Pr
   cUnitThresholdAmount: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   debtMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  debtTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityIRR: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   equityMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9931,6 +10041,8 @@ export const ProjectInvestmentStatsUpdateWithoutProjectInputSchema: z.ZodType<Pr
   targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalAUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalCUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  boolEquity: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  boolDebt: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUncheckedUpdateWithoutProjectInput> = z.object({
@@ -9938,10 +10050,13 @@ export const ProjectInvestmentStatsUncheckedUpdateWithoutProjectInputSchema: z.Z
   cUnitThresholdAmount: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   debtMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  debtTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityIRR: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   equityMinInvestment: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9952,6 +10067,8 @@ export const ProjectInvestmentStatsUncheckedUpdateWithoutProjectInputSchema: z.Z
   targetEquityMultiple: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalAUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   totalCUnitReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  boolEquity: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  boolDebt: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectMilestonesUpsertWithoutProjectInputSchema: z.ZodType<Prisma.ProjectMilestonesUpsertWithoutProjectInput> = z.object({
