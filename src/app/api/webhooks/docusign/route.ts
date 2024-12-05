@@ -58,7 +58,7 @@ export async function POST(req: NextRequest) {
         if (dealEvents.length >= dealDocuments.length && dealDocuments.length > 0) {
             console.log("All documents signed for deal", deal.id);
             // update deal and hubspot
-            const dealData = { hubspotId: deal.hubspotId, signaturesCompletedDate: dealEvent.dateCompleted ?? new Date() }
+            const dealData = { hubspotId: deal.hubspotId, signaturesCompletedDate: dealEvent.dateCompleted ?? new Date(), dealStage: 4 }
             await updateDeal(dealData);
 
             // get documentName from projectdocs
