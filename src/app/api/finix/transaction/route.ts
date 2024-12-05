@@ -1,10 +1,10 @@
 'use server';
 import { updateDeal } from "@/libs/deal/utils.server";
 import prisma from "@/libs/prisma.server";
-import { DealWithInvestmentStats } from "@/libs/types";
+import type { DealWithInvestmentStats } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { PaymentMethod, User } from "@prisma/client";
+import { PaymentMethod, type User } from "@prisma/client";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
 
@@ -21,9 +21,9 @@ export async function POST(request: NextRequest) {
         return errorResponse('User not found', 404);
     }
 
-    const body = await request.json() as { plaid_public_token: string, plaid_account_id: string, dealId: number };
-    if (!(body.plaid_public_token || body.plaid_account_id || !body.dealId)) {
-        return errorResponse('plaid_public_token and plaid_account_id are required', 400);
+    const body = await request.json() as { plaid_public_token: string, plaid_account_id: string, dealId: number, sessionKey: string, merchantId: string };
+    if (!(body.plaid_public_token || body.plaid_account_id || body.dealId || body.sessionKey || body.merchantId)) {
+        return errorResponse('plaid_public_token, plaid_account_id, dealId and sessionKey are required', 400);
     }
     try {
         const third_party_token = await getPlaidToken(body.plaid_public_token, body.plaid_account_id);
@@ -50,11 +50,10 @@ export async function POST(request: NextRequest) {
             return errorResponse('The investment amount is invalid', 400);
         }
 
-        const { project: { slug, name: projectName }, investmentStats, ...dealData } = deal;
-        const merchantId = process.env[`FINIX_MERCHANT_ID_${slug.toUpperCase()}`]!;
+        const { project: { name: projectName }, investmentStats, ...dealData } = deal;
 
         // transfer money to Finix merchant
-        const achTransferResponseData = await initializeFinixTransfer({ ...dealData, investmentStats }, merchantId, buyerId, projectName);
+        const achTransferResponseData = await initializeFinixTransfer({ ...dealData, investmentStats }, body.merchantId, buyerId, projectName, body.sessionKey);
         if (isError(achTransferResponseData)) {
             console.error("Error transferring money 1:");
             console.error(achTransferResponseData);
@@ -62,10 +61,10 @@ export async function POST(request: NextRequest) {
         }
 
         if (!achTransferResponseData.state && achTransferResponseData._embedded) {
-            console.error(achTransferResponseData._embedded.errors);
+            console.error("achTransferResponseDataError: ", achTransferResponseData._embedded.errors[0]?.toString());
             return errorResponse(achTransferResponseData._embedded.errors[0]?.message ?? "The ACH transfer failed. Please contact your Neutral Representative", 500);
         }
-        
+
         if (achTransferResponseData.state?.toUpperCase() === 'SUCCEEDED') {
             try {
                 await updateDeal({
@@ -163,7 +162,9 @@ async function getBuyerId(identity: string, third_party_token: string) {
 }
 
 // transfer with fraud protection and idempotency id
-async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId: string, buyerId: string, projectName: string) {
+async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId: string, buyerId: string, projectName: string, fraudSessionKey: string) {
+    console.log("fraudSessionKey", fraudSessionKey);
+    console.log("merchantId", merchantId);
     const amountInCents = deal.investmentStats.amount * (process.env.NODE_ENV === "production" ? 100 : 1);
     const achTransferResponse = await fetch(`${process.env.FINIX_BASE_URL!}/transfers`, {
         method: 'POST',
@@ -184,7 +185,7 @@ async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId
                 project: projectName
             },
             idempotency_id: deal.transactionId,
-            fraud_session_id: deal.transactionId,
+            fraud_session_id: fraudSessionKey,
         })
     });
 

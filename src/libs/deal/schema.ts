@@ -25,7 +25,7 @@ export const zDealUpdateSchema = z.object({
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
   dateFundsSent: z.date().nullish(),
-  paymentMethod: z.nativeEnum(PaymentMethod).optional(),
+  paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
 });
 

@@ -1,5 +1,4 @@
 /* eslint-disable */
-import { getErrorMessage } from '@/libs/utils';
 import axios from 'axios';
 import React from 'react';
 
@@ -15,6 +14,7 @@ import { toast } from 'react-toastify';
 
 interface Props {
     dealId: number;
+    merchantId: string;
 }
 interface State {
     token: null | string;
@@ -37,27 +37,35 @@ class PlaidLinkClass extends React.Component<Props, State> {
 
     onSuccess: PlaidLinkOnSuccess = async (publicToken, metadata) => {
         const fullMetadata = metadata as PlaidLinkOnSuccessMetadata & { account_id: string };
-        // https://plaid.com/docs/api/tokens/#token-exchange-flow 
-        const res = await axios.post('/api/finix/transaction', {
-            plaid_public_token: publicToken,
-            plaid_account_id: fullMetadata.account_id,
-            type: "PLAID_PROCESSOR_TOKEN",
-            dealId: this.props.dealId
-        })
-            .catch((error) => {
-                console.error("Finix transaction error", error);
-                const errorMessage = error.response.data.error;
-                toast.error(errorMessage);
-                return error.response;
-            });
 
-        if (res.status === 200) {
-            const { message } = res.data;
-            console.log(message);
-            toast.success(message);
-            // TODO: show success message: https://linear.app/neutralus/issue/NTRL-183/ux-revise-ach-payment-step
-            // TODO: disable the button to avoid multiple clicks
-        }
+        console.log("merchantId:", this.props.merchantId);
+        const FinixAuth = window.Finix.Auth('sandbox', this.props.merchantId, async (sk: string) => {
+            console.log("sessionKey", sk);
+
+            // https://plaid.com/docs/api/tokens/#token-exchange-flow 
+            const res = await axios.post('/api/finix/transaction', {
+                plaid_public_token: publicToken,
+                plaid_account_id: fullMetadata.account_id,
+                dealId: this.props.dealId,
+                sessionKey: sk,
+                merchantId: this.props.merchantId,
+            })
+                .catch((error) => {
+                    console.error("Finix transaction error", error);
+                    const errorMessage = error.response.data.error;
+                    toast.error(errorMessage);
+                    return error.response;
+                });
+
+            if (res.status === 200) {
+                const { message } = res.data;
+                console.log(message);
+                toast.success(message);
+                // TODO: show success message: https://linear.app/neutralus/issue/NTRL-183/ux-revise-ach-payment-step
+                // TODO: disable the button to avoid multiple clicks
+            }
+
+        });
 
     };
 
