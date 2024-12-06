@@ -74,29 +74,25 @@ const isDealCompleted = (dealStage: number): boolean => {
 /**
  * Deal Stage Reference:
  * 0 = Get Started
- * 1 = Type
- * 2 = Amount
- * 3 = Details
- * 4 = Review & Submit
- * 5 = Completed
+ * 2 = review
+ * 3 = review
+ * 4 = fund
+ * 5 = fund
  *
- * //TODO CHANGE
  */
 
 const getNextStep = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
     case 0:
       return "get-started";
-    case 1:
-      return "type";
     case 2:
-      return "amount";
     case 3:
-      return "details";
-    case 4:
       return "review";
+    case 4:
+    case 5:
+      return "fund";
     default:
-      return "completed";
+      return "get-started";
   }
 };
 
@@ -104,14 +100,12 @@ const getNextStepDisplay = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
     case 0:
       return "Next Step: Get Started";
-    case 1:
-      return "Next Step: Select Investment Type";
     case 2:
-      return "Next Step: Enter Amount";
+      return "Next Step: Review & Sign";
     case 3:
-      return "Next Step: Fill Details";
+      return "Next Step: Review & Sign";
     case 4:
-      return "Next Step: Review & Submit";
+      return "Next Step: Fund";
     default:
       return "Completed";
   }

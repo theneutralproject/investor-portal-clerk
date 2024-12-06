@@ -1,47 +1,21 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  Box,
-} from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
-import { styled } from "@mui/material/styles";
+import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import ShareOnSocial from "./ShareOnSocial";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-
-const bulletPoints = [
-  "Priority project construction updates",
-  "Access to exclusive investor events",
-  "Investor newsletter and regular investment updates",
-  "View investment details and project updates 24/7 in your investor portal",
-];
-
-const StyledListItemIcon = styled(ListItemIcon)({
-  minWidth: "32px",
-  "& .MuiSvgIcon-root": {
-    color: "#16a34a", // Green color for check icons
-    fontSize: "1.2rem",
-  },
-});
+import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 
 const PaymentProcessing: React.FC = () => {
   const router = useRouter();
-
+  const { deal } = useDealFlow();
   const goToDashboard = () => {
     router.push("/projects");
   };
 
   return (
     <Box sx={{ p: 3 }}>
-      <DealFlowTitle title="We're Processing Your Payment" />
+      <DealFlowTitle title="Fund Your Investment" />
 
       <Typography variant="body2" gutterBottom sx={{ mb: 1 }}>
         After we&apos;ve received your funds we&apos;ll update your account to
@@ -61,26 +35,19 @@ const PaymentProcessing: React.FC = () => {
           </Typography>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Congratulations on investing in a sustainable development!
-            Here&apos;s what you can expect from us from here on out:
+            Thank you for your payment in the amount of $
+            {deal?.investmentStats?.amount} for your investment with ID{" "}
+            {deal?.paymentReferenceId}.
           </Typography>
 
-          <List sx={{ mb: 2 }}>
-            {bulletPoints.map((point, index) => (
-              <ListItem key={index} sx={{ py: 0.5 }}>
-                <StyledListItemIcon>
-                  <CheckIcon />
-                </StyledListItemIcon>
-                <ListItemText
-                  primary={point}
-                  primaryTypographyProps={{
-                    variant: "body2",
-                    sx: { lineHeight: 1.3 },
-                  }}
-                />
-              </ListItem>
-            ))}
-          </List>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Please print this authorization for your records.You have authorized
+            us to initiate an automated clearing house (ACH) one-time debit in
+            your name to your bank account. This transaction will be presented
+            to your financial institution by the next business day. You further
+            agree that you may not revoke this authorization or cancel this
+            payment.
+          </Typography>
 
           <Button fullWidth variant="neutralBlack" onClick={goToDashboard}>
             GO TO DASHBOARD
