@@ -1,4 +1,4 @@
-import { DealOwnershipType, DealFinancingType, DealUnitType } from "@prisma/client";
+import { DealOwnershipType, DealFinancingType, DealUnitType, PaymentMethod } from "@prisma/client";
 import { z } from "zod";
 
 
@@ -24,6 +24,9 @@ export const zDealUpdateSchema = z.object({
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
+  dateFundsSent: z.date().nullish(),
+  paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
+  paymentReferenceId: z.string().nullish(),
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;

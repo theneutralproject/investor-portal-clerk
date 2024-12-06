@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useClerk, useUser } from "@clerk/nextjs";
-import { Avatar, Menu, MenuItem, IconButton } from "@mui/material";
+import { Avatar, Menu, MenuItem, IconButton, Button, Box } from "@mui/material";
 import LogoutIcon from "@mui/icons-material/Logout";
 import DescriptionIcon from "@mui/icons-material/Description";
 import posthog from "posthog-js";
@@ -31,7 +31,28 @@ const UserAvatar = () => {
   };
 
   if (!user) {
-    return <div></div>;
+    return (
+      <Box sx={{ display: "flex", gap: 2 }}>
+        <Link href="https://invest.neutral.us/" passHref>
+          <Button variant="neutralYellow">Create account</Button>
+        </Link>
+        <Link href="https://invest.neutral.us/" passHref>
+          <Button
+            variant="text"
+            sx={{
+              borderColor: "white",
+              color: "white",
+              "&:hover": {
+                borderColor: "#f5f5f5",
+                backgroundColor: "rgba(255,255,255,0.1)",
+              },
+            }}
+          >
+            Sign in
+          </Button>
+        </Link>
+      </Box>
+    );
   }
 
   return (

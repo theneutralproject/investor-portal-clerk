@@ -54,6 +54,7 @@ export default function RootLayout({
           </body>
 
           <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ""} />
+          <script type="text/javascript" src="https://forms.finixpymnts.com/finix.js" async></script>
         </html>
       </ClerkProvider>
     </CSPostHogProvider>
