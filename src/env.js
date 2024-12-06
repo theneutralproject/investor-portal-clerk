@@ -21,7 +21,6 @@ export const env = createEnv({
     FINIX_USERNAME: z.string(),
     FINIX_PASSWORD: z.string(),
     FINIX_BASE_URL: z.string(),
-    NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: z.string(),
     FINIX_WH_USERNAME: z.string(),
     FINIX_WH_PASSWORD: z.string(),
     HUBSPOT_ACCESS_TOKEN: z.string(),
@@ -63,6 +62,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FINIX_MERCHANT_ID_519: z.string(),
     NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON: z.string(),
     NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS: z.string(),
+    NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: z.string(),
   },
 
   /**
