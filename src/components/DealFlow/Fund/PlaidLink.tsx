@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 interface Props {
   dealId: number;
   merchantId: string;
+  refetchDeal: () => Promise<void>;
 }
 interface State {
   token: null | string;
@@ -68,6 +69,8 @@ class PlaidLinkClass extends React.Component<Props, State> {
           const { message } = res.data;
           console.log(message);
           toast.success(message);
+          //refetch the deal
+          await this.props.refetchDeal();
           // TODO: show success message: https://linear.app/neutralus/issue/NTRL-183/ux-revise-ach-payment-step
           // TODO: disable the button to avoid multiple clicks
         }

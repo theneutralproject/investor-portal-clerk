@@ -68,9 +68,6 @@ const FundCheck: React.FC<FundCheckProps> = ({
     await updateDeal(
       {
         ...deal,
-        dealStage: 4, //Submitted funds
-        paymentReferenceId: checkNumber,
-        dateFundsSent: new Date(),
         paymentMethod: "CHECK",
       },
       false

@@ -50,7 +50,6 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
     await updateDeal(
       {
         ...deal,
-        dealStage: 4, //Submitted funds
         paymentReferenceId: wireTransferId,
         dateFundsSent: new Date(),
         paymentMethod: "WIRE",

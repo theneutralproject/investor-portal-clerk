@@ -110,7 +110,7 @@ export const FundingOptions: React.FC<{
             subLabel={
               SHOW_PLAID
                 ? "Recommended"
-                : `Disabled: We only allow amounts up to $${MAX_AMOUNT.toLocaleString()} via bank transfer`
+                : `We only allow amounts up to $${MAX_AMOUNT.toLocaleString()} via bank transfer`
             }
             checked={selectedOption === "plaid"}
             onChange={onChange}

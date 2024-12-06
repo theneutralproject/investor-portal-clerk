@@ -41,23 +41,12 @@ const PaymentComplete: React.FC = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <DealFlowTitle title="We're Processing Your Payment" />
-
-      <Typography variant="body2" gutterBottom sx={{ mb: 1 }}>
-        After we&apos;ve received your funds we&apos;ll update your account to
-        reflect that you&apos;ve complete all 4 steps.
-      </Typography>
-
-      <Typography variant="body2" sx={{ mb: 4 }}>
-        You&apos;ll hear from our team shortly about transferring the funds.
-        After that, we&apos;ll keep you posted regularly about construction
-        progress, investment updates, and more.
-      </Typography>
+      <DealFlowTitle title="Fund Your Investment" />
 
       <Card>
         <CardContent>
-          <Typography variant="h6" component="h2" gutterBottom>
-            Your payment is processing
+          <Typography variant="h4" gutterBottom>
+            You&apos;re an Investor!
           </Typography>
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

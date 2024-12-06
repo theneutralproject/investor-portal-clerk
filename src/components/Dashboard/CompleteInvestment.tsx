@@ -85,6 +85,8 @@ const getNextStep = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
     case 0:
       return "get-started";
+    case 1:
+      return "details";
     case 2:
     case 3:
       return "review";
@@ -98,16 +100,18 @@ const getNextStep = (deal: DealWithFullOrgAndProject): string => {
 
 const getNextStepDisplay = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
-    case 0:
-      return "Next Step: Get Started";
+    case 1:
+      return "Next Step: Details";
     case 2:
       return "Next Step: Review & Sign";
     case 3:
       return "Next Step: Review & Sign";
     case 4:
       return "Next Step: Fund";
-    default:
+    case 5:
       return "Completed";
+    default:
+      return "Next Step: Get Started";
   }
 };
 

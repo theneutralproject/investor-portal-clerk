@@ -5,6 +5,7 @@ import { Card, CardContent, Typography, Button, Box } from "@mui/material";
 import ShareOnSocial from "./ShareOnSocial";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+import { PaymentMethod } from "@prisma/client";
 
 const PaymentProcessing: React.FC = () => {
   const router = useRouter();
@@ -40,14 +41,21 @@ const PaymentProcessing: React.FC = () => {
             {deal?.paymentReferenceId}.
           </Typography>
 
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Please print this authorization for your records.You have authorized
-            us to initiate an automated clearing house (ACH) one-time debit in
-            your name to your bank account. This transaction will be presented
-            to your financial institution by the next business day. You further
-            agree that you may not revoke this authorization or cancel this
-            payment.
-          </Typography>
+          {deal?.paymentMethod === PaymentMethod.ACH && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Please print this authorization for your records.You have
+              authorized us to initiate an automated clearing house (ACH)
+              one-time debit in your name to your bank account. This transaction
+              will be presented to your financial institution by the next
+              business day. You further agree that you may not revoke this
+              authorization or cancel this payment.
+            </Typography>
+          )}
+          {deal?.paymentMethod !== PaymentMethod.ACH && (
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Todo for check and wire
+            </Typography>
+          )}
 
           <Button fullWidth variant="neutralBlack" onClick={goToDashboard}>
             GO TO DASHBOARD

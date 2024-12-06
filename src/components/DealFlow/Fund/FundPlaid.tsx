@@ -51,7 +51,7 @@ const PlaidLogo = () => (
 );
 
 const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
-  const { deal } = useDealFlow();
+  const { deal, refetchDeal } = useDealFlow();
   return (
     <Box sx={{ p: 3 }}>
       <DealFlowTitle title="Fund Your Investment" />
@@ -86,7 +86,11 @@ const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
             industry standard for connecting to bank accounts and transferring
             funds.
           </Typography>
-          <PlaidLinkClass dealId={deal?.id} merchantId={merchantId} />
+          <PlaidLinkClass
+            dealId={deal?.id}
+            merchantId={merchantId}
+            refetchDeal={refetchDeal}
+          />
 
           <Typography
             variant="body2"

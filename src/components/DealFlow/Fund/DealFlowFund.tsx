@@ -29,12 +29,12 @@ const DealFlowFund: React.FC = () => {
     }
   };
 
-  if (deal?.paymentReferenceId !== null) {
-    return <PaymentProcessing />;
-  }
-
   if (deal?.dealStage === 5) {
     return <PaymentComplete />;
+  }
+
+  if (deal?.paymentReferenceId !== null) {
+    return <PaymentProcessing />;
   }
 
   if (showComponent) {
