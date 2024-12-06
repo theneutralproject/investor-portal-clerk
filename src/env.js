@@ -62,7 +62,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FINIX_MERCHANT_ID_519: z.string(),
     NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON: z.string(),
     NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS: z.string(),
-    NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: z.string(),
+    NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: z.number(),
   },
 
   /**
