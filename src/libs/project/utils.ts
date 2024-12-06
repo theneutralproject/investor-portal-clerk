@@ -1,8 +1,7 @@
-import { DealUnitType, type ProjectInvestmentStats, type ProjectMilestones } from "@prisma/client";
+import { DealInvestmentStats, DealUnitType, type ProjectInvestmentStats, type ProjectMilestones } from "@prisma/client";
 import { parse } from 'csv-parse';
 import { add, startOfMonth } from "date-fns";
 import type { ReturnsDateObject } from "./schema";
-import { isError } from "lodash";
 import { finished } from "stream";
 import { promisify } from "util";
 
@@ -13,10 +12,10 @@ interface MilestoneType {
     aUnitReturns: number,
     cUnitReturns: number,
 }
-async function readEquityMilestoneData(csvUrl: string): Promise<MilestoneType[] | Error> {
+export async function readEquityMilestoneData(csvUrl: string) {
     if (!csvUrl) {
         console.error('CSV url not provided');
-        return new Error('CSV url not provided');
+        throw new Error('CSV url not provided');
     }
     const response = await fetch(csvUrl);
     const text = await response.text();
@@ -41,7 +40,7 @@ async function readEquityMilestoneData(csvUrl: string): Promise<MilestoneType[] 
     // Catch any error
     parser.on('error', function (err) {
         console.error(err.message);
-        return new Error(err.message);
+        throw new Error(err.message);
     });
     parser.on('end', function () {
         return milestones;
@@ -57,70 +56,68 @@ export async function getEquityStatsFromProject(amount: number, equityReturnsFil
     let numberCUnits = 0;
     let numberAUnits = 0;
     let shareOfEquity = 0;
+    try {
+        const equityMilestones = await readEquityMilestoneData(equityReturnsFileUrl);
 
-    const equityMilestones = await readEquityMilestoneData(equityReturnsFileUrl);
-    if (isError(equityMilestones)) {
-        return equityMilestones;
+        const firstMilestone = equityMilestones?.[0];
+        if (!firstMilestone?.aUnitReturns || !firstMilestone?.cUnitReturns) {
+            console.error('Milestone data not found in equity returns file');
+            throw new Error('Milestone data not found in equity returns file');
+        }
+
+        if (amount >= cUnitThresholdAmount) {
+            unitType = DealUnitType.CUNIT;
+            numberCUnits = amount / 100000;
+            shareOfEquity = -amount / firstMilestone.cUnitReturns;
+        } else {
+            numberAUnits = amount / 100000;
+            shareOfEquity = -amount / firstMilestone.aUnitReturns;
+        }
+
+        return { unitType, numberCUnits, numberAUnits, shareOfEquity, equityMilestones };
+    } catch (e) {
+        console.error('Failed to get equity stats for project:', e);
+        throw e;
     }
-
-    const firstMilestone = equityMilestones?.[0];
-    if (!firstMilestone?.aUnitReturns || !firstMilestone?.cUnitReturns) {
-        console.error('Milestone data not found in equity returns file');
-        return new Error('Milestone data not found in equity returns file');
-    }
-
-    if (amount >= cUnitThresholdAmount) {
-        unitType = DealUnitType.CUNIT;
-        numberCUnits = amount / 100000;
-        shareOfEquity = -amount / firstMilestone.cUnitReturns;
-    } else {
-        numberAUnits = amount / 100000;
-        shareOfEquity = -amount / firstMilestone.aUnitReturns;
-    }
-
-    return { unitType, numberCUnits, numberAUnits, shareOfEquity, equityMilestones };
 }
 
-export function getDebtPayoutSchedule(
-    amount: number,
-    investmentStats: ProjectInvestmentStats,
-    closingDate: Date
-): ReturnsDateObject[] {
-    // Initialize closing date logic
-    // const closingDate = milestones.financialClosing;
-    let date = closingDate;
-    if (closingDate.getUTCDate() !== 1) {
-        date = startOfMonth(closingDate);
-    }
-
-    // Calculate interest rate based on threshold
-    const interestRate = amount >= investmentStats.interestRateDollarThreshold
+// Calculate interest rate based on threshold
+export function getDebtInterestRate(amount: number, investmentStats: ProjectInvestmentStats) {
+    return amount >= investmentStats.interestRateDollarThreshold
         ? investmentStats.interestRateMax
         : investmentStats.interestRateMin;
+}
 
+function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths: number, paymentFreqMonths: number, closingDate: Date) {
     const debtPayoutSchedule: ReturnsDateObject[] = [];
     let cumulativeDistribution = 0;
     let investmentMultiple = 0;
 
     let distributionDivisor = 4;
-    let paymentFreq = investmentStats.debtPaymentFreqMonths; //default to every 3 months
+    let paymentFreq = paymentFreqMonths; //default to every 3 months
     console.log("paymentFreq", paymentFreq);
-    if(paymentFreq === 0) {
+    if (paymentFreq === 0) {
         // one time payment at the end of the term
-        paymentFreq = investmentStats.debtTermMonthsMax;
+        paymentFreq = termMonths;
         distributionDivisor = 1;
     }
-    
-    for (let i = 1; i <= investmentStats.debtTermMonthsMax; i++) {
+
+    // Initialize closing date logic
+    let date = closingDate;
+    if (closingDate.getUTCDate() !== 1) {
+        date = startOfMonth(closingDate);
+    }
+
+    for (let i = 1; i <= termMonths; i++) {
         // Move to next month
         date = startOfMonth(add(date, { months: 1 }));
 
         // Calculate distribution amount based on payment frequency
         let distributionAmount = 0;
         if (i % paymentFreq === 0 && i !== 0) {
-            if(paymentFreq === investmentStats.debtTermMonthsMax) {
+            if (paymentFreq === termMonths) {
                 // onetime payment at the end of the term:
-                distributionAmount = amount * interestRate/100 * investmentStats.debtTermMonthsMax / 12;
+                distributionAmount = amount * interestRate / 100 * termMonths / 12;
                 console.log('onetime payment', distributionAmount);
             }
             else {
@@ -130,14 +127,14 @@ export function getDebtPayoutSchedule(
         }
 
         // Handle final payment (principal + interest)
-        if (i === investmentStats.debtTermMonthsMax) {
+        if (i === termMonths) {
             console.log('final payment', distributionAmount);
             distributionAmount += amount;
         }
 
         // Calculate running totals
         cumulativeDistribution += distributionAmount;
-    
+
         const multiple = (distributionAmount / amount);
         investmentMultiple += multiple;
 
@@ -159,8 +156,39 @@ export function getDebtPayoutSchedule(
 
         debtPayoutSchedule.push(entry);
     }
-// console.log(debtPayoutSchedule);
+    // console.log(debtPayoutSchedule);
     return debtPayoutSchedule;
+
+}
+
+// Calculate debt payout schedule for a closed or in progress deal (used in dashboard)
+export function getDebtPayoutScheduleForDeal(investmentStats: DealInvestmentStats, closingDate: Date): ReturnsDateObject[] {
+    if(!closingDate) {
+
+    }
+    return _getDebtPayoutSchedule(
+        investmentStats.amount,
+        investmentStats.debtInterestRatePerc,
+        investmentStats.debtTermMonthsMax,
+        investmentStats.debtPaymentFreqMonths,
+        closingDate
+    );
+}
+
+// Calculate debt payout schedule for a project (used to simulate returns before a deal has closed)
+export function getDebtPayoutScheduleForProject(
+    amount: number,
+    investmentStats: ProjectInvestmentStats,
+    closingDate: Date
+): ReturnsDateObject[] {
+    const interestRate = getDebtInterestRate(amount, investmentStats);
+    return _getDebtPayoutSchedule(
+        amount,
+        interestRate,
+        investmentStats.debtTermMonthsMax,
+        investmentStats.debtPaymentFreqMonths,
+        closingDate
+    );
 }
 
 // Helper function for consistent rounding
@@ -169,7 +197,35 @@ function roundTo(num: number, decimals: number): number {
     return Math.round(num * factor) / factor;
 }
 
-export function getEquityPayoutSchedule(
+// used in dashboard for  finalized deals
+export function getEquityPayoutScheduleForDeal(
+    stats: DealInvestmentStats,
+    projectMilestones: ProjectMilestones,
+    equityMilestones: MilestoneType[]
+): ReturnsDateObject[] {
+    const { amount, shareOfEquity, unitType, equityPreferredReturn } = stats;
+    return getEquityPayoutSchedule(
+        amount,
+        projectMilestones,
+        equityMilestones,
+        shareOfEquity,
+        unitType,
+        equityPreferredReturn
+    );
+}
+// used to simulate returns for equity financing
+export function getEquityPayoutScheduleForProject(
+    amount: number,
+    projectMilestones: ProjectMilestones,
+    equityMilestones: MilestoneType[],
+    shareOfEquity: number,
+    unitType: DealUnitType,
+    preferredReturn: number
+): ReturnsDateObject[] {
+    return getEquityPayoutSchedule(amount, projectMilestones, equityMilestones, shareOfEquity, unitType, preferredReturn);
+}
+
+function getEquityPayoutSchedule(
     amount: number,
     projectMilestones: ProjectMilestones,
     equityMilestones: MilestoneType[],
@@ -228,7 +284,7 @@ export function getEquityPayoutSchedule(
             accruedPreferredReturn: Number(accruedPreferredReturn.toFixed(2)),
         });
         previousEntry = schedule[schedule.length - 1];
-console.log(schedule[schedule.length - 1]);
+        console.log(schedule[schedule.length - 1]);
         return schedule;
     }, []);
 }

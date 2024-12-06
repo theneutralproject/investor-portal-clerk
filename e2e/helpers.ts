@@ -18,12 +18,12 @@ async function deleteHubspotDeal(hubspotId: string) {
     if (response.status >= 300) {
       console.error("ERROR: unable to delete Hubspot deal:\n", response.statusText);
       console.log("response", response);
-      return new Error("unable to delete hubspot deal");
+      return;// new Error("unable to delete hubspot deal");
     }
     return { success: true };
   }).catch((fetchError) => {
     console.error("ERROR: unable to delete Hubspot deal:\n", fetchError);
-    return new Error("unable to delete hubspot deal")
+    return;// new Error("unable to delete hubspot deal")
   });
 }
 
