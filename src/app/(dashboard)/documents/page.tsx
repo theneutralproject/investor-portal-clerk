@@ -16,6 +16,8 @@ import {
   TableRow,
   CircularProgress,
   Alert,
+  Card,
+  CardContent,
 } from "@mui/material";
 import { useQuery } from "@tanstack/react-query";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -93,6 +95,32 @@ const DocumentList = ({
       >
         <CircularProgress />
       </Box>
+    );
+  }
+
+  if (documents.length === 0) {
+    return (
+      <Card
+        sx={{
+          minHeight: "300px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <CardContent>
+          <Box sx={{ maxWidth: "800px", textAlign: "center" }}>
+            <Typography variant="h6" gutterBottom>
+              No Documents
+            </Typography>
+            <Typography variant="body1" color="text.secondary">
+              Documents will appear here after you complete an investment or
+              when your tax documents are generated at the end of the tax
+              season.
+            </Typography>
+          </Box>
+        </CardContent>
+      </Card>
     );
   }
 
