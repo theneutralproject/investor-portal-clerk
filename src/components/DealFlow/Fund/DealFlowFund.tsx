@@ -1,162 +1,61 @@
 import React, { useState } from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-  Stack,
-  Alert,
-  IconButton,
-  Collapse,
-} from "@mui/material";
-import {
-  AccountBalance as BankIcon,
-  Payment as PaymentIcon,
-  AccountBalanceWallet as WireIcon,
-  ContentCopy as CopyIcon,
-  ExpandMore as ExpandMoreIcon,
-  ExpandLess as ExpandLessIcon,
-} from "@mui/icons-material";
+import { Box, Typography } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "../Shared/DealFlowFooter";
-import PaymentProcessing from "./PaymentProcessing";
+import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
+import PaymentProcessing from "@components/DealFlow/Fund/PaymentProcessing";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import { type Deal } from "@prisma/client";
-import { type ProjectWithAllNestedData } from "@/libs/types";
-import PlaidLinkClass from "./PlaidLink";
-
-const getPaymentInfo = (project: ProjectWithAllNestedData, deal: Deal) => {
-  const defaultPaymentInfo = {
-    investmentEntity: "Not Available",
-    accountNumber: "Not Available",
-    routingNumber: "Not Available",
-    mailTo: "Not Available",
-    companyName: "Not Available",
-  };
-
-  if (!project || !deal) {
-    return defaultPaymentInfo;
-  }
-
-  const foundPaymentInfo =
-    project?.projectPaymentInfo?.find(
-      (info) =>
-        deal?.investmentEntity &&
-        info.investmentEntity === deal.investmentEntity
-    ) ?? defaultPaymentInfo;
-
-  const mailTo =
-    foundPaymentInfo.investmentEntity !== "Not Available"
-      ? `${foundPaymentInfo.investmentEntity}\nAttn: Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703`
-      : "Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703";
-
-  return {
-    companyName: foundPaymentInfo.investmentEntity,
-    mailTo,
-    accountNumber: foundPaymentInfo.accountNumber,
-    routingNumber: foundPaymentInfo.routingNumber,
-  };
-};
-
-const getMerchantId = (projectSlug: string) => {
-  switch (projectSlug) {
-    case "edison":
-      return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON!;
-      break;
-    case "bakers":
-      return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS!;
-      break;
-    case "519":
-      return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_519!;
-      break;
-    default:
-      throw new Error("Invalid project slug");
-  }
-
-}
+import FundPlaid from "@components/DealFlow/Fund/FundPlaid";
+import FundCheck from "@components/DealFlow/Fund/FundCheck";
+import FundACH from "@components/DealFlow/Fund/FundACH";
+import {
+  getPaymentInfo,
+  getMerchantId,
+  FundingOptions,
+} from "@components/DealFlow/Fund/FundShared";
+import PaymentComplete from "@components/DealFlow/Fund/PaymentComplete";
 
 const DealFlowFund: React.FC = () => {
-
   const { project, deal } = useDealFlow();
-  const [copied, setCopied] = useState<string | null>(null);
-  const [showProcessing, setShowProcessing] = useState(false);
-  const [expandedSections, setExpandedSections] = useState<
-    Record<string, boolean>
-  >({
-    plaid: false,
-    check: false,
-    wire: false,
-  });
+  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [showComponent, setShowComponent] = useState(false);
 
-  const { routingNumber, accountNumber, mailTo, companyName } = getPaymentInfo(
-    project,
-    deal
-  );
+  const paymentInfo = getPaymentInfo(project, deal);
   const investmentAmount = deal?.investmentStats?.amount ?? 0;
   const merchantId = getMerchantId(project.slug);
 
-  const toggleSection = (section: string) => {
-    setExpandedSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+  const handleContinue = () => {
+    if (selectedOption) {
+      setShowComponent(true);
+    }
   };
 
-  const copyToClipboard = (text: string, field: string) => {
-    void navigator.clipboard.writeText(text);
-    setCopied(field);
-    setTimeout(() => setCopied(null), 2000);
-  };
+  if (deal?.dealStage === 5) {
+    return <PaymentComplete />;
+  }
 
-  const toProcessingScreen = async () => {
-    setShowProcessing(true);
-  };
-
-  const renderDetailRow = (
-    label: string,
-    value: string | number,
-    copyable?: boolean
-  ) => (
-    <Stack
-      direction="row"
-      justifyContent="space-between"
-      alignItems="flex-start" // Changed from center to flex-start
-      sx={{ width: "100%" }}
-    >
-      <Typography variant="body2" sx={{ textTransform: "capitalize" }}>
-        {label}:
-      </Typography>
-      <Stack direction="row" alignItems="flex-start" spacing={1}>
-        {copied === label && (
-          <Alert sx={{}} severity="success">
-            Copied to clipboard
-          </Alert>
-        )}
-
-        <Typography
-          component="pre" // Changed to pre
-          sx={{
-            fontFamily: "inherit", // Keep the same font
-            margin: 0, // Remove default pre margins
-            whiteSpace: "pre-line", // Respect \n but wrap text
-          }}
-        >
-          {value}
-        </Typography>
-        {copyable && (
-          <IconButton
-            size="small"
-            onClick={() => copyToClipboard(String(value), label)}
-          >
-            <CopyIcon fontSize="small" sx={{ color: "black" }} />
-          </IconButton>
-        )}
-      </Stack>
-    </Stack>
-  );
-
-  if (showProcessing) {
+  if (deal?.paymentReferenceId !== null) {
     return <PaymentProcessing />;
+  }
+
+  if (showComponent) {
+    switch (selectedOption) {
+      case "plaid":
+        return <FundPlaid merchantId={merchantId} />;
+      case "check":
+        return (
+          <FundCheck
+            paymentInfo={paymentInfo}
+            investmentAmount={investmentAmount}
+          />
+        );
+      case "wire":
+        return (
+          <FundACH
+            paymentInfo={paymentInfo}
+            investmentAmount={investmentAmount}
+          />
+        );
+    }
   }
 
   return (
@@ -165,122 +64,25 @@ const DealFlowFund: React.FC = () => {
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
         As the final step, provide the bank account you&apos;d like to use to
-        fund your investment. All information and transactions are encrypted, and
-        Neutral does not store your banking information.
+        fund your investment. All information and transactions are encrypted,
+        and Neutral does not store your banking information.
       </Typography>
 
-      {/** Plaid Connection Section
-       * TODO: Only show if process.env.FINIX_MAX_TRANSACTION_AMOUNT! is less than the deal amount 
-      */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            onClick={() => toggleSection("plaid")}
-            sx={{ cursor: "pointer" }}
-          >
-            <BankIcon sx={{ color: "black" }} />
-            <Typography variant="h6" flex={1}>
-              Connect Your Bank Account
-            </Typography>
-            {expandedSections.plaid ? (
-              <ExpandLessIcon sx={{ color: "black" }} />
-            ) : (
-              <ExpandMoreIcon sx={{ color: "black" }} />
-            )}
-          </Stack>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 4 }}>
+        How would you like to fund your investment?
+      </Typography>
 
-          <Collapse in={expandedSections.plaid}>
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              sx={{ mt: 2, mb: 3 }}
-            >
-              Fund transfers are powered by our trusted partner, Plaid, the
-              industry standard for connecting to bank accounts and transferring
-              funds.
-            </Typography>
-            <PlaidLinkClass dealId={deal.id} merchantId={merchantId} />
-          </Collapse>
-        </CardContent>
-      </Card>
+      <FundingOptions
+        selectedOption={selectedOption}
+        onChange={setSelectedOption}
+        deal={deal}
+      />
 
-      {/* Check Payment Section */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            onClick={() => toggleSection("check")}
-            sx={{ cursor: "pointer" }}
-          >
-            <PaymentIcon sx={{ color: "black" }} />
-            <Typography variant="h6" flex={1}>
-              Pay by Check
-            </Typography>
-            {expandedSections.check ? (
-              <ExpandLessIcon sx={{ color: "black" }} />
-            ) : (
-              <ExpandMoreIcon sx={{ color: "black" }} />
-            )}
-          </Stack>
-
-          <Collapse in={expandedSections.check}>
-            <Box sx={{ mt: 2 }}>
-              <Stack spacing={2}>
-                {renderDetailRow("Pay to", companyName)}
-                {renderDetailRow(
-                  "Amount",
-                  `$${investmentAmount.toLocaleString()}`
-                )}
-                {renderDetailRow("Memo", `Deal ID: ${deal?.id}`)}
-                {renderDetailRow("Mail to", mailTo)}
-              </Stack>
-            </Box>
-          </Collapse>
-        </CardContent>
-      </Card>
-
-      {/* Wire Transfer Section */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            onClick={() => toggleSection("wire")}
-            sx={{ cursor: "pointer" }}
-          >
-            <WireIcon sx={{ color: "black" }} />
-            <Typography variant="h6" flex={1}>
-              Wire Transfer
-            </Typography>
-            {expandedSections.wire ? (
-              <ExpandLessIcon sx={{ color: "black" }} />
-            ) : (
-              <ExpandMoreIcon sx={{ color: "black" }} />
-            )}
-          </Stack>
-
-          <Collapse in={expandedSections.wire}>
-            <Box sx={{ mt: 2 }}>
-              <Stack spacing={2}>
-                {renderDetailRow(
-                  "Amount",
-                  `$${investmentAmount.toLocaleString()}`
-                )}
-                {renderDetailRow("Account Number", accountNumber, true)}
-                {renderDetailRow("Routing Number", routingNumber, true)}
-              </Stack>
-            </Box>
-          </Collapse>
-        </CardContent>
-      </Card>
-
-      <DealFlowFooter onBack={() => null} onContinue={toProcessingScreen} />
+      <DealFlowFooter
+        onBack={() => null}
+        onContinue={handleContinue}
+        isContinueDisabled={!selectedOption}
+      />
     </Box>
   );
 };

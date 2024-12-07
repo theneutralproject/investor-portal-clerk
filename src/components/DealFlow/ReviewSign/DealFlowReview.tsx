@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Box, Typography, Card, List } from "@mui/material";
 import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
 import { useUser } from "@clerk/nextjs";
@@ -11,6 +11,25 @@ import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const { user } = useUser();
+  const hasRunRef = useRef(false);
+
+  useEffect(() => {
+    //Make sure dealStage is 2 when on /review
+    const updateDealStage = async () => {
+      if (!hasRunRef.current && deal && deal.dealStage < 2) {
+        hasRunRef.current = true;
+        await updateDeal(
+          {
+            ...deal,
+            dealStage: 2,
+          },
+          false
+        );
+      }
+    };
+
+    void updateDealStage();
+  }, [deal, updateDeal]); // Include deal in dependencies to wait for it to be valid
 
   const docusignDocuments =
     project?.documents?.filter((doc) => doc.documentType === "DOCUSIGN") || [];
