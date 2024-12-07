@@ -1,9 +1,9 @@
 import prisma from "@/libs/prisma.server";
-import { ReturnsDateObject } from "@/libs/project/schema";
+import type { ReturnsDateObject } from "@/libs/project/schema";
 import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData } from "@/libs/project/utils";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { $Enums, DealFinancingType } from "@prisma/client";
+import { type $Enums, DealFinancingType } from "@prisma/client";
 import { date } from "zod";
 
 export async function GET() {
@@ -54,7 +54,7 @@ export async function GET() {
     }
     console.log("deals", deals.length);
     // for each deal, get the payout schedule based on the financing type
-    const payoutSchedules = await deals.map(async deal => {
+    const payoutSchedules = deals.map(async deal => {
         const { project, investmentStats, closingDate } = deal;
         if (!investmentStats) {
             return [];
@@ -120,7 +120,7 @@ export async function GET() {
     const consolidatedSchedule = [] as ReturnsDateObject[]
 
     // calculate summary stats for all deals:
-    const resolvedPayoutSchedules = await Promise.all(payoutSchedules);
+    const resolvedPayoutSchedules = (await Promise.all(payoutSchedules)).sort((a, b) => a[0]!.date <= b[0]!.date ? -1 : 1);
     resolvedPayoutSchedules.forEach(schedulePerDeal => {
         if (!schedulePerDeal.length) return;
         const deal = deals.find(deal => deal.id === schedulePerDeal[0]!.dealId);
@@ -128,15 +128,17 @@ export async function GET() {
         portfolioStats.portfolioValueToDate += deal.investmentStats?.amount ?? 0;
         portfolioStats.projectedPortfolioValue += deal.investmentStats?.amount ?? 0;
         portfolioStats.principalInvested += deal.investmentStats?.amount ?? 0;
-        let dealSummary = {
+        const dealSummary = {
             dealId: deal.id,
             committedAmount: deal.investmentStats?.amount ?? 0,
             distributionsToDate: 0,
             accruedInterestToDate: 0,
         }
-        schedulePerDeal.forEach(dateObject => {
+        let previousDateObject: ReturnsDateObject | undefined;
+        schedulePerDeal.forEach((dateObject, i) => {
+            if(!previousDateObject) previousDateObject = dateObject;
             // if the dateObject is already in the consolidated schedule, add to the existing date object
-            const existingDateObject = consolidatedSchedule.find(obj => obj.date.toDateString() === dateObject.date.toDateString());
+            const existingDateObject = consolidatedSchedule.find(obj => obj.date.toDateString() == dateObject.date.toDateString());
             if (existingDateObject) {
                 existingDateObject.distributionAmount += dateObject.distributionAmount;
                 existingDateObject.cumulativeDistribution += dateObject.cumulativeDistribution;
@@ -144,13 +146,20 @@ export async function GET() {
                 existingDateObject.totalNetReturn += dateObject.totalNetReturn;
                 existingDateObject.investmentMultiple += dateObject.investmentMultiple;
                 if (dateObject.accruedPreferredReturn) existingDateObject.accruedPreferredReturn = existingDateObject.accruedPreferredReturn ?? 0 + dateObject.accruedPreferredReturn;
+                previousDateObject = existingDateObject;
             }
             else {
+                // dateObject.distributionAmount += previousDateObject.distributionAmount;
+                dateObject.accruedPreferredReturn = previousDateObject.accruedPreferredReturn ?? 0 + (dateObject.accruedPreferredReturn ?? 0);
+                dateObject.investmentMultiple += previousDateObject.investmentMultiple;
+                dateObject.totalGrossReturn = previousDateObject.totalGrossReturn + dateObject.distributionAmount;
+                dateObject.totalNetReturn = previousDateObject.totalNetReturn + dateObject.distributionAmount;
+                dateObject.cumulativeDistribution = previousDateObject.cumulativeDistribution + dateObject.distributionAmount;
+                previousDateObject = dateObject;
                 consolidatedSchedule.push(dateObject);
             }
             // if the date is in the past, add the distribution amount to the portfolio stats
             if (dateObject.date < new Date()) {
-                console.log("processing past date object", dateObject);
                 portfolioStats.distributionsToDate += dateObject.distributionAmount;
                 portfolioStats.accruedInterestToDate += dateObject.accruedPreferredReturn ?? 0;
                 portfolioStats.portfolioValueToDate += dateObject.distributionAmount;
@@ -167,7 +176,7 @@ export async function GET() {
         // add the deal summary to the dealSummaryStats
         dealSummaryStats.push(dealSummary);
     });
-
+    
     // return deals with payoutSchedules
     return jsonResponse({ consolidatedSchedule, portfolioStats, dealSummaryStats });
 }

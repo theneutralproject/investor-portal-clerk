@@ -53,9 +53,9 @@ test.describe("api/dashboard/returns test", () => {
         expect(lastScheduleEntry.cumulativeDistribution).toBe(140000);
     });
     
-    test('[GET] get dashboard returns for multiple deals', async ({ request }) => {
+    test('[GET] get dashboard returns for multiple DEBT deals starting on the same day', async ({ request }) => {
 
-                // create a equity deal
+                // create first debt deal
                 const dealCreateResponse = await request.post('/api/deals', { data: debtDealData1 });
                 debtDeal2 = await JSON.parse(await dealCreateResponse.text());
         
@@ -76,6 +76,42 @@ test.describe("api/dashboard/returns test", () => {
         const stats = await JSON.parse(await response.text());
         console.log("stats", stats);
         expect(stats.consolidatedSchedule.length).toBe(48);
+        const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
+        expect(lastScheduleEntry.cumulativeDistribution).toBe(280000);
+    });
+    
+    test('[GET] get dashboard returns for multiple DEBT deals starting on offset days', async ({ request }) => {
+
+        const debtDealData2: DealCreateSchema = {
+            organizationId: 4,
+            projectId: 1,
+            dealStage: 1,
+            transactionId: 'test-deal-debt2',
+            financingType: DealFinancingType.promissory_note_now,
+            amount: 100000,
+        };
+
+                // create first debt deal
+                const dealCreateResponse = await request.post('/api/deals', { data: debtDealData2 });
+                debtDeal2 = await JSON.parse(await dealCreateResponse.text());
+        
+                // the put deal route configures the investment stats in the backend. 
+                const dealUpdateResponse = await request.put('/api/deals', {
+                    data: {
+                        hubspotId: debtDeal2!.hubspotId,
+                        dealStage: 5,
+                        closingDate: new Date(2024, 11, 1),
+                    }
+                });
+        
+                debtDeal2 = await JSON.parse(await dealUpdateResponse.text());
+
+
+        const response = await request.get('/api/dashboard/returns');
+        expect(response.status()).toBe(200);
+        const stats = await JSON.parse(await response.text());
+        console.log("stats", stats);
+        expect(stats.consolidatedSchedule.length).toBe(69);
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
         expect(lastScheduleEntry.cumulativeDistribution).toBe(280000);
     });

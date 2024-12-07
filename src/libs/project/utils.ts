@@ -1,6 +1,6 @@
-import { DealInvestmentStats, DealUnitType, type ProjectInvestmentStats, type ProjectMilestones } from "@prisma/client";
+import { type DealInvestmentStats, DealUnitType, type ProjectInvestmentStats, type ProjectMilestones } from "@prisma/client";
 import { parse } from 'csv-parse';
-import { add, startOfMonth } from "date-fns";
+import { add, endOfMonth, startOfMonth } from "date-fns";
 import type { ReturnsDateObject } from "./schema";
 import { finished } from "stream";
 import { promisify } from "util";
@@ -88,6 +88,13 @@ export function getDebtInterestRate(amount: number, investmentStats: ProjectInve
         : investmentStats.interestRateMin;
 }
 
+    // find last day of first month of next quarter
+export function getPayoutScheduleStartDate(closingDate: Date) {
+    const thisQuarter = Math.ceil((closingDate.getUTCMonth()) / 3);
+    const firstDayOfNextQuarter = new Date(closingDate.getUTCFullYear(), thisQuarter * 3, 1);
+    return new Date(endOfMonth(firstDayOfNextQuarter).setHours(0, 0, 0, 0));
+}
+
 function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths: number, paymentFreqMonths: number, closingDate: Date) {
     const debtPayoutSchedule: ReturnsDateObject[] = [];
     let cumulativeDistribution = 0;
@@ -101,13 +108,9 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
         paymentFreq = termMonths;
         distributionDivisor = 1;
     }
-
-    // Initialize closing date logic
-    let date = closingDate;
-    if (closingDate.getUTCDate() !== 1) {
-        date = startOfMonth(closingDate);
-    }
-
+    console.log("closingDate\t\t\t", closingDate);    
+    let date = getPayoutScheduleStartDate(closingDate);
+    console.log("payout schedule start date\t", date);
     for (let i = 1; i <= termMonths; i++) {
         // Move to next month
         date = startOfMonth(add(date, { months: 1 }));
@@ -118,17 +121,14 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
             if (paymentFreq === termMonths) {
                 // onetime payment at the end of the term:
                 distributionAmount = amount * interestRate / 100 * termMonths / 12;
-                console.log('onetime payment', distributionAmount);
             }
             else {
                 distributionAmount = (amount * interestRate / 100) / distributionDivisor;
-                console.log('monthly payment', distributionAmount);
             }
         }
 
         // Handle final payment (principal + interest)
         if (i === termMonths) {
-            console.log('final payment', distributionAmount);
             distributionAmount += amount;
         }
 
@@ -163,7 +163,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
 
 // Calculate debt payout schedule for a closed or in progress deal (used in dashboard)
 export function getDebtPayoutScheduleForDeal(investmentStats: DealInvestmentStats, closingDate: Date): ReturnsDateObject[] {
-    if(!closingDate) {
+    if (!closingDate) {
 
     }
     return _getDebtPayoutSchedule(

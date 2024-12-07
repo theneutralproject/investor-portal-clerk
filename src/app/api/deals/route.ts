@@ -2,7 +2,7 @@ import prisma from "@/libs/prisma.server";
 import { currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { isError } from "lodash";
-import { DealFinancingType, DealInvestmentStats } from "@prisma/client";
+import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
@@ -242,7 +242,7 @@ export async function PUT(request: NextRequest) {
   try {
     // const dealData = await request.json() as DealUpdateSchema;
 
-    let requestBody = await request.json() as DealUpdateSchema;
+    const requestBody = await request.json() as DealUpdateSchema;
     // parse the date strings into Date objects for zod to validate
     if(requestBody.closingDate) {
       requestBody.closingDate = new Date(Date.parse(requestBody.closingDate.toString()));

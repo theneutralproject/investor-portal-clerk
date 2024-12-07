@@ -5,7 +5,7 @@ import type { DealUpdateSchema } from "./schema";
 import { getDebtInterestRate, getEquityStatsFromProject } from "../project/utils";
 import prisma from "../prisma.server";
 import { getHsDealPropsFromDeal, updateHubspotDealProperties } from '../hubspot/utils';
-import { DealWithInvestmentStats, ProjectWithInvestmentStats } from '../types';
+import type { DealWithInvestmentStats, ProjectWithInvestmentStats } from '../types';
 
 /**
  * Updates a deal, as well as investmentStats in the DB and in Hubspot
@@ -62,9 +62,9 @@ export async function updateDeal(
                 throw Error("Failed to update deal with hubspot data");
             }
 
-            let dealFinancingType = financingType ?? existingDeal.investmentStats?.financingType;
-            let dealAmount = amount ?? existingDeal.investmentStats?.amount;
-            let dealOwnershipType = ownershipType ?? existingDeal.investmentStats?.ownershipType;
+            const dealFinancingType = financingType ?? existingDeal.investmentStats?.financingType;
+            const dealAmount = amount ?? existingDeal.investmentStats?.amount;
+            const dealOwnershipType = ownershipType ?? existingDeal.investmentStats?.ownershipType;
 
             let newInvestmentStats = {
                 amount: dealAmount,
@@ -122,7 +122,7 @@ export async function updateDeal(
 
     if (updateHubspot) {
         try {
-            let hsDealData = updateDealData
+            const hsDealData = updateDealData
             if (updatedStats) {
                 hsDealData.investmentStats = updatedStats;
             }
@@ -161,7 +161,7 @@ export async function populateDealEquityStats(stats: DealInvestmentStats, projec
     stats.debtPaymentFreqMonths = 0;
     stats.debtInterestRatePerc = 0;
 
-    let minInvestmentAmount = project.investmentStats.equityMinInvestment;
+    const minInvestmentAmount = project.investmentStats.equityMinInvestment;
     if (stats.amount < minInvestmentAmount) {
         console.error(
             `The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`
