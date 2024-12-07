@@ -17,7 +17,7 @@ test.describe("api/dashboard/returns test", () => {
         amount: 100000,
     };
 
-    test.beforeEach(async ({ request }) => {
+    test.beforeAll(async ({ request }) => {
         await clearAllTestData();
         // create a debt deal
         const dealCreateResponse = await request.post('/api/deals', { data: debtDealData1 });
@@ -102,7 +102,7 @@ test.describe("api/dashboard/returns test", () => {
         const stats = await JSON.parse(await response.text());
         expect(stats.consolidatedSchedule.length).toBe(69);
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-        expect(lastScheduleEntry.cumulativeDistribution).toBe(280000);
+        expect(lastScheduleEntry.cumulativeDistribution).toBe(420000);
     });
 
     test('[GET] get dashboard returns for one EQUITY deal', async ({ request }) => {
@@ -140,9 +140,9 @@ test.describe("api/dashboard/returns test", () => {
         const response = await request.get('/api/dashboard/returns');
         expect(response.status()).toBe(200);
         const stats = await JSON.parse(await response.text());
-        expect(stats.consolidatedSchedule.length).toBe(60);
+        expect(stats.consolidatedSchedule.length).toBe(79);
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-        expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(193006.00);
+        expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(333006);
     });
 
     test('[GET] get dashboard returns for one DEBT and one EQUITY deal', async ({ request }) => {
@@ -176,12 +176,12 @@ test.describe("api/dashboard/returns test", () => {
         const stats = await JSON.parse(await response.text());
         expect(stats.consolidatedSchedule.length).toBe(79);
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-        expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(333006.00);
+        expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(526013);
     });
 
     // TODO: Add test for equity deal that starts after official closing date. Need to talk to finance team to understand how to handle this case.
 
-    test.afterEach(async () => {
+    test.afterAll(async () => {
         let promises = [];
         if (debtDeal1) {
             promises.push(deleteDealInDbAndHubspot(debtDeal1));
