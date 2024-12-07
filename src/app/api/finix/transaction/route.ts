@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
             return errorResponse('You are not a member of this organization', 401);
         }
 
-        const maxFinixAmount = parseFloat(process.env.FINIX_MAX_TRANSACTION_AMOUNT ?? "0");
+        const maxFinixAmount = parseFloat(process.env.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT ?? "0");
         if (!deal.investmentStats || deal.investmentStats.amount <= 0 || deal.investmentStats.amount > maxFinixAmount) {
             return errorResponse('The investment amount is invalid', 400);
         }
