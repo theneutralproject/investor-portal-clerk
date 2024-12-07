@@ -5,22 +5,9 @@ import {
   Typography,
   Button,
   Stack,
-  styled,
   Divider,
 } from "@mui/material";
 import Image from "next/image";
-
-const StyledButton = styled(Button)(({ theme }) => ({
-  borderRadius: "20px",
-  textTransform: "none",
-  padding: "8px 24px",
-  backgroundColor: theme.palette.background.paper,
-  color: theme.palette.text.primary,
-  border: `1px solid ${theme.palette.divider}`,
-  "&:hover": {
-    backgroundColor: theme.palette.action.hover,
-  },
-}));
 
 interface QuestionsProps {
   phoneNumber?: string;

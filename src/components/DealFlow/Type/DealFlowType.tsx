@@ -7,7 +7,7 @@ import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { MODAL_KEYS } from "../Shared/Modal/DealFlowLearnMoreModal";
 
 const DealFlowType: React.FC = () => {
-  const { deal, updateDeal } = useDealFlow();
+  const { deal, updateDeal, project } = useDealFlow();
   const [financingType, setFinancingType] = useState<DealFinancingType>(
     deal?.investmentStats?.financingType ?? DealFinancingType.equity
   );
@@ -29,18 +29,26 @@ const DealFlowType: React.FC = () => {
   };
 
   const investmentTypes = [
-    {
-      type: DealFinancingType.equity,
-      title: "Equity Investment",
-      description:
-        "Common Equity benefits from the property's performance; in contrast to Common Debt, this type of investment offers higher potential returns and tax optimization. Common Equity does have a higher risk associated with the higher return.",
-    },
-    {
-      type: DealFinancingType.promissory_note_now,
-      title: "Debt Investment",
-      description:
-        "Common Debt provides a fixed rate of return, and it has priority in repayment to Common Equity, making it a less risky investment. Furthermore, Common Debt has a fixed rate of return per annum, distributed quarterly.",
-    },
+    ...(project?.investmentStats?.boolEquity
+      ? [
+          {
+            type: DealFinancingType.equity,
+            title: "Equity Investment",
+            description:
+              "Common Equity benefits from the property's performance; in contrast to Common Debt, this type of investment offers higher potential returns and tax optimization. Common Equity does have a higher risk associated with the higher return.",
+          },
+        ]
+      : []),
+    ...(project?.investmentStats?.boolDebt
+      ? [
+          {
+            type: DealFinancingType.promissory_note_now,
+            title: "Debt Investment",
+            description:
+              "Common Debt provides a fixed rate of return, and it has priority in repayment to Common Equity, making it a less risky investment. Furthermore, Common Debt has a fixed rate of return per annum, distributed quarterly.",
+          },
+        ]
+      : []),
   ];
 
   return (
