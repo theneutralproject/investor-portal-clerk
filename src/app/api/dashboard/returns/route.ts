@@ -4,7 +4,6 @@ import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquit
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { type $Enums, DealFinancingType } from "@prisma/client";
-import { date } from "zod";
 
 export async function GET() {
     // get loggedin user
@@ -135,7 +134,7 @@ export async function GET() {
             accruedInterestToDate: 0,
         }
         let previousDateObject: ReturnsDateObject | undefined;
-        schedulePerDeal.forEach((dateObject, i) => {
+        schedulePerDeal.forEach((dateObject) => {
             if(!previousDateObject) previousDateObject = dateObject;
             // if the dateObject is already in the consolidated schedule, add to the existing date object
             const existingDateObject = consolidatedSchedule.find(obj => obj.date.toDateString() == dateObject.date.toDateString());

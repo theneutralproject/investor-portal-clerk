@@ -183,7 +183,7 @@ export function populateDealDebtStats(stats: DealInvestmentStats, project: Proje
     stats.numberAUnits = 0;
     stats.numberCUnits = 0;
     stats.shareOfEquity = 0;
-    let minInvestmentAmount = project.investmentStats.debtMinInvestment;
+    const minInvestmentAmount = project.investmentStats.debtMinInvestment;
     if (stats.amount < minInvestmentAmount) {
         console.error(
             `The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`
