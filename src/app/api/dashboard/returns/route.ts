@@ -1,6 +1,6 @@
 import prisma from "@/libs/prisma.server";
 import type { ReturnsDateObject } from "@/libs/project/schema";
-import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData } from "@/libs/project/utils";
+import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData, roundTo } from "@/libs/project/utils";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { type $Enums, DealFinancingType } from "@prisma/client";
@@ -150,10 +150,10 @@ export async function GET() {
             else {
                 // dateObject.distributionAmount += previousDateObject.distributionAmount;
                 dateObject.accruedPreferredReturn = previousDateObject.accruedPreferredReturn ?? 0 + (dateObject.accruedPreferredReturn ?? 0);
-                dateObject.investmentMultiple += previousDateObject.investmentMultiple;
-                dateObject.totalGrossReturn = previousDateObject.totalGrossReturn + dateObject.distributionAmount;
-                dateObject.totalNetReturn = previousDateObject.totalNetReturn + dateObject.distributionAmount;
-                dateObject.cumulativeDistribution = previousDateObject.cumulativeDistribution + dateObject.distributionAmount;
+                dateObject.investmentMultiple += roundTo(previousDateObject.investmentMultiple, 2);
+                dateObject.totalGrossReturn = roundTo(previousDateObject.totalGrossReturn + dateObject.distributionAmount, 2);
+                dateObject.totalNetReturn = roundTo(previousDateObject.totalNetReturn + dateObject.distributionAmount, 2);
+                dateObject.cumulativeDistribution = roundTo(previousDateObject.cumulativeDistribution + dateObject.distributionAmount,2);
                 previousDateObject = dateObject;
                 consolidatedSchedule.push(dateObject);
             }

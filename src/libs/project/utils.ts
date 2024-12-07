@@ -192,12 +192,12 @@ export function getDebtPayoutScheduleForProject(
 }
 
 // Helper function for consistent rounding
-function roundTo(num: number, decimals: number): number {
+export function roundTo(num: number, decimals: number): number {
     const factor = Math.pow(10, decimals);
     return Math.round(num * factor) / factor;
 }
 
-// used in dashboard for  finalized deals
+// used in dashboard for finalized deals
 export function getEquityPayoutScheduleForDeal(
     stats: DealInvestmentStats,
     projectMilestones: ProjectMilestones,
