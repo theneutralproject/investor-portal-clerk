@@ -5,7 +5,6 @@ import {
   CardContent,
   Typography,
   Grid,
-  useTheme,
   Divider,
   Button,
   Stack,
@@ -17,18 +16,102 @@ import {
   YAxis,
   ResponsiveContainer,
   CartesianGrid,
+  Tooltip,
+  Legend,
 } from "recharts";
 import PortfolioMetric from "./PortfolioMetric";
-import { ProjectWithAllNestedData } from "@/libs/types";
 import { useQuery } from "@tanstack/react-query";
-import { DashboardPortfolioResponse } from "@/libs/types";
 import axios from "axios";
+
+interface ConsolidatedSchedule {
+  date: string;
+  distributionAmount: number;
+  multiple: number;
+  cumulativeDistribution: number;
+  investmentMultiple: number;
+  totalGrossReturn: number;
+  totalNetReturn: number;
+  interestRateOrIrrPerc: number;
+  accruedPreferredReturn: number;
+  dealId: number;
+}
+
+interface PortfolioStats {
+  portfolioValueToDate: number;
+  distributionsToDate: number;
+  accruedInterestToDate: number;
+  projectedInterest: number;
+  projectedDistributions: number;
+  projectedPortfolioValue: number;
+  principalInvested: number;
+}
+
+interface DealSummaryStats {
+  dealId: number;
+  committedAmount: number;
+  distributionsToDate: number;
+  accruedInterestToDate: number;
+}
+
+interface DashboardPortfolioResponse {
+  consolidatedSchedule: ConsolidatedSchedule[];
+  portfolioStats: PortfolioStats;
+  dealSummaryStats: DealSummaryStats[];
+}
 
 interface MetricData {
   label: string;
   value: string;
   color: string;
 }
+
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+const formatQuarter = (dateString: string): string => {
+  const date = new Date(dateString);
+  const quarter = Math.floor(date.getMonth() / 3) + 1;
+  const year = date.getFullYear().toString().slice(-2);
+  return `Q${quarter} '${year}`;
+};
+const groupByQuarter = (
+  schedule: ConsolidatedSchedule[],
+  portfolioStats: PortfolioStats
+): any[] => {
+  const quarterData = schedule.reduce((acc: { [key: string]: any }, curr) => {
+    const quarterKey = formatQuarter(curr.date);
+
+    if (!acc[quarterKey]) {
+      acc[quarterKey] = {
+        quarter: quarterKey,
+        principal: portfolioStats.principalInvested,
+        accruedInterest: 0,
+        distributions: 0,
+        portfolioValue: portfolioStats.principalInvested + curr.totalGrossReturn,
+      };
+    }
+
+    // Take max cumulative distribution for the quarter
+    acc[quarterKey].distributions = Math.max(
+      acc[quarterKey].distributions,
+      curr.cumulativeDistribution
+    );
+    acc[quarterKey].accruedInterest = Math.max(0, curr.accruedPreferredReturn);
+
+    // Update portfolio value to latest totalGrossReturn in quarter plus principal
+    acc[quarterKey].portfolioValue = portfolioStats.principalInvested + curr.totalGrossReturn;
+
+    return acc;
+  }, {});
+
+  return Object.values(quarterData);
+};
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const { isLoading, data } = useQuery<DashboardPortfolioResponse, Error>({
@@ -39,12 +122,44 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
         .then((res) => res.data),
   });
 
-  const metrics: MetricData[] = [
-    { label: "Portfolio Value", value: "$0", color: "#FFB800" },
-    { label: "Distributions", value: "$0", color: "#5AAC6A" },
-    { label: "Accrued Interest", value: "$0", color: "#2196F3" },
-    { label: "Principal", value: "$0", color: "#656565" },
-  ];
+  const metrics: MetricData[] = React.useMemo(() => {
+    if (!data) {
+      return [
+        { label: "Portfolio Value", value: "$0", color: "#FFB800" },
+        { label: "Distributions", value: "$0", color: "#5AAC6A" },
+        { label: "Accrued Interest", value: "$0", color: "#2196F3" },
+        { label: "Principal", value: "$0", color: "#656565" },
+      ];
+    }
+
+    return [
+      {
+        label: "Portfolio Value",
+        value: formatCurrency(data.portfolioStats.portfolioValueToDate),
+        color: "#FFB800",
+      },
+      {
+        label: "Distributions",
+        value: formatCurrency(data.portfolioStats.distributionsToDate),
+        color: "#5AAC6A",
+      },
+      {
+        label: "Accrued Interest",
+        value: formatCurrency(data.portfolioStats.accruedInterestToDate),
+        color: "#2196F3",
+      },
+      {
+        label: "Principal",
+        value: formatCurrency(data.portfolioStats.principalInvested),
+        color: "#656565",
+      },
+    ];
+  }, [data]);
+
+  const chartData = React.useMemo(() => {
+    if (!data) return [];
+    return groupByQuarter(data.consolidatedSchedule, data.portfolioStats);
+  }, [data]);
 
   return (
     <Card sx={{ borderRadius: "8px", position: "relative" }}>
@@ -75,7 +190,47 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 
         <Box sx={{ height: 300, mt: 4 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={[]}></LineChart>
+            <LineChart
+              data={chartData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="quarter" />
+              <YAxis />
+              <Tooltip
+                formatter={(value: number) => formatCurrency(value)}
+                labelFormatter={(label) => `Quarter: ${label}`}
+              />
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="principal"
+                stroke="#656565"
+                name="Principal"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="accruedInterest"
+                stroke="#2196F3"
+                name="Accrued Interest"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="distributions"
+                stroke="#5AAC6A"
+                name="Distributions"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="portfolioValue"
+                stroke="#FFB800"
+                name="Portfolio Value"
+                strokeWidth={2}
+              />
+            </LineChart>
           </ResponsiveContainer>
         </Box>
 
@@ -135,7 +290,6 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 };
 
 export default DashboardPortfolio;
-
 
 /*
 Example response:
