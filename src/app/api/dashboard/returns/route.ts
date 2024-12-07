@@ -1,6 +1,7 @@
 import prisma from "@/libs/prisma.server";
 import type { ReturnsDateObject } from "@/libs/project/schema";
 import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData, roundTo } from "@/libs/project/utils";
+import { type DashboardPortfolioResponse, type DealSummaryStats, type PortfolioStats } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { type $Enums, DealFinancingType } from "@prisma/client";
@@ -96,7 +97,9 @@ export async function GET() {
         }
     });
 
-    const portfolioStats = {
+
+
+    const portfolioStats: PortfolioStats = {
         portfolioValueToDate: 0,
         distributionsToDate: 0,
         accruedInterestToDate: 0,
@@ -106,12 +109,7 @@ export async function GET() {
         principalInvested: 0
     }
 
-    type DealSummaryStats = {
-        dealId: number;
-        committedAmount: number;
-        distributionsToDate: number;
-        accruedInterestToDate: number;
-    }
+
 
     const dealSummaryStats = [] as DealSummaryStats[]// 
 
@@ -177,5 +175,5 @@ export async function GET() {
     });
     
     // return deals with payoutSchedules
-    return jsonResponse({ consolidatedSchedule, portfolioStats, dealSummaryStats });
+    return jsonResponse({ consolidatedSchedule, portfolioStats, dealSummaryStats } as DashboardPortfolioResponse);
 }

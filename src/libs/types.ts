@@ -18,6 +18,7 @@ import {
   type DealDocument,
   type ProjectPaymentInfo,
 } from "@prisma/client";
+import { ReturnsDateObject } from "./project/schema";
 
 export type ProjectWithAllNestedData = Project & {
   pictures: ProjectPicture[];
@@ -108,4 +109,25 @@ export type MemberWithUser = Member & {
 
 export type MemberWithFullUser = Member & {
   user: User & { address: Address | null };
+};
+
+export type PortfolioStats = {
+  portfolioValueToDate: number;
+  distributionsToDate: number;
+  accruedInterestToDate: number;
+  projectedInterest: number;
+  projectedDistributions: number;
+  projectedPortfolioValue: number;
+  principalInvested: number;
+};
+export type DealSummaryStats = {
+  dealId: number;
+  committedAmount: number;
+  distributionsToDate: number;
+  accruedInterestToDate: number;
+};
+export type DashboardPortfolioResponse = {
+  consolidatedSchedule: ReturnsDateObject[];
+  portfolioStats: PortfolioStats;
+  dealSummaryStats: DealSummaryStats[];
 };

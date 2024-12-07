@@ -19,6 +19,10 @@ import {
   CartesianGrid,
 } from "recharts";
 import PortfolioMetric from "./PortfolioMetric";
+import { ProjectWithAllNestedData } from "@/libs/types";
+import { useQuery } from "@tanstack/react-query";
+import { DashboardPortfolioResponse } from "@/libs/types";
+import axios from "axios";
 
 interface MetricData {
   label: string;
@@ -26,28 +30,20 @@ interface MetricData {
   color: string;
 }
 
-interface ChartData {
-  name: string;
-  value: number;
-}
-
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
-  const theme = useTheme();
+  const { isLoading, data } = useQuery<DashboardPortfolioResponse, Error>({
+    queryKey: ["dashboard", "portfolio"],
+    queryFn: () =>
+      axios
+        .get<DashboardPortfolioResponse>("/api/dashboard/returns")
+        .then((res) => res.data),
+  });
 
   const metrics: MetricData[] = [
     { label: "Portfolio Value", value: "$0", color: "#FFB800" },
     { label: "Distributions", value: "$0", color: "#5AAC6A" },
     { label: "Accrued Interest", value: "$0", color: "#2196F3" },
     { label: "Principal", value: "$0", color: "#656565" },
-  ];
-
-  const chartData: ChartData[] = [
-    { name: "Q1 23", value: 0 },
-    { name: "Q2 23", value: 0 },
-    { name: "Q3 23", value: 0 },
-    { name: "Q4 23", value: 0 },
-    { name: "Q1 24", value: 0 },
-    { name: "Q2 24", value: 0 },
   ];
 
   return (
@@ -79,39 +75,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 
         <Box sx={{ height: 300, mt: 4 }}>
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={chartData}
-              margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
-            >
-              <CartesianGrid
-                stroke={theme.palette.grey[200]}
-                vertical={false}
-              />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: theme.palette.text.secondary }}
-                dy={10}
-                padding={{ left: 20, right: 20 }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: theme.palette.text.secondary }}
-                ticks={[0, 100000, 200000, 300000]}
-                tickFormatter={(value) => `$${value / 1000}k`}
-                dx={-10}
-                padding={{ top: 20, bottom: 20 }}
-              />
-              <Line
-                type="monotone"
-                dataKey="value"
-                stroke={theme.palette.primary.main}
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
+            <LineChart data={[]}></LineChart>
           </ResponsiveContainer>
         </Box>
 
@@ -171,3 +135,53 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 };
 
 export default DashboardPortfolio;
+
+
+/*
+Example response:
+{
+  "consolidatedSchedule": [
+    {
+      "date": "2024-12-01T06:00:00.000Z",
+      "distributionAmount": 0,
+      "multiple": 0,
+      "cumulativeDistribution": 0,
+      "investmentMultiple": 0,
+      "totalGrossReturn": 0,
+      "totalNetReturn": -100000,
+      "interestRateOrIrrPerc": -1200,
+      "accruedPreferredReturn": 0,
+      "dealId": 1216
+    },
+    {
+      "date": "2025-01-01T06:00:00.000Z",
+      "distributionAmount": 0,
+      "multiple": 0,
+      "cumulativeDistribution": 0,
+      "investmentMultiple": 0,
+      "totalGrossReturn": 0,
+      "totalNetReturn": -100000,
+      "interestRateOrIrrPerc": -600,
+      "accruedPreferredReturn": 0,
+      "dealId": 1216
+    }
+  ],
+  "portfolioStats": {
+    "portfolioValueToDate": 100000,
+    "distributionsToDate": 0,
+    "accruedInterestToDate": 0,
+    "projectedInterest": 0,
+    "projectedDistributions": 193006.9300000001,
+    "projectedPortfolioValue": 293006.9299999999,
+    "principalInvested": 100000
+  },
+  "dealSummaryStats": [
+    {
+      "dealId": 1216,
+      "committedAmount": 100000,
+      "distributionsToDate": 0,
+      "accruedInterestToDate": 0
+    }
+  ]
+}
+*/
