@@ -6,9 +6,9 @@ import { Deal, DealFinancingType, DealUnitType } from '@prisma/client';
 import { clearAllTestData, deleteDealInDbAndHubspot } from 'e2e/helpers';
 
 test.describe("api/deals test", () => {
-    let testDeal: Deal | null = null;
+    let edisonTEstDeal: Deal | null = null;
     let secondDeal: Deal | null = null;
-    const testDealData: DealCreateSchema = {
+    const edisonTestDealData: DealCreateSchema = {
         organizationId: 4,
         projectId: 1,
         dealStage: 0,
@@ -17,11 +17,18 @@ test.describe("api/deals test", () => {
         amount: 5555,
     };
     test.beforeAll(async ({ request }) => {
+        console.log("beforeAll");
         await clearAllTestData();
         // create a deal
-        const response = await request.post('/api/deals', { data: testDealData });
-        testDeal = await JSON.parse(await response.text());
-
+        console.log(("still beforeAll"));
+        try{
+        const response = await request.post('/api/deals', { data: edisonTestDealData });
+        edisonTEstDeal = await JSON.parse(await response.text());
+        console.log("testDeal", edisonTEstDeal);
+        } catch (e) {
+            console.log("cound not create test deal:");
+            console.error(e);
+        }   
     });
 
     test('[GET] get all deals returns null if no deal exists', async ({ request }) => {
@@ -35,13 +42,15 @@ test.describe("api/deals test", () => {
     test('[GET] get all deals returns a deal for the Edison', async ({ request }) => {
         const response = await request.get('/api/deals?slug=edison');
         expect(response.status()).toBe(200);
-        const { investmentStats, ...deal } = await JSON.parse(await response.text()) as DealWithInvestmentStats;
+        const body = await JSON.parse(await response.text());
+        console.log(body);
+        const { investmentStats, ...deal } = body as DealWithInvestmentStats;
         expect(response.headers()['content-type']).toBe('application/json');
-        expect(investmentStats.amount).toBe(testDealData.amount);
-        expect(investmentStats.numberAUnits).toBe((testDealData.amount! / 100000));
+        expect(investmentStats.amount).toBe(edisonTestDealData.amount);
+        expect(investmentStats.numberAUnits).toBe((edisonTestDealData.amount! / 100000));
         expect(investmentStats.numberCUnits).toBe(0);
         expect(investmentStats.unitType).toBe(DealUnitType.AUNIT);
-        expect(deal.dealStage).toBe(testDealData.dealStage);
+        expect(deal.dealStage).toBe(edisonTestDealData.dealStage);
     });
 
     test('[POST] create a deal', async ({ request }) => {
@@ -64,13 +73,13 @@ test.describe("api/deals test", () => {
     });
 
     test('[PUT] update a deal', async ({ request }) => {
-        if (!testDeal) {
+        if (!edisonTEstDeal) {
             console.error("testDeal is null - skipping test");
             test.skip();
         };
         const response = await request.put('/api/deals', {
             data: {
-                hubspotId: testDeal?.hubspotId,
+                hubspotId: edisonTEstDeal?.hubspotId,
                 projectId: 1,
                 organizationId: 4,
                 dealStage: 1,
@@ -90,10 +99,10 @@ test.describe("api/deals test", () => {
         expect(body.dealStage).toBe(1);
     });
 
-    test.afterEach(async () => {
-        if (testDeal) {
-            await deleteDealInDbAndHubspot(testDeal);
-            testDeal = null;
+    test.afterAll(async () => {
+        if (edisonTEstDeal) {
+            await deleteDealInDbAndHubspot(edisonTEstDeal);
+            edisonTEstDeal = null;
         } else {
             console.error("testDeal is null - skipping cleanup");
         }

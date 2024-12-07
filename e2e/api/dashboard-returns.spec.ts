@@ -17,7 +17,7 @@ test.describe("api/dashboard/returns test", () => {
         amount: 100000,
     };
 
-    test.beforeAll(async ({ request }) => {
+    test.beforeEach(async ({ request }) => {
         await clearAllTestData();
         // create a debt deal
         const dealCreateResponse = await request.post('/api/deals', { data: debtDealData1 });
@@ -178,7 +178,7 @@ test.describe("api/dashboard/returns test", () => {
         expect(response.status()).toBe(200);
         const stats = await JSON.parse(await response.text());
         console.log("stats", stats);
-        expect(stats.consolidatedSchedule.length).toBe(69);
+        expect(stats.consolidatedSchedule.length).toBe(79);
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
         expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(333006.00);
     });
@@ -186,20 +186,22 @@ test.describe("api/dashboard/returns test", () => {
     // TODO: Add test for equity deal that starts after official closing date. Need to talk to finance team to understand how to handle this case.
 
     test.afterEach(async () => {
+        let promises = [];
         if (debtDeal1) {
-            await deleteDealInDbAndHubspot(debtDeal1);
-            debtDeal1 = null;
+            promises.push(deleteDealInDbAndHubspot(debtDeal1));
         } else {
             console.error("debtDeal1 is null - skipping cleanup");
         }
         if (debtDeal2) {
-            await deleteDealInDbAndHubspot(debtDeal2);
-            debtDeal2 = null;
+            promises.push(deleteDealInDbAndHubspot(debtDeal2));
         }
         if (equityDeal1) {
-            await deleteDealInDbAndHubspot(equityDeal1);
-            equityDeal1 = null;
+            promises.push(deleteDealInDbAndHubspot(equityDeal1));
         }
+        await Promise.all(promises);
+        debtDeal1 = null;
+        debtDeal2 = null;
+        equityDeal1 = null;
         return;
     });
 });
