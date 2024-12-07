@@ -90,6 +90,7 @@ const DealFlowAmount: React.FC = () => {
 
     await updateDeal({
       ...deal,
+      dealStage: 1, //Input amount
       investmentStats: {
         ...deal.investmentStats,
         amount,
