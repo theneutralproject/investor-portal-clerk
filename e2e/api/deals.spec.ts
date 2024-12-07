@@ -17,16 +17,12 @@ test.describe("api/deals test", () => {
         amount: 5555,
     };
     test.beforeAll(async ({ request }) => {
-        console.log("beforeAll");
         await clearAllTestData();
-        // create a deal
-        console.log(("still beforeAll"));
         try{
         const response = await request.post('/api/deals', { data: edisonTestDealData });
         edisonTEstDeal = await JSON.parse(await response.text());
-        console.log("testDeal", edisonTEstDeal);
         } catch (e) {
-            console.log("cound not create test deal:");
+            console.error("could not create test deal in BEFOREALL:");
             console.error(e);
         }   
     });
@@ -43,7 +39,6 @@ test.describe("api/deals test", () => {
         const response = await request.get('/api/deals?slug=edison');
         expect(response.status()).toBe(200);
         const body = await JSON.parse(await response.text());
-        console.log(body);
         const { investmentStats, ...deal } = body as DealWithInvestmentStats;
         expect(response.headers()['content-type']).toBe('application/json');
         expect(investmentStats.amount).toBe(edisonTestDealData.amount);
