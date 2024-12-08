@@ -174,6 +174,7 @@ test.describe("api/dashboard/returns test", () => {
         const response = await request.get('/api/dashboard/returns');
         expect(response.status()).toBe(200);
         const stats = await JSON.parse(await response.text());
+        console.log(stats);
         expect(stats.consolidatedSchedule.length).toBe(79);
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
         expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(333006.00);

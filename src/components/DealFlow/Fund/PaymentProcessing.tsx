@@ -11,7 +11,7 @@ const PaymentProcessing: React.FC = () => {
   const router = useRouter();
   const { deal } = useDealFlow();
   const goToDashboard = () => {
-    router.push("/projects");
+    router.push("/dashboard");
   };
 
   return (

@@ -1,7 +1,7 @@
 import prisma from "@/libs/prisma.server";
 import type { ReturnsDateObject } from "@/libs/project/schema";
 import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData, roundTo } from "@/libs/project/utils";
-import { type DashboardPortfolioResponse, type DealSummaryStats, type PortfolioStats } from "@/libs/types";
+import { DealWithInvestmentStatsAndProject, type DashboardPortfolioResponse, type DealSummaryStats, type PortfolioStats } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { type $Enums, DealFinancingType } from "@prisma/client";
@@ -20,6 +20,7 @@ export async function GET() {
                     organization: {
                         include: {
                             deals: {
+                                where: { dealStage: 5 },
                                 include: {
                                     investmentStats: true,
                                     project: { include: { milestones: true } }
@@ -34,29 +35,27 @@ export async function GET() {
     if (!user) {
         return errorResponse("User not found in database", 404);
     }
-
+    const deals: DealWithInvestmentStatsAndProject[] = [];
     // iterate through organizations and get deals
-    const deals: ({ project: { milestones: { id: number; projectId: number; equityContribution: Date; financialClosing: Date; groundBreakingCeremony: Date | null; startVerticalConstruction: Date | null; toppingOut: Date | null; preLeasing: Date | null; fullEnclosure: Date | null; temporaryOccupancy: Date; grandOpening: Date; stabilized: Date; refinance: Date; sale: Date; } | null; } & { id: number; name: string; location: string; tags: string; status: $Enums.Status; description: string; marketHighlights: string; youtubeUrl: string; slug: string; equityReturnsFile: string; }; investmentStats: { id: number; ownershipType: $Enums.DealOwnershipType; dealId: number; amount: number; financingType: $Enums.DealFinancingType; unitType: $Enums.DealUnitType; debtInterestRatePerc: number; debtTermMonthsMin: number; debtTermMonthsMax: number; debtPaymentFreqMonths: number; debtPaymentFreq: string; equityTermMonths: number; equityPreferredReturn: number; shareOfEquity: number; numberAUnits: number; numberCUnits: number; } | null; } & { id: number; hubspotId: string; organizationId: number; projectId: number; dealStage: number; transactionId: string; investmentEntity: string; closingDate: Date | null; signaturesCompletedDate: Date | null; dateFundsSent: Date | null; paymentMethod: $Enums.PaymentMethod | null; paymentReferenceId: string | null; })[] = [];
     for (const member of user.organizationMember) {
         const org = member.organization;
         for (const deal of org.deals) {
 
-            console.log("deal", deal.id, deal.investmentStats?.amount, deal.project.id);
-            if (deal.dealStage === 5) {
-                if (!deal.investmentStats) {
-                    console.error(`Deal ${deal.id} has no investment stats`);
-                }
-                if (deal.investmentStats && deal.project) {
-                    deals.push(deal);
-                }
+            console.log("completed deal/ amount/ project/ type", deal.id, deal.investmentStats?.amount, deal.project.id, deal.investmentStats?.financingType);
+            if (!deal.investmentStats) {
+                console.error(`Deal ${deal.id} has no investment stats`);
+            }
+            if (deal.investmentStats && deal.project) {
+                deals.push(deal);
             }
         }
     }
-    console.log("deals", deals.length);
+    console.log("num completed deals", deals.length);
     // for each deal, get the payout schedule based on the financing type
     const payoutSchedules = deals.map(async deal => {
         const { project, investmentStats, closingDate } = deal;
         if (!investmentStats) {
+            console.error(`Investment stats missing for deal ${deal.id}`);
             return [];
         }
         if (!closingDate) {
@@ -64,7 +63,7 @@ export async function GET() {
             return [];
         }
         if (!project?.milestones || !project.equityReturnsFile) {
-            console.error(`Project milestones or equity returns file not found for project ${project.id}`);
+            console.error(`Project milestones or equity returns file not found for project  of deal ${deal.id}`);
             return [];
         }
         if (investmentStats.financingType === DealFinancingType.equity) {
@@ -88,7 +87,7 @@ export async function GET() {
                     dealId: deal.id,
                 }
             });
-
+            console.log("debt payout schedule", debtPayoutSchedule.length);
             return debtPayoutSchedule
         }
         else {
@@ -117,11 +116,24 @@ export async function GET() {
     const consolidatedSchedule = [] as ReturnsDateObject[]
 
     // calculate summary stats for all deals:
-    const resolvedPayoutSchedules = (await Promise.all(payoutSchedules)).sort((a, b) => a[0]!.date <= b[0]!.date ? -1 : 1);
+    console.log("sorting payout schedules");
+    const resolvedPayoutSchedules = (await Promise.all(payoutSchedules)).sort((a, b) => {
+        if (!a[0]?.date) return 1;
+        if (!b[0]?.date) return -1;
+        return a[0].date <= b[0].date ? -1 : 1;
+    });
+    console.log("resolved payout schedules", resolvedPayoutSchedules.length);
     resolvedPayoutSchedules.forEach(schedulePerDeal => {
-        if (!schedulePerDeal.length) return;
-        const deal = deals.find(deal => deal.id === schedulePerDeal[0]!.dealId);
-        if (!deal) return;
+        if (schedulePerDeal.length === 0) {
+            console.error("Empty schedule for deal");
+            return;
+        }
+        const deal = deals.find(deal => deal.id === schedulePerDeal[0]?.dealId);
+        if (!deal) {
+            console.log(schedulePerDeal[0]);
+            console.error("Deal not found for schedule");
+            return;
+        };
         portfolioStats.portfolioValueToDate += deal.investmentStats?.amount ?? 0;
         portfolioStats.projectedPortfolioValue += deal.investmentStats?.amount ?? 0;
         portfolioStats.principalInvested += deal.investmentStats?.amount ?? 0;
@@ -133,7 +145,7 @@ export async function GET() {
         }
         let previousDateObject: ReturnsDateObject | undefined;
         schedulePerDeal.forEach((dateObject) => {
-            if(!previousDateObject) previousDateObject = dateObject;
+            if (!previousDateObject) previousDateObject = dateObject;
             // if the dateObject is already in the consolidated schedule, add to the existing date object
             const existingDateObject = consolidatedSchedule.find(obj => obj.date.toDateString() == dateObject.date.toDateString());
             if (existingDateObject) {
@@ -151,7 +163,7 @@ export async function GET() {
                 dateObject.investmentMultiple += roundTo(previousDateObject.investmentMultiple, 2);
                 dateObject.totalGrossReturn = roundTo(previousDateObject.totalGrossReturn + dateObject.distributionAmount, 2);
                 dateObject.totalNetReturn = roundTo(previousDateObject.totalNetReturn + dateObject.distributionAmount, 2);
-                dateObject.cumulativeDistribution = roundTo(previousDateObject.cumulativeDistribution + dateObject.distributionAmount,2);
+                dateObject.cumulativeDistribution = roundTo(previousDateObject.cumulativeDistribution + dateObject.distributionAmount, 2);
                 previousDateObject = dateObject;
                 consolidatedSchedule.push(dateObject);
             }
@@ -173,7 +185,7 @@ export async function GET() {
         // add the deal summary to the dealSummaryStats
         dealSummaryStats.push(dealSummary);
     });
-    
+
     // return deals with payoutSchedules
     return jsonResponse({ consolidatedSchedule, portfolioStats, dealSummaryStats } as DashboardPortfolioResponse);
 }

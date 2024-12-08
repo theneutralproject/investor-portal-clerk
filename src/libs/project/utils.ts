@@ -102,13 +102,12 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
 
     let distributionDivisor = 4;
     let paymentFreq = paymentFreqMonths; //default to every 3 months
-    console.log("paymentFreq", paymentFreq);
     if (paymentFreq === 0) {
         // one time payment at the end of the term
         paymentFreq = termMonths;
         distributionDivisor = 1;
     }
-    console.log("closingDate\t\t\t", closingDate);    
+    console.log("closingDate\t\t", closingDate);    
     let date = getPayoutScheduleStartDate(closingDate);
     console.log("payout schedule start date\t", date);
     for (let i = 1; i <= termMonths; i++) {
@@ -164,8 +163,10 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
 // Calculate debt payout schedule for a closed or in progress deal (used in dashboard)
 export function getDebtPayoutScheduleForDeal(investmentStats: DealInvestmentStats, closingDate: Date): ReturnsDateObject[] {
     if (!closingDate) {
-
+        console.error('Closing date not provided for deal', investmentStats.dealId);
+        throw new Error('Closing date not provided');
     }
+    console.log(investmentStats)
     return _getDebtPayoutSchedule(
         investmentStats.amount,
         investmentStats.debtInterestRatePerc,
@@ -284,7 +285,7 @@ function getEquityPayoutSchedule(
             accruedPreferredReturn: Number(accruedPreferredReturn.toFixed(2)),
         });
         previousEntry = schedule[schedule.length - 1];
-        console.log(schedule[schedule.length - 1]);
+        // console.log(schedule[schedule.length - 1]);
         return schedule;
     }, []);
 }

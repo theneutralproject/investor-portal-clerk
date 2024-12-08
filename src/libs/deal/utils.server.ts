@@ -14,7 +14,8 @@ import type { DealWithInvestmentStats, ProjectWithInvestmentStats } from '../typ
  */
 export async function updateDeal(
     updateDealData: DealUpdateSchema /**dealData includes fields for both Deal and DealInvestmentStats */,
-    updateHubspot = false
+    updateHubspot = false,
+    allowMaintenanceOfCompletedDeals = false
 ) {
     const { investmentStats: investmentStatsToUpdate, ...dealData } = updateDealData;
     const existingDeal = await prisma.deal.findUnique({
@@ -28,7 +29,7 @@ export async function updateDeal(
         throw Error("The deal does not exist in the database");
     }
 
-    if (existingDeal.dealStage === 5) {
+    if (existingDeal.dealStage === 5 && !allowMaintenanceOfCompletedDeals) {
         console.error("Completed Deals cannot be updated");
         throw Error("Completed Deals cannot be updated");
     }
@@ -39,8 +40,8 @@ export async function updateDeal(
 
     let updatedStats: DealInvestmentStats | null = null;
     // Only update investment stats if the deal stage is less than 4 (not yet signed)
-    if (existingDeal.dealStage >= 4) {
-        console.error(
+    if (existingDeal.dealStage >= 4 && !allowMaintenanceOfCompletedDeals) {
+        console.warn(
             `Deal with id ${existingDeal.id} is already signed, and the investmentStats cannot be updated.`
         );
     } else {
@@ -107,7 +108,7 @@ export async function updateDeal(
     let updatedDeal: DealWithInvestmentStats
     /* eslint-disable-next-line */
     try {
-        console.log("Updating deal with this data:", dealData);
+        // console.log("Updating deal with this data:", dealData);
         updatedDeal = await prisma.deal
             .update({
                 where: { hubspotId: dealData.hubspotId },
