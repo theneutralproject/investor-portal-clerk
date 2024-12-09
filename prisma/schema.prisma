@@ -192,7 +192,7 @@ model ProjectInvestmentStats {
   equityPaymentFreq           String  @default("quarterly")
   equityPaymentFreqMonths     Int     @default(3)
   equityTermMonths            Int     @default(60)
-  preferredReturn             Float   @default(0.1)
+  equityPreferredReturn       Float   @default(0.1)
   investmentGoal              Float   @default(0.0)
   investmentRaised            Float   @default(0.0)
   interestRateMin             Float   @default(10.0)

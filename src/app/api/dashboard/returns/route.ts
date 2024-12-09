@@ -1,10 +1,11 @@
 import prisma from "@/libs/prisma.server";
-import type { ReturnsDateObject } from "@/libs/project/schema";
-import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData, roundTo } from "@/libs/project/utils";
-import { DealWithInvestmentStatsAndProject, type DashboardPortfolioResponse, type DealSummaryStats, type PortfolioStats } from "@/libs/types";
+import type { ReturnsDateObject, ReturnsDealStats, ReturnsPortfolioResponse, ReturnsPortfolioStats } from "@/libs/returns/schema";
+import { getDebtPayoutScheduleForDeal, getEquityPayoutScheduleForDeal, readEquityMilestoneData, roundTo } from "@/libs/returns/utils";
+import { DealWithInvestmentStatsAndProject } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { type $Enums, DealFinancingType } from "@prisma/client";
+import { DealFinancingType } from "@prisma/client";
+import { eq } from "lodash";
 
 export async function GET() {
     // get loggedin user
@@ -40,8 +41,6 @@ export async function GET() {
     for (const member of user.organizationMember) {
         const org = member.organization;
         for (const deal of org.deals) {
-
-            console.log("completed deal/ amount/ project/ type", deal.id, deal.investmentStats?.amount, deal.project.id, deal.investmentStats?.financingType);
             if (!deal.investmentStats) {
                 console.error(`Deal ${deal.id} has no investment stats`);
             }
@@ -50,7 +49,7 @@ export async function GET() {
             }
         }
     }
-    console.log("num completed deals", deals.length);
+
     // for each deal, get the payout schedule based on the financing type
     const payoutSchedules = deals.map(async deal => {
         const { project, investmentStats, closingDate } = deal;
@@ -72,6 +71,7 @@ export async function GET() {
                 const equityPayoutSchedule = getEquityPayoutScheduleForDeal(investmentStats, project.milestones, equityMilestones).map(dateObject => {
                     return { ...dateObject, dealId: deal.id };
                 });
+                console.log("equity payout schedule last item:", equityPayoutSchedule[equityPayoutSchedule.length - 1]);
                 return equityPayoutSchedule;
             }
             catch (e) {
@@ -96,50 +96,45 @@ export async function GET() {
         }
     });
 
-
-
-    const portfolioStats: PortfolioStats = {
+    const portfolioStats: ReturnsPortfolioStats = {
         portfolioValueToDate: 0,
         distributionsToDate: 0,
         accruedInterestToDate: 0,
-        projectedInterest: 0,
+        projectedAccruedInterest: 0,
         projectedDistributions: 0,
         projectedPortfolioValue: 0,
         principalInvested: 0
     }
 
-
-
-    const dealSummaryStats = [] as DealSummaryStats[]// 
+    const dealStats = [] as ReturnsDealStats[]// 
 
     // create one timeline for all deals, from the earliest closing date to the latest term date 
     const consolidatedSchedule = [] as ReturnsDateObject[]
 
     // calculate summary stats for all deals:
-    console.log("sorting payout schedules");
     const resolvedPayoutSchedules = (await Promise.all(payoutSchedules)).sort((a, b) => {
         if (!a[0]?.date) return 1;
         if (!b[0]?.date) return -1;
         return a[0].date <= b[0].date ? -1 : 1;
     });
-    console.log("resolved payout schedules", resolvedPayoutSchedules.length);
+    console.log("resolved payout schedules length:", resolvedPayoutSchedules.length);
     resolvedPayoutSchedules.forEach(schedulePerDeal => {
         if (schedulePerDeal.length === 0) {
             console.error("Empty schedule for deal");
             return;
         }
         const deal = deals.find(deal => deal.id === schedulePerDeal[0]?.dealId);
-        if (!deal) {
+        if (!deal?.investmentStats) {
             console.log(schedulePerDeal[0]);
             console.error("Deal not found for schedule");
             return;
         };
-        portfolioStats.portfolioValueToDate += deal.investmentStats?.amount ?? 0;
-        portfolioStats.projectedPortfolioValue += deal.investmentStats?.amount ?? 0;
-        portfolioStats.principalInvested += deal.investmentStats?.amount ?? 0;
+        portfolioStats.portfolioValueToDate += deal.investmentStats.amount;
+        portfolioStats.projectedPortfolioValue += deal.investmentStats.amount;
+        portfolioStats.principalInvested += deal.investmentStats.amount;
         const dealSummary = {
             dealId: deal.id,
-            committedAmount: deal.investmentStats?.amount ?? 0,
+            committedAmount: deal.investmentStats.amount,
             distributionsToDate: 0,
             accruedInterestToDate: 0,
         }
@@ -154,24 +149,25 @@ export async function GET() {
                 existingDateObject.totalGrossReturn += dateObject.totalGrossReturn;
                 existingDateObject.totalNetReturn += dateObject.totalNetReturn;
                 existingDateObject.investmentMultiple += dateObject.investmentMultiple;
-                if (dateObject.accruedPreferredReturn) existingDateObject.accruedPreferredReturn = existingDateObject.accruedPreferredReturn ?? 0 + dateObject.accruedPreferredReturn;
+                existingDateObject.accruedPreferredReturn = existingDateObject.accruedPreferredReturn + dateObject.accruedPreferredReturn;
                 previousDateObject = existingDateObject;
+
             }
             else {
-                // dateObject.distributionAmount += previousDateObject.distributionAmount;
-                dateObject.accruedPreferredReturn = previousDateObject.accruedPreferredReturn ?? 0 + (dateObject.accruedPreferredReturn ?? 0);
-                dateObject.investmentMultiple += roundTo(previousDateObject.investmentMultiple, 2);
-                dateObject.totalGrossReturn = roundTo(previousDateObject.totalGrossReturn + dateObject.distributionAmount, 2);
-                dateObject.totalNetReturn = roundTo(previousDateObject.totalNetReturn + dateObject.distributionAmount, 2);
-                dateObject.cumulativeDistribution = roundTo(previousDateObject.cumulativeDistribution + dateObject.distributionAmount, 2);
+                // create new date object and add to the schedule
+                dateObject.accruedPreferredReturn = previousDateObject.accruedPreferredReturn + dateObject.preferredReturnCurrent;
+                dateObject.investmentMultiple += previousDateObject.investmentMultiple;
+                dateObject.totalGrossReturn = previousDateObject.totalGrossReturn + dateObject.distributionAmount;
+                dateObject.totalNetReturn = previousDateObject.totalNetReturn + dateObject.distributionAmount;
+                dateObject.cumulativeDistribution = previousDateObject.cumulativeDistribution + dateObject.distributionAmount;
                 previousDateObject = dateObject;
                 consolidatedSchedule.push(dateObject);
             }
             // if the date is in the past, add the distribution amount to the portfolio stats
             if (dateObject.date < new Date()) {
                 portfolioStats.distributionsToDate += dateObject.distributionAmount;
-                portfolioStats.accruedInterestToDate += dateObject.accruedPreferredReturn ?? 0;
-                portfolioStats.portfolioValueToDate += dateObject.distributionAmount;
+                portfolioStats.accruedInterestToDate += dateObject.accruedPreferredReturn;
+                portfolioStats.portfolioValueToDate += (dateObject.distributionAmount + dateObject.accruedPreferredReturn);
 
                 // update the deal summary stats
                 dealSummary.distributionsToDate += dateObject.distributionAmount;
@@ -179,13 +175,13 @@ export async function GET() {
 
             }
             portfolioStats.projectedDistributions += dateObject.distributionAmount;
-            portfolioStats.projectedInterest += dateObject.accruedPreferredReturn ?? 0;
+            portfolioStats.projectedAccruedInterest += dateObject.preferredReturnCurrent ?? 0;
             portfolioStats.projectedPortfolioValue += dateObject.distributionAmount;
         });
         // add the deal summary to the dealSummaryStats
-        dealSummaryStats.push(dealSummary);
+        dealStats.push(dealSummary);
     });
 
     // return deals with payoutSchedules
-    return jsonResponse({ consolidatedSchedule, portfolioStats, dealSummaryStats } as DashboardPortfolioResponse);
+    return jsonResponse({ consolidatedSchedule, portfolioStats, dealStats } as ReturnsPortfolioResponse);
 }

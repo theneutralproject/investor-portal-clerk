@@ -2,7 +2,7 @@ import 'server-only';
 import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import { isError } from "lodash";
 import type { DealUpdateSchema } from "./schema";
-import { getDebtInterestRate, getEquityStatsFromProject } from "../project/utils";
+import { getDebtInterestRate, getEquityStatsFromProject } from "../returns/utils";
 import prisma from "../prisma.server";
 import { getHsDealPropsFromDeal, updateHubspotDealProperties } from '../hubspot/utils';
 import type { DealWithInvestmentStats, ProjectWithInvestmentStats } from '../types';
@@ -154,6 +154,7 @@ export async function populateDealEquityStats(stats: DealInvestmentStats, projec
     stats.numberAUnits = numberAUnits;
     stats.numberCUnits = numberCUnits;
     stats.equityTermMonths = project.investmentStats.equityTermMonths;
+    stats.equityPreferredReturn = project.investmentStats.equityPreferredReturn;
 
     // set all debt related fields to null
     stats.debtTermMonthsMin = 0;

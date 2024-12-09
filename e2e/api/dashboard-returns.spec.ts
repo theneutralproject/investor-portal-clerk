@@ -1,4 +1,5 @@
 import { DealCreateSchema } from '@/libs/deal/schema';
+import { ReturnsPortfolioResponse } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType } from '@prisma/client';
 import { clearAllTestData, deleteDealInDbAndHubspot } from 'e2e/helpers';
@@ -50,7 +51,6 @@ test.describe("api/dashboard/returns test", () => {
             const response = await request.get('/api/dashboard/returns');
             expect(response.status()).toBe(200);
             const stats = await JSON.parse(await response.text());
-            console.log(stats);
             expect(stats.consolidatedSchedule.length).toBe(48);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
             expect(lastScheduleEntry.cumulativeDistribution).toBe(140000);
@@ -127,10 +127,12 @@ test.describe("api/dashboard/returns test", () => {
         try {
             const response = await request.get('/api/dashboard/returns');
             expect(response.status()).toBe(200);
-            const stats = await JSON.parse(await response.text());
+            const stats = await JSON.parse(await response.text()) as ReturnsPortfolioResponse;
             expect(stats.consolidatedSchedule.length).toBe(69);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-            expect(lastScheduleEntry.cumulativeDistribution).toBe(280000);
+            expect(lastScheduleEntry?.cumulativeDistribution).toBe(280000);
+            expect(stats.portfolioStats?.principalInvested).toBe(200000);
+            expect(stats.portfolioStats?.projectedDistributions).toBe(280000);
         } catch (e) {
             console.error("could not get dashboard returns for multiple DEBT deals starting on offset days in api/dashboard/returns test:");
             console.error(e);
@@ -222,7 +224,6 @@ test.describe("api/dashboard/returns test", () => {
             const response = await request.get('/api/dashboard/returns');
             expect(response.status()).toBe(200);
             const stats = await JSON.parse(await response.text());
-            console.log(stats);
             expect(stats.consolidatedSchedule.length).toBe(79);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
             expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(333006.00);

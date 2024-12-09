@@ -7,7 +7,7 @@ export interface ProjectedReturn {
   totalNetReturn: number;
 }
 
-export interface InvestmentStats {
+export interface InvestmentStatsSummary {
   interestRateOrIrrPerc: number;
   investmentMultiple: number;
   totalGrossReturn: number;
