@@ -14,7 +14,7 @@ export async function POST() {
         take: 30,
         skip: 0
     });
-    let resultsArray: Deal[] = [];
+    const resultsArray: Deal[] = [];
     for await (const deal of deals) {
         const { hubspotId, dealStage, investmentStats, projectId, closingDate, signaturesCompletedDate, dateFundsSent, paymentMethod, paymentReferenceId } = deal;
         let tempDealStage = dealStage;

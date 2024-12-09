@@ -171,14 +171,12 @@ export async function POST(request: NextRequest) {
     const { investmentStats, ...projectData } = project;
     if (dealData.financingType === DealFinancingType.equity) {
       try {
-        console.log("Populating EQUITY stats for NEW deal with id");
         newInvestmentStats = await populateDealEquityStats(newInvestmentStats, { ...projectData, investmentStats });
       } catch (e) {
         throw e;
       }
     }
     else {
-      console.log("Populating DEBT stats for NEW deal with id");
       newInvestmentStats = populateDealDebtStats(newInvestmentStats, { ...projectData, investmentStats });
     }
 
