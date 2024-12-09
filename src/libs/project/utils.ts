@@ -116,6 +116,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
 
         // Calculate distribution amount based on payment frequency
         let distributionAmount = 0;
+        let accruedPreferredReturn = 0;
         if (i % paymentFreq === 0 && i !== 0) {
             if (paymentFreq === termMonths) {
                 // onetime payment at the end of the term:
@@ -151,6 +152,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
             totalGrossReturn: roundTo(totalGrossReturn, 2),
             totalNetReturn: roundTo(totalNetReturn, 2),
             interestRateOrIrrPerc: interestRate,
+            accruedPreferredReturn: roundTo(accruedPreferredReturn, 2),
         };
 
         debtPayoutSchedule.push(entry);
