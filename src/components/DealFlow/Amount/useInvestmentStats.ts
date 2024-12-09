@@ -1,11 +1,11 @@
 // hooks/useInvestmentStats.ts
 import { useMemo } from "react";
-import type { InvestmentStats } from "./dealFlow.types";
-import type { ReturnsDateObject } from "@/libs/project/schema";
+import type { InvestmentStatsSummary } from "./dealFlow.types";
+import type { ReturnsDateObject } from "@/libs/returns/schema";
 
 export const useInvestmentStats = (
   returnsData: ReturnsDateObject[]
-): InvestmentStats | null => {
+): InvestmentStatsSummary | null => {
   return useMemo(() => {
     if (returnsData.length === 0) return null;
     const lastDataPoint = returnsData[returnsData.length - 1];

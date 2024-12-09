@@ -1,7 +1,7 @@
 // hooks/useReturnsData.ts
 import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
-import type { ReturnsDateObject } from "@/libs/project/schema";
+import type { ReturnsDateObject } from "@/libs/returns/schema";
 
 interface UseReturnsDataProps {
   projectId?: number;

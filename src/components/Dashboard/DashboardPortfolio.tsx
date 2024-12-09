@@ -22,42 +22,7 @@ import {
 import PortfolioMetric from "./PortfolioMetric";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-
-interface ConsolidatedSchedule {
-  date: string;
-  distributionAmount: number;
-  multiple: number;
-  cumulativeDistribution: number;
-  investmentMultiple: number;
-  totalGrossReturn: number;
-  totalNetReturn: number;
-  interestRateOrIrrPerc: number;
-  accruedPreferredReturn: number;
-  dealId: number;
-}
-
-interface PortfolioStats {
-  portfolioValueToDate: number;
-  distributionsToDate: number;
-  accruedInterestToDate: number;
-  projectedInterest: number;
-  projectedDistributions: number;
-  projectedPortfolioValue: number;
-  principalInvested: number;
-}
-
-interface DealSummaryStats {
-  dealId: number;
-  committedAmount: number;
-  distributionsToDate: number;
-  accruedInterestToDate: number;
-}
-
-interface DashboardPortfolioResponse {
-  consolidatedSchedule: ConsolidatedSchedule[];
-  portfolioStats: PortfolioStats;
-  dealSummaryStats: DealSummaryStats[];
-}
+import { ReturnsDateObject, ReturnsPortfolioResponse, ReturnsPortfolioStats } from "@/libs/returns/schema";
 
 interface MetricData {
   label: string;
@@ -81,11 +46,11 @@ const formatQuarter = (dateString: string): string => {
   return `Q${quarter} '${year}`;
 };
 const groupByQuarter = (
-  schedule: ConsolidatedSchedule[],
-  portfolioStats: PortfolioStats
+  schedule: ReturnsDateObject[],
+  portfolioStats: ReturnsPortfolioStats
 ): any[] => {
   const quarterData = schedule.reduce((acc: { [key: string]: any }, curr) => {
-    const quarterKey = formatQuarter(curr.date);
+    const quarterKey = formatQuarter(curr.date.toString());
 
     if (!acc[quarterKey]) {
       acc[quarterKey] = {
@@ -114,11 +79,11 @@ const groupByQuarter = (
 };
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
-  const { isLoading, data } = useQuery<DashboardPortfolioResponse, Error>({
+  const { isLoading, data } = useQuery<ReturnsPortfolioResponse, Error>({
     queryKey: ["dashboard", "portfolio"],
     queryFn: () =>
       axios
-        .get<DashboardPortfolioResponse>("/api/dashboard/returns")
+        .get<ReturnsPortfolioResponse>("/api/dashboard/returns")
         .then((res) => res.data),
   });
 

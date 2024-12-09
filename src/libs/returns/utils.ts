@@ -98,7 +98,7 @@ export function getPayoutScheduleStartDate(closingDate: Date) {
 function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths: number, paymentFreqMonths: number, closingDate: Date) {
     const debtPayoutSchedule: ReturnsDateObject[] = [];
     let cumulativeDistribution = 0;
-    let investmentMultiple = 0;
+    let cumulativeInvestmentMultiple = 0;
 
     let distributionDivisor = 4;
     let paymentFreq = paymentFreqMonths; //default to every 3 months
@@ -107,16 +107,15 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
         paymentFreq = termMonths;
         distributionDivisor = 1;
     }
-    console.log("closingDate\t\t", closingDate);    
+    console.log("DEBT closingDate\t\t", closingDate);    
     let date = getPayoutScheduleStartDate(closingDate);
-    console.log("payout schedule start date\t", date);
+    console.log("DEBT payout schedule start date\t", date);
     for (let i = 1; i <= termMonths; i++) {
         // Move to next month
         date = startOfMonth(add(date, { months: 1 }));
 
         // Calculate distribution amount based on payment frequency
         let distributionAmount = 0;
-        let accruedPreferredReturn = 0;
         if (i % paymentFreq === 0 && i !== 0) {
             if (paymentFreq === termMonths) {
                 // onetime payment at the end of the term:
@@ -136,8 +135,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
         cumulativeDistribution += distributionAmount;
 
         const multiple = (distributionAmount / amount);
-        investmentMultiple += multiple;
-
+        cumulativeInvestmentMultiple += multiple;
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
         const totalNetReturn = cumulativeDistribution - amount;
@@ -145,14 +143,16 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
         // Round all numerical values for consistency
         const entry: ReturnsDateObject = {
             date,
-            distributionAmount: roundTo(distributionAmount, 2),
-            multiple: roundTo(multiple, 4),
-            cumulativeDistribution: roundTo(cumulativeDistribution, 2),
-            investmentMultiple: roundTo(investmentMultiple, 4),
-            totalGrossReturn: roundTo(totalGrossReturn, 2),
-            totalNetReturn: roundTo(totalNetReturn, 2),
+            distributionAmount: distributionAmount,
+            distributionMultiple: multiple,
+            cumulativeDistribution: cumulativeDistribution,
+            cumulativeDistributionMultiple: cumulativeDistribution / amount,
+            investmentMultiple: multiple,
+            totalGrossReturn: totalGrossReturn,
+            totalNetReturn: totalNetReturn,
             interestRateOrIrrPerc: interestRate,
-            accruedPreferredReturn: roundTo(accruedPreferredReturn, 2),
+            accruedPreferredReturn: 0, // only used for equity deals
+            preferredReturnCurrent: 0, // only used for equity deals
         };
 
         debtPayoutSchedule.push(entry);
@@ -245,13 +245,15 @@ function getEquityPayoutSchedule(
     let previousEntry: ReturnsDateObject | undefined = {
         date: new Date(),
         distributionAmount: 0,
-        multiple: 1,
+        distributionMultiple: 1,
         cumulativeDistribution: 0,
+        cumulativeDistributionMultiple: 1,
         investmentMultiple: 1,
         totalGrossReturn: 0,
         totalNetReturn: 0,
         interestRateOrIrrPerc: 0,
         accruedPreferredReturn: 0,
+        preferredReturnCurrent: 0,
     }
     return equityMilestones.reduce<ReturnsDateObject[]>((schedule, em, index) => {
         if (!em) {
@@ -266,25 +268,29 @@ function getEquityPayoutSchedule(
         // Calculate distribution amount based on unit type
         const distributionAmount = shareOfEquity *
             (unitType === DealUnitType.CUNIT ? em.cUnitReturns : em.aUnitReturns);
-
         const cumulativeDistribution = (previousEntry?.cumulativeDistribution ?? 0) + distributionAmount;
         const multiple = distributionAmount / amount;
-        const investmentMultiple = cumulativeDistribution / amount;
+        const cumulativeDistributionMultiple = cumulativeDistribution / amount;
+        const investmentMultiple = distributionAmount / amount;
         const irr = (investmentMultiple - 1) / (index / 12);
-        const accruedPreferredReturn = amount * preferredReturn * (index / 12);
+        const preferredReturnCurrent = amount * preferredReturn / 12;
+        const accruedPreferredReturn = preferredReturnCurrent * index;
+        console.log("accruedPreferredReturn\t", accruedPreferredReturn, amount, preferredReturn, index);
         // Calculate returns
         const totalGrossReturn = cumulativeDistribution;
         const totalNetReturn = cumulativeDistribution - amount;
         schedule.push({
             date,
-            distributionAmount: Number(distributionAmount.toFixed(2)),
-            multiple: Number(multiple.toFixed(4)),
-            cumulativeDistribution: Number(cumulativeDistribution.toFixed(2)),
-            investmentMultiple: Number(investmentMultiple.toFixed(4)),
-            totalGrossReturn: Number(totalGrossReturn.toFixed(2)),
-            totalNetReturn: Number(totalNetReturn.toFixed(2)),
-            interestRateOrIrrPerc: Number((irr * 100).toFixed(2)),
-            accruedPreferredReturn: Number(accruedPreferredReturn.toFixed(2)),
+            distributionAmount,
+            distributionMultiple: multiple,
+            cumulativeDistribution,
+            cumulativeDistributionMultiple,
+            investmentMultiple,
+            totalGrossReturn,
+            totalNetReturn,
+            interestRateOrIrrPerc: (irr * 100),
+            preferredReturnCurrent,
+            accruedPreferredReturn,
         });
         previousEntry = schedule[schedule.length - 1];
         // console.log(schedule[schedule.length - 1]);

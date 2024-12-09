@@ -3,7 +3,7 @@ import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils';
 import { DealFinancingType } from '@prisma/client';
 import { type NextRequest } from 'next/server';
-import { getDebtPayoutScheduleForProject, getEquityPayoutScheduleForProject, getEquityStatsFromProject } from '@/libs/project/utils';
+import { getDebtPayoutScheduleForProject, getEquityPayoutScheduleForProject, getEquityStatsFromProject } from '@/libs/returns/utils';
 
 type RequestBody = {
     projectId: number;
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         try {
             const equityDetails = await getEquityStatsFromProject(amount, project.equityReturnsFile, investmentStats.cUnitThresholdAmount);
             const { unitType, shareOfEquity, equityMilestones } = equityDetails;
-            const equityPayoutSchedule = getEquityPayoutScheduleForProject(amount, milestones, equityMilestones, shareOfEquity, unitType, investmentStats.preferredReturn);
+            const equityPayoutSchedule = getEquityPayoutScheduleForProject(amount, milestones, equityMilestones, shareOfEquity, unitType, investmentStats.equityPreferredReturn);
             return jsonResponse(equityPayoutSchedule);
         } catch (e) {
             console.error(

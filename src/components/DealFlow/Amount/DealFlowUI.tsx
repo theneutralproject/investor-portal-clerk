@@ -11,9 +11,9 @@ import {
 import {
   type ProjectedReturn,
   type ChartConfig,
-  type InvestmentStats,
+  type InvestmentStatsSummary,
 } from "./dealFlow.types";
-import type { ReturnsDateObject } from "@/libs/project/schema";
+import type { ReturnsDateObject } from "@/libs/returns/schema";
 import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 
 interface QuickSelectChipsProps {
@@ -93,7 +93,7 @@ export const ReturnsChart: React.FC<ReturnsChartProps> = ({ data, config }) => (
 );
 
 interface InvestmentStatsDisplayProps {
-  stats: InvestmentStats;
+  stats: InvestmentStatsSummary;
   returnsData: ReturnsDateObject[];
   dealInvestmentStats: DealInvestmentStats;
 }
