@@ -52,8 +52,8 @@ export type DealWithInvestmentStats = Deal & {
 };
 
 export type DealWithInvestmentStatsAndProject = Deal & {
-  investmentStats?: DealInvestmentStats;
-  project?: Project;
+  investmentStats?: DealInvestmentStats | null;
+  project?: Project & { milestones: ProjectMilestones | null } | null;
 };
 
 export type DealWithOrgMembersAndProject = Deal & {
