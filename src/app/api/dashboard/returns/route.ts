@@ -48,8 +48,7 @@ export async function GET() {
             }
         }
     }
-
-    const returnsObjectsByDate = {} as { [key: number]: ReturnsDateObject[] };
+    const returnsObjectsByDate: Record<number, ReturnsDateObject[]> = {};
     const dealStats = [] as ReturnsDealStats[];
     const portfolioStats: ReturnsPortfolioStats = {
         portfolioValueToDate: 0,
@@ -63,7 +62,7 @@ export async function GET() {
     };
 
     // for each deal, get the payout schedule based on the financing type
-    const resolvedSchedules = await deals.map(async deal => {
+    const resolvedSchedules = deals.map(async deal => {
         const { project, investmentStats, closingDate } = deal;
         if (!investmentStats) {
             console.error(`Investment stats missing for deal ${deal.id}`);

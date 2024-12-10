@@ -279,7 +279,7 @@ function _getEquityPayoutSchedule(
         const equityDistributionCumulative = (previousEntry?.equityDistributionCumulative ?? 0) + distributionAmount;
         const preferredReturnCurrent = (amount * preferredReturn / 12);
         const equityAccruedPreferredReturn = preferredReturnCurrent * index;
-        let portfolioValueToDate = previousEntry ? previousEntry.portfolioValueToDate + distributionAmount : 0;
+        const portfolioValueToDate = previousEntry ? previousEntry.portfolioValueToDate + distributionAmount : 0;
         // if(index === schedule.length - 1) {
         //     portfolioValueToDate -=amount
         // }

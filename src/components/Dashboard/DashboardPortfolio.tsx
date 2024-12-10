@@ -25,7 +25,6 @@ import axios from "axios";
 import type {
   ReturnsDateObject,
   PortfolioReturnsResponse,
-  ReturnsPortfolioStats,
 } from "@/libs/returns/schema";
 
 interface MetricData {
@@ -37,8 +36,8 @@ interface MetricData {
 interface QuarterData {
   quarter: string;
   principal: number;
-  accruedInterest: number;
-  distributions: number;
+  equityDistributions: number;
+  debtDistributions: number;
   portfolioValue: number;
 }
 
@@ -60,7 +59,6 @@ const formatQuarter = (dateString: string): string => {
 
 const groupByQuarter = (
   schedule: ReturnsDateObject[],
-  portfolioStats: ReturnsPortfolioStats
 ): QuarterData[] => {
   const quarterData = schedule.reduce<Record<string, QuarterData>>(
     (acc, curr) => {
@@ -70,8 +68,8 @@ const groupByQuarter = (
         acc[quarterKey] = {
           quarter: quarterKey,
           principal: curr.principalInvestedToDate,
-          accruedInterest: 0,
-          distributions: 0,
+          equityDistributions: 0,
+          debtDistributions: 0,
           portfolioValue: curr.portfolioValueToDate,
         };
       }
@@ -79,18 +77,18 @@ const groupByQuarter = (
       acc[quarterKey] = {
         quarter: quarterKey,
         principal: curr.principalInvestedToDate,
-        accruedInterest: 0,
-        distributions: 0,
+        equityDistributions: 0,
+        debtDistributions: 0,
         portfolioValue: curr.portfolioValueToDate,
       };
     }
 
       // Update values with the current period data
-      acc[quarterKey].distributions = Math.max(
-        acc[quarterKey].distributions,
+      acc[quarterKey].debtDistributions = Math.max(
+        acc[quarterKey].debtDistributions,
         curr.debtDistributionsCumulative
       );
-      acc[quarterKey].accruedInterest = Math.max(
+      acc[quarterKey].equityDistributions = Math.max(
         0,
         curr.equityDistributionCumulative
       );
@@ -119,26 +117,26 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     if (!data) {
       return [
         { label: "Portfolio Value", value: "$0", color: "#FFB800" },
-        { label: "Distributions", value: "$0", color: "#5AAC6A" },
-        { label: "Accrued Interest", value: "$0", color: "#2196F3" },
+        { label: "Debt Distributions", value: "$0", color: "#5AAC6A" },
+        { label: "Equity Distributions", value: "$0", color: "#2196F3" },
         { label: "Principal", value: "$0", color: "#656565" },
       ];
     }
 
     return [
       {
-        label: "Portfolio Value",
-        value: formatCurrency(data.portfolioStats.portfolioValueToDate),
+        label: "Proj. Portfolio Value",
+        value: formatCurrency(data.portfolioStats.projectedPortfolioValue),
         color: "#FFB800",
       },
       {
-        label: "Distributions",
-        value: formatCurrency(data.portfolioStats.debtDistributionsToDate),
+        label: "Proj. Debt Distributions",
+        value: formatCurrency(data.portfolioStats.projectedDebtDistributions),
         color: "#5AAC6A",
       },
       {
-        label: "Accrued Interest",
-        value: formatCurrency(data.portfolioStats.equityDistributionsToDate),
+        label: "Proj. Equity Distributions",
+        value: formatCurrency(data.portfolioStats.projectedEquityDistributions),
         color: "#2196F3",
       },
       {
@@ -151,7 +149,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 
   const chartData = React.useMemo(() => {
     if (!data) return [];
-    return groupByQuarter(data.consolidatedSchedule, data.portfolioStats);
+    return groupByQuarter(data.consolidatedSchedule);
   }, [data]);
 
   return (
@@ -204,16 +202,16 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               />
               <Line
                 type="monotone"
-                dataKey="accruedInterest"
+                dataKey="equityDistributions"
                 stroke="#2196F3"
-                name="Accrued Interest"
+                name="Equity Distributions"
                 strokeWidth={2}
               />
               <Line
                 type="monotone"
-                dataKey="distributions"
+                dataKey="debtDistributions"
                 stroke="#5AAC6A"
-                name="Distributions"
+                name="Debt Distributions"
                 strokeWidth={2}
               />
               <Line
