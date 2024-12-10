@@ -97,8 +97,8 @@ export function getPayoutScheduleStartDate(closingDate: Date) {
 
 function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths: number, paymentFreqMonths: number, closingDate: Date) {
     const payoutSchedule: ReturnsDateObject[] = [];
-    let cumulativeDistribution = 0;
-    let portfolioValueToDate = amount
+    let distributionsCumulative = 0;
+    let portfolioValueToDate = 0;
     let distributionDivisor = 4;
     let paymentFreq = paymentFreqMonths; //default to every 3 months
     if (paymentFreq === 0) {
@@ -135,30 +135,33 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
         // Handle final payment (principal + interest)
         if (i === termMonths) {
             distributionAmount += amount;
-            portfolioValueToDate -= amount;
+            // portfolioValueToDate -= amount;
 
-            stats.totalGrossReturn = cumulativeDistribution + distributionAmount;
-            stats.totalNetReturn = cumulativeDistribution - amount;
-            stats.investmentMultiple = (cumulativeDistribution + distributionAmount) / amount;
+            stats.totalGrossReturn = distributionsCumulative + distributionAmount;
+            stats.totalNetReturn = distributionsCumulative - amount;
+            stats.investmentMultiple = (distributionsCumulative + distributionAmount) / amount;
         }
 
         // Calculate running totals
-        cumulativeDistribution += distributionAmount;
+        distributionsCumulative += distributionAmount;
         portfolioValueToDate += distributionAmount;
 
         // Round all numerical values for consistency
         const entry: ReturnsDateObject = {
             date,
-            distributionAmount: distributionAmount,
-            cumulativeDistribution: cumulativeDistribution,
-            accruedPreferredReturn: 0, // only used for equity deals
-            preferredReturnCurrent: 0, // only used for equity deals
+            debtDistributionsCurrent: distributionAmount,
+            debtDistributionsCumulative: distributionsCumulative,
+            equityDistributionsCurrent: 0,
+            equityDistributionCumulative: 0,
+            equityAccruedPreferredReturn: 0,
             portfolioValueToDate: portfolioValueToDate,
+            principalInvestedToDate: amount,
+            principalInvestedCurrent: i === 1 ? amount : 0,
         };
 
         payoutSchedule.push(entry);
     }
-
+console.log("DEBT payout schedule\t", payoutSchedule);
     return { schedule: payoutSchedule, stats };
 
 }
@@ -207,7 +210,7 @@ export function getEquityPayoutScheduleForDeal(
     equityMilestones: MilestoneType[]
 ): ReturnsDateObject[] {
     const { amount, shareOfEquity, unitType, equityPreferredReturn } = stats;
-    return getEquityPayoutSchedule(
+    return _getEquityPayoutSchedule(
         amount,
         projectMilestones,
         equityMilestones,
@@ -225,26 +228,26 @@ export function getEquityPayoutScheduleForProject(
     unitType: DealUnitType,
     preferredReturn: number
 ) {
-    const schedule = getEquityPayoutSchedule(amount, projectMilestones, equityMilestones, shareOfEquity, unitType, preferredReturn);
+    const schedule = _getEquityPayoutSchedule(amount, projectMilestones, equityMilestones, shareOfEquity, unitType, preferredReturn);
     const lastEntry = schedule[schedule.length - 1];
     if (!lastEntry) {
         console.error('No last entry found in equity payout schedule');
         throw new Error('No last entry found in equity payout');
     }
-    const investmentMultiple = lastEntry.cumulativeDistribution / amount
+    const investmentMultiple = lastEntry.equityDistributionCumulative / amount
     const irr = (investmentMultiple - 1) / ((schedule.length - 1) / 12);
     const stats = {
         investmentMultiple,
         interestRateOrIrrPerc: roundTo(irr * 100, 2),
-        totalGrossReturn: lastEntry.cumulativeDistribution,
-        totalNetReturn: lastEntry.cumulativeDistribution - amount,
+        totalGrossReturn: lastEntry.equityDistributionCumulative,
+        totalNetReturn: lastEntry.equityDistributionCumulative - amount,
     } as ProjectReturnsStats;
 
     return { schedule, stats };
 
 }
 
-function getEquityPayoutSchedule(
+function _getEquityPayoutSchedule(
     amount: number,
     projectMilestones: ProjectMilestones,
     equityMilestones: MilestoneType[],
@@ -259,14 +262,7 @@ function getEquityPayoutSchedule(
         throw new Error('Milestone data not found in equity returns file');
     }
 
-    let previousEntry: ReturnsDateObject | undefined = {
-        date: new Date(),
-        distributionAmount: 0,
-        cumulativeDistribution: 0,
-        accruedPreferredReturn: 0,
-        preferredReturnCurrent: 0,
-        portfolioValueToDate: 0,
-    }
+    let previousEntry: ReturnsDateObject | undefined = undefined;
     return equityMilestones.reduce<ReturnsDateObject[]>((schedule, em, index) => {
         if (!em) {
             throw new Error(`Invalid milestone data at index ${index}`);
@@ -274,25 +270,29 @@ function getEquityPayoutSchedule(
         if (index === 0) {
             return schedule;
         }
-
-
         // Advance date by one month
         date = startOfMonth(add(date, { months: 1 }));
 
         // Calculate distribution amount based on unit type
         const distributionAmount = shareOfEquity *
             (unitType === DealUnitType.CUNIT ? em.cUnitReturns : em.aUnitReturns);
-        const cumulativeDistribution = (previousEntry?.cumulativeDistribution ?? 0) + distributionAmount;
-        const preferredReturnCurrent = amount * preferredReturn / 12;
-        const accruedPreferredReturn = preferredReturnCurrent * index;
-        const portfolioValueToDate = previousEntry ? distributionAmount + previousEntry.portfolioValueToDate : amount;
+        const equityDistributionCumulative = (previousEntry?.equityDistributionCumulative ?? 0) + distributionAmount;
+        const preferredReturnCurrent = (amount * preferredReturn / 12);
+        const equityAccruedPreferredReturn = preferredReturnCurrent * index;
+        let portfolioValueToDate = previousEntry ? previousEntry.portfolioValueToDate + distributionAmount : 0;
+        // if(index === schedule.length - 1) {
+        //     portfolioValueToDate -=amount
+        // }
         schedule.push({
             date,
-            distributionAmount,
-            cumulativeDistribution,
-            preferredReturnCurrent,
-            accruedPreferredReturn,
-            portfolioValueToDate
+            debtDistributionsCurrent: 0,
+            debtDistributionsCumulative: 0,
+            equityDistributionsCurrent: distributionAmount,
+            equityDistributionCumulative,
+            portfolioValueToDate,
+            principalInvestedToDate: amount,
+            principalInvestedCurrent: index === 1 ? amount : 0,
+            equityAccruedPreferredReturn,
         });
 
         previousEntry = schedule[schedule.length - 1];

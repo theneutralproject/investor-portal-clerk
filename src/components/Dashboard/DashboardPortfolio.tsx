@@ -55,7 +55,7 @@ const groupByQuarter = (
     if (!acc[quarterKey]) {
       acc[quarterKey] = {
         quarter: quarterKey,
-        principal: portfolioStats.principalInvested,
+        principal: curr.principalInvestedToDate,
         accruedInterest: 0,
         distributions: 0,
         portfolioValue: curr.portfolioValueToDate,
@@ -65,9 +65,9 @@ const groupByQuarter = (
     // Take max cumulative distribution for the quarter
     acc[quarterKey].distributions = Math.max(
       acc[quarterKey].distributions,
-      curr.cumulativeDistribution
+      curr.debtDistributionsCumulative + curr.equityDistributionCumulative
     );
-    acc[quarterKey].accruedInterest = Math.max(0, curr.accruedPreferredReturn);
+    acc[quarterKey].accruedInterest = Math.max(0, curr.equityDistributionsCurrent);
 
     // Update portfolio value to latest totalGrossReturn in quarter plus principal
     acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
@@ -105,12 +105,12 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
       },
       {
         label: "Distributions",
-        value: formatCurrency(data.portfolioStats.distributionsToDate),
+        value: formatCurrency(data.portfolioStats.debtDistributionsToDate),
         color: "#5AAC6A",
       },
       {
         label: "Accrued Interest",
-        value: formatCurrency(data.portfolioStats.accruedInterestToDate),
+        value: formatCurrency(data.portfolioStats.equityDistributionsToDate),
         color: "#2196F3",
       },
       {

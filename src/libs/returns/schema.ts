@@ -2,20 +2,24 @@ import { z } from "zod";
 
 export const zReturnsDateObjectSchema = z.object({
     date: z.date(),
-    distributionAmount: z.number(), // typically used for debt deals
-    cumulativeDistribution: z.number(), // sum of all distributionAmounts
-    accruedPreferredReturn : z.number(), // only used for equity deals // should dip once there are distributions
-    preferredReturnCurrent: z.number(), // indicate return for current month
+    debtDistributionsCurrent: z.number(), // used for debt deals
+    debtDistributionsCumulative: z.number(), // sum of all debtDistributions
+    equityDistributionsCurrent : z.number(), // only used for equity deals // should dip once there are distributions
+    equityDistributionCumulative: z.number(), // sum of all equityDistributions
+    equityAccruedPreferredReturn: z.number(), // only used for equity deals
     portfolioValueToDate: z.number(),
+    principalInvestedToDate: z.number(), // sum of all principalInvestedCurrent
+    principalInvestedCurrent: z.number(), // indicate principal invested for current month
 });
 export type ReturnsDateObject = z.infer<typeof zReturnsDateObjectSchema>;
 
 export const zReturnsPortfolioStatsSchema = z.object({
     portfolioValueToDate: z.number(), // sum of accruedInterestToDate and distributionsToDate and principalInvested
     distributionsToDate: z.number(), // payments made to the investor to date
-    accruedInterestToDate: z.number(), // only used for equity deals
-    projectedAccruedReturn: z.number(), // only used for equity deals
-    projectedDistributions: z.number(), // sum of existing and future distributions
+    debtDistributionsToDate: z.number(), // only used for debt deals
+    equityDistributionsToDate: z.number(), // only used for equity deals
+    projectedEquityDistributions: z.number(), // only used for equity deals
+    projectedDebtDistributions: z.number(), // sum of existing and future distributions
     projectedPortfolioValue: z.number(), // sum of portfolioValueToDate and projectedDistributions
     principalInvested: z.number(), // sum of all committed amounts
 });
@@ -25,7 +29,6 @@ export const zReturnsDealStatsSchema = z.object({
     dealId: z.number(),
     committedAmount: z.number(),
     distributionsToDate: z.number(),
-    accruedInterestToDate: z.number(),
 });
 export type ReturnsDealStats = z.infer<typeof zReturnsDealStatsSchema>;
 

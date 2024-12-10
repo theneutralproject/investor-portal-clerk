@@ -63,8 +63,8 @@ const DealFlowAmount: React.FC = () => {
       const year = date.getFullYear().toString().slice(2);
       return {
         date: `Q${quarter} '${year}`,
-        accruedPreferredReturn: dataPoint.accruedPreferredReturn,
-        totalGrossReturn: dataPoint.cumulativeDistribution,
+        accruedPreferredReturn: dataPoint.equityAccruedPreferredReturn,
+        totalGrossReturn: dataPoint.equityDistributionCumulative + dataPoint.debtDistributionsCumulative,
         fullDate: date,
       };
     });
