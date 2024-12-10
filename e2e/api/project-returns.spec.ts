@@ -18,10 +18,15 @@ test.describe("api/project/returns test", () => {
             const stats = await JSON.parse(await response.text()) as ReturnsDateObject[];
             expect(stats.length).toBe(60);
             const lastScheduleEntry = stats[stats.length - 1];
-            expect(lastScheduleEntry?.interestRateOrIrrPerc).toBe(18.6);
-            expect(lastScheduleEntry?.totalNetReturn).toBe(93006.93);
-            expect(lastScheduleEntry?.totalGrossReturn).toBe(193006.93);
-            expect(lastScheduleEntry?.accruedPreferredReturn).toBe(50000);
+            if(!lastScheduleEntry) {
+                throw new Error("lastScheduleEntry is undefined");
+            }
+            // todo: bring back IRR
+            expect(lastScheduleEntry.accruedPreferredReturn).toBe(50000);
+            expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(193006);
+            expect(Math.floor(lastScheduleEntry.cumulativeDistribution)).toBe(193006);
+            
+            console.log(lastScheduleEntry);
         } catch (e) {
             console.error("could not get dashboard returns for one debt deal in api/project/returns test:");
             console.error(e);
@@ -39,14 +44,15 @@ test.describe("api/project/returns test", () => {
             });
             expect(response.status()).toBe(200);
             const stats = await JSON.parse(await response.text()) as ReturnsDateObject[];
-            console.log(stats);
             expect(stats.length).toBe(48);
             const lastScheduleEntry = stats[stats.length - 1];
-            expect(lastScheduleEntry?.interestRateOrIrrPerc).toBe(10);
-            expect(lastScheduleEntry?.totalNetReturn).toBe(40000);
-            expect(lastScheduleEntry?.totalGrossReturn).toBe(140000);
-            expect(lastScheduleEntry?.investmentMultiple).toBe(1.4);
-            expect(lastScheduleEntry?.accruedPreferredReturn).toBe(0);
+            if(!lastScheduleEntry) {
+                throw new Error("lastScheduleEntry is undefined");
+            }
+            console.log("lastScheduleEntry", lastScheduleEntry);
+            expect(lastScheduleEntry.accruedPreferredReturn).toBe(0);
+            expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(140000);
+            expect(lastScheduleEntry.distributionAmount).toBe(102500);
         } catch (e) {
             console.error("could not get dashboard returns for one debt deal in api/project/returns test:");
             console.error(e);

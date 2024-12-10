@@ -22,7 +22,7 @@ import {
 import PortfolioMetric from "./PortfolioMetric";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { ReturnsDateObject, ReturnsPortfolioResponse, ReturnsPortfolioStats } from "@/libs/returns/schema";
+import { ReturnsDateObject, PortfolioReturnsResponse, ReturnsPortfolioStats } from "@/libs/returns/schema";
 
 interface MetricData {
   label: string;
@@ -58,7 +58,7 @@ const groupByQuarter = (
         principal: portfolioStats.principalInvested,
         accruedInterest: 0,
         distributions: 0,
-        portfolioValue: portfolioStats.principalInvested + curr.totalGrossReturn,
+        portfolioValue: curr.portfolioValueToDate,
       };
     }
 
@@ -70,7 +70,7 @@ const groupByQuarter = (
     acc[quarterKey].accruedInterest = Math.max(0, curr.accruedPreferredReturn);
 
     // Update portfolio value to latest totalGrossReturn in quarter plus principal
-    acc[quarterKey].portfolioValue = portfolioStats.principalInvested + curr.totalGrossReturn;
+    acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
 
     return acc;
   }, {});
@@ -79,11 +79,11 @@ const groupByQuarter = (
 };
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
-  const { isLoading, data } = useQuery<ReturnsPortfolioResponse, Error>({
+  const { isLoading, data } = useQuery<PortfolioReturnsResponse, Error>({
     queryKey: ["dashboard", "portfolio"],
     queryFn: () =>
       axios
-        .get<ReturnsPortfolioResponse>("/api/dashboard/returns")
+        .get<PortfolioReturnsResponse>("/api/dashboard/returns")
         .then((res) => res.data),
   });
 
@@ -256,51 +256,3 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 
 export default DashboardPortfolio;
 
-/*
-Example response:
-{
-  "consolidatedSchedule": [
-    {
-      "date": "2024-12-01T06:00:00.000Z",
-      "distributionAmount": 0,
-      "multiple": 0,
-      "cumulativeDistribution": 0,
-      "investmentMultiple": 0,
-      "totalGrossReturn": 0,
-      "totalNetReturn": -100000,
-      "interestRateOrIrrPerc": -1200,
-      "accruedPreferredReturn": 0,
-      "dealId": 1216
-    },
-    {
-      "date": "2025-01-01T06:00:00.000Z",
-      "distributionAmount": 0,
-      "multiple": 0,
-      "cumulativeDistribution": 0,
-      "investmentMultiple": 0,
-      "totalGrossReturn": 0,
-      "totalNetReturn": -100000,
-      "interestRateOrIrrPerc": -600,
-      "accruedPreferredReturn": 0,
-      "dealId": 1216
-    }
-  ],
-  "portfolioStats": {
-    "portfolioValueToDate": 100000,
-    "distributionsToDate": 0,
-    "accruedInterestToDate": 0,
-    "projectedInterest": 0,
-    "projectedDistributions": 193006.9300000001,
-    "projectedPortfolioValue": 293006.9299999999,
-    "principalInvested": 100000
-  },
-  "dealSummaryStats": [
-    {
-      "dealId": 1216,
-      "committedAmount": 100000,
-      "distributionsToDate": 0,
-      "accruedInterestToDate": 0
-    }
-  ]
-}
-*/
