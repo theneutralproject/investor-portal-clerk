@@ -69,7 +69,7 @@ const groupByQuarter = (
       if (!acc[quarterKey]) {
         acc[quarterKey] = {
           quarter: quarterKey,
-          principal: portfolioStats.principalInvested,
+          principal: curr.principalInvestedToDate,
           accruedInterest: 0,
           distributions: 0,
           portfolioValue: curr.portfolioValueToDate,
