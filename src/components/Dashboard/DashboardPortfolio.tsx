@@ -22,12 +22,24 @@ import {
 import PortfolioMetric from "./PortfolioMetric";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { ReturnsDateObject, PortfolioReturnsResponse, ReturnsPortfolioStats } from "@/libs/returns/schema";
+import type {
+  ReturnsDateObject,
+  PortfolioReturnsResponse,
+  ReturnsPortfolioStats,
+} from "@/libs/returns/schema";
 
 interface MetricData {
   label: string;
   value: string;
   color: string;
+}
+
+interface QuarterData {
+  quarter: string;
+  principal: number;
+  accruedInterest: number;
+  distributions: number;
+  portfolioValue: number;
 }
 
 const formatCurrency = (value: number): string => {
@@ -45,13 +57,24 @@ const formatQuarter = (dateString: string): string => {
   const year = date.getFullYear().toString().slice(-2);
   return `Q${quarter} '${year}`;
 };
+
 const groupByQuarter = (
   schedule: ReturnsDateObject[],
   portfolioStats: ReturnsPortfolioStats
-): any[] => {
-  const quarterData = schedule.reduce((acc: { [key: string]: any }, curr) => {
-    const quarterKey = formatQuarter(curr.date.toString());
+): QuarterData[] => {
+  const quarterData = schedule.reduce<Record<string, QuarterData>>(
+    (acc, curr) => {
+      const quarterKey = formatQuarter(curr.date.toString());
 
+      if (!acc[quarterKey]) {
+        acc[quarterKey] = {
+          quarter: quarterKey,
+          principal: portfolioStats.principalInvested,
+          accruedInterest: 0,
+          distributions: 0,
+          portfolioValue: curr.portfolioValueToDate,
+        };
+      }
     if (!acc[quarterKey]) {
       acc[quarterKey] = {
         quarter: quarterKey,
@@ -62,29 +85,34 @@ const groupByQuarter = (
       };
     }
 
-    // Take max cumulative distribution for the quarter
-    acc[quarterKey].distributions = Math.max(
-      acc[quarterKey].distributions,
-      curr.debtDistributionsCumulative + curr.equityDistributionCumulative
-    );
-    acc[quarterKey].accruedInterest = Math.max(0, curr.equityDistributionsCurrent);
+      // Update values with the current period data
+      acc[quarterKey].distributions = Math.max(
+        acc[quarterKey].distributions,
+        curr.debtDistributionsCumulative
+      );
+      acc[quarterKey].accruedInterest = Math.max(
+        0,
+        curr.equityDistributionCumulative
+      );
+      acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
 
-    // Update portfolio value to latest totalGrossReturn in quarter plus principal
-    acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
-
-    return acc;
-  }, {});
+      return acc;
+    },
+    {}
+  );
 
   return Object.values(quarterData);
 };
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
-  const { isLoading, data } = useQuery<PortfolioReturnsResponse, Error>({
+  const { data } = useQuery<PortfolioReturnsResponse, Error>({
     queryKey: ["dashboard", "portfolio"],
-    queryFn: () =>
-      axios
-        .get<PortfolioReturnsResponse>("/api/dashboard/returns")
-        .then((res) => res.data),
+    queryFn: async () => {
+      const response = await axios.get<PortfolioReturnsResponse>(
+        "/api/dashboard/returns"
+      );
+      return response.data;
+    },
   });
 
   const metrics: MetricData[] = React.useMemo(() => {
@@ -164,7 +192,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               <YAxis />
               <Tooltip
                 formatter={(value: number) => formatCurrency(value)}
-                labelFormatter={(label) => `Quarter: ${label}`}
+                labelFormatter={(label: string) => `Quarter: ${label}`}
               />
               <Legend />
               <Line
@@ -255,4 +283,3 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 };
 
 export default DashboardPortfolio;
-
