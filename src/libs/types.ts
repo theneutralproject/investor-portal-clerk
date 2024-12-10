@@ -18,7 +18,6 @@ import {
   type DealDocument,
   type ProjectPaymentInfo,
 } from "@prisma/client";
-import { ReturnsDateObject } from "./returns/schema";
 
 export type ProjectWithAllNestedData = Project & {
   pictures: ProjectPicture[];

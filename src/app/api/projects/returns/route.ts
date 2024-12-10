@@ -3,7 +3,7 @@ import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils';
 import { DealFinancingType } from '@prisma/client';
 import { type NextRequest } from 'next/server';
-import { getDebtPayoutScheduleForProject, getEquityPayoutScheduleForProject, getEquityStatsFromProject } from '@/libs/returns/utils';
+import { getDebtPayoutScheduleForProject as getDebtPayoutScheduleAndStatsForProject, getEquityPayoutScheduleForProject as getEquityPayoutScheduleAndStatsForProject, getEquityStatsFromProject } from '@/libs/returns/utils';
 
 type RequestBody = {
     projectId: number;
@@ -46,13 +46,17 @@ export async function POST(request: NextRequest) {
         }
     }
 
+    if (financingType !== DealFinancingType.equity && financingType !== DealFinancingType.promissory_note_now) {
+        return jsonResponse({ message: 'Financing type not supported' }, 400);
+    }
+
     // debt financing
     if (financingType === DealFinancingType.promissory_note_now) {
         if (amount < investmentStats.debtMinInvestment) {
             return jsonResponse({ message: `The minimum investment amount for this project is $${investmentStats.debtMinInvestment.toLocaleString()}` }, 400);
         }
-        const payoutSchedule = getDebtPayoutScheduleForProject(amount, investmentStats, startDate);
-        return jsonResponse(payoutSchedule);
+        const payoutScheduleAndStats = getDebtPayoutScheduleAndStatsForProject(amount, investmentStats, startDate);
+        return jsonResponse(payoutScheduleAndStats);
     }
 
     // equity financing
@@ -60,8 +64,8 @@ export async function POST(request: NextRequest) {
         try {
             const equityDetails = await getEquityStatsFromProject(amount, project.equityReturnsFile, investmentStats.cUnitThresholdAmount);
             const { unitType, shareOfEquity, equityMilestones } = equityDetails;
-            const equityPayoutSchedule = getEquityPayoutScheduleForProject(amount, milestones, equityMilestones, shareOfEquity, unitType, investmentStats.equityPreferredReturn);
-            return jsonResponse(equityPayoutSchedule);
+            const payoutScheduleAndStats = getEquityPayoutScheduleAndStatsForProject(amount, milestones, equityMilestones, shareOfEquity, unitType, investmentStats.equityPreferredReturn);
+            return jsonResponse(payoutScheduleAndStats);
         } catch (e) {
             console.error(
                 `Failed to get equity stats for project ${project.name}:`
@@ -70,5 +74,4 @@ export async function POST(request: NextRequest) {
             return errorResponse('Failed to get equity stats', 500);
         }
     }
-    return jsonResponse({ message: 'Financing type not supported' }, 400);
 } 

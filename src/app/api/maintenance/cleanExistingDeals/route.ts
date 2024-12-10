@@ -1,8 +1,8 @@
-import { DealUpdateSchema } from "@/libs/deal/schema";
+import type { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils.server";
 import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
-import { Deal, PaymentMethod } from "@prisma/client";
+import { type Deal, PaymentMethod } from "@prisma/client";
 
 
 export async function POST() {
