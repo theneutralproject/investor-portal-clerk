@@ -22,7 +22,6 @@ import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
 import { QuickSelectChips } from "./DealFlowUI";
 import { InvestmentStatsDisplay } from "./DealFlowUI";
 import { useReturnsData } from "./useReturnsData";
-import { useInvestmentStats } from "./useInvestmentStats";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { DealFinancingType } from "@prisma/client";
 
@@ -42,14 +41,12 @@ const DealFlowAmount: React.FC = () => {
       : project?.investmentStats?.debtMinInvestment ?? 5000;
   const MAX_INVESTMENT = 10_000_000;
 
-  const { returnsData, isLoading, error } = useReturnsData({
+  const { returnsData, isLoading, error, stats: investmentStats } = useReturnsData({
     projectId: project?.id,
     amount,
     minInvestment: MIN_INVESTMENT,
     financingType: deal?.investmentStats?.financingType,
   });
-
-  const investmentStats = useInvestmentStats(returnsData);
 
   const validationError = useMemo(
     () =>
@@ -66,8 +63,8 @@ const DealFlowAmount: React.FC = () => {
       const year = date.getFullYear().toString().slice(2);
       return {
         date: `Q${quarter} '${year}`,
-        accruedPreferredReturn: dataPoint.accruedPreferredReturn,
-        totalGrossReturn: dataPoint.totalGrossReturn,
+        accruedPreferredReturn: dataPoint.equityAccruedPreferredReturn,
+        totalGrossReturn: dataPoint.equityDistributionCumulative + dataPoint.debtDistributionsCumulative,
         fullDate: date,
       };
     });

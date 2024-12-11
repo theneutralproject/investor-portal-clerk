@@ -5,7 +5,6 @@ import {
   CardContent,
   Typography,
   Grid,
-  useTheme,
   Divider,
   Button,
   Stack,
@@ -17,8 +16,16 @@ import {
   YAxis,
   ResponsiveContainer,
   CartesianGrid,
+  Tooltip,
+  Legend,
 } from "recharts";
 import PortfolioMetric from "./PortfolioMetric";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import type {
+  ReturnsDateObject,
+  PortfolioReturnsResponse,
+} from "@/libs/returns/schema";
 
 interface MetricData {
   label: string;
@@ -26,29 +33,124 @@ interface MetricData {
   color: string;
 }
 
-interface ChartData {
-  name: string;
-  value: number;
+interface QuarterData {
+  quarter: string;
+  principal: number;
+  equityDistributions: number;
+  debtDistributions: number;
+  portfolioValue: number;
 }
 
+const formatCurrency = (value: number): string => {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(value);
+};
+
+const formatQuarter = (dateString: string): string => {
+  const date = new Date(dateString);
+  const quarter = Math.floor(date.getMonth() / 3) + 1;
+  const year = date.getFullYear().toString().slice(-2);
+  return `Q${quarter} '${year}`;
+};
+
+const groupByQuarter = (
+  schedule: ReturnsDateObject[],
+): QuarterData[] => {
+  const quarterData = schedule.reduce<Record<string, QuarterData>>(
+    (acc, curr) => {
+      const quarterKey = formatQuarter(curr.date.toString());
+
+      if (!acc[quarterKey]) {
+        acc[quarterKey] = {
+          quarter: quarterKey,
+          principal: curr.principalInvestedToDate,
+          equityDistributions: 0,
+          debtDistributions: 0,
+          portfolioValue: curr.portfolioValueToDate,
+        };
+      }
+    if (!acc[quarterKey]) {
+      acc[quarterKey] = {
+        quarter: quarterKey,
+        principal: curr.principalInvestedToDate,
+        equityDistributions: 0,
+        debtDistributions: 0,
+        portfolioValue: curr.portfolioValueToDate,
+      };
+    }
+
+      // Update values with the current period data
+      acc[quarterKey].debtDistributions = Math.max(
+        acc[quarterKey].debtDistributions,
+        curr.debtDistributionsCumulative
+      );
+      acc[quarterKey].equityDistributions = Math.max(
+        0,
+        curr.equityDistributionCumulative
+      );
+      acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
+
+      return acc;
+    },
+    {}
+  );
+
+  return Object.values(quarterData);
+};
+
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
-  const theme = useTheme();
+  const { data } = useQuery<PortfolioReturnsResponse, Error>({
+    queryKey: ["dashboard", "portfolio"],
+    queryFn: async () => {
+      const response = await axios.get<PortfolioReturnsResponse>(
+        "/api/dashboard/returns"
+      );
+      return response.data;
+    },
+  });
 
-  const metrics: MetricData[] = [
-    { label: "Portfolio Value", value: "$0", color: "#FFB800" },
-    { label: "Distributions", value: "$0", color: "#5AAC6A" },
-    { label: "Accrued Interest", value: "$0", color: "#2196F3" },
-    { label: "Principal", value: "$0", color: "#656565" },
-  ];
+  const metrics: MetricData[] = React.useMemo(() => {
+    if (!data) {
+      return [
+        { label: "Portfolio Value", value: "$0", color: "#FFB800" },
+        { label: "Debt Distributions", value: "$0", color: "#5AAC6A" },
+        { label: "Equity Distributions", value: "$0", color: "#2196F3" },
+        { label: "Principal", value: "$0", color: "#656565" },
+      ];
+    }
 
-  const chartData: ChartData[] = [
-    { name: "Q1 23", value: 0 },
-    { name: "Q2 23", value: 0 },
-    { name: "Q3 23", value: 0 },
-    { name: "Q4 23", value: 0 },
-    { name: "Q1 24", value: 0 },
-    { name: "Q2 24", value: 0 },
-  ];
+    return [
+      {
+        label: "Proj. Portfolio Value",
+        value: formatCurrency(data.portfolioStats.projectedPortfolioValue),
+        color: "#FFB800",
+      },
+      {
+        label: "Proj. Debt Distributions",
+        value: formatCurrency(data.portfolioStats.projectedDebtDistributions),
+        color: "#5AAC6A",
+      },
+      {
+        label: "Proj. Equity Distributions",
+        value: formatCurrency(data.portfolioStats.projectedEquityDistributions),
+        color: "#2196F3",
+      },
+      {
+        label: "Principal",
+        value: formatCurrency(data.portfolioStats.principalInvested),
+        color: "#656565",
+      },
+    ];
+  }, [data]);
+
+  const chartData = React.useMemo(() => {
+    if (!data) return [];
+    return groupByQuarter(data.consolidatedSchedule);
+  }, [data]);
 
   return (
     <Card sx={{ borderRadius: "8px", position: "relative" }}>
@@ -81,35 +183,43 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
               data={chartData}
-              margin={{ top: 20, right: 30, bottom: 20, left: 20 }}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
             >
-              <CartesianGrid
-                stroke={theme.palette.grey[200]}
-                vertical={false}
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="quarter" />
+              <YAxis />
+              <Tooltip
+                formatter={(value: number) => formatCurrency(value)}
+                labelFormatter={(label: string) => `Quarter: ${label}`}
               />
-              <XAxis
-                dataKey="name"
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: theme.palette.text.secondary }}
-                dy={10}
-                padding={{ left: 20, right: 20 }}
-              />
-              <YAxis
-                axisLine={false}
-                tickLine={false}
-                tick={{ fill: theme.palette.text.secondary }}
-                ticks={[0, 100000, 200000, 300000]}
-                tickFormatter={(value) => `$${value / 1000}k`}
-                dx={-10}
-                padding={{ top: 20, bottom: 20 }}
+              <Legend />
+              <Line
+                type="monotone"
+                dataKey="principal"
+                stroke="#656565"
+                name="Principal"
+                strokeWidth={2}
               />
               <Line
                 type="monotone"
-                dataKey="value"
-                stroke={theme.palette.primary.main}
+                dataKey="equityDistributions"
+                stroke="#2196F3"
+                name="Equity Distributions"
                 strokeWidth={2}
-                dot={false}
+              />
+              <Line
+                type="monotone"
+                dataKey="debtDistributions"
+                stroke="#5AAC6A"
+                name="Debt Distributions"
+                strokeWidth={2}
+              />
+              <Line
+                type="monotone"
+                dataKey="portfolioValue"
+                stroke="#FFB800"
+                name="Portfolio Value"
+                strokeWidth={2}
               />
             </LineChart>
           </ResponsiveContainer>

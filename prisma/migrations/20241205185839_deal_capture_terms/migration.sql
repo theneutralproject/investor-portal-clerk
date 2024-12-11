@@ -1,0 +1,7 @@
+-- AlterTable
+ALTER TABLE "DealInvestmentStats" ADD COLUMN     "debtInterestRatePerc" DOUBLE PRECISION NOT NULL DEFAULT 0.0,
+ADD COLUMN     "debtPaumentFreqMonths" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "debtPaymentFreq" TEXT NOT NULL DEFAULT '',
+ADD COLUMN     "debtTermMonthsMax" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "debtTermMonthsMin" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN     "equiteTermMonths" INTEGER NOT NULL DEFAULT 0;
