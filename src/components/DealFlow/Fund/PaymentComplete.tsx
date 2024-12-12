@@ -36,7 +36,7 @@ const PaymentComplete: React.FC = () => {
   const router = useRouter();
 
   const goToDashboard = () => {
-    router.push("/projects");
+    router.push("/dashboard");
   };
 
   return (
