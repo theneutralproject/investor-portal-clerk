@@ -47,7 +47,7 @@ const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 
-const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
+export const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
   const headerPicture = deal.project.pictures.find(
     (picture) => picture.type === "HEADER"
   );

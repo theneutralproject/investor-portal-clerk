@@ -1,7 +1,7 @@
 // LearnPage.tsx
 "use client";
 
-import { Box } from "@mui/material";
+import { Box, Card, CardContent, Divider, Typography } from "@mui/material";
 import DashboardPageBanner from "@/components/Dashboard/DashboardPageBanner";
 import DashboardPortfolio from "@/components/Dashboard/DashboardPortfolio";
 import Grid from "@mui/material/Grid2";
@@ -17,6 +17,7 @@ import type {
 import DashboardProjects from "@/components/Dashboard/DashboardProjects";
 import { useUser } from "@clerk/nextjs";
 import CompleteInvestment from "@/components/Dashboard/CompleteInvestment";
+import DashboardDeals from "@/components/Dashboard/DashboardDeals";
 
 const DashboardPage = () => {
   const { user } = useUser();
@@ -53,10 +54,36 @@ const DashboardPage = () => {
         background="/DashboardHeader.jpeg"
         headline={headline}
       />
-      <Grid container spacing={2} sx={{ mt: 2 }}>
-        <Grid size={8} display="flex" justifyContent="center">
+      <Grid
+        container
+        spacing={2}
+        sx={{ mt: 2, background: "#f5f5f5", borderRadius: "8px" }}
+      >
+        <Grid
+          size={8}
+          display="flex"
+          justifyContent="center"
+          sx={{ background: "#f5f5f5" }}
+        >
           <Box sx={{ width: "100%" }}>
-            <DashboardPortfolio loggedIn={loggedIn} />
+            <Card sx={{ borderRadius: "8px", position: "relative" }}>
+              <CardContent>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontSize: "20px",
+                    mb: 2,
+                  }}
+                >
+                  Portfolio
+                </Typography>
+
+                <Divider sx={{ mb: 3 }} />
+
+                <DashboardPortfolio loggedIn={loggedIn} />
+                <DashboardDeals deals={dealsData ?? []} />
+              </CardContent>
+            </Card>
             <DashboardProjects projects={data ?? []} />
           </Box>
         </Grid>
