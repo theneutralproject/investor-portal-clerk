@@ -14,6 +14,7 @@ import { toast } from "react-toastify";
 interface Props {
   dealId: number;
   merchantId: string;
+  projectSlug: string;
   refetchDeal: () => Promise<void>;
 }
 interface State {
@@ -27,6 +28,9 @@ class PlaidLinkClass extends React.Component<Props, State> {
   async createLinkToken() {
     const response = await fetch("/api/finix/plaidLinkToken", {
       method: "POST",
+      body: JSON.stringify({
+        "slug": this.props.projectSlug,
+      })
     });
     const link_token = await response.json();
     return link_token;
@@ -57,6 +61,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
             dealId: this.props.dealId,
             sessionKey: sk,
             merchantId: this.props.merchantId,
+            slug: this.props.projectSlug,
           })
           .catch((error) => {
             console.error("Finix transaction error", error);
