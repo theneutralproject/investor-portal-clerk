@@ -16,7 +16,7 @@ export const UserScalarFieldEnumSchema = z.enum(['id','clerkId','role','email','
 
 export const DealScalarFieldEnumSchema = z.enum(['id','projectId','dealStage','hubspotId','transactionId','investmentEntity','organizationId','closingDate','signaturesCompletedDate','dateFundsSent','paymentMethod','paymentReferenceId']);
 
-export const DealInvestmentStatsScalarFieldEnumSchema = z.enum(['id','dealId','amount','financingType','unitType','ownershipType','numberAUnits','numberCUnits','shareOfEquity']);
+export const DealInvestmentStatsScalarFieldEnumSchema = z.enum(['id','dealId','amount','financingType','unitType','ownershipType','debtInterestRatePerc','debtTermMonthsMin','debtTermMonthsMax','debtPaymentFreqMonths','debtPaymentFreq','equityTermMonths','equityPreferredReturn','shareOfEquity','numberAUnits','numberCUnits']);
 
 export const OrganizationScalarFieldEnumSchema = z.enum(['id','name','ownerId','tin','dateOfCreation','juristication','isPrimary','ownershipType']);
 
@@ -34,7 +34,7 @@ export const ProjectScalarFieldEnumSchema = z.enum(['id','name','location','tags
 
 export const ProjectPropertyStatsScalarFieldEnumSchema = z.enum(['id','avgRent','avgUnitSize','commercialSqFt','numUnits','projectId']);
 
-export const ProjectInvestmentStatsScalarFieldEnumSchema = z.enum(['id','cUnitThresholdAmount','debtMinInvestment','debtPaymentFreq','debtPaymentFreqMonths','debtTermMonthsMax','debtTermMonthsMin','equityIRR','equityMinInvestment','equityPaymentFreq','equityPaymentFreqMonths','equityTermMonths','preferredReturn','investmentGoal','investmentRaised','interestRateMin','interestRateMax','interestRateDollarThreshold','projectId','targetEquityMultiple','totalAUnitReturn','totalCUnitReturn','boolEquity','boolDebt']);
+export const ProjectInvestmentStatsScalarFieldEnumSchema = z.enum(['id','cUnitThresholdAmount','debtMinInvestment','debtPaymentFreq','debtPaymentFreqMonths','debtTermMonthsMax','debtTermMonthsMin','equityIRR','equityMinInvestment','equityPaymentFreq','equityPaymentFreqMonths','equityTermMonths','equityPreferredReturn','investmentGoal','investmentRaised','interestRateMin','interestRateMax','interestRateDollarThreshold','projectId','targetEquityMultiple','totalAUnitReturn','totalCUnitReturn','boolEquity','boolDebt']);
 
 export const ProjectPaymentInfoScalarFieldEnumSchema = z.enum(['id','projectId','investmentEntity','accountNumber','routingNumber']);
 
@@ -170,6 +170,9 @@ export type Deal = z.infer<typeof DealSchema>
 // DEAL INVESTMENT STATS SCHEMA
 /////////////////////////////////////////
 
+/**
+ * used to manifest the agreed upon terms of the deal
+ */
 export const DealInvestmentStatsSchema = z.object({
   financingType: DealFinancingTypeSchema,
   unitType: DealUnitTypeSchema,
@@ -177,9 +180,16 @@ export const DealInvestmentStatsSchema = z.object({
   id: z.number().int(),
   dealId: z.number().int(),
   amount: z.number(),
+  debtInterestRatePerc: z.number(),
+  debtTermMonthsMin: z.number().int(),
+  debtTermMonthsMax: z.number().int(),
+  debtPaymentFreqMonths: z.number().int(),
+  debtPaymentFreq: z.string(),
+  equityTermMonths: z.number().int(),
+  equityPreferredReturn: z.number(),
+  shareOfEquity: z.number(),
   numberAUnits: z.number(),
   numberCUnits: z.number(),
-  shareOfEquity: z.number(),
 })
 
 export type DealInvestmentStats = z.infer<typeof DealInvestmentStatsSchema>
@@ -312,7 +322,7 @@ export const ProjectSchema = z.object({
   marketHighlights: z.string(),
   youtubeUrl: z.string(),
   slug: z.string(),
-  equityReturnsFile: z.string().nullable(),
+  equityReturnsFile: z.string(),
 })
 
 export type Project = z.infer<typeof ProjectSchema>
@@ -349,7 +359,7 @@ export const ProjectInvestmentStatsSchema = z.object({
   equityPaymentFreq: z.string(),
   equityPaymentFreqMonths: z.number().int(),
   equityTermMonths: z.number().int(),
-  preferredReturn: z.number(),
+  equityPreferredReturn: z.number(),
   investmentGoal: z.number(),
   investmentRaised: z.number(),
   interestRateMin: z.number(),
@@ -630,9 +640,16 @@ export const DealInvestmentStatsSelectSchema: z.ZodType<Prisma.DealInvestmentSta
   financingType: z.boolean().optional(),
   unitType: z.boolean().optional(),
   ownershipType: z.boolean().optional(),
+  debtInterestRatePerc: z.boolean().optional(),
+  debtTermMonthsMin: z.boolean().optional(),
+  debtTermMonthsMax: z.boolean().optional(),
+  debtPaymentFreqMonths: z.boolean().optional(),
+  debtPaymentFreq: z.boolean().optional(),
+  equityTermMonths: z.boolean().optional(),
+  equityPreferredReturn: z.boolean().optional(),
+  shareOfEquity: z.boolean().optional(),
   numberAUnits: z.boolean().optional(),
   numberCUnits: z.boolean().optional(),
-  shareOfEquity: z.boolean().optional(),
   deal: z.union([z.boolean(),z.lazy(() => DealArgsSchema)]).optional(),
 }).strict()
 
@@ -897,7 +914,7 @@ export const ProjectInvestmentStatsSelectSchema: z.ZodType<Prisma.ProjectInvestm
   equityPaymentFreq: z.boolean().optional(),
   equityPaymentFreqMonths: z.boolean().optional(),
   equityTermMonths: z.boolean().optional(),
-  preferredReturn: z.boolean().optional(),
+  equityPreferredReturn: z.boolean().optional(),
   investmentGoal: z.boolean().optional(),
   investmentRaised: z.boolean().optional(),
   interestRateMin: z.boolean().optional(),
@@ -1484,9 +1501,16 @@ export const DealInvestmentStatsWhereInputSchema: z.ZodType<Prisma.DealInvestmen
   financingType: z.union([ z.lazy(() => EnumDealFinancingTypeFilterSchema),z.lazy(() => DealFinancingTypeSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => EnumDealUnitTypeFilterSchema),z.lazy(() => DealUnitTypeSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMin: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMax: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  debtPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  equityTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  equityPreferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
-  shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict();
 
@@ -1497,9 +1521,16 @@ export const DealInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Prisma
   financingType: z.lazy(() => SortOrderSchema).optional(),
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
   numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   deal: z.lazy(() => DealOrderByWithRelationInputSchema).optional()
 }).strict();
 
@@ -1525,9 +1556,16 @@ export const DealInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.DealInv
   financingType: z.union([ z.lazy(() => EnumDealFinancingTypeFilterSchema),z.lazy(() => DealFinancingTypeSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => EnumDealUnitTypeFilterSchema),z.lazy(() => DealUnitTypeSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMin: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  debtTermMonthsMax: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  debtPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  equityTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  equityPreferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
-  shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict());
 
@@ -1538,9 +1576,16 @@ export const DealInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<Pri
   financingType: z.lazy(() => SortOrderSchema).optional(),
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
   numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => DealInvestmentStatsCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => DealInvestmentStatsAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => DealInvestmentStatsMaxOrderByAggregateInputSchema).optional(),
@@ -1558,9 +1603,16 @@ export const DealInvestmentStatsScalarWhereWithAggregatesInputSchema: z.ZodType<
   financingType: z.union([ z.lazy(() => EnumDealFinancingTypeWithAggregatesFilterSchema),z.lazy(() => DealFinancingTypeSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => EnumDealUnitTypeWithAggregatesFilterSchema),z.lazy(() => DealUnitTypeSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeWithAggregatesFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMin: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtTermMonthsMax: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  debtPaymentFreq: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  equityTermMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  equityPreferredReturn: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  shareOfEquity: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
-  shareOfEquity: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
 export const OrganizationWhereInputSchema: z.ZodType<Prisma.OrganizationWhereInput> = z.object({
@@ -2030,7 +2082,7 @@ export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.ob
   marketHighlights: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   youtubeUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   slug: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  equityReturnsFile: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
   documents: z.lazy(() => ProjectDocumentListRelationFilterSchema).optional(),
   investmentStats: z.union([ z.lazy(() => ProjectInvestmentStatsNullableRelationFilterSchema),z.lazy(() => ProjectInvestmentStatsWhereInputSchema) ]).optional().nullable(),
@@ -2050,7 +2102,7 @@ export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrde
   marketHighlights: z.lazy(() => SortOrderSchema).optional(),
   youtubeUrl: z.lazy(() => SortOrderSchema).optional(),
   slug: z.lazy(() => SortOrderSchema).optional(),
-  equityReturnsFile: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  equityReturnsFile: z.lazy(() => SortOrderSchema).optional(),
   deals: z.lazy(() => DealOrderByRelationAggregateInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentOrderByRelationAggregateInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsOrderByWithRelationInputSchema).optional(),
@@ -2101,7 +2153,7 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
   description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   marketHighlights: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   youtubeUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  equityReturnsFile: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
   documents: z.lazy(() => ProjectDocumentListRelationFilterSchema).optional(),
   investmentStats: z.union([ z.lazy(() => ProjectInvestmentStatsNullableRelationFilterSchema),z.lazy(() => ProjectInvestmentStatsWhereInputSchema) ]).optional().nullable(),
@@ -2121,7 +2173,7 @@ export const ProjectOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectO
   marketHighlights: z.lazy(() => SortOrderSchema).optional(),
   youtubeUrl: z.lazy(() => SortOrderSchema).optional(),
   slug: z.lazy(() => SortOrderSchema).optional(),
-  equityReturnsFile: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  equityReturnsFile: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ProjectCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => ProjectAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ProjectMaxOrderByAggregateInputSchema).optional(),
@@ -2142,7 +2194,7 @@ export const ProjectScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Proje
   marketHighlights: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   youtubeUrl: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   slug: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
-  equityReturnsFile: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const ProjectPropertyStatsWhereInputSchema: z.ZodType<Prisma.ProjectPropertyStatsWhereInput> = z.object({
@@ -2235,7 +2287,7 @@ export const ProjectInvestmentStatsWhereInputSchema: z.ZodType<Prisma.ProjectInv
   equityPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   equityPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   equityTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
-  preferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  equityPreferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentRaised: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   interestRateMin: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
@@ -2263,7 +2315,7 @@ export const ProjectInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Pri
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -2307,7 +2359,7 @@ export const ProjectInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.Proj
   equityPaymentFreq: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   equityPaymentFreqMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   equityTermMonths: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
-  preferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
+  equityPreferredReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   investmentRaised: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   interestRateMin: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
@@ -2334,7 +2386,7 @@ export const ProjectInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -2369,7 +2421,7 @@ export const ProjectInvestmentStatsScalarWhereWithAggregatesInputSchema: z.ZodTy
   equityPaymentFreq: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   equityPaymentFreqMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   equityTermMonths: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
-  preferredReturn: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
+  equityPreferredReturn: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   investmentGoal: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   investmentRaised: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
   interestRateMin: z.union([ z.lazy(() => FloatWithAggregatesFilterSchema),z.number() ]).optional(),
@@ -3204,9 +3256,16 @@ export const DealInvestmentStatsCreateInputSchema: z.ZodType<Prisma.DealInvestme
   financingType: z.lazy(() => DealFinancingTypeSchema).optional(),
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
+  debtInterestRatePerc: z.number().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtPaymentFreq: z.string().optional(),
+  equityTermMonths: z.number().int().optional(),
+  equityPreferredReturn: z.number().optional(),
+  shareOfEquity: z.number().optional(),
   numberAUnits: z.number().optional(),
   numberCUnits: z.number().optional(),
-  shareOfEquity: z.number().optional(),
   deal: z.lazy(() => DealCreateNestedOneWithoutInvestmentStatsInputSchema)
 }).strict();
 
@@ -3217,9 +3276,16 @@ export const DealInvestmentStatsUncheckedCreateInputSchema: z.ZodType<Prisma.Dea
   financingType: z.lazy(() => DealFinancingTypeSchema).optional(),
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
+  debtInterestRatePerc: z.number().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtPaymentFreq: z.string().optional(),
+  equityTermMonths: z.number().int().optional(),
+  equityPreferredReturn: z.number().optional(),
+  shareOfEquity: z.number().optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional(),
-  shareOfEquity: z.number().optional()
+  numberCUnits: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.DealInvestmentStatsUpdateInput> = z.object({
@@ -3227,9 +3293,16 @@ export const DealInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.DealInvestme
   financingType: z.union([ z.lazy(() => DealFinancingTypeSchema),z.lazy(() => EnumDealFinancingTypeFieldUpdateOperationsInputSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => DealUnitTypeSchema),z.lazy(() => EnumDealUnitTypeFieldUpdateOperationsInputSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
-  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   deal: z.lazy(() => DealUpdateOneRequiredWithoutInvestmentStatsNestedInputSchema).optional()
 }).strict();
 
@@ -3240,9 +3313,16 @@ export const DealInvestmentStatsUncheckedUpdateInputSchema: z.ZodType<Prisma.Dea
   financingType: z.union([ z.lazy(() => DealFinancingTypeSchema),z.lazy(() => EnumDealFinancingTypeFieldUpdateOperationsInputSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => DealUnitTypeSchema),z.lazy(() => EnumDealUnitTypeFieldUpdateOperationsInputSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
-  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.DealInvestmentStatsCreateManyInput> = z.object({
@@ -3252,9 +3332,16 @@ export const DealInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.DealInve
   financingType: z.lazy(() => DealFinancingTypeSchema).optional(),
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
+  debtInterestRatePerc: z.number().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtPaymentFreq: z.string().optional(),
+  equityTermMonths: z.number().int().optional(),
+  equityPreferredReturn: z.number().optional(),
+  shareOfEquity: z.number().optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional(),
-  shareOfEquity: z.number().optional()
+  numberCUnits: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Prisma.DealInvestmentStatsUpdateManyMutationInput> = z.object({
@@ -3262,9 +3349,16 @@ export const DealInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Prisma.
   financingType: z.union([ z.lazy(() => DealFinancingTypeSchema),z.lazy(() => EnumDealFinancingTypeFieldUpdateOperationsInputSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => DealUnitTypeSchema),z.lazy(() => EnumDealUnitTypeFieldUpdateOperationsInputSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
-  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Prisma.DealInvestmentStatsUncheckedUpdateManyInput> = z.object({
@@ -3274,9 +3368,16 @@ export const DealInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Prisma
   financingType: z.union([ z.lazy(() => DealFinancingTypeSchema),z.lazy(() => EnumDealFinancingTypeFieldUpdateOperationsInputSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => DealUnitTypeSchema),z.lazy(() => EnumDealUnitTypeFieldUpdateOperationsInputSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
-  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const OrganizationCreateInputSchema: z.ZodType<Prisma.OrganizationCreateInput> = z.object({
@@ -3680,7 +3781,7 @@ export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -3700,7 +3801,7 @@ export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUnchecke
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -3719,7 +3820,7 @@ export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -3739,7 +3840,7 @@ export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUnchecke
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -3759,7 +3860,7 @@ export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInp
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable()
+  equityReturnsFile: z.string()
 }).strict();
 
 export const ProjectUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectUpdateManyMutationInput> = z.object({
@@ -3771,7 +3872,7 @@ export const ProjectUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectUpdat
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateManyInput> = z.object({
@@ -3784,7 +3885,7 @@ export const ProjectUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectUnch
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectPropertyStatsCreateInputSchema: z.ZodType<Prisma.ProjectPropertyStatsCreateInput> = z.object({
@@ -3858,7 +3959,7 @@ export const ProjectInvestmentStatsCreateInputSchema: z.ZodType<Prisma.ProjectIn
   equityPaymentFreq: z.string().optional(),
   equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
-  preferredReturn: z.number().optional(),
+  equityPreferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
   interestRateMin: z.number().optional(),
@@ -3885,7 +3986,7 @@ export const ProjectInvestmentStatsUncheckedCreateInputSchema: z.ZodType<Prisma.
   equityPaymentFreq: z.string().optional(),
   equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
-  preferredReturn: z.number().optional(),
+  equityPreferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
   interestRateMin: z.number().optional(),
@@ -3911,7 +4012,7 @@ export const ProjectInvestmentStatsUpdateInputSchema: z.ZodType<Prisma.ProjectIn
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   interestRateMin: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3938,7 +4039,7 @@ export const ProjectInvestmentStatsUncheckedUpdateInputSchema: z.ZodType<Prisma.
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   interestRateMin: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3965,7 +4066,7 @@ export const ProjectInvestmentStatsCreateManyInputSchema: z.ZodType<Prisma.Proje
   equityPaymentFreq: z.string().optional(),
   equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
-  preferredReturn: z.number().optional(),
+  equityPreferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
   interestRateMin: z.number().optional(),
@@ -3991,7 +4092,7 @@ export const ProjectInvestmentStatsUpdateManyMutationInputSchema: z.ZodType<Pris
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   interestRateMin: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -4017,7 +4118,7 @@ export const ProjectInvestmentStatsUncheckedUpdateManyInputSchema: z.ZodType<Pri
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   interestRateMin: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -4956,18 +5057,31 @@ export const DealInvestmentStatsCountOrderByAggregateInputSchema: z.ZodType<Pris
   financingType: z.lazy(() => SortOrderSchema).optional(),
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsAvgOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsAvgOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsMaxOrderByAggregateInput> = z.object({
@@ -4977,9 +5091,16 @@ export const DealInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Prisma
   financingType: z.lazy(() => SortOrderSchema).optional(),
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsMinOrderByAggregateInput> = z.object({
@@ -4989,18 +5110,31 @@ export const DealInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Prisma
   financingType: z.lazy(() => SortOrderSchema).optional(),
   unitType: z.lazy(() => SortOrderSchema).optional(),
   ownershipType: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealInvestmentStatsSumOrderByAggregateInputSchema: z.ZodType<Prisma.DealInvestmentStatsSumOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   dealId: z.lazy(() => SortOrderSchema).optional(),
   amount: z.lazy(() => SortOrderSchema).optional(),
+  debtInterestRatePerc: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMin: z.lazy(() => SortOrderSchema).optional(),
+  debtTermMonthsMax: z.lazy(() => SortOrderSchema).optional(),
+  debtPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  shareOfEquity: z.lazy(() => SortOrderSchema).optional(),
   numberAUnits: z.lazy(() => SortOrderSchema).optional(),
-  numberCUnits: z.lazy(() => SortOrderSchema).optional(),
-  shareOfEquity: z.lazy(() => SortOrderSchema).optional()
+  numberCUnits: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const FloatWithAggregatesFilterSchema: z.ZodType<Prisma.FloatWithAggregatesFilter> = z.object({
@@ -5581,7 +5715,7 @@ export const ProjectInvestmentStatsCountOrderByAggregateInputSchema: z.ZodType<P
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -5606,7 +5740,7 @@ export const ProjectInvestmentStatsAvgOrderByAggregateInputSchema: z.ZodType<Pri
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -5631,7 +5765,7 @@ export const ProjectInvestmentStatsMaxOrderByAggregateInputSchema: z.ZodType<Pri
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -5658,7 +5792,7 @@ export const ProjectInvestmentStatsMinOrderByAggregateInputSchema: z.ZodType<Pri
   equityPaymentFreq: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -5683,7 +5817,7 @@ export const ProjectInvestmentStatsSumOrderByAggregateInputSchema: z.ZodType<Pri
   equityMinInvestment: z.lazy(() => SortOrderSchema).optional(),
   equityPaymentFreqMonths: z.lazy(() => SortOrderSchema).optional(),
   equityTermMonths: z.lazy(() => SortOrderSchema).optional(),
-  preferredReturn: z.lazy(() => SortOrderSchema).optional(),
+  equityPreferredReturn: z.lazy(() => SortOrderSchema).optional(),
   investmentGoal: z.lazy(() => SortOrderSchema).optional(),
   investmentRaised: z.lazy(() => SortOrderSchema).optional(),
   interestRateMin: z.lazy(() => SortOrderSchema).optional(),
@@ -8319,7 +8453,7 @@ export const ProjectCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreat
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -8338,7 +8472,7 @@ export const ProjectUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.Pro
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -8386,9 +8520,16 @@ export const DealInvestmentStatsCreateWithoutDealInputSchema: z.ZodType<Prisma.D
   financingType: z.lazy(() => DealFinancingTypeSchema).optional(),
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
+  debtInterestRatePerc: z.number().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtPaymentFreq: z.string().optional(),
+  equityTermMonths: z.number().int().optional(),
+  equityPreferredReturn: z.number().optional(),
+  shareOfEquity: z.number().optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional(),
-  shareOfEquity: z.number().optional()
+  numberCUnits: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsUncheckedCreateWithoutDealInputSchema: z.ZodType<Prisma.DealInvestmentStatsUncheckedCreateWithoutDealInput> = z.object({
@@ -8397,9 +8538,16 @@ export const DealInvestmentStatsUncheckedCreateWithoutDealInputSchema: z.ZodType
   financingType: z.lazy(() => DealFinancingTypeSchema).optional(),
   unitType: z.lazy(() => DealUnitTypeSchema).optional(),
   ownershipType: z.lazy(() => DealOwnershipTypeSchema).optional(),
+  debtInterestRatePerc: z.number().optional(),
+  debtTermMonthsMin: z.number().int().optional(),
+  debtTermMonthsMax: z.number().int().optional(),
+  debtPaymentFreqMonths: z.number().int().optional(),
+  debtPaymentFreq: z.string().optional(),
+  equityTermMonths: z.number().int().optional(),
+  equityPreferredReturn: z.number().optional(),
+  shareOfEquity: z.number().optional(),
   numberAUnits: z.number().optional(),
-  numberCUnits: z.number().optional(),
-  shareOfEquity: z.number().optional()
+  numberCUnits: z.number().optional()
 }).strict();
 
 export const DealInvestmentStatsCreateOrConnectWithoutDealInputSchema: z.ZodType<Prisma.DealInvestmentStatsCreateOrConnectWithoutDealInput> = z.object({
@@ -8512,7 +8660,7 @@ export const ProjectUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUpdat
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -8531,7 +8679,7 @@ export const ProjectUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.Pro
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -8572,9 +8720,16 @@ export const DealInvestmentStatsUpdateWithoutDealInputSchema: z.ZodType<Prisma.D
   financingType: z.union([ z.lazy(() => DealFinancingTypeSchema),z.lazy(() => EnumDealFinancingTypeFieldUpdateOperationsInputSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => DealUnitTypeSchema),z.lazy(() => EnumDealUnitTypeFieldUpdateOperationsInputSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
-  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsUncheckedUpdateWithoutDealInputSchema: z.ZodType<Prisma.DealInvestmentStatsUncheckedUpdateWithoutDealInput> = z.object({
@@ -8583,9 +8738,16 @@ export const DealInvestmentStatsUncheckedUpdateWithoutDealInputSchema: z.ZodType
   financingType: z.union([ z.lazy(() => DealFinancingTypeSchema),z.lazy(() => EnumDealFinancingTypeFieldUpdateOperationsInputSchema) ]).optional(),
   unitType: z.union([ z.lazy(() => DealUnitTypeSchema),z.lazy(() => EnumDealUnitTypeFieldUpdateOperationsInputSchema) ]).optional(),
   ownershipType: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => EnumDealOwnershipTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  debtInterestRatePerc: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMin: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtTermMonthsMax: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  debtPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberAUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   numberCUnits: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
-  shareOfEquity: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const AccreditationVerificationUpsertWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUpsertWithoutDealInput> = z.object({
@@ -9817,7 +9979,7 @@ export const ProjectInvestmentStatsCreateWithoutProjectInputSchema: z.ZodType<Pr
   equityPaymentFreq: z.string().optional(),
   equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
-  preferredReturn: z.number().optional(),
+  equityPreferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
   interestRateMin: z.number().optional(),
@@ -9843,7 +10005,7 @@ export const ProjectInvestmentStatsUncheckedCreateWithoutProjectInputSchema: z.Z
   equityPaymentFreq: z.string().optional(),
   equityPaymentFreqMonths: z.number().int().optional(),
   equityTermMonths: z.number().int().optional(),
-  preferredReturn: z.number().optional(),
+  equityPreferredReturn: z.number().optional(),
   investmentGoal: z.number().optional(),
   investmentRaised: z.number().optional(),
   interestRateMin: z.number().optional(),
@@ -10032,7 +10194,7 @@ export const ProjectInvestmentStatsUpdateWithoutProjectInputSchema: z.ZodType<Pr
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   interestRateMin: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10058,7 +10220,7 @@ export const ProjectInvestmentStatsUncheckedUpdateWithoutProjectInputSchema: z.Z
   equityPaymentFreq: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   equityPaymentFreqMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   equityTermMonths: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
-  preferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
+  equityPreferredReturn: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentGoal: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   investmentRaised: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
   interestRateMin: z.union([ z.number(),z.lazy(() => FloatFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10201,7 +10363,7 @@ export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10220,7 +10382,7 @@ export const ProjectUncheckedCreateWithoutPropertyStatsInputSchema: z.ZodType<Pr
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10254,7 +10416,7 @@ export const ProjectUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10273,7 +10435,7 @@ export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Pr
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10291,7 +10453,7 @@ export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10310,7 +10472,7 @@ export const ProjectUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10344,7 +10506,7 @@ export const ProjectUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10363,7 +10525,7 @@ export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10381,7 +10543,7 @@ export const ProjectCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10400,7 +10562,7 @@ export const ProjectUncheckedCreateWithoutProjectPaymentInfoInputSchema: z.ZodTy
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10434,7 +10596,7 @@ export const ProjectUpdateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10453,7 +10615,7 @@ export const ProjectUncheckedUpdateWithoutProjectPaymentInfoInputSchema: z.ZodTy
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10471,7 +10633,7 @@ export const ProjectCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10490,7 +10652,7 @@ export const ProjectUncheckedCreateWithoutMilestonesInputSchema: z.ZodType<Prism
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10524,7 +10686,7 @@ export const ProjectUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10543,7 +10705,7 @@ export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prism
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10561,7 +10723,7 @@ export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCr
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10580,7 +10742,7 @@ export const ProjectUncheckedCreateWithoutPicturesInputSchema: z.ZodType<Prisma.
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10614,7 +10776,7 @@ export const ProjectUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUp
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10633,7 +10795,7 @@ export const ProjectUncheckedUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10674,7 +10836,7 @@ export const ProjectCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectC
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10693,7 +10855,7 @@ export const ProjectUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma
   marketHighlights: z.string().optional(),
   youtubeUrl: z.string().optional(),
   slug: z.string(),
-  equityReturnsFile: z.string().optional().nullable(),
+  equityReturnsFile: z.string(),
   deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
@@ -10743,7 +10905,7 @@ export const ProjectUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectU
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
@@ -10762,7 +10924,7 @@ export const ProjectUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma
   marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
-  equityReturnsFile: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),

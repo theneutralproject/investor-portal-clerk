@@ -55,17 +55,25 @@ model Deal {
   DocusignEvent             DocusignEvent[]
 }
 
+/// used to manifest the agreed upon terms of the deal
 model DealInvestmentStats {
-  id            Int               @id @default(autoincrement())
-  dealId        Int               @unique
-  amount        Float             @default(5000.0)
-  financingType DealFinancingType @default(equity)
-  unitType      DealUnitType      @default(AUNIT)
-  ownershipType DealOwnershipType @default(INDIVIDUAL)
-  numberAUnits  Float             @default(0.0)
-  numberCUnits  Float             @default(0.0)
-  shareOfEquity Float             @default(0.0)
-  deal          Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id                    Int               @id @default(autoincrement())
+  dealId                Int               @unique
+  amount                Float             @default(5000.0)
+  financingType         DealFinancingType @default(equity)
+  unitType              DealUnitType      @default(AUNIT)
+  ownershipType         DealOwnershipType @default(INDIVIDUAL)
+  debtInterestRatePerc  Float             @default(0.0)
+  debtTermMonthsMin     Int               @default(0)
+  debtTermMonthsMax     Int               @default(0)
+  debtPaymentFreqMonths Int               @default(0)
+  debtPaymentFreq       String            @default("")
+  equityTermMonths      Int               @default(0)
+  equityPreferredReturn Float             @default(0.0)
+  shareOfEquity         Float             @default(0.0)
+  numberAUnits          Float             @default(0.0)
+  numberCUnits          Float             @default(0.0)
+  deal                  Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model Organization {
@@ -151,7 +159,7 @@ model Project {
   marketHighlights   String                  @default("")
   youtubeUrl         String                  @default("")
   slug               String                  @unique
-  equityReturnsFile  String?
+  equityReturnsFile  String
   deals              Deal[]
   documents          ProjectDocument[]
   investmentStats    ProjectInvestmentStats?
@@ -184,7 +192,7 @@ model ProjectInvestmentStats {
   equityPaymentFreq           String  @default("quarterly")
   equityPaymentFreqMonths     Int     @default(3)
   equityTermMonths            Int     @default(60)
-  preferredReturn             Float   @default(0.1)
+  equityPreferredReturn       Float   @default(0.1)
   investmentGoal              Float   @default(0.0)
   investmentRaised            Float   @default(0.0)
   interestRateMin             Float   @default(10.0)
