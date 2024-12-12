@@ -67,6 +67,7 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
   ).then(async (response) => {
     if (response.status >= 300) {
       console.error(`ERROR: unable to update Hubspot contact for HS User ID ${hubspotContact.hubspotId}:\n`, response.statusText);
+      // eslint-disable-next-line
       const resJson = await response.json();
       console.log("response", resJson);
       return new Error("unable to update hubspot contact");
