@@ -21,7 +21,7 @@ export async function updateDeal(
     const existingDeal = await prisma.deal.findUnique({
         where: { hubspotId: dealData.hubspotId },
         include: { investmentStats: true, 
-            project: { select: { id: true, name: true, slug: true } } as any
+            project: { select: { id: true, name: true, slug: true } }
          },
     });
     if (!existingDeal) {
