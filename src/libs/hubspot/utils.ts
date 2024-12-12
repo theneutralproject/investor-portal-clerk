@@ -66,8 +66,9 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
     }
   ).then(async (response) => {
     if (response.status >= 300) {
-      console.error("ERROR: unable to update Hubspot contact:\n", response.statusText);
-      console.log("response", response);
+      console.error(`ERROR: unable to update Hubspot contact for HS User ID ${hubspotContact.hubspotId}:\n`, response.statusText);
+      const resJson = await response.json();
+      console.log("response", resJson);
       return new Error("unable to update hubspot contact");
     }
     return { success: true };
@@ -77,6 +78,32 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
   });
   return hsRes;
 };
+
+export async function getListOfHSContacts(arrVids: string[]) {
+  ///https://api.hubapi.com/contacts/v1/contact/vids/batch/?vid=3234574&vid=3714024&hapikey=demo
+  const firstVid = arrVids.shift();
+  const vids = arrVids.map(v => v.trim()).join("&vid=");
+
+  console.log(`/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`);
+
+  const response = await fetch(
+    `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+    }
+  )
+  const data = JSON.parse(await response.text());
+  if (response.status >= 300) {
+    console.error("ERROR: unable to get Hubspot contacts:\n", data);
+    throw new Error("unable to get hubspot contacts");
+  }
+  // console.log("data", data.keys());
+  return Object.keys(data);
+}
 
 export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
