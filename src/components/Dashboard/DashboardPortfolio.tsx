@@ -1,14 +1,5 @@
 import React from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Divider,
-  Button,
-  Stack,
-} from "@mui/material";
+import { Box, Button, Grid, Stack, Typography } from "@mui/material";
 import {
   ComposedChart,
   Line,
@@ -58,11 +49,13 @@ const formatQuarter = (dateString: string): string => {
   const year = date.getFullYear().toString().slice(-2);
   return `Q${quarter} '${year}`;
 };
+
 const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
   const currentDate = new Date();
   const quarterData = schedule.reduce<Record<string, QuarterData>>(
     (acc, curr) => {
       const quarterKey = formatQuarter(curr.date.toString());
+      //For testing, we make it + 48 months ahead
       const isProjected =
         new Date(curr.date) >
         new Date(currentDate.getTime() + 48 * 30 * 24 * 60 * 60 * 1000);
@@ -77,12 +70,10 @@ const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
           isProjected,
         };
       } else {
-        // If any entry in the quarter is projected, mark the whole quarter as projected
         acc[quarterKey].isProjected =
           acc[quarterKey].isProjected || isProjected;
       }
 
-      // Update distributions based on cumulative values
       acc[quarterKey].debtDistributions = Math.max(
         acc[quarterKey].debtDistributions,
         curr.debtDistributionsCumulative
@@ -99,6 +90,26 @@ const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
   );
 
   return Object.values(quarterData);
+};
+
+// Type-safe data accessors for the chart
+const dataAccessors = {
+  principal: (data: QuarterData) =>
+    data.isProjected ? undefined : data.principal,
+  principalProjected: (data: QuarterData) =>
+    data.isProjected ? data.principal : undefined,
+  equityDistributions: (data: QuarterData) =>
+    data.isProjected ? undefined : data.equityDistributions,
+  equityDistributionsProjected: (data: QuarterData) =>
+    data.isProjected ? data.equityDistributions : undefined,
+  debtDistributions: (data: QuarterData) =>
+    data.isProjected ? undefined : data.debtDistributions,
+  debtDistributionsProjected: (data: QuarterData) =>
+    data.isProjected ? data.debtDistributions : undefined,
+  portfolioValue: (data: QuarterData) =>
+    data.isProjected ? undefined : data.portfolioValue,
+  portfolioValueProjected: (data: QuarterData) =>
+    data.isProjected ? data.portfolioValue : undefined,
 };
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
@@ -183,7 +194,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             {/* Areas for historical data */}
             <Area
               type="monotone"
-              dataKey={(data) => (data.isProjected ? null : data.principal)}
+              dataKey={dataAccessors.principal}
               stroke="#656565"
               fill="#656565"
               fillOpacity={0.1}
@@ -192,9 +203,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             />
             <Area
               type="monotone"
-              dataKey={(data) =>
-                data.isProjected ? null : data.equityDistributions
-              }
+              dataKey={dataAccessors.equityDistributions}
               stroke="#2196F3"
               fill="#2196F3"
               fillOpacity={0.1}
@@ -203,9 +212,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             />
             <Area
               type="monotone"
-              dataKey={(data) =>
-                data.isProjected ? null : data.debtDistributions
-              }
+              dataKey={dataAccessors.debtDistributions}
               stroke="#5AAC6A"
               fill="#5AAC6A"
               fillOpacity={0.1}
@@ -214,9 +221,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             />
             <Area
               type="monotone"
-              dataKey={(data) =>
-                data.isProjected ? null : data.portfolioValue
-              }
+              dataKey={dataAccessors.portfolioValue}
               stroke="#FFB800"
               fill="#FFB800"
               fillOpacity={0.1}
@@ -227,7 +232,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             {/* Lines for projected data */}
             <Line
               type="monotone"
-              dataKey={(data) => (data.isProjected ? data.principal : null)}
+              dataKey={dataAccessors.principalProjected}
               stroke="#656565"
               name="Principal (Projected)"
               strokeWidth={3}
@@ -237,9 +242,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             />
             <Line
               type="monotone"
-              dataKey={(data) =>
-                data.isProjected ? data.equityDistributions : null
-              }
+              dataKey={dataAccessors.equityDistributionsProjected}
               stroke="#2196F3"
               name="Equity Distributions (Projected)"
               strokeWidth={3}
@@ -249,9 +252,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             />
             <Line
               type="monotone"
-              dataKey={(data) =>
-                data.isProjected ? data.debtDistributions : null
-              }
+              dataKey={dataAccessors.debtDistributionsProjected}
               stroke="#5AAC6A"
               name="Debt Distributions (Projected)"
               strokeWidth={3}
@@ -261,9 +262,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             />
             <Line
               type="monotone"
-              dataKey={(data) =>
-                data.isProjected ? data.portfolioValue : null
-              }
+              dataKey={dataAccessors.portfolioValueProjected}
               stroke="#FFB800"
               name="Portfolio Value (Projected)"
               strokeWidth={3}

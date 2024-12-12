@@ -1,29 +1,13 @@
 import React from "react";
 import { Box, Card, CardContent, Typography, styled } from "@mui/material";
-import { type Deal, type Address } from "@prisma/client";
 import { getProjectPicture } from "./CompleteInvestment";
-
-type OrganizationWithFullMembersAndAddress = {
-  name: string;
-  address: Address | null;
-};
-
-type ProjectWithAllNestedData = {
-  name: string;
-  location: string;
-  investmentStats?: {
-    investmentRaised: number;
-    investmentGoal: number;
-  };
-};
-
-type DealWithFullOrgAndProject = Deal & {
-  organization: OrganizationWithFullMembersAndAddress;
-  project: ProjectWithAllNestedData;
-};
+import {
+  type DealWithFullOrgAndProject,
+  type DealWithOrgMembersAndProject,
+} from "@/libs/types";
 
 interface DashboardDealsProps {
-  deals: DealWithFullOrgAndProject[];
+  deals: DealWithOrgMembersAndProject[];
 }
 
 const StyledCard = styled(Card)({
@@ -82,7 +66,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
       </TableHeader>
       <CardContent sx={{ p: 0 }}>
         {deals.map((deal) => {
-          const picture = getProjectPicture(deal);
+          const picture = getProjectPicture(deal as DealWithFullOrgAndProject);
           return (
             <TableRow key={deal.id}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
@@ -97,12 +81,12 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
                 </Box>
               </Box>
               <Typography variant="body2">
-                {deal.investmentStats.financingType === "equity"
+                {deal.investmentStats?.financingType === "equity"
                   ? "Equity"
                   : "Debt"}
               </Typography>
               <Typography variant="body2">
-                {formatCurrency(deal.investmentStats.amount)}
+                {formatCurrency(deal.investmentStats?.amount ?? 0)}
               </Typography>
               <Typography variant="body2">Need data</Typography>
             </TableRow>

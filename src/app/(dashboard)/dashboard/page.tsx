@@ -11,7 +11,7 @@ import CreateAccount from "@/components/Dashboard/CreateAccount";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 import type {
-  DealWithFullOrgAndProject,
+  DealWithOrgMembersAndProject,
   ProjectWithAllNestedData,
 } from "@/libs/types";
 import DashboardProjects from "@/components/Dashboard/DashboardProjects";
@@ -33,13 +33,13 @@ const DashboardPage = () => {
   });
 
   const { isLoading: dealsLoading, data: dealsData } = useQuery<
-    DealWithFullOrgAndProject[],
+    DealWithOrgMembersAndProject[],
     Error
   >({
     queryKey: ["deals", "all"],
     queryFn: () =>
       axios
-        .get<DealWithFullOrgAndProject[]>("/api/dashboard/deals")
+        .get<DealWithOrgMembersAndProject[]>("/api/dashboard/deals")
         .then((res) => res.data),
   });
 
