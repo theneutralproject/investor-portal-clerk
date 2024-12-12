@@ -2,7 +2,7 @@
 import { getFinixUserName, getFinixPassword } from "@/libs/finix/utils";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 
 export async function POST(request: NextRequest) {
     const user = await currentUser();
