@@ -4,13 +4,13 @@ import { isAdminUser } from "@/libs/maintenance/utils";
 import prisma from "@/libs/prisma.server";
 import { jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
-import { type Deal, PaymentMethod, Role } from "@prisma/client";
+import { type Deal, PaymentMethod } from "@prisma/client";
 
 
 export async function POST() {
     const clerkUser = await currentUser();
     if (!clerkUser) return jsonResponse({ error: "User not found" }, 404);
-    if(!isAdminUser(clerkUser.id)) return jsonResponse({ error: "User is not an admin" }, 403);
+    if(! await isAdminUser(clerkUser.id)) return jsonResponse({ error: "User is not an admin" }, 403);
 
     // get all deals
     const deals = await prisma.deal.findMany({
