@@ -6,4 +6,3 @@ export enum ProjectName {
   "The Bloom" = "The Bloom",
   "519 W Main" = "519 W Main"
 };
-

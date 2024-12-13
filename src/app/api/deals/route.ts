@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
 
     const project = await prisma.project.findUnique({
       where: { id: dealData.projectId },
-      include: { investmentStats: true }
+      include: { investmentStats: true },
     });
     if (!project?.investmentStats || !project?.equityReturnsFile) {
       return jsonResponse(
