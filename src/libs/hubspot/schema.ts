@@ -85,7 +85,7 @@ export const zHsDealSearchResultsSchema = z.object({
 
 export const zHsDealDocsAccessedUpdateSchema = z.object({
   dealId: z.number(),
-  dealStage: z.number().min(1).max(5),
+  dealStage: z.number().min(1).max(6),
   documentNames: z.string(),
 });
 
