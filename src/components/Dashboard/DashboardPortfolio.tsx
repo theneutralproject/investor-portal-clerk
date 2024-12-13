@@ -51,14 +51,12 @@ const formatQuarter = (dateString: string): string => {
 };
 
 const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
-  const currentDate = new Date();
+  //For testing, we make it + 48 months ahead
+  const currentDate = new Date(new Date().setMonth(new Date().getMonth() + 48));
   const quarterData = schedule.reduce<Record<string, QuarterData>>(
     (acc, curr) => {
       const quarterKey = formatQuarter(curr.date.toString());
-      //For testing, we make it + 48 months ahead
-      const isProjected =
-        new Date(curr.date) >
-        new Date(currentDate.getTime() + 48 * 30 * 24 * 60 * 60 * 1000);
+      const isProjected = new Date(curr.date) > currentDate;
 
       if (!acc[quarterKey]) {
         acc[quarterKey] = {
