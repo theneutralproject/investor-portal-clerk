@@ -20,7 +20,9 @@ export async function updateDeal(
     const { investmentStats: investmentStatsToUpdate, ...dealData } = updateDealData;
     const existingDeal = await prisma.deal.findUnique({
         where: { hubspotId: dealData.hubspotId },
-        include: { investmentStats: true },
+        include: { investmentStats: true, 
+            project: { select: { id: true, name: true, slug: true } }
+         },
     });
     if (!existingDeal) {
         console.error(
@@ -29,7 +31,7 @@ export async function updateDeal(
         throw Error("The deal does not exist in the database");
     }
 
-    if (existingDeal.dealStage === 5 && !allowMaintenanceOfCompletedDeals) {
+    if (existingDeal.dealStage >= 5 && !allowMaintenanceOfCompletedDeals) {
         console.error("Completed Deals cannot be updated");
         throw Error("Completed Deals cannot be updated");
     }
@@ -42,7 +44,7 @@ export async function updateDeal(
     // Only update investment stats if the deal stage is less than 4 (not yet signed)
     if (existingDeal.dealStage >= 4 && !allowMaintenanceOfCompletedDeals) {
         console.warn(
-            `Deal with id ${existingDeal.id} is already signed, and the investmentStats cannot be updated.`
+            `Deal with id ${existingDeal.id} is already signed, and the investmentStats will not be updated, but the deal itself will be.`
         );
     } else {
         if (investmentStatsToUpdate) {
@@ -127,7 +129,8 @@ export async function updateDeal(
             if (updatedStats) {
                 hsDealData.investmentStats = updatedStats;
             }
-            const hsDeal = getHsDealPropsFromDeal(updateDealData);
+            console.log("Updating deal in Hubspot with this data:", existingDeal.project.slug, hsDealData);
+            const hsDeal = getHsDealPropsFromDeal(updateDealData, existingDeal.project.slug);
             await updateHubspotDealProperties(hsDeal);
         } catch (error) {
             console.error("Failed to update deal in Hubspot", error);

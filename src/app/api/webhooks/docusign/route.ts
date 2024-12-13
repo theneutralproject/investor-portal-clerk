@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
             console.log("All documents signed for deal", deal.id);
             // update deal and hubspot
             const dealData = { hubspotId: deal.hubspotId, signaturesCompletedDate: dealEvent.dateCompleted ?? new Date(), dealStage: 4 }
-            await updateDeal(dealData);
+            await updateDeal(dealData, true);
 
             // get documentName from projectdocs
             const projectDoc = await prisma.projectDocument.findFirst({
