@@ -5,6 +5,10 @@ import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
+import { Client } from "@hubspot/api-client";
+import { FilterOperatorEnum, type PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/companies";
+
+const hubspotClient = new Client({"accessToken":process.env.HUBSPOT_ACCESS_TOKEN});
 
 export async function createHubspotContact(hubspotContact: HubspotContact) {
   const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
@@ -106,6 +110,29 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
 //   return Object.keys(data);
 // }
 
+export async function getListOfHSDeals() {
+  const lostDealstages = ["closedlost", "146586774", "257596003"];
+  const PublicObjectSearchRequest = {
+    limit: 100,
+    properties: ["hs_object_id", "dealname", "dealstage", "amount", "project_name"],
+    filterGroups: [{
+    filters: [
+      {
+        propertyName: "dealstage",
+        operator: FilterOperatorEnum.In,
+        values: lostDealstages
+      }
+    ]
+  }] } as PublicObjectSearchRequest;
+
+  try {
+    const apiResponse = await hubspotClient.crm.deals.searchApi.doSearch(PublicObjectSearchRequest);
+    return apiResponse.results;
+  } catch (e) {
+    console.error("Error", e);
+  }
+}
+
 export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
   console.log("properties", properties);
@@ -128,7 +155,7 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
       body,
     }
   )
-  
+
   const hsDealCreateRespBody = (await resBody.json()) as HsDealCreateResponse;
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
@@ -217,7 +244,7 @@ export function getHsDealPropsFromDeal(deal: DealUpdateSchema, projectSlug: stri
 
   if (investmentStats?.amount) hsReturnObject.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
   if (investmentStats?.financingType) hsReturnObject.properties.push({ name: "financing_type", value: investmentStats?.financingType });
-  if(signaturesCompletedDate) hsReturnObject.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
+  if (signaturesCompletedDate) hsReturnObject.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
   return hsReturnObject;
 }
 
@@ -289,7 +316,7 @@ export async function getFundingAmount(projectSlug: string) {
           ]
         };
 
-      } 
+      }
       case "bakers": {
         return {
           limit: 100, /**pagination - max=100 */
@@ -380,7 +407,7 @@ export function getDealStageIntFromHSString(hsDealStageStr: string) {
 
 
 export function getHsDealStageStrFromInt(dealStage: number, projectSlug: string) {
-  if(dealStage < 0 || dealStage > 6) {
+  if (dealStage < 0 || dealStage > 6) {
     console.error(`dealStage ${dealStage} is not valid`)
     return "null";
   }
