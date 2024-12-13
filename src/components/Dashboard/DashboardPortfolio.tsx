@@ -95,19 +95,19 @@ const dataAccessors = {
   principal: (data: QuarterData) =>
     data.isProjected ? undefined : data.principal,
   principalProjected: (data: QuarterData) =>
-    data.isProjected ? data.principal : undefined,
+    data.isProjected ? data.principal : data.principal,
   equityDistributions: (data: QuarterData) =>
     data.isProjected ? undefined : data.equityDistributions,
   equityDistributionsProjected: (data: QuarterData) =>
-    data.isProjected ? data.equityDistributions : undefined,
+    data.isProjected ? data.equityDistributions : data.equityDistributions,
   debtDistributions: (data: QuarterData) =>
     data.isProjected ? undefined : data.debtDistributions,
   debtDistributionsProjected: (data: QuarterData) =>
-    data.isProjected ? data.debtDistributions : undefined,
+    data.isProjected ? data.debtDistributions : data.debtDistributions,
   portfolioValue: (data: QuarterData) =>
     data.isProjected ? undefined : data.portfolioValue,
   portfolioValueProjected: (data: QuarterData) =>
-    data.isProjected ? data.portfolioValue : undefined,
+    data.isProjected ? data.portfolioValue : data.portfolioValue,
 };
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
@@ -233,9 +233,9 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               dataKey={dataAccessors.principalProjected}
               stroke="#656565"
               name="Principal (Projected)"
-              strokeWidth={3}
+              strokeWidth={2}
               dot={false}
-              strokeDasharray="10 10"
+              strokeDasharray="5"
               legendType="none"
             />
             <Line
@@ -243,9 +243,9 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               dataKey={dataAccessors.equityDistributionsProjected}
               stroke="#2196F3"
               name="Equity Distributions (Projected)"
-              strokeWidth={3}
+              strokeWidth={2}
               dot={false}
-              strokeDasharray="10 10"
+              strokeDasharray="5"
               legendType="none"
             />
             <Line
@@ -253,9 +253,9 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               dataKey={dataAccessors.debtDistributionsProjected}
               stroke="#5AAC6A"
               name="Debt Distributions (Projected)"
-              strokeWidth={3}
+              strokeWidth={2}
               dot={false}
-              strokeDasharray="10 10"
+              strokeDasharray="5"
               legendType="none"
             />
             <Line
@@ -263,9 +263,9 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               dataKey={dataAccessors.portfolioValueProjected}
               stroke="#FFB800"
               name="Portfolio Value (Projected)"
-              strokeWidth={3}
+              strokeWidth={2}
               dot={false}
-              strokeDasharray="10 10"
+              strokeDasharray="5"
               legendType="none"
             />
           </ComposedChart>
