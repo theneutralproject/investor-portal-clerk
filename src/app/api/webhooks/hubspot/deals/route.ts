@@ -1,7 +1,7 @@
 'use server';
 import type { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils.server";
-import { HSDealPropNames, getDealStageInt, getProjectNameFromDealStage, getFundingAmount } from "@/libs/hubspot/utils";
+import { HSDealPropNames, getDealStageIntFromHSString, getFundingAmount, getProjectSlugFromDealStage } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma.server";
 import { getErrorMessage } from "@/libs/utils";
 import { DealFinancingType, type Deal } from "@prisma/client";
@@ -57,12 +57,11 @@ export async function POST(req: Request) {
     console.log("payload", payload);
     const dealBody: DealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
-      // investmentStats: {},
     };
-    let updateProjectFunding = false;
+    let updateProjectFunding = false; // flag to update project funding tracker 
     switch (payload.propertyName) {
       case HSDealPropNames.dealstage.toString():
-        dealBody.dealStage = getDealStageInt(payload.propertyValue);
+        dealBody.dealStage = getDealStageIntFromHSString(payload.propertyValue);
         updateProjectFunding = dealBody.dealStage >= 3;
         break;
       case HSDealPropNames.amount.toString():
@@ -82,25 +81,25 @@ export async function POST(req: Request) {
     }
 
     if (updateProjectFunding) {
-      const projectToUpdate = getProjectNameFromDealStage(
+      const projectSlugToUpdate = getProjectSlugFromDealStage(
         payload.propertyValue
       );
-      if (!isError(projectToUpdate)) {
-        const amountRaised = await getFundingAmount(projectToUpdate);
+      if (!isError(projectSlugToUpdate)) {
+        const amountRaised = await getFundingAmount(projectSlugToUpdate);
         if (isError(amountRaised)) {
           console.error(
-            `unable to fetch deal amount raised for project ${projectToUpdate}: ${amountRaised.message}`
+            `unable to fetch deal amount raised for project ${projectSlugToUpdate}: ${amountRaised.message}`
           );
         } else {
           console.log(
-            `attempting to update project funding tracker for ${projectToUpdate} to ${amountRaised}`
+            `attempting to update project funding tracker for ${projectSlugToUpdate} to ${amountRaised}`
           );
 
           const project = await prisma.project.findUnique({
-            where: { name: projectToUpdate }
+            where: { name: projectSlugToUpdate }
           });
           if (!project) return new Response(
-            JSON.stringify({ error: `project with name ${projectToUpdate} does not exist` }),
+            JSON.stringify({ error: `project with name ${projectSlugToUpdate} does not exist` }),
             {
               status: 500,
               headers: { "Content-Type": "application/json" },

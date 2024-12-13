@@ -19,7 +19,7 @@ export const zDealUpdateSchema = z.object({
   hubspotId: z.string(),
   projectId: z.number().int().optional(),
   organizationId: z.number().optional(),
-  dealStage: z.number().optional(),
+  dealStage: z.number().min(0).max(6).optional(),
   accreditationVerifierId: z.number().optional().nullable(),
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
   closingDate: z.date().nullish(),
@@ -34,7 +34,7 @@ export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
 export const zDealCreateSchema = z.object({
   projectId: z.number().int(),
   amount: z.number().optional(),
-  dealStage: z.number().optional(),
+  dealStage: z.number().min(0).max(6).optional(),
   financingType: z.nativeEnum(DealFinancingType).optional(),
   transactionId: z.string().optional(),
   organizationId: z.number().optional() /**will be set in the backend if not provided by UI */,
