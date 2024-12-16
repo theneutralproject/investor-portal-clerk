@@ -278,7 +278,8 @@ model DocusignEvent {
   dealId             Int
   dateSent           DateTime?
   dateCompleted      DateTime?
-  signatureCompleted Boolean   @default(false)
+  allSignaturesCompleted Boolean   @default(false)
+  investorSignatureCompleted Boolean @default(false)
   user               User      @relation(fields: [userId], references: [id])
   deal               Deal      @relation(fields: [dealId], references: [id])
 }

@@ -5,9 +5,7 @@ import { errorResponse, jsonResponse } from "@/libs/utils";
 import { z } from "zod";
 import type {
   DealFinancingType,
-  DocumentEvent,
   Organization,
-  User,
 } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
 
@@ -19,32 +17,33 @@ const QuerySchema = z.object({
 async function fetchProjectDocuments(
   projectId: number,
   financingType: DealFinancingType | null,
-  neutralUser: User | null
+  userId: number,
+  dealId: number
 ) {
   const documents = await prisma.projectDocument.findMany({
     where: {
       projectId: projectId,
       ...(financingType
         ? {
-            OR: [
-              { financingTypes: { has: financingType } },
-              { financingTypes: { equals: [] } },
-            ],
-          }
+          OR: [
+            { financingTypes: { has: financingType } },
+            { financingTypes: { equals: [] } },
+          ],
+        }
         : { financingTypes: { equals: [] } }),
-    },
-    include: {
-      documentEvents: {
-        where: { userId: neutralUser?.id },
-      },
-    },
+      documentType: "DOCUSIGN",
+    }
   });
 
+  const dealDocusignEvents = await prisma.docusignEvent.findMany({
+    where: {
+      userId,
+      dealId,
+    }
+  });
   const results = documents.map((doc) => ({
     ...doc,
-    completed: doc.documentEvents.some(
-      (event: DocumentEvent) => event.documentId === doc.id
-    ),
+    completed: dealDocusignEvents.find((event) => event.templateId === doc.docusignTemplateId)?.investorSignatureCompleted ?? false,
   }));
 
   return results;
@@ -133,16 +132,17 @@ export async function GET(request: NextRequest) {
       return errorResponse("You do not have access to this deal", 403);
     }
 
-    const documents = await fetchProjectDocuments(
+    const docusignDocs = await fetchProjectDocuments(
       project.id,
       deal.investmentStats?.financingType ?? null,
-      dbUser
+      dbUser.id,
+      deal.id,
     );
 
     return jsonResponse({
       project: {
         ...project,
-        documents,
+        documents: docusignDocs,
       },
       deal,
     });

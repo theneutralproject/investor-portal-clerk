@@ -1,6 +1,5 @@
 'use server';
 import type { NextRequest } from "next/server";
-import { DocumentEventType } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
 
 interface DocuSignParams {
@@ -60,16 +59,26 @@ async function getProjectDocument(documentTemplateId: string) {
 }
 
 // Create document event based on the event type
-async function createDocumentEvent(params: DocuSignParams, documentId: number) {
+async function createDocumentEvent(params: DocuSignParams) {
   if (params.event === "signing_complete") {
-    await prisma.documentEvent.create({
-      data: {
-        userId: parseInt(params.userId),
-        documentId,
-        date: new Date(),
-        type: DocumentEventType.SIGN,
-      },
+    console.log("Creating document event for signing_complete");
+    const existingDocusignEvent = await prisma.docusignEvent.findFirst({
+      where: { dealId: parseInt(params.dealId), userId: parseInt(params.userId), templateId: params.documentTemplateId },
     });
+
+    if (existingDocusignEvent) {
+      await prisma.docusignEvent.update({
+        where: { id: existingDocusignEvent.id },
+        data: {
+          investorSignatureCompleted: true,
+        },
+      });
+      console.log(`Docusign Event updated for dealId ${params.dealId} and userId ${params.userId}`);
+      return;
+    } else {
+      console.error(`Docusign Event not found for dealId ${params.dealId} and userId ${params.userId}`);
+      return;
+    }
   }
 }
 
@@ -109,8 +118,8 @@ export async function GET(request: NextRequest) {
     // Get project document
     const projectDocument = await getProjectDocument(params.documentTemplateId);
 
-    // Create document event if applicable
-    await createDocumentEvent(params, projectDocument.id);
+    // Create document event if signature has been completed
+    await createDocumentEvent(params);
 
     // Build and return redirect URL
     const redirectUrl = buildRedirectUrl(
