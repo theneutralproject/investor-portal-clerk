@@ -1,6 +1,6 @@
 # Comprehensive Test Plan
 
-- [ ] Require tests to succeed before merging in Github Actions
+- [x] Require tests to succeed before merging in Github Actions
 
 
 ## 1. Dashboard (/Projects route)
@@ -10,7 +10,7 @@
   - Example: "Welcome, Brent"
 
 ### 1.2 Project Display
-- [ ] Ensure at least one project is visible on the dashboard
+- [x] Ensure at least one project is visible on the dashboard
 - [ ] Verify that each project displays the following information correctly:
   - [ ] Relevant title
   - [ ] Location
@@ -50,7 +50,7 @@
   - [ ] Other relevant project information
 
 ### 4.2 Deal Flow Logic
-- [ ] Ensure the deal flow logic is functioning as expected
+- [x] Ensure the deal flow logic is functioning as expected
 
 ### 4.3 Tab Functionality
 - [ ] Confirm that tab changes work properly
