@@ -16,8 +16,8 @@ const ReviewingInvestment: React.FC = () => {
         progress, investment updates, and more.
       </Typography>
 
-      <Button variant="neutralBlack" onClick={() => router.push("/projects")}>
-        Back to Projects
+      <Button variant="neutralBlack" onClick={() => router.push("/dashboard")}>
+        Back to Dashboard
       </Button>
     </Box>
   );
