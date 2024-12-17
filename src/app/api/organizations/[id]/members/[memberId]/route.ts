@@ -6,7 +6,7 @@ import { getUserAndOrg } from "../helpers";
 import { isNumber } from "lodash";
 import { type OrganizationMemberUpdateSchema, zOrganizationMemberUpdateSchema } from "@/libs/organization/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
-import type { HubspotContact } from "@/libs/hubspot/schema";
+import type { HubspotContactCreateUpdateSchema } from "@/libs/hubspot/schema";
 
 /**
  * Remove one member at the time (but not self)
@@ -141,7 +141,7 @@ export async function PUT(request: NextRequest) {
             });
 
             // also update them in hubspot
-            const hubspotContact: HubspotContact = {
+            const hubspotContact: HubspotContactCreateUpdateSchema = {
                 hubspotId: updatedMember.user.hubspotId,
                 email: updatedMember.user.email,
                 properties: [
