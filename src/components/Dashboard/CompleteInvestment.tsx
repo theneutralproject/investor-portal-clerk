@@ -10,11 +10,14 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { type DealWithFullOrgAndProject } from "@/libs/types";
+import {
+  type DealWithOrgMembersAndProject,
+  type DealWithFullOrgAndProject,
+} from "@/libs/types";
 import { useRouter } from "next/navigation";
 
 interface CompleteInvestmentProps {
-  deals: DealWithFullOrgAndProject[];
+  deals: DealWithOrgMembersAndProject[];
 }
 
 const ContinueButton = styled(Button)(({}) => ({
@@ -47,7 +50,7 @@ const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 
-const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
+export const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
   const headerPicture = deal.project.pictures.find(
     (picture) => picture.type === "HEADER"
   );
@@ -115,7 +118,7 @@ const getNextStepDisplay = (deal: DealWithFullOrgAndProject): string => {
   }
 };
 
-const getDealProgress = (deal: DealWithFullOrgAndProject): number => {
+const getDealProgress = (deal: DealWithOrgMembersAndProject): number => {
   const MAX_DEAL_STAGE = 5;
   return (deal.dealStage / MAX_DEAL_STAGE) * 100;
 };
@@ -123,8 +126,8 @@ const getDealProgress = (deal: DealWithFullOrgAndProject): number => {
 const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
   const router = useRouter();
 
-  const handleContinue = (deal: DealWithFullOrgAndProject) => {
-    const nextStep = getNextStep(deal);
+  const handleContinue = (deal: DealWithOrgMembersAndProject) => {
+    const nextStep = getNextStep(deal as DealWithFullOrgAndProject);
     router.push(`/dealflow/${deal.project.slug}/${deal.id}/${nextStep}`);
   };
 
@@ -167,7 +170,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
             <Box key={deal.id} sx={{ mb: 3 }}>
               <ProjectCard>
                 <Avatar
-                  src={getProjectPicture(deal)}
+                  src={getProjectPicture(deal as DealWithFullOrgAndProject)}
                   alt={deal.project.name}
                   sx={{
                     width: 56,
@@ -187,7 +190,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
                       color: "rgba(255, 255, 255, 0.7)",
                     }}
                   >
-                    {getNextStepDisplay(deal)}
+                    {getNextStepDisplay(deal as DealWithFullOrgAndProject)}
                   </Typography>
                   <StyledLinearProgress
                     variant="determinate"

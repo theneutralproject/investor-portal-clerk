@@ -1137,7 +1137,7 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   userOrgId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
   referralSource: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
-  address: z.union([ z.lazy(() => AddressNullableScalarRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
+  address: z.union([ z.lazy(() => AddressNullableRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
   organizationMember: z.lazy(() => MemberListRelationFilterSchema).optional(),
   organizationsOwned: z.lazy(() => OrganizationListRelationFilterSchema).optional(),
   DealDocumentUploaded: z.lazy(() => DealDocumentListRelationFilterSchema).optional(),
@@ -1328,7 +1328,7 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   dateOfBirth: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   referralSource: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
-  address: z.union([ z.lazy(() => AddressNullableScalarRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
+  address: z.union([ z.lazy(() => AddressNullableRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
   organizationMember: z.lazy(() => MemberListRelationFilterSchema).optional(),
   organizationsOwned: z.lazy(() => OrganizationListRelationFilterSchema).optional(),
   DealDocumentUploaded: z.lazy(() => DealDocumentListRelationFilterSchema).optional(),
@@ -1390,11 +1390,11 @@ export const DealWhereInputSchema: z.ZodType<Prisma.DealWhereInput> = z.object({
   dateFundsSent: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   paymentMethod: z.union([ z.lazy(() => EnumPaymentMethodNullableFilterSchema),z.lazy(() => PaymentMethodSchema) ]).optional().nullable(),
   paymentReferenceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  organization: z.union([ z.lazy(() => OrganizationScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
   document: z.lazy(() => DealDocumentListRelationFilterSchema).optional(),
-  investmentStats: z.union([ z.lazy(() => DealInvestmentStatsNullableScalarRelationFilterSchema),z.lazy(() => DealInvestmentStatsWhereInputSchema) ]).optional().nullable(),
-  accreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableScalarRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
+  investmentStats: z.union([ z.lazy(() => DealInvestmentStatsNullableRelationFilterSchema),z.lazy(() => DealInvestmentStatsWhereInputSchema) ]).optional().nullable(),
+  accreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
   DocusignEvent: z.lazy(() => DocusignEventListRelationFilterSchema).optional()
 }).strict();
 
@@ -1447,11 +1447,11 @@ export const DealWhereUniqueInputSchema: z.ZodType<Prisma.DealWhereUniqueInput> 
   dateFundsSent: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   paymentMethod: z.union([ z.lazy(() => EnumPaymentMethodNullableFilterSchema),z.lazy(() => PaymentMethodSchema) ]).optional().nullable(),
   paymentReferenceId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  organization: z.union([ z.lazy(() => OrganizationScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
   document: z.lazy(() => DealDocumentListRelationFilterSchema).optional(),
-  investmentStats: z.union([ z.lazy(() => DealInvestmentStatsNullableScalarRelationFilterSchema),z.lazy(() => DealInvestmentStatsWhereInputSchema) ]).optional().nullable(),
-  accreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableScalarRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
+  investmentStats: z.union([ z.lazy(() => DealInvestmentStatsNullableRelationFilterSchema),z.lazy(() => DealInvestmentStatsWhereInputSchema) ]).optional().nullable(),
+  accreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
   DocusignEvent: z.lazy(() => DocusignEventListRelationFilterSchema).optional()
 }).strict());
 
@@ -1513,7 +1513,7 @@ export const DealInvestmentStatsWhereInputSchema: z.ZodType<Prisma.DealInvestmen
   shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict();
 
 export const DealInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Prisma.DealInvestmentStatsOrderByWithRelationInput> = z.object({
@@ -1568,7 +1568,7 @@ export const DealInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.DealInv
   shareOfEquity: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberAUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   numberCUnits: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict());
 
 export const DealInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<Prisma.DealInvestmentStatsOrderByWithAggregationInput> = z.object({
@@ -1630,9 +1630,9 @@ export const OrganizationWhereInputSchema: z.ZodType<Prisma.OrganizationWhereInp
   isPrimary: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
-  address: z.union([ z.lazy(() => AddressNullableScalarRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
+  address: z.union([ z.lazy(() => AddressNullableRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
   document: z.lazy(() => OrganizationDocumentListRelationFilterSchema).optional(),
-  ownedBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  ownedBy: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
   members: z.lazy(() => MemberListRelationFilterSchema).optional()
 }).strict();
 
@@ -1668,9 +1668,9 @@ export const OrganizationWhereUniqueInputSchema: z.ZodType<Prisma.OrganizationWh
   isPrimary: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   ownershipType: z.union([ z.lazy(() => EnumDealOwnershipTypeFilterSchema),z.lazy(() => DealOwnershipTypeSchema) ]).optional(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
-  address: z.union([ z.lazy(() => AddressNullableScalarRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
+  address: z.union([ z.lazy(() => AddressNullableRelationFilterSchema),z.lazy(() => AddressWhereInputSchema) ]).optional().nullable(),
   document: z.lazy(() => OrganizationDocumentListRelationFilterSchema).optional(),
-  ownedBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  ownedBy: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
   members: z.lazy(() => MemberListRelationFilterSchema).optional()
 }).strict());
 
@@ -1713,8 +1713,8 @@ export const MemberWhereInputSchema: z.ZodType<Prisma.MemberWhereInput> = z.obje
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   type: z.union([ z.lazy(() => EnumMembershipTypeFilterSchema),z.lazy(() => MembershipTypeSchema) ]).optional(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  organization: z.union([ z.lazy(() => OrganizationScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
+  user: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
 }).strict();
 
 export const MemberOrderByWithRelationInputSchema: z.ZodType<Prisma.MemberOrderByWithRelationInput> = z.object({
@@ -1739,8 +1739,8 @@ export const MemberWhereUniqueInputSchema: z.ZodType<Prisma.MemberWhereUniqueInp
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   type: z.union([ z.lazy(() => EnumMembershipTypeFilterSchema),z.lazy(() => MembershipTypeSchema) ]).optional(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  organization: z.union([ z.lazy(() => OrganizationScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
+  user: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
 }).strict());
 
 export const MemberOrderByWithAggregationInputSchema: z.ZodType<Prisma.MemberOrderByWithAggregationInput> = z.object({
@@ -1776,8 +1776,8 @@ export const AccreditationVerificationWhereInputSchema: z.ZodType<Prisma.Accredi
   method: z.union([ z.lazy(() => EnumVerificationMethodFilterSchema),z.lazy(() => VerificationMethodSchema) ]).optional(),
   dealId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   verifierId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
-  verifier: z.union([ z.lazy(() => AccreditationVerifierNullableScalarRelationFilterSchema),z.lazy(() => AccreditationVerifierWhereInputSchema) ]).optional().nullable(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  verifier: z.union([ z.lazy(() => AccreditationVerifierNullableRelationFilterSchema),z.lazy(() => AccreditationVerifierWhereInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AccreditationVerificationOrderByWithRelationInputSchema: z.ZodType<Prisma.AccreditationVerificationOrderByWithRelationInput> = z.object({
@@ -1827,8 +1827,8 @@ export const AccreditationVerificationWhereUniqueInputSchema: z.ZodType<Prisma.A
   NOT: z.union([ z.lazy(() => AccreditationVerificationWhereInputSchema),z.lazy(() => AccreditationVerificationWhereInputSchema).array() ]).optional(),
   basis: z.union([ z.lazy(() => EnumVerificationBasisFilterSchema),z.lazy(() => VerificationBasisSchema) ]).optional(),
   method: z.union([ z.lazy(() => EnumVerificationMethodFilterSchema),z.lazy(() => VerificationMethodSchema) ]).optional(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
-  verifier: z.union([ z.lazy(() => AccreditationVerifierNullableScalarRelationFilterSchema),z.lazy(() => AccreditationVerifierWhereInputSchema) ]).optional().nullable(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  verifier: z.union([ z.lazy(() => AccreditationVerifierNullableRelationFilterSchema),z.lazy(() => AccreditationVerifierWhereInputSchema) ]).optional().nullable(),
 }).strict());
 
 export const AccreditationVerificationOrderByWithAggregationInputSchema: z.ZodType<Prisma.AccreditationVerificationOrderByWithAggregationInput> = z.object({
@@ -1865,7 +1865,7 @@ export const AccreditationVerifierWhereInputSchema: z.ZodType<Prisma.Accreditati
   email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   phoneNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  AccreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableScalarRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
+  AccreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AccreditationVerifierOrderByWithRelationInputSchema: z.ZodType<Prisma.AccreditationVerifierOrderByWithRelationInput> = z.object({
@@ -1891,7 +1891,7 @@ export const AccreditationVerifierWhereUniqueInputSchema: z.ZodType<Prisma.Accre
   email: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   title: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   phoneNumber: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
-  AccreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableScalarRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
+  AccreditationVerification: z.union([ z.lazy(() => AccreditationVerificationNullableRelationFilterSchema),z.lazy(() => AccreditationVerificationWhereInputSchema) ]).optional().nullable(),
 }).strict());
 
 export const AccreditationVerifierOrderByWithAggregationInputSchema: z.ZodType<Prisma.AccreditationVerifierOrderByWithAggregationInput> = z.object({
@@ -1932,8 +1932,8 @@ export const DealDocumentWhereInputSchema: z.ZodType<Prisma.DealDocumentWhereInp
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   uploadedById: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   taxYear: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
-  uploadedBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  uploadedBy: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
 }).strict();
 
 export const DealDocumentOrderByWithRelationInputSchema: z.ZodType<Prisma.DealDocumentOrderByWithRelationInput> = z.object({
@@ -1964,8 +1964,8 @@ export const DealDocumentWhereUniqueInputSchema: z.ZodType<Prisma.DealDocumentWh
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   uploadedById: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   taxYear: z.union([ z.lazy(() => IntNullableFilterSchema),z.number().int() ]).optional().nullable(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
-  uploadedBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  uploadedBy: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
 }).strict());
 
 export const DealDocumentOrderByWithAggregationInputSchema: z.ZodType<Prisma.DealDocumentOrderByWithAggregationInput> = z.object({
@@ -2009,8 +2009,8 @@ export const OrganizationDocumentWhereInputSchema: z.ZodType<Prisma.Organization
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   uploadedById: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
-  organization: z.union([ z.lazy(() => OrganizationScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
-  uploadedBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
+  uploadedBy: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
 }).strict();
 
 export const OrganizationDocumentOrderByWithRelationInputSchema: z.ZodType<Prisma.OrganizationDocumentOrderByWithRelationInput> = z.object({
@@ -2039,8 +2039,8 @@ export const OrganizationDocumentWhereUniqueInputSchema: z.ZodType<Prisma.Organi
   organizationId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   uploadedById: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
-  organization: z.union([ z.lazy(() => OrganizationScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
-  uploadedBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  organization: z.union([ z.lazy(() => OrganizationRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional(),
+  uploadedBy: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
 }).strict());
 
 export const OrganizationDocumentOrderByWithAggregationInputSchema: z.ZodType<Prisma.OrganizationDocumentOrderByWithAggregationInput> = z.object({
@@ -2087,10 +2087,10 @@ export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.ob
   equityReturnsFile: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
   documents: z.lazy(() => ProjectDocumentListRelationFilterSchema).optional(),
-  investmentStats: z.union([ z.lazy(() => ProjectInvestmentStatsNullableScalarRelationFilterSchema),z.lazy(() => ProjectInvestmentStatsWhereInputSchema) ]).optional().nullable(),
-  milestones: z.union([ z.lazy(() => ProjectMilestonesNullableScalarRelationFilterSchema),z.lazy(() => ProjectMilestonesWhereInputSchema) ]).optional().nullable(),
+  investmentStats: z.union([ z.lazy(() => ProjectInvestmentStatsNullableRelationFilterSchema),z.lazy(() => ProjectInvestmentStatsWhereInputSchema) ]).optional().nullable(),
+  milestones: z.union([ z.lazy(() => ProjectMilestonesNullableRelationFilterSchema),z.lazy(() => ProjectMilestonesWhereInputSchema) ]).optional().nullable(),
   pictures: z.lazy(() => ProjectPictureListRelationFilterSchema).optional(),
-  propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableScalarRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
+  propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional()
 }).strict();
 
@@ -2158,10 +2158,10 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
   equityReturnsFile: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   deals: z.lazy(() => DealListRelationFilterSchema).optional(),
   documents: z.lazy(() => ProjectDocumentListRelationFilterSchema).optional(),
-  investmentStats: z.union([ z.lazy(() => ProjectInvestmentStatsNullableScalarRelationFilterSchema),z.lazy(() => ProjectInvestmentStatsWhereInputSchema) ]).optional().nullable(),
-  milestones: z.union([ z.lazy(() => ProjectMilestonesNullableScalarRelationFilterSchema),z.lazy(() => ProjectMilestonesWhereInputSchema) ]).optional().nullable(),
+  investmentStats: z.union([ z.lazy(() => ProjectInvestmentStatsNullableRelationFilterSchema),z.lazy(() => ProjectInvestmentStatsWhereInputSchema) ]).optional().nullable(),
+  milestones: z.union([ z.lazy(() => ProjectMilestonesNullableRelationFilterSchema),z.lazy(() => ProjectMilestonesWhereInputSchema) ]).optional().nullable(),
   pictures: z.lazy(() => ProjectPictureListRelationFilterSchema).optional(),
-  propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableScalarRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
+  propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional()
 }).strict());
 
@@ -2209,7 +2209,7 @@ export const ProjectPropertyStatsWhereInputSchema: z.ZodType<Prisma.ProjectPrope
   commercialSqFt: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   numUnits: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectPropertyStatsOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectPropertyStatsOrderByWithRelationInput> = z.object({
@@ -2244,7 +2244,7 @@ export const ProjectPropertyStatsWhereUniqueInputSchema: z.ZodType<Prisma.Projec
   avgUnitSize: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   commercialSqFt: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   numUnits: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
 export const ProjectPropertyStatsOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectPropertyStatsOrderByWithAggregationInput> = z.object({
@@ -2301,7 +2301,7 @@ export const ProjectInvestmentStatsWhereInputSchema: z.ZodType<Prisma.ProjectInv
   totalCUnitReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   boolEquity: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   boolDebt: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsOrderByWithRelationInput> = z.object({
@@ -2372,7 +2372,7 @@ export const ProjectInvestmentStatsWhereUniqueInputSchema: z.ZodType<Prisma.Proj
   totalCUnitReturn: z.union([ z.lazy(() => FloatFilterSchema),z.number() ]).optional(),
   boolEquity: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   boolDebt: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
 export const ProjectInvestmentStatsOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsOrderByWithAggregationInput> = z.object({
@@ -2446,7 +2446,7 @@ export const ProjectPaymentInfoWhereInputSchema: z.ZodType<Prisma.ProjectPayment
   investmentEntity: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   accountNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   routingNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectPaymentInfoOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectPaymentInfoOrderByWithRelationInput> = z.object({
@@ -2470,7 +2470,7 @@ export const ProjectPaymentInfoWhereUniqueInputSchema: z.ZodType<Prisma.ProjectP
   investmentEntity: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   accountNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   routingNumber: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
 export const ProjectPaymentInfoOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectPaymentInfoOrderByWithAggregationInput> = z.object({
@@ -2515,7 +2515,7 @@ export const ProjectMilestonesWhereInputSchema: z.ZodType<Prisma.ProjectMileston
   stabilized: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   refinance: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   sale: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectMilestonesOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectMilestonesOrderByWithRelationInput> = z.object({
@@ -2566,7 +2566,7 @@ export const ProjectMilestonesWhereUniqueInputSchema: z.ZodType<Prisma.ProjectMi
   stabilized: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   refinance: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   sale: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
 export const ProjectMilestonesOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectMilestonesOrderByWithAggregationInput> = z.object({
@@ -2619,7 +2619,7 @@ export const ProjectPictureWhereInputSchema: z.ZodType<Prisma.ProjectPictureWher
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   url: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => EnumPictureTypeFilterSchema),z.lazy(() => PictureTypeSchema) ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectPictureOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectPictureOrderByWithRelationInput> = z.object({
@@ -2641,7 +2641,7 @@ export const ProjectPictureWhereUniqueInputSchema: z.ZodType<Prisma.ProjectPictu
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   url: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   type: z.union([ z.lazy(() => EnumPictureTypeFilterSchema),z.lazy(() => PictureTypeSchema) ]).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
 export const ProjectPictureOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectPictureOrderByWithAggregationInput> = z.object({
@@ -2681,7 +2681,7 @@ export const ProjectDocumentWhereInputSchema: z.ZodType<Prisma.ProjectDocumentWh
   documentType: z.union([ z.lazy(() => EnumDocumentTypeFilterSchema),z.lazy(() => DocumentTypeSchema) ]).optional(),
   docusignTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectDocumentOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectDocumentOrderByWithRelationInput> = z.object({
@@ -2717,7 +2717,7 @@ export const ProjectDocumentWhereUniqueInputSchema: z.ZodType<Prisma.ProjectDocu
   documentType: z.union([ z.lazy(() => EnumDocumentTypeFilterSchema),z.lazy(() => DocumentTypeSchema) ]).optional(),
   docusignTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
-  project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
+  project: z.union([ z.lazy(() => ProjectRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
 
 export const ProjectDocumentOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectDocumentOrderByWithAggregationInput> = z.object({
@@ -2763,8 +2763,8 @@ export const DocumentEventWhereInputSchema: z.ZodType<Prisma.DocumentEventWhereI
   documentId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   date: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   type: z.union([ z.lazy(() => EnumDocumentEventTypeFilterSchema),z.lazy(() => DocumentEventTypeSchema) ]).optional(),
-  document: z.union([ z.lazy(() => ProjectDocumentScalarRelationFilterSchema),z.lazy(() => ProjectDocumentWhereInputSchema) ]).optional(),
-  user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  document: z.union([ z.lazy(() => ProjectDocumentRelationFilterSchema),z.lazy(() => ProjectDocumentWhereInputSchema) ]).optional(),
+  user: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
 }).strict();
 
 export const DocumentEventOrderByWithRelationInputSchema: z.ZodType<Prisma.DocumentEventOrderByWithRelationInput> = z.object({
@@ -2789,8 +2789,8 @@ export const DocumentEventWhereUniqueInputSchema: z.ZodType<Prisma.DocumentEvent
   documentId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   date: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   type: z.union([ z.lazy(() => EnumDocumentEventTypeFilterSchema),z.lazy(() => DocumentEventTypeSchema) ]).optional(),
-  document: z.union([ z.lazy(() => ProjectDocumentScalarRelationFilterSchema),z.lazy(() => ProjectDocumentWhereInputSchema) ]).optional(),
-  user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  document: z.union([ z.lazy(() => ProjectDocumentRelationFilterSchema),z.lazy(() => ProjectDocumentWhereInputSchema) ]).optional(),
+  user: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
 }).strict());
 
 export const DocumentEventOrderByWithAggregationInputSchema: z.ZodType<Prisma.DocumentEventOrderByWithAggregationInput> = z.object({
@@ -2830,8 +2830,8 @@ export const DocusignEventWhereInputSchema: z.ZodType<Prisma.DocusignEventWhereI
   dateCompleted: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   allSignaturesCompleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   investorSignatureCompleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  user: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict();
 
 export const DocusignEventOrderByWithRelationInputSchema: z.ZodType<Prisma.DocusignEventOrderByWithRelationInput> = z.object({
@@ -2873,8 +2873,8 @@ export const DocusignEventWhereUniqueInputSchema: z.ZodType<Prisma.DocusignEvent
   dateCompleted: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   allSignaturesCompleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   investorSignatureCompleted: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
-  user: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
-  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+  user: z.union([ z.lazy(() => UserRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  deal: z.union([ z.lazy(() => DealRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
 }).strict());
 
 export const DocusignEventOrderByWithAggregationInputSchema: z.ZodType<Prisma.DocusignEventOrderByWithAggregationInput> = z.object({
@@ -2921,8 +2921,8 @@ export const AddressWhereInputSchema: z.ZodType<Prisma.AddressWhereInput> = z.ob
   country: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   organizationId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
   userId: z.union([ z.lazy(() => IntNullableFilterSchema),z.number() ]).optional().nullable(),
-  organization: z.union([ z.lazy(() => OrganizationNullableScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional().nullable(),
-  user: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  organization: z.union([ z.lazy(() => OrganizationNullableRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional().nullable(),
+  user: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
 }).strict();
 
 export const AddressOrderByWithRelationInputSchema: z.ZodType<Prisma.AddressOrderByWithRelationInput> = z.object({
@@ -2978,8 +2978,8 @@ export const AddressWhereUniqueInputSchema: z.ZodType<Prisma.AddressWhereUniqueI
   zipcode: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   state: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   country: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
-  organization: z.union([ z.lazy(() => OrganizationNullableScalarRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional().nullable(),
-  user: z.union([ z.lazy(() => UserNullableScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
+  organization: z.union([ z.lazy(() => OrganizationNullableRelationFilterSchema),z.lazy(() => OrganizationWhereInputSchema) ]).optional().nullable(),
+  user: z.union([ z.lazy(() => UserNullableRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional().nullable(),
 }).strict());
 
 export const AddressOrderByWithAggregationInputSchema: z.ZodType<Prisma.AddressOrderByWithAggregationInput> = z.object({
@@ -4720,7 +4720,7 @@ export const DocumentEventListRelationFilterSchema: z.ZodType<Prisma.DocumentEve
   none: z.lazy(() => DocumentEventWhereInputSchema).optional()
 }).strict();
 
-export const AddressNullableScalarRelationFilterSchema: z.ZodType<Prisma.AddressNullableScalarRelationFilter> = z.object({
+export const AddressNullableRelationFilterSchema: z.ZodType<Prisma.AddressNullableRelationFilter> = z.object({
   is: z.lazy(() => AddressWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => AddressWhereInputSchema).optional().nullable()
 }).strict();
@@ -4938,22 +4938,22 @@ export const EnumPaymentMethodNullableFilterSchema: z.ZodType<Prisma.EnumPayment
   not: z.union([ z.lazy(() => PaymentMethodSchema),z.lazy(() => NestedEnumPaymentMethodNullableFilterSchema) ]).optional().nullable(),
 }).strict();
 
-export const OrganizationScalarRelationFilterSchema: z.ZodType<Prisma.OrganizationScalarRelationFilter> = z.object({
+export const OrganizationRelationFilterSchema: z.ZodType<Prisma.OrganizationRelationFilter> = z.object({
   is: z.lazy(() => OrganizationWhereInputSchema).optional(),
   isNot: z.lazy(() => OrganizationWhereInputSchema).optional()
 }).strict();
 
-export const ProjectScalarRelationFilterSchema: z.ZodType<Prisma.ProjectScalarRelationFilter> = z.object({
+export const ProjectRelationFilterSchema: z.ZodType<Prisma.ProjectRelationFilter> = z.object({
   is: z.lazy(() => ProjectWhereInputSchema).optional(),
   isNot: z.lazy(() => ProjectWhereInputSchema).optional()
 }).strict();
 
-export const DealInvestmentStatsNullableScalarRelationFilterSchema: z.ZodType<Prisma.DealInvestmentStatsNullableScalarRelationFilter> = z.object({
+export const DealInvestmentStatsNullableRelationFilterSchema: z.ZodType<Prisma.DealInvestmentStatsNullableRelationFilter> = z.object({
   is: z.lazy(() => DealInvestmentStatsWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => DealInvestmentStatsWhereInputSchema).optional().nullable()
 }).strict();
 
-export const AccreditationVerificationNullableScalarRelationFilterSchema: z.ZodType<Prisma.AccreditationVerificationNullableScalarRelationFilter> = z.object({
+export const AccreditationVerificationNullableRelationFilterSchema: z.ZodType<Prisma.AccreditationVerificationNullableRelationFilter> = z.object({
   is: z.lazy(() => AccreditationVerificationWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => AccreditationVerificationWhereInputSchema).optional().nullable()
 }).strict();
@@ -5059,7 +5059,7 @@ export const EnumDealOwnershipTypeFilterSchema: z.ZodType<Prisma.EnumDealOwnersh
   not: z.union([ z.lazy(() => DealOwnershipTypeSchema),z.lazy(() => NestedEnumDealOwnershipTypeFilterSchema) ]).optional(),
 }).strict();
 
-export const DealScalarRelationFilterSchema: z.ZodType<Prisma.DealScalarRelationFilter> = z.object({
+export const DealRelationFilterSchema: z.ZodType<Prisma.DealRelationFilter> = z.object({
   is: z.lazy(() => DealWhereInputSchema).optional(),
   isNot: z.lazy(() => DealWhereInputSchema).optional()
 }).strict();
@@ -5208,7 +5208,7 @@ export const DealListRelationFilterSchema: z.ZodType<Prisma.DealListRelationFilt
   none: z.lazy(() => DealWhereInputSchema).optional()
 }).strict();
 
-export const UserScalarRelationFilterSchema: z.ZodType<Prisma.UserScalarRelationFilter> = z.object({
+export const UserRelationFilterSchema: z.ZodType<Prisma.UserRelationFilter> = z.object({
   is: z.lazy(() => UserWhereInputSchema).optional(),
   isNot: z.lazy(() => UserWhereInputSchema).optional()
 }).strict();
@@ -5335,7 +5335,7 @@ export const EnumVerificationMethodFilterSchema: z.ZodType<Prisma.EnumVerificati
   not: z.union([ z.lazy(() => VerificationMethodSchema),z.lazy(() => NestedEnumVerificationMethodFilterSchema) ]).optional(),
 }).strict();
 
-export const AccreditationVerifierNullableScalarRelationFilterSchema: z.ZodType<Prisma.AccreditationVerifierNullableScalarRelationFilter> = z.object({
+export const AccreditationVerifierNullableRelationFilterSchema: z.ZodType<Prisma.AccreditationVerifierNullableRelationFilter> = z.object({
   is: z.lazy(() => AccreditationVerifierWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => AccreditationVerifierWhereInputSchema).optional().nullable()
 }).strict();
@@ -5575,12 +5575,12 @@ export const ProjectDocumentListRelationFilterSchema: z.ZodType<Prisma.ProjectDo
   none: z.lazy(() => ProjectDocumentWhereInputSchema).optional()
 }).strict();
 
-export const ProjectInvestmentStatsNullableScalarRelationFilterSchema: z.ZodType<Prisma.ProjectInvestmentStatsNullableScalarRelationFilter> = z.object({
+export const ProjectInvestmentStatsNullableRelationFilterSchema: z.ZodType<Prisma.ProjectInvestmentStatsNullableRelationFilter> = z.object({
   is: z.lazy(() => ProjectInvestmentStatsWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => ProjectInvestmentStatsWhereInputSchema).optional().nullable()
 }).strict();
 
-export const ProjectMilestonesNullableScalarRelationFilterSchema: z.ZodType<Prisma.ProjectMilestonesNullableScalarRelationFilter> = z.object({
+export const ProjectMilestonesNullableRelationFilterSchema: z.ZodType<Prisma.ProjectMilestonesNullableRelationFilter> = z.object({
   is: z.lazy(() => ProjectMilestonesWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => ProjectMilestonesWhereInputSchema).optional().nullable()
 }).strict();
@@ -5591,7 +5591,7 @@ export const ProjectPictureListRelationFilterSchema: z.ZodType<Prisma.ProjectPic
   none: z.lazy(() => ProjectPictureWhereInputSchema).optional()
 }).strict();
 
-export const ProjectPropertyStatsNullableScalarRelationFilterSchema: z.ZodType<Prisma.ProjectPropertyStatsNullableScalarRelationFilter> = z.object({
+export const ProjectPropertyStatsNullableRelationFilterSchema: z.ZodType<Prisma.ProjectPropertyStatsNullableRelationFilter> = z.object({
   is: z.lazy(() => ProjectPropertyStatsWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => ProjectPropertyStatsWhereInputSchema).optional().nullable()
 }).strict();
@@ -6067,7 +6067,7 @@ export const EnumDocumentEventTypeFilterSchema: z.ZodType<Prisma.EnumDocumentEve
   not: z.union([ z.lazy(() => DocumentEventTypeSchema),z.lazy(() => NestedEnumDocumentEventTypeFilterSchema) ]).optional(),
 }).strict();
 
-export const ProjectDocumentScalarRelationFilterSchema: z.ZodType<Prisma.ProjectDocumentScalarRelationFilter> = z.object({
+export const ProjectDocumentRelationFilterSchema: z.ZodType<Prisma.ProjectDocumentRelationFilter> = z.object({
   is: z.lazy(() => ProjectDocumentWhereInputSchema).optional(),
   isNot: z.lazy(() => ProjectDocumentWhereInputSchema).optional()
 }).strict();
@@ -6166,12 +6166,12 @@ export const DocusignEventSumOrderByAggregateInputSchema: z.ZodType<Prisma.Docus
   dealId: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
-export const OrganizationNullableScalarRelationFilterSchema: z.ZodType<Prisma.OrganizationNullableScalarRelationFilter> = z.object({
+export const OrganizationNullableRelationFilterSchema: z.ZodType<Prisma.OrganizationNullableRelationFilter> = z.object({
   is: z.lazy(() => OrganizationWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => OrganizationWhereInputSchema).optional().nullable()
 }).strict();
 
-export const UserNullableScalarRelationFilterSchema: z.ZodType<Prisma.UserNullableScalarRelationFilter> = z.object({
+export const UserNullableRelationFilterSchema: z.ZodType<Prisma.UserNullableRelationFilter> = z.object({
   is: z.lazy(() => UserWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => UserWhereInputSchema).optional().nullable()
 }).strict();

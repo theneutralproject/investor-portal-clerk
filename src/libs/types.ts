@@ -52,12 +52,13 @@ export type DealWithInvestmentStats = Deal & {
 
 export type DealWithInvestmentStatsAndProject = Deal & {
   investmentStats?: DealInvestmentStats | null;
-  project?: Project & { milestones: ProjectMilestones | null } | null;
+  project?: (Project & { milestones: ProjectMilestones | null }) | null;
 };
 
 export type DealWithOrgMembersAndProject = Deal & {
   organization: OrganizationWithFullMembers;
   project: Project;
+  investmentStats?: DealInvestmentStats | null;
 };
 
 export type DealWithFullOrgAndProject = Deal & {
