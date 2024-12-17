@@ -38,7 +38,7 @@ const Referral: React.FC = () => {
 
   useEffect(() => {
     if (data?.referralSource) {
-      router.push("/projects");
+      router.push("/dashboard");
     }
   }, [data?.referralSource, router]);
 
@@ -67,7 +67,7 @@ const Referral: React.FC = () => {
 
       await axios.put("/api/users/hubspot", hsUser);
 
-      router.push("/projects");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error updating user information:", error);
     }

@@ -19,14 +19,29 @@ type DocusignWebhookPayload = {
 
 export async function POST(req: NextRequest) {
     const payload = (await req.json()) as DocusignWebhookPayload;
-    if (payload.event === "envelope-completed") {
+    if (payload.event === "recipient-completed") {
+        // update dealEvent
+        try {
+            await prisma.docusignEvent.update({
+                where: { envelopeId: payload.data.envelopeId },
+                data: {
+                    investorSignatureCompleted: true,
+                },
+            });
+            return jsonResponse({ message: `Docusign webhook processed for envelopeId ${payload.data.envelopeId}` });
+        } catch (error) {
+            console.error("Failed to update docusign event");
+            return jsonResponse({ message: `Failed to update docusign event for envelopeId ${payload.data.envelopeId}` }, 500);
+        }
+    }
+    else if (payload.event === "envelope-completed") {
 
         // update dealEvent
         const dealEvent = await prisma.docusignEvent.update({
             where: { envelopeId: payload.data.envelopeId },
             data: {
                 dateCompleted: new Date(),
-                signatureCompleted: true,
+                allSignaturesCompleted: true,
             },
             include: { deal: { include: { investmentStats: true } } }
         });
@@ -35,7 +50,7 @@ export async function POST(req: NextRequest) {
             return jsonResponse({ message: `Failed to update docusign event for envelopeId ${payload.data.envelopeId}` }, 500);
         }
         const { deal } = dealEvent;
-        if(!deal.investmentStats) {
+        if (!deal.investmentStats) {
             console.error("Deal has no investment stats");
             return jsonResponse({ message: `Deal has no investment stats` }, 500);
         }
@@ -52,7 +67,7 @@ export async function POST(req: NextRequest) {
 
         // get docusignevents
         const dealEvents = await prisma.docusignEvent.findMany({
-            where: { dealId: deal.id, signatureCompleted: true },
+            where: { dealId: deal.id, allSignaturesCompleted: true },
         });
 
         if (dealEvents.length >= dealDocuments.length && dealDocuments.length > 0) {
@@ -117,7 +132,6 @@ export async function POST(req: NextRequest) {
             return jsonResponse({ message: "PDF successfully stored" });
         }
 
-        // uoTT1Ro4kzrvomebRxAduqQh5OdJSbeJUenG759lVC8=
         return jsonResponse({ message: "Docusign webhook received" });
     }
     else {
