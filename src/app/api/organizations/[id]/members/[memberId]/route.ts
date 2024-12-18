@@ -144,13 +144,13 @@ export async function PUT(request: NextRequest) {
             const hubspotContact: HubspotContactCreateUpdateSchema = {
                 hubspotId: updatedMember.user.hubspotId,
                 email: updatedMember.user.email,
-                properties: [
-                    { property: `firstname`, value: updatedMember.user.firstName },
-                    { property: `lastname`, value: updatedMember.user.lastName },
-                ]
+                properties: {
+                    firstname: updatedMember.user.firstName,
+                    lastname: updatedMember.user.lastName,
+                }
             };
             if (updatedMember.user.phoneNumber) {
-                hubspotContact.properties.push({ property: `phone`, value: updatedMember.user.phoneNumber });
+                hubspotContact.properties.phone = updatedMember.user.phoneNumber;
             }
             try {
                 const hsRes = await updateHubspotContact(hubspotContact);

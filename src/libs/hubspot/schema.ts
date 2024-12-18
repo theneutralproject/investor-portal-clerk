@@ -1,4 +1,4 @@
-import { SimplePublicObjectInputForCreate } from "@hubspot/api-client/lib/codegen/crm/contacts";
+import type { SimplePublicObjectInputForCreate } from "@hubspot/api-client/lib/codegen/crm/contacts";
 import { DealFinancingType, DealUnitType } from "@prisma/client";
 import { z } from "zod";
 

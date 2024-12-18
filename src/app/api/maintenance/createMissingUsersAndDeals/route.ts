@@ -8,12 +8,12 @@ import { currentUser, clerkClient } from "@clerk/nextjs/server";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma.server";
 import { getDealsWithContactsFromHubspot } from "@/libs/hubspot/utils";
-import { UserCreateSchema } from "@/libs/user/schema";
+import type { UserCreateSchema } from "@/libs/user/schema";
 import { createUserInDbAndHubspot } from "@/libs/user/utils";
-import { DealCreateSchema } from "@/libs/deal/schema";
+import type { DealCreateSchema } from "@/libs/deal/schema";
 import { ProjectName } from "@/libs/schema";
 import { createDealForAdmin } from "@/libs/deal/utils.server";
-import { DealWithInvestmentStats } from "@/libs/types";
+import type { DealWithInvestmentStats } from "@/libs/types";
 
 const finishedAsync = promisify(finished);
 
@@ -92,6 +92,7 @@ async function getDealsFromCsv() {
     const dealRecords: DealRecord[] = [];
 
     parser.on('readable', () => {
+        /* eslint-disable */
         let record;
         while (record = parser.read()) {
             let dealRecord: DealRecord | null = null;
@@ -113,7 +114,7 @@ async function getDealsFromCsv() {
                     debtMaxTerm: getNumbersFromString(record['PN Max Term Months']),
                 }
                 if (dealRecord.V2 === 'TRUE') dealRecords.push(dealRecord);
-
+                /* eslint-enable */
             } catch (e) {
                 console.error("unable to create deal record - skipping to next one:\n", e);
             }
@@ -147,16 +148,16 @@ async function findOrCreateClerkUser(email: string, firstname: string, lastname:
     if (phone) clerkData.phoneNumber = [phone];
 
     try {
-    const exisingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
-    if (exisingClerkUsers[0]) {
-        return exisingClerkUsers[0];
-    }
+        const exisingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
+        if (exisingClerkUsers[0]) {
+            return exisingClerkUsers[0];
+        }
 
-    const newClerkUser = await clerkClient.users.createUser(clerkData);
-    if (!newClerkUser) {
-        throw new Error("Error creating Clerk user");
-    }
-    return newClerkUser;
+        const newClerkUser = await clerkClient.users.createUser(clerkData);
+        if (!newClerkUser) {
+            throw new Error("Error creating Clerk user");
+        }
+        return newClerkUser;
     } catch (e) {
         console.error("Error creating Clerk user for clerkdata", clerkData);
         console.error(getErrorMessage(e));
@@ -193,13 +194,13 @@ export async function POST() {
             console.error("SKIPPING - deal contact incomplete:", dealcontact.contact);
             continue;
         }
-        let cleanPhone = phone?.replace(/\D/g,'');
-        
+        const cleanPhone = phone?.replace(/\D/g, '');
+
         let dealOwner = await prisma.user.findFirst({ where: { email } });
         console.log("i:", i);
         if (i > 10) break;
         if (!dealOwner) {
-            try{
+            try {
                 const clerkUser = await findOrCreateClerkUser(email, firstname, lastname, cleanPhone);
 
                 const dbUserData = {
@@ -210,7 +211,7 @@ export async function POST() {
                     hubspotId: hs_object_id,
                 } as UserCreateSchema;
                 if (cleanPhone) dbUserData.phoneNumber = cleanPhone;
-                dbUserData.hubspotId = dbUserData.hubspotId || '';
+                dbUserData.hubspotId = dbUserData.hubspotId ?? '';
 
                 dealOwner = await createUserInDbAndHubspot(dbUserData);
 
@@ -255,7 +256,7 @@ export async function POST() {
                 console.error("Project not found");
                 continue;
         }
-        
+
         // potentially create a second org for joint ownership
         let altOrgId: number | undefined;
         if (dealInput.ownershipType !== DealOwnershipType.INDIVIDUAL && dealInput.orgName) {
@@ -294,9 +295,9 @@ export async function POST() {
             paymentMethod: PaymentMethod.CHECK,
             paymentReferenceId: 'N/A',
         }
-        if(dealInput.debtMinTerm) dealCreateData.debtMinTerm = dealInput.debtMinTerm;
-        if(dealInput.debtMaxTerm) dealCreateData.debtMaxTerm = dealInput.debtMaxTerm;
-        if(dealInput.debtInterestRatePerc) dealCreateData.debtInterestRatePerc = dealInput.debtInterestRatePerc
+        if (dealInput.debtMinTerm) dealCreateData.debtMinTerm = dealInput.debtMinTerm;
+        if (dealInput.debtMaxTerm) dealCreateData.debtMaxTerm = dealInput.debtMaxTerm;
+        if (dealInput.debtInterestRatePerc) dealCreateData.debtInterestRatePerc = dealInput.debtInterestRatePerc
 
         const newDeal = await createDealForAdmin(dealCreateData, dealOwner);
         newDealsArr.push(newDeal);

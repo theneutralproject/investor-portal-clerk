@@ -1,5 +1,5 @@
 import 'server-only';
-import { DealFinancingType, Prisma, User, type DealInvestmentStats } from "@prisma/client";
+import { DealFinancingType, type Prisma, type User, type DealInvestmentStats } from "@prisma/client";
 import { isError } from "lodash";
 import { type DealCreateSchema, type DealUpdateSchema } from "./schema";
 import { getDebtInterestRate, getEquityStatsFromProject } from "../returns/utils";

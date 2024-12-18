@@ -6,7 +6,7 @@ import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
 import { Client } from "@hubspot/api-client";
-import { FilterOperatorEnum, SimplePublicObject, type PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/deals";
+import { FilterOperatorEnum, type SimplePublicObject, type PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/deals";
 
 const hubspotClient = new Client({ "accessToken": process.env.HUBSPOT_ACCESS_TOKEN });
 
@@ -50,8 +50,8 @@ export async function createHubspotContact(hubspotContact: HubspotContactCreateU
     .getTime()
     .toString();
 
-  hubspotContact.properties["date_signed_up"] = signupDate;
-  hubspotContact.properties["email"] = hubspotContact.email;
+  hubspotContact.properties.date_signed_up = signupDate;
+  hubspotContact.properties.email = hubspotContact.email;
   try {
     const hubspotCreateResponse = await hubspotClient.crm.contacts.basicApi.create(hubspotContact);
     return hubspotCreateResponse.id;

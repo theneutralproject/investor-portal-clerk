@@ -3,7 +3,7 @@ import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import { DealDocumentType, Prisma } from "@prisma/client";
+import { DealDocumentType, type Prisma } from "@prisma/client";
 import { storageClient } from "@/libs/supabase";
 
 /**
@@ -92,10 +92,10 @@ export async function GET(request: NextRequest) {
         dealStage: { gte: minDealstage }
     };
     if (projectId) {
-        where["projectId"] = projectId;
+        where.projectId = projectId;
     }
     if (email) {
-        where["organizationId"] = { in: ownerOrgIds };
+        where.organizationId = { in: ownerOrgIds };
     }
 
     const deals = await prisma.deal.findMany({
