@@ -1,44 +1,29 @@
-import { authMiddleware, redirectToSignUp } from "@clerk/nextjs";
-import { type NextRequest } from "next/server";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
-export default authMiddleware({
-  ignoredRoutes: [
-    "/api/webhooks/(.*)", 
-    "/api/admin/(.*)", 
-    "/api/docusign/return", 
-    "/api/finix/webhooks", 
-    "api/clerk"
-  ],
-  publicRoutes: (req: NextRequest) => {
-    const publicRoutes = [
-      "/terms",
-      "/support",
-    ];
+const isPublicRoute = createRouteMatcher([
+  '/terms', 
+  '/support',
+])
 
-    // Use exact path matching or proper pattern matching
-    return publicRoutes.some((route) => {
-      if (route.includes("(.*)")) {
-        // For wildcard routes, convert to regex
-        const pattern = new RegExp(`^${route.replace("(.*)", ".*")}$`);
-        return pattern.test(req.nextUrl.pathname);
-      }
-      // For exact routes, use exact matching
-      return req.nextUrl.pathname === route;
-    });
-  },
+const isIgnoredRoute = createRouteMatcher([
+  '/api/webhooks/(.*)', 
+  '/api/admin/(.*)', 
+  '/api/docusign/return', 
+  '/api/finix/webhooks', 
+  '/api/clerk'
+])
 
-  // eslint-disable-next-line consistent-return
-  afterAuth(auth, _req) {
-    if (!auth.userId && !auth.isPublicRoute) {
-      console.log("not logged in:", _req.url);
-      const returnBackUrl = `${_req.url}${
-        _req.url.includes("?") ? "&" : "?"
-      }afterauth=true`;
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return redirectToSignUp({ returnBackUrl: returnBackUrl });
-    }
-  },
+export default clerkMiddleware(async (auth, req) => {
+  if (isPublicRoute(req) || isIgnoredRoute(req)) return // if it's a public route, do nothing
+  await auth.protect() // for any other route, require auth
+
+  const { redirectToSignIn } = await auth()
+  if (!(await auth()).userId)  {
+    console.log("not logged in:", req.url)
+    redirectToSignIn();
+  }
 });
+
 
 export const config = {
   matcher: ["/((?!.*\\..*|_next).*)", "/"],

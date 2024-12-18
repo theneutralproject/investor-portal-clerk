@@ -1,6 +1,6 @@
 import prisma from "@/libs/prisma.server";
 import { errorResponse, jsonResponse } from "@/libs/utils";
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 
 // get deals by logged in user
 export async function GET() {

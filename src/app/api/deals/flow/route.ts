@@ -1,6 +1,6 @@
 "use server";
 import { type NextRequest } from "next/server";
-import { currentUser } from "@clerk/nextjs";
+import { currentUser } from "@clerk/nextjs/server";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { z } from "zod";
 import type {

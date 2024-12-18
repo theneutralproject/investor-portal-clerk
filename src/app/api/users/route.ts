@@ -80,7 +80,7 @@ export async function PUT(request: NextRequest) {
             console.log(hsError)
         }
         try {
-            await clerkClient.users.updateUser(clerkUser.id, clerkUpdate)
+            await (await clerkClient()).users.updateUser(clerkUser.id, clerkUpdate)
         } catch (clerkError) {
             console.log(clerkError)
         }
