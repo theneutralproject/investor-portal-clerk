@@ -2,7 +2,7 @@ import { DealCreateSchema } from '@/libs/deal/schema';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType } from '@prisma/client';
-import { clearAllTestData, deleteDealInDbAndHubspot } from 'e2e/helpers';
+import { clearAllTestDeals, deleteDealInDbAndHubspot } from 'e2e/helpers';
 
 test.describe("api/dashboard/returns test", () => {
     let debtDeal1: Deal | null = null;
@@ -20,7 +20,7 @@ test.describe("api/dashboard/returns test", () => {
 
     test.beforeEach(async ({ request }) => {
         try {
-            await clearAllTestData();
+            await clearAllTestDeals();
         } catch (e) {
             console.error("could not clear all test data in api/dashboard/returns beforeEach:");
             console.error(e);

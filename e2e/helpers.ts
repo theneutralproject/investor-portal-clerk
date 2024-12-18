@@ -28,9 +28,18 @@ async function deleteHubspotDeal(hubspotId: string) {
 }
 
 export async function resetOrgInDb(request: APIRequestContext): Promise<OrganizationWithMembersAndAddress> {
+
+  // delete all but the test user's individual org
   // console.log("begin resetting org in db");
   const testUser = await prisma.user.findFirst({ where: { email: `${process.env.E2E_CLERK_USER_USERNAME}` } });
-  if (!testUser) { throw new Error("test user not found in db"); }
+  if (!testUser?.userOrgId) { throw new Error("test user not found in db"); }
+
+  const allOrgs = await prisma.organization.findMany({ where: { ownerId: testUser.id } });
+  for (const org of allOrgs) {
+    if (org.id === testUser.userOrgId) { continue; }
+    await request.delete(`/api/organizations/${org.id}`);
+  }
+
   const response = await request.put(`/api/organizations/${testUser?.userOrgId}`, {
     data: {
       name: "Testi Tester's Organization",
@@ -63,7 +72,7 @@ export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
   return;
 }
 
-export async function clearAllTestData() {
+export async function clearAllTestDeals() {
   const testUser = await prisma.user.findFirst({ where: { email: `${process.env.E2E_CLERK_USER_USERNAME}` } });
   if (!testUser) { throw new Error("test user not found in db"); }
   //Find all orgs owned by the test user
