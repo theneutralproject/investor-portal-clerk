@@ -44,6 +44,9 @@ export const zDealCreateSchema = z.object({
   dateFundsSent: z.date().or(z.string().transform(str => new Date(str))).nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
+  debtMinTerm: z.number().int().nullish(),
+  debtMaxTerm: z.number().int().nullish(),
+  debtInterestRatePerc: z.number().nullish(),
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;

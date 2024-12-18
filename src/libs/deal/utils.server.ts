@@ -99,6 +99,9 @@ async function _createDeal(dealData: DealCreateSchema, user: User, project: Proj
     }
     else {
         newInvestmentStats = populateDealDebtStats(newInvestmentStats, { ...projectData, investmentStats });
+        if (dealData.debtMaxTerm) newInvestmentStats.debtTermMonthsMax = dealData.debtMaxTerm;
+        if (dealData.debtMinTerm) newInvestmentStats.debtTermMonthsMin = dealData.debtMinTerm;
+        if (dealData.debtInterestRatePerc) newInvestmentStats.debtInterestRatePerc = dealData.debtInterestRatePerc;
     }
 
     // ensure that organizationId and hubspotId are set
@@ -114,7 +117,7 @@ async function _createDeal(dealData: DealCreateSchema, user: User, project: Proj
         hubspotId: dealData.hubspotId,
         transactionId: dealData.transactionId,
         investmentEntity:
-            getInvestmentEntity(project.name, dealData.financingType) ?? "", //TODO: add this to the function above
+            getInvestmentEntity(project.name, dealData.financingType) ?? "",
         investmentStats: {
             create:
                 newInvestmentStats
