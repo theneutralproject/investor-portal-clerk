@@ -10,7 +10,7 @@ import {
   getEquityPayoutScheduleForDeal,
   readEquityMilestoneData,
 } from "@/libs/returns/utils";
-import type { DealWithInvestmentStatsAndProject } from "@/libs/types";
+import type { DealWithInvestmentStatsAndProjectWithPics } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { DealFinancingType } from "@prisma/client";
@@ -49,7 +49,7 @@ export async function GET() {
   if (!user) {
     return errorResponse("User not found in database", 404);
   }
-  const deals: DealWithInvestmentStatsAndProject[] = [];
+  const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
   for (const member of user.organizationMember) {
     const org = member.organization;
@@ -101,7 +101,12 @@ export async function GET() {
         investmentStats.financingType === DealFinancingType.equity
           ? "equity"
           : "debt",
-      project,
+      project: {
+        id: project.id,
+        name: project.name,
+        location: project.location,
+        pictures: project.pictures,
+      },
     };
 
     const todayNumeric = new Date().getTime();
