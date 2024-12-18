@@ -29,8 +29,14 @@ const useDocuments = (
     if (financingType) {
       url += `&financingType=${financingType}`;
     }
+    try{
     const response = await axios.get(url);
     return response.data;
+    }
+    catch(e) {
+      console.error(e);
+      return []
+    }
   };
 
   // Using useQuery to manage the fetching of documents

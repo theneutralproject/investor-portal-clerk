@@ -161,7 +161,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
 
         payoutSchedule.push(entry);
     }
-console.log("DEBT payout schedule\t", payoutSchedule);
+console.log("DEBT payout schedule\t", payoutSchedule.length);
     return { schedule: payoutSchedule, stats };
 
 }

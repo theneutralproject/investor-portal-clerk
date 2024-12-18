@@ -182,7 +182,6 @@ export async function GET() {
                 combinedDateObject.debtDistributionsCumulative = previousDateObject.debtDistributionsCumulative + combinedDateObject.debtDistributionsCurrent;
                 combinedDateObject.portfolioValueToDate = previousDateObject.portfolioValueToDate + combinedDateObject.debtDistributionsCurrent + combinedDateObject.equityDistributionsCurrent;
                 combinedDateObject.principalInvestedToDate = previousDateObject.principalInvestedToDate + combinedDateObject.principalInvestedCurrent;
-                console.log("combined date object", combinedDateObject);
             }
             previousDateObject = combinedDateObject;
             consolidatedSchedule.push(combinedDateObject);

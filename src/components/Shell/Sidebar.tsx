@@ -35,8 +35,8 @@ import MobileSidebar from "./MobileSidebar";
 
 export const ROUTES = [
   {
-    name: "Projects",
-    path: "/projects",
+    name: "Dashboard",
+    path: "/dashboard",
     icon: HomeIcon,
   },
   {
