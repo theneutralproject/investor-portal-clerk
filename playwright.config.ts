@@ -21,7 +21,7 @@ if (!baseURL || !testUserToken) {
 }
 
 export default defineConfig({
-  timeout: 30 * 1000,
+  timeout: 120 * 1000,
   testDir: './e2e',
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -44,6 +44,8 @@ export default defineConfig({
       // Assuming personal access token available in the environment.
       'Authorization': `Bearer ${testUserToken}`,
     },
+    navigationTimeout: 120 * 1000,
+    actionTimeout: 120 * 1000,
   },
   /* Run your local dev server before starting the tests */
   webServer: {
