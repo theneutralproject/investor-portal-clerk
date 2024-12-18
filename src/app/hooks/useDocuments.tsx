@@ -9,8 +9,8 @@ export type DocumentWithCompletion = ProjectDocument & { completed: boolean };
 
 const useDocuments = (
   projectId: number,
-  dealStageCheck: number,
-  financingType: DealFinancingType
+  dealStageCheck?: number,
+  financingType?: DealFinancingType
 ) => {
   const queryClient = useQueryClient();
   const documentsQueryKey = [
@@ -22,7 +22,13 @@ const useDocuments = (
 
   // Query function for fetching all documents within a project
   const fetchDocuments = async () => {
-    const url = `/api/documents/project?projectId=${projectId}&dealStage=${dealStageCheck}&financingType=${financingType}`;
+    let url = `/api/documents/project?projectId=${projectId}`;
+    if (dealStageCheck) {
+      url += `&dealStage=${dealStageCheck}`;
+    }
+    if (financingType) {
+      url += `&financingType=${financingType}`;
+    }
     const response = await axios.get(url);
     return response.data;
   };

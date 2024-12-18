@@ -9,17 +9,23 @@ import {
 } from "@mui/material";
 import { type ProjectWithAllNestedData } from "@/libs/types";
 import { LineDisplay } from "../Overview/InvestmentSummaryBox";
-
+import HubspotScheduleCall from "@/components/HubspotScheduleCall";
+import { useRouter } from "next/navigation";
 interface RightSidebarCTAProps {
   project: ProjectWithAllNestedData;
 }
 
 const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
+  const router = useRouter();
   const fundingPercentage = Math.round(
     (project.investmentStats.investmentRaised /
       project.investmentStats.investmentGoal) *
       100
   );
+
+  const handleInvest = () => {
+    router.push(`/dealflow/${project.slug}/new/get-started`);
+  };
 
   return (
     <Card>
@@ -101,12 +107,11 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
         <Divider sx={{ my: 2 }} />
 
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-          <Button fullWidth variant="neutralYellow">
+          <Button fullWidth variant="neutralYellow" onClick={handleInvest}>
             Invest
           </Button>
-          <Button fullWidth variant="grayPill">
-            Schedule a Call
-          </Button>
+
+          <HubspotScheduleCall onExit={() => null} />
         </Box>
       </CardContent>
     </Card>

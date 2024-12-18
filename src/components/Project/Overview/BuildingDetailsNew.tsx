@@ -1,7 +1,6 @@
 import React from "react";
 import { Card, CardContent, Divider, Typography } from "@mui/material";
 import { LineDisplay } from "./InvestmentSummaryBox";
-import CollapsibleCard from "./CollapsibleCard";
 import type { ProjectWithStats } from "@/libs/types";
 
 const formatter = Intl.NumberFormat("en", { maximumFractionDigits: 2 });

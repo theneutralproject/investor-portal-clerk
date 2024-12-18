@@ -27,7 +27,7 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   return (
     <div>
       <Button
-        variant="neutralBlack"
+        variant="grayPill"
         sx={{ p: "4px 20px", borderRadius: "99px" }}
         fullWidth
         onClick={() => {
