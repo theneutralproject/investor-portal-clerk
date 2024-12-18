@@ -1,19 +1,11 @@
 import React from "react";
-import {
-  Box,
-  Card,
-  CardContent,
-  IconButton,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { type DocumentWithCompletion } from "@/app/hooks/useDocuments";
-import BorderColorIcon from "@mui/icons-material/BorderColor";
 
 const DocumentCard = ({
   document,
@@ -28,7 +20,6 @@ const DocumentCard = ({
   handleDownloadDocument: (document: DocumentWithCompletion) => void;
   handleSignDocument?: (document: DocumentWithCompletion) => void;
 }) => {
-
   const documentLocked = dealStage < document.dealStage;
 
   // const renderIcon = () => {

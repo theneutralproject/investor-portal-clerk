@@ -1,16 +1,17 @@
 import React from "react";
 import { Box, Card, CardContent, Typography, styled } from "@mui/material";
 import { getProjectPicture } from "./CompleteInvestment";
-import {
-  type DealWithFullOrgAndProject,
-  type DealWithOrgMembersAndProject,
-} from "@/libs/types";
+import type { PortfolioReturnsResponse } from "@/libs/returns/schema";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
-import { PortfolioReturnsResponse } from "@/libs/returns/schema";
 
 interface DashboardDealsProps {
   loggedIn: boolean;
+}
+
+interface Project {
+  name: string;
+  location: string;
 }
 
 const StyledCard = styled(Card)({
@@ -80,17 +81,19 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
       </TableHeader>
       <CardContent sx={{ p: 0 }}>
         {data.dealStats.map((deal) => {
-          const picture = getProjectPicture(deal.project);
+          if (!deal.project) return null;
+          // @ts-expect-error this mapping is okay
+          const picture = getProjectPicture(deal);
           return (
             <TableRow key={deal.dealId}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <ProjectImage src={picture} alt={deal.project.name} />
+                <ProjectImage src={picture} />
                 <Box>
                   <Typography variant="body1" fontWeight={500}>
-                    {deal.project.name}
+                    {(deal.project as Project)?.name || "Project"}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {deal.project.location}
+                    {(deal.project as Project)?.location || "Location"}
                   </Typography>
                 </Box>
               </Box>
