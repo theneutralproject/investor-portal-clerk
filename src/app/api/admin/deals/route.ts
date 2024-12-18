@@ -101,7 +101,8 @@ export async function GET(request: NextRequest) {
     const deals = await prisma.deal.findMany({
         where: where,
         include: {
-            organization: true,
+            organization: { include: { ownedBy: true } },
+            investmentStats: true,
         }
     });
     return jsonResponse(deals);
