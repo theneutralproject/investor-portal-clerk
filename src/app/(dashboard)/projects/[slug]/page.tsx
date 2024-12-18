@@ -48,6 +48,7 @@ export default function Page({ params: { slug } }: PageProps) {
   };
 
   const { user } = useUser();
+  const loggedIn = !!user;
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
     ProjectWithAllNestedData[],
@@ -163,9 +164,9 @@ export default function Page({ params: { slug } }: PageProps) {
           <ProjectDescriptionNew data={project} />
           <MarketHighlightsNew data={project} />
           <InvestmentCalculatorNew project={project} />
-          <DocumentsNew project={project} />
+          {loggedIn && <DocumentsNew project={project} />}
           <GalleryNew data={project} />
-          <HaveQuestionsNew data={project} />
+          <HaveQuestionsNew />
         </Grid>
         <Grid size={4} sx={{ background: "unset" }}>
           <RightSidebarCTA project={project} />

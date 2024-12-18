@@ -1,8 +1,16 @@
 import React from "react";
 import { Card, CardContent, Divider, Typography } from "@mui/material";
-import type { ProjectWithStats } from "@/libs/types";
+import type { ProjectWithAllNestedData } from "@/libs/types";
+import ImageGallery from "react-image-gallery";
+import "react-image-gallery/styles/css/image-gallery.css";
 
-const GalleryNew = ({ data }: { data: ProjectWithStats }) => {
+const GalleryNew = ({ data }: { data: ProjectWithAllNestedData }) => {
+  const images =
+    data.pictures?.map((picture) => ({
+      original: picture.url,
+      thumbnail: picture.url,
+    })) || [];
+
   return (
     <Card sx={{ mt: 2 }}>
       <CardContent>
@@ -11,9 +19,14 @@ const GalleryNew = ({ data }: { data: ProjectWithStats }) => {
         </Typography>
         <Divider sx={{ mt: 2, mb: 2 }} />
 
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          {data.marketHighlights}
-        </Typography>
+        <ImageGallery
+          items={images}
+          showPlayButton={false}
+          showFullscreenButton={true}
+          showNav={false}
+          showThumbnails={true}
+          thumbnailPosition="bottom"
+        />
       </CardContent>
     </Card>
   );

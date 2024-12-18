@@ -1,8 +1,19 @@
 import React from "react";
-import { Card, CardContent, Divider, Typography } from "@mui/material";
-import type { ProjectWithStats } from "@/libs/types";
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  Typography,
+  Button,
+} from "@mui/material";
+import HubspotContactForm from "@/components/HubspotContactForm";
+import HubspotScheduleCall from "@/components/HubspotScheduleCall";
+import { useRouter } from "next/navigation";
 
-const HaveQuestionsNew = ({ data }: { data: ProjectWithStats }) => {
+const HaveQuestionsNew = () => {
+  const router = useRouter();
+
   return (
     <Card sx={{ mt: 2 }}>
       <CardContent>
@@ -11,9 +22,50 @@ const HaveQuestionsNew = ({ data }: { data: ProjectWithStats }) => {
         </Typography>
         <Divider sx={{ mt: 2, mb: 2 }} />
 
-        <Typography variant="body2" sx={{ mt: 2 }}>
-          {data.marketHighlights}
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <Box sx={{ flex: 1 }}>
+            <HubspotContactForm
+              onExit={() => null}
+              trigger={
+                <Button fullWidth variant="grayPill">
+                  Send an Email
+                </Button>
+              }
+            />
+          </Box>
+
+          <Box sx={{ flex: 1 }}>
+            <HubspotScheduleCall onExit={() => null} />
+          </Box>
+
+          <Box sx={{ flex: 1 }}>
+            <Button
+              variant="grayPill"
+              fullWidth
+              onClick={() => router.push("/learn")}
+            >
+              View FAQs
+            </Button>
+          </Box>
+        </Box>
+
+        <Box sx={{ height: 400, mt: 3 }}>
+          <iframe
+            src="https://www.chatbase.co/chatbot-iframe/g9lmo4egbpiJsKnInQrSC"
+            title="Spruce - The Neutral Project Advisor"
+            width="100%"
+            height="100%"
+            style={{ border: "none" }}
+          />
+        </Box>
       </CardContent>
     </Card>
   );
