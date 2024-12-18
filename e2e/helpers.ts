@@ -18,12 +18,12 @@ async function deleteHubspotDeal(hubspotId: string) {
     if (response.status >= 300) {
       console.error("ERROR: unable to delete Hubspot deal:\n", response.statusText);
       console.log("response", response);
-      return;// new Error("unable to delete hubspot deal");
+      return { success: false };
     }
     return { success: true };
   }).catch((fetchError) => {
     console.error("ERROR: unable to delete Hubspot deal:\n", fetchError);
-    return;// new Error("unable to delete hubspot deal")
+    return { success: false };
   });
 }
 
@@ -43,11 +43,23 @@ export async function resetOrgInDb(request: APIRequestContext): Promise<Organiza
   return body;
 }
 
-export async function deleteDealInDbAndHubspot(deal: Deal) {
-  // console.log("begin deleting deal in db and hubspot");
-  await prisma.deal.delete({ where: { id: deal.id } });
-  await deleteHubspotDeal(deal.hubspotId);
-  console.log("finished deleting deal in db and hubspot");
+export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
+  let dealToDelete: Deal | null = null
+  let dealId: number | null = null;
+  if(typeof dealOrDealId  === "number") {
+    dealId = dealOrDealId;
+  }
+  else {
+    dealId = dealOrDealId.id
+  }
+  try {
+    dealToDelete = await prisma.deal.delete({ where: { id: dealId } });
+  } catch (e) {
+    console.error("could not delete deal in db", e);
+  }
+  if(!dealToDelete) return;
+  const dlHs = await deleteHubspotDeal(dealToDelete.hubspotId);
+  console.log("finished deleting deal in db and hubspot - success:", dlHs.success);
   return;
 }
 

@@ -6,7 +6,7 @@ import { Deal, DealFinancingType, DealUnitType } from '@prisma/client';
 import { clearAllTestData, deleteDealInDbAndHubspot } from 'e2e/helpers';
 
 test.describe("api/deals test", () => {
-    let edisonTEstDeal: Deal | null = null;
+    let edisonTestDeal: Deal | null = null;
     let secondDeal: Deal | null = null;
     const edisonTestDealData: DealCreateSchema = {
         organizationId: 4,
@@ -20,7 +20,7 @@ test.describe("api/deals test", () => {
         await clearAllTestData();
         try{
         const response = await request.post('/api/deals', { data: edisonTestDealData });
-        edisonTEstDeal = await JSON.parse(await response.text());
+        edisonTestDeal = await JSON.parse(await response.text());
         } catch (e) {
             console.error("could not create test deal in BEFOREALL:");
             console.error(e);
@@ -68,13 +68,13 @@ test.describe("api/deals test", () => {
     });
 
     test('[PUT] update a deal', async ({ request }) => {
-        if (!edisonTEstDeal) {
+        if (!edisonTestDeal) {
             console.error("testDeal is null - skipping test");
             test.skip();
         };
         const response = await request.put('/api/deals', {
             data: {
-                hubspotId: edisonTEstDeal?.hubspotId,
+                hubspotId: edisonTestDeal?.hubspotId,
                 projectId: 1,
                 organizationId: 4,
                 dealStage: 1,
@@ -95,9 +95,9 @@ test.describe("api/deals test", () => {
     });
 
     test.afterAll(async () => {
-        if (edisonTEstDeal) {
-            await deleteDealInDbAndHubspot(edisonTEstDeal);
-            edisonTEstDeal = null;
+        if (edisonTestDeal) {
+            await deleteDealInDbAndHubspot(edisonTestDeal);
+            edisonTestDeal = null;
         } else {
             console.error("testDeal is null - skipping cleanup");
         }

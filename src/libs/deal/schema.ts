@@ -33,11 +33,20 @@ export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
 
 export const zDealCreateSchema = z.object({
   projectId: z.number().int(),
-  amount: z.number().optional(),
-  dealStage: z.number().min(0).max(6).optional(),
-  financingType: z.nativeEnum(DealFinancingType).optional(),
-  transactionId: z.string().optional(),
-  organizationId: z.number().optional() /**will be set in the backend if not provided by UI */,
+  organizationId: z.number().int().nullish(),
+  amount: z.number().nullish(),
+  hubspotId: z.string().nullish(),
+  dealStage: z.number().min(0).max(6).nullish(),
+  financingType: z.nativeEnum(DealFinancingType).nullish(),
+  transactionId: z.string().nullish(),
+  closingDate: z.date().nullish(),
+  signaturesCompletedDate: z.date().nullish(),
+  dateFundsSent: z.date().or(z.string().transform(str => new Date(str))).nullish(),
+  paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
+  paymentReferenceId: z.string().nullish(),
+  debtMinTerm: z.number().int().nullish(),
+  debtMaxTerm: z.number().int().nullish(),
+  debtInterestRatePerc: z.number().nullish(),
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;
