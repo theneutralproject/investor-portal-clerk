@@ -16,6 +16,7 @@ const CreateButton = styled(Button)(({}) => ({
   color: "black",
   borderRadius: "56px",
   textTransform: "none",
+  padding: "10px 20px",
   "&:hover": {
     backgroundColor: "#f5f5f5",
   },
@@ -64,7 +65,7 @@ const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
           </Typography>
 
           <Stack direction="row" spacing={2} mt={2} alignItems="center">
-            <CreateButton variant="contained">CREATE ACCOUNT</CreateButton>
+            <CreateButton href="/login">CREATE ACCOUNT</CreateButton>
 
             <SignInLink href="/login">SIGN IN</SignInLink>
           </Stack>

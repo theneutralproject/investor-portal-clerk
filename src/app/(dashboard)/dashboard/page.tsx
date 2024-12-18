@@ -41,6 +41,7 @@ const DashboardPage = () => {
       axios
         .get<DealWithOrgMembersAndProject[]>("/api/dashboard/deals")
         .then((res) => res.data),
+    enabled: loggedIn,
   });
 
   if (isLoading || dealsLoading) return <div>Loading...</div>;

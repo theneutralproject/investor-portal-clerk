@@ -132,7 +132,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             height="21"
             src="/Neutral_White_Medium.png"
             alt="Neutral Logo"
-            onClick={() => router.push("/projects")}
+            onClick={() => router.push("/dashboard")}
             style={{ cursor: "pointer" }}
           />
 
