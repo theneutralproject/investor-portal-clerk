@@ -28,7 +28,6 @@ const DocumentCard = ({
   handleDownloadDocument: (document: DocumentWithCompletion) => void;
   handleSignDocument?: (document: DocumentWithCompletion) => void;
 }) => {
-  const DOCUSIGN_FLAG = false;
 
   const documentLocked = dealStage < document.dealStage;
 
@@ -114,20 +113,6 @@ const DocumentCard = ({
             <DownloadIcon />
           </IconButton>
         )}
-        {DOCUSIGN_FLAG &&
-          document?.link?.toUpperCase().includes("DOCUSIGN") && (
-            <Tooltip title="Launch Docusign" placement="bottom">
-              <IconButton
-                aria-label="sign document"
-                size="large"
-                onClick={() => {
-                  handleSignDocument && handleSignDocument(document);
-                }}
-              >
-                <BorderColorIcon />
-              </IconButton>
-            </Tooltip>
-          )}
       </Box>
     </Card>
   );
