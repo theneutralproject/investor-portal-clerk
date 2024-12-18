@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Grid, Typography, Divider } from "@mui/material";
-import { type Decimal } from "@prisma/client/runtime/library";
+import { Decimal } from "@prisma/client/runtime/library";
 import type { ProjectWithStats } from "@/libs/types";
 import type { ProjectInvestmentStats } from "@prisma/client";
 
@@ -25,7 +25,7 @@ export const LineDisplay = ({
         {value}
       </Typography>
     ) : (
-      <>{value}</>
+      <>{value instanceof Decimal ? value.toString() : value}</>
     )}
   </Box>
 );

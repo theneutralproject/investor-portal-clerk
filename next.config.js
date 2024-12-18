@@ -18,8 +18,15 @@ const config = {
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],
-  }, 
+  },
   webpack: (config) => {
+    // config.resolve.fallback = {
+    //   // TODO NOT CONFIDENT THIS IS A GOOD IDEA YET - THIS WAS AN ATTEMPT TO GET PLAYWRIGHT TO WORK AFTER CLERK UPGRADE
+    //   ...config.resolve.fallback,  
+    //   async_hooks: false,
+    //   fs: false,
+    //   child_process: false,
+    // };
     config.externals.push({
       'node:crypto': 'commonjs crypto',
     });
