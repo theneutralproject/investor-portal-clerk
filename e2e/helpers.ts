@@ -43,13 +43,22 @@ export async function resetOrgInDb(request: APIRequestContext): Promise<Organiza
   return body;
 }
 
-export async function deleteDealInDbAndHubspot(deal: Deal) {
+export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
+  let dealToDelete: Deal | null = null
+  let dealId: number | null = null;
+  if(typeof dealOrDealId  === "number") {
+    dealId = dealOrDealId;
+  }
+  else {
+    dealId = dealOrDealId.id
+  }
   try {
-    await prisma.deal.delete({ where: { id: deal.id } });
+    dealToDelete = await prisma.deal.delete({ where: { id: dealId } });
   } catch (e) {
     console.error("could not delete deal in db", e);
   }
-  const dlHs = await deleteHubspotDeal(deal.hubspotId);
+  if(!dealToDelete) return;
+  const dlHs = await deleteHubspotDeal(dealToDelete.hubspotId);
   console.log("finished deleting deal in db and hubspot - success:", dlHs.success);
   return;
 }
