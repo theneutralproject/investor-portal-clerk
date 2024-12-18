@@ -5,6 +5,10 @@ import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
+import { Client } from "@hubspot/api-client";
+import { FilterOperatorEnum, type PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/companies";
+
+const hubspotClient = new Client({"accessToken":process.env.HUBSPOT_ACCESS_TOKEN});
 
 export async function createHubspotContact(hubspotContact: HubspotContact) {
   const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
@@ -66,8 +70,10 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
     }
   ).then(async (response) => {
     if (response.status >= 300) {
-      console.error("ERROR: unable to update Hubspot contact:\n", response.statusText);
-      console.log("response", response);
+      console.error(`ERROR: unable to update Hubspot contact for HS User ID ${hubspotContact.hubspotId}:\n`, response.statusText);
+      // eslint-disable-next-line
+      const resJson = await response.json();
+      console.log("response", resJson);
       return new Error("unable to update hubspot contact");
     }
     return { success: true };
@@ -77,6 +83,55 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
   });
   return hsRes;
 };
+
+// export async function getListOfHSContacts(arrVids: string[]) {
+//   ///https://api.hubapi.com/contacts/v1/contact/vids/batch/?vid=3234574&vid=3714024&hapikey=demo
+//   const firstVid = arrVids.shift();
+//   const vids = arrVids.map(v => v.trim()).join("&vid=");
+
+//   console.log(`/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`);
+
+//   const response = await fetch(
+//     `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`,
+//     {
+//       method: "GET",
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+//       },
+//     }
+//   )
+//   const data = JSON.parse(await response.text());
+//   if (response.status >= 300) {
+//     console.error("ERROR: unable to get Hubspot contacts:\n", data);
+//     throw new Error("unable to get hubspot contacts");
+//   }
+//   // console.log("data", data.keys());
+//   return Object.keys(data);
+// }
+
+export async function getListOfHSDeals() {
+  const lostDealstages = ["closedlost", "146586774", "257596003"];
+  const PublicObjectSearchRequest = {
+    limit: 100,
+    properties: ["hs_object_id", "dealname", "dealstage", "amount", "project_name"],
+    filterGroups: [{
+    filters: [
+      {
+        propertyName: "dealstage",
+        operator: FilterOperatorEnum.In,
+        values: lostDealstages
+      }
+    ]
+  }] } as PublicObjectSearchRequest;
+
+  try {
+    const apiResponse = await hubspotClient.crm.deals.searchApi.doSearch(PublicObjectSearchRequest);
+    return apiResponse.results;
+  } catch (e) {
+    console.error("Error", e);
+  }
+}
 
 export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
@@ -100,7 +155,7 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
       body,
     }
   )
-  
+
   const hsDealCreateRespBody = (await resBody.json()) as HsDealCreateResponse;
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
@@ -179,16 +234,17 @@ export function initDealPropsForProject(projectName: string, user: User, dealDat
 }
 /* eslint-enable */
 
-export function getHsDealPropsFromDeal(deal: DealUpdateSchema) {
+export function getHsDealPropsFromDeal(deal: DealUpdateSchema, projectSlug: string) {
   const { dealStage, hubspotId, investmentStats, signaturesCompletedDate } = deal;
   const hsReturnObject = {
     hubspotDealId: parseInt(hubspotId, 10),
     properties: []
   } as HubspotDealUpdate;
-  if (dealStage) hsReturnObject.properties.push({ name: "dealstage", value: dealStage.toString() });
+  if (dealStage) hsReturnObject.properties.push({ name: "dealstage", value: getHsDealStageStrFromInt(dealStage, projectSlug) });
+
   if (investmentStats?.amount) hsReturnObject.properties.push({ name: "amount", value: investmentStats?.amount.toString() });
   if (investmentStats?.financingType) hsReturnObject.properties.push({ name: "financing_type", value: investmentStats?.financingType });
-  if(signaturesCompletedDate) hsReturnObject.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
+  if (signaturesCompletedDate) hsReturnObject.properties.push({ name: "date_signatures_completed", value: signaturesCompletedDate.toISOString() });
   return hsReturnObject;
 }
 
@@ -213,10 +269,10 @@ export async function associateContactWithDealInHubspot(contactId: string, dealI
   );
 }
 
-export async function getFundingAmount(projectName: ProjectName) {
-  function getPayload(project: ProjectName) {
-    switch (project) {
-      case ProjectName["The Edison"]: {
+export async function getFundingAmount(projectSlug: string) {
+  function _getPayload(slug: string) {
+    switch (slug) {
+      case "edison": {
         return {
           limit: 100, /**pagination - max=100 */
           after: 0,
@@ -238,7 +294,7 @@ export async function getFundingAmount(projectName: ProjectName) {
           ]
         };
       }
-      case ProjectName["519 W Main"]: {
+      case "519": {
         return {
           limit: 100, /**pagination - max=100 */
           after: 0,
@@ -261,9 +317,32 @@ export async function getFundingAmount(projectName: ProjectName) {
         };
 
       }
+      case "bakers": {
+        return {
+          limit: 100, /**pagination - max=100 */
+          after: 0,
+          filterGroups: [
+            {
+              filters: [
+                {
+                  propertyName: "dealstage",
+                  operator: "IN",
+                  values: ["257596001", "257596003"]
+                },
+                {
+                  propertyName: "project_name",
+                  operator: "EQ",
+                  value: "Bakers Place"
+                },
+              ]
+            }
+          ]
+        };
+
+      }
       default: {
-        console.error(`The project with name ${project} is not yet supported in getDealPropsForProject()`)
-        return new Error(`The project with name ${project} is not yet supported in getDealPropsForProject()`);
+        console.error(`The project with slug ${slug} is not yet supported in getFundingAmount()`)
+        return new Error(`The project with slug ${slug} is not yet supported in getFundingAmount()`);
       }
     }
   }
@@ -274,7 +353,7 @@ export async function getFundingAmount(projectName: ProjectName) {
   let dealsFetched = 0;
   let totalDeals = 100;
   while (dealsFetched < totalDeals) {
-    const payload = getPayload(projectName)
+    const payload = _getPayload(projectSlug)
     if (payload instanceof Error) {
       return 25000000;
     }
@@ -308,50 +387,80 @@ export async function getFundingAmount(projectName: ProjectName) {
 
 /**
  * 
- * @param dealstage 
+ * @param hsDealStageStr 
  * @returns dealstage integer of corresponding dealstage for any of our projects
  */
-export function getDealStageInt(dealstage: string) {
-  let pos = EdisonDealStages.map(e => e.value).indexOf(dealstage);
-
+export function getDealStageIntFromHSString(hsDealStageStr: string) {
+  let pos = EdisonDealStages.map(e => e.value).indexOf(hsDealStageStr);
   if (pos === -1) {
-    pos = _519WMainDealStages.map(e => e.value).indexOf(dealstage);
+    pos = _519WMainDealStages.map(e => e.value).indexOf(hsDealStageStr);
   }
-  return pos;
+  if (pos === -1) {
+    pos = BakersPlaceDealStages.map(e => e.value).indexOf(hsDealStageStr);
+  }
+  if (pos === -1) {
+    console.error(`dealStage ${hsDealStageStr} is not valid`)
+    return -1;
+  }
+  return pos + 1;
 }
 
-export function getProjectNameFromDealStage(dealstage: string) {
-  if (EdisonDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["The Edison"];
-  if (_519WMainDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["519 W Main"];
-  if (BakersPlaceDealStages.map(e => e.value).indexOf(dealstage) > -1) return ProjectName["Bakers Place"];
+
+export function getHsDealStageStrFromInt(dealStage: number, projectSlug: string) {
+  if (dealStage < 0 || dealStage > 6) {
+    console.error(`dealStage ${dealStage} is not valid`)
+    return "null";
+  }
+  if (dealStage > 0) dealStage -= 1;
+  switch (projectSlug) {
+    case "edison": {
+      return EdisonDealStages[dealStage]?.value ?? "null";
+    }
+    case "519": {
+      return _519WMainDealStages[dealStage]?.value ?? "null";
+    }
+    case "bakers": {
+      return BakersPlaceDealStages[dealStage]?.value ?? "null";
+    }
+    default: {
+      console.error(`The project with slug ${projectSlug} is not yet supported in getHsDealStageStrFromInt()`)
+      return "null";
+    }
+  }
+}
+
+export function getProjectSlugFromDealStage(dealstage: string) {
+  if (EdisonDealStages.map(e => e.value).indexOf(dealstage) > -1) return "edison";
+  if (_519WMainDealStages.map(e => e.value).indexOf(dealstage) > -1) return "519";
+  if (BakersPlaceDealStages.map(e => e.value).indexOf(dealstage) > -1) return "bakers";
   return new Error("project not yet supported");
 };
 
 export const EdisonDealStages = [
-  { key: "aQualified", value: "appointmentscheduled" },
-  { key: "bAwareness", value: "165518133" },
-  { key: "cContractShared", value: "presentationscheduled" },
-  { key: "dContractSigned", value: "decisionmakerboughtin" },
-  { key: "eFunded", value: "contractsent" },
-  { key: "fClosedLost", value: "closedlost" }
+  { key: "aQualified", value: "appointmentscheduled", intVal: 1 },
+  { key: "bAwareness", value: "165518133", intVal: 2 },
+  { key: "cContractShared", value: "presentationscheduled", intVal: 3 },
+  { key: "dContractSigned", value: "decisionmakerboughtin", intVal: 4 },
+  { key: "eFunded", value: "contractsent", intVal: 5 },
+  { key: "fClosedLost", value: "closedlost", intVal: 6 }
 ];
 
 export const _519WMainDealStages = [
-  { key: "aQualified", value: "146586769" },
-  { key: "bAwareness", value: "165498481" },
-  { key: "cContractShared", value: "146586771" },
-  { key: "dContractSigned", value: "146586772" },
-  { key: "eFunded", value: "146586773" },
-  { key: "fClosedLost", value: "146586774" }
+  { key: "aQualified", value: "146586769", intVal: 1 },
+  { key: "bAwareness", value: "165498481", intVal: 2 },
+  { key: "cContractShared", value: "146586771", intVal: 3 },
+  { key: "dContractSigned", value: "146586772", intVal: 4 },
+  { key: "eFunded", value: "146586773", intVal: 5 },
+  { key: "fClosedLost", value: "146586774", intVal: 6 }
 ];
 
 export const BakersPlaceDealStages = [
-  { key: "aQualified", value: "257595997" },
-  { key: "bAwareness", value: "257595998" },
-  { key: "cContractShared", value: "257595999" },
-  { key: "dContractSigned", value: "257596000" },
-  { key: "eFunded", value: "257596001" },
-  { key: "fClosedLost", value: "257596001" }
+  { key: "aQualified", value: "257595997", intVal: 1 },
+  { key: "bAwareness", value: "257595998", intVal: 2 },
+  { key: "cContractShared", value: "257595999", intVal: 3 },
+  { key: "dContractSigned", value: "257596000", intVal: 4 },
+  { key: "eFunded", value: "257596001", intVal: 5 },
+  { key: "fClosedLost", value: "257596003", intVal: 6 }
 ]
 
 export enum ReferralSource {

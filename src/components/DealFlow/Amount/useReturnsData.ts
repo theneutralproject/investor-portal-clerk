@@ -1,7 +1,7 @@
 // hooks/useReturnsData.ts
 import { useState, useCallback, useEffect } from "react";
 import axios from "axios";
-import type { ReturnsDateObject } from "@/libs/project/schema";
+import type { ProjectReturnsResponse, ProjectReturnsStats, ReturnsDateObject } from "@/libs/returns/schema";
 
 interface UseReturnsDataProps {
   projectId?: number;
@@ -17,6 +17,7 @@ export const useReturnsData = ({
   financingType,
 }: UseReturnsDataProps) => {
   const [returnsData, setReturnsData] = useState<ReturnsDateObject[]>([]);
+  const [stats, setStats] = useState<ProjectReturnsStats | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string>("");
 
@@ -26,7 +27,7 @@ export const useReturnsData = ({
 
       setIsLoading(true);
       try {
-        const { data } = await axios.post<ReturnsDateObject[]>(
+        const { data } = await axios.post<ProjectReturnsResponse>(
           "/api/projects/returns",
           {
             projectId,
@@ -35,8 +36,10 @@ export const useReturnsData = ({
           }
         );
 
+        const { stats, schedule } = data;
+        setStats(stats);
         setReturnsData(
-          data.map((item) => ({
+          schedule.map((item) => ({
             ...item,
             date: new Date(item.date),
           }))
@@ -62,5 +65,5 @@ export const useReturnsData = ({
     }
   }, [amount, fetchReturnsData, minInvestment]);
 
-  return { returnsData, isLoading, error };
+  return { returnsData, stats, isLoading, error };
 };

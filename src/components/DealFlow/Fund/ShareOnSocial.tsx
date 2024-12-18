@@ -39,7 +39,7 @@ const ShareOnSocial = () => {
             objectFit: "contain",
             flexShrink: 0,
           }}
-          image="https://placehold.co/150x150"
+          image="/socialIcon.png"
           alt="Neutral logo"
         />
 

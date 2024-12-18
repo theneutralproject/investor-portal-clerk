@@ -1,14 +1,14 @@
 // types/dealFlow.ts
 export interface ProjectedReturn {
   year: number;
-  cumulativeDistribution: number;
+  distributionsCumulative: number;
   investmentMultiple: number;
   totalGrossReturn: number;
   totalNetReturn: number;
 }
 
-export interface InvestmentStats {
-  interestRateOrIrr: number;
+export interface InvestmentStatsSummary {
+  interestRateOrIrrPerc: number;
   investmentMultiple: number;
   totalGrossReturn: number;
   totalNetReturn: number;

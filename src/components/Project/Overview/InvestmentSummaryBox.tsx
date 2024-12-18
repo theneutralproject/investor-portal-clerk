@@ -37,8 +37,16 @@ const getInterestRate = (investmentStats: ProjectInvestmentStats) => {
   else return `${investmentStats.interestRateMin}%`;
 }
 
+const getDebtTermString = (investmentStats: ProjectInvestmentStats) => {
+  if (investmentStats.debtTermMonthsMin === investmentStats.debtTermMonthsMax) {
+    return `${investmentStats.debtTermMonthsMax} month`;
+  }
+  return `${investmentStats.debtTermMonthsMin} or ${investmentStats.debtTermMonthsMax} months`;
+}
+
 const getEquitySummaryBox = (data: ProjectWithStats) => {
-  if (data.id === 2) {
+  // for bakers place, only show debt information
+  if (!data.investmentStats.boolEquity) {
     return (
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>
@@ -47,7 +55,7 @@ const getEquitySummaryBox = (data: ProjectWithStats) => {
           name="Min. Investment"
           value={`$${formatter.format(data.investmentStats.debtMinInvestment)}`}
         />
-        <LineDisplay name="Term" value={`${data.investmentStats.debtTermMonths} months`} />
+        <LineDisplay name="Term" value={getDebtTermString(data.investmentStats)} />
         <LineDisplay name="Payment" value={`${data.investmentStats.debtPaymentFreq}`} />
       </Grid>
     );
@@ -65,7 +73,7 @@ const getEquitySummaryBox = (data: ProjectWithStats) => {
         <LineDisplay name="Distribution" value={`${data.investmentStats.equityPaymentFreq}*`} />
         <LineDisplay
           name="Preferred Return"
-          value={`${data.investmentStats.preferredReturn*100}%**`}
+          value={`${data.investmentStats.equityPreferredReturn*100}%**`}
         />
       </Grid>
       <Grid
@@ -83,7 +91,7 @@ const getEquitySummaryBox = (data: ProjectWithStats) => {
           name="Min. Investment"
           value={`$${formatter.format(data.investmentStats.debtMinInvestment)}`}
         />
-        <LineDisplay name="Term" value={`${data.investmentStats.debtTermMonths} months`} />
+        <LineDisplay name="Term" value={getDebtTermString(data.investmentStats)} />
         <LineDisplay name="Payment" value={`${data.investmentStats.debtPaymentFreq}`} />
       </Grid>
 

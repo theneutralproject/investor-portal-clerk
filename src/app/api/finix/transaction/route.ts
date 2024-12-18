@@ -1,5 +1,6 @@
 'use server';
 import { updateDeal } from "@/libs/deal/utils.server";
+import { getFinixUserName, getFinixPassword } from "@/libs/finix/utils";
 import prisma from "@/libs/prisma.server";
 import type { DealWithInvestmentStats } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
@@ -26,9 +27,6 @@ export async function POST(request: NextRequest) {
         return errorResponse('plaid_public_token, plaid_account_id, dealId and sessionKey are required', 400);
     }
     try {
-        const third_party_token = await getPlaidToken(body.plaid_public_token, body.plaid_account_id);
-        const identity = await getIdentity(user);
-        const buyerId = await getBuyerId(identity, third_party_token);
 
         const deal = await prisma.deal.findUnique({
             where: { id: body.dealId },
@@ -38,22 +36,23 @@ export async function POST(request: NextRequest) {
                 organization: { include: { members: true } }
             }
         });
-        if (!deal) {
-            return errorResponse('Deal not found', 404);
+
+        const maxFinixAmount = parseFloat(process.env.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT ?? "0");
+        if (!deal?.investmentStats || deal.investmentStats.amount <= 0 || deal.investmentStats.amount > maxFinixAmount) {
+            return errorResponse('The investment amount is invalid', 400);
         }
         if (!deal.organization.members.find(member => member.userId === user.id)) {
             return errorResponse('You are not a member of this organization', 401);
         }
 
-        const maxFinixAmount = parseFloat(process.env.FINIX_MAX_TRANSACTION_AMOUNT ?? "0");
-        if (!deal.investmentStats || deal.investmentStats.amount <= 0 || deal.investmentStats.amount > maxFinixAmount) {
-            return errorResponse('The investment amount is invalid', 400);
-        }
+        const { project: { name: projectName, slug }, investmentStats, ...dealData } = deal;
 
-        const { project: { name: projectName }, investmentStats, ...dealData } = deal;
+        const third_party_token = await getPlaidToken(body.plaid_public_token, body.plaid_account_id, slug);
+        const identity = await getIdentity(user, slug);
+        const buyerId = await getBuyerId(identity, third_party_token, slug);
 
         // transfer money to Finix merchant
-        const achTransferResponseData = await initializeFinixTransfer({ ...dealData, investmentStats }, body.merchantId, buyerId, projectName, body.sessionKey);
+        const achTransferResponseData = await initializeFinixTransfer({ ...dealData, investmentStats }, body.merchantId, buyerId, projectName, slug, body.sessionKey);
         if (isError(achTransferResponseData)) {
             console.error("Error transferring money 1:");
             console.error(achTransferResponseData);
@@ -103,13 +102,13 @@ export async function POST(request: NextRequest) {
     }
 }
 
-async function getPlaidToken(plaid_public_token: string, plaid_account_id: string) {
+async function getPlaidToken(plaid_public_token: string, plaid_account_id: string, slug: string) {
     const plaidTokenResponse = await fetch(`${process.env.FINIX_BASE_URL!}/third_party_tokens`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Finix-Version': '2022-02-01',
-            'Authorization': 'Basic ' + Buffer.from(`${process.env.FINIX_USERNAME!}:${process.env.FINIX_PASSWORD!}`).toString('base64')
+            'Authorization': 'Basic ' + Buffer.from(`${getFinixUserName(slug)}:${getFinixPassword(slug)}`).toString('base64')
         },
         body: JSON.stringify({
             plaid_public_token,
@@ -121,13 +120,13 @@ async function getPlaidToken(plaid_public_token: string, plaid_account_id: strin
     return token;
 }
 
-async function getIdentity(user: User) {
+async function getIdentity(user: User, slug: string) {
     const identityResponse = await fetch(`${process.env.FINIX_BASE_URL!}/identities`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Finix-Version': '2022-02-01',
-            'Authorization': 'Basic ' + Buffer.from(`${process.env.FINIX_USERNAME!}:${process.env.FINIX_PASSWORD!}`).toString('base64')
+            'Authorization': 'Basic ' + Buffer.from(`${getFinixUserName(slug)}:${getFinixPassword(slug)}`).toString('base64')
         },
         body: JSON.stringify({
             entity: {
@@ -142,13 +141,13 @@ async function getIdentity(user: User) {
     return id;
 }
 
-async function getBuyerId(identity: string, third_party_token: string) {
+async function getBuyerId(identity: string, third_party_token: string, slug: string) {
     const paymentInstrumentResponse = await fetch(`${process.env.FINIX_BASE_URL!}/payment_instruments`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Finix-Version': '2022-02-01',
-            'Authorization': 'Basic ' + Buffer.from(`${process.env.FINIX_USERNAME!}:${process.env.FINIX_PASSWORD!}`).toString('base64')
+            'Authorization': 'Basic ' + Buffer.from(`${getFinixUserName(slug)}:${getFinixPassword(slug)}`).toString('base64')
         },
         body: JSON.stringify({
             identity,
@@ -162,7 +161,7 @@ async function getBuyerId(identity: string, third_party_token: string) {
 }
 
 // transfer with fraud protection and idempotency id
-async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId: string, buyerId: string, projectName: string, fraudSessionKey: string) {
+async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId: string, buyerId: string, projectName: string, slug: string, fraudSessionKey: string) {
     console.log("fraudSessionKey", fraudSessionKey);
     console.log("merchantId", merchantId);
     const amountInCents = deal.investmentStats.amount * (process.env.NODE_ENV === "production" ? 100 : 1);
@@ -171,7 +170,7 @@ async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId
         headers: {
             'Content-Type': 'application/json',
             'Finix-Version': '2022-02-01',
-            'Authorization': 'Basic ' + Buffer.from(`${process.env.FINIX_USERNAME!}:${process.env.FINIX_PASSWORD!}`).toString('base64')
+            'Authorization': 'Basic ' + Buffer.from(`${getFinixUserName(slug)}:${getFinixPassword(slug)}`).toString('base64')
         },
         body: JSON.stringify({
             amount: amountInCents,

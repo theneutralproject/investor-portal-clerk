@@ -10,11 +10,14 @@ import {
   LinearProgress,
 } from "@mui/material";
 import { styled } from "@mui/material/styles";
-import { type DealWithFullOrgAndProject } from "@/libs/types";
+import {
+  type DealWithOrgMembersAndProject,
+  type DealWithFullOrgAndProject,
+} from "@/libs/types";
 import { useRouter } from "next/navigation";
 
 interface CompleteInvestmentProps {
-  deals: DealWithFullOrgAndProject[];
+  deals: DealWithOrgMembersAndProject[];
 }
 
 const ContinueButton = styled(Button)(({}) => ({
@@ -47,7 +50,7 @@ const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
   },
 }));
 
-const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
+export const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
   const headerPicture = deal.project.pictures.find(
     (picture) => picture.type === "HEADER"
   );
@@ -74,13 +77,11 @@ const isDealCompleted = (dealStage: number): boolean => {
 /**
  * Deal Stage Reference:
  * 0 = Get Started
- * 1 = Type
- * 2 = Amount
- * 3 = Details
- * 4 = Review & Submit
- * 5 = Completed
+ * 2 = review
+ * 3 = review
+ * 4 = fund
+ * 5 = fund
  *
- * //TODO CHANGE
  */
 
 const getNextStep = (deal: DealWithFullOrgAndProject): string => {
@@ -88,36 +89,36 @@ const getNextStep = (deal: DealWithFullOrgAndProject): string => {
     case 0:
       return "get-started";
     case 1:
-      return "type";
-    case 2:
-      return "amount";
-    case 3:
       return "details";
-    case 4:
+    case 2:
+    case 3:
       return "review";
+    case 4:
+    case 5:
+      return "fund";
     default:
-      return "completed";
+      return "get-started";
   }
 };
 
 const getNextStepDisplay = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
-    case 0:
-      return "Next Step: Get Started";
     case 1:
-      return "Next Step: Select Investment Type";
+      return "Next Step: Details";
     case 2:
-      return "Next Step: Enter Amount";
+      return "Next Step: Review & Sign";
     case 3:
-      return "Next Step: Fill Details";
+      return "Next Step: Review & Sign";
     case 4:
-      return "Next Step: Review & Submit";
-    default:
+      return "Next Step: Fund";
+    case 5:
       return "Completed";
+    default:
+      return "Next Step: Get Started";
   }
 };
 
-const getDealProgress = (deal: DealWithFullOrgAndProject): number => {
+const getDealProgress = (deal: DealWithOrgMembersAndProject): number => {
   const MAX_DEAL_STAGE = 5;
   return (deal.dealStage / MAX_DEAL_STAGE) * 100;
 };
@@ -125,8 +126,8 @@ const getDealProgress = (deal: DealWithFullOrgAndProject): number => {
 const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
   const router = useRouter();
 
-  const handleContinue = (deal: DealWithFullOrgAndProject) => {
-    const nextStep = getNextStep(deal);
+  const handleContinue = (deal: DealWithOrgMembersAndProject) => {
+    const nextStep = getNextStep(deal as DealWithFullOrgAndProject);
     router.push(`/dealflow/${deal.project.slug}/${deal.id}/${nextStep}`);
   };
 
@@ -169,7 +170,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
             <Box key={deal.id} sx={{ mb: 3 }}>
               <ProjectCard>
                 <Avatar
-                  src={getProjectPicture(deal)}
+                  src={getProjectPicture(deal as DealWithFullOrgAndProject)}
                   alt={deal.project.name}
                   sx={{
                     width: 56,
@@ -189,7 +190,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
                       color: "rgba(255, 255, 255, 0.7)",
                     }}
                   >
-                    {getNextStepDisplay(deal)}
+                    {getNextStepDisplay(deal as DealWithFullOrgAndProject)}
                   </Typography>
                   <StyledLinearProgress
                     variant="determinate"

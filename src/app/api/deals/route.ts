@@ -2,18 +2,18 @@ import prisma from "@/libs/prisma.server";
 import { currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
 import { isError } from "lodash";
-import { DealFinancingType } from "@prisma/client";
+import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import { initDealPropsForProject, createHubspotDeal, updateHubspotDealProperties, getHsDealPropsFromDeal } from "@/libs/hubspot/utils";
+import { initDealPropsForProject, createHubspotDeal } from "@/libs/hubspot/utils";
 import { jsonResponse } from "@/libs/utils";
 import { updateDeal } from "@/libs/deal/utils.server";
-import { getEquityStatsFromProject } from "@/libs/project/utils";
 import { getInvestmentEntity } from "@/libs/deal/utils";
+import { populateDealDebtStats, populateDealEquityStats } from "@/libs/deal/utils.server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -110,9 +110,9 @@ export async function POST(request: NextRequest) {
 
     const project = await prisma.project.findUnique({
       where: { id: dealData.projectId },
-      include: { investmentStats: true }
+      include: { investmentStats: true },
     });
-    if (!project || !project.investmentStats || !project.equityReturnsFile) {
+    if (!project?.investmentStats || !project?.equityReturnsFile) {
       return jsonResponse(
         { error: `Project with id ${dealData.projectId} not found in DB` },
         400
@@ -162,14 +162,23 @@ export async function POST(request: NextRequest) {
     else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
 
     if (!dealData.amount) dealData.amount = minInvestmentAmount;
-    const equityDetails = await getEquityStatsFromProject(dealData.amount, project.equityReturnsFile, project.investmentStats.cUnitThresholdAmount);
-    if (isError(equityDetails)) {
-        console.error(
-            `Failed to get equity stats during deal creation`
-        );
-        return jsonResponse({ error: "Failed to get equity stats during deal creation" }, 500);
+
+    let newInvestmentStats = {
+      amount: dealData.amount,
+      financingType: dealData.financingType,
+    } as DealInvestmentStats;
+
+    const { investmentStats, ...projectData } = project;
+    if (dealData.financingType === DealFinancingType.equity) {
+      try {
+        newInvestmentStats = await populateDealEquityStats(newInvestmentStats, { ...projectData, investmentStats });
+      } catch (e) {
+        throw e;
+      }
     }
-    const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
+    else {
+      newInvestmentStats = populateDealDebtStats(newInvestmentStats, { ...projectData, investmentStats });
+    }
 
     const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
     if (!hsDeal) {
@@ -188,7 +197,7 @@ export async function POST(request: NextRequest) {
     if (isError(hsDealId)) {
       return jsonResponse({ error: "HS Deal cannot be created." }, 400);
     }
-    
+
     const deal = await prisma.deal.create({
       data: {
         organizationId: dealData.organizationId,
@@ -198,15 +207,19 @@ export async function POST(request: NextRequest) {
         transactionId: dealData.transactionId,
         investmentEntity:
           getInvestmentEntity(project.name, dealData.financingType) ?? "",
-          investmentStats: {create: {
-            amount: dealData.amount,
-            financingType: dealData.financingType,
-            unitType,
-            shareOfEquity,
-            numberAUnits,
-            numberCUnits,
-            /**all other fields have postgresql defaults */
-          }}
+        investmentStats: {
+          create:
+            newInvestmentStats
+          //   {
+          //   amount: dealData.amount,
+          //   financingType: dealData.financingType,
+          //   unitType,
+          //   shareOfEquity,
+          //   numberAUnits,
+          //   numberCUnits,
+          //   /**all other fields have postgresql defaults */
+          // }
+        }
       },
       include: { investmentStats: true }
     });
@@ -225,7 +238,14 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
+    // const dealData = await request.json() as DealUpdateSchema;
+
     const requestBody = await request.json() as DealUpdateSchema;
+    // parse the date strings into Date objects for zod to validate
+    if(requestBody.closingDate) {
+      requestBody.closingDate = new Date(Date.parse(requestBody.closingDate.toString()));
+    }
+
     let deal: DealUpdateSchema;
     try {
       deal = zDealUpdateSchema.parse(requestBody);
@@ -234,10 +254,9 @@ export async function PUT(request: NextRequest) {
       console.error("ERROR: unable to parse PUT body:\n", parseError);
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
+
     // also update the deal in hubspot:
-    const hsDeal = getHsDealPropsFromDeal(deal);
     const updatedDeal = await updateDeal(deal, true);
-    await updateHubspotDealProperties(hsDeal);
 
     return jsonResponse(updatedDeal);
   } catch (error) {

@@ -34,6 +34,10 @@ export type ProjectWithStats = Project & {
   milestones: ProjectMilestones;
 };
 
+export type ProjectWithInvestmentStats = Project & {
+  investmentStats: ProjectInvestmentStats;
+};
+
 export type UserWithAddress = User & {
   address: Address | null;
 };
@@ -46,9 +50,15 @@ export type DealWithInvestmentStats = Deal & {
   investmentStats: DealInvestmentStats;
 };
 
+export type DealWithInvestmentStatsAndProject = Deal & {
+  investmentStats?: DealInvestmentStats | null;
+  project?: (Project & { milestones: ProjectMilestones | null }) | null;
+};
+
 export type DealWithOrgMembersAndProject = Deal & {
   organization: OrganizationWithFullMembers;
   project: Project;
+  investmentStats?: DealInvestmentStats | null;
 };
 
 export type DealWithFullOrgAndProject = Deal & {
