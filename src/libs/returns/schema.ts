@@ -23,12 +23,14 @@ export const zReturnsPortfolioStatsSchema = z.object({
     projectedPortfolioValue: z.number(), // sum of portfolioValueToDate and projectedDistributions
     principalInvested: z.number(), // sum of all committed amounts
 });
-export type ReturnsPortfolioStats = z.infer<typeof zReturnsPortfolioStatsSchema>;
 
+export type ReturnsPortfolioStats = z.infer<typeof zReturnsPortfolioStatsSchema>;
 export const zReturnsDealStatsSchema = z.object({
     dealId: z.number(),
-    committedAmount: z.number(),
+    committedAmount: z.number(), 
     distributionsToDate: z.number(),
+    project: z.any(),
+    financingType: z.enum(["equity", "debt"]),
 });
 export type ReturnsDealStats = z.infer<typeof zReturnsDealStatsSchema>;
 

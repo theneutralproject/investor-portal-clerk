@@ -5,9 +5,12 @@ import {
   type DealWithFullOrgAndProject,
   type DealWithOrgMembersAndProject,
 } from "@/libs/types";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
+import { PortfolioReturnsResponse } from "@/libs/returns/schema";
 
 interface DashboardDealsProps {
-  deals: DealWithOrgMembersAndProject[];
+  loggedIn: boolean;
 }
 
 const StyledCard = styled(Card)({
@@ -46,7 +49,17 @@ const StyledHeader = styled(Typography)(({}) => ({
   fontWeight: 500,
 }));
 
-const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
+const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
+  const { data } = useQuery<PortfolioReturnsResponse, Error>({
+    queryKey: ["dashboard", "portfolio"],
+    queryFn: async () => {
+      const response = await axios.get<PortfolioReturnsResponse>(
+        "/api/dashboard/returns"
+      );
+      return response.data;
+    },
+    enabled: loggedIn,
+  });
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -56,6 +69,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
     }).format(amount);
   };
 
+  if (!data?.dealStats.length) return null;
   return (
     <StyledCard>
       <TableHeader>
@@ -65,10 +79,10 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
         <StyledHeader>Distributions to Date</StyledHeader>
       </TableHeader>
       <CardContent sx={{ p: 0 }}>
-        {deals.map((deal) => {
-          const picture = getProjectPicture(deal as DealWithFullOrgAndProject);
+        {data.dealStats.map((deal) => {
+          const picture = getProjectPicture(deal.project);
           return (
-            <TableRow key={deal.id}>
+            <TableRow key={deal.dealId}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <ProjectImage src={picture} alt={deal.project.name} />
                 <Box>
@@ -81,14 +95,14 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
                 </Box>
               </Box>
               <Typography variant="body2">
-                {deal.investmentStats?.financingType === "equity"
-                  ? "Equity"
-                  : "Debt"}
+                {deal.financingType === "equity" ? "Equity" : "Debt"}
               </Typography>
               <Typography variant="body2">
-                {formatCurrency(deal.investmentStats?.amount ?? 0)}
+                {formatCurrency(deal.committedAmount)}
               </Typography>
-              <Typography variant="body2">Need data</Typography>
+              <Typography variant="body2">
+                {formatCurrency(deal.distributionsToDate)}
+              </Typography>
             </TableRow>
           );
         })}
