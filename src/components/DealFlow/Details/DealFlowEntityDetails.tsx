@@ -8,6 +8,7 @@ import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumen
 import DealFlowFooter from "../Shared/DealFlowFooter";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
 import { DealDocumentType } from "@prisma/client";
+import { EncryptionCard } from "./EncryptionCard";
 
 const REQUIRED_DOCUMENTS = [
   {
@@ -160,7 +161,7 @@ const DealFlowEntityDetails: React.FC = () => {
         type="organization"
         dealDocumentType={DealDocumentType.INVESTMENT_DOCUMENT}
       />
-
+      <EncryptionCard />
       <DealFlowFooter
         onBack={() => null}
         onContinue={handleContinue}
