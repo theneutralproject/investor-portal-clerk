@@ -97,6 +97,7 @@ export async function GET() {
       dealId: deal.id,
       committedAmount: investmentStats.amount,
       distributionsToDate: 0,
+      distributionsProjected: 0,
       financingType:
         investmentStats.financingType === DealFinancingType.equity
           ? "equity"
@@ -108,7 +109,6 @@ export async function GET() {
         pictures: project.pictures,
       },
     };
-
     const todayNumeric = new Date().getTime();
     portfolioStats.principalInvested += investmentStats.amount;
     portfolioStats.portfolioValueToDate += investmentStats.amount;
@@ -141,6 +141,9 @@ export async function GET() {
 
             dealSummary.distributionsToDate +=
               dateObject.equityDistributionsCurrent;
+          } else {
+            dealSummary.distributionsProjected +=
+              dateObject.equityDistributionsCurrent;
           }
           if (!returnsObjectsByDate[dateNo]) {
             returnsObjectsByDate[dateNo] = [dateObject];
@@ -148,7 +151,6 @@ export async function GET() {
             returnsObjectsByDate[dateNo].push(dateObject);
           }
         });
-        return schedule;
       } catch (e) {
         console.error(`Failed to get equity stats for deal ${deal.id}:`);
         console.error(e);
@@ -180,6 +182,9 @@ export async function GET() {
 
           dealSummary.distributionsToDate +=
             dateObject.debtDistributionsCurrent;
+        } else {
+          dealSummary.distributionsProjected +=
+            dateObject.debtDistributionsCurrent;
         }
         if (!returnsObjectsByDate[dateNo]) {
           returnsObjectsByDate[dateNo] = [dateObject];
@@ -197,12 +202,14 @@ export async function GET() {
       );
       return [];
     }
+
+    console.log("adding to deal stats", dealSummary.dealId, dealSummary.financingType);
     dealStats.push(dealSummary);
     console.log(`Deal ${deal.id} stats:`, dealSummary);
   });
 
   await Promise.all(resolvedSchedules);
-
+console.log("resolved schedules", resolvedSchedules.length);
   const consolidatedSchedule = [] as ReturnsDateObject[];
   let previousDateObject: ReturnsDateObject | undefined;
 

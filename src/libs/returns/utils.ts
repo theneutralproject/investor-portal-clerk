@@ -113,9 +113,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
         investmentMultiple: 0,
     }
 
-    console.log("DEBT closingDate\t\t", closingDate);
     let date = getPayoutScheduleStartDate(closingDate);
-    console.log("DEBT payout schedule start date\t", date);
     for (let i = 1; i <= termMonths; i++) {
         // Move to next month
         date = startOfMonth(add(date, { months: 1 }));
@@ -161,9 +159,7 @@ function _getDebtPayoutSchedule(amount: number, interestRate: number, termMonths
 
         payoutSchedule.push(entry);
     }
-console.log("DEBT payout schedule\t", payoutSchedule.length);
     return { schedule: payoutSchedule, stats };
-
 }
 
 // Calculate debt payout schedule for a closed or in progress deal (used in dashboard)

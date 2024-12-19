@@ -30,6 +30,7 @@ export const zReturnsDealStatsSchema = z.object({
     dealId: z.number(),
     committedAmount: z.number(), 
     distributionsToDate: z.number(),
+    distributionsProjected: z.number(),
     project: z.object({
         id: z.number(),
         name: z.string(),

@@ -160,7 +160,7 @@ test.describe("api/dashboard/returns test", () => {
             dealStage: 1,
             transactionId: 'test-deal-equity1',
             financingType: DealFinancingType.equity,
-            amount: 100000,
+            amount: 50000,
         };
         try {
             // create first debt deal
@@ -193,7 +193,7 @@ test.describe("api/dashboard/returns test", () => {
             console.log("stats", stats);
             expect(stats.consolidatedSchedule.length).toBe(60);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-            expect(Math.floor(lastScheduleEntry?.equityDistributionCumulative ?? 0)).toBe(193006.00);
+            expect(Math.floor(lastScheduleEntry?.equityDistributionCumulative ?? 0)).toBe(193006.00/2);
         } catch (e) {
             console.error("could not get dashboard returns for one EQUITY deal in api/dashboard/returns test:");
             console.error(e);
@@ -208,7 +208,7 @@ test.describe("api/dashboard/returns test", () => {
             dealStage: 1,
             transactionId: 'test-deal-equity1',
             financingType: DealFinancingType.equity,
-            amount: 100000,
+            amount: 10000,
         };
         try {
             // create first debt deal
@@ -249,7 +249,7 @@ test.describe("api/dashboard/returns test", () => {
 
         const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
         const cumulativeDistribution = (lastScheduleEntry?.debtDistributionsCumulative ?? 0) + (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-        expect(Math.floor(cumulativeDistribution)).toBe(333006.00);
+        expect(Math.floor(cumulativeDistribution)).toBe(140000 + 19300.00);
     });
 
     // TODO: Add test for equity deal that starts after official closing date. Need to talk to finance team to understand how to handle this case.
