@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
     if (includeDealDocument) {
         const allDeals = await prisma.deal.findMany({
             where: {
-                dealStage: { gte: minDealstage },
+                dealStage: { gte: minDealstage, lt: 6 },
             },
             include: {
                 document: { include: { uploadedBy: true } }
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     }
 
     const where: Prisma.DealWhereInput = {
-        dealStage: { gte: minDealstage }
+        dealStage: { gte: minDealstage, lt: 6 },
     };
     if (projectId) {
         where.projectId = projectId;
