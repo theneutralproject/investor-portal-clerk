@@ -203,13 +203,13 @@ export async function GET() {
       return [];
     }
 
-    console.log("adding to deal stats", dealSummary.dealId, dealSummary.financingType);
+    console.log(`adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`);
     dealStats.push(dealSummary);
-    console.log(`Deal ${deal.id} stats:`, dealSummary);
+    // console.log(`Deal ${deal.id} stats:`, dealSummary);
   });
 
   await Promise.all(resolvedSchedules);
-console.log("resolved schedules", resolvedSchedules.length);
+  
   const consolidatedSchedule = [] as ReturnsDateObject[];
   let previousDateObject: ReturnsDateObject | undefined;
 
