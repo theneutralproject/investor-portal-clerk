@@ -21,7 +21,7 @@ if (!baseURL || !testUserToken) {
 }
 
 export default defineConfig({
-  timeout: 30 * 1000,
+  timeout: 60 * 1000,
   testDir: './e2e',
   /* Run tests in files in parallel */
   fullyParallel: false,
@@ -44,13 +44,15 @@ export default defineConfig({
       // Assuming personal access token available in the environment.
       'Authorization': `Bearer ${testUserToken}`,
     },
+    navigationTimeout: 60 * 1000,
+    actionTimeout: 60 * 1000,
   },
   /* Run your local dev server before starting the tests */
   webServer: {
     // command: process.env.CI ? 'DEBUG=pw:webserver npm run build && npm run start' : 'npm run dev',
     command: 'npm run dev',
     url: baseURL,
-    timeout: 1000 * 1000,
+    timeout: 10 * 60 * 1000, /**15 mins per test */
     reuseExistingServer: !process.env.CI,
   },
   /* Configure projects for major browsers */

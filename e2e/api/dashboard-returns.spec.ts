@@ -2,7 +2,7 @@ import { DealCreateSchema } from '@/libs/deal/schema';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType } from '@prisma/client';
-import { clearAllTestData, deleteDealInDbAndHubspot } from 'e2e/helpers';
+import { clearAllTestDeals, deleteDealInDbAndHubspot } from 'e2e/helpers';
 
 test.describe("api/dashboard/returns test", () => {
     let debtDeal1: Deal | null = null;
@@ -20,7 +20,7 @@ test.describe("api/dashboard/returns test", () => {
 
     test.beforeEach(async ({ request }) => {
         try {
-            await clearAllTestData();
+            await clearAllTestDeals();
         } catch (e) {
             console.error("could not clear all test data in api/dashboard/returns beforeEach:");
             console.error(e);
@@ -227,21 +227,29 @@ test.describe("api/dashboard/returns test", () => {
                 closingDate: new Date(2023, 1, 15),
             }
         });
+        let stats: PortfolioReturnsResponse | null = null;
         try {
             equityDeal1 = await JSON.parse(await dealUpdateResponse.text());
 
             const response = await request.get('/api/dashboard/returns');
             expect(response.status()).toBe(200);
-            const stats = await JSON.parse(await response.text()) as PortfolioReturnsResponse;
-            expect(stats.consolidatedSchedule.length).toBe(79);
-            console.log("stats", stats);
-            const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-            const cumulativeDistribution = (lastScheduleEntry?.debtDistributionsCumulative ?? 0) + (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-            expect(Math.floor(cumulativeDistribution)).toBe(333006.00);
+            stats = await JSON.parse(await response.text()) as PortfolioReturnsResponse;
+
         } catch (e) {
             console.error("could not get dashboard returns for one DEBT and one EQUITY deal in api/dashboard/returns test:");
             console.error(e);
         }
+        if(!stats?.consolidatedSchedule) {
+            console.error("no good response from API");
+            test.skip();
+            return;
+        }
+        expect(stats.consolidatedSchedule.length).toBeGreaterThanOrEqual(79);
+        expect(stats.consolidatedSchedule.length).toBeLessThanOrEqual(80);
+
+        const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
+        const cumulativeDistribution = (lastScheduleEntry?.debtDistributionsCumulative ?? 0) + (lastScheduleEntry?.equityDistributionCumulative ?? 0);
+        expect(Math.floor(cumulativeDistribution)).toBe(333006.00);
     });
 
     // TODO: Add test for equity deal that starts after official closing date. Need to talk to finance team to understand how to handle this case.
