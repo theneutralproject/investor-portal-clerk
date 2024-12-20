@@ -292,7 +292,7 @@ const InvestmentCalculatorNew = ({
                 stackId="1"
                 stroke={theme.palette.success.main}
                 fill={theme.palette.success.light}
-                fillOpacity={0.8}
+                fillOpacity={0.3}
               />
               {investmentType === "Equity" && (<>
                 <Area
@@ -301,14 +301,14 @@ const InvestmentCalculatorNew = ({
                   stackId="2"
                   stroke={theme.palette.primary.main}
                   fill={theme.palette.primary.light}
-                  fillOpacity={0.8} />
+                  fillOpacity={0.3} />
                 <Area
                   type="monotone"
                   dataKey="Real Estate Investment Trust (Avg.)"
                   stackId="3"
                   stroke={theme.palette.warning.main}
                   fill={theme.palette.warning.light}
-                  fillOpacity={0.8} /></>)}
+                  fillOpacity={0.3} /></>)}
             </AreaChart>
           </ResponsiveContainer>
         </Box>
