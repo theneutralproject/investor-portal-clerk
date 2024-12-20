@@ -1,3 +1,4 @@
+import { PictureTypeSchema } from "prisma/generated/zod";
 import { z } from "zod";
 
 export const zReturnsDateObjectSchema = z.object({
@@ -29,7 +30,17 @@ export const zReturnsDealStatsSchema = z.object({
     dealId: z.number(),
     committedAmount: z.number(), 
     distributionsToDate: z.number(),
-    project: z.any(),
+    distributionsProjected: z.number(),
+    project: z.object({
+        id: z.number(),
+        name: z.string(),
+        location: z.string(),
+        pictures: z.array(z.object({
+            id: z.number(),
+            type: PictureTypeSchema,
+            url: z.string(),
+        })).nullable(),
+    }),
     financingType: z.enum(["equity", "debt"]),
 });
 export type ReturnsDealStats = z.infer<typeof zReturnsDealStatsSchema>;

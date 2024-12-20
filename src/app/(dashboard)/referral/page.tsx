@@ -17,7 +17,7 @@ import { useUser } from "@clerk/nextjs";
 import { type User } from "@prisma/client";
 import { useQuery } from "@tanstack/react-query";
 import { ReferralSource } from "@/libs/hubspot/utils";
-import { type HubspotContact } from "@/libs/hubspot/schema";
+import { type HubspotContactCreateUpdateSchema } from "@/libs/hubspot/schema";
 
 const normalizeLabel = (label: string) => {
   return label
@@ -55,14 +55,10 @@ const Referral: React.FC = () => {
         throw new Error("User email address not found");
       }
 
-      const hsUser: HubspotContact = {
+      const hsUser: HubspotContactCreateUpdateSchema = {
         email,
-        properties: [
-          {
-            property: "referral_source",
-            value: referralSource,
-          },
-        ],
+        properties:
+          { "referral_source": referralSource },
       };
 
       await axios.put("/api/users/hubspot", hsUser);

@@ -10,7 +10,7 @@ import {
   getEquityPayoutScheduleForDeal,
   readEquityMilestoneData,
 } from "@/libs/returns/utils";
-import type { DealWithInvestmentStatsAndProject } from "@/libs/types";
+import type { DealWithInvestmentStatsAndProjectWithPics } from "@/libs/types";
 import { errorResponse, jsonResponse } from "@/libs/utils";
 import { currentUser } from "@clerk/nextjs/server";
 import { DealFinancingType } from "@prisma/client";
@@ -49,7 +49,7 @@ export async function GET() {
   if (!user) {
     return errorResponse("User not found in database", 404);
   }
-  const deals: DealWithInvestmentStatsAndProject[] = [];
+  const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
   for (const member of user.organizationMember) {
     const org = member.organization;
@@ -97,13 +97,18 @@ export async function GET() {
       dealId: deal.id,
       committedAmount: investmentStats.amount,
       distributionsToDate: 0,
+      distributionsProjected: 0,
       financingType:
         investmentStats.financingType === DealFinancingType.equity
           ? "equity"
           : "debt",
-      project,
+      project: {
+        id: project.id,
+        name: project.name,
+        location: project.location,
+        pictures: project.pictures,
+      },
     };
-
     const todayNumeric = new Date().getTime();
     portfolioStats.principalInvested += investmentStats.amount;
     portfolioStats.portfolioValueToDate += investmentStats.amount;
@@ -136,6 +141,9 @@ export async function GET() {
 
             dealSummary.distributionsToDate +=
               dateObject.equityDistributionsCurrent;
+          } else {
+            dealSummary.distributionsProjected +=
+              dateObject.equityDistributionsCurrent;
           }
           if (!returnsObjectsByDate[dateNo]) {
             returnsObjectsByDate[dateNo] = [dateObject];
@@ -143,7 +151,6 @@ export async function GET() {
             returnsObjectsByDate[dateNo].push(dateObject);
           }
         });
-        return schedule;
       } catch (e) {
         console.error(`Failed to get equity stats for deal ${deal.id}:`);
         console.error(e);
@@ -175,6 +182,9 @@ export async function GET() {
 
           dealSummary.distributionsToDate +=
             dateObject.debtDistributionsCurrent;
+        } else {
+          dealSummary.distributionsProjected +=
+            dateObject.debtDistributionsCurrent;
         }
         if (!returnsObjectsByDate[dateNo]) {
           returnsObjectsByDate[dateNo] = [dateObject];
@@ -192,12 +202,14 @@ export async function GET() {
       );
       return [];
     }
+
+    console.log(`adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`);
     dealStats.push(dealSummary);
-    console.log(`Deal ${deal.id} stats:`, dealSummary);
+    // console.log(`Deal ${deal.id} stats:`, dealSummary);
   });
 
   await Promise.all(resolvedSchedules);
-
+  
   const consolidatedSchedule = [] as ReturnsDateObject[];
   let previousDateObject: ReturnsDateObject | undefined;
 

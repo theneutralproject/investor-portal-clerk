@@ -11,6 +11,7 @@ import {
 } from "@/libs/user/schema";
 import type { MemberWithPartialUser, MemberWithUser } from "@/libs/types";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import { EncryptionCard } from "./EncryptionCard";
 
 const DealFlowCoInvestor: React.FC = () => {
   const {
@@ -56,13 +57,13 @@ const DealFlowCoInvestor: React.FC = () => {
         return prevMembers.map((member, i) =>
           i === index
             ? {
-                ...member,
-                ...(field === "title"
-                  ? { title: value }
-                  : {
-                      user: { ...member.user, [field]: value } as Partial<User>,
-                    }),
-              }
+              ...member,
+              ...(field === "title"
+                ? { title: value }
+                : {
+                  user: { ...member.user, [field]: value } as Partial<User>,
+                }),
+            }
             : member
         );
       });
@@ -162,7 +163,7 @@ const DealFlowCoInvestor: React.FC = () => {
           </Button>
         </Box>
       )}
-
+      <EncryptionCard />
       <DealFlowFooter onBack={() => null} onContinue={nextRoute} />
     </Box>
   );

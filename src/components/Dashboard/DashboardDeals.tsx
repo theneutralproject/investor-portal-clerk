@@ -71,6 +71,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
   };
 
   if (!data?.dealStats.length) return null;
+  console.log(data.dealStats.length);
   return (
     <StyledCard>
       <TableHeader>

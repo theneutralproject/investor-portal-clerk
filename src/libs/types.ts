@@ -50,9 +50,9 @@ export type DealWithInvestmentStats = Deal & {
   investmentStats: DealInvestmentStats;
 };
 
-export type DealWithInvestmentStatsAndProject = Deal & {
+export type DealWithInvestmentStatsAndProjectWithPics = Deal & {
   investmentStats?: DealInvestmentStats | null;
-  project?: (Project & { milestones: ProjectMilestones | null }) | null;
+  project?: (Project & { milestones: ProjectMilestones | null, pictures: ProjectPicture[] | null  }) | null;
 };
 
 export type DealWithOrgMembersAndProject = Deal & {

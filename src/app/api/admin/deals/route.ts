@@ -3,10 +3,14 @@ import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import { DealDocumentType } from "@prisma/client";
+import { DealDocumentType, type Prisma } from "@prisma/client";
 import { storageClient } from "@/libs/supabase";
 
-// get deals by email and project name OR with dealdocument
+/**
+ * can filter by email, projectName, minDealstage (default = 5), includeDealDocument (default = false)
+ * @param request 
+ * @returns 
+ */
 export async function GET(request: NextRequest) {
     const adminUser = await getAdminFromRequest(request);
     if (isError(adminUser)) {
@@ -34,10 +38,10 @@ export async function GET(request: NextRequest) {
     if (includeDealDocument) {
         const allDeals = await prisma.deal.findMany({
             where: {
-                dealStage: { gte: minDealstage },
+                dealStage: { gte: minDealstage, lt: 6 },
             },
             include: {
-                document: {include: {uploadedBy: true}}
+                document: { include: { uploadedBy: true } }
             }
         });
 
@@ -49,46 +53,56 @@ export async function GET(request: NextRequest) {
         }));
     }
 
-    // else return deals by email and project name
-    if (!email || !projectName) {
-        return errorResponse("Missing required query parameters", 400);
-    }
+    let projectId: number | undefined;
+    if (projectName) {
+        const project = await prisma.project.findFirst({
+            where: {
+                name: {
+                    contains: projectName,
+                    mode: "insensitive"
+                },
+            }
+        });
 
-    const project = await prisma.project.findFirst({
-        where: {
-            name: {
-                contains: projectName,
-                mode: "insensitive"
-            },
+        if (!project) {
+            return errorResponse(`Project with name containing ${projectName} not found`, 404);
         }
-    });
-
-    if (!project) {
-        return errorResponse(`Project with name containing ${projectName} not found`, 404);
+        projectId = project.id;
     }
 
-    const owners = await prisma.user.findMany({
-        where: {
-            email: {
-                contains: email,
-                mode: "insensitive"
+    let ownerOrgIds: number[] = [];
+    if (email) {
+        const owners = await prisma.user.findMany({
+            where: {
+                email: {
+                    contains: email,
+                    mode: "insensitive"
+                },
             },
-        },
-        include: { organizationsOwned: true }
-    });
+            include: { organizationsOwned: true }
+        });
 
-    if (!owners?.length) {
-        return errorResponse(`User with email containing ${email} not found`, 404);
+        ownerOrgIds = owners.map(owner => owner.organizationsOwned.map(org => org.id)).flat();
+        if (!ownerOrgIds.length) {
+            return errorResponse(`User with email containing ${email} not found`, 404);
+        }
     }
-    const ownerOrgIds = owners.map(owner => owner.organizationsOwned.map(org => org.id)).flat();
+
+    const where: Prisma.DealWhereInput = {
+        dealStage: { gte: minDealstage, lt: 6 },
+    };
+    if (projectId) {
+        where.projectId = projectId;
+    }
+    if (email) {
+        where.organizationId = { in: ownerOrgIds };
+    }
+
     const deals = await prisma.deal.findMany({
-        where: {
-            organizationId: { in: ownerOrgIds },
-            projectId: project.id,
-            dealStage: { gte: minDealstage }
-        }, include: {
-            organization: true,
-            // project: true
+        where: where,
+        include: {
+            organization: { include: { ownedBy: true } },
+            investmentStats: true,
         }
     });
     return jsonResponse(deals);

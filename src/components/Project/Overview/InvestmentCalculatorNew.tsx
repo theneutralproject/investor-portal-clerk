@@ -120,24 +120,41 @@ const InvestmentCalculatorNew = ({
   const [investment, setInvestment] = useState(100000);
   const [investmentType, setInvestmentType] = useState("Equity");
 
-  const targetTermLength = project.investmentStats.equityTermMonths;
-  const { targetEquityMultiple } = project.investmentStats;
+  const targetTermLengthEquity = project.investmentStats.equityTermMonths;
+  const targetTermLengthDebt = project.investmentStats.debtTermMonthsMax;
+  const { targetEquityMultiple, interestRateMax, interestRateMin, interestRateDollarThreshold } = project.investmentStats;
   const sp_annual_rate = 12.2;
   const reit_annual_rate = 11.3;
 
   const sp500return = Math.round(
-    investment * (1 + (sp_annual_rate / 100) * (targetTermLength / 12))
+    investment * (1 + (sp_annual_rate / 100) * (targetTermLengthEquity / 12))
   );
   const reitReturn = Math.round(
-    investment * (1 + (reit_annual_rate / 100) * (targetTermLength / 12))
+    investment * (1 + (reit_annual_rate / 100) * (targetTermLengthEquity / 12))
   );
-  const totalTargetedReturn = Math.round(investment * targetEquityMultiple);
+  const getDebtInterestRate = () => (investment < interestRateDollarThreshold) ? interestRateMin : interestRateMax;
 
-  const generateChartData = () => {
-    const years = Math.ceil(targetTermLength / 12);
+  const getTargetedReturn = () => {
+    return Math.round(getTargetMultiple() * investment).toLocaleString();
+  }
+
+  const getTargetetTermLength = () => {
+    return investmentType === "Equity"
+      ? targetTermLengthEquity
+      : targetTermLengthDebt;
+  }
+
+  const getTargetMultiple = () => {
+    return investmentType === "Equity"
+      ? targetEquityMultiple
+      : (getDebtInterestRate() * targetTermLengthDebt / 12) / 100 + 1;
+  }
+
+  const generateEquityChartData = () => {
+    const years = Math.ceil(targetTermLengthEquity / 12);
     const data = [];
     const monthlyRate =
-      Math.pow(targetEquityMultiple, 1 / targetTermLength) - 1;
+      Math.pow(targetEquityMultiple, 1 / targetTermLengthEquity) - 1;
     const sp500MonthlyRate = sp_annual_rate / 1200;
     const reitMonthlyRate = reit_annual_rate / 1200;
 
@@ -162,6 +179,43 @@ const InvestmentCalculatorNew = ({
     }
     return data;
   };
+
+  const generateDebtChartData = () => {
+    const years = Math.ceil(targetTermLengthDebt / 12);
+    const data = [];
+    const monthlyRate = getDebtInterestRate() / 1200;
+    const sp500MonthlyRate = sp_annual_rate / 1200;
+    const reitMonthlyRate = reit_annual_rate / 1200;
+console.log('monthlyRate', monthlyRate * 12, sp500MonthlyRate, reitMonthlyRate);
+    for (let year = 0; year <= years; year++) {
+      const months = year * 12;
+      const targetValue = investment * Math.pow(1 + monthlyRate, months);
+      console.log(Math.pow(1 + monthlyRate, months), targetValue,months);
+      const sp500Value = investment * Math.pow(1 + sp500MonthlyRate, months);
+      const reitValue = investment * Math.pow(1 + reitMonthlyRate, months);
+console.log(year, targetValue, sp500Value, reitValue);
+      data.push({
+        year: year === 0 ? "0" : `${year}yrs`,
+        [`${project.name} (Target Return)`]: Number(
+          ((targetValue / investment - 1) * 100).toFixed(1)
+        ),
+        "S&P 500 (Avg.)": Number(
+          ((sp500Value / investment - 1) * 100).toFixed(1)
+        ),
+        "Real Estate Investment Trust (Avg.)": Number(
+          ((reitValue / investment - 1) * 100).toFixed(1)
+        ),
+      });
+    }
+    return data;
+  }
+
+  const getChartData = () => {
+    return investmentType === "Equity"
+      ? generateEquityChartData()
+      : generateDebtChartData();
+  };
+
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInvestment(Number(event.target.value));
@@ -203,31 +257,31 @@ const InvestmentCalculatorNew = ({
           <TextField
             fullWidth
             label="Target Term Length"
-            value={`${targetTermLength} Months`}
+            value={`${getTargetetTermLength()} Months`}
             disabled
           />
 
           <TextField
             fullWidth
             label="Target Equity Multiple"
-            value={`${targetEquityMultiple}x`}
+            value={`${getTargetMultiple()}x`}
             disabled
           />
         </InputGrid>
 
         <Box sx={{ mb: 4 }}>
           <Typography variant="h4" sx={{ mb: 1 }}>
-            ${totalTargetedReturn.toLocaleString()}
+            ${getTargetedReturn()}
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Total target return ({targetTermLength} Mo.)
+            Total target return ({getTargetetTermLength()} Mo.)
           </Typography>
         </Box>
 
         <Box sx={{ width: "100%", height: 400, mb: 3 }}>
           <ResponsiveContainer>
             <AreaChart
-              data={generateChartData()}
+              data={getChartData()}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
