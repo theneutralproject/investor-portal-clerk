@@ -186,14 +186,11 @@ const InvestmentCalculatorNew = ({
     const monthlyRate = getDebtInterestRate() / 1200;
     const sp500MonthlyRate = sp_annual_rate / 1200;
     const reitMonthlyRate = reit_annual_rate / 1200;
-console.log('monthlyRate', monthlyRate * 12, sp500MonthlyRate, reitMonthlyRate);
     for (let year = 0; year <= years; year++) {
       const months = year * 12;
-      const targetValue = investment * Math.pow(1 + monthlyRate, months);
-      console.log(Math.pow(1 + monthlyRate, months), targetValue,months);
+      const targetValue = investment + investment * monthlyRate * months;
       const sp500Value = investment * Math.pow(1 + sp500MonthlyRate, months);
       const reitValue = investment * Math.pow(1 + reitMonthlyRate, months);
-console.log(year, targetValue, sp500Value, reitValue);
       data.push({
         year: year === 0 ? "0" : `${year}yrs`,
         [`${project.name} (Target Return)`]: Number(
@@ -295,46 +292,44 @@ console.log(year, targetValue, sp500Value, reitValue);
                 stackId="1"
                 stroke={theme.palette.success.main}
                 fill={theme.palette.success.light}
-                fillOpacity={0.2}
+                fillOpacity={0.8}
               />
-              <Area
-                type="monotone"
-                dataKey="S&P 500 (Avg.)"
-                stackId="2"
-                stroke={theme.palette.primary.main}
-                fill={theme.palette.primary.light}
-                fillOpacity={0.2}
-              />
-              <Area
-                type="monotone"
-                dataKey="Real Estate Investment Trust (Avg.)"
-                stackId="3"
-                stroke={theme.palette.warning.main}
-                fill={theme.palette.warning.light}
-                fillOpacity={0.2}
-              />
+              {investmentType === "Equity" && (<>
+                <Area
+                  type="monotone"
+                  dataKey="S&P 500 (Avg.)"
+                  stackId="2"
+                  stroke={theme.palette.primary.main}
+                  fill={theme.palette.primary.light}
+                  fillOpacity={0.8} />
+                <Area
+                  type="monotone"
+                  dataKey="Real Estate Investment Trust (Avg.)"
+                  stackId="3"
+                  stroke={theme.palette.warning.main}
+                  fill={theme.palette.warning.light}
+                  fillOpacity={0.8} /></>)}
             </AreaChart>
           </ResponsiveContainer>
         </Box>
 
         <Divider sx={{ mb: 2 }} />
-
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>
-          Compare returns:
-        </Typography>
-
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography color="text.secondary">AVG. S&P 500</Typography>
-            <Typography>${sp500return.toLocaleString()}</Typography>
-          </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Typography color="text.secondary">
-              AVG. Real estate investment trust
-            </Typography>
-            <Typography>${reitReturn.toLocaleString()}</Typography>
-          </Box>
-        </Box>
+        {investmentType === "Equity" && (
+          <><Typography variant="subtitle1" sx={{ mb: 2 }}>
+            Compare returns:
+          </Typography><Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography color="text.secondary">AVG. S&P 500</Typography>
+                <Typography>${sp500return.toLocaleString()}</Typography>
+              </Box>
+              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                <Typography color="text.secondary">
+                  AVG. Real estate investment trust
+                </Typography>
+                <Typography>${reitReturn.toLocaleString()}</Typography>
+              </Box>
+            </Box></>
+        )}
       </CardContent>
     </Card>
   );
