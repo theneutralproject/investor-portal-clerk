@@ -1,7 +1,15 @@
 import React, { useState } from "react";
 import { Button, Modal, Box } from "@mui/material";
 
-function HubspotContactForm({ onExit }: { onExit?: () => void }) {
+type HubspotContactFormProps = {
+  onExit?: () => void;
+  trigger?: React.ReactNode;
+};
+
+export function HubspotContactForm({
+  onExit,
+  trigger,
+}: HubspotContactFormProps) {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -24,18 +32,22 @@ function HubspotContactForm({ onExit }: { onExit?: () => void }) {
     p: 2,
   };
 
+  const defaultTrigger = (
+    <Button
+      variant="neutralBlack"
+      sx={{ p: "4px 20px", borderRadius: "99px" }}
+      fullWidth
+      onClick={() => {
+        handleOpen();
+      }}
+    >
+      Send an Email
+    </Button>
+  );
+
   return (
     <div>
-      <Button
-        variant="neutralBlack"
-        sx={{ p: "4px 20px", borderRadius: "99px" }}
-        fullWidth
-        onClick={() => {
-          handleOpen();
-        }}
-      >
-        Send an Email
-      </Button>
+      {trigger ? <div onClick={handleOpen}>{trigger}</div> : defaultTrigger}
       <Modal
         open={open}
         onClose={handleClose}

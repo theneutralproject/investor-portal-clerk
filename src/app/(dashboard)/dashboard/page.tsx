@@ -41,6 +41,7 @@ const DashboardPage = () => {
       axios
         .get<DealWithOrgMembersAndProject[]>("/api/dashboard/deals")
         .then((res) => res.data),
+    enabled: loggedIn,
   });
 
   if (isLoading || dealsLoading) return <div>Loading...</div>;
@@ -81,7 +82,7 @@ const DashboardPage = () => {
                 <Divider sx={{ mb: 3 }} />
 
                 <DashboardPortfolio loggedIn={loggedIn} />
-                <DashboardDeals deals={dealsData ?? []} />
+                <DashboardDeals loggedIn={loggedIn} />
               </CardContent>
             </Card>
             <DashboardProjects projects={data ?? []} />

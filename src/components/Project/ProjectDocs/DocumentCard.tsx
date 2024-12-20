@@ -1,22 +1,18 @@
 import React from "react";
-import { Box, Card, CardContent, IconButton, Tooltip, Typography } from "@mui/material";
+import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
 import DownloadIcon from "@mui/icons-material/Download";
-import LockedIcon from "@mui/icons-material/Lock";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import LiteYouTubeEmbed from "react-lite-youtube-embed";
 import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
 import { theme } from "@/components/Shell/NeutralThemeProvider";
 import { type DocumentWithCompletion } from "@/app/hooks/useDocuments";
-import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
-import CheckBoxIcon from "@mui/icons-material/CheckBox";
-import BorderColorIcon from '@mui/icons-material/BorderColor';
 
 const DocumentCard = ({
   document,
   dealStage,
   handleViewDocument,
   handleDownloadDocument,
-  handleSignDocument
+  handleSignDocument,
 }: {
   document: DocumentWithCompletion;
   dealStage: number;
@@ -24,20 +20,17 @@ const DocumentCard = ({
   handleDownloadDocument: (document: DocumentWithCompletion) => void;
   handleSignDocument?: (document: DocumentWithCompletion) => void;
 }) => {
-
-  const DOCUSIGN_FLAG = false;
-
   const documentLocked = dealStage < document.dealStage;
 
-  const renderIcon = () => {
-    if (document.completed) {
-      return <CheckBoxIcon sx={{ color: "#626f52" }} />;
-    } else if (documentLocked) {
-      return <LockedIcon />;
-    } else {
-      return <CheckBoxOutlineBlankIcon />;
-    }
-  };
+  // const renderIcon = () => {
+  //   if (document.completed) {
+  //     return <CheckBoxIcon sx={{ color: "#626f52" }} />;
+  //   } else if (documentLocked) {
+  //     return <LockedIcon />;
+  //   } else {
+  //     return <CheckBoxOutlineBlankIcon />;
+  //   }
+  // };
 
   if (document.link.includes("youtube")) {
     const id = document.link.split("v=")[1];
@@ -68,10 +61,10 @@ const DocumentCard = ({
     >
       <Box
         sx={{
-          p: theme.spacing(2),
+          p: theme.spacing(1),
         }}
       >
-        {renderIcon()}
+        {/* {renderIcon()} */}
       </Box>
       <Box
         sx={{
@@ -111,21 +104,6 @@ const DocumentCard = ({
             <DownloadIcon />
           </IconButton>
         )}
-        {
-          DOCUSIGN_FLAG &&
-          document?.link?.toUpperCase().includes("DOCUSIGN") &&
-          (
-            <Tooltip title="Launch Docusign" placement="bottom">
-              <IconButton
-                aria-label="sign document"
-                size="large"
-                onClick={() => {
-                  handleSignDocument && handleSignDocument(document);
-                }}
-              >
-                < BorderColorIcon />
-              </IconButton></Tooltip>
-          )}
       </Box>
     </Card>
   );

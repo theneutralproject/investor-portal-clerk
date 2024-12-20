@@ -1,13 +1,17 @@
 import React from "react";
 import { Box, Card, CardContent, Typography, styled } from "@mui/material";
 import { getProjectPicture } from "./CompleteInvestment";
-import {
-  type DealWithFullOrgAndProject,
-  type DealWithOrgMembersAndProject,
-} from "@/libs/types";
+import type { PortfolioReturnsResponse } from "@/libs/returns/schema";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 
 interface DashboardDealsProps {
-  deals: DealWithOrgMembersAndProject[];
+  loggedIn: boolean;
+}
+
+interface Project {
+  name: string;
+  location: string;
 }
 
 const StyledCard = styled(Card)({
@@ -46,7 +50,17 @@ const StyledHeader = styled(Typography)(({}) => ({
   fontWeight: 500,
 }));
 
-const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
+const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
+  const { data } = useQuery<PortfolioReturnsResponse, Error>({
+    queryKey: ["dashboard", "portfolio"],
+    queryFn: async () => {
+      const response = await axios.get<PortfolioReturnsResponse>(
+        "/api/dashboard/returns"
+      );
+      return response.data;
+    },
+    enabled: loggedIn,
+  });
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -56,6 +70,8 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
     }).format(amount);
   };
 
+  if (!data?.dealStats.length) return null;
+  console.log(data.dealStats.length);
   return (
     <StyledCard>
       <TableHeader>
@@ -65,30 +81,32 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ deals }) => {
         <StyledHeader>Distributions to Date</StyledHeader>
       </TableHeader>
       <CardContent sx={{ p: 0 }}>
-        {deals.map((deal) => {
-          const picture = getProjectPicture(deal as DealWithFullOrgAndProject);
+        {data.dealStats.map((deal) => {
+          if (!deal.project) return null;
+          // @ts-expect-error this mapping is okay
+          const picture = getProjectPicture(deal);
           return (
-            <TableRow key={deal.id}>
+            <TableRow key={deal.dealId}>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <ProjectImage src={picture} alt={deal.project.name} />
+                <ProjectImage src={picture} />
                 <Box>
                   <Typography variant="body1" fontWeight={500}>
-                    {deal.project.name}
+                    {(deal.project as Project)?.name || "Project"}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {deal.project.location}
+                    {(deal.project as Project)?.location || "Location"}
                   </Typography>
                 </Box>
               </Box>
               <Typography variant="body2">
-                {deal.investmentStats?.financingType === "equity"
-                  ? "Equity"
-                  : "Debt"}
+                {deal.financingType === "equity" ? "Equity" : "Debt"}
               </Typography>
               <Typography variant="body2">
-                {formatCurrency(deal.investmentStats?.amount ?? 0)}
+                {formatCurrency(deal.committedAmount)}
               </Typography>
-              <Typography variant="body2">Need data</Typography>
+              <Typography variant="body2">
+                {formatCurrency(deal.distributionsToDate)}
+              </Typography>
             </TableRow>
           );
         })}

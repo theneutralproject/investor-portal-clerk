@@ -3,16 +3,19 @@ import { type NextRequest } from "next/server";
 
 export default authMiddleware({
   ignoredRoutes: [
-    "/api/webhooks/(.*)", 
-    "/api/admin/(.*)", 
-    "/api/docusign/return", 
-    "/api/finix/webhooks", 
-    "api/clerk"
+    "/api/webhooks/(.*)",
+    "/api/admin/(.*)",
+    "/api/docusign/return",
+    "/api/finix/webhooks",
+    "api/clerk",
   ],
   publicRoutes: (req: NextRequest) => {
     const publicRoutes = [
       "/terms",
       "/support",
+      "/dashboard",
+      "/api/projects",
+      "/projects/(.*)",
     ];
 
     // Use exact path matching or proper pattern matching

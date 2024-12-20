@@ -31,8 +31,8 @@ setup("authenticate", async ({ page }) => {
       password: process.env.E2E_CLERK_USER_PASSWORD!,
     },
   });
-  await page.goto("/projects");
-  await page.getByText('All Projects');
+  await page.goto("/dashboard");
+  await page.getByText('Offerings');
   
   const pageContext = await page.context();
   

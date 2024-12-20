@@ -33,10 +33,10 @@ const UserAvatar = () => {
   if (!user) {
     return (
       <Box sx={{ display: "flex", gap: 2 }}>
-        <Link href="https://invest.neutral.us/" passHref>
+        <Link href="/login" passHref>
           <Button variant="neutralYellow">Create account</Button>
         </Link>
-        <Link href="https://invest.neutral.us/" passHref>
+        <Link href="/login" passHref>
           <Button
             variant="text"
             sx={{

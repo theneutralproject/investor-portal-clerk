@@ -10,18 +10,18 @@ const config = {
     return [
       {
         source: "/",
-        destination: "/projects",
+        destination: "/dashboard",
         permanent: true,
       },
     ];
   },
   experimental: {
     missingSuspenseWithCSRBailout: false,
-    serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],
-  }, 
+    serverComponentsExternalPackages: ["docusign-esign", "pdf-parse"],
+  },
   webpack: (config) => {
     config.externals.push({
-      'node:crypto': 'commonjs crypto',
+      "node:crypto": "commonjs crypto",
     });
     return config;
   },

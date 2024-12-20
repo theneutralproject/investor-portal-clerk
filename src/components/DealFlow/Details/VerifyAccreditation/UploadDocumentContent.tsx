@@ -24,6 +24,7 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
     documentList = [
       "Bank statement",
       "Brokerage statement",
+      "Personal Financial Statement (PFS)",
       "Certificate of deposit",
     ];
   } else if (accreditationType?.includes("professional license")) {

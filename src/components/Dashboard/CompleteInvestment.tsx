@@ -153,16 +153,6 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
 
         <Divider sx={{ mb: 2, borderColor: "#3C3C3C" }} />
 
-        <Typography
-          variant="body1"
-          sx={{
-            color: "rgba(255, 255, 255, 0.7)",
-            mb: 2,
-          }}
-        >
-          Add funds to complete your investment
-        </Typography>
-
         {deals
           .filter((deal) => !isDealCompleted(deal.dealStage))
           .sort((a, b) => a.id - b.id)

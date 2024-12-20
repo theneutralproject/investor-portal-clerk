@@ -162,9 +162,8 @@ async function getBuyerId(identity: string, third_party_token: string, slug: str
 
 // transfer with fraud protection and idempotency id
 async function initializeFinixTransfer(deal: DealWithInvestmentStats, merchantId: string, buyerId: string, projectName: string, slug: string, fraudSessionKey: string) {
-    console.log("fraudSessionKey", fraudSessionKey);
     console.log("merchantId", merchantId);
-    const amountInCents = deal.investmentStats.amount * (process.env.NODE_ENV === "production" ? 100 : 1);
+    const amountInCents = deal.investmentStats.amount * 100;
     const achTransferResponse = await fetch(`${process.env.FINIX_BASE_URL!}/transfers`, {
         method: 'POST',
         headers: {

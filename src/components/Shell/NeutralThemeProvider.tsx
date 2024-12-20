@@ -142,10 +142,8 @@ export const theme = createTheme({
           props: { variant: "neutralYellow" },
           style: {
             borderRadius: "56px",
-            background: "#feb800",
-            boxShadow:
-              "0px 1px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.20)",
-            padding: "6px 20px",
+            background: "#dfaf43",
+            padding: "8px 22px",
             color: "#fff",
             "&:hover": {
               backgroundColor: "#E6BF69",

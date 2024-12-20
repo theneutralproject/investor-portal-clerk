@@ -19,36 +19,9 @@ import { type Address } from "@prisma/client";
 import InfoIcon from "@mui/icons-material/Info";
 import LockIcon from "@mui/icons-material/Lock";
 import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import { EncryptionCard } from "./EncryptionCard";
 
-const EncryptionCard = () => {
-  return (
-    <Card>
-      <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <LockIcon sx={{ fontSize: 20, color: "text.secondary" }} />
-          <Typography
-            variant="subtitle1"
-            component="div"
-            sx={{ fontWeight: 500, color: "text.primary" }}
-          >
-            256-Bit Encryption
-          </Typography>
-        </Box>
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mt: 0.5,
-            pl: "28px",
-          }}
-        >
-          Neutral uses industry-standard 256-bit encryption to ensure that your
-          data remains private and secure.
-        </Typography>
-      </CardContent>
-    </Card>
-  );
-};
+
 
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
