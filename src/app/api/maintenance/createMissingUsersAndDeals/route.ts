@@ -17,11 +17,13 @@ import type { DealWithInvestmentStats } from "@/libs/types";
 
 const finishedAsync = promisify(finished);
 
-const projectName: ProjectName = ProjectName["Bakers Place"];
+const projectName: ProjectName = ProjectName["519 W Main"];
+// const projectName: ProjectName = ProjectName["Bakers Place"];
 const filePath = path.join('./seedData', `Investor Cap Table - ${projectName}.csv`);
 
 interface DealRecord {
     V2?: string;
+    addedInV2?: string;
     investorName: string;
     orgName?: string;
     dealHubspotId: string;
@@ -110,10 +112,11 @@ async function getDealsFromCsv() {
                     debtInterestRatePerc: getNumbersFromString(record['PN Unit']),
                     linkToDocumentFolder: record['Link to Documents'],
                     V2: record.V2,
+                    addedInV2: record['Added in V2'],
                     debtMinTerm: getNumbersFromString(record['PN Min Term Months']),
                     debtMaxTerm: getNumbersFromString(record['PN Max Term Months']),
                 }
-                if (dealRecord.V2 === 'TRUE') dealRecords.push(dealRecord);
+                if (dealRecord.V2 === 'TRUE' && dealRecord.addedInV2 !== 'TRUE') dealRecords.push(dealRecord);
                 /* eslint-enable */
             } catch (e) {
                 console.error("unable to create deal record - skipping to next one:\n", e);
@@ -184,21 +187,38 @@ export async function POST() {
         console.log("All deals found in hubspot");
     }
 
+    // find all deals in db
+    const allDBDeals = await prisma.deal.findMany({
+        where: { projectId: 2, dealStage: 5 },
+        // select: { hubspotId: true }
+    });
+    // filter out deals that are already in the db
+    const missingHubspotDeals = hsSearchResults.deals?.filter(hsDeal => !allDBDeals.find(dbDeal => dbDeal.hubspotId === hsDeal.id));
+    const extraDBDeals = allDBDeals.filter(dbDeal => hsSearchResults.deals?.find(hsDeal => hsDeal.id === dbDeal.hubspotId));
+    console.log("missingHubspotDeals:", missingHubspotDeals?.length);
+    console.log(missingHubspotDeals?.map(deal => deal.id));
+    console.log("allDBDeals:", allDBDeals.length);
+    console.log(allDBDeals.map(deal => deal.hubspotId));
+    console.log("extraDBDeals:", extraDBDeals.length);
+    console.log(extraDBDeals.map(deal => deal.hubspotId));
+    // return jsonResponse({ missingHubspotDeals, allDBDeals }, 200);
+
+    
     const newDealsArr: DealWithInvestmentStats[] = [];
     // loop through deals and create missing users and deals
-    let i = 0;
+    let i = -1;
     for await (const dealcontact of hsSearchResults.dealContacts) {
         // create user if not found
+        i++;
+        console.log("i:", i);
         const { email, firstname, lastname, hs_object_id, phone } = dealcontact.contact.properties;
         if (!email || !firstname || !lastname || !hs_object_id) {
             console.error("SKIPPING - deal contact incomplete:", dealcontact.contact);
             continue;
         }
         const cleanPhone = phone?.replace(/\D/g, '');
-
         let dealOwner = await prisma.user.findFirst({ where: { email } });
-        console.log("i:", i);
-        if (i > 10) break;
+        console.log("dealOwner:", dealOwner?.firstName, dealOwner?.lastName);
         if (!dealOwner) {
             try {
                 const clerkUser = await findOrCreateClerkUser(email, firstname, lastname, cleanPhone);
@@ -260,28 +280,37 @@ export async function POST() {
         // potentially create a second org for joint ownership
         let altOrgId: number | undefined;
         if (dealInput.ownershipType !== DealOwnershipType.INDIVIDUAL && dealInput.orgName) {
-            // create an org of this type
-            const orgCreateData = {
-                name: dealInput.orgName.trim(),
-                ownershipType: dealInput.ownershipType,
-                ownerId: dealOwner.id,
-                members: {
-                    create: {
-                        type: MembershipType.OWNER,
-                        userId: dealOwner.id
+
+            // check if org already exists
+            const altOrg = (await prisma.organization.findMany({ where: { ownerId: dealOwner.id } })).filter(org => org.name === dealInput.orgName)[0];
+            if (altOrg) {
+                altOrgId = altOrg.id;
+            }
+            else {
+                // create an org of this type
+                const orgCreateData = {
+                    name: dealInput.orgName.trim(),
+                    ownershipType: dealInput.ownershipType,
+                    ownerId: dealOwner.id,
+                    members: {
+                        create: {
+                            type: MembershipType.OWNER,
+                            userId: dealOwner.id
+                        }
                     }
+                };
+                try {
+                    const newOrg = await prisma.organization.create({
+                        data: orgCreateData
+                    });
+                    altOrgId = newOrg.id;
+                } catch (e) {
+                    console.error("Error creating organization:", e);
                 }
-            };
-            try {
-                const newOrg = await prisma.organization.create({
-                    data: orgCreateData
-                });
-                altOrgId = newOrg.id;
-            } catch (e) {
-                console.error("Error creating organization:", e);
             }
         }
 
+        console.log("Creating deal for user:", dealOwner.firstName, dealOwner.lastName, "deal amount:", dealInput.dealAmount);
         const dealCreateData: DealCreateSchema = {
             amount: dealInput.dealAmount,
             projectId: projectId,
@@ -298,11 +327,14 @@ export async function POST() {
         if (dealInput.debtMinTerm) dealCreateData.debtMinTerm = dealInput.debtMinTerm;
         if (dealInput.debtMaxTerm) dealCreateData.debtMaxTerm = dealInput.debtMaxTerm;
         if (dealInput.debtInterestRatePerc) dealCreateData.debtInterestRatePerc = dealInput.debtInterestRatePerc
-
+        console.log("dealCreateData:", dealCreateData);
+        try{
         const newDeal = await createDealForAdmin(dealCreateData, dealOwner);
         newDealsArr.push(newDeal);
-
-        i++;
+        } catch (e) {
+            console.error("Error creating deal above");
+            continue;
+        }
     }
 
     return jsonResponse(newDealsArr, 201);
