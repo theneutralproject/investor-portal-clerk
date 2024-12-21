@@ -17,7 +17,7 @@ import type { DealWithInvestmentStats } from "@/libs/types";
 
 const finishedAsync = promisify(finished);
 
-const projectName = ProjectName["519 W Main"];
+const projectName: ProjectName = ProjectName["519 W Main"];
 // const projectName: ProjectName = ProjectName["Bakers Place"];
 const filePath = path.join('./seedData', `Investor Cap Table - ${projectName}.csv`);
 
