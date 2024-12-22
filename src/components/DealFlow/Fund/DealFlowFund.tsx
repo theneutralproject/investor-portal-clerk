@@ -1,22 +1,22 @@
-import React, { useState } from "react";
-import { Box, Typography } from "@mui/material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import PaymentProcessing from "@components/DealFlow/Fund/PaymentProcessing";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import FundPlaid from "@components/DealFlow/Fund/FundPlaid";
-import FundCheck from "@components/DealFlow/Fund/FundCheck";
-import FundACH from "@components/DealFlow/Fund/FundACH";
+import React, { useState } from 'react';
+import { Box, Typography } from '@mui/material';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import PaymentProcessing from '@components/DealFlow/Fund/PaymentProcessing';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import FundPlaid from '@components/DealFlow/Fund/FundPlaid';
+import FundCheck from '@components/DealFlow/Fund/FundCheck';
+import FundACH from '@components/DealFlow/Fund/FundACH';
 import {
   getPaymentInfo,
   getMerchantId,
   FundingOptions,
-} from "@components/DealFlow/Fund/FundShared";
-import PaymentComplete from "@components/DealFlow/Fund/PaymentComplete";
+} from '@components/DealFlow/Fund/FundShared';
+import PaymentComplete from '@components/DealFlow/Fund/PaymentComplete';
 
 const DealFlowFund: React.FC = () => {
   const { project, deal } = useDealFlow();
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>('');
   const [showComponent, setShowComponent] = useState(false);
 
   const paymentInfo = getPaymentInfo(project, deal);
@@ -39,16 +39,16 @@ const DealFlowFund: React.FC = () => {
 
   if (showComponent) {
     switch (selectedOption) {
-      case "plaid":
+      case 'plaid':
         return <FundPlaid merchantId={merchantId} />;
-      case "check":
+      case 'check':
         return (
           <FundCheck
             paymentInfo={paymentInfo}
             investmentAmount={investmentAmount}
           />
         );
-      case "wire":
+      case 'wire':
         return (
           <FundACH
             paymentInfo={paymentInfo}

@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, Modal, Box } from "@mui/material";
+import React, { useState } from 'react';
+import { Button, Modal, Box } from '@mui/material';
 
 type HubspotContactFormProps = {
   onExit?: () => void;
@@ -22,20 +22,20 @@ export function HubspotContactForm({
 
   // Styles for the modal to center it
   const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
     width: 500,
     height: 450,
-    bgcolor: "#1b323e",
+    bgcolor: '#1b323e',
     p: 2,
   };
 
   const defaultTrigger = (
     <Button
       variant="neutralBlack"
-      sx={{ p: "4px 20px", borderRadius: "99px" }}
+      sx={{ p: '4px 20px', borderRadius: '99px' }}
       fullWidth
       onClick={() => {
         handleOpen();
@@ -57,7 +57,7 @@ export function HubspotContactForm({
         <Box sx={style}>
           <iframe
             title="hubspot"
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             src="https://share.hsforms.com/1qNeQazGrSMuSu61GfzUWvAedxrp"
           />
         </Box>

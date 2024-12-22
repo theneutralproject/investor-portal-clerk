@@ -1,4 +1,5 @@
 ### Table RLS
+
 Supabase recommends to protect all data using row level security. This way, a user that is making a direct request from the UX to Supabase can only access documents that they are entitled to access, for example if doc.ownerid === userid.
 When creating new tables, we turn on RLS, but we do not write an RLS policy. This means that technically nobody is allowed to read the data from the table.
 

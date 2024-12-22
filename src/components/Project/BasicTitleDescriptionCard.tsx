@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Typography,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const BasicTitleDescriptionAccordion = ({
   title,
@@ -25,8 +25,8 @@ const BasicTitleDescriptionAccordion = ({
       expanded={expanded}
       onChange={handleToggle}
       sx={{
-        border: "1px solid rgba(0, 0, 0, 0.12)",
-        borderRadius: "4px",
+        border: '1px solid rgba(0, 0, 0, 0.12)',
+        borderRadius: '4px',
         mt: 2,
       }}
     >

@@ -1,12 +1,10 @@
-
 // https://medium.com/@philip.andrewweedewang/debounce-hook-in-react-typescript-in-20-lines-of-code-9cde26254d10
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect } from 'react';
 
 type Timer = ReturnType<typeof setTimeout>;
 // eslint-disable-next-line
 type SomeFunction = (...args: any[]) => void;
-
 
 /**
  *

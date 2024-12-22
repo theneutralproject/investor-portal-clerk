@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Typography, Stack } from "@mui/material";
+import React from 'react';
+import { Box, Typography, Stack } from '@mui/material';
 
 interface PortfolioMetricProps {
   value: string;
@@ -17,16 +17,16 @@ const PortfolioMetric: React.FC<PortfolioMetricProps> = ({
       <Box
         sx={{
           width: 4,
-          height: "56px",
+          height: '56px',
           backgroundColor: color,
-          borderRadius: "10px",
+          borderRadius: '10px',
         }}
       />
       <Box>
         <Typography
           variant="h6"
           sx={{
-            fontWeight: "bold",
+            fontWeight: 'bold',
           }}
         >
           {value}

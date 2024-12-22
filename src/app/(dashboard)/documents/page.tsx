@@ -1,5 +1,5 @@
-"use client";
-import React, { useState } from "react";
+'use client';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -18,11 +18,11 @@ import {
   Alert,
   Card,
   CardContent,
-} from "@mui/material";
-import { useQuery } from "@tanstack/react-query";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import { format } from "date-fns";
+} from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import FileDownloadIcon from '@mui/icons-material/FileDownload';
+import { format } from 'date-fns';
 
 interface Document {
   id: number;
@@ -45,20 +45,20 @@ interface DocumentsResponse {
 const handleDownload = async (downloadUrl: string, fileName: string) => {
   try {
     const response = await fetch(downloadUrl);
-    if (!response.ok) throw new Error("Download failed");
+    if (!response.ok) throw new Error('Download failed');
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    const link = document.createElement('a');
     link.href = url;
-    link.setAttribute("download", fileName);
+    link.setAttribute('download', fileName);
     document.body.appendChild(link);
     link.click();
     link.parentNode?.removeChild(link);
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error("Download error:", error);
-    alert("Failed to download the file. Please try again.");
+    console.error('Download error:', error);
+    alert('Failed to download the file. Please try again.');
   }
 };
 
@@ -102,14 +102,14 @@ const DocumentList = ({
     return (
       <Card
         sx={{
-          minHeight: "300px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          minHeight: '300px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <CardContent>
-          <Box sx={{ maxWidth: "800px", textAlign: "center" }}>
+          <Box sx={{ maxWidth: '800px', textAlign: 'center' }}>
             <Typography variant="h6" gutterBottom>
               No Documents
             </Typography>
@@ -126,18 +126,18 @@ const DocumentList = ({
 
   return (
     <Box>
-      {sortedYears.map((year) => (
+      {sortedYears.map(year => (
         <Accordion
           key={year}
           defaultExpanded
           sx={{
             mb: 2,
             boxShadow: 0,
-            border: "1px solid #e0e0e0",
-            borderRadius: "16px",
-            "&.MuiAccordion-root": {
-              "&:before": {
-                display: "none",
+            border: '1px solid #e0e0e0',
+            borderRadius: '16px',
+            '&.MuiAccordion-root': {
+              '&:before': {
+                display: 'none',
               },
             },
           }}
@@ -145,10 +145,10 @@ const DocumentList = ({
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             sx={{
-              bgcolor: "background.default",
-              "& .MuiAccordionSummary-content": {
-                display: "flex",
-                alignItems: "center",
+              bgcolor: 'background.default',
+              '& .MuiAccordionSummary-content': {
+                display: 'flex',
+                alignItems: 'center',
               },
             }}
           >
@@ -172,12 +172,12 @@ const DocumentList = ({
                 </TableRow>
               </TableHead>
               <TableBody>
-                {groupedDocs[year]?.map((doc) => (
+                {groupedDocs[year]?.map(doc => (
                   <TableRow key={doc.id}>
                     <TableCell>{doc.name}</TableCell>
                     <TableCell>{doc.projectName}</TableCell>
                     <TableCell>
-                      {format(new Date(doc.dateCreated), "MMM d, yyyy")}
+                      {format(new Date(doc.dateCreated), 'MMM d, yyyy')}
                     </TableCell>
                     <TableCell align="right">
                       <Button
@@ -206,8 +206,8 @@ const DocumentsPage = () => {
   const [tabValue, setTabValue] = useState(0);
 
   const { data, error, isLoading } = useQuery<DocumentsResponse>({
-    queryKey: ["documents"],
-    queryFn: () => fetch("/api/documents/deal").then((res) => res.json()),
+    queryKey: ['documents'],
+    queryFn: () => fetch('/api/documents/deal').then(res => res.json()),
   });
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
@@ -220,20 +220,20 @@ const DocumentsPage = () => {
         Documents
       </Typography>
 
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
         <Tabs
           value={tabValue}
           onChange={handleTabChange}
           TabIndicatorProps={{
             style: {
-              backgroundColor: "#1c5e20",
+              backgroundColor: '#1c5e20',
             },
           }}
           sx={{
-            "& .MuiTab-root": {
-              color: "text.secondary",
-              "&.Mui-selected": {
-                color: "#1c5e20",
+            '& .MuiTab-root': {
+              color: 'text.secondary',
+              '&.Mui-selected': {
+                color: '#1c5e20',
               },
             },
           }}

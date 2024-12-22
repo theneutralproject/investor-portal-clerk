@@ -1,23 +1,23 @@
-import React, { useState, type ChangeEvent } from "react";
-import { Box, TextField, Autocomplete } from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
-import { useRouter } from "next/navigation";
-import { usStates } from "@/components/DealFlow/Helpers/DealFlowHelpers";
-import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
-import DealFlowFooter from "../Shared/DealFlowFooter";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import { DealDocumentType } from "@prisma/client";
-import { EncryptionCard } from "./EncryptionCard";
+import React, { useState, type ChangeEvent } from 'react';
+import { Box, TextField, Autocomplete } from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { useDealFlow } from '@/components/DealFlow/Shared/DealFlowContext';
+import { useRouter } from 'next/navigation';
+import { usStates } from '@/components/DealFlow/Helpers/DealFlowHelpers';
+import DealFlowDocumentUpload from '@/components/DealFlow/Shared/DealFlowDocumentUpload';
+import DealFlowFooter from '../Shared/DealFlowFooter';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { DealDocumentType } from '@prisma/client';
+import { EncryptionCard } from './EncryptionCard';
 
 const REQUIRED_DOCUMENTS = [
   {
-    display: "Certificate of Formation",
-    key: "organization-certificate-of-formation",
+    display: 'Certificate of Formation',
+    key: 'organization-certificate-of-formation',
   },
   {
-    display: "Operating Agreement",
-    key: "organization-operating-agreement",
+    display: 'Operating Agreement',
+    key: 'organization-operating-agreement',
   },
 ];
 interface FormData {
@@ -28,11 +28,11 @@ interface FormData {
 }
 
 export const formatDate = (date: Date | null | undefined | string): string => {
-  if (!date) return "";
-  if (typeof date === "string") {
-    return date.split("T")[0] ?? "";
+  if (!date) return '';
+  if (typeof date === 'string') {
+    return date.split('T')[0] ?? '';
   }
-  return date.toISOString().split("T")[0] ?? "";
+  return date.toISOString().split('T')[0] ?? '';
 };
 
 const DealFlowEntityDetails: React.FC = () => {
@@ -40,17 +40,17 @@ const DealFlowEntityDetails: React.FC = () => {
   const router = useRouter();
 
   const [formData, setFormData] = useState<FormData>({
-    name: organization?.name ?? "",
-    tin: organization?.tin ?? "",
+    name: organization?.name ?? '',
+    tin: organization?.tin ?? '',
     dateOfCreation: formatDate(organization?.dateOfCreation),
-    juristication: organization?.juristication ?? "",
+    juristication: organization?.juristication ?? '',
   });
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleContinue = async () => {
@@ -68,18 +68,16 @@ const DealFlowEntityDetails: React.FC = () => {
         );
       }
     } catch (error) {
-      console.error("Error updating organization:", error);
+      console.error('Error updating organization:', error);
     }
   };
 
   const allRequiredDocumentsAreUploaded = () => {
     const orgDocuments = organization?.document ?? [];
-    const requiredKeys = REQUIRED_DOCUMENTS.map((doc) => doc.key);
+    const requiredKeys = REQUIRED_DOCUMENTS.map(doc => doc.key);
 
-    const hasAllRequired = requiredKeys.every((requiredKey) => {
-      const matchingDocs = orgDocuments.filter(
-        (doc) => doc.key === requiredKey
-      );
+    const hasAllRequired = requiredKeys.every(requiredKey => {
+      const matchingDocs = orgDocuments.filter(doc => doc.key === requiredKey);
       return matchingDocs.length > 0;
     });
 
@@ -132,7 +130,7 @@ const DealFlowEntityDetails: React.FC = () => {
         <Grid size={6}>
           <Autocomplete
             options={usStates}
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
                 label="Jurisdiction of Registration"
@@ -149,7 +147,7 @@ const DealFlowEntityDetails: React.FC = () => {
             value={formData.juristication}
             onChange={(_, newValue) =>
               handleInputChange({
-                target: { name: "juristication", value: newValue ?? "" },
+                target: { name: 'juristication', value: newValue ?? '' },
               } as React.ChangeEvent<HTMLInputElement>)
             }
           />

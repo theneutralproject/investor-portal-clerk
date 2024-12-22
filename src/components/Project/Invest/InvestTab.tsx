@@ -1,20 +1,20 @@
 /* eslint-disable */
-import React, { useState } from "react";
-import { Box, Typography, Card, CardContent } from "@mui/material";
-import DocumentCard from "../ProjectDocs/DocumentCard";
+import React, { useState } from 'react';
+import { Box, Typography, Card, CardContent } from '@mui/material';
+import DocumentCard from '../ProjectDocs/DocumentCard';
 import useDocuments, {
   type DocumentWithCompletion,
-} from "@/app/hooks/useDocuments";
-import { DocumentType, type Project } from "@prisma/client";
-import { theme } from "@/components/Shell/NeutralThemeProvider";
-import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
-import { useDebounce } from "@/app/hooks/useDebounce";
-import { useUser } from "@clerk/nextjs";
-import axios from "axios";
-import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
-import type { DocusignEnvelopeCreateSchema } from "@/libs/docusign/schema";
-import { DealWithInvestmentStats } from "@/libs/types";
-import { UserResource } from "@clerk/types";
+} from '@/app/hooks/useDocuments';
+import { DocumentType, type Project } from '@prisma/client';
+import { theme } from '@/components/Shell/NeutralThemeProvider';
+import DocumentViewerModal from '../ProjectDocs/DocumentViewerModal';
+import { useDebounce } from '@/app/hooks/useDebounce';
+import { useUser } from '@clerk/nextjs';
+import axios from 'axios';
+import { updateHubspotDealDocsAccessed } from '@/libs/hubspot/utils';
+import type { DocusignEnvelopeCreateSchema } from '@/libs/docusign/schema';
+import { DealWithInvestmentStats } from '@/libs/types';
+import { UserResource } from '@clerk/types';
 
 export const createDocusignEnvelope = async (
   envelopeId: string,
@@ -23,7 +23,7 @@ export const createDocusignEnvelope = async (
 ) => {
   const url = `/api/docusign`;
   if (!user) {
-    console.log("!user");
+    console.log('!user');
     return null;
   }
   const body: DocusignEnvelopeCreateSchema = {
@@ -31,17 +31,16 @@ export const createDocusignEnvelope = async (
     templateId: envelopeId,
   };
 
-  const docusignResponse = await axios.post(url, body).catch((error) => {
+  const docusignResponse = await axios.post(url, body).catch(error => {
     if (error.response) {
-      console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n", error.response);
-    }
-    else{
-      console.log("\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n", error);
+      console.log('\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n', error.response);
+    } else {
+      console.log('\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n', error);
     }
     return error;
   });
   if (docusignResponse?.data?.consentUrl) {
-    console.log("must authenticate using consentUrl");
+    console.log('must authenticate using consentUrl');
     window.location.assign(docusignResponse.data.consentUrl);
   }
 
@@ -74,13 +73,13 @@ export const InvestTab: React.FC<{
     75000
   );
 
-  const [modelOpenType, setModelOpenType] = useState("");
+  const [modelOpenType, setModelOpenType] = useState('');
   const [currentDocument, setCurrentDocument] =
     useState<DocumentWithCompletion | null>(null);
 
   const handleViewDocument = (document: DocumentWithCompletion) => {
     setCurrentDocument(document);
-    setModelOpenType("DOCUMENT");
+    setModelOpenType('DOCUMENT');
   };
 
   const handleSignDocument = (document: DocumentWithCompletion) => {
@@ -92,7 +91,7 @@ export const InvestTab: React.FC<{
     ) {
       createDocusignEnvelope(document.docusignTemplateId, deal.id, user);
     } else {
-      setModelOpenType("DOCUMENT");
+      setModelOpenType('DOCUMENT');
     }
   };
 
@@ -100,13 +99,13 @@ export const InvestTab: React.FC<{
     if (!document?.completed) {
       documentEventMutation.mutate({
         documentId: document?.id,
-        type: "DOWNLOAD",
+        type: 'DOWNLOAD',
       });
       const documentNames = [
         ...[document],
-        ...data.filter((doc) => doc.completed),
+        ...data.filter(doc => doc.completed),
       ]
-        .map((doc) => doc.name)
+        .map(doc => doc.name)
         .toString();
       updateHubspotDealDocs({
         dealId: parseInt(deal.hubspotId, 10),
@@ -114,23 +113,23 @@ export const InvestTab: React.FC<{
         documentNames: documentNames,
       });
     }
-    window.open(document.link, "_blank");
+    window.open(document.link, '_blank');
   };
 
   const handleCloseModal = () => {
-    setModelOpenType("");
+    setModelOpenType('');
     if (currentDocument != null) {
       documentEventMutation.mutate({
         documentId: currentDocument.id,
-        type: "VIEW",
+        type: 'VIEW',
       });
 
       // add current doc to list of already read docs and notify hubspot webhook about this event
       const documentNames = [
         ...[currentDocument],
-        ...data.filter((doc) => doc.completed),
+        ...data.filter(doc => doc.completed),
       ]
-        .map((doc) => doc?.name)
+        .map(doc => doc?.name)
         .toString();
       updateHubspotDealDocs({
         dealId: parseInt(deal.hubspotId, 10),
@@ -172,7 +171,7 @@ export const InvestTab: React.FC<{
 
           {currentDocument?.link && (
             <DocumentViewerModal
-              open={modelOpenType === "DOCUMENT"}
+              open={modelOpenType === 'DOCUMENT'}
               onClose={handleCloseModal}
               fileUrl={currentDocument.link}
             />

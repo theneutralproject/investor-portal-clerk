@@ -1,11 +1,11 @@
-import React from "react";
-import { Box, Grid, Typography, Divider } from "@mui/material";
-import { type Decimal } from "@prisma/client/runtime/library";
-import type { ProjectWithStats } from "@/libs/types";
-import type { ProjectInvestmentStats } from "@prisma/client";
+import React from 'react';
+import { Box, Grid, Typography, Divider } from '@mui/material';
+import { type Decimal } from '@prisma/client/runtime/library';
+import type { ProjectWithStats } from '@/libs/types';
+import type { ProjectInvestmentStats } from '@prisma/client';
 
-const formatter = Intl.NumberFormat("en", {
-  notation: "compact",
+const formatter = Intl.NumberFormat('en', {
+  notation: 'compact',
   maximumFractionDigits: 1,
 });
 
@@ -23,10 +23,10 @@ export const LineDisplay = ({
     marginTop={2}
   >
     <Typography variant="body2">{name}:</Typography>
-    {typeof value === "string" || typeof value === "number" ? (
+    {typeof value === 'string' || typeof value === 'number' ? (
       <Typography
         variant="body2"
-        sx={{ color: "#000000DE", fontWeight: "600" }}
+        sx={{ color: '#000000DE', fontWeight: '600' }}
       >
         {value}
       </Typography>
@@ -75,7 +75,7 @@ const getEquitySummaryBox = (data: ProjectWithStats) => {
     );
   }
   return (
-    <Grid container spacing={2} sx={{ alignItems: "stretch", height: "100%" }}>
+    <Grid container spacing={2} sx={{ alignItems: 'stretch', height: '100%' }}>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Equity Returns</Typography>
         <LineDisplay name="IRR" value={`${data.investmentStats.equityIRR}%`} />
@@ -102,9 +102,9 @@ const getEquitySummaryBox = (data: ProjectWithStats) => {
         item
         xs={12}
         sm={1}
-        sx={{ display: { xs: "none", sm: "flex" }, justifyContent: "center" }}
+        sx={{ display: { xs: 'none', sm: 'flex' }, justifyContent: 'center' }}
       >
-        <Divider orientation="vertical" flexItem sx={{ height: "100%" }} />
+        <Divider orientation="vertical" flexItem sx={{ height: '100%' }} />
       </Grid>
       <Grid item xs={12} sm={5.5}>
         <Typography variant="body1">Debt Returns</Typography>

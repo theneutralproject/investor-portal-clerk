@@ -1,41 +1,41 @@
-import prisma from "@/libs/prisma.server";
-import { currentUser } from "@clerk/nextjs/server";
-import type { NextRequest } from "next/server";
+import prisma from '@/libs/prisma.server';
+import { currentUser } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
-} from "../../../libs/deal/schema";
-import { jsonResponse } from "@/libs/utils";
-import { createDealForUser, updateDeal } from "@/libs/deal/utils.server";
+} from '../../../libs/deal/schema';
+import { jsonResponse } from '@/libs/utils';
+import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 /**
- * 
- * @param request 
+ *
+ * @param request
  * @returns Deal for a given project, if the user is a member of the organization that owns the deal
  */
 export async function GET(request: NextRequest) {
   const url = new URL(request.url);
-  const slug = new URLSearchParams(url.search).get("slug");
+  const slug = new URLSearchParams(url.search).get('slug');
 
   if (!slug) {
-    return jsonResponse({ error: "Project slug is required" }, 400);
+    return jsonResponse({ error: 'Project slug is required' }, 400);
   }
 
   try {
     const clerkUser = await currentUser();
     if (!clerkUser) {
-      return jsonResponse({ error: "User not found" }, 404);
+      return jsonResponse({ error: 'User not found' }, 404);
     }
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: clerkUser.id },
     });
     if (!dbUser) {
-      console.error("Neutral user not found in api/deals");
+      console.error('Neutral user not found in api/deals');
       return jsonResponse(
         {
           error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
@@ -61,22 +61,31 @@ export async function GET(request: NextRequest) {
     });
 
     const deals = await prisma.deal.findMany({
-      where: { organizationId: { in: userOrgs.map((org) => org.id) }, projectId: project.id },
-      include: { investmentStats: true }
+      where: {
+        organizationId: { in: userOrgs.map(org => org.id) },
+        projectId: project.id,
+      },
+      include: { investmentStats: true },
     });
 
     if (!deals || deals.length === 0) {
       return jsonResponse(null, 200); // Valid return with no deals found
     }
 
-
     // only return deals for organizations (1) that the user is the owner of, or (2) that are completed, and the user is a member of its organization
-    return jsonResponse(deals.filter(deal => deal.dealStage === 5 || userOrgs.some(org => org.id === deal.organizationId && org.ownerId === dbUser.id))[0] ?? null);
-
+    return jsonResponse(
+      deals.filter(
+        deal =>
+          deal.dealStage === 5 ||
+          userOrgs.some(
+            org => org.id === deal.organizationId && org.ownerId === dbUser.id
+          )
+      )[0] ?? null
+    );
   } catch (error) {
     const errorMessage = (error as Error).message;
     console.error(errorMessage);
-    return jsonResponse({ error: "Error fetching data: " + errorMessage }, 500);
+    return jsonResponse({ error: 'Error fetching data: ' + errorMessage }, 500);
   }
 }
 
@@ -84,14 +93,19 @@ export async function POST(request: NextRequest) {
   try {
     const user = await currentUser();
     if (!user) {
-      return jsonResponse({ error: "User not found" }, 404);
+      return jsonResponse({ error: 'User not found' }, 404);
     }
 
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: user.id },
     });
     if (!dbUser) {
-      return jsonResponse({ error: `User record with clerkid ${user.id} not found in prisma (POST)` }, 404);
+      return jsonResponse(
+        {
+          error: `User record with clerkid ${user.id} not found in prisma (POST)`,
+        },
+        404
+      );
     }
 
     const requestBody = (await request.json()) as DealCreateSchema;
@@ -99,14 +113,14 @@ export async function POST(request: NextRequest) {
     try {
       dealData = zDealCreateSchema.parse(requestBody);
     } catch (parseError) {
-      console.error("ERROR: unable to parse POST body:\n", parseError);
-      return jsonResponse({ error: "Input data malformatted" }, 400);
+      console.error('ERROR: unable to parse POST body:\n', parseError);
+      return jsonResponse({ error: 'Input data malformatted' }, 400);
     }
 
     // only create a deal if the user is the owner of the organization
     if (dealData.organizationId) {
       const org = await prisma.organization.findFirst({
-        where: { id: dealData.organizationId, ownerId: dbUser.id }
+        where: { id: dealData.organizationId, ownerId: dbUser.id },
       });
       if (!org) {
         return jsonResponse(
@@ -121,17 +135,17 @@ export async function POST(request: NextRequest) {
     if (!dealData.organizationId) {
       // use the default organization:
       const userOrg = await prisma.organization.findFirst({
-        where: { ownerId: dbUser.id }
+        where: { ownerId: dbUser.id },
       });
       if (userOrg) {
         dealData.organizationId = userOrg.id;
-      }
-      else return jsonResponse(
-        {
-          error: `Deal cannot be created. No Owner Org was found for the User w ID ${dbUser.id}`,
-        },
-        500
-      );
+      } else
+        return jsonResponse(
+          {
+            error: `Deal cannot be created. No Owner Org was found for the User w ID ${dbUser.id}`,
+          },
+          500
+        );
     }
 
     const deal = await createDealForUser(dealData, dbUser);
@@ -145,26 +159,27 @@ export async function POST(request: NextRequest) {
 
 /**
  * Update a deal in the DB, and also trigger a deal update in hubspot
- * @param request 
+ * @param request
  * @returns updated Deal
  */
 export async function PUT(request: NextRequest) {
   try {
     // const dealData = await request.json() as DealUpdateSchema;
 
-    const requestBody = await request.json() as DealUpdateSchema;
+    const requestBody = (await request.json()) as DealUpdateSchema;
     // parse the date strings into Date objects for zod to validate
     if (requestBody.closingDate) {
-      requestBody.closingDate = new Date(Date.parse(requestBody.closingDate.toString()));
+      requestBody.closingDate = new Date(
+        Date.parse(requestBody.closingDate.toString())
+      );
     }
 
     let deal: DealUpdateSchema;
     try {
       deal = zDealUpdateSchema.parse(requestBody);
-
     } catch (parseError) {
-      console.error("ERROR: unable to parse PUT body:\n", parseError);
-      return jsonResponse({ error: "Input data malformatted" }, 400);
+      console.error('ERROR: unable to parse PUT body:\n', parseError);
+      return jsonResponse({ error: 'Input data malformatted' }, 400);
     }
 
     // also update the deal in hubspot:
@@ -172,7 +187,7 @@ export async function PUT(request: NextRequest) {
 
     return jsonResponse(updatedDeal);
   } catch (error) {
-    console.error("Error updating deal:", error);
-    return jsonResponse({ error: "Error updating deal" }, 500);
+    console.error('Error updating deal:', error);
+    return jsonResponse({ error: 'Error updating deal' }, 500);
   }
 }

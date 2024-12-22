@@ -1,7 +1,7 @@
-import React from "react";
-import { Box, Typography, Button } from "@mui/material";
-import { useRouter } from "next/navigation";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+import React from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 
 const ReviewingInvestment: React.FC = () => {
   const router = useRouter();
@@ -16,7 +16,7 @@ const ReviewingInvestment: React.FC = () => {
         progress, investment updates, and more.
       </Typography>
 
-      <Button variant="neutralBlack" onClick={() => router.push("/dashboard")}>
+      <Button variant="neutralBlack" onClick={() => router.push('/dashboard')}>
         Back to Dashboard
       </Button>
     </Box>

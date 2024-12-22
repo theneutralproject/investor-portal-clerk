@@ -1,6 +1,10 @@
-import { DealOwnershipType, DealFinancingType, DealUnitType, PaymentMethod } from "@prisma/client";
-import { z } from "zod";
-
+import {
+  DealOwnershipType,
+  DealFinancingType,
+  DealUnitType,
+  PaymentMethod,
+} from '@prisma/client';
+import { z } from 'zod';
 
 export const zDealInvestmentStatsUpdateSchema = z.object({
   amount: z.number().optional(),
@@ -12,7 +16,9 @@ export const zDealInvestmentStatsUpdateSchema = z.object({
   shareOfEquity: z.number().min(0).optional(),
 });
 
-export type DealInvestmentStatsUpdateSchema = z.infer<typeof zDealInvestmentStatsUpdateSchema>;
+export type DealInvestmentStatsUpdateSchema = z.infer<
+  typeof zDealInvestmentStatsUpdateSchema
+>;
 
 // always look up a deal by hubspotId
 export const zDealUpdateSchema = z.object({
@@ -24,7 +30,10 @@ export const zDealUpdateSchema = z.object({
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
-  dateFundsSent: z.date().or(z.string().transform(str => new Date(str))).nullish(),
+  dateFundsSent: z
+    .date()
+    .or(z.string().transform(str => new Date(str)))
+    .nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
 });
@@ -41,7 +50,10 @@ export const zDealCreateSchema = z.object({
   transactionId: z.string().nullish(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
-  dateFundsSent: z.date().or(z.string().transform(str => new Date(str))).nullish(),
+  dateFundsSent: z
+    .date()
+    .or(z.string().transform(str => new Date(str)))
+    .nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
   debtMinTerm: z.number().int().nullish(),

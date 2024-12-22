@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -9,17 +9,17 @@ import {
   CircularProgress,
   Paper,
   Divider,
-} from "@mui/material";
-import { Upload, Check, X, FileText } from "lucide-react";
-import { useDealFlow } from "./DealFlowContext";
+} from '@mui/material';
+import { Upload, Check, X, FileText } from 'lucide-react';
+import { useDealFlow } from './DealFlowContext';
 import {
   type OrganizationDocument,
   type DealDocument,
   type DealDocumentType,
-} from "@prisma/client";
+} from '@prisma/client';
 
-type UploadStatus = "uploading" | "success" | "error";
-type DocumentType = "organization" | "deal";
+type UploadStatus = 'uploading' | 'success' | 'error';
+type DocumentType = 'organization' | 'deal';
 
 interface Document {
   display: string;
@@ -51,7 +51,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
   const [uploadState, setUploadState] = useState<UploadState>(() => {
     const initial: UploadState = {};
-    documents.forEach((doc) => {
+    documents.forEach(doc => {
       initial[doc.key] = [];
     });
     return initial;
@@ -59,7 +59,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
   const resetUploadState = useCallback(() => {
     const initial: UploadState = {};
-    documents.forEach((doc) => {
+    documents.forEach(doc => {
       initial[doc.key] = [];
     });
     setUploadState(initial);
@@ -68,8 +68,8 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   const handleFileUpload = useCallback(
     async (key: string, file: File, formData: FormData): Promise<void> => {
       try {
-        const response = await fetch("/api/documents", {
-          method: "POST",
+        const response = await fetch('/api/documents', {
+          method: 'POST',
           body: formData,
         });
 
@@ -78,13 +78,13 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
         if (!response.ok) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-          throw new Error(responseData?.error || "Upload failed");
+          throw new Error(responseData?.error || 'Upload failed');
         }
 
-        setUploadState((prev) => ({
+        setUploadState(prev => ({
           ...prev,
-          [key]: (prev[key] ?? []).map((item) =>
-            item.file === file ? { ...item, status: "success" as const } : item
+          [key]: (prev[key] ?? []).map(item =>
+            item.file === file ? { ...item, status: 'success' as const } : item
           ),
         }));
 
@@ -94,15 +94,15 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
         await refetchDeal();
         resetUploadState();
       } catch (error) {
-        setUploadState((prev) => ({
+        setUploadState(prev => ({
           ...prev,
-          [key]: (prev[key] ?? []).map((item) =>
+          [key]: (prev[key] ?? []).map(item =>
             item.file === file
               ? {
                   ...item,
-                  status: "error" as const,
+                  status: 'error' as const,
                   error:
-                    error instanceof Error ? error.message : "Upload failed",
+                    error instanceof Error ? error.message : 'Upload failed',
                 }
               : item
           ),
@@ -115,11 +115,11 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   const handleFileSelect = useCallback(
     async (key: string, file: File) => {
       if (!organization?.id || !deal?.id) {
-        console.error("Missing organization or deal ID");
+        console.error('Missing organization or deal ID');
         return;
       }
 
-      console.log("File select triggered:", {
+      console.log('File select triggered:', {
         key,
         fileName: file.name,
         fileSize: file.size,
@@ -127,25 +127,25 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       });
 
       // Update state immediately for UI feedback
-      setUploadState((prev) => ({
+      setUploadState(prev => ({
         ...prev,
         [key]: [
           ...(prev[key] ?? []),
           {
             file,
-            status: "uploading",
+            status: 'uploading',
           },
         ],
       }));
 
       // Prepare form data
       const formData = new FormData();
-      formData.append("file", file);
-      formData.append("type", type);
-      formData.append("organizationId", organization.id.toString());
-      formData.append("key", key);
-      formData.append("dealId", deal.id.toString());
-      formData.append("dealDocumentType", dealDocumentType ?? "");
+      formData.append('file', file);
+      formData.append('type', type);
+      formData.append('organizationId', organization.id.toString());
+      formData.append('key', key);
+      formData.append('dealId', deal.id.toString());
+      formData.append('dealDocumentType', dealDocumentType ?? '');
       // Start upload process
       void handleFileUpload(key, file, formData);
     },
@@ -153,19 +153,19 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   );
 
   const handleRemoveFile = useCallback((key: string, fileToRemove: File) => {
-    setUploadState((prev) => ({
+    setUploadState(prev => ({
       ...prev,
-      [key]: (prev[key] ?? []).filter((item) => item.file !== fileToRemove),
+      [key]: (prev[key] ?? []).filter(item => item.file !== fileToRemove),
     }));
   }, []);
 
   const getExistingDocuments = useCallback(
     (key: string): Partial<DocumentTypes>[] => {
-      if (type === "organization") {
-        return (organization?.document?.filter((doc) => doc.key === key) ||
+      if (type === 'organization') {
+        return (organization?.document?.filter(doc => doc.key === key) ||
           []) as Partial<OrganizationDocument>[];
       } else {
-        return (deal?.document?.filter((doc) => doc.type === key) ||
+        return (deal?.document?.filter(doc => doc.type === key) ||
           []) as Partial<DealDocument>[];
       }
     },
@@ -174,13 +174,13 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
   const renderUploadStatus = useCallback((upload: FileUploadState) => {
     switch (upload.status) {
-      case "uploading":
+      case 'uploading':
         return <CircularProgress size={20} sx={{ ml: 1 }} />;
-      case "success":
+      case 'success':
         return <Check size={20} color="green" style={{ marginLeft: 8 }} />;
-      case "error":
+      case 'error':
         return (
-          <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Typography variant="caption" color="error" sx={{ mr: 1 }}>
               {upload.error}
             </Typography>
@@ -198,9 +198,9 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       existingDocs: Partial<DocumentTypes>[],
       currentUploads: FileUploadState[]
     ) => (
-      <Paper key={doc.key} elevation={1} sx={{ mb: 2, overflow: "hidden" }}>
-        <Box sx={{ p: 2, bgcolor: "grey.50" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "medium" }}>
+      <Paper key={doc.key} elevation={1} sx={{ mb: 2, overflow: 'hidden' }}>
+        <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 'medium' }}>
             {doc.display}
           </Typography>
         </Box>
@@ -210,7 +210,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
         {existingDocs.length > 0 && (
           <Box>
             <List dense>
-              {existingDocs.map((existingDoc) => (
+              {existingDocs.map(existingDoc => (
                 <ListItem
                   key={existingDoc.id}
                   sx={{
@@ -236,12 +236,12 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
                 <ListItem
                   key={`${upload.file.name}-${uploadIndex}`}
                   sx={{
-                    bgcolor: "grey.50",
+                    bgcolor: 'grey.50',
                     borderRadius: 1,
                     mb: 0.5,
                   }}
                 >
-                  <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', flex: 1 }}>
                     <FileText size={16} style={{ marginRight: 8 }} />
                     <Typography variant="body2">{upload.file.name}</Typography>
                   </Box>
@@ -261,7 +261,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           </Box>
         )}
 
-        <Box sx={{ p: 2, bgcolor: "grey.50" }}>
+        <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
           <Button
             variant="blackPill"
             component="label"
@@ -273,7 +273,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
               type="file"
               hidden
               accept=".pdf,.png,.jpg,.jpeg"
-              onChange={(e) => {
+              onChange={e => {
                 const file = e.target.files?.[0];
                 if (file) {
                   void handleFileSelect(doc.key, file);
@@ -289,8 +289,8 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
   return (
     <Box sx={{ mt: 3 }}>
-      <List sx={{ width: "100%" }}>
-        {documents.map((doc) => {
+      <List sx={{ width: '100%' }}>
+        {documents.map(doc => {
           const existingDocs = getExistingDocuments(doc.key);
           const currentUploads = uploadState[doc.key] ?? [];
           return renderDocumentSection(doc, existingDocs, currentUploads);

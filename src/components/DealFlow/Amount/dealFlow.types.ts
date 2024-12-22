@@ -14,7 +14,7 @@ export interface InvestmentStatsSummary {
   totalNetReturn: number;
 }
 
-export type ViewMode = "distribution" | "multiple";
+export type ViewMode = 'distribution' | 'multiple';
 
 export interface ChartConfig {
   dataKey: string;

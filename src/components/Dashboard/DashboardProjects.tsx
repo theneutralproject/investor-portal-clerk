@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Card,
@@ -9,15 +9,15 @@ import {
   styled,
   Divider,
   LinearProgress,
-} from "@mui/material";
-import { type ProjectWithAllNestedData } from "@/libs/types";
+} from '@mui/material';
+import { type ProjectWithAllNestedData } from '@/libs/types';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
   padding: theme.spacing(3),
-  boxShadow: "none",
-  transition: "box-shadow 0.2s",
-  "&:hover": {
+  boxShadow: 'none',
+  transition: 'box-shadow 0.2s',
+  '&:hover': {
     boxShadow: theme.shadows[4],
   },
 }));
@@ -26,18 +26,18 @@ const ProjectImage = styled(Box)(({ theme }) => ({
   width: 120,
   height: 120,
   borderRadius: theme.shape.borderRadius,
-  overflow: "hidden",
-  "& img": {
-    width: "100%",
-    height: "100%",
-    objectFit: "cover",
+  overflow: 'hidden',
+  '& img': {
+    width: '100%',
+    height: '100%',
+    objectFit: 'cover',
   },
 }));
 
 const ProjectMetric = styled(Box)(({ theme }) => ({
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "flex-start",
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'flex-start',
   gap: theme.spacing(0.5),
 }));
 
@@ -49,8 +49,8 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
   const formatNumber = (num: number) =>
     num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
 
-  const getHeaderImage = (pictures: ProjectWithAllNestedData["pictures"]) => {
-    const headerImage = pictures.find((pic) => pic.type === "HEADER")?.url;
+  const getHeaderImage = (pictures: ProjectWithAllNestedData['pictures']) => {
+    const headerImage = pictures.find(pic => pic.type === 'HEADER')?.url;
     return headerImage ?? pictures[0]?.url;
   };
 
@@ -58,14 +58,14 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
     Math.min((raised / goal) * 100, 100);
 
   return (
-    <Card sx={{ borderRadius: "8px", mt: 2 }}>
+    <Card sx={{ borderRadius: '8px', mt: 2 }}>
       <CardContent>
-        <Typography variant="h6" sx={{ fontSize: "20px", mb: 2 }}>
+        <Typography variant="h6" sx={{ fontSize: '20px', mb: 2 }}>
           Offerings
         </Typography>
         <Divider sx={{ mb: 2 }} />
 
-        {projects.map((project) => {
+        {projects.map(project => {
           const headerImage = getHeaderImage(project.pictures);
           const fundingProgress = calculateFundingProgress(
             project.investmentStats.investmentRaised,
@@ -88,9 +88,9 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                 <Grid item xs>
                   <Box
                     sx={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
                       mb: 2,
                     }}
                   >
@@ -111,7 +111,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                     </Button>
                   </Box>
 
-                  <Box sx={{ display: "flex", gap: 6, mb: 1 }}>
+                  <Box sx={{ display: 'flex', gap: 6, mb: 1 }}>
                     <ProjectMetric>
                       <Typography variant="h6">
                         {formatNumber(project.investmentStats.equityIRR)}%
@@ -158,10 +158,10 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                     sx={{
                       height: 4,
                       borderRadius: 2,
-                      backgroundColor: "grey.200",
-                      "& .MuiLinearProgress-bar": {
+                      backgroundColor: 'grey.200',
+                      '& .MuiLinearProgress-bar': {
                         borderRadius: 2,
-                        backgroundColor: "#2f7d32",
+                        backgroundColor: '#2f7d32',
                       },
                     }}
                   />

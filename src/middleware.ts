@@ -1,28 +1,28 @@
-import { authMiddleware, redirectToSignUp } from "@clerk/nextjs";
-import { type NextRequest } from "next/server";
+import { authMiddleware, redirectToSignUp } from '@clerk/nextjs';
+import { type NextRequest } from 'next/server';
 
 export default authMiddleware({
   ignoredRoutes: [
-    "/api/webhooks/(.*)",
-    "/api/admin/(.*)",
-    "/api/docusign/return",
-    "/api/finix/webhooks",
-    "api/clerk",
+    '/api/webhooks/(.*)',
+    '/api/admin/(.*)',
+    '/api/docusign/return',
+    '/api/finix/webhooks',
+    'api/clerk',
   ],
   publicRoutes: (req: NextRequest) => {
     const publicRoutes = [
-      "/terms",
-      "/support",
-      "/dashboard",
-      "/api/projects",
-      "/projects/(.*)",
+      '/terms',
+      '/support',
+      '/dashboard',
+      '/api/projects',
+      '/projects/(.*)',
     ];
 
     // Use exact path matching or proper pattern matching
-    return publicRoutes.some((route) => {
-      if (route.includes("(.*)")) {
+    return publicRoutes.some(route => {
+      if (route.includes('(.*)')) {
         // For wildcard routes, convert to regex
-        const pattern = new RegExp(`^${route.replace("(.*)", ".*")}$`);
+        const pattern = new RegExp(`^${route.replace('(.*)', '.*')}$`);
         return pattern.test(req.nextUrl.pathname);
       }
       // For exact routes, use exact matching
@@ -33,9 +33,9 @@ export default authMiddleware({
   // eslint-disable-next-line consistent-return
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
-      console.log("not logged in:", _req.url);
+      console.log('not logged in:', _req.url);
       const returnBackUrl = `${_req.url}${
-        _req.url.includes("?") ? "&" : "?"
+        _req.url.includes('?') ? '&' : '?'
       }afterauth=true`;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return redirectToSignUp({ returnBackUrl: returnBackUrl });
@@ -44,5 +44,5 @@ export default authMiddleware({
 });
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/"],
+  matcher: ['/((?!.*\\..*|_next).*)', '/'],
 };

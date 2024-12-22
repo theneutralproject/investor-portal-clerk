@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, LinearProgress, Typography } from "@mui/material";
+import React from 'react';
+import { Box, LinearProgress, Typography } from '@mui/material';
 
 function ProgressBar({ dealStage }: { dealStage: number }) {
   const value = ((dealStage + 1) / 4) * 100;
@@ -11,11 +11,11 @@ function ProgressBar({ dealStage }: { dealStage: number }) {
           variant="determinate"
           value={value}
           sx={{
-            borderRadius: "4px",
-            height: "18px",
-            backgroundColor: "#c0c5ba",
-            "& .MuiLinearProgress-bar": {
-              backgroundColor: "#626F52",
+            borderRadius: '4px',
+            height: '18px',
+            backgroundColor: '#c0c5ba',
+            '& .MuiLinearProgress-bar': {
+              backgroundColor: '#626F52',
             },
           }}
         />

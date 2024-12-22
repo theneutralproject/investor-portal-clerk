@@ -1,6 +1,6 @@
-import React from "react";
-import { Card, CardContent, Divider, Typography } from "@mui/material";
-import type { ProjectWithStats } from "@/libs/types";
+import React from 'react';
+import { Card, CardContent, Divider, Typography } from '@mui/material';
+import type { ProjectWithStats } from '@/libs/types';
 
 const MarketHighlightsNew = ({ data }: { data: ProjectWithStats }) => {
   return (

@@ -1,5 +1,5 @@
 /* eslint-disable */
-import { theme } from "@/components/Shell/NeutralThemeProvider";
+import { theme } from '@/components/Shell/NeutralThemeProvider';
 import {
   Box,
   Card,
@@ -11,46 +11,53 @@ import {
   Select,
   Typography,
   useMediaQuery,
-} from "@mui/material";
-import { type Project } from "@prisma/client";
+} from '@mui/material';
+import { type Project } from '@prisma/client';
 
-import { LineDisplay } from "../Overview/InvestmentSummaryBox";
-import { SetStateAction, useState } from "react";
-import { DealWithInvestmentStats } from "@/libs/types";
+import { LineDisplay } from '../Overview/InvestmentSummaryBox';
+import { SetStateAction, useState } from 'react';
+import { DealWithInvestmentStats } from '@/libs/types';
 
 const routingNumbers = [
   {
-    value: "DIRECT_DEPOSIT",
-    label: "Direct Deposit and Electronic Payment",
-    routingNumber: "075911988",
+    value: 'DIRECT_DEPOSIT',
+    label: 'Direct Deposit and Electronic Payment',
+    routingNumber: '075911988',
   },
   {
-    value: "DOMESTIC_WIRE",
-    label: "Domestic Wire",
-    routingNumber: "121000248",
+    value: 'DOMESTIC_WIRE',
+    label: 'Domestic Wire',
+    routingNumber: '121000248',
   },
   {
-    value: "INTERNATIONAL_WIRE",
-    label: "International Wire",
-    routingNumber: "WFBIUS6S",
+    value: 'INTERNATIONAL_WIRE',
+    label: 'International Wire',
+    routingNumber: 'WFBIUS6S',
   },
 ];
 
 function lookupAccountNumber(investmentEntity: string) {
   switch (investmentEntity) {
-    case "Edison Project LLC": { return "9211305785" }
-    case "North Edison LLC": { return "9211305819" }
-    case "Vanilla 301 LLC": { return "9211305793" }
-    default: return "PLEASE CHECK IN WITH NEUTRAL"
+    case 'Edison Project LLC': {
+      return '9211305785';
+    }
+    case 'North Edison LLC': {
+      return '9211305819';
+    }
+    case 'Vanilla 301 LLC': {
+      return '9211305793';
+    }
+    default:
+      return 'PLEASE CHECK IN WITH NEUTRAL';
   }
 }
 
-export const FundTab: React.FC<{ project: Project; deal: DealWithInvestmentStats }> = ({
-  project,
-  deal,
-}) => {
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const [selectedMethod, setSelectedMethod] = useState("");
+export const FundTab: React.FC<{
+  project: Project;
+  deal: DealWithInvestmentStats;
+}> = ({ project, deal }) => {
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [selectedMethod, setSelectedMethod] = useState('');
   if (!deal) return null;
 
   const handleChange = (event: {
@@ -61,11 +68,13 @@ export const FundTab: React.FC<{ project: Project; deal: DealWithInvestmentStats
 
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
-      <CardContent sx={{ p: isMobile ? 0 : "16px" }}>
+      <CardContent sx={{ p: isMobile ? 0 : '16px' }}>
         <CardContent>
           <Typography variant="h6">Fund Your Investment</Typography>
           <Typography variant="caption">
-            You can fund the investment by check, or electronically. The instructions are listed below. Please reach out if you have any questions.
+            You can fund the investment by check, or electronically. The
+            instructions are listed below. Please reach out if you have any
+            questions.
           </Typography>
 
           <Card>
@@ -74,25 +83,25 @@ export const FundTab: React.FC<{ project: Project; deal: DealWithInvestmentStats
               <Divider sx={{ mt: 2 }} />
 
               <LineDisplay name="Payable To" value={deal.investmentEntity} />
-              <LineDisplay name="Amount" value={`$${deal.investmentStats.amount}`} />
               <LineDisplay
-                name="Ref Number"
-                value={`${deal.transactionId}`}
+                name="Amount"
+                value={`$${deal.investmentStats.amount}`}
               />
+              <LineDisplay name="Ref Number" value={`${deal.transactionId}`} />
               <LineDisplay
                 name="Mail to"
                 value={
-                  <Box sx={{ width: "180px" }}>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                  <Box sx={{ width: '180px' }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       {deal.investmentEntity}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       Attn: Nathan Helbach
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       25 W. Main Street, Suite 500
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       Madison, WI 53703
                     </Typography>
                   </Box>
@@ -106,8 +115,14 @@ export const FundTab: React.FC<{ project: Project; deal: DealWithInvestmentStats
               <Typography variant="body1">Pay by Wire Transfer</Typography>
               <Divider sx={{ mt: 2 }} />
 
-              <LineDisplay name="Amount" value={`$${deal.investmentStats.amount}`} />
-              <LineDisplay name="Account Number" value={lookupAccountNumber(deal.investmentEntity)} />
+              <LineDisplay
+                name="Amount"
+                value={`$${deal.investmentStats.amount}`}
+              />
+              <LineDisplay
+                name="Account Number"
+                value={lookupAccountNumber(deal.investmentEntity)}
+              />
 
               <FormControl fullWidth sx={{ mt: 2 }}>
                 <InputLabel id="method-label">Select Routing</InputLabel>
@@ -131,24 +146,21 @@ export const FundTab: React.FC<{ project: Project; deal: DealWithInvestmentStats
                   Routing Number: {routingNumbers[selectedMethod].routingNumber}
                 </Typography>
               )}
-              <LineDisplay
-                name="Ref Number"
-                value={`${deal.transactionId}`}
-              />
+              <LineDisplay name="Ref Number" value={`${deal.transactionId}`} />
               <LineDisplay
                 name="Address"
                 value={
-                  <Box sx={{ width: "180px" }}>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                  <Box sx={{ width: '180px' }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       {deal.investmentEntity}
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       Attn: Nathan Helbach
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       25 W. Main Street, Suite 500
                     </Typography>
-                    <Typography variant="body2" sx={{ color: "#000000DE" }}>
+                    <Typography variant="body2" sx={{ color: '#000000DE' }}>
                       Madison, WI 53703
                     </Typography>
                   </Box>

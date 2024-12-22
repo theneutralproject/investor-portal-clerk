@@ -1,25 +1,25 @@
-import prisma from "@/libs/prisma.server";
+import prisma from '@/libs/prisma.server';
 import type {
   ReturnsDateObject,
   ReturnsDealStats,
   PortfolioReturnsResponse,
   ReturnsPortfolioStats,
-} from "@/libs/returns/schema";
+} from '@/libs/returns/schema';
 import {
   getDebtPayoutScheduleForDeal,
   getEquityPayoutScheduleForDeal,
   readEquityMilestoneData,
-} from "@/libs/returns/utils";
-import type { DealWithInvestmentStatsAndProjectWithPics } from "@/libs/types";
-import { errorResponse, jsonResponse } from "@/libs/utils";
-import { currentUser } from "@clerk/nextjs/server";
-import { DealFinancingType } from "@prisma/client";
+} from '@/libs/returns/utils';
+import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
+import { errorResponse, jsonResponse } from '@/libs/utils';
+import { currentUser } from '@clerk/nextjs/server';
+import { DealFinancingType } from '@prisma/client';
 
 export async function GET() {
   // get loggedin user
   const clerkUser = await currentUser();
   if (!clerkUser) {
-    return errorResponse("User not authenticated", 401);
+    return errorResponse('User not authenticated', 401);
   }
   const user = await prisma.user.findUnique({
     where: { clerkId: clerkUser.id },
@@ -47,7 +47,7 @@ export async function GET() {
     },
   });
   if (!user) {
-    return errorResponse("User not found in database", 404);
+    return errorResponse('User not found in database', 404);
   }
   const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
@@ -76,7 +76,7 @@ export async function GET() {
   };
 
   // for each deal, get the payout schedule based on the financing type
-  const resolvedSchedules = deals.map(async (deal) => {
+  const resolvedSchedules = deals.map(async deal => {
     const { project, investmentStats, closingDate } = deal;
     if (!investmentStats) {
       console.error(`Investment stats missing for deal ${deal.id}`);
@@ -100,8 +100,8 @@ export async function GET() {
       distributionsProjected: 0,
       financingType:
         investmentStats.financingType === DealFinancingType.equity
-          ? "equity"
-          : "debt",
+          ? 'equity'
+          : 'debt',
       project: {
         id: project.id,
         name: project.name,
@@ -203,13 +203,15 @@ export async function GET() {
       return [];
     }
 
-    console.log(`adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`);
+    console.log(
+      `adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`
+    );
     dealStats.push(dealSummary);
     // console.log(`Deal ${deal.id} stats:`, dealSummary);
   });
 
   await Promise.all(resolvedSchedules);
-  
+
   const consolidatedSchedule = [] as ReturnsDateObject[];
   let previousDateObject: ReturnsDateObject | undefined;
 
@@ -217,10 +219,10 @@ export async function GET() {
     a <= b ? -1 : 1
   );
   // console.log("Sorted keys:", sortedKeys.map(key => new Date(parseInt(key)).toDateString()));
-  sortedKeys.forEach((key) => {
+  sortedKeys.forEach(key => {
     const dateObjects = returnsObjectsByDate[parseInt(key)];
     if (!dateObjects?.length) {
-      console.error("Empty date objects for key:", key);
+      console.error('Empty date objects for key:', key);
       return;
     } else {
       // combine the date objects for the same date
