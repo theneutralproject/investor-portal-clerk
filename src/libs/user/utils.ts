@@ -9,7 +9,7 @@ import {
 import prisma from '../prisma.server';
 import type { UserCreateSchema } from './schema';
 import { getErrorMessage } from '../utils';
-import { type Deal, MembershipType, type User } from '@prisma/client';
+import { type Deal, MembershipType, Role, type User } from '@prisma/client';
 import type { UserWithAddress } from '../types';
 
 /**
@@ -129,4 +129,11 @@ export function sanitizeUser(user: User | UserWithAddress) {
     ...user,
     ssn: user.ssn ? `***-**-${user.ssn.slice(-4)}` : null,
   };
+}
+
+export async function isAdminUser(clerkId: string): Promise<boolean> {
+  const user = await prisma.user.findFirst({
+    where: { clerkId, role: Role.ADMIN },
+  });
+  return !!user;
 }

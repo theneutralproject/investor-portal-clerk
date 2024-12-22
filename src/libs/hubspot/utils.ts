@@ -12,7 +12,8 @@ import {
 import type { DealUpdateSchema, DealCreateSchema } from '../deal/schema';
 import { getErrorMessage } from '../utils';
 import { getInvestmentEntity } from '../deal/utils';
-import { ProjectName } from '../schema';
+import { ProjectName } from '@/libs/project/schema';
+
 import { Client } from '@hubspot/api-client';
 import {
   FilterOperatorEnum,

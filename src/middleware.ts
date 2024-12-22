@@ -14,7 +14,7 @@ export default authMiddleware({
       '/terms',
       '/support',
       '/dashboard',
-      '/api/projects',
+      '/api/public/projects',
       '/projects/(.*)',
     ];
 
