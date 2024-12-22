@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import './dealPage.css';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';

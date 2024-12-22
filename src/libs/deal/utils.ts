@@ -1,5 +1,5 @@
 import type { DealFinancingType } from '@prisma/client';
-import { ProjectName } from '../schema';
+import { ProjectName } from '@/libs/project/schema';
 
 const InvestmentEntity = {
   'The Edison': {

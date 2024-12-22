@@ -1,6 +1,6 @@
 import type { DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
-import { isAdminUser } from '@/libs/maintenance/utils';
+import { isAdminUser } from '@/libs/user/utils';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs/server';
