@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from '@mui/material';
 
 const DashboardPageBanner = ({
   headline,
@@ -10,11 +10,11 @@ const DashboardPageBanner = ({
   return (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "flex-end",
-        height: "220px",
-        width: "100%",
-        borderRadius: "8px",
+        display: 'flex',
+        alignItems: 'flex-end',
+        height: '220px',
+        width: '100%',
+        borderRadius: '8px',
         background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.60) 100%), url("${background}") lightgray 0px -122.163px / 100% 391.783% no-repeat`,
       }}
     >
@@ -28,7 +28,7 @@ const DashboardPageBanner = ({
           variant="h3"
           gutterBottom
           sx={{
-            color: "white",
+            color: 'white',
           }}
         >
           {headline}

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -6,7 +6,7 @@ import {
   InputAdornment,
   CircularProgress,
   Alert,
-} from "@mui/material";
+} from '@mui/material';
 import {
   AreaChart,
   Area,
@@ -16,18 +16,18 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
-} from "recharts";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import { QuickSelectChips } from "./DealFlowUI";
-import { InvestmentStatsDisplay } from "./DealFlowUI";
-import { useReturnsData } from "./useReturnsData";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import { DealFinancingType } from "@prisma/client";
+} from 'recharts';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import { QuickSelectChips } from './DealFlowUI';
+import { InvestmentStatsDisplay } from './DealFlowUI';
+import { useReturnsData } from './useReturnsData';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { DealFinancingType } from '@prisma/client';
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
-const ACCRUED_RETURN_COLOR = "#d7b15c";
-const GROSS_RETURN_COLOR = "#3e6f42";
+const ACCRUED_RETURN_COLOR = '#d7b15c';
+const GROSS_RETURN_COLOR = '#3e6f42';
 
 const DealFlowAmount: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -37,11 +37,16 @@ const DealFlowAmount: React.FC = () => {
 
   const MIN_INVESTMENT =
     deal?.investmentStats?.financingType === DealFinancingType.equity
-      ? project?.investmentStats?.equityMinInvestment ?? 5000
-      : project?.investmentStats?.debtMinInvestment ?? 5000;
+      ? (project?.investmentStats?.equityMinInvestment ?? 5000)
+      : (project?.investmentStats?.debtMinInvestment ?? 5000);
   const MAX_INVESTMENT = 10_000_000;
 
-  const { returnsData, isLoading, error, stats: investmentStats } = useReturnsData({
+  const {
+    returnsData,
+    isLoading,
+    error,
+    stats: investmentStats,
+  } = useReturnsData({
     projectId: project?.id,
     amount,
     minInvestment: MIN_INVESTMENT,
@@ -52,19 +57,21 @@ const DealFlowAmount: React.FC = () => {
     () =>
       amount < MIN_INVESTMENT
         ? `Minimum investment amount is $${MIN_INVESTMENT.toLocaleString()}`
-        : "",
+        : '',
     [amount, MIN_INVESTMENT]
   );
 
   const chartData = useMemo(() => {
-    return returnsData.map((dataPoint) => {
+    return returnsData.map(dataPoint => {
       const date = new Date(dataPoint.date);
       const quarter = Math.floor(date.getMonth() / 3) + 1;
       const year = date.getFullYear().toString().slice(2);
       return {
         date: `Q${quarter} '${year}`,
         accruedPreferredReturn: dataPoint.equityAccruedPreferredReturn,
-        totalGrossReturn: dataPoint.equityDistributionCumulative + dataPoint.debtDistributionsCumulative,
+        totalGrossReturn:
+          dataPoint.equityDistributionCumulative +
+          dataPoint.debtDistributionsCumulative,
         fullDate: date,
       };
     });
@@ -112,18 +119,18 @@ const DealFlowAmount: React.FC = () => {
       return (
         <Box
           sx={{
-            backgroundColor: "white",
+            backgroundColor: 'white',
             p: 2,
-            border: "1px solid #ccc",
+            border: '1px solid #ccc',
             borderRadius: 1,
           }}
         >
           <Typography variant="subtitle2">{label}</Typography>
           {payload.map((entry, index) => (
             <Typography key={index} variant="body2" sx={{ color: entry.color }}>
-              {entry.dataKey === "totalGrossReturn"
-                ? "Cumulative Investor Return: "
-                : "Investor Accrued Preferred Return: "}
+              {entry.dataKey === 'totalGrossReturn'
+                ? 'Cumulative Investor Return: '
+                : 'Investor Accrued Preferred Return: '}
               {formatCurrency(entry.value)}
             </Typography>
           ))}
@@ -137,13 +144,13 @@ const DealFlowAmount: React.FC = () => {
     <Box>
       <DealFlowTitle title="Enter Investment Amount" />
 
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <TextField
           fullWidth
           type="text"
           value={amount.toLocaleString()}
-          onChange={(e) => {
-            const value = e.target.value.replace(/[^0-9]/g, "");
+          onChange={e => {
+            const value = e.target.value.replace(/[^0-9]/g, '');
             handleAmountChange({
               target: { value },
             } as React.ChangeEvent<HTMLInputElement>);
@@ -154,8 +161,8 @@ const DealFlowAmount: React.FC = () => {
             startAdornment: <InputAdornment position="start">$</InputAdornment>,
           }}
           sx={{
-            "& .MuiOutlinedInput-root": {
-              backgroundColor: "white",
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'white',
             },
           }}
         />
@@ -174,9 +181,9 @@ const DealFlowAmount: React.FC = () => {
           <Box
             sx={{
               height: 400,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <CircularProgress />
@@ -191,7 +198,7 @@ const DealFlowAmount: React.FC = () => {
               Investor Returns
             </Typography>
 
-            <Box sx={{ width: "100%", height: 400 }}>
+            <Box sx={{ width: '100%', height: 400 }}>
               <ResponsiveContainer>
                 <AreaChart
                   data={chartData}

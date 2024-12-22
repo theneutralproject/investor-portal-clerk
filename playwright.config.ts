@@ -1,4 +1,3 @@
-
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -17,7 +16,9 @@ if (process.env.NODE_ENV !== 'production' && !process.env.CI === true) {
 const baseURL = process.env.BASE_URL;
 const testUserToken = process.env.TEST_USER_TOKEN;
 if (!baseURL || !testUserToken) {
-  throw new Error('Please provide BASE_URL and TEST_USER_TOKEN environment variable.');
+  throw new Error(
+    'Please provide BASE_URL and TEST_USER_TOKEN environment variable.'
+  );
 }
 
 export default defineConfig({
@@ -42,7 +43,7 @@ export default defineConfig({
     extraHTTPHeaders: {
       // Add authorization token to all requests.
       // Assuming personal access token available in the environment.
-      'Authorization': `Bearer ${testUserToken}`,
+      Authorization: `Bearer ${testUserToken}`,
     },
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
@@ -52,7 +53,7 @@ export default defineConfig({
     // command: process.env.CI ? 'DEBUG=pw:webserver npm run build && npm run start' : 'npm run dev',
     command: 'npm run dev',
     url: baseURL,
-    timeout: 10 * 60 * 1000, /**15 mins per test */
+    timeout: 10 * 60 * 1000 /**15 mins per test */,
     reuseExistingServer: !process.env.CI,
   },
   /* Configure projects for major browsers */
@@ -91,5 +92,5 @@ export default defineConfig({
     //   name: 'Google Chrome',
     //   use: { ...devices['Desktop Chrome'], channel: 'chrome' },
     // },
-  ]
+  ],
 });

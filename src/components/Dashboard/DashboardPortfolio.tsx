@@ -1,6 +1,6 @@
-import React from "react";
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
-import Link from "next/link";
+import React from 'react';
+import { Box, Button, Grid, Stack, Typography } from '@mui/material';
+import Link from 'next/link';
 
 import {
   ComposedChart,
@@ -12,14 +12,14 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-} from "recharts";
-import PortfolioMetric from "./PortfolioMetric";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+} from 'recharts';
+import PortfolioMetric from './PortfolioMetric';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import type {
   ReturnsDateObject,
   PortfolioReturnsResponse,
-} from "@/libs/returns/schema";
+} from '@/libs/returns/schema';
 
 interface MetricData {
   label: string;
@@ -37,9 +37,9 @@ interface QuarterData {
 }
 
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -113,10 +113,10 @@ const dataAccessors = {
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
-    queryKey: ["dashboard", "portfolio"],
+    queryKey: ['dashboard', 'portfolio'],
     queryFn: async () => {
       const response = await axios.get<PortfolioReturnsResponse>(
-        "/api/dashboard/returns"
+        '/api/dashboard/returns'
       );
       return response.data;
     },
@@ -126,33 +126,33 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const metrics: MetricData[] = React.useMemo(() => {
     if (!data) {
       return [
-        { label: "Portfolio Value", value: "$0", color: "#FFB800" },
-        { label: "Debt Distributions", value: "$0", color: "#5AAC6A" },
-        { label: "Equity Distributions", value: "$0", color: "#2196F3" },
-        { label: "Principal", value: "$0", color: "#656565" },
+        { label: 'Portfolio Value', value: '$0', color: '#FFB800' },
+        { label: 'Debt Distributions', value: '$0', color: '#5AAC6A' },
+        { label: 'Equity Distributions', value: '$0', color: '#2196F3' },
+        { label: 'Principal', value: '$0', color: '#656565' },
       ];
     }
 
     return [
       {
-        label: "Proj. Portfolio Value",
+        label: 'Proj. Portfolio Value',
         value: formatCurrency(data.portfolioStats.projectedPortfolioValue),
-        color: "#FFB800",
+        color: '#FFB800',
       },
       {
-        label: "Proj. Debt Distributions",
+        label: 'Proj. Debt Distributions',
         value: formatCurrency(data.portfolioStats.projectedDebtDistributions),
-        color: "#5AAC6A",
+        color: '#5AAC6A',
       },
       {
-        label: "Proj. Equity Distributions",
+        label: 'Proj. Equity Distributions',
         value: formatCurrency(data.portfolioStats.projectedEquityDistributions),
-        color: "#2196F3",
+        color: '#2196F3',
       },
       {
-        label: "Principal",
+        label: 'Principal',
         value: formatCurrency(data.portfolioStats.principalInvested),
-        color: "#656565",
+        color: '#656565',
       },
     ];
   }, [data]);
@@ -277,17 +277,17 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
       {!loggedIn && (
         <Box
           sx={{
-            position: "absolute",
+            position: 'absolute',
             top: 80,
             left: 0,
             right: 0,
             bottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.6)",
-            backdropFilter: "blur(4px)",
-            borderRadius: "8px",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: '8px',
           }}
         >
           <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
@@ -312,11 +312,11 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
                 <Button
                   variant="text"
                   sx={{
-                    borderColor: "text.primary",
-                    color: "text.primary",
-                    "&:hover": {
-                      borderColor: "text.primary",
-                      bgcolor: "rgba(0, 0, 0, 0.04)",
+                    borderColor: 'text.primary',
+                    color: 'text.primary',
+                    '&:hover': {
+                      borderColor: 'text.primary',
+                      bgcolor: 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
                 >

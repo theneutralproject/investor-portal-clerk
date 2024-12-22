@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod';
 
 export const env = createEnv({
   /**
@@ -9,8 +9,8 @@ export const env = createEnv({
   server: {
     DATABASE_URL: z.string().url(),
     NODE_ENV: z
-      .enum(["development", "test", "production"])
-      .default("development"),
+      .enum(['development', 'test', 'production'])
+      .default('development'),
     CLERK_SECRET_KEY: z.string(),
     CLERK_WEBHOOK_SECRET: z.string(),
     E2E_CLERK_USER_USERNAME: z.string(),
@@ -53,7 +53,6 @@ export const env = createEnv({
     DOCUSIGN_RSA_PRIVATE_KEY: z.string(),
   },
 
-
   /**
    * Specify your client-side environment variables schema here. This way you can ensure the app
    * isn't built with invalid env vars. To expose them to the client, prefix them with
@@ -76,7 +75,8 @@ export const env = createEnv({
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
     NODE_ENV: process.env.NODE_ENV,
-    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
+    NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
+      process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY: process.env.CLERK_SECRET_KEY,
     CLERK_WEBHOOK_SECRET: process.env.CLERK_WEBHOOK_SECRET,
     E2E_CLERK_USER_USERNAME: process.env.E2E_CLERK_USER_USERNAME,
@@ -91,16 +91,22 @@ export const env = createEnv({
     FINIX_PASSWORD_EDISON: process.env.FINIX_PASSWORD_EDISON,
     FINIX_PASSWORD_BAKERS: process.env.FINIX_PASSWORD_BAKERS,
     FINIX_BASE_URL: process.env.FINIX_BASE_URL,
-    NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS: process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS,
-    NEXT_PUBLIC_FINIX_MERCHANT_ID_519: process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_519,
-    NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON: process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON,
-    NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: process.env.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT,
+    NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS:
+      process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS,
+    NEXT_PUBLIC_FINIX_MERCHANT_ID_519:
+      process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_519,
+    NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON:
+      process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON,
+    NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT:
+      process.env.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT,
     FINIX_WH_USERNAME: process.env.FINIX_WH_USERNAME,
     FINIX_WH_PASSWORD: process.env.FINIX_WH_PASSWORD,
     HUBSPOT_ACCESS_TOKEN: process.env.HUBSPOT_ACCESS_TOKEN,
     HUBSPOT_API_BASE_URL: process.env.HUBSPOT_API_BASE_URL,
-    HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK: process.env.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK,
-    HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK: process.env.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK,
+    HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK:
+      process.env.HUBSPOT_PROJECT_DOC_ACCESSED_WEBHOOK,
+    HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK:
+      process.env.HUBSPOT_FINANCE_DOC_ACCESSED_WEBHOOK,
     HUBSPOT_OWNER_ID: process.env.HUBSPOT_OWNER_ID,
     SUPABASE_STORAGE_URL: process.env.SUPABASE_STORAGE_URL,
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
@@ -115,7 +121,8 @@ export const env = createEnv({
     GOOGLE_OAUTH_URL: process.env.GOOGLE_OAUTH_URL,
     GOOGLE_ACCESS_TOKEN_URL: process.env.GOOGLE_ACCESS_TOKEN_URL,
     GOOGLE_TOKEN_INFO_URL: process.env.GOOGLE_TOKEN_INFO_URL,
-    GOOGLE_CALLBACK_URL_SUBDIRECTORY: process.env.GOOGLE_CALLBACK_URL_SUBDIRECTORY,
+    GOOGLE_CALLBACK_URL_SUBDIRECTORY:
+      process.env.GOOGLE_CALLBACK_URL_SUBDIRECTORY,
     JWT_SECRET: process.env.JWT_SECRET,
     IRON_SESSION_PASSWORD: process.env.IRON_SESSION_PASSWORD,
     DOCUSIGN_BASE_PATH: process.env.DOCUSIGN_BASE_PATH,

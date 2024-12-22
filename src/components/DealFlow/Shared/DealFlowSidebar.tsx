@@ -1,50 +1,50 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import React from "react";
-import { Typography, Box, Divider, Chip } from "@mui/material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import { DealFinancingType } from "@prisma/client";
-import Image from "next/image";
-import DealFlowSidebarDetails from "./DealFlowSidebarDetails";
-import ChatInterface from "@/components/ChatInterface";
+import React from 'react';
+import { Typography, Box, Divider, Chip } from '@mui/material';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import { DealFinancingType } from '@prisma/client';
+import Image from 'next/image';
+import DealFlowSidebarDetails from './DealFlowSidebarDetails';
+import ChatInterface from '@/components/ChatInterface';
 const DealFlowSidebar = () => {
   const { project, deal } = useDealFlow();
 
   const projectPicture = project?.pictures?.find(
-    (picture) => picture.type === "HEADER"
+    picture => picture.type === 'HEADER'
   )?.url;
 
   const investmentAmount = deal?.investmentStats?.amount;
   const displayAmount = investmentAmount
     ? `$${investmentAmount.toLocaleString()}`
-    : "$0";
+    : '$0';
 
   return (
     <Box
       sx={{
         p: 2,
-        backgroundColor: "#f4f5f7",
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "calc(100vh - 64px)",
+        backgroundColor: '#f4f5f7',
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: 'calc(100vh - 64px)',
       }}
     >
       <Box>
         <Typography
           variant="h6"
           gutterBottom
-          sx={{ fontWeight: "bold", color: "#333" }}
+          sx={{ fontWeight: 'bold', color: '#333' }}
         >
           Investment Summary
         </Typography>
         {project && (
-          <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
             <Box
               component="img"
               src={projectPicture}
               sx={{ width: 60, height: 60, mr: 2, borderRadius: 1 }}
             />
             <Box>
-              <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>
+              <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                 {project?.name}
               </Typography>
               <Typography variant="body2" color="text.secondary">
@@ -53,18 +53,18 @@ const DealFlowSidebar = () => {
             </Box>
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
-                flexDirection: "column",
-                ml: "auto",
+                display: 'flex',
+                alignItems: 'center',
+                flexDirection: 'column',
+                ml: 'auto',
               }}
             >
               <Typography
                 variant="h6"
                 sx={{
-                  ml: "auto",
-                  fontWeight: "bold",
-                  color: investmentAmount ? "inherit" : "text.disabled",
+                  ml: 'auto',
+                  fontWeight: 'bold',
+                  color: investmentAmount ? 'inherit' : 'text.disabled',
                 }}
               >
                 {displayAmount}
@@ -74,16 +74,16 @@ const DealFlowSidebar = () => {
                   label={
                     deal.investmentStats.financingType ===
                     DealFinancingType.equity
-                      ? "Equity"
-                      : "Debt"
+                      ? 'Equity'
+                      : 'Debt'
                   }
                   size="small"
                   sx={{
                     mt: 0.5,
-                    fontWeight: "bold",
-                    color: "gray",
-                    borderRadius: "16px",
-                    backgroundColor: "action.selected",
+                    fontWeight: 'bold',
+                    color: 'gray',
+                    borderRadius: '16px',
+                    backgroundColor: 'action.selected',
                   }}
                 />
               )}
@@ -94,15 +94,15 @@ const DealFlowSidebar = () => {
 
       <DealFlowSidebarDetails />
 
-      <Box sx={{ mt: "auto" }}>
+      <Box sx={{ mt: 'auto' }}>
         <Divider sx={{ my: 2 }} />
 
-        <Box sx={{ display: "flex", gap: 2, mb: 2 }}>
+        <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
             <Image
@@ -117,7 +117,7 @@ const DealFlowSidebar = () => {
             <Typography
               variant="subtitle1"
               gutterBottom
-              sx={{ fontWeight: "bold" }}
+              sx={{ fontWeight: 'bold' }}
             >
               Questions?
             </Typography>
@@ -127,8 +127,8 @@ const DealFlowSidebar = () => {
             </Typography>
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
+                display: 'flex',
+                alignItems: 'center',
                 gap: 2,
                 mt: 1,
               }}

@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Card,
@@ -9,9 +9,9 @@ import {
   Tab,
   Tabs,
   Typography,
-} from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
-import { type Project } from "@prisma/client";
+} from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
+import { type Project } from '@prisma/client';
 
 function CustomTab({
   label,
@@ -28,9 +28,9 @@ function CustomTab({
   const tabProps = {
     label,
     icon: !isEnabled ? <LockIcon /> : null,
-    iconPosition: "start",
+    iconPosition: 'start',
     disabled: !isEnabled,
-    sx: { opacity: isEnabled ? "1" : "0.5" },
+    sx: { opacity: isEnabled ? '1' : '0.5' },
     ...props,
   };
 
@@ -53,7 +53,7 @@ function ProjectHeader({
 }) {
   return (
     <Card>
-      <CardContent sx={{ paddingBottom: "0 !important" }}>
+      <CardContent sx={{ paddingBottom: '0 !important' }}>
         <Grid container spacing={2}>
           <Grid item xs={10} md={6}>
             <Typography variant="h3" gutterBottom>
@@ -68,9 +68,9 @@ function ProjectHeader({
             xs={2}
             md={6}
             sx={{
-              justifyContent: "flex-end",
-              alignItems: "center",
-              display: percentRaised > 50 ? "flex" : "none",
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              display: percentRaised > 50 ? 'flex' : 'none',
             }}
           >
             <Hidden smDown>
@@ -82,9 +82,9 @@ function ProjectHeader({
             <Box position="relative" display="inline-flex">
               <CircularProgress
                 variant="determinate"
-                value={ percentRaised >= 100 ? 100 : percentRaised}
+                value={percentRaised >= 100 ? 100 : percentRaised}
                 size={50}
-                sx={{ color: "#969f7e" }}
+                sx={{ color: '#969f7e' }}
                 thickness={5}
               />
               <Box
@@ -97,7 +97,9 @@ function ProjectHeader({
                 alignItems="center"
                 justifyContent="center"
               >
-                <Typography variant="caption">{percentRaised >= 100 ? 100 : percentRaised}%</Typography>
+                <Typography variant="caption">
+                  {percentRaised >= 100 ? 100 : percentRaised}%
+                </Typography>
               </Box>
             </Box>
           </Grid>
@@ -108,7 +110,7 @@ function ProjectHeader({
           variant="scrollable"
           allowScrollButtonsMobile
           aria-label="Deal Tabs"
-          sx={{ m: "0" }}
+          sx={{ m: '0' }}
         >
           <Tab label="Overview" />
           <CustomTab

@@ -1,5 +1,5 @@
-import type { ProjectWithStats } from "@/libs/types";
-import React, { useState } from "react";
+import type { ProjectWithStats } from '@/libs/types';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -12,7 +12,7 @@ import {
   Box,
   Divider,
   useTheme,
-} from "@mui/material";
+} from '@mui/material';
 import {
   AreaChart,
   Area,
@@ -22,38 +22,38 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-} from "recharts";
-import { styled } from "@mui/material/styles";
+} from 'recharts';
+import { styled } from '@mui/material/styles';
 
 const InputGrid = styled(Box)(({ theme }) => ({
-  display: "grid",
-  gridTemplateColumns: "repeat(4, 1fr)",
+  display: 'grid',
+  gridTemplateColumns: 'repeat(4, 1fr)',
   gap: theme.spacing(2),
   marginBottom: theme.spacing(3),
-  [theme.breakpoints.down("md")]: {
-    gridTemplateColumns: "1fr",
+  [theme.breakpoints.down('md')]: {
+    gridTemplateColumns: '1fr',
   },
 }));
 
 // Custom Legend styles
 const LegendContainer = styled(Box)({
-  display: "flex",
-  alignItems: "center",
-  gap: "24px",
-  justifyContent: "center",
-  padding: "8px 0",
+  display: 'flex',
+  alignItems: 'center',
+  gap: '24px',
+  justifyContent: 'center',
+  padding: '8px 0',
 });
 
 const LegendItem = styled(Box)({
-  display: "flex",
-  alignItems: "center",
-  gap: "8px",
+  display: 'flex',
+  alignItems: 'center',
+  gap: '8px',
 });
 
-const LegendDot = styled("div")<{ color: string }>(({ color }) => ({
-  width: "8px",
-  height: "8px",
-  borderRadius: "50%",
+const LegendDot = styled('div')<{ color: string }>(({ color }) => ({
+  width: '8px',
+  height: '8px',
+  borderRadius: '50%',
   backgroundColor: color,
 }));
 
@@ -94,9 +94,9 @@ interface TooltipProps {
 const CustomTooltip = ({ active, payload, label }: TooltipProps) => {
   if (active && payload?.length) {
     return (
-      <Card sx={{ p: 1, backgroundColor: "rgba(255, 255, 255, 0.9)" }}>
+      <Card sx={{ p: 1, backgroundColor: 'rgba(255, 255, 255, 0.9)' }}>
         <Typography variant="subtitle2">Time: {label}</Typography>
-        {payload.map((entry) => (
+        {payload.map(entry => (
           <Typography
             key={entry.name}
             variant="body2"
@@ -118,11 +118,16 @@ const InvestmentCalculatorNew = ({
 }) => {
   const theme = useTheme();
   const [investment, setInvestment] = useState(100000);
-  const [investmentType, setInvestmentType] = useState("Equity");
+  const [investmentType, setInvestmentType] = useState('Equity');
 
   const targetTermLengthEquity = project.investmentStats.equityTermMonths;
   const targetTermLengthDebt = project.investmentStats.debtTermMonthsMax;
-  const { targetEquityMultiple, interestRateMax, interestRateMin, interestRateDollarThreshold } = project.investmentStats;
+  const {
+    targetEquityMultiple,
+    interestRateMax,
+    interestRateMin,
+    interestRateDollarThreshold,
+  } = project.investmentStats;
   const sp_annual_rate = 12.2;
   const reit_annual_rate = 11.3;
 
@@ -132,23 +137,26 @@ const InvestmentCalculatorNew = ({
   const reitReturn = Math.round(
     investment * (1 + (reit_annual_rate / 100) * (targetTermLengthEquity / 12))
   );
-  const getDebtInterestRate = () => (investment < interestRateDollarThreshold) ? interestRateMin : interestRateMax;
+  const getDebtInterestRate = () =>
+    investment < interestRateDollarThreshold
+      ? interestRateMin
+      : interestRateMax;
 
   const getTargetedReturn = () => {
     return Math.round(getTargetMultiple() * investment).toLocaleString();
-  }
+  };
 
   const getTargetetTermLength = () => {
-    return investmentType === "Equity"
+    return investmentType === 'Equity'
       ? targetTermLengthEquity
       : targetTermLengthDebt;
-  }
+  };
 
   const getTargetMultiple = () => {
-    return investmentType === "Equity"
+    return investmentType === 'Equity'
       ? targetEquityMultiple
-      : (getDebtInterestRate() * targetTermLengthDebt / 12) / 100 + 1;
-  }
+      : (getDebtInterestRate() * targetTermLengthDebt) / 12 / 100 + 1;
+  };
 
   const generateEquityChartData = () => {
     const years = Math.ceil(targetTermLengthEquity / 12);
@@ -165,14 +173,14 @@ const InvestmentCalculatorNew = ({
       const reitValue = investment * Math.pow(1 + reitMonthlyRate, months);
 
       data.push({
-        year: year === 0 ? "0" : `${year}yrs`,
+        year: year === 0 ? '0' : `${year}yrs`,
         [`${project.name} (Target Return)`]: Number(
           ((targetValue / investment - 1) * 100).toFixed(1)
         ),
-        "S&P 500 (Avg.)": Number(
+        'S&P 500 (Avg.)': Number(
           ((sp500Value / investment - 1) * 100).toFixed(1)
         ),
-        "Real Estate Investment Trust (Avg.)": Number(
+        'Real Estate Investment Trust (Avg.)': Number(
           ((reitValue / investment - 1) * 100).toFixed(1)
         ),
       });
@@ -186,36 +194,40 @@ const InvestmentCalculatorNew = ({
     const monthlyRate = getDebtInterestRate() / 1200;
     const sp500MonthlyRate = sp_annual_rate / 1200;
     const reitMonthlyRate = reit_annual_rate / 1200;
-console.log('monthlyRate', monthlyRate * 12, sp500MonthlyRate, reitMonthlyRate);
+    console.log(
+      'monthlyRate',
+      monthlyRate * 12,
+      sp500MonthlyRate,
+      reitMonthlyRate
+    );
     for (let year = 0; year <= years; year++) {
       const months = year * 12;
       const targetValue = investment * Math.pow(1 + monthlyRate, months);
-      console.log(Math.pow(1 + monthlyRate, months), targetValue,months);
+      console.log(Math.pow(1 + monthlyRate, months), targetValue, months);
       const sp500Value = investment * Math.pow(1 + sp500MonthlyRate, months);
       const reitValue = investment * Math.pow(1 + reitMonthlyRate, months);
-console.log(year, targetValue, sp500Value, reitValue);
+      console.log(year, targetValue, sp500Value, reitValue);
       data.push({
-        year: year === 0 ? "0" : `${year}yrs`,
+        year: year === 0 ? '0' : `${year}yrs`,
         [`${project.name} (Target Return)`]: Number(
           ((targetValue / investment - 1) * 100).toFixed(1)
         ),
-        "S&P 500 (Avg.)": Number(
+        'S&P 500 (Avg.)': Number(
           ((sp500Value / investment - 1) * 100).toFixed(1)
         ),
-        "Real Estate Investment Trust (Avg.)": Number(
+        'Real Estate Investment Trust (Avg.)': Number(
           ((reitValue / investment - 1) * 100).toFixed(1)
         ),
       });
     }
     return data;
-  }
+  };
 
   const getChartData = () => {
-    return investmentType === "Equity"
+    return investmentType === 'Equity'
       ? generateEquityChartData()
       : generateDebtChartData();
   };
-
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setInvestment(Number(event.target.value));
@@ -246,7 +258,7 @@ console.log(year, targetValue, sp500Value, reitValue);
             <InputLabel>Type</InputLabel>
             <Select
               value={investmentType}
-              onChange={(e) => setInvestmentType(e.target.value)}
+              onChange={e => setInvestmentType(e.target.value)}
               label="Type"
             >
               <MenuItem value="Equity">Equity</MenuItem>
@@ -278,7 +290,7 @@ console.log(year, targetValue, sp500Value, reitValue);
           </Typography>
         </Box>
 
-        <Box sx={{ width: "100%", height: 400, mb: 3 }}>
+        <Box sx={{ width: '100%', height: 400, mb: 3 }}>
           <ResponsiveContainer>
             <AreaChart
               data={getChartData()}
@@ -286,7 +298,7 @@ console.log(year, targetValue, sp500Value, reitValue);
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="year" />
-              <YAxis tickFormatter={(value) => `${value}%`} domain={[0, 30]} />
+              <YAxis tickFormatter={value => `${value}%`} domain={[0, 30]} />
               <Tooltip content={<CustomTooltip />} />
               <Legend content={<CustomLegend payload={[]} />} />
               <Area
@@ -323,12 +335,12 @@ console.log(year, targetValue, sp500Value, reitValue);
           Compare returns:
         </Typography>
 
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography color="text.secondary">AVG. S&P 500</Typography>
             <Typography>${sp500return.toLocaleString()}</Typography>
           </Box>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
             <Typography color="text.secondary">
               AVG. Real estate investment trust
             </Typography>

@@ -1,5 +1,5 @@
-import React from "react";
-import { useRouter } from "next/navigation";
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
 import {
   Card,
@@ -11,24 +11,24 @@ import {
   ListItemIcon,
   ListItemText,
   Box,
-} from "@mui/material";
-import CheckIcon from "@mui/icons-material/Check";
-import { styled } from "@mui/material/styles";
-import ShareOnSocial from "./ShareOnSocial";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+} from '@mui/material';
+import CheckIcon from '@mui/icons-material/Check';
+import { styled } from '@mui/material/styles';
+import ShareOnSocial from './ShareOnSocial';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 
 const bulletPoints = [
-  "Priority project construction updates",
-  "Access to exclusive investor events",
-  "Investor newsletter and regular investment updates",
-  "View investment details and project updates 24/7 in your investor portal",
+  'Priority project construction updates',
+  'Access to exclusive investor events',
+  'Investor newsletter and regular investment updates',
+  'View investment details and project updates 24/7 in your investor portal',
 ];
 
 const StyledListItemIcon = styled(ListItemIcon)({
-  minWidth: "32px",
-  "& .MuiSvgIcon-root": {
-    color: "#16a34a", // Green color for check icons
-    fontSize: "1.2rem",
+  minWidth: '32px',
+  '& .MuiSvgIcon-root': {
+    color: '#16a34a', // Green color for check icons
+    fontSize: '1.2rem',
   },
 });
 
@@ -36,7 +36,7 @@ const PaymentComplete: React.FC = () => {
   const router = useRouter();
 
   const goToDashboard = () => {
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
   return (
@@ -63,7 +63,7 @@ const PaymentComplete: React.FC = () => {
                 <ListItemText
                   primary={point}
                   primaryTypographyProps={{
-                    variant: "body2",
+                    variant: 'body2',
                     sx: { lineHeight: 1.3 },
                   }}
                 />

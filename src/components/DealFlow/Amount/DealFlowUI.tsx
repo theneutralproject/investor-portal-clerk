@@ -1,5 +1,5 @@
-import React from "react";
-import { Box, Chip, styled, Typography } from "@mui/material";
+import React from 'react';
+import { Box, Chip, styled, Typography } from '@mui/material';
 import {
   AreaChart,
   Area,
@@ -7,14 +7,14 @@ import {
   YAxis,
   ResponsiveContainer,
   Tooltip,
-} from "recharts";
+} from 'recharts';
 import {
   type ProjectedReturn,
   type ChartConfig,
   type InvestmentStatsSummary,
-} from "./dealFlow.types";
-import type { ReturnsDateObject } from "@/libs/returns/schema";
-import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
+} from './dealFlow.types';
+import type { ReturnsDateObject } from '@/libs/returns/schema';
+import { DealFinancingType, type DealInvestmentStats } from '@prisma/client';
 
 interface QuickSelectChipsProps {
   amounts: number[];
@@ -27,27 +27,27 @@ export const QuickSelectChips: React.FC<QuickSelectChipsProps> = ({
   selectedAmount,
   onSelect,
 }) => (
-  <Box sx={{ display: "flex", gap: 1 }}>
-    {amounts.map((value) => (
+  <Box sx={{ display: 'flex', gap: 1 }}>
+    {amounts.map(value => (
       <Chip
         key={value}
         label={`$${value.toLocaleString()}`}
         onClick={() => onSelect(value)}
-        color={selectedAmount === value ? "primary" : "default"}
-        variant={selectedAmount === value ? "filled" : "outlined"}
+        color={selectedAmount === value ? 'primary' : 'default'}
+        variant={selectedAmount === value ? 'filled' : 'outlined'}
         sx={{
           flex: 1,
-          "&:hover": {
-            backgroundColor: "#e0e0e0",
+          '&:hover': {
+            backgroundColor: '#e0e0e0',
           },
-          "&:focus": {
-            backgroundColor: "black",
+          '&:focus': {
+            backgroundColor: 'black',
           },
-          "&:active": {
-            backgroundColor: "black",
+          '&:active': {
+            backgroundColor: 'black',
           },
           ...(selectedAmount === value
-            ? { backgroundColor: "black", color: "white" }
+            ? { backgroundColor: 'black', color: 'white' }
             : {}),
         }}
       />
@@ -61,7 +61,7 @@ interface ReturnsChartProps {
 }
 
 export const ReturnsChart: React.FC<ReturnsChartProps> = ({ data, config }) => (
-  <Box sx={{ height: 200, width: "100%" }}>
+  <Box sx={{ height: 200, width: '100%' }}>
     <ResponsiveContainer>
       <AreaChart
         data={data}
@@ -73,12 +73,12 @@ export const ReturnsChart: React.FC<ReturnsChartProps> = ({ data, config }) => (
         />
         <YAxis
           tickFormatter={config.yAxisFormatter}
-          domain={[0, "dataMax"]}
+          domain={[0, 'dataMax']}
           width={55}
         />
         <Tooltip
           formatter={config.tooltipFormatter}
-          labelFormatter={(label) => `Year: ${label}`}
+          labelFormatter={label => `Year: ${label}`}
         />
         <Area
           type="monotone"
@@ -99,25 +99,25 @@ interface InvestmentStatsDisplayProps {
 }
 const StyledOuterBox = styled(Box)({
   marginTop: 3,
-  display: "flex",
-  flexDirection: "column",
+  display: 'flex',
+  flexDirection: 'column',
   gap: 4,
-  padding: "10px 40px",
+  padding: '10px 40px',
 });
 
 const StyledStatRow = styled(Box)({
-  display: "flex",
-  justifyContent: "space-between",
-  width: "100%",
-  alignItems: "center",
+  display: 'flex',
+  justifyContent: 'space-between',
+  width: '100%',
+  alignItems: 'center',
 });
 
 const StyledLabel = styled(Typography)({
-  variant: "body2",
+  variant: 'body2',
 });
 
 const StyledValue = styled(Typography)({
-  variant: "body1",
+  variant: 'body1',
   fontWeight: 500,
 });
 
@@ -131,7 +131,7 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
       <StyledLabel>Investment Term:</StyledLabel>
       <StyledValue>
         {(() => {
-          if (returnsData.length < 2) return "N/A";
+          if (returnsData.length < 2) return 'N/A';
 
           const lastDate =
             returnsData[returnsData.length - 1]?.date ?? new Date();
@@ -142,7 +142,7 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
             (lastDate.getTime() - firstDate.getTime()) / MS_PER_MONTH
           );
           return monthsDiff + 1;
-        })()}{" "}
+        })()}{' '}
         Months
       </StyledValue>
     </StyledStatRow>
@@ -150,8 +150,8 @@ export const InvestmentStatsDisplay: React.FC<InvestmentStatsDisplayProps> = ({
     <StyledStatRow>
       <StyledLabel>
         {dealInvestmentStats.financingType === DealFinancingType.equity
-          ? "IRR"
-          : "Interest Rate"}
+          ? 'IRR'
+          : 'Interest Rate'}
         :
       </StyledLabel>
       <StyledValue>{stats.interestRateOrIrrPerc}%</StyledValue>

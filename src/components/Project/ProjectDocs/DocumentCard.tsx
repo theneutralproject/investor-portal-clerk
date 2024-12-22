@@ -1,11 +1,11 @@
-import React from "react";
-import { Box, Card, CardContent, IconButton, Typography } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/Download";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import LiteYouTubeEmbed from "react-lite-youtube-embed";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import { theme } from "@/components/Shell/NeutralThemeProvider";
-import { type DocumentWithCompletion } from "@/app/hooks/useDocuments";
+import React from 'react';
+import { Box, Card, CardContent, IconButton, Typography } from '@mui/material';
+import DownloadIcon from '@mui/icons-material/Download';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import LiteYouTubeEmbed from 'react-lite-youtube-embed';
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
+import { theme } from '@/components/Shell/NeutralThemeProvider';
+import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
 
 const DocumentCard = ({
   document,
@@ -32,8 +32,8 @@ const DocumentCard = ({
   //   }
   // };
 
-  if (document.link.includes("youtube")) {
-    const id = document.link.split("v=")[1];
+  if (document.link.includes('youtube')) {
+    const id = document.link.split('v=')[1];
 
     return (
       <Card sx={{ mb: 2 }}>
@@ -54,9 +54,9 @@ const DocumentCard = ({
   return (
     <Card
       sx={{
-        display: "flex",
+        display: 'flex',
         mb: theme.spacing(2),
-        alignItems: "center",
+        alignItems: 'center',
       }}
     >
       <Box
@@ -68,8 +68,8 @@ const DocumentCard = ({
       </Box>
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
+          display: 'flex',
+          flexDirection: 'column',
         }}
       >
         <Typography variant="subtitle2">{document.name}</Typography>
@@ -77,10 +77,10 @@ const DocumentCard = ({
       </Box>
       <Box
         sx={{
-          ml: "auto", // Moves the icons to the right
-          display: documentLocked ? "none" : "flex",
-          flexDirection: "row",
-          alignItems: "flex-end",
+          ml: 'auto', // Moves the icons to the right
+          display: documentLocked ? 'none' : 'flex',
+          flexDirection: 'row',
+          alignItems: 'flex-end',
           p: theme.spacing(1),
         }}
       >
@@ -93,7 +93,7 @@ const DocumentCard = ({
         >
           <VisibilityIcon />
         </IconButton>
-        {!document?.link?.toUpperCase().includes("DOCUSIGN") && (
+        {!document?.link?.toUpperCase().includes('DOCUSIGN') && (
           <IconButton
             aria-label="download document"
             size="large"

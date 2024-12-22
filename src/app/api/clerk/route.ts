@@ -1,17 +1,17 @@
-import type { WebhookEvent } from "@clerk/nextjs/server";
-import { headers } from "next/headers";
-import { Webhook } from "svix";
-import { createUserInDbAndHubspot } from "@/libs/user/utils";
-import type { UserCreateSchema } from "@/libs/user/schema";
+import type { WebhookEvent } from '@clerk/nextjs/server';
+import { headers } from 'next/headers';
+import { Webhook } from 'svix';
+import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import type { UserCreateSchema } from '@/libs/user/schema';
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
   const headerPayload = headers();
 
   const svixHeaders = {
-    "svix-id": headerPayload.get("svix-id")!,
-    "svix-timestamp": headerPayload.get("svix-timestamp")!,
-    "svix-signature": headerPayload.get("svix-signature")!,
+    'svix-id': headerPayload.get('svix-id')!,
+    'svix-timestamp': headerPayload.get('svix-timestamp')!,
+    'svix-signature': headerPayload.get('svix-signature')!,
   };
 
   const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET ?? ``);
@@ -20,9 +20,9 @@ async function validateRequest(request: Request) {
 
 export async function POST(request: Request) {
   const { type, data } = await validateRequest(request);
-  console.log("clerk webhook received of type:", type)
+  console.log('clerk webhook received of type:', type);
   switch (type) {
-    case "user.created": {
+    case 'user.created': {
       const {
         id,
         primary_email_address_id,
@@ -33,42 +33,50 @@ export async function POST(request: Request) {
         phone_numbers,
       } = data;
 
-      const email = primary_email_address_id ? ((email_addresses.find(({ id }) => id === primary_email_address_id))?.email_address ?? "") : (email_addresses[0]?.email_address ?? "") 
-      const phonenumber = primary_phone_number_id ? ((phone_numbers.find(({ id }) => id === primary_phone_number_id))?.phone_number ?? "") : (phone_numbers[0]?.phone_number ?? "")
-      if(email === "") {
+      const email = primary_email_address_id
+        ? (email_addresses.find(({ id }) => id === primary_email_address_id)
+            ?.email_address ?? '')
+        : (email_addresses[0]?.email_address ?? '');
+      const phonenumber = primary_phone_number_id
+        ? (phone_numbers.find(({ id }) => id === primary_phone_number_id)
+            ?.phone_number ?? '')
+        : (phone_numbers[0]?.phone_number ?? '');
+      if (email === '') {
         // TODO: log this error. The user will not be created in the DB!
-        console.error("No email found for user", data)
-        return new Response(JSON.stringify({error: `No email found for new clerk user!!!`}), {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        });
-      } 
-      
+        console.error('No email found for user', data);
+        return new Response(
+          JSON.stringify({ error: `No email found for new clerk user!!!` }),
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' },
+          }
+        );
+      }
+
       const newUserData = {
         clerkId: id,
         email: email.toLowerCase(),
         firstName: first_name,
         lastName: last_name,
         phoneNumber: phonenumber,
-        address: undefined
+        address: undefined,
       } as UserCreateSchema;
 
       /* Store user in DB**/
       try {
-        await createUserInDbAndHubspot(newUserData)
+        await createUserInDbAndHubspot(newUserData);
         break;
       } catch (userCreateError) {
         return new Response(JSON.stringify(userCreateError), {
           status: 500,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         });
       }
-
     }
-    case "session.created": /** FALL THROUGH SWITCHES */
-    case "session.ended":
-    case "session.revoked":
-    case "session.removed": {
+    case 'session.created': /** FALL THROUGH SWITCHES */
+    case 'session.ended':
+    case 'session.revoked':
+    case 'session.removed': {
       break;
     }
 
@@ -77,8 +85,8 @@ export async function POST(request: Request) {
     }
   }
 
-  return new Response(JSON.stringify({ message: "success" }), {
+  return new Response(JSON.stringify({ message: 'success' }), {
     status: 200,
-    headers: { "Content-Type": "application/json" },
+    headers: { 'Content-Type': 'application/json' },
   });
 }

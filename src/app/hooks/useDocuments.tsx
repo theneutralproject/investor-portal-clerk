@@ -1,9 +1,9 @@
 /* eslint-disable */
 // @ts-nocheck
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { DealFinancingType, ProjectDocument } from "@prisma/client";
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { DealFinancingType, ProjectDocument } from '@prisma/client';
 
 export type DocumentWithCompletion = ProjectDocument & { completed: boolean };
 
@@ -14,7 +14,7 @@ const useDocuments = (
 ) => {
   const queryClient = useQueryClient();
   const documentsQueryKey = [
-    "documents",
+    'documents',
     projectId,
     dealStageCheck,
     financingType,
@@ -29,13 +29,12 @@ const useDocuments = (
     if (financingType) {
       url += `&financingType=${financingType}`;
     }
-    try{
-    const response = await axios.get(url);
-    return response.data;
-    }
-    catch(e) {
+    try {
+      const response = await axios.get(url);
+      return response.data;
+    } catch (e) {
       console.error(e);
-      return []
+      return [];
     }
   };
 
@@ -66,7 +65,7 @@ const useDocuments = (
 
       queryClient.setQueryData(
         documentsQueryKey,
-        previousDocuments.map((doc) =>
+        previousDocuments.map(doc =>
           doc.id === documentId ? { ...doc, completed: true } : doc
         )
       );

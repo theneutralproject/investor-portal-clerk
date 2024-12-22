@@ -1,7 +1,7 @@
-"use client";
-import React, { useState } from "react";
-import { Fab, Button, Modal, Box, useTheme } from "@mui/material";
-import ChatIcon from "@mui/icons-material/Chat";
+'use client';
+import React, { useState } from 'react';
+import { Fab, Button, Modal, Box, useTheme } from '@mui/material';
+import ChatIcon from '@mui/icons-material/Chat';
 
 const ChatInterface = ({ type }: { type: string }) => {
   const [open, setOpen] = useState(false);
@@ -12,22 +12,22 @@ const ChatInterface = ({ type }: { type: string }) => {
 
   // Determine whether to render FAB or Button based on the type prop
   const renderChatTrigger = () => {
-    if (type === "FAB") {
+    if (type === 'FAB') {
       return (
         <Fab
           onClick={handleOpen}
           sx={{
-            backgroundColor: "#626f52",
-            position: "fixed",
+            backgroundColor: '#626f52',
+            position: 'fixed',
             bottom: theme.spacing(2),
             right: theme.spacing(2),
             zIndex: 1200, // Higher than most elements
           }}
         >
-          <ChatIcon sx={{ color: "white" }} />
+          <ChatIcon sx={{ color: 'white' }} />
         </Fab>
       );
-    } else if (type === "DEALFLOW_BUTTON") {
+    } else if (type === 'DEALFLOW_BUTTON') {
       return (
         <Button variant="grayPill" onClick={handleOpen}>
           Chat
@@ -49,20 +49,20 @@ const ChatInterface = ({ type }: { type: string }) => {
         open={open}
         onClose={handleClose}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
         }}
       >
         <Box
           sx={{
             width: 800,
             height: 600,
-            bgcolor: "background.paper",
-            border: "2px solid #000",
+            bgcolor: 'background.paper',
+            border: '2px solid #000',
             boxShadow: 24,
             p: 4,
-            overflow: "hidden", // Ensures no scroll bars are visible inside the modal
+            overflow: 'hidden', // Ensures no scroll bars are visible inside the modal
           }}
         >
           <iframe
@@ -70,7 +70,7 @@ const ChatInterface = ({ type }: { type: string }) => {
             title="Spruce - The Neutral Project Advisor"
             width="100%"
             height="100%"
-            style={{ border: "none" }}
+            style={{ border: 'none' }}
           />
         </Box>
       </Modal>

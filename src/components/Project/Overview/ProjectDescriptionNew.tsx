@@ -1,14 +1,14 @@
-import React from "react";
-import { Card, CardContent, Divider, Typography } from "@mui/material";
-import type { ProjectWithStats } from "@/libs/types";
-import { theme } from "@/components/Shell/NeutralThemeProvider";
-import LiteYouTubeEmbed from "react-lite-youtube-embed";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
+import React from 'react';
+import { Card, CardContent, Divider, Typography } from '@mui/material';
+import type { ProjectWithStats } from '@/libs/types';
+import { theme } from '@/components/Shell/NeutralThemeProvider';
+import LiteYouTubeEmbed from 'react-lite-youtube-embed';
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
 
 const ProjectDescriptionNew = ({ data }: { data: ProjectWithStats }) => {
-  let youtubeID = "";
-  if (data.youtubeUrl?.includes("v=")) {
-    youtubeID = data.youtubeUrl.split("v=")[1]!;
+  let youtubeID = '';
+  if (data.youtubeUrl?.includes('v=')) {
+    youtubeID = data.youtubeUrl.split('v=')[1]!;
   }
 
   return (

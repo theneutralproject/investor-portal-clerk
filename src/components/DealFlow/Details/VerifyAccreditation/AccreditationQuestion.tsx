@@ -1,6 +1,6 @@
 // AccreditationQuestion.tsx
 
-import React from "react";
+import React from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -12,9 +12,9 @@ import {
   Card,
   CardContent,
   Box,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { type Question } from "@/components/DealFlow/Helpers/types";
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { type Question } from '@/components/DealFlow/Helpers/types';
 
 interface AccreditationQuestionProps {
   question: Question;
@@ -37,17 +37,17 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
       onChange={() => onToggle(question.id)}
       sx={{
         boxShadow: 0,
-        "&:before": { display: "none" },
+        '&:before': { display: 'none' },
         mt: 2,
-        border: "1px solid #e0e0e0",
+        border: '1px solid #e0e0e0',
         borderRadius: 1,
       }}
     >
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <Typography variant="h6">{question.title}</Typography>
           {answer && (
-            <Typography variant="body2" sx={{ color: "text.secondary" }}>
+            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
               Selected: {answer}
             </Typography>
           )}
@@ -57,11 +57,11 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
         <RadioGroup
           aria-label={question.id}
           name={question.id}
-          value={answer || ""}
-          onChange={(e) => onChange(question.id, e.target.value)}
+          value={answer || ''}
+          onChange={e => onChange(question.id, e.target.value)}
         >
-          {question.options.map((option) => (
-            <Card key={option} sx={{ mb: 1, "&:hover": { boxShadow: 3 } }}>
+          {question.options.map(option => (
+            <Card key={option} sx={{ mb: 1, '&:hover': { boxShadow: 3 } }}>
               <CardContent>
                 <FormControlLabel
                   value={option}

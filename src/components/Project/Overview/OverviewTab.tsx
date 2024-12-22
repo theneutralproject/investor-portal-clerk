@@ -4,26 +4,26 @@ import {
   Card,
   Divider,
   useMediaQuery,
-} from "@mui/material";
-import { theme } from "../../Shell/NeutralThemeProvider";
-import InvestmentSummaryBox from "./InvestmentSummaryBox";
-import LiteYouTubeEmbed from "react-lite-youtube-embed";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import BuildingDetails from "./BuildingDetails";
-import BasicTitleDescriptionCard from "../BasicTitleDescriptionCard";
-import ProjectCalculator from "./ProjectCalculator";
-import type { ProjectWithAllNestedData } from "@/libs/types";
+} from '@mui/material';
+import { theme } from '../../Shell/NeutralThemeProvider';
+import InvestmentSummaryBox from './InvestmentSummaryBox';
+import LiteYouTubeEmbed from 'react-lite-youtube-embed';
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
+import BuildingDetails from './BuildingDetails';
+import BasicTitleDescriptionCard from '../BasicTitleDescriptionCard';
+import ProjectCalculator from './ProjectCalculator';
+import type { ProjectWithAllNestedData } from '@/libs/types';
 
 export const OverviewTab = ({ data }: { data: ProjectWithAllNestedData }) => {
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  let youtubeID = "";
-  if (data.youtubeUrl?.includes("v=")) {
-    youtubeID = data.youtubeUrl.split("v=")[1]!;
+  let youtubeID = '';
+  if (data.youtubeUrl?.includes('v=')) {
+    youtubeID = data.youtubeUrl.split('v=')[1]!;
   }
   return (
     <Card sx={{ mt: theme.spacing(2) }}>
-      <CardContent sx={{ p: isMobile ? 0 : "16px" }}>
+      <CardContent sx={{ p: isMobile ? 0 : '16px' }}>
         <Card>
           <CardContent>
             <Typography variant="h6" gutterBottom>

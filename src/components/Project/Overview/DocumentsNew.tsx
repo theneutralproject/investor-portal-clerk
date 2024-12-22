@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Card, CardContent, Divider, Typography } from "@mui/material";
-import type { ProjectWithStats } from "@/libs/types";
-import useDocuments from "@/app/hooks/useDocuments";
-import { type DocumentWithCompletion } from "@/app/hooks/useDocuments";
-import DocumentCard from "../ProjectDocs/DocumentCard";
-import DocumentViewerModal from "../ProjectDocs/DocumentViewerModal";
+import React, { useState } from 'react';
+import { Card, CardContent, Divider, Typography } from '@mui/material';
+import type { ProjectWithStats } from '@/libs/types';
+import useDocuments from '@/app/hooks/useDocuments';
+import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
+import DocumentCard from '../ProjectDocs/DocumentCard';
+import DocumentViewerModal from '../ProjectDocs/DocumentViewerModal';
 
 // Define a proper error type
 type ApiError = {
@@ -39,7 +39,7 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
   };
 
   const handleDownloadDocument = (document: DocumentWithCompletion) => {
-    window.open(document.link, "_blank");
+    window.open(document.link, '_blank');
   };
 
   const handleCloseModal = () => {

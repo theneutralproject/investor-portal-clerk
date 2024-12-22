@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Typography,
@@ -8,51 +8,51 @@ import {
   Avatar,
   Divider,
   LinearProgress,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 import {
   type DealWithOrgMembersAndProject,
   type DealWithFullOrgAndProject,
-} from "@/libs/types";
-import { useRouter } from "next/navigation";
+} from '@/libs/types';
+import { useRouter } from 'next/navigation';
 
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
 }
 
 const ContinueButton = styled(Button)(({}) => ({
-  backgroundColor: "white",
-  color: "black",
-  borderRadius: "24px",
-  textTransform: "none",
-  padding: "8px 24px",
-  "&:hover": {
-    backgroundColor: "#f5f5f5",
+  backgroundColor: 'white',
+  color: 'black',
+  borderRadius: '24px',
+  textTransform: 'none',
+  padding: '8px 24px',
+  '&:hover': {
+    backgroundColor: '#f5f5f5',
   },
 }));
 
 const ProjectCard = styled(Box)(({ theme }) => ({
-  display: "flex",
-  alignItems: "center",
+  display: 'flex',
+  alignItems: 'center',
   gap: theme.spacing(2),
-  padding: "2px 10px",
+  padding: '2px 10px',
   marginBottom: theme.spacing(1),
-  width: "100%",
+  width: '100%',
 }));
 
 const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
   height: 4,
   borderRadius: 2,
-  backgroundColor: "rgba(255, 255, 255, 0.1)",
+  backgroundColor: 'rgba(255, 255, 255, 0.1)',
   marginTop: theme.spacing(1),
-  "& .MuiLinearProgress-bar": {
-    backgroundColor: "#4CAF50",
+  '& .MuiLinearProgress-bar': {
+    backgroundColor: '#4CAF50',
   },
 }));
 
 export const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
   const headerPicture = deal.project.pictures.find(
-    (picture) => picture.type === "HEADER"
+    picture => picture.type === 'HEADER'
   );
 
   if (headerPicture?.url) {
@@ -87,34 +87,34 @@ const isDealCompleted = (dealStage: number): boolean => {
 const getNextStep = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
     case 0:
-      return "get-started";
+      return 'get-started';
     case 1:
-      return "details";
+      return 'details';
     case 2:
     case 3:
-      return "review";
+      return 'review';
     case 4:
     case 5:
-      return "fund";
+      return 'fund';
     default:
-      return "get-started";
+      return 'get-started';
   }
 };
 
 const getNextStepDisplay = (deal: DealWithFullOrgAndProject): string => {
   switch (deal.dealStage) {
     case 1:
-      return "Next Step: Details";
+      return 'Next Step: Details';
     case 2:
-      return "Next Step: Review & Sign";
+      return 'Next Step: Review & Sign';
     case 3:
-      return "Next Step: Review & Sign";
+      return 'Next Step: Review & Sign';
     case 4:
-      return "Next Step: Fund";
+      return 'Next Step: Fund';
     case 5:
-      return "Completed";
+      return 'Completed';
     default:
-      return "Next Step: Get Started";
+      return 'Next Step: Get Started';
   }
 };
 
@@ -134,9 +134,9 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
   return (
     <Card
       sx={{
-        backgroundColor: "black",
-        borderRadius: "8px",
-        color: "white",
+        backgroundColor: 'black',
+        borderRadius: '8px',
+        color: 'white',
         mb: 2,
       }}
     >
@@ -144,19 +144,19 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
         <Typography
           variant="body1"
           sx={{
-            fontSize: "20px",
+            fontSize: '20px',
             mb: 2,
           }}
         >
           Complete Your Investment
         </Typography>
 
-        <Divider sx={{ mb: 2, borderColor: "#3C3C3C" }} />
+        <Divider sx={{ mb: 2, borderColor: '#3C3C3C' }} />
 
         {deals
-          .filter((deal) => !isDealCompleted(deal.dealStage))
+          .filter(deal => !isDealCompleted(deal.dealStage))
           .sort((a, b) => a.id - b.id)
-          .map((deal) => (
+          .map(deal => (
             <Box key={deal.id} sx={{ mb: 3 }}>
               <ProjectCard>
                 <Avatar
@@ -165,7 +165,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
                   sx={{
                     width: 56,
                     height: 56,
-                    borderRadius: "8px",
+                    borderRadius: '8px',
                   }}
                   variant="square"
                 />
@@ -177,7 +177,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "rgba(255, 255, 255, 0.7)",
+                      color: 'rgba(255, 255, 255, 0.7)',
                     }}
                   >
                     {getNextStepDisplay(deal as DealWithFullOrgAndProject)}

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Box,
   Card,
@@ -6,26 +6,26 @@ import {
   Container,
   Divider,
   Typography,
-} from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import "react-image-gallery/styles/css/image-gallery.css";
-import "./dealPage.css";
-import { useEffect } from "react";
-import axios from "axios";
-import { useQuery } from "@tanstack/react-query";
-import { useSearchParams } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
-import posthog from "posthog-js";
-import type { ProjectWithAllNestedData } from "@/libs/types";
-import InvestmentSummaryBox from "@/components/Project/Overview/InvestmentSummaryBox";
-import RightSidebarCTA from "@/components/Project/NewProject/RightSidebarCTA";
-import BuildingDetailsNew from "@/components/Project/Overview/BuildingDetailsNew";
-import ProjectDescriptionNew from "@/components/Project/Overview/ProjectDescriptionNew";
-import MarketHighlightsNew from "@/components/Project/Overview/MarketHighlightsNew";
-import InvestmentCalculatorNew from "@/components/Project/Overview/InvestmentCalculatorNew";
-import DocumentsNew from "@/components/Project/Overview/DocumentsNew";
-import GalleryNew from "@/components/Project/Overview/GalleryNew";
-import HaveQuestionsNew from "@/components/Project/Overview/HaveQuestionsNew";
+} from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import 'react-image-gallery/styles/css/image-gallery.css';
+import './dealPage.css';
+import { useEffect } from 'react';
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
+import posthog from 'posthog-js';
+import type { ProjectWithAllNestedData } from '@/libs/types';
+import InvestmentSummaryBox from '@/components/Project/Overview/InvestmentSummaryBox';
+import RightSidebarCTA from '@/components/Project/NewProject/RightSidebarCTA';
+import BuildingDetailsNew from '@/components/Project/Overview/BuildingDetailsNew';
+import ProjectDescriptionNew from '@/components/Project/Overview/ProjectDescriptionNew';
+import MarketHighlightsNew from '@/components/Project/Overview/MarketHighlightsNew';
+import InvestmentCalculatorNew from '@/components/Project/Overview/InvestmentCalculatorNew';
+import DocumentsNew from '@/components/Project/Overview/DocumentsNew';
+import GalleryNew from '@/components/Project/Overview/GalleryNew';
+import HaveQuestionsNew from '@/components/Project/Overview/HaveQuestionsNew';
 
 export type PageProps = {
   params: {
@@ -42,9 +42,9 @@ interface QueryParams {
 export default function Page({ params: { slug } }: PageProps) {
   const searchParams = useSearchParams();
   const queryParams: QueryParams = {
-    afterauth: searchParams.get("afterauth"),
-    dealStage: searchParams.get("dealStage"),
-    financingType: searchParams.get("financingType"),
+    afterauth: searchParams.get('afterauth'),
+    dealStage: searchParams.get('dealStage'),
+    financingType: searchParams.get('financingType'),
   };
 
   const { user } = useUser();
@@ -54,11 +54,11 @@ export default function Page({ params: { slug } }: PageProps) {
     ProjectWithAllNestedData[],
     Error
   >({
-    queryKey: ["project", slug],
+    queryKey: ['project', slug],
     queryFn: () =>
       axios
         .get<ProjectWithAllNestedData[]>(`/api/projects?slug=${slug}`)
-        .then((res) => res.data),
+        .then(res => res.data),
   });
 
   useEffect(() => {
@@ -90,7 +90,7 @@ export default function Page({ params: { slug } }: PageProps) {
   const project = projectData[0];
 
   const projectImage =
-    project.pictures.find((picture) => picture.type === "HEADER")?.url ??
+    project.pictures.find(picture => picture.type === 'HEADER')?.url ??
     project.pictures[0]?.url;
 
   return (
@@ -98,25 +98,25 @@ export default function Page({ params: { slug } }: PageProps) {
       <Box
         sx={{
           background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 70.16%, rgba(0, 0, 0, 0.40) 100%), url("${projectImage}") lightgray 0px -637.293px / 100% 294.465% no-repeat`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          height: "400px",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "flex-end",
-          alignItems: "flex-start",
-          color: "white",
-          textAlign: "left",
-          position: "relative",
-          padding: "20px 40px",
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          height: '400px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+          alignItems: 'flex-start',
+          color: 'white',
+          textAlign: 'left',
+          position: 'relative',
+          padding: '20px 40px',
         }}
       >
         <Box>
           <Typography
             variant="h3"
             sx={{
-              color: "white",
-              fontSize: "64px",
+              color: 'white',
+              fontSize: '64px',
               fontWeight: 500,
             }}
           >
@@ -126,8 +126,8 @@ export default function Page({ params: { slug } }: PageProps) {
             variant="h5"
             component="h2"
             sx={{
-              color: "white",
-              fontSize: "18px",
+              color: 'white',
+              fontSize: '18px',
               fontWeight: 400,
             }}
           >
@@ -140,7 +140,7 @@ export default function Page({ params: { slug } }: PageProps) {
       <Grid
         container
         spacing={2}
-        sx={{ mt: 2, background: "#f5f5f5", borderRadius: "8px" }}
+        sx={{ mt: 2, background: '#f5f5f5', borderRadius: '8px' }}
       >
         <Grid
           size={8}
@@ -168,7 +168,7 @@ export default function Page({ params: { slug } }: PageProps) {
           <GalleryNew data={project} />
           <HaveQuestionsNew />
         </Grid>
-        <Grid size={4} sx={{ background: "unset" }}>
+        <Grid size={4} sx={{ background: 'unset' }}>
           <RightSidebarCTA project={project} />
         </Grid>
       </Grid>
