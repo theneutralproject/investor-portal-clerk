@@ -56,7 +56,7 @@ export default function Page({ params: { slug } }: PageProps) {
     queryKey: ['project', slug],
     queryFn: () =>
       axios
-        .get<ProjectWithAllNestedData[]>(`/api/projects?slug=${slug}`)
+        .get<ProjectWithAllNestedData[]>(`/api/public/projects?slug=${slug}`)
         .then(res => res.data),
   });
 
