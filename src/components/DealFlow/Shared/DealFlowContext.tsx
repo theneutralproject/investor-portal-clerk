@@ -1,52 +1,52 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { type AccreditationVerificationCreateSchema } from "@/libs/accreditationVerification/schema";
+import { type AccreditationVerificationCreateSchema } from '@/libs/accreditationVerification/schema';
 import {
   type OrganizationWithDocuments,
   type ProjectWithAllNestedData,
   type UserWithAddress,
   type DealWithInvestmentStatsAndDocument,
   type MemberWithUser,
-} from "@/libs/types";
+} from '@/libs/types';
 import {
   DealOwnershipType,
   DealFinancingType,
   type Project,
   type Organization,
   type AccreditationVerification,
-} from "@prisma/client";
-import axios from "axios";
-import { useRouter, usePathname } from "next/navigation";
-import React, { createContext, useState, useContext, useEffect } from "react";
-import { toast } from "react-toastify";
-import DealFlowGetStarted from "@components/DealFlow/GetStarted/DealFlowGetStarted";
-import DealFlowType from "@components/DealFlow/Type/DealFlowType";
-import DealFlowAmount from "@components/DealFlow/Amount/DealFlowAmount";
-import DealFlowDetails from "@components/DealFlow/Details/DealFlowDetails";
-import DealFlowDetailsOwnershipType from "@components/DealFlow/Details/DealFlowDetailsOwnershipType";
-import DealFlowCoInvestor from "@components/DealFlow/Details/DealFlowCoInvestor";
-import DealFlowEntityDetails from "@components/DealFlow/Details/DealFlowEntityDetails";
-import DealFlowEntityDetailsCoInvestor from "@components/DealFlow/Details/DealFlowEntityDetailsCoInvestor";
-import DealFlowVerifyAccreditation from "@components/DealFlow/Details/VerifyAccreditation/DealFlowVerifyAccreditation";
+} from '@prisma/client';
+import axios from 'axios';
+import { useRouter, usePathname } from 'next/navigation';
+import React, { createContext, useState, useContext, useEffect } from 'react';
+import { toast } from 'react-toastify';
+import DealFlowGetStarted from '@components/DealFlow/GetStarted/DealFlowGetStarted';
+import DealFlowType from '@components/DealFlow/Type/DealFlowType';
+import DealFlowAmount from '@components/DealFlow/Amount/DealFlowAmount';
+import DealFlowDetails from '@components/DealFlow/Details/DealFlowDetails';
+import DealFlowDetailsOwnershipType from '@components/DealFlow/Details/DealFlowDetailsOwnershipType';
+import DealFlowCoInvestor from '@components/DealFlow/Details/DealFlowCoInvestor';
+import DealFlowEntityDetails from '@components/DealFlow/Details/DealFlowEntityDetails';
+import DealFlowEntityDetailsCoInvestor from '@components/DealFlow/Details/DealFlowEntityDetailsCoInvestor';
+import DealFlowVerifyAccreditation from '@components/DealFlow/Details/VerifyAccreditation/DealFlowVerifyAccreditation';
 import {
   type OrganizationMemberCreateSchema,
   type OrganizationMemberUpdateSchema,
-} from "@/libs/organization/schema";
-import DealFlowReview from "@components/DealFlow/ReviewSign/DealFlowReview";
-import DealFlowFund from "@components/DealFlow/Fund/DealFlowFund";
-import type { DealCreateSchema } from "@/libs/deal/schema";
+} from '@/libs/organization/schema';
+import DealFlowReview from '@components/DealFlow/ReviewSign/DealFlowReview';
+import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
+import type { DealCreateSchema } from '@/libs/deal/schema';
 // Define the step types
 export type StepType =
-  | "get-started"
-  | "type"
-  | "amount"
-  | "details"
-  | "details-ownership-type"
-  | "co-investor"
-  | "entity-details"
-  | "entity-details-co-investor"
-  | "verify-accreditation"
-  | "review"
-  | "fund";
+  | 'get-started'
+  | 'type'
+  | 'amount'
+  | 'details'
+  | 'details-ownership-type'
+  | 'co-investor'
+  | 'entity-details'
+  | 'entity-details-co-investor'
+  | 'verify-accreditation'
+  | 'review'
+  | 'fund';
 
 // Define an interface for the step object
 interface Step {
@@ -62,77 +62,77 @@ interface Step {
 // Create the steps array with type safety
 export const steps: Step[] = [
   {
-    value: "get-started",
-    display: "Get Started",
+    value: 'get-started',
+    display: 'Get Started',
     component: DealFlowGetStarted,
     progress: 0,
   },
   {
-    value: "type",
-    display: "Type",
+    value: 'type',
+    display: 'Type',
     component: DealFlowType,
     isMajor: true,
     progress: 10,
   },
   {
-    value: "amount",
-    display: "Amount",
+    value: 'amount',
+    display: 'Amount',
     component: DealFlowAmount,
     isMajor: true,
     progress: 20,
   },
   {
-    value: "details",
-    display: "Details",
+    value: 'details',
+    display: 'Details',
     component: DealFlowDetails,
     isMajor: true,
     progress: 30,
   },
   {
-    value: "details-ownership-type",
-    display: "Ownership Type",
+    value: 'details-ownership-type',
+    display: 'Ownership Type',
     component: DealFlowDetailsOwnershipType,
-    majorParent: "details",
+    majorParent: 'details',
     progress: 40,
   },
   {
-    value: "co-investor",
-    display: "Co-Investor",
+    value: 'co-investor',
+    display: 'Co-Investor',
     component: DealFlowCoInvestor,
-    majorParent: "details",
+    majorParent: 'details',
     progress: 50,
   },
   {
-    value: "entity-details",
-    display: "Entity Details",
+    value: 'entity-details',
+    display: 'Entity Details',
     component: DealFlowEntityDetails,
-    majorParent: "details",
+    majorParent: 'details',
     progress: 60,
   },
   {
-    value: "entity-details-co-investor",
-    display: "Entity Details (Co-Investor)",
+    value: 'entity-details-co-investor',
+    display: 'Entity Details (Co-Investor)',
     component: DealFlowEntityDetailsCoInvestor,
-    majorParent: "details",
+    majorParent: 'details',
     progress: 70,
   },
   {
-    value: "verify-accreditation",
-    display: "Verify Accreditation",
+    value: 'verify-accreditation',
+    display: 'Verify Accreditation',
     component: DealFlowVerifyAccreditation,
-    majorParent: "details",
+    majorParent: 'details',
     progress: 80,
   },
   {
-    value: "review",
-    display: "Review & Sign",
+    value: 'review',
+    display: 'Review & Sign',
     component: DealFlowReview,
     isMajor: true,
     progress: 90,
   },
   {
-    value: "fund",
-    display: "Fund",
+    value: 'fund',
+    display: 'Fund',
     component: DealFlowFund,
     isMajor: true,
     progress: 100,
@@ -141,47 +141,41 @@ export const steps: Step[] = [
 ];
 
 export const stepComponents = Object.fromEntries(
-  steps
-    .filter((step) => step.component)
-    .map((step) => [step.value, step.component])
+  steps.filter(step => step.component).map(step => [step.value, step.component])
 );
 
-export const MAJOR_STEPS = steps.filter((step) => step.isMajor);
+export const MAJOR_STEPS = steps.filter(step => step.isMajor);
 
-export const stepValues: StepType[] = steps.map((step) => step.value);
+export const stepValues: StepType[] = steps.map(step => step.value);
 
 export const calculateDealProgress = (
   currentStep: StepType,
   ownershipType: DealOwnershipType | undefined
 ): number => {
   // Find current step info
-  const currentStepInfo = steps.find((s) => s.value === currentStep);
+  const currentStepInfo = steps.find(s => s.value === currentStep);
   if (!currentStepInfo) return 0;
 
   // Handle optional paths based on ownership type
-  if (currentStepInfo.majorParent === "details") {
+  if (currentStepInfo.majorParent === 'details') {
     const entityDetailsRequired =
       ownershipType &&
-      ["CORPORATION", "COMMON", "OTHER", "TRUST"].includes(
+      ['CORPORATION', 'COMMON', 'OTHER', 'TRUST'].includes(
         ownershipType as string
       );
 
     const coInvestorRequired =
       ownershipType &&
-      ["PARTNERSHIP", "MARITAL", "JOINT"].includes(ownershipType as string);
+      ['PARTNERSHIP', 'MARITAL', 'JOINT'].includes(ownershipType as string);
 
     // Skip entity-details progress if not required
-    if (currentStepInfo.value === "entity-details" && !entityDetailsRequired) {
-      return (
-        steps.find((s) => s.value === "verify-accreditation")?.progress ?? 0
-      );
+    if (currentStepInfo.value === 'entity-details' && !entityDetailsRequired) {
+      return steps.find(s => s.value === 'verify-accreditation')?.progress ?? 0;
     }
 
     // Skip co-investor progress if not required
-    if (currentStepInfo.value === "co-investor" && !coInvestorRequired) {
-      return (
-        steps.find((s) => s.value === "verify-accreditation")?.progress ?? 0
-      );
+    if (currentStepInfo.value === 'co-investor' && !coInvestorRequired) {
+      return steps.find(s => s.value === 'verify-accreditation')?.progress ?? 0;
     }
   }
 
@@ -257,16 +251,16 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const router = useRouter();
   const pathname = usePathname();
   const getNextStep = (currentStep: StepType): StepType | null => {
-    const currentIndex = steps.findIndex((s) => s.value === currentStep);
+    const currentIndex = steps.findIndex(s => s.value === currentStep);
 
     const nextStep = steps[currentIndex + 1]?.value ?? null;
 
     //Note: NEXT STEP DEPENDS ON ANSWER
-    if (currentStep === "details-ownership-type") {
+    if (currentStep === 'details-ownership-type') {
       const ownershipType = deal?.investmentStats?.ownershipType;
 
       if (!ownershipType) {
-        return "verify-accreditation";
+        return 'verify-accreditation';
       }
 
       const coInvestorTypes: DealOwnershipType[] = [
@@ -282,15 +276,15 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         DealOwnershipType.TRUST,
       ];
 
-      if (coInvestorTypes.some((type) => type === ownershipType)) {
-        return "co-investor";
+      if (coInvestorTypes.some(type => type === ownershipType)) {
+        return 'co-investor';
       }
 
-      if (entityDetailsTypes.some((type) => type === ownershipType)) {
-        return "entity-details";
+      if (entityDetailsTypes.some(type => type === ownershipType)) {
+        return 'entity-details';
       }
 
-      return "verify-accreditation";
+      return 'verify-accreditation';
     }
 
     return nextStep;
@@ -301,11 +295,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     if (!deal || !pathname) return;
 
     // Extract the current step from the pathname
-    const pathParts = pathname.split("/");
+    const pathParts = pathname.split('/');
     const currentRouteStep = pathParts[pathParts.length - 1] as StepType;
 
     // Find step info for the current route
-    const currentStepInfo = steps.find((s) => s.value === currentRouteStep);
+    const currentStepInfo = steps.find(s => s.value === currentRouteStep);
     if (!currentStepInfo) return;
 
     // If this step has a required deal stage
@@ -314,7 +308,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         // Find the last valid step based on deal stage
         const lastValidStep = steps
           .filter(
-            (s) =>
+            s =>
               s.requiredDealStage === undefined ||
               deal.dealStage >= s.requiredDealStage
           )
@@ -326,11 +320,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
             router.push(
               `/dealflow/${projectSlug}/${dealId}/${lastValidStep.value}`
             );
-            toast.error("Please complete previous steps first");
+            toast.error('Please complete previous steps first');
           }
         } else {
           router.push(`/dealflow/${projectSlug}/${dealId}`);
-          toast.error("Invalid deal stage for this step");
+          toast.error('Invalid deal stage for this step');
         }
       }
     }
@@ -348,7 +342,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
               projectSlug
             )}&dealId=${encodeURIComponent(dealId)}`
           ),
-          fetch("/api/users"),
+          fetch('/api/users'),
         ]);
 
         if (!dealResponse.ok || !userResponse.ok) {
@@ -382,8 +376,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
           setOrganization(organizationData as OrganizationWithDocuments);
         }
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setError("Failed to load data. Please try again.");
+        console.error('Error fetching data:', error);
+        setError('Failed to load data. Please try again.');
       } finally {
         setIsLoading(false);
       }
@@ -412,11 +406,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       if (nextStep && incrementStep) {
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
-      toast.success("Deal updated successfully");
+      toast.success('Deal updated successfully');
     } catch (error) {
-      console.error("Error updating deal:", error);
-      setError("Failed to update deal. Please try again.");
-      toast.error("Failed to update deal. Please try again.");
+      console.error('Error updating deal:', error);
+      setError('Failed to update deal. Please try again.');
+      toast.error('Failed to update deal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -433,18 +427,18 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     try {
       const { data } = await axios.post<{ id: string }>(
-        "/api/deals",
+        '/api/deals',
         dealCreateData
       );
       const nextStep = getNextStep(step);
       if (nextStep) {
         router.push(`/dealflow/${project.slug}/${data.id}/${nextStep}`);
       }
-      toast.success("Deal created successfully");
+      toast.success('Deal created successfully');
     } catch (error) {
-      console.error("Error creating deal:", error);
-      setError("Failed to create deal. Please try again.");
-      toast.error("Failed to create deal. Please try again.");
+      console.error('Error creating deal:', error);
+      setError('Failed to create deal. Please try again.');
+      toast.error('Failed to create deal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -470,11 +464,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       if (nextStep) {
         router.push(`/dealflow/${project?.slug}/${deal?.id}/${nextStep}`);
       }
-      toast.success("User updated successfully");
+      toast.success('User updated successfully');
     } catch (error) {
-      console.error("Error updating user:", error);
-      setError("Failed to update user. Please try again.");
-      toast.error("Failed to update user. Please try again.");
+      console.error('Error updating user:', error);
+      setError('Failed to update user. Please try again.');
+      toast.error('Failed to update user. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -488,13 +482,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     try {
       const { data } = await axios.post<Organization>(
-        "/api/organizations",
+        '/api/organizations',
         organizationData
       );
       setOrganization(data as OrganizationWithDocuments);
 
       if (!deal) {
-        throw new Error("Deal not found");
+        throw new Error('Deal not found');
       }
 
       //Update deal with new organizationId
@@ -507,9 +501,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         },
       });
     } catch (error) {
-      console.error("Error creating organization:", error);
-      setError("Failed to create organization. Please try again.");
-      toast.error("Failed to create organization. Please try again.");
+      console.error('Error creating organization:', error);
+      setError('Failed to create organization. Please try again.');
+      toast.error('Failed to create organization. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -543,8 +537,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
       setDeal(dealData.deal);
     } catch (error) {
-      console.error("Error fetching deal data:", error);
-      setError("Failed to load deal data. Please try again.");
+      console.error('Error fetching deal data:', error);
+      setError('Failed to load deal data. Please try again.');
     }
   };
 
@@ -568,9 +562,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
     } catch (error) {
-      console.error("Error updating organization:", error);
-      setError("Failed to update organization. Please try again.");
-      toast.error("Failed to update organization. Please try again.");
+      console.error('Error updating organization:', error);
+      setError('Failed to update organization. Please try again.');
+      toast.error('Failed to update organization. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -593,11 +587,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         ...organization,
         members: [...organization.members, data],
       });
-      toast.success("Co-investor created successfully");
+      toast.success('Co-investor created successfully');
     } catch (error) {
-      console.error("Error creating organization member:", error);
-      setError("Failed to create organization member. Please try again.");
-      toast.error("Failed to create organization member. Please try again.");
+      console.error('Error creating organization member:', error);
+      setError('Failed to create organization member. Please try again.');
+      toast.error('Failed to create organization member. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -613,9 +607,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         `/api/organizations/${organization.id}/members/${memberId}`
       );
       setOrganization(data);
-      toast.success("Co-investor deleted successfully");
+      toast.success('Co-investor deleted successfully');
     } catch (error) {
-      console.error("Error deleting organization member:", error);
+      console.error('Error deleting organization member:', error);
     } finally {
       setIsLoading(false);
     }
@@ -637,18 +631,18 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       );
       //Find organization member by userId and update
       const organizationMember = organization?.members.find(
-        (member) => member.id === data?.id
+        member => member.id === data?.id
       );
       if (organizationMember) {
         organizationMember.title = data.title;
         organizationMember.user = data.user;
       }
       setOrganization(organization);
-      toast.success("Co-investor updated successfully");
+      toast.success('Co-investor updated successfully');
     } catch (error) {
-      console.error("Error updating organization member:", error);
-      setError("Failed to update organization member. Please try again.");
-      toast.error("Failed to update organization member. Please try again.");
+      console.error('Error updating organization member:', error);
+      setError('Failed to update organization member. Please try again.');
+      toast.error('Failed to update organization member. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -662,16 +656,16 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setError(null);
 
     try {
-      await axios.post<AccreditationVerification>("/api/deals/verification", {
+      await axios.post<AccreditationVerification>('/api/deals/verification', {
         ...verificationData,
         dealId: deal.id,
       });
 
-      toast.success("Accreditation verifier created successfully");
+      toast.success('Accreditation verifier created successfully');
     } catch (error) {
-      console.error("Error creating accreditation verifier:", error);
-      setError("Failed to create accreditation verifier. Please try again.");
-      toast.error("Failed to create accreditation verifier. Please try again.");
+      console.error('Error creating accreditation verifier:', error);
+      setError('Failed to create accreditation verifier. Please try again.');
+      toast.error('Failed to create accreditation verifier. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -710,7 +704,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 export const useDealFlow = (): DealFlowContextType => {
   const context = useContext(DealFlowContext);
   if (context === undefined) {
-    throw new Error("useDealFlow must be used within a DealFlowProvider");
+    throw new Error('useDealFlow must be used within a DealFlowProvider');
   }
   return context;
 };

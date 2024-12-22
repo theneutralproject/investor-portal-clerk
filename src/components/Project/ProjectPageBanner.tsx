@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography } from '@mui/material';
 
 const ProjectPageBanner = ({
   headline,
@@ -12,14 +12,14 @@ const ProjectPageBanner = ({
   return (
     <Box
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "flex-start",
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
         backgroundImage: `url("${background}")`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        height: "300px",
-        width: "100%",
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        height: '300px',
+        width: '100%',
       }}
     >
       <Box
@@ -33,7 +33,7 @@ const ProjectPageBanner = ({
           variant="h3"
           gutterBottom
           sx={{
-            color: headline === "Learn" ? "white" : "",
+            color: headline === 'Learn' ? 'white' : '',
           }}
         >
           {headline}
@@ -41,7 +41,7 @@ const ProjectPageBanner = ({
         <Typography
           variant="body2"
           sx={{
-            color: headline === "Learn" ? "rgba(255, 255, 255, 0.80)" : "",
+            color: headline === 'Learn' ? 'rgba(255, 255, 255, 0.80)' : '',
           }}
         >
           {description}

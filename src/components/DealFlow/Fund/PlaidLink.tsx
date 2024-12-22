@@ -1,6 +1,6 @@
 /* eslint-disable */
-import axios from "axios";
-import React from "react";
+import axios from 'axios';
+import React from 'react';
 
 import {
   PlaidLink,
@@ -8,8 +8,8 @@ import {
   PlaidLinkOnEvent,
   PlaidLinkOnExit,
   PlaidLinkOnSuccessMetadata,
-} from "react-plaid-link";
-import { toast } from "react-toastify";
+} from 'react-plaid-link';
+import { toast } from 'react-toastify';
 
 interface Props {
   dealId: number;
@@ -26,11 +26,11 @@ class PlaidLinkClass extends React.Component<Props, State> {
     this.state = { token: null };
   }
   async createLinkToken() {
-    const response = await fetch("/api/finix/plaidLinkToken", {
-      method: "POST",
+    const response = await fetch('/api/finix/plaidLinkToken', {
+      method: 'POST',
       body: JSON.stringify({
-        "slug": this.props.projectSlug,
-      })
+        slug: this.props.projectSlug,
+      }),
     });
     const link_token = await response.json();
     return link_token;
@@ -46,16 +46,16 @@ class PlaidLinkClass extends React.Component<Props, State> {
       account_id: string;
     };
 
-    console.log("merchantId:", this.props.merchantId);
+    console.log('merchantId:', this.props.merchantId);
     const FinixAuth = window.Finix.Auth(
-      "sandbox",
+      'sandbox',
       this.props.merchantId,
       async (sk: string) => {
-        console.log("sessionKey", sk);
+        console.log('sessionKey', sk);
 
         // https://plaid.com/docs/api/tokens/#token-exchange-flow
         const res = await axios
-          .post("/api/finix/transaction", {
+          .post('/api/finix/transaction', {
             plaid_public_token: publicToken,
             plaid_account_id: fullMetadata.account_id,
             dealId: this.props.dealId,
@@ -63,8 +63,8 @@ class PlaidLinkClass extends React.Component<Props, State> {
             merchantId: this.props.merchantId,
             slug: this.props.projectSlug,
           })
-          .catch((error) => {
-            console.error("Finix transaction error", error);
+          .catch(error => {
+            console.error('Finix transaction error', error);
             const errorMessage = error.response.data.error;
             toast.error(errorMessage);
             return error.response;
@@ -84,14 +84,14 @@ class PlaidLinkClass extends React.Component<Props, State> {
   };
 
   onEvent: PlaidLinkOnEvent = (eventName, metadata) => {
-    console.log("onEvent:");
+    console.log('onEvent:');
     // log onEvent callbacks from Link
     // https://plaid.com/docs/link/web/#onevent
     console.log(eventName, metadata);
   };
 
   onExit: PlaidLinkOnExit = (error, metadata) => {
-    console.log("onExit:");
+    console.log('onExit:');
     // log onExit callbacks from Link, handle errors
     // https://plaid.com/docs/link/web/#onexit
     console.log(error, metadata);
@@ -103,18 +103,18 @@ class PlaidLinkClass extends React.Component<Props, State> {
       <PlaidLink
         className="CustomButton"
         style={{
-          padding: "8px",
-          fontSize: "16px",
-          cursor: "pointer",
-          backgroundColor: "#000",
-          color: "#fff",
-          border: "none",
-          borderRadius: "4px",
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "8px",
+          padding: '8px',
+          fontSize: '16px',
+          cursor: 'pointer',
+          backgroundColor: '#000',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px',
         }}
         token={this.state.token}
         onSuccess={this.onSuccess}
@@ -125,7 +125,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
           width="24"
           height="24"
           viewBox="0 0 24 24"
-          style={{ color: "white" }}
+          style={{ color: 'white' }}
         >
           <path
             fill="currentColor"

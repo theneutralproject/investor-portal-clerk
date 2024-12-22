@@ -1,6 +1,6 @@
 'use server';
-import type { NextRequest } from "next/server";
-import prisma from "@/libs/prisma.server";
+import type { NextRequest } from 'next/server';
+import prisma from '@/libs/prisma.server';
 
 interface DocuSignParams {
   documentTemplateId: string;
@@ -12,7 +12,7 @@ interface DocuSignParams {
 class ValidationError extends Error {
   constructor(message: string) {
     super(message);
-    this.name = "ValidationError";
+    this.name = 'ValidationError';
   }
 }
 
@@ -20,10 +20,10 @@ class ValidationError extends Error {
 function extractParams(request: NextRequest): DocuSignParams {
   const searchParams = request.nextUrl.searchParams;
   const params = {
-    documentTemplateId: searchParams.get("documentTemplateId"),
-    userId: searchParams.get("userId"),
-    dealId: searchParams.get("dealId"),
-    event: searchParams.get("event"),
+    documentTemplateId: searchParams.get('documentTemplateId'),
+    userId: searchParams.get('userId'),
+    dealId: searchParams.get('dealId'),
+    event: searchParams.get('event'),
   };
 
   if (
@@ -33,7 +33,7 @@ function extractParams(request: NextRequest): DocuSignParams {
     !params.event
   ) {
     throw new ValidationError(
-      "Missing required parameters: documentTemplateId or userId or dealId or event"
+      'Missing required parameters: documentTemplateId or userId or dealId or event'
     );
   }
 
@@ -52,7 +52,7 @@ async function getProjectDocument(documentTemplateId: string) {
   });
 
   if (!projectDocument) {
-    throw new ValidationError("Project document not found");
+    throw new ValidationError('Project document not found');
   }
 
   return projectDocument;
@@ -60,10 +60,14 @@ async function getProjectDocument(documentTemplateId: string) {
 
 // Create document event based on the event type
 async function createDocumentEvent(params: DocuSignParams) {
-  if (params.event === "signing_complete") {
-    console.log("Creating document event for signing_complete");
+  if (params.event === 'signing_complete') {
+    console.log('Creating document event for signing_complete');
     const existingDocusignEvent = await prisma.docusignEvent.findFirst({
-      where: { dealId: parseInt(params.dealId), userId: parseInt(params.userId), templateId: params.documentTemplateId },
+      where: {
+        dealId: parseInt(params.dealId),
+        userId: parseInt(params.userId),
+        templateId: params.documentTemplateId,
+      },
     });
 
     if (existingDocusignEvent) {
@@ -73,10 +77,14 @@ async function createDocumentEvent(params: DocuSignParams) {
           investorSignatureCompleted: true,
         },
       });
-      console.log(`Docusign Event updated for dealId ${params.dealId} and userId ${params.userId}`);
+      console.log(
+        `Docusign Event updated for dealId ${params.dealId} and userId ${params.userId}`
+      );
       return;
     } else {
-      console.error(`Docusign Event not found for dealId ${params.dealId} and userId ${params.userId}`);
+      console.error(
+        `Docusign Event not found for dealId ${params.dealId} and userId ${params.userId}`
+      );
       return;
     }
   }
@@ -86,7 +94,7 @@ async function createDocumentEvent(params: DocuSignParams) {
 function buildRedirectUrl(projectSlug: string, dealId: string): URL {
   const baseUrl = process.env.BASE_URL;
   if (!baseUrl) {
-    throw new Error("BASE_URL environment variable is not set");
+    throw new Error('BASE_URL environment variable is not set');
   }
   return new URL(`/dealflow/${projectSlug}/${dealId}/review`, baseUrl);
 }
@@ -94,18 +102,18 @@ function buildRedirectUrl(projectSlug: string, dealId: string): URL {
 // Create error response
 function createErrorResponse(error: unknown) {
   const status = error instanceof ValidationError ? 400 : 500;
-  const message = error instanceof Error ? error.message : "Unknown error";
+  const message = error instanceof Error ? error.message : 'Unknown error';
 
-  console.error("DocuSign return handler error:", error);
+  console.error('DocuSign return handler error:', error);
 
   return new Response(
     JSON.stringify({
-      error: status === 400 ? message : "Internal server error",
+      error: status === 400 ? message : 'Internal server error',
       details: status === 500 ? message : undefined,
     }),
     {
       status,
-      headers: { "Content-Type": "application/json" },
+      headers: { 'Content-Type': 'application/json' },
     }
   );
 }

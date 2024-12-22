@@ -6,22 +6,22 @@ import {
   Button,
   Divider,
   Box,
-} from "@mui/material";
-import Link from "next/link";
-import ProjectMetrics from "./ProjectMetrics";
-import { type ProjectWithAllNestedData } from "@/libs/types";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+} from '@mui/material';
+import Link from 'next/link';
+import ProjectMetrics from './ProjectMetrics';
+import { type ProjectWithAllNestedData } from '@/libs/types';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
 const ProjectCard: React.FC<{ project: ProjectWithAllNestedData }> = ({
   project,
 }) => {
   const cardPicture = project?.pictures?.find(
-    (picture) => picture.type === "CARD"
+    picture => picture.type === 'CARD'
   );
 
   const convertedStatus = () => {
-    if (project.status === "ACTIVE") return "Funding";
-    if (project.status === "INACTIVE") return "Funded";
+    if (project.status === 'ACTIVE') return 'Funding';
+    if (project.status === 'INACTIVE') return 'Funded';
 
     return project.status;
   };
@@ -31,8 +31,8 @@ const ProjectCard: React.FC<{ project: ProjectWithAllNestedData }> = ({
   return (
     <Card
       sx={{
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         margin: 2,
         maxWidth: 345,
         minWidth: 345,
@@ -58,19 +58,19 @@ const ProjectCard: React.FC<{ project: ProjectWithAllNestedData }> = ({
           <Button
             variant="contained"
             style={{
-              backgroundColor: "#31713D",
-              borderRadius: "100px",
-              padding: "6px 10px",
-              textTransform: "none",
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-              fontSize: "12px",
+              backgroundColor: '#31713D',
+              borderRadius: '100px',
+              padding: '6px 10px',
+              textTransform: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontSize: '12px',
             }}
           >
             {status}
-            {status === "Funded" && (
-              <CheckCircleIcon style={{ color: "white", fontSize: "16px" }} />
+            {status === 'Funded' && (
+              <CheckCircleIcon style={{ color: 'white', fontSize: '16px' }} />
             )}
           </Button>
         </Box>

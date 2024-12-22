@@ -1,12 +1,12 @@
-import prisma from "@/libs/prisma.server";
-import { errorResponse, jsonResponse } from "@/libs/utils";
-import { currentUser } from "@clerk/nextjs";
+import prisma from '@/libs/prisma.server';
+import { errorResponse, jsonResponse } from '@/libs/utils';
+import { currentUser } from '@clerk/nextjs';
 
 // get deals by logged in user
 export async function GET() {
   const clerkUser = await currentUser();
   if (!clerkUser) {
-    return errorResponse("User not authenticated", 401);
+    return errorResponse('User not authenticated', 401);
   }
 
   // Get the user from the database
@@ -15,7 +15,7 @@ export async function GET() {
   });
 
   if (!dbUser) {
-    return errorResponse("User not found in database", 404);
+    return errorResponse('User not found in database', 404);
   }
 
   // Get all organizations where user is a member
@@ -26,7 +26,7 @@ export async function GET() {
   // Get all deals for those organizations
   const deals = await prisma.deal.findMany({
     where: {
-      organizationId: { in: userOrgs.map((org) => org.id) },
+      organizationId: { in: userOrgs.map(org => org.id) },
     },
     include: {
       organization: true,
@@ -39,9 +39,9 @@ export async function GET() {
     },
   });
 
-  const filteredDeals = deals.filter((deal) =>
+  const filteredDeals = deals.filter(deal =>
     userOrgs.some(
-      (org) => org.id === deal.organizationId && org.ownerId === dbUser.id
+      org => org.id === deal.organizationId && org.ownerId === dbUser.id
     )
   );
 

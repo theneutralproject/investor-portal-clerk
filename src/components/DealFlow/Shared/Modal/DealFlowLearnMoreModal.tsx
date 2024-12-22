@@ -6,46 +6,46 @@ import {
   IconButton,
   styled,
   Paper,
-} from "@mui/material";
-import React, { useState } from "react";
-import CloseIcon from "@mui/icons-material/Close";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import Link from "next/link";
+} from '@mui/material';
+import React, { useState } from 'react';
+import CloseIcon from '@mui/icons-material/Close';
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import Link from 'next/link';
 
 export const MODAL_KEYS = {
-  CHOOSE_INVESTMENT_TYPE: "CHOOSE_INVESTMENT_TYPE",
-  VERIFY_ACCREDITATION: "VERIFY_ACCREDITATION",
+  CHOOSE_INVESTMENT_TYPE: 'CHOOSE_INVESTMENT_TYPE',
+  VERIFY_ACCREDITATION: 'VERIFY_ACCREDITATION',
 } as const;
 
 export type ModalKeyType = (typeof MODAL_KEYS)[keyof typeof MODAL_KEYS];
 
 // Modal style configuration
 const ModalContainer = styled(Paper)(({ theme }) => ({
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "auto",
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 'auto',
   minWidth: 400,
-  maxWidth: "90vw",
-  maxHeight: "90vh",
-  overflow: "auto",
+  maxWidth: '90vw',
+  maxHeight: '90vh',
+  overflow: 'auto',
   padding: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
-  display: "flex",
-  flexDirection: "column",
+  display: 'flex',
+  flexDirection: 'column',
 }));
 
 const ModalHeader = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
   marginBottom: theme.spacing(2),
 }));
 
 const ModalFooter = styled(Box)(({ theme }) => ({
-  display: "flex",
-  justifyContent: "flex-end",
+  display: 'flex',
+  justifyContent: 'flex-end',
   marginTop: theme.spacing(1),
   paddingTop: theme.spacing(2),
   borderTop: `1px solid ${theme.palette.divider}`,
@@ -72,9 +72,9 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
   // Modal content mapping
   const modalContents: Record<ModalKeyType, ModalContent> = {
     [MODAL_KEYS.CHOOSE_INVESTMENT_TYPE]: {
-      title: "Choose Investment Type",
+      title: 'Choose Investment Type',
       content: (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Typography variant="body1" paragraph>
             The primary difference between common Debt and common equity is the
             level of risk and potential return. Common Debt provides fixed
@@ -92,15 +92,15 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
           </Typography>
 
           <Typography variant="body1">
-            Refer to this{" "}
+            Refer to this{' '}
             <Link
               href="https://www.neutral.us/learn/real-estate-capital-stacks"
               target="_blank"
               rel="noopener"
-              style={{ textDecoration: "underline", color: "#000000DE" }}
+              style={{ textDecoration: 'underline', color: '#000000DE' }}
             >
               blog post
-            </Link>{" "}
+            </Link>{' '}
             if you want to read more about the multiple layers of financing used
             in our real estate projects.
           </Typography>
@@ -108,9 +108,9 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
       ),
     },
     [MODAL_KEYS.VERIFY_ACCREDITATION]: {
-      title: "Accreditation Verification",
+      title: 'Accreditation Verification',
       content: (
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <Typography variant="h6">
             How can I prove I&apos;m an accredited investor?
           </Typography>
@@ -150,8 +150,8 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
             variant="body2"
             sx={{
               mt: 2,
-              fontStyle: "italic",
-              color: "text.secondary",
+              fontStyle: 'italic',
+              color: 'text.secondary',
             }}
           >
             All accreditation documents you submit will remain confidential and
@@ -163,7 +163,7 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
   };
 
   const currentContent = modalContents[modalKey] || {
-    title: "Information",
+    title: 'Information',
     content: <Typography>Content not found for this section.</Typography>,
   };
 
@@ -201,7 +201,7 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
               onClick={handleClose}
               size="small"
               sx={{
-                position: "absolute",
+                position: 'absolute',
                 right: 8,
                 top: 8,
               }}
@@ -210,7 +210,7 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
             </IconButton>
           </ModalHeader>
 
-          <Box id="modal-description" sx={{ flex: 1, overflow: "auto" }}>
+          <Box id="modal-description" sx={{ flex: 1, overflow: 'auto' }}>
             {currentContent.content}
           </Box>
 

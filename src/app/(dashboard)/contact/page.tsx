@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Box,
   Card,
@@ -6,14 +6,14 @@ import {
   Grid,
   Typography,
   Button,
-} from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneInTalkIcon from "@mui/icons-material/PhoneInTalk";
-import QuestionIcon from "@mui/icons-material/QuestionAnswer";
-import HubspotScheduleCall from "@/components/HubspotScheduleCall";
-import ChatInterface from "@/components/ChatInterface";
-import HubspotContactForm from "@/components/HubspotContactForm";
-import { useRouter } from "next/navigation";
+} from '@mui/material';
+import EmailIcon from '@mui/icons-material/Email';
+import PhoneInTalkIcon from '@mui/icons-material/PhoneInTalk';
+import QuestionIcon from '@mui/icons-material/QuestionAnswer';
+import HubspotScheduleCall from '@/components/HubspotScheduleCall';
+import ChatInterface from '@/components/ChatInterface';
+import HubspotContactForm from '@/components/HubspotContactForm';
+import { useRouter } from 'next/navigation';
 
 const ContactMethod = ({
   Icon,
@@ -28,64 +28,64 @@ const ContactMethod = ({
 }) => {
   const router = useRouter();
   const renderCTA = () => {
-    if (buttonText === "Schedule Now") {
+    if (buttonText === 'Schedule Now') {
       return (
         <Box
           sx={{
             mt: 2,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <Box sx={{ width: "180px" }}>
+          <Box sx={{ width: '180px' }}>
             <HubspotScheduleCall onExit={() => null} />
           </Box>
         </Box>
       );
     }
 
-    if (buttonText === "Start Chat") {
+    if (buttonText === 'Start Chat') {
       return (
         <Box
           sx={{
             mt: 2,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <Box sx={{ width: "180px" }}>
+          <Box sx={{ width: '180px' }}>
             <ChatInterface type="BUTTON" />
           </Box>
         </Box>
       );
     }
 
-    if (buttonText === "Email Us") {
+    if (buttonText === 'Email Us') {
       return (
         <Box
           sx={{
             mt: 2,
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}
         >
-          <Box sx={{ width: "180px" }}>
+          <Box sx={{ width: '180px' }}>
             <HubspotContactForm onExit={() => null} />
           </Box>
         </Box>
       );
     }
 
-    if (buttonText === "Visit Learn Page") {
+    if (buttonText === 'Visit Learn Page') {
       return (
         <Button
           variant="neutralBlack"
           color="primary"
-          sx={{ marginTop: 2, p: "4px 20px", borderRadius: "99px" }}
-          onClick={() => router.push("/learn")}
+          sx={{ marginTop: 2, p: '4px 20px', borderRadius: '99px' }}
+          onClick={() => router.push('/learn')}
         >
           {buttonText}
         </Button>
@@ -96,7 +96,7 @@ const ContactMethod = ({
       <Button
         variant="neutralBlack"
         color="primary"
-        sx={{ marginTop: 2, p: "4px 20px", borderRadius: "99px" }}
+        sx={{ marginTop: 2, p: '4px 20px', borderRadius: '99px' }}
       >
         {buttonText}
       </Button>
@@ -104,9 +104,9 @@ const ContactMethod = ({
   };
   return (
     <Grid item xs={12} sm={4}>
-      <Card sx={{ textAlign: "center", padding: 2, borderRadius: "8px" }}>
+      <Card sx={{ textAlign: 'center', padding: 2, borderRadius: '8px' }}>
         <CardContent>
-          <Icon sx={{ fontSize: 30, color: "#000000" }} />
+          <Icon sx={{ fontSize: 30, color: '#000000' }} />
           <Typography variant="h6" gutterBottom>
             {title}
           </Typography>
@@ -123,21 +123,21 @@ const ContactPage = () => {
     <Box>
       <Card
         sx={{
-          backgroundColor: "#31713D",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "200px",
-          color: "white",
-          textAlign: "center",
+          backgroundColor: '#31713D',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '200px',
+          color: 'white',
+          textAlign: 'center',
         }}
       >
         <CardContent>
-          <Typography variant="h3" gutterBottom sx={{ color: "white" }}>
+          <Typography variant="h3" gutterBottom sx={{ color: 'white' }}>
             How Can We Help?
           </Typography>
-          <Typography variant="body2" sx={{ color: "white" }}>
+          <Typography variant="body2" sx={{ color: 'white' }}>
             Get in touch with us or check our Learn page for answers.
           </Typography>
         </CardContent>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -12,22 +12,22 @@ import {
   styled,
   IconButton,
   Tooltip,
-} from "@mui/material";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import DeleteIcon from "@mui/icons-material/Delete";
-import VerifiedUserIcon from "@mui/icons-material/VerifiedUser";
-import { MembershipType, type User } from "@prisma/client";
-import type { MemberWithUser } from "@/libs/types";
+} from '@mui/material';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import DeleteIcon from '@mui/icons-material/Delete';
+import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import { MembershipType, type User } from '@prisma/client';
+import type { MemberWithUser } from '@/libs/types';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
-  boxShadow: "none",
+  boxShadow: 'none',
 }));
 
 const ExpandableHeader = styled(Box)(({ theme }) => ({
-  cursor: "pointer",
+  cursor: 'pointer',
   padding: theme.spacing(2),
-  "&:hover": {
+  '&:hover': {
     backgroundColor: theme.palette.action.hover,
   },
 }));
@@ -44,9 +44,9 @@ const ExpandMore = styled(({ expand, ...other }: ExpandMoreProps) => {
     </div>
   );
 })(({ theme, expand }) => ({
-  transform: !expand ? "rotate(0deg)" : "rotate(180deg)",
-  marginLeft: "auto",
-  transition: theme.transitions.create("transform", {
+  transform: !expand ? 'rotate(0deg)' : 'rotate(180deg)',
+  marginLeft: 'auto',
+  transition: theme.transitions.create('transform', {
     duration: theme.transitions.duration.shortest,
   }),
 }));
@@ -59,7 +59,7 @@ interface CoInvestorCardProps {
   index: number;
   onSave: (index: number) => void;
   onCancel: (index: number) => void;
-  onChange: (index: number, field: keyof User | "title", value: string) => void;
+  onChange: (index: number, field: keyof User | 'title', value: string) => void;
   expanded: boolean;
   onExpand: (index: number) => void;
   deleteOrganizationMember?: (memberId: number) => void;
@@ -118,8 +118,8 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
     );
   };
 
-  const handleChange = (field: keyof User | "title", value: string) => {
-    setTouchedFields((prev) => new Set(prev).add(field));
+  const handleChange = (field: keyof User | 'title', value: string) => {
+    setTouchedFields(prev => new Set(prev).add(field));
     onChange(index, field, value);
   };
 
@@ -133,14 +133,14 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
     return isFieldTouched(field) && !validationFn(value);
   };
 
-  const investorType = coInvestor.type === "OWNER" ? "Investor" : "Co-Investor";
+  const investorType = coInvestor.type === 'OWNER' ? 'Investor' : 'Co-Investor';
   const readOnly = coInvestor.type === MembershipType.OWNER;
   const showDelete = coInvestor.id && deleteOrganizationMember && !readOnly;
   const isRegisteredUser =
     coInvestor?.user?.clerkId !== undefined && coInvestor.user.clerkId !== null;
   const userName =
-    coInvestor.user.firstName ?? coInvestor.user.lastName
-      ? `${coInvestor.user.firstName ?? ""} ${coInvestor.user.lastName ?? ""}`
+    (coInvestor.user.firstName ?? coInvestor.user.lastName)
+      ? `${coInvestor.user.firstName ?? ''} ${coInvestor.user.lastName ?? ''}`
       : `${investorType} ${index + 1}`;
 
   return (
@@ -161,9 +161,9 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
                 <VerifiedUserIcon
                   sx={{
                     ml: 1,
-                    fontSize: "1rem",
-                    verticalAlign: "middle",
-                    color: "primary.main",
+                    fontSize: '1rem',
+                    verticalAlign: 'middle',
+                    color: 'primary.main',
                   }}
                 />
               </Tooltip>
@@ -182,7 +182,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
           {showDelete && (
             <Tooltip title="Delete Member">
               <IconButton
-                onClick={(e) => {
+                onClick={e => {
                   e.stopPropagation();
                   if (deleteOrganizationMember && coInvestor.id) {
                     deleteOrganizationMember(coInvestor.id);
@@ -215,42 +215,42 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
               <TextField
                 variant="standard"
                 label="First Name"
-                value={coInvestor.user.firstName ?? ""}
-                onChange={(e) => handleChange("firstName", e.target.value)}
+                value={coInvestor.user.firstName ?? ''}
+                onChange={e => handleChange('firstName', e.target.value)}
                 fullWidth
                 disabled={readOnly || isRegisteredUser}
                 error={showError(
-                  "firstName",
+                  'firstName',
                   isNameValid,
                   coInvestor.user.firstName
                 )}
                 helperText={
                   showError(
-                    "firstName",
+                    'firstName',
                     isNameValid,
                     coInvestor.user.firstName
-                  ) && "First name must be at least 2 characters"
+                  ) && 'First name must be at least 2 characters'
                 }
                 required
               />
               <TextField
                 variant="standard"
                 label="Last Name"
-                value={coInvestor.user.lastName ?? ""}
-                onChange={(e) => handleChange("lastName", e.target.value)}
+                value={coInvestor.user.lastName ?? ''}
+                onChange={e => handleChange('lastName', e.target.value)}
                 fullWidth
                 disabled={readOnly || isRegisteredUser}
                 error={showError(
-                  "lastName",
+                  'lastName',
                   isNameValid,
                   coInvestor.user.lastName
                 )}
                 helperText={
                   showError(
-                    "lastName",
+                    'lastName',
                     isNameValid,
                     coInvestor.user.lastName
-                  ) && "Last name must be at least 2 characters"
+                  ) && 'Last name must be at least 2 characters'
                 }
                 required
               />
@@ -258,54 +258,54 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
             <TextField
               variant="standard"
               label="Email"
-              value={coInvestor.user.email ?? ""}
-              onChange={(e) => handleChange("email", e.target.value)}
+              value={coInvestor.user.email ?? ''}
+              onChange={e => handleChange('email', e.target.value)}
               fullWidth
               disabled={readOnly || isRegisteredUser}
-              error={showError("email", isEmailValid, coInvestor.user.email)}
+              error={showError('email', isEmailValid, coInvestor.user.email)}
               helperText={
-                showError("email", isEmailValid, coInvestor.user.email) &&
-                "Please enter a valid email address"
+                showError('email', isEmailValid, coInvestor.user.email) &&
+                'Please enter a valid email address'
               }
               required
             />
             <TextField
               variant="standard"
               label="Phone Number"
-              value={coInvestor.user.phoneNumber ?? ""}
-              onChange={(e) => handleChange("phoneNumber", e.target.value)}
+              value={coInvestor.user.phoneNumber ?? ''}
+              onChange={e => handleChange('phoneNumber', e.target.value)}
               fullWidth
               disabled={readOnly || isRegisteredUser}
               error={showError(
-                "phoneNumber",
+                'phoneNumber',
                 isPhoneValid,
                 coInvestor.user.phoneNumber
               )}
               helperText={
                 showError(
-                  "phoneNumber",
+                  'phoneNumber',
                   isPhoneValid,
                   coInvestor.user.phoneNumber
-                ) && "Please enter a valid phone number"
+                ) && 'Please enter a valid phone number'
               }
             />
             <TextField
               variant="standard"
               label="Title"
-              value={coInvestor.title ?? ""}
-              onChange={(e) => handleChange("title", e.target.value)}
+              value={coInvestor.title ?? ''}
+              onChange={e => handleChange('title', e.target.value)}
               fullWidth
               disabled={readOnly || isRegisteredUser}
-              error={showError("title", isTitleValid, coInvestor.title)}
+              error={showError('title', isTitleValid, coInvestor.title)}
               helperText={
-                showError("title", isTitleValid, coInvestor.title) &&
-                "Title must be at least 2 characters"
+                showError('title', isTitleValid, coInvestor.title) &&
+                'Title must be at least 2 characters'
               }
               required
             />
           </Box>
         </CardContent>
-        <CardActions sx={{ justifyContent: "flex-end", mb: 1 }}>
+        <CardActions sx={{ justifyContent: 'flex-end', mb: 1 }}>
           <Button
             variant="grayPill"
             onClick={() => onCancel(index)}

@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { Typography, Divider, TextField } from "@mui/material";
-import { LineDisplay } from "./InvestmentSummaryBox";
-import CollapsibleCard from "./CollapsibleCard";
-import type { ProjectWithStats } from "@/libs/types";
+import React, { useState } from 'react';
+import { Typography, Divider, TextField } from '@mui/material';
+import { LineDisplay } from './InvestmentSummaryBox';
+import CollapsibleCard from './CollapsibleCard';
+import type { ProjectWithStats } from '@/libs/types';
 
 const ProjectCalculator = ({ data }: { data: ProjectWithStats }) => {
   const [investment, setInvestment] = useState(100000);
@@ -40,17 +40,14 @@ const ProjectCalculator = ({ data }: { data: ProjectWithStats }) => {
         sx={{ mb: 2 }}
       />
 
-      <LineDisplay
-        name="Target Multiple"
-        value={targetEquityMultiple + "x"}
-      />
+      <LineDisplay name="Target Multiple" value={targetEquityMultiple + 'x'} />
       <LineDisplay
         name="Target Term Length (Months)"
         value={targetTermLength}
       />
 
-      <Typography variant="h6" sx={{ fontWeight: "500" }}>
-        Total targeted return: ${totalTargetedReturn.toLocaleString()} over{" "}
+      <Typography variant="h6" sx={{ fontWeight: '500' }}>
+        Total targeted return: ${totalTargetedReturn.toLocaleString()} over{' '}
         {targetTermLength} months
       </Typography>
 

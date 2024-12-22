@@ -1,9 +1,9 @@
-import React from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import { useTheme } from "@mui/material/styles";
+import React from 'react';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import { useTheme } from '@mui/material/styles';
 
-import StepAvatar from "@/components/StepAvatar";
+import StepAvatar from '@/components/StepAvatar';
 
 function StepIndicator({
   stepNumber,
@@ -33,7 +33,7 @@ function StepIndicator({
           sx={{
             ml: theme.spacing(2),
             fontWeight: isCurrentStep ? 550 : 400,
-            color: isCurrentStep ? "#000000DE" : "#00000099",
+            color: isCurrentStep ? '#000000DE' : '#00000099',
           }}
         >
           {label}
@@ -42,12 +42,12 @@ function StepIndicator({
       {!isLastStep && (
         <Box
           sx={{
-            marginTop: "6px",
-            marginBottom: "6px",
-            height: "20px",
-            width: "2px",
-            bgcolor: "#BDBDBD",
-            marginLeft: "11px",
+            marginTop: '6px',
+            marginBottom: '6px',
+            height: '20px',
+            width: '2px',
+            bgcolor: '#BDBDBD',
+            marginLeft: '11px',
           }}
         />
       )}

@@ -17,7 +17,7 @@ import {
   type OrganizationDocument,
   type DealDocument,
   type ProjectPaymentInfo,
-} from "@prisma/client";
+} from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
   pictures: ProjectPicture[];
@@ -52,7 +52,12 @@ export type DealWithInvestmentStats = Deal & {
 
 export type DealWithInvestmentStatsAndProjectWithPics = Deal & {
   investmentStats?: DealInvestmentStats | null;
-  project?: (Project & { milestones: ProjectMilestones | null, pictures: ProjectPicture[] | null  }) | null;
+  project?:
+    | (Project & {
+        milestones: ProjectMilestones | null;
+        pictures: ProjectPicture[] | null;
+      })
+    | null;
 };
 
 export type DealWithOrgMembersAndProject = Deal & {

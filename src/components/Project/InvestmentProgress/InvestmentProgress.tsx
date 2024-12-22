@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import {
   Card,
   CardContent,
@@ -6,23 +6,23 @@ import {
   Divider,
   Button,
   Box,
-} from "@mui/material";
+} from '@mui/material';
 
-import { DealFinancingType, type Deal, type Project } from "@prisma/client";
-import ProgressBar from "./ProgressBar";
-import StepIndicator from "./StepIndicator";
-import HubspotScheduleCall from "@/components/HubspotScheduleCall";
-import StepAvatar from "@/components/StepAvatar";
-import { useRouter } from "next/navigation";
-import axios from "axios";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import type { DealCreateSchema } from "@/libs/deal/schema";
+import { DealFinancingType, type Deal, type Project } from '@prisma/client';
+import ProgressBar from './ProgressBar';
+import StepIndicator from './StepIndicator';
+import HubspotScheduleCall from '@/components/HubspotScheduleCall';
+import StepAvatar from '@/components/StepAvatar';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { DealCreateSchema } from '@/libs/deal/schema';
 
 const INVESTMENT_STEPS = [
-  "Schedule a Call with an Advisor",
-  "Review Project Documents",
-  "Sign Investment Agreements",
-  "Fund Your Investment",
+  'Schedule a Call with an Advisor',
+  'Review Project Documents',
+  'Sign Investment Agreements',
+  'Fund Your Investment',
 ];
 
 const InvestmentProgress: React.FC<{
@@ -39,7 +39,7 @@ const InvestmentProgress: React.FC<{
       axios.post(`/api/deals`, dealData),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["deal", project.id.toString()],
+        queryKey: ['deal', project.id.toString()],
       });
     },
   });
@@ -49,13 +49,13 @@ const InvestmentProgress: React.FC<{
       axios.put(`/api/deals`, updateData),
     onSuccess: () => {
       void queryClient.invalidateQueries({
-        queryKey: ["deal", project.id.toString()],
+        queryKey: ['deal', project.id.toString()],
       });
     },
   });
 
   const generateCTAButton = () => {
-    if (project.status === "INACTIVE") {
+    if (project.status === 'INACTIVE') {
       return (
         <Typography variant="caption">
           This project is fully funded. Feel free to explore other investment
@@ -93,7 +93,7 @@ const InvestmentProgress: React.FC<{
       if (currentTab === 1) {
         return (
           <Box>
-            <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
+            <Typography variant="subtitle2" sx={{ color: '#000000DE' }}>
               Review Project Documents
             </Typography>
             <Typography variant="caption">
@@ -120,7 +120,7 @@ const InvestmentProgress: React.FC<{
       if (currentTab === 2) {
         return (
           <Box>
-            <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
+            <Typography variant="subtitle2" sx={{ color: '#000000DE' }}>
               Review Invest Agreements
             </Typography>
             <Typography variant="caption">
@@ -146,7 +146,7 @@ const InvestmentProgress: React.FC<{
       if (currentTab === 3) {
         return (
           <Box>
-            <Typography variant="subtitle2" sx={{ color: "#000000DE" }}>
+            <Typography variant="subtitle2" sx={{ color: '#000000DE' }}>
               Fund Your Investment
             </Typography>
             <Typography variant="caption">
@@ -169,26 +169,26 @@ const InvestmentProgress: React.FC<{
   };
 
   //Funded
-  if (project.status === "INACTIVE") {
+  if (project.status === 'INACTIVE') {
     return (
       <Card>
         <CardContent>
           <Box
             sx={{
-              display: "flex",
-              alignItems: "center",
+              display: 'flex',
+              alignItems: 'center',
             }}
           >
             <StepAvatar isComplete stepNumber={3} />
-            <Typography variant="h6" sx={{ ml: "10px" }}>{`Funded`}</Typography>
+            <Typography variant="h6" sx={{ ml: '10px' }}>{`Funded`}</Typography>
           </Box>
 
           <Divider sx={{ mt: 2, mb: 2 }} />
 
           <Button
             variant="neutralBlack"
-            sx={{ width: "100%" }}
-            onClick={() => router.push("/projects")}
+            sx={{ width: '100%' }}
+            onClick={() => router.push('/projects')}
           >
             Browse Projects
           </Button>

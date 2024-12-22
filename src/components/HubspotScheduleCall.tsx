@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Button, Modal, Box } from "@mui/material";
+import React, { useState } from 'react';
+import { Button, Modal, Box } from '@mui/material';
 
 function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -14,13 +14,13 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
 
   // Styles for the modal to center it
   const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
     width: 500,
     height: 700,
-    bgcolor: "#1b323e",
+    bgcolor: '#1b323e',
     p: 2,
   };
 
@@ -28,7 +28,7 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
     <div>
       <Button
         variant="grayPill"
-        sx={{ p: "4px 20px", borderRadius: "99px" }}
+        sx={{ p: '4px 20px', borderRadius: '99px' }}
         fullWidth
         onClick={() => {
           handleOpen();
@@ -45,7 +45,7 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
         <Box sx={style}>
           <iframe
             title="hubspot"
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             src="https://meetings.hubspot.com/storm-murphy/investor-portal-meeting?embed=true"
           />
         </Box>

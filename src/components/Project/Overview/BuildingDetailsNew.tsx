@@ -1,9 +1,9 @@
-import React from "react";
-import { Card, CardContent, Divider, Typography } from "@mui/material";
-import { LineDisplay } from "./InvestmentSummaryBox";
-import type { ProjectWithStats } from "@/libs/types";
+import React from 'react';
+import { Card, CardContent, Divider, Typography } from '@mui/material';
+import { LineDisplay } from './InvestmentSummaryBox';
+import type { ProjectWithStats } from '@/libs/types';
 
-const formatter = Intl.NumberFormat("en", { maximumFractionDigits: 2 });
+const formatter = Intl.NumberFormat('en', { maximumFractionDigits: 2 });
 
 const BuildingDetailsNew = ({ data }: { data: ProjectWithStats }) => {
   return (

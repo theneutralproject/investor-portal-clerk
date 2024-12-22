@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Typography,
@@ -8,17 +8,17 @@ import {
   FormControl,
   Stack,
   Card,
-} from "@mui/material";
+} from '@mui/material';
 import {
   AccountBalance as BankIcon,
   Payment as PaymentIcon,
   AccountBalanceWallet as WireIcon,
-} from "@mui/icons-material";
-import { type Deal } from "@prisma/client";
+} from '@mui/icons-material';
+import { type Deal } from '@prisma/client';
 import {
   type DealWithInvestmentStats,
   type ProjectWithAllNestedData,
-} from "@/libs/types";
+} from '@/libs/types';
 
 interface FundingOptionProps {
   value: string;
@@ -42,11 +42,11 @@ const FundingOption = ({
   <Card
     sx={{
       p: 2,
-      cursor: "pointer",
-      "&:hover": {
-        bgcolor: "action.hover",
+      cursor: 'pointer',
+      '&:hover': {
+        bgcolor: 'action.hover',
       },
-      display: "flex",
+      display: 'flex',
       opacity: disabled ? 0.5 : 1,
     }}
   >
@@ -63,8 +63,8 @@ const FundingOption = ({
         <Box>
           <Box
             sx={{
-              display: "flex",
-              flexDirection: "column",
+              display: 'flex',
+              flexDirection: 'column',
             }}
           >
             <Typography variant="body1">{label}</Typography>
@@ -77,11 +77,11 @@ const FundingOption = ({
         </Box>
       }
       sx={{
-        width: "100%",
+        width: '100%',
         margin: 0,
       }}
     />
-    <Box sx={{ display: "flex", alignItems: "center" }}>{icon}</Box>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>{icon}</Box>
   </Card>
 );
 
@@ -91,16 +91,16 @@ export const FundingOptions: React.FC<{
   deal: DealWithInvestmentStats;
 }> = ({ selectedOption, onChange, deal }) => {
   const MAX_AMOUNT = parseFloat(
-    process.env.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT ?? "0"
+    process.env.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT ?? '0'
   );
   const dealAmount = deal?.investmentStats?.amount ?? 0;
   const SHOW_PLAID = dealAmount < MAX_AMOUNT;
 
   return (
-    <FormControl component="fieldset" sx={{ width: "100%" }}>
+    <FormControl component="fieldset" sx={{ width: '100%' }}>
       <RadioGroup
         value={selectedOption}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={e => onChange(e.target.value)}
       >
         <Stack spacing={2}>
           <FundingOption
@@ -109,10 +109,10 @@ export const FundingOptions: React.FC<{
             label="Connect with Bank Account"
             subLabel={
               SHOW_PLAID
-                ? "Recommended"
+                ? 'Recommended'
                 : `We only allow amounts up to $${MAX_AMOUNT.toLocaleString()} via bank transfer`
             }
-            checked={selectedOption === "plaid"}
+            checked={selectedOption === 'plaid'}
             onChange={onChange}
             disabled={!SHOW_PLAID}
           />
@@ -120,14 +120,14 @@ export const FundingOptions: React.FC<{
             value="check"
             icon={<PaymentIcon color="action" />}
             label="Fund via Check"
-            checked={selectedOption === "check"}
+            checked={selectedOption === 'check'}
             onChange={onChange}
           />
           <FundingOption
             value="wire"
             icon={<WireIcon color="action" />}
             label="Fund via Wire Transfer"
-            checked={selectedOption === "wire"}
+            checked={selectedOption === 'wire'}
             onChange={onChange}
           />
         </Stack>
@@ -141,11 +141,11 @@ export const getPaymentInfo = (
   deal: Deal
 ) => {
   const defaultPaymentInfo = {
-    investmentEntity: "Not Available",
-    accountNumber: "Not Available",
-    routingNumber: "Not Available",
-    mailTo: "Not Available",
-    companyName: "Not Available",
+    investmentEntity: 'Not Available',
+    accountNumber: 'Not Available',
+    routingNumber: 'Not Available',
+    mailTo: 'Not Available',
+    companyName: 'Not Available',
   };
 
   if (!project || !deal) {
@@ -154,15 +154,15 @@ export const getPaymentInfo = (
 
   const foundPaymentInfo =
     project?.projectPaymentInfo?.find(
-      (info) =>
+      info =>
         deal?.investmentEntity &&
         info.investmentEntity === deal.investmentEntity
     ) ?? defaultPaymentInfo;
 
   const mailTo =
-    foundPaymentInfo.investmentEntity !== "Not Available"
+    foundPaymentInfo.investmentEntity !== 'Not Available'
       ? `${foundPaymentInfo.investmentEntity}\nAttn: Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703`
-      : "Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703";
+      : 'Nathan Helbach\n25 W. Main Street, Suite 500\nMadison, WI 53703';
 
   return {
     companyName: foundPaymentInfo.investmentEntity,
@@ -174,13 +174,13 @@ export const getPaymentInfo = (
 
 export const getMerchantId = (projectSlug: string) => {
   switch (projectSlug) {
-    case "edison":
+    case 'edison':
       return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON!;
-    case "bakers":
+    case 'bakers':
       return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS!;
-    case "519":
+    case '519':
       return process.env.NEXT_PUBLIC_FINIX_MERCHANT_ID_519!;
     default:
-      throw new Error("Invalid project slug");
+      throw new Error('Invalid project slug');
   }
 };

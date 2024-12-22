@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
   RadioGroup,
   FormControlLabel,
   Radio,
-} from "@mui/material";
-import { DealOwnershipType } from "@prisma/client";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import { useRouter } from "next/navigation";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+} from '@mui/material';
+import { DealOwnershipType } from '@prisma/client';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import { useRouter } from 'next/navigation';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 const DealFlowDetailsOwnershipType: React.FC = () => {
   const { deal, updateDeal, createOrganization, project } = useDealFlow();
   const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
@@ -36,7 +36,7 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
       });
     } else {
       await createOrganization({
-        tin: "123456789",
+        tin: '123456789',
         dateOfCreation: new Date(),
         ownershipType: ownershipType,
       });
@@ -55,9 +55,9 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
 
   const formatOwnershipType = (type: string): string => {
     return type
-      .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(" ");
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
   };
 
   return (
@@ -72,7 +72,7 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
         value={ownershipType}
         onChange={handleOwnershipTypeChange}
       >
-        {Object.values(DealOwnershipType).map((type) => (
+        {Object.values(DealOwnershipType).map(type => (
           <FormControlLabel
             key={type}
             value={type}

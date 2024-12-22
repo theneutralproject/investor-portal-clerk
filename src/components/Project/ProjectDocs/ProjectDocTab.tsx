@@ -1,17 +1,17 @@
 /* eslint-disable */
-import { CardContent, Card } from "@mui/material";
-import { theme } from "../../Shell/NeutralThemeProvider";
-import "react-lite-youtube-embed/dist/LiteYouTubeEmbed.css";
-import { Deal, type Project } from "@prisma/client";
-import DocumentCard from "./DocumentCard";
+import { CardContent, Card } from '@mui/material';
+import { theme } from '../../Shell/NeutralThemeProvider';
+import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
+import { Deal, type Project } from '@prisma/client';
+import DocumentCard from './DocumentCard';
 import useDocuments, {
   type DocumentWithCompletion,
-} from "@/app/hooks/useDocuments";
-import DocumentViewerModal from "./DocumentViewerModal";
-import { useState } from "react";
-import { useDebounce } from "@/app/hooks/useDebounce";
-import { updateHubspotDealDocsAccessed } from "@/libs/hubspot/utils";
-import { DealWithInvestmentStats } from "@/libs/types";
+} from '@/app/hooks/useDocuments';
+import DocumentViewerModal from './DocumentViewerModal';
+import { useState } from 'react';
+import { useDebounce } from '@/app/hooks/useDebounce';
+import { updateHubspotDealDocsAccessed } from '@/libs/hubspot/utils';
+import { DealWithInvestmentStats } from '@/libs/types';
 
 export const ProjectDocTab: React.FC<{
   project: Project;
@@ -54,14 +54,14 @@ export const ProjectDocTab: React.FC<{
     if (!document?.completed) {
       documentEventMutation.mutate({
         documentId: document?.id,
-        type: "DOWNLOAD",
+        type: 'DOWNLOAD',
       });
       // add current doc to list of already read docs and notify hubspot webhook about this event
       const documentNames = [
         ...[document],
-        ...data.filter((doc) => doc.completed),
+        ...data.filter(doc => doc.completed),
       ]
-        .map((doc) => doc.name)
+        .map(doc => doc.name)
         .toString();
       updateHubspotDealDocs({
         dealId: parseInt(deal.hubspotId, 10),
@@ -69,7 +69,7 @@ export const ProjectDocTab: React.FC<{
         documentNames: documentNames,
       });
     }
-    window.open(document.link, "_blank");
+    window.open(document.link, '_blank');
   };
 
   const handleCloseModal = () => {
@@ -78,15 +78,15 @@ export const ProjectDocTab: React.FC<{
     if (!currentDocument?.completed) {
       documentEventMutation.mutate({
         documentId: currentDocument?.id,
-        type: "VIEW",
+        type: 'VIEW',
       });
 
       // add current doc to list of already read docs and notify hubspot webhook about this event
       const documentNames = [
         ...[currentDocument],
-        ...data.filter((doc) => doc.completed),
+        ...data.filter(doc => doc.completed),
       ]
-        .map((doc) => doc?.name)
+        .map(doc => doc?.name)
         .toString();
       updateHubspotDealDocs({
         dealId: parseInt(deal.hubspotId, 10),

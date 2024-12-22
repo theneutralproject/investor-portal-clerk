@@ -1,12 +1,12 @@
-import React from "react";
-import { Card, CardContent, Divider, Typography } from "@mui/material";
-import type { ProjectWithAllNestedData } from "@/libs/types";
-import ImageGallery from "react-image-gallery";
-import "react-image-gallery/styles/css/image-gallery.css";
+import React from 'react';
+import { Card, CardContent, Divider, Typography } from '@mui/material';
+import type { ProjectWithAllNestedData } from '@/libs/types';
+import ImageGallery from 'react-image-gallery';
+import 'react-image-gallery/styles/css/image-gallery.css';
 
 const GalleryNew = ({ data }: { data: ProjectWithAllNestedData }) => {
   const images =
-    data.pictures?.map((picture) => ({
+    data.pictures?.map(picture => ({
       original: picture.url,
       thumbnail: picture.url,
     })) || [];

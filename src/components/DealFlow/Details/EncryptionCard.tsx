@@ -1,23 +1,17 @@
-import React from "react";
-import {
-  Box,
-  Typography,
-  Card,
-  CardContent,
-} from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
-
+import React from 'react';
+import { Box, Typography, Card, CardContent } from '@mui/material';
+import LockIcon from '@mui/icons-material/Lock';
 
 export const EncryptionCard = () => {
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <LockIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LockIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
           <Typography
             variant="subtitle1"
             component="div"
-            sx={{ fontWeight: 500, color: "text.primary" }}
+            sx={{ fontWeight: 500, color: 'text.primary' }}
           >
             256-Bit Encryption
           </Typography>
@@ -25,9 +19,9 @@ export const EncryptionCard = () => {
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
+            color: 'text.secondary',
             mt: 0.5,
-            pl: "28px",
+            pl: '28px',
           }}
         >
           Neutral uses industry-standard 256-bit encryption to ensure that your

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -6,11 +6,11 @@ import {
   Typography,
   Box,
   TextField,
-} from "@mui/material";
-import { Payment as PaymentIcon } from "@mui/icons-material";
-import DealFlowFooter from "../Shared/DealFlowFooter";
-import DealFlowTitle from "../Shared/DealFlowTitle";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+} from '@mui/material';
+import { Payment as PaymentIcon } from '@mui/icons-material';
+import DealFlowFooter from '../Shared/DealFlowFooter';
+import DealFlowTitle from '../Shared/DealFlowTitle';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 
 interface FundCheckProps {
   paymentInfo: {
@@ -28,7 +28,7 @@ const FundCheck: React.FC<FundCheckProps> = ({
 
   const [checkNumber, setCheckNumber] = useState<string>(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    deal?.paymentReferenceId ?? ""
+    deal?.paymentReferenceId ?? ''
   );
 
   const handleCheckNumberChange = (
@@ -42,18 +42,18 @@ const FundCheck: React.FC<FundCheckProps> = ({
       direction="row"
       justifyContent="space-between"
       alignItems="flex-start"
-      sx={{ width: "100%" }}
+      sx={{ width: '100%' }}
     >
-      <Typography variant="body2" sx={{ textTransform: "capitalize" }}>
+      <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
         {label}:
       </Typography>
       <Stack direction="row" alignItems="flex-start" spacing={1}>
         <Typography
           component="pre"
           sx={{
-            fontFamily: "inherit",
+            fontFamily: 'inherit',
             margin: 0,
-            whiteSpace: "pre-line",
+            whiteSpace: 'pre-line',
           }}
         >
           {value}
@@ -68,7 +68,7 @@ const FundCheck: React.FC<FundCheckProps> = ({
     await updateDeal(
       {
         ...deal,
-        paymentMethod: "CHECK",
+        paymentMethod: 'CHECK',
       },
       false
     );
@@ -85,9 +85,9 @@ const FundCheck: React.FC<FundCheckProps> = ({
             direction="row"
             alignItems="center"
             spacing={2}
-            sx={{ cursor: "pointer" }}
+            sx={{ cursor: 'pointer' }}
           >
-            <PaymentIcon sx={{ color: "black" }} />
+            <PaymentIcon sx={{ color: 'black' }} />
             <Typography variant="h6" flex={1}>
               Add Funds by Check
             </Typography>
@@ -95,13 +95,13 @@ const FundCheck: React.FC<FundCheckProps> = ({
 
           <Box sx={{ mt: 2 }}>
             <Stack spacing={2}>
-              {renderDetailRow("Pay to", paymentInfo.companyName)}
+              {renderDetailRow('Pay to', paymentInfo.companyName)}
               {renderDetailRow(
-                "Amount",
+                'Amount',
                 `$${investmentAmount.toLocaleString()}`
               )}
-              {renderDetailRow("Memo", `Deal ID: ${deal?.id}`)}
-              {renderDetailRow("Mail to", paymentInfo.mailTo)}
+              {renderDetailRow('Memo', `Deal ID: ${deal?.id}`)}
+              {renderDetailRow('Mail to', paymentInfo.mailTo)}
             </Stack>
           </Box>
         </CardContent>

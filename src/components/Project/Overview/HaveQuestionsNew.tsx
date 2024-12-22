@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Card,
@@ -6,10 +6,10 @@ import {
   Divider,
   Typography,
   Button,
-} from "@mui/material";
-import HubspotContactForm from "@/components/HubspotContactForm";
-import HubspotScheduleCall from "@/components/HubspotScheduleCall";
-import { useRouter } from "next/navigation";
+} from '@mui/material';
+import HubspotContactForm from '@/components/HubspotContactForm';
+import HubspotScheduleCall from '@/components/HubspotScheduleCall';
+import { useRouter } from 'next/navigation';
 
 const HaveQuestionsNew = () => {
   const router = useRouter();
@@ -24,10 +24,10 @@ const HaveQuestionsNew = () => {
 
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "row",
-            width: "100%",
-            alignItems: "center",
+            display: 'flex',
+            flexDirection: 'row',
+            width: '100%',
+            alignItems: 'center',
             gap: 2,
           }}
         >
@@ -50,7 +50,7 @@ const HaveQuestionsNew = () => {
             <Button
               variant="grayPill"
               fullWidth
-              onClick={() => router.push("/learn")}
+              onClick={() => router.push('/learn')}
             >
               View FAQs
             </Button>
@@ -63,7 +63,7 @@ const HaveQuestionsNew = () => {
             title="Spruce - The Neutral Project Advisor"
             width="100%"
             height="100%"
-            style={{ border: "none" }}
+            style={{ border: 'none' }}
           />
         </Box>
       </CardContent>

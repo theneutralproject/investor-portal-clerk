@@ -1,7 +1,7 @@
 // LearnPage.tsx
-"use client";
+'use client';
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 import {
   Box,
   Card,
@@ -11,11 +11,11 @@ import {
   useMediaQuery,
   useTheme,
   keyframes,
-} from "@mui/material";
-import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
-import faqData from "./faq";
-import InfoSidebar from "@/components/InfoSidebar";
-import FAQAccordion from "@/components/Learn/FAQAccordion";
+} from '@mui/material';
+import ProjectPageBanner from '@/components/Project/ProjectPageBanner';
+import faqData from './faq';
+import InfoSidebar from '@/components/InfoSidebar';
+import FAQAccordion from '@/components/Learn/FAQAccordion';
 
 const highlightPulse = keyframes`
   0% {
@@ -44,7 +44,7 @@ interface FAQ {
 
 const LearnPage = () => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const faqRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [highlightedFaq, setHighlightedFaq] = useState<number | null>(null);
   const [orderedFaqs, setOrderedFaqs] = useState<FAQ[]>(faqData);
@@ -87,11 +87,11 @@ const LearnPage = () => {
         const faqElement = faqRefs.current[0];
         if (faqElement) {
           const expandButton = faqElement.querySelector(
-            ".MuiAccordionSummary-expandIconWrapper"
+            '.MuiAccordionSummary-expandIconWrapper'
           );
           if (
             expandButton &&
-            !expandButton.classList.contains("Mui-expanded")
+            !expandButton.classList.contains('Mui-expanded')
           ) {
             (expandButton as HTMLElement).click();
           }
@@ -115,10 +115,10 @@ const LearnPage = () => {
       }
     };
 
-    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener('hashchange', handleHashChange);
 
     return () => {
-      window.removeEventListener("hashchange", handleHashChange);
+      window.removeEventListener('hashchange', handleHashChange);
       if (highlightTimeoutRef.current) {
         clearTimeout(highlightTimeoutRef.current);
       }
@@ -145,18 +145,18 @@ const LearnPage = () => {
                 <Box
                   key={faq.id}
                   //@ts-expect-error - ref is not typed
-                  ref={(el) => {
+                  ref={el => {
                     faqRefs.current[index] = el as HTMLDivElement;
                     return el;
                   }}
                   id={`faq-${faq.id}`}
                   sx={{
                     borderRadius: 1,
-                    transition: "background-color 0.3s ease",
+                    transition: 'background-color 0.3s ease',
                     animation:
                       highlightedFaq === index
                         ? `${highlightPulse} 2s ease`
-                        : "none",
+                        : 'none',
                   }}
                 >
                   <FAQAccordion

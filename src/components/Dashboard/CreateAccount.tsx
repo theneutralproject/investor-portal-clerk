@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Box,
   Typography,
@@ -8,26 +8,26 @@ import {
   Link,
   Divider,
   CardContent,
-} from "@mui/material";
-import { styled } from "@mui/material/styles";
+} from '@mui/material';
+import { styled } from '@mui/material/styles';
 
 const CreateButton = styled(Button)(({}) => ({
-  backgroundColor: "white",
-  color: "black",
-  borderRadius: "56px",
-  textTransform: "none",
-  padding: "10px 20px",
-  "&:hover": {
-    backgroundColor: "#f5f5f5",
+  backgroundColor: 'white',
+  color: 'black',
+  borderRadius: '56px',
+  textTransform: 'none',
+  padding: '10px 20px',
+  '&:hover': {
+    backgroundColor: '#f5f5f5',
   },
 }));
 
 const SignInLink = styled(Link)(({}) => ({
-  color: "rgba(255, 255, 255, 0.66)",
-  textDecoration: "none",
-  cursor: "pointer",
-  "&:hover": {
-    color: "rgba(255, 255, 255, 1)",
+  color: 'rgba(255, 255, 255, 0.66)',
+  textDecoration: 'none',
+  cursor: 'pointer',
+  '&:hover': {
+    color: 'rgba(255, 255, 255, 1)',
   },
 }));
 
@@ -40,9 +40,9 @@ const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
   return (
     <Card
       sx={{
-        backgroundColor: "black",
-        borderRadius: "8px",
-        color: "white",
+        backgroundColor: 'black',
+        borderRadius: '8px',
+        color: 'white',
         mb: 2,
       }}
     >
@@ -51,14 +51,14 @@ const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
           <Typography
             variant="body1"
             sx={{
-              fontSize: "20px",
+              fontSize: '20px',
               mb: 2,
             }}
           >
             Create Your Account
           </Typography>
 
-          <Divider sx={{ mb: 2, borderColor: "#3C3C3C" }} />
+          <Divider sx={{ mb: 2, borderColor: '#3C3C3C' }} />
 
           <Typography variant="subtitle1" color="rgba(255, 255, 255, 0.7)">
             Create your free account to access exclusive investment information.

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { useCallback, useState } from "react";
-import { useResizeObserver } from "@wojtekmaj/react-hooks";
-import { pdfjs, Document, Page } from "react-pdf";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
+import { useCallback, useState } from 'react';
+import { useResizeObserver } from '@wojtekmaj/react-hooks';
+import { pdfjs, Document, Page } from 'react-pdf';
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
+import 'react-pdf/dist/esm/Page/TextLayer.css';
 import {
   Dialog,
   DialogContent,
@@ -12,17 +12,17 @@ import {
   IconButton,
   Box,
   Typography,
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
 
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy } from 'pdfjs-dist';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 const options = {
-  cMapUrl: "/cmaps/",
-  standardFontDataUrl: "/standard_fonts/",
+  cMapUrl: '/cmaps/',
+  standardFontDataUrl: '/standard_fonts/',
 };
 
 const resizeObserverOptions = {};
@@ -43,7 +43,7 @@ const DocumentViewerModal = ({
   const [containerRef, setContainerRef] = useState<HTMLElement | null>(null);
   const [containerWidth, setContainerWidth] = useState<number>();
 
-  const onResize = useCallback<ResizeObserverCallback>((entries) => {
+  const onResize = useCallback<ResizeObserverCallback>(entries => {
     const [entry] = entries;
     if (entry) {
       setContainerWidth(entry.contentRect.width);
@@ -52,7 +52,7 @@ const DocumentViewerModal = ({
 
   useResizeObserver(containerRef, resizeObserverOptions, onResize);
 
-  if (!fileUrl || fileUrl === "") return null;
+  if (!fileUrl || fileUrl === '') return null;
 
   const onDocumentLoadSuccess = ({
     numPages: nextNumPages,
@@ -68,9 +68,9 @@ const DocumentViewerModal = ({
       maxWidth="md"
       PaperProps={{
         sx: {
-          height: "90vh",
-          display: "flex",
-          flexDirection: "column",
+          height: '90vh',
+          display: 'flex',
+          flexDirection: 'column',
         },
       }}
     >
@@ -78,29 +78,29 @@ const DocumentViewerModal = ({
         sx={{
           m: 0,
           p: 2,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
         }}
       >
         <Typography variant="h6">Document Viewer</Typography>
         <IconButton
           aria-label="close"
           onClick={onClose}
-          sx={{ color: "grey.500" }}
+          sx={{ color: 'grey.500' }}
         >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent dividers sx={{ p: 2, flex: 1, overflow: "auto" }}>
+      <DialogContent dividers sx={{ p: 2, flex: 1, overflow: 'auto' }}>
         <Box
           ref={setContainerRef}
           sx={{
-            "& .react-pdf__Document": {
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
+            '& .react-pdf__Document': {
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
               gap: 2,
             },
           }}

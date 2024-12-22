@@ -1,7 +1,7 @@
-import React from "react";
-import { Box, Typography } from "@mui/material";
-import DealFlowDocumentUpload from "@/components/DealFlow/Shared/DealFlowDocumentUpload";
-import { DealDocumentType } from "@prisma/client";
+import React from 'react';
+import { Box, Typography } from '@mui/material';
+import DealFlowDocumentUpload from '@/components/DealFlow/Shared/DealFlowDocumentUpload';
+import { DealDocumentType } from '@prisma/client';
 
 interface UploadDocumentContentProps {
   accreditationType: string;
@@ -10,26 +10,26 @@ interface UploadDocumentContentProps {
 const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
   accreditationType,
 }) => {
-  let uploadInstructions = "";
+  let uploadInstructions = '';
   let documentList: string[] = [];
   const dealDocumentType: DealDocumentType =
     DealDocumentType.VERIFICATION_ACCREDITATION;
 
-  if (accreditationType?.includes("income")) {
+  if (accreditationType?.includes('income')) {
     uploadInstructions =
-      "Upload one of the following documents for each of the last two years to verify accreditation:";
-    documentList = ["K1", "W2", "1099", "1040"];
-  } else if (accreditationType?.includes("net worth")) {
-    uploadInstructions = "Upload one of the following to verify accreditation:";
+      'Upload one of the following documents for each of the last two years to verify accreditation:';
+    documentList = ['K1', 'W2', '1099', '1040'];
+  } else if (accreditationType?.includes('net worth')) {
+    uploadInstructions = 'Upload one of the following to verify accreditation:';
     documentList = [
-      "Bank statement",
-      "Brokerage statement",
-      "Personal Financial Statement (PFS)",
-      "Certificate of deposit",
+      'Bank statement',
+      'Brokerage statement',
+      'Personal Financial Statement (PFS)',
+      'Certificate of deposit',
     ];
-  } else if (accreditationType?.includes("professional license")) {
+  } else if (accreditationType?.includes('professional license')) {
     uploadInstructions =
-      "Upload documents to prove you hold a license and are in good standing.";
+      'Upload documents to prove you hold a license and are in good standing.';
   }
 
   return (
@@ -42,13 +42,13 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
           {doc}
         </Typography>
       ))}
-      {(accreditationType?.includes("income") ||
-        accreditationType?.includes("net worth")) && (
+      {(accreditationType?.includes('income') ||
+        accreditationType?.includes('net worth')) && (
         <Typography variant="body2" sx={{ mt: 2 }}>
-          Documents must show proof of{" "}
-          {accreditationType?.includes("income")
-            ? "income over $200,000 (individually) or $300,000 (with spouse or partner) in each of the prior two years, and reasonably expects the same for the current year."
-            : "net worth over $1 million, excluding primary residence (individually or with spouse or partner)."}
+          Documents must show proof of{' '}
+          {accreditationType?.includes('income')
+            ? 'income over $200,000 (individually) or $300,000 (with spouse or partner) in each of the prior two years, and reasonably expects the same for the current year.'
+            : 'net worth over $1 million, excluding primary residence (individually or with spouse or partner).'}
         </Typography>
       )}
 
@@ -56,8 +56,8 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
         type="deal"
         documents={[
           {
-            display: "Verification Accreditation",
-            key: "VERIFICATION_ACCREDITATION",
+            display: 'Verification Accreditation',
+            key: 'VERIFICATION_ACCREDITATION',
           },
         ]}
         dealDocumentType={dealDocumentType}

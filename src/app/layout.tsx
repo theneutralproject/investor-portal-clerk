@@ -1,27 +1,27 @@
-import "@/styles/globals.css";
+import '@/styles/globals.css';
 
-import { Inter } from "next/font/google";
-import { GoogleAnalytics } from '@next/third-parties/google'
+import { Inter } from 'next/font/google';
+import { GoogleAnalytics } from '@next/third-parties/google';
 
-import NeutralThemeProvider from "@/components/Shell/NeutralThemeProvider";
-import Sidebar from "@/components/Shell/Sidebar";
-import NeutralQueryProvider from "@/components/QueryClientProvider";
-import { ClerkProvider } from "@clerk/nextjs";
-import "react-toastify/dist/ReactToastify.css";
+import NeutralThemeProvider from '@/components/Shell/NeutralThemeProvider';
+import Sidebar from '@/components/Shell/Sidebar';
+import NeutralQueryProvider from '@/components/QueryClientProvider';
+import { ClerkProvider } from '@clerk/nextjs';
+import 'react-toastify/dist/ReactToastify.css';
 
-import { ToastContainer } from "react-toastify";
+import { ToastContainer } from 'react-toastify';
 
-import ChatInterface from "@/components/ChatInterface";
-import { CSPostHogProvider } from "./providers";
+import ChatInterface from '@/components/ChatInterface';
+import { CSPostHogProvider } from './providers';
 
 const inter = Inter({
-  subsets: ["latin"],
+  subsets: ['latin'],
 });
 
 export const metadata = {
-  title: "Investor Portal",
-  description: "Investor Portal | The Neutral Project",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  title: 'Investor Portal',
+  description: 'Investor Portal | The Neutral Project',
+  icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 
 export default function RootLayout({
@@ -53,8 +53,12 @@ export default function RootLayout({
             <ChatInterface type="FAB" />
           </body>
 
-          <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ""} />
-          <script type="text/javascript" src="https://forms.finixpymnts.com/finix.js" async></script>
+          <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
+          <script
+            type="text/javascript"
+            src="https://forms.finixpymnts.com/finix.js"
+            async
+          ></script>
         </html>
       </ClerkProvider>
     </CSPostHogProvider>

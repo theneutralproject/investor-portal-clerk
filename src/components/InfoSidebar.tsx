@@ -1,6 +1,6 @@
-import { Grid, Card, CardContent, Typography, Button } from "@mui/material";
-import Link from "next/link";
-import HubspotScheduleCall from "./HubspotScheduleCall";
+import { Grid, Card, CardContent, Typography, Button } from '@mui/material';
+import Link from 'next/link';
+import HubspotScheduleCall from './HubspotScheduleCall';
 
 const InfoSidebar = () => {
   return (
@@ -15,7 +15,7 @@ const InfoSidebar = () => {
             <Button
               variant="neutralBlack"
               fullWidth
-              sx={{ mt: 2, height: "42px" }}
+              sx={{ mt: 2, height: '42px' }}
             >
               GET IN TOUCH
             </Button>
@@ -27,7 +27,11 @@ const InfoSidebar = () => {
         <CardContent>
           <Typography variant="h5">About The Neutral Project</Typography>
           <Typography variant="caption">
-            The Neutral Project is a regenerative and sustainable real estate company. Our leadership team has successfully completed numerous projects and is committed to maximizing investors’ alpha while maintaining our thesis of developing sustainable and regenerative buildings.
+            The Neutral Project is a regenerative and sustainable real estate
+            company. Our leadership team has successfully completed numerous
+            projects and is committed to maximizing investors’ alpha while
+            maintaining our thesis of developing sustainable and regenerative
+            buildings.
           </Typography>
         </CardContent>
       </Card>
