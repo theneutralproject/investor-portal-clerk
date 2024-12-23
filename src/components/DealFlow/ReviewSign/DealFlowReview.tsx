@@ -2,11 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { Box, Typography, Card, List } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { useUser } from '@clerk/nextjs';
-import { createDocusignEnvelope } from '@/components/Project/Invest/InvestTab';
 import DealFlowFooter from '../Shared/DealFlowFooter';
 import DocumentItem from '@components/DealFlow/ReviewSign/DocumentItem';
 import ReviewingInvestment from '@components/DealFlow/ReviewSign/ReviewingInvestment';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { createDocusignEnvelope } from '@components/DealFlow/Helpers/DealFlowHelpers';
 
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
