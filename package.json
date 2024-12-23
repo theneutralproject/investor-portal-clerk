@@ -12,6 +12,9 @@
       "prettier --write"
     ]
   },
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
     "build": "next build",
     "db:push": "prisma db push",

@@ -16,7 +16,7 @@ import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils';
 import type { UserCreateSchema } from '@/libs/user/schema';
 import { createUserInDbAndHubspot } from '@/libs/user/utils';
 import type { DealCreateSchema } from '@/libs/deal/schema';
-import { ProjectName } from '@/libs/schema';
+import { ProjectName } from '@/libs/project/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
 

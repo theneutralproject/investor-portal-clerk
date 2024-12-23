@@ -28,7 +28,7 @@ const DashboardPage = () => {
     queryKey: ['project', 'all'],
     queryFn: () =>
       axios
-        .get<ProjectWithAllNestedData[]>('/api/projects')
+        .get<ProjectWithAllNestedData[]>('/api/public/projects')
         .then(res => res.data),
   });
 

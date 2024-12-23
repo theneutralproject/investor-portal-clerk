@@ -9,7 +9,6 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import './dealPage.css';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
@@ -57,7 +56,7 @@ export default function Page({ params: { slug } }: PageProps) {
     queryKey: ['project', slug],
     queryFn: () =>
       axios
-        .get<ProjectWithAllNestedData[]>(`/api/projects?slug=${slug}`)
+        .get<ProjectWithAllNestedData[]>(`/api/public/projects?slug=${slug}`)
         .then(res => res.data),
   });
 
