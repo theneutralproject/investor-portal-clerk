@@ -28,7 +28,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
   };
 
   return (
-    <Card>
+    <Card sx={{ mb: 2 }}>
       <CardContent>
         <Box
           sx={{

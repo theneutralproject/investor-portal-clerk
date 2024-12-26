@@ -5,8 +5,6 @@ import {
   TextField,
   CircularProgress,
   Autocomplete,
-  Card,
-  CardContent,
   Tooltip,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
@@ -17,7 +15,6 @@ import { usStates } from '@components/DealFlow/Helpers/DealFlowHelpers';
 import { formatDate } from '@components/DealFlow/Details/DealFlowEntityDetails';
 import { type Address } from '@prisma/client';
 import InfoIcon from '@mui/icons-material/Info';
-import LockIcon from '@mui/icons-material/Lock';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { EncryptionCard } from './EncryptionCard';
 

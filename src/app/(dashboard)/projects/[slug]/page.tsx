@@ -25,6 +25,7 @@ import InvestmentCalculatorNew from '@/components/Project/Overview/InvestmentCal
 import DocumentsNew from '@/components/Project/Overview/DocumentsNew';
 import GalleryNew from '@/components/Project/Overview/GalleryNew';
 import HaveQuestionsNew from '@/components/Project/Overview/HaveQuestionsNew';
+import CreateAccount from '@/components/Dashboard/CreateAccount';
 
 export type PageProps = {
   params: {
@@ -148,7 +149,7 @@ export default function Page({ params: { slug } }: PageProps) {
           flexDirection="column"
           bgcolor="#f5f5f5"
         >
-          <Card>
+          <Card sx={{ position: 'relative' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Investment Summary
@@ -169,6 +170,7 @@ export default function Page({ params: { slug } }: PageProps) {
         </Grid>
         <Grid size={4} sx={{ background: 'unset' }}>
           <RightSidebarCTA project={project} />
+          {!loggedIn && <CreateAccount />}
         </Grid>
       </Grid>
     </Container>
