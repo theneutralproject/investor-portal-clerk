@@ -36,6 +36,21 @@ interface QuarterData {
   isProjected: boolean;
 }
 
+interface TooltipPayloadItem {
+  name: string;
+  value: number;
+  color: string;
+  payload: {
+    isProjected: boolean;
+  };
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string;
+}
+
 const formatCurrency = (value: number): string => {
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
@@ -89,6 +104,60 @@ const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
   );
 
   return Object.values(quarterData);
+};
+
+const CustomTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+}) => {
+  if (!active || !payload) return null;
+
+  const isProjected = payload[0]?.payload?.isProjected;
+
+  return (
+    <Box
+      sx={{
+        bgcolor: 'background.paper',
+        p: 2,
+        border: 1,
+        borderColor: 'grey.200',
+        borderRadius: 1,
+        boxShadow: 1,
+      }}
+    >
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        Quarter: {label}
+      </Typography>
+      {payload.map((entry: TooltipPayloadItem) => {
+        if (!isProjected && entry.name.includes('Projected')) return null;
+        if (isProjected && !entry.name.includes('Projected')) return null;
+
+        if (entry.value !== undefined) {
+          return (
+            <Typography
+              key={entry.name}
+              variant="body2"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: entry.color,
+                  display: 'inline-block',
+                }}
+              />
+              {entry.name}: {formatCurrency(entry.value)}
+            </Typography>
+          );
+        }
+        return null;
+      })}
+    </Box>
+  );
 };
 
 // Type-safe data accessors for the chart
@@ -186,7 +255,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             <XAxis dataKey="quarter" />
             <YAxis />
             <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
+              content={<CustomTooltip />}
               labelFormatter={(label: string) => `Quarter: ${label}`}
             />
             <Legend />
