@@ -1,3 +1,4 @@
+// Modified RightSidebarCTA.tsx
 import React from 'react';
 import {
   Card,
@@ -6,26 +7,31 @@ import {
   Box,
   Button,
   Divider,
+  useTheme,
+  useMediaQuery,
 } from '@mui/material';
 import { type ProjectWithAllNestedData } from '@/libs/types';
 import { LineDisplay } from '../Overview/InvestmentSummaryBox';
 import HubspotScheduleCall from '@/components/HubspotScheduleCall';
-import { useRouter } from 'next/navigation';
+
 interface RightSidebarCTAProps {
   project: ProjectWithAllNestedData;
+  onInvest: () => void;
 }
 
-const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
-  const router = useRouter();
+const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
+  project,
+  onInvest,
+}) => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const fundingPercentage = Math.round(
     (project.investmentStats.investmentRaised /
       project.investmentStats.investmentGoal) *
       100
   );
 
-  const handleInvest = () => {
-    router.push(`/dealflow/${project.slug}/new/get-started`);
-  };
+  if (isMobile) return null;
 
   return (
     <Card sx={{ mb: 2 }}>
@@ -36,6 +42,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
             flexDirection: 'row',
             height: '50px',
             alignItems: 'center',
+            width: '100%',
           }}
         >
           <Box>
@@ -78,9 +85,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
             </Box>
           </Box>
         </Box>
-
         <Divider sx={{ my: 2 }} />
-
         <Box>
           <LineDisplay
             name="Total Units"
@@ -90,27 +95,32 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({ project }) => {
             name="Investment Term"
             value={`${project.investmentStats.equityTermMonths} Months`}
           />
-
           <LineDisplay
             name="Min Investment"
             value={`$${project.investmentStats.equityMinInvestment / 1000}k`}
           />
-
           <LineDisplay
             name="IRR / Interest"
-            value={`${project.investmentStats.equityIRR.toFixed(1)}% / ${
-              project.investmentStats.interestRateMin
-            }-${project.investmentStats.interestRateMax}%`}
+            value={`${project.investmentStats.equityIRR.toFixed(1)}% / ${project.investmentStats.interestRateMin}-${
+              project.investmentStats.interestRateMax
+            }%`}
           />
         </Box>
-
         <Divider sx={{ my: 2 }} />
-
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button fullWidth variant="neutralYellow" onClick={handleInvest}>
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={onInvest}
+            sx={{
+              backgroundColor: '#F0B642',
+              '&:hover': {
+                backgroundColor: '#d4a33b',
+              },
+            }}
+          >
             Invest
           </Button>
-
           <HubspotScheduleCall onExit={() => null} />
         </Box>
       </CardContent>

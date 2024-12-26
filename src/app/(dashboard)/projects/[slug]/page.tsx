@@ -6,6 +6,7 @@ import {
   Container,
   Divider,
   Typography,
+  useMediaQuery,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import 'react-image-gallery/styles/css/image-gallery.css';
@@ -26,6 +27,9 @@ import DocumentsNew from '@/components/Project/Overview/DocumentsNew';
 import GalleryNew from '@/components/Project/Overview/GalleryNew';
 import HaveQuestionsNew from '@/components/Project/Overview/HaveQuestionsNew';
 import CreateAccount from '@/components/Dashboard/CreateAccount';
+import { theme } from '@/components/Shell/NeutralThemeProvider';
+import { useRouter } from 'next/navigation';
+import MobileCTA from '@/components/Project/NewProject/MobileCTA';
 
 export type PageProps = {
   params: {
@@ -46,7 +50,8 @@ export default function Page({ params: { slug } }: PageProps) {
     dealStage: searchParams.get('dealStage'),
     financingType: searchParams.get('financingType'),
   };
-
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const router = useRouter();
   const { user } = useUser();
   const loggedIn = !!user;
 
@@ -93,6 +98,10 @@ export default function Page({ params: { slug } }: PageProps) {
     project.pictures.find(picture => picture.type === 'HEADER')?.url ??
     project.pictures[0]?.url;
 
+  const handleInvest = () => {
+    router.push(`/dealflow/${project.slug}/new/get-started`);
+  };
+
   return (
     <Container maxWidth="lg">
       <Box
@@ -100,7 +109,7 @@ export default function Page({ params: { slug } }: PageProps) {
           background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 70.16%, rgba(0, 0, 0, 0.40) 100%), url("${projectImage}") lightgray 0px -637.293px / 100% 294.465% no-repeat`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          height: '400px',
+          height: isMobile ? '200px' : '400px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-end',
@@ -108,7 +117,7 @@ export default function Page({ params: { slug } }: PageProps) {
           color: 'white',
           textAlign: 'left',
           position: 'relative',
-          padding: '20px 40px',
+          padding: isMobile ? '10px 20px' : '20px 40px',
         }}
       >
         <Box>
@@ -136,14 +145,17 @@ export default function Page({ params: { slug } }: PageProps) {
         </Box>
       </Box>
 
+      {isMobile && <MobileCTA project={project} onInvest={handleInvest} />}
+
       {/* Overall container, 2 column layout */}
       <Grid
         container
         spacing={2}
+        direction={{ xs: 'column-reverse', md: 'row' }}
         sx={{ mt: 2, background: '#f5f5f5', borderRadius: '8px' }}
       >
         <Grid
-          size={8}
+          size={{ xs: 12, md: 8 }}
           display="flex"
           justifyContent="center"
           flexDirection="column"
@@ -168,8 +180,8 @@ export default function Page({ params: { slug } }: PageProps) {
           <GalleryNew data={project} />
           <HaveQuestionsNew />
         </Grid>
-        <Grid size={4} sx={{ background: 'unset' }}>
-          <RightSidebarCTA project={project} />
+        <Grid size={{ xs: 12, md: 4 }} sx={{ background: 'unset' }}>
+          <RightSidebarCTA project={project} onInvest={handleInvest} />
           {!loggedIn && <CreateAccount />}
         </Grid>
       </Grid>
