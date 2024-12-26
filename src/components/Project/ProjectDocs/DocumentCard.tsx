@@ -12,7 +12,6 @@ const DocumentCard = ({
   dealStage,
   handleViewDocument,
   handleDownloadDocument,
-  handleSignDocument,
 }: {
   document: DocumentWithCompletion;
   dealStage: number;
