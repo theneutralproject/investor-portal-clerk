@@ -32,6 +32,7 @@ const TableHeader = styled(Box)(({ theme }) => ({
   gridTemplateColumns: '300px 1fr 1fr 1fr 1fr',
   padding: theme.spacing(1.5),
   borderBottom: `1px solid ${theme.palette.divider}`,
+  minWidth: 900,
 }));
 
 const TableRow = styled(Box)(({ theme }) => ({
@@ -39,6 +40,7 @@ const TableRow = styled(Box)(({ theme }) => ({
   gridTemplateColumns: '300px 1fr 1fr 1fr 1fr',
   padding: theme.spacing(1.5),
   alignItems: 'center',
+  minWidth: 900,
   '&:not(:last-child)': {
     borderBottom: `1px solid ${theme.palette.divider}`,
   },
@@ -49,6 +51,11 @@ const StyledHeader = styled(Typography)(({}) => ({
   fontSize: 14,
   fontWeight: 500,
 }));
+
+const ScrollContainer = styled(Box)({
+  overflowX: 'auto',
+  width: '100%',
+});
 
 const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
@@ -71,46 +78,47 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
   };
 
   if (!data?.dealStats.length) return null;
-  console.log(data.dealStats.length);
   return (
     <StyledCard>
-      <TableHeader>
-        <Box /> {/* Empty space for image and name column */}
-        <StyledHeader>Type</StyledHeader>
-        <StyledHeader>Committed</StyledHeader>
-        <StyledHeader>Distributions to Date</StyledHeader>
-      </TableHeader>
-      <CardContent sx={{ p: 0 }}>
-        {data.dealStats.map(deal => {
-          if (!deal.project) return null;
-          // @ts-expect-error this mapping is okay
-          const picture = getProjectPicture(deal);
-          return (
-            <TableRow key={deal.dealId}>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                <ProjectImage src={picture} />
-                <Box>
-                  <Typography variant="body1" fontWeight={500}>
-                    {(deal.project as Project)?.name || 'Project'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {(deal.project as Project)?.location || 'Location'}
-                  </Typography>
+      <ScrollContainer>
+        <TableHeader>
+          <Box /> {/* Empty space for image and name column */}
+          <StyledHeader>Type</StyledHeader>
+          <StyledHeader>Committed</StyledHeader>
+          <StyledHeader>Distributions to Date</StyledHeader>
+        </TableHeader>
+        <CardContent sx={{ p: 0 }}>
+          {data.dealStats.map(deal => {
+            if (!deal.project) return null;
+            // @ts-expect-error this mapping is okay
+            const picture = getProjectPicture(deal);
+            return (
+              <TableRow key={deal.dealId}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                  <ProjectImage src={picture} />
+                  <Box>
+                    <Typography variant="body1" fontWeight={500}>
+                      {(deal.project as Project)?.name || 'Project'}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {(deal.project as Project)?.location || 'Location'}
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-              <Typography variant="body2">
-                {deal.financingType === 'equity' ? 'Equity' : 'Debt'}
-              </Typography>
-              <Typography variant="body2">
-                {formatCurrency(deal.committedAmount)}
-              </Typography>
-              <Typography variant="body2">
-                {formatCurrency(deal.distributionsToDate)}
-              </Typography>
-            </TableRow>
-          );
-        })}
-      </CardContent>
+                <Typography variant="body2">
+                  {deal.financingType === 'equity' ? 'Equity' : 'Debt'}
+                </Typography>
+                <Typography variant="body2">
+                  {formatCurrency(deal.committedAmount)}
+                </Typography>
+                <Typography variant="body2">
+                  {formatCurrency(deal.distributionsToDate)}
+                </Typography>
+              </TableRow>
+            );
+          })}
+        </CardContent>
+      </ScrollContainer>
     </StyledCard>
   );
 };
