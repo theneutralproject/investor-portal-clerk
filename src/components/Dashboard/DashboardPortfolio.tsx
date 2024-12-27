@@ -23,7 +23,8 @@ import type {
 
 interface MetricData {
   label: string;
-  value: string;
+  toDateValue: string;
+  projectedTotalValue: string;
   color: string;
 }
 
@@ -195,32 +196,68 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const metrics: MetricData[] = React.useMemo(() => {
     if (!data) {
       return [
-        { label: 'Portfolio Value', value: '$0', color: '#FFB800' },
-        { label: 'Debt Distributions', value: '$0', color: '#5AAC6A' },
-        { label: 'Equity Distributions', value: '$0', color: '#2196F3' },
-        { label: 'Principal', value: '$0', color: '#656565' },
+        {
+          label: 'Portfolio Value',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#FFB800',
+        },
+        {
+          label: 'Debt Distributions',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#5AAC6A',
+        },
+        {
+          label: 'Equity Distributions',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#2196F3',
+        },
+        {
+          label: 'Principal',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#656565',
+        },
       ];
     }
 
     return [
       {
         label: 'Proj. Portfolio Value',
-        value: formatCurrency(data.portfolioStats.projectedPortfolioValue),
+        toDateValue: formatCurrency(data.portfolioStats.portfolioValueToDate),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.projectedPortfolioValue
+        ),
         color: '#FFB800',
       },
       {
         label: 'Proj. Debt Distributions',
-        value: formatCurrency(data.portfolioStats.projectedDebtDistributions),
+        toDateValue: formatCurrency(
+          data.portfolioStats.debtDistributionsToDate
+        ),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.projectedDebtDistributions
+        ),
         color: '#5AAC6A',
       },
       {
         label: 'Proj. Equity Distributions',
-        value: formatCurrency(data.portfolioStats.projectedEquityDistributions),
+        toDateValue: formatCurrency(
+          data.portfolioStats.equityDistributionsToDate
+        ),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.projectedEquityDistributions
+        ),
         color: '#2196F3',
       },
       {
         label: 'Principal',
-        value: formatCurrency(data.portfolioStats.principalInvested),
+        toDateValue: formatCurrency(data.portfolioStats.principalInvested),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.principalInvested
+        ),
         color: '#656565',
       },
     ];
@@ -237,7 +274,8 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
         {metrics.map((metric, index) => (
           <Grid item xs={3} key={index}>
             <PortfolioMetric
-              value={metric.value}
+              toDateValue={metric.toDateValue}
+              projectedTotalValue={metric.projectedTotalValue}
               label={metric.label}
               color={metric.color}
             />
