@@ -34,7 +34,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
   if (isMobile) return null;
 
   return (
-    <Card sx={{ mb: 2 }}>
+    <Card sx={{ mb: 2, position: 'sticky', top: 80 }}>
       <CardContent>
         <Box
           sx={{
