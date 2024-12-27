@@ -12,6 +12,7 @@ import {
 import type { MemberWithPartialUser, MemberWithUser } from '@/libs/types';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { EncryptionCard } from './EncryptionCard';
+import { MODAL_KEYS } from '../Shared/Modal/DealFlowLearnMoreModal';
 
 const DealFlowCoInvestor: React.FC = () => {
   const {
@@ -136,7 +137,10 @@ const DealFlowCoInvestor: React.FC = () => {
 
   return (
     <Box>
-      <DealFlowTitle title="Add Co-Investors" />
+      <DealFlowTitle
+        title="Add Co-Investors"
+        modalKey={MODAL_KEYS.ADD_CO_INVESTORS}
+      />
 
       {localMembers.map((coInvestor, index) => (
         <CoInvestorCard

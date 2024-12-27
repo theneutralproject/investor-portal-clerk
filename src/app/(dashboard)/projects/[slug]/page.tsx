@@ -79,6 +79,20 @@ export default function Page({ params: { slug } }: PageProps) {
     }
   }, [user, queryParams.afterauth]);
 
+  useEffect(() => {
+    if (
+      typeof window !== 'undefined' &&
+      window.location.hash === '#documents'
+    ) {
+      setTimeout(() => {
+        const documentsSection = document.getElementById('documents');
+        if (documentsSection) {
+          documentsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+  }, [projectData]);
+
   if (projectLoading || !projectData) {
     return <div>Loading...</div>;
   }
@@ -176,7 +190,13 @@ export default function Page({ params: { slug } }: PageProps) {
           <ProjectDescriptionNew data={project} />
           <MarketHighlightsNew data={project} />
           <InvestmentCalculatorNew project={project} />
-          {loggedIn && <DocumentsNew project={project} />}
+          <Box sx={{ position: 'relative' }}>
+            <Box
+              id="documents"
+              sx={{ position: 'absolute', top: -80, left: 0 }}
+            />
+            {loggedIn && <DocumentsNew project={project} />}
+          </Box>
           <GalleryNew data={project} />
           <HaveQuestionsNew />
         </Grid>

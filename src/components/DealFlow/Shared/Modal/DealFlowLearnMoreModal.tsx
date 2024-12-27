@@ -15,6 +15,7 @@ import Link from 'next/link';
 export const MODAL_KEYS = {
   CHOOSE_INVESTMENT_TYPE: 'CHOOSE_INVESTMENT_TYPE',
   VERIFY_ACCREDITATION: 'VERIFY_ACCREDITATION',
+  ADD_CO_INVESTORS: 'ADD_CO_INVESTORS',
 } as const;
 
 export type ModalKeyType = (typeof MODAL_KEYS)[keyof typeof MODAL_KEYS];
@@ -156,6 +157,19 @@ const DealFlowLearnMoreModal: React.FC<DealFlowLearnMoreModalProps> = ({
           >
             All accreditation documents you submit will remain confidential and
             will be solely used for verification purposes.
+          </Typography>
+        </Box>
+      ),
+    },
+    [MODAL_KEYS.ADD_CO_INVESTORS]: {
+      title: 'Invite Co-Investors to your deal',
+      content: (
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Typography variant="body2">
+            If you are investing together with a spouse or business partners,
+            you can invite them here. Once the deal is fully funded, your
+            co-investors will be able to see deal updates, such as tax documents
+            and construction updates, through our portal.
           </Typography>
         </Box>
       ),
