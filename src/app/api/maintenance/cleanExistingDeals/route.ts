@@ -1,3 +1,4 @@
+'use server';
 import type { DealUpdateSchema } from "@/libs/deal/schema";
 import { updateDeal } from "@/libs/deal/utils.server";
 import { isAdminUser } from "@/libs/maintenance/utils";

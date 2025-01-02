@@ -1,3 +1,4 @@
+'use server';
 import { DealFinancingType, DealOwnershipType, MembershipType, PaymentMethod } from "@prisma/client";
 import { parse } from 'csv-parse';
 import path from "path";
@@ -192,7 +193,7 @@ export async function POST() {
                 const clerkUser = await findOrCreateClerkUser(email, firstname, lastname, cleanPhone);
 
                 const dbUserData = {
-                    clerkId: clerkUser.id,
+                    clerkId: clerkUser?.id,
                     email,
                     firstName: firstname.trim(),
                     lastName: lastname.trim(),
