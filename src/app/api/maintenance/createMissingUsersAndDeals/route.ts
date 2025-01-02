@@ -4,8 +4,8 @@ import path from "path";
 import fs from "fs";
 import { finished } from "stream";
 import { promisify } from "util";
-import { currentUser, clerkClient } from "@clerk/nextjs/server";
-import { getErrorMessage, jsonResponse } from "@/libs/utils";
+import { currentUser } from "@clerk/nextjs/server";
+import { jsonResponse } from "@/libs/utils";
 import prisma from "@/libs/prisma.server";
 import { getDealsWithContactsFromHubspot } from "@/libs/hubspot/utils";
 import type { UserCreateSchema } from "@/libs/user/schema";
@@ -14,6 +14,7 @@ import type { DealCreateSchema } from "@/libs/deal/schema";
 import { ProjectName } from "@/libs/schema";
 import { createDealForAdmin } from "@/libs/deal/utils.server";
 import type { DealWithInvestmentStats } from "@/libs/types";
+import { findOrCreateClerkUser } from "@/libs/maintenance/utils";
 
 const finishedAsync = promisify(finished);
 
@@ -135,39 +136,6 @@ async function getDealsFromCsv() {
     await finishedAsync(parser);
     return dealRecords;
 };
-
-async function findOrCreateClerkUser(email: string, firstname: string, lastname: string, phone?: string) {
-    const clerkData = {
-        emailAddress: [email],
-        firstName: firstname.trim(),
-        lastName: lastname.trim(),
-    } as {
-        emailAddress: string[];
-        firstName: string;
-        lastName: string;
-        phoneNumber?: string[];
-    }
-
-    if (phone) clerkData.phoneNumber = [phone];
-
-    try {
-        const exisingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
-        if (exisingClerkUsers[0]) {
-            return exisingClerkUsers[0];
-        }
-
-        const newClerkUser = await clerkClient.users.createUser(clerkData);
-        if (!newClerkUser) {
-            throw new Error("Error creating Clerk user");
-        }
-        return newClerkUser;
-    } catch (e) {
-        console.error("Error creating Clerk user for clerkdata", clerkData);
-        console.error(getErrorMessage(e));
-        throw new Error(getErrorMessage(e));
-    }
-
-}
 
 export async function POST() {
     const requestingClerkUser = await currentUser();
