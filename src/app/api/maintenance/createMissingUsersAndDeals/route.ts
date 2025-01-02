@@ -136,7 +136,7 @@ async function getDealsFromCsv() {
     return dealRecords;
 };
 
-async function findOrCreateClerkUser(email: string, firstname: string, lastname: string, phone?: string) {
+export async function findOrCreateClerkUser(email: string, firstname: string, lastname: string, phone?: string) {
     const clerkData = {
         emailAddress: [email],
         firstName: firstname.trim(),
