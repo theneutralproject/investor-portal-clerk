@@ -28,9 +28,14 @@ export async function findOrCreateClerkUser(email: string, firstname: string, la
     try {
         const exisingClerkUsers = await clerkClient.users.getUserList({ emailAddress: [email] });
         if (exisingClerkUsers[0]) {
+            console.log("User already exists in Clerk", email);
             return exisingClerkUsers[0];
         }
 
+        if(!phone) {
+            console.log("User does not exist in Clerk and phone number is missing for user:", email);
+            return null;
+        }
         const newClerkUser = await clerkClient.users.createUser(clerkData);
         if (!newClerkUser) {
             throw new Error("Error creating Clerk user");

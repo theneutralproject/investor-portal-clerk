@@ -7,7 +7,7 @@ export async function GET() {
   const allUsers = await prisma.user.findMany();
   const promiseArr = [];
   for (const user of allUsers) {
-    console.log(`Processing user ${user.email}`);
+    console.log(`Processing user ${user.email} with clerkId ${user.clerkId}`);
     if (!user.clerkId) {
       console.log(`User ${user.id} does not have a clerkId`);
       continue;
@@ -21,11 +21,15 @@ export async function GET() {
       lastName,
       cleanPhone
     );
+    if(!clerkUser) {
+      promiseArr.push({ id: null, status: 'skipped', email });
+      continue;
+    }
 
     // create user in clerk and update user in db and hubspot
-    if (clerkUser.id !== clerkId) {
+    if (clerkUser?.id !== clerkId) {
       console.log(
-        `User ${user.id} clerkId ${clerkId} does not match clerkId ${clerkUser.id}`
+        `User ${user.id} clerkId ${clerkId} does not match clerkId ${clerkUser?.id}`
       );
       try {
         // update user in hubspot
