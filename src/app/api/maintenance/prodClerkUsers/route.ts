@@ -2,9 +2,14 @@
 import prisma from '@/libs/prisma.server';
 import { createHubspotContact } from '@/libs/hubspot/utils';
 import { jsonResponse } from '@/libs/utils';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
+import { findOrCreateClerkUser, isAdminUser } from '@/libs/maintenance/utils';
+import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET() {
+  const clerkUser = await currentUser();
+  if (!clerkUser) return jsonResponse({ error: "User not found" }, 404);
+  if (! await isAdminUser(clerkUser.id)) return jsonResponse({ error: "User is not an admin" }, 403);
+
   const allUsers = await prisma.user.findMany();
   const promiseArr = [];
   for (const user of allUsers) {
@@ -22,7 +27,7 @@ export async function GET() {
       lastName,
       cleanPhone
     );
-    if(!clerkUser) {
+    if (!clerkUser) {
       promiseArr.push({ id: null, status: 'skipped', email });
       continue;
     }
