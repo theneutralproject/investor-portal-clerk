@@ -1,7 +1,7 @@
 import prisma from '@/libs/prisma.server';
-import { findOrCreateClerkUser } from '../createMissingUsersAndDeals/route';
 import { createHubspotContact } from '@/libs/hubspot/utils';
 import { jsonResponse } from '@/libs/utils';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
 
 export async function GET() {
   const allUsers = await prisma.user.findMany();
