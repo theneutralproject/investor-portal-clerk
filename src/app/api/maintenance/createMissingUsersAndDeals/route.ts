@@ -1,3 +1,4 @@
+'use server';
 import { DealFinancingType, DealOwnershipType, MembershipType, PaymentMethod } from "@prisma/client";
 import { parse } from 'csv-parse';
 import path from "path";

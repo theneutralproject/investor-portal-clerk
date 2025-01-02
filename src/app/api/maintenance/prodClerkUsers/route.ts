@@ -1,3 +1,4 @@
+'use server';
 import prisma from '@/libs/prisma.server';
 import { createHubspotContact } from '@/libs/hubspot/utils';
 import { jsonResponse } from '@/libs/utils';
