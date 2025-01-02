@@ -144,7 +144,7 @@ async function getDealsFromCsv() {
   return dealRecords;
 }
 
-async function findOrCreateClerkUser(
+export async function findOrCreateClerkUser(
   email: string,
   firstname: string,
   lastname: string,
