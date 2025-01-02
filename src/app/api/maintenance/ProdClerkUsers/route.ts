@@ -6,7 +6,11 @@ import { jsonResponse } from '@/libs/utils';
 export async function GET() {
   const allUsers = await prisma.user.findMany();
   const promiseArr = [];
+  let i = 0;
   for (const user of allUsers) {
+    i++;
+    console.log(`Processing user ${user.email}`, i);
+    if (i > 3) break;
     if (!user.clerkId) {
       console.log(`User ${user.id} does not have a clerkId`);
       continue;
