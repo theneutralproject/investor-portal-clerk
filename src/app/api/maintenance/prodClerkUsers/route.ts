@@ -6,11 +6,8 @@ import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
 export async function GET() {
   const allUsers = await prisma.user.findMany();
   const promiseArr = [];
-  let i = 0;
   for (const user of allUsers) {
-    i++;
-    console.log(`Processing user ${user.email}`, i);
-    if (i > 3) break;
+    console.log(`Processing user ${user.email}`);
     if (!user.clerkId) {
       console.log(`User ${user.id} does not have a clerkId`);
       continue;
