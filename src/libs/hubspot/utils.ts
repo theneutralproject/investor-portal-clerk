@@ -25,6 +25,12 @@ const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
 });
 
+export function formatDateForHubspot(date: Date) {
+  return new Date(date.setUTCHours(0, 0, 0, 0))
+    .getTime()
+    .toString();
+}
+
 export async function createHubspotContact(
   hubspotContact: HubspotContactCreateUpdateSchema
 ) {
@@ -62,9 +68,7 @@ export async function createHubspotContact(
   }
 
   console.log('Creating new contact in hubspot');
-  const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
-    .getTime()
-    .toString();
+  const signupDate = formatDateForHubspot(new Date());
 
   hubspotContact.properties.date_signed_up = signupDate;
   hubspotContact.properties.email = hubspotContact.email;
@@ -309,7 +313,7 @@ export async function updateHubspotDealProperties(
   const body = JSON.stringify({
     properties: hsDealUpdateData.properties,
   });
-  return await fetch(
+  const hsRes = await fetch(
     `${process.env.HUBSPOT_API_BASE_URL}/deals/v1/deal/${hsDealUpdateData.hubspotDealId}`,
     {
       method: 'PUT',
@@ -320,6 +324,12 @@ export async function updateHubspotDealProperties(
       body,
     }
   );
+  
+  if(hsRes.status >= 300) {
+    console.error('Unable to update deal in hubspot:\n', hsRes);
+    // throw new Error('unable to update deal in hubspot');
+  }
+  return hsRes;
 }
 
 /* eslint-disable */
@@ -412,12 +422,24 @@ export function getHsDealPropsFromDeal(
   deal: DealUpdateSchema,
   projectSlug: string
 ) {
-  const { dealStage, hubspotId, investmentStats, signaturesCompletedDate } =
+  const { dealStage, hubspotId, investmentStats, signaturesCompletedDate, transactionId } =
     deal;
   const hsReturnObject = {
     hubspotDealId: parseInt(hubspotId, 10),
     properties: [],
   } as HubspotDealUpdate;
+
+  hsReturnObject.properties.push({
+    name: 'origin_source',
+    value: 'Investor Portal',
+  });
+
+  if (transactionId)
+    hsReturnObject.properties.push({
+      name: 'transaction_id',
+      value: transactionId,
+    });
+
   if (dealStage)
     hsReturnObject.properties.push({
       name: 'dealstage',
@@ -434,10 +456,33 @@ export function getHsDealPropsFromDeal(
       name: 'financing_type',
       value: investmentStats?.financingType,
     });
+
+  if ((investmentStats?.numberAUnits ?? 0) > 0) {
+    hsReturnObject.properties.push({
+      name: 'equity_unit',
+      value: `A Unit`,
+    });
+  }
+
+  if ((investmentStats?.numberCUnits ?? 0) > 0) {
+    hsReturnObject.properties.push({
+      name: 'equity_unit',
+      value: `C Unit`,
+    });
+  }
+
+  if (investmentStats?.financingType === 'promissory_note_now' && investmentStats?.unitType) {
+    hsReturnObject.properties.push({
+      name: 'pn_unit',
+      value: investmentStats?.unitType === "AUNIT" ? 'A Unit' : 'B Unit',
+    });
+  }
+
+
   if (signaturesCompletedDate)
     hsReturnObject.properties.push({
       name: 'date_signatures_completed',
-      value: signaturesCompletedDate.toISOString(),
+      value: formatDateForHubspot(signaturesCompletedDate),
     });
   return hsReturnObject;
 }

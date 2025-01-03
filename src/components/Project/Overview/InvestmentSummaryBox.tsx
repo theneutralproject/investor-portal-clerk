@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid, Typography, Divider, Button, Stack } from '@mui/material';
-import { type Decimal } from '@prisma/client/runtime/library';
+import { Decimal } from '@prisma/client/runtime/library';
 import type { ProjectWithStats } from '@/libs/types';
 import type { ProjectInvestmentStats } from '@prisma/client';
 import { useUser } from '@clerk/nextjs';
@@ -23,12 +23,12 @@ export const LineDisplay: React.FC<LineDisplayProps> = ({ name, value }) => (
     marginTop={2}
   >
     <Typography variant="body2">{name}:</Typography>
-    {typeof value === 'string' || typeof value === 'number' ? (
+    {typeof value === 'string' || typeof value === 'number' || value instanceof Decimal ? (
       <Typography
         variant="body2"
         sx={{ color: '#000000DE', fontWeight: '600' }}
       >
-        {value}
+        {value instanceof Decimal ? value.toString() : value}
       </Typography>
     ) : (
       value
