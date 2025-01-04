@@ -23,7 +23,9 @@ export const LineDisplay: React.FC<LineDisplayProps> = ({ name, value }) => (
     marginTop={2}
   >
     <Typography variant="body2">{name}:</Typography>
-    {typeof value === 'string' || typeof value === 'number' || value instanceof Decimal ? (
+    {typeof value === 'string' ||
+    typeof value === 'number' ||
+    value instanceof Decimal ? (
       <Typography
         variant="body2"
         sx={{ color: '#000000DE', fontWeight: '600' }}

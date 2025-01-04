@@ -371,7 +371,9 @@ export async function populateDealEquityStats(
 
   const minInvestmentAmount = project.investmentStats.equityMinInvestment;
   if (stats.amount < minInvestmentAmount) {
-    console.log(`Increasing minimum investment amount to $${minInvestmentAmount.toLocaleString()}`);
+    console.log(
+      `Increasing minimum investment amount to $${minInvestmentAmount.toLocaleString()}`
+    );
     stats.amount = minInvestmentAmount;
   }
   if (stats.amount < minInvestmentAmount) {
@@ -406,7 +408,9 @@ export function populateDealDebtStats(
   stats.shareOfEquity = 0;
   const minInvestmentAmount = project.investmentStats.debtMinInvestment;
   if (stats.amount < minInvestmentAmount) {
-    console.log(`Increasing minimum investment amount to $${minInvestmentAmount.toLocaleString()}`);
+    console.log(
+      `Increasing minimum investment amount to $${minInvestmentAmount.toLocaleString()}`
+    );
     stats.amount = minInvestmentAmount;
   }
   if (stats.amount < minInvestmentAmount) {
@@ -421,6 +425,8 @@ export function populateDealDebtStats(
 }
 
 export function toUTCMidnight(date: Date): Date {
-  const utcMidnight = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const utcMidnight = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  );
   return utcMidnight;
 }

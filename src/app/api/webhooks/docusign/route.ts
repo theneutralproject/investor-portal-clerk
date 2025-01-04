@@ -90,7 +90,9 @@ export async function POST(req: NextRequest) {
       const dealData = {
         hubspotId: deal.hubspotId,
         // store as date at UTC midnight
-        signaturesCompletedDate: toUTCMidnight(dealEvent.dateCompleted ?? new Date()),
+        signaturesCompletedDate: toUTCMidnight(
+          dealEvent.dateCompleted ?? new Date()
+        ),
         dealStage: 4,
       };
       await updateDeal(dealData, true);

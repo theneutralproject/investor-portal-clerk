@@ -1,5 +1,4 @@
 import {
-  DealFinancingType,
   DealOwnershipType,
   MembershipType,
   PaymentMethod,
@@ -17,13 +16,11 @@ import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
 import { getDealsFromCsv } from '@/libs/maintenance/utils.server';
 
-
 const projectName: ProjectName = ProjectName['519 W Main'];
 const filePath = path.join(
   './seedData',
   `Investor Cap Table - ${projectName}.csv`
 );
-
 
 async function findOrCreateClerkUser(
   email: string,

@@ -111,8 +111,13 @@ export function getDebtInterestRate(
     : investmentStats.interestRateMin;
 }
 
-export function getDebtUnitType(amount: number, investmentStats: ProjectInvestmentStats) {
-  return amount >= investmentStats.interestRateDollarThreshold ? DealUnitType.BUNIT : DealUnitType.AUNIT;
+export function getDebtUnitType(
+  amount: number,
+  investmentStats: ProjectInvestmentStats
+) {
+  return amount >= investmentStats.interestRateDollarThreshold
+    ? DealUnitType.BUNIT
+    : DealUnitType.AUNIT;
 }
 
 // find last day of first month of next quarter

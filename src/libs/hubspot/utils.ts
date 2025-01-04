@@ -26,9 +26,7 @@ const hubspotClient = new Client({
 });
 
 export function formatDateForHubspot(date: Date) {
-  return new Date(date.setUTCHours(0, 0, 0, 0))
-    .getTime()
-    .toString();
+  return new Date(date.setUTCHours(0, 0, 0, 0)).getTime().toString();
 }
 
 export async function createHubspotContact(
@@ -324,8 +322,8 @@ export async function updateHubspotDealProperties(
       body,
     }
   );
-  
-  if(hsRes.status >= 300) {
+
+  if (hsRes.status >= 300) {
     console.error('Unable to update deal in hubspot:\n', hsRes);
     // throw new Error('unable to update deal in hubspot');
   }
@@ -422,8 +420,13 @@ export function getHsDealPropsFromDeal(
   deal: DealUpdateSchema,
   projectSlug: string
 ) {
-  const { dealStage, hubspotId, investmentStats, signaturesCompletedDate, transactionId } =
-    deal;
+  const {
+    dealStage,
+    hubspotId,
+    investmentStats,
+    signaturesCompletedDate,
+    transactionId,
+  } = deal;
   const hsReturnObject = {
     hubspotDealId: parseInt(hubspotId, 10),
     properties: [],
@@ -471,13 +474,15 @@ export function getHsDealPropsFromDeal(
     });
   }
 
-  if (investmentStats?.financingType === 'promissory_note_now' && investmentStats?.unitType) {
+  if (
+    investmentStats?.financingType === 'promissory_note_now' &&
+    investmentStats?.unitType
+  ) {
     hsReturnObject.properties.push({
       name: 'pn_unit',
-      value: investmentStats?.unitType === "AUNIT" ? 'A Unit' : 'B Unit',
+      value: investmentStats?.unitType === 'AUNIT' ? 'A Unit' : 'B Unit',
     });
   }
-
 
   if (signaturesCompletedDate)
     hsReturnObject.properties.push({
