@@ -359,6 +359,7 @@ enum DealOwnershipType {
 
 enum DealUnitType {
   AUNIT
+  BUNIT
   CUNIT
 }
 

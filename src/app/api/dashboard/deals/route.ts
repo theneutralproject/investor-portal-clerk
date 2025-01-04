@@ -6,6 +6,7 @@ import { currentUser } from '@clerk/nextjs';
 export async function GET() {
   const clerkUser = await currentUser();
   if (!clerkUser) {
+    console.log('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
 
@@ -15,6 +16,7 @@ export async function GET() {
   });
 
   if (!dbUser) {
+    console.log('User not found in database');
     return errorResponse('User not found in database', 404);
   }
 
@@ -33,12 +35,12 @@ export async function GET() {
       project: {
         include: {
           pictures: true,
-        },
+        }, 
       },
       investmentStats: true,
     },
   });
-
+  
   const filteredDeals = deals.filter(deal =>
     userOrgs.some(
       org => org.id === deal.organizationId && org.ownerId === dbUser.id

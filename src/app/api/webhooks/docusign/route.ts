@@ -1,5 +1,5 @@
 import { createDocumentEntry } from '@/libs/admin/utils';
-import { updateDeal } from '@/libs/deal/utils.server';
+import { toUTCMidnight, updateDeal } from '@/libs/deal/utils.server';
 import {
   getEnvelopeAsPdfFileBuffer,
   instantiateApiClient,
@@ -89,7 +89,10 @@ export async function POST(req: NextRequest) {
       // update deal and hubspot
       const dealData = {
         hubspotId: deal.hubspotId,
-        signaturesCompletedDate: dealEvent.dateCompleted ?? new Date(),
+        // store as date at UTC midnight
+        signaturesCompletedDate: toUTCMidnight(
+          dealEvent.dateCompleted ?? new Date()
+        ),
         dealStage: 4,
       };
       await updateDeal(dealData, true);

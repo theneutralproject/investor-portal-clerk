@@ -7,7 +7,7 @@ export default authMiddleware({
     '/api/admin/(.*)',
     '/api/docusign/return',
     '/api/finix/webhooks',
-    'api/clerk',
+    '/api/clerk',
   ],
   publicRoutes: (req: NextRequest) => {
     const publicRoutes = [
