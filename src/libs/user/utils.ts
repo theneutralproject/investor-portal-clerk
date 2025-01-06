@@ -99,12 +99,15 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
         // add orgId to user
         updatedUser = await prisma.user.update({ where: { id: dbUser.id }, data: { userOrgId } });
     } catch (error) {
-        console.error("Unable to create user in DB:\n", getErrorMessage(error));
+        // this should only happen if a duplicate webhook is received from clerk
+        console.warn("Unable to create user in DB:\n", getErrorMessage(error));
         // check if user already exists in DB:
         const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
         if (!existingUser) {
+            console.error("User neither created nor found  in DB:\n", getErrorMessage(error));
             throw new Error(getErrorMessage(error));
         } else {
+            console.warn(`Processing existing user ${existingUser.email}`);
             updatedUser = existingUser;
         }
     }
