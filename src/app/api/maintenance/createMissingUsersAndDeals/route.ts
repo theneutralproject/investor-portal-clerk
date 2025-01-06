@@ -1,6 +1,5 @@
 'use server';
 import {
-  DealFinancingType,
   DealOwnershipType,
   MembershipType,
   PaymentMethod,
@@ -45,7 +44,6 @@ export async function POST() {
 
   const newDealsArr: DealWithInvestmentStats[] = [];
   // loop through deals and create missing users and deals
-  const i = 0;
   for await (const dealcontact of hsSearchResults.dealContacts) {
     // create user if not found
     const { email, firstname, lastname, hs_object_id, phone } =

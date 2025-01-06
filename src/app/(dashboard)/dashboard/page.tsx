@@ -15,45 +15,16 @@ import Grid from '@mui/material/Grid2';
 import InvestingWithNeutral from '@/components/Dashboard/InvestingWithNeutral';
 import Questions from '@/components/Dashboard/Questions';
 import CreateAccount from '@/components/Dashboard/CreateAccount';
-import axios from 'axios';
-import { useQuery } from '@tanstack/react-query';
-import type {
-  DealWithOrgMembersAndProject,
-  ProjectWithAllNestedData,
-} from '@/libs/types';
 import DashboardProjects from '@/components/Dashboard/DashboardProjects';
-import { useUser } from '@clerk/nextjs';
 import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 import DashboardDeals from '@/components/Dashboard/DashboardDeals';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
-
+import { useDashboard } from '@/components/Dashboard/DashboardContext';
 const DashboardPage = () => {
-  const { user } = useUser();
+  const { loggedIn, user, projects, deals, isLoading } = useDashboard();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const loggedIn = !!user;
-
-  const { isLoading, data } = useQuery<ProjectWithAllNestedData[], Error>({
-    queryKey: ['project', 'all'],
-    queryFn: () =>
-      axios
-        .get<ProjectWithAllNestedData[]>('/api/public/projects')
-        .then(res => res.data),
-  });
-
-  const { isLoading: dealsLoading, data: dealsData } = useQuery<
-    DealWithOrgMembersAndProject[],
-    Error
-  >({
-    queryKey: ['deals', 'all'],
-    queryFn: () =>
-      axios
-        .get<DealWithOrgMembersAndProject[]>('/api/dashboard/deals')
-        .then(res => res.data),
-    enabled: loggedIn,
-  });
-
-  if (isLoading || dealsLoading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
 
   const headline = loggedIn
     ? `Welcome to Neutral, ${user?.firstName}`
@@ -97,15 +68,17 @@ const DashboardPage = () => {
                 <DashboardDeals loggedIn={loggedIn} />
               </CardContent>
             </Card>
-            <DashboardProjects projects={data ?? []} />
+            <DashboardProjects projects={projects ?? []} />
           </Box>
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }} display="flex" justifyContent="flex-end">
           <Box sx={{ width: '100%', backgroundColor: '#f5f5f5' }}>
             {!loggedIn && <CreateAccount />}
-            {dealsData && dealsData.length > 0 && !isMobile && (
-              <CompleteInvestment deals={dealsData} />
+            {deals && deals.length > 0 && !isMobile && (
+              <CompleteInvestment
+                deals={deals?.filter(deal => deal.dealStage < 5)}
+              />
             )}
             <InvestingWithNeutral />
             <Questions />

@@ -1,10 +1,9 @@
 import React from 'react';
 import { Box, Grid, Typography, Divider, Button, Stack } from '@mui/material';
-import { Decimal } from '@prisma/client/runtime/library';
 import type { ProjectWithStats } from '@/libs/types';
 import type { ProjectInvestmentStats } from '@prisma/client';
-import { useUser } from '@clerk/nextjs';
 import Link from 'next/link';
+import { useDashboard } from '@/components/Dashboard/DashboardContext';
 const formatter = new Intl.NumberFormat('en', {
   notation: 'compact',
   maximumFractionDigits: 1,
@@ -12,7 +11,7 @@ const formatter = new Intl.NumberFormat('en', {
 
 interface LineDisplayProps {
   name: string;
-  value: string | number | Decimal | React.ReactNode;
+  value: string | number | React.ReactNode;
 }
 
 export const LineDisplay: React.FC<LineDisplayProps> = ({ name, value }) => (
@@ -23,14 +22,12 @@ export const LineDisplay: React.FC<LineDisplayProps> = ({ name, value }) => (
     marginTop={2}
   >
     <Typography variant="body2">{name}:</Typography>
-    {typeof value === 'string' ||
-    typeof value === 'number' ||
-    value instanceof Decimal ? (
+    {typeof value === 'string' || typeof value === 'number' ? (
       <Typography
         variant="body2"
         sx={{ color: '#000000DE', fontWeight: '600' }}
       >
-        {value instanceof Decimal ? value.toString() : value}
+        {typeof value === 'number' ? value.toString() : value}
       </Typography>
     ) : (
       value
@@ -124,8 +121,7 @@ const Footnotes: React.FC<FootnotesProps> = ({ investmentStats }) => (
 const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
   data,
 }) => {
-  const { user } = useUser();
-  const loggedIn = !!user;
+  const { loggedIn } = useDashboard();
 
   if (!data.investmentStats.boolEquity) {
     return (

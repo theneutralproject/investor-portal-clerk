@@ -1,0 +1,78 @@
+'use client';
+
+import React, { createContext, useContext } from 'react';
+import axios from 'axios';
+import { useQuery } from '@tanstack/react-query';
+import { useUser } from '@clerk/nextjs';
+import type {
+  DealWithOrgMembersAndProject,
+  ProjectWithAllNestedData,
+} from '@/libs/types';
+
+interface DashboardContextType {
+  projects: ProjectWithAllNestedData[];
+  deals: DealWithOrgMembersAndProject[];
+  isLoading: boolean;
+  isError: boolean;
+  loggedIn: boolean;
+  user: ReturnType<typeof useUser>['user'];
+}
+
+const DashboardContext = createContext<DashboardContextType | undefined>(
+  undefined
+);
+
+export function DashboardProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useUser();
+  const loggedIn = !!user;
+
+  const {
+    isLoading: projectsLoading,
+    isError: projectsError,
+    data: projectsData,
+  } = useQuery<ProjectWithAllNestedData[], Error>({
+    queryKey: ['project', 'all'],
+    queryFn: () =>
+      axios
+        .get<ProjectWithAllNestedData[]>('/api/public/projects')
+        .then(res => res.data),
+  });
+
+  const {
+    isLoading: dealsLoading,
+    isError: dealsError,
+    data: dealsData,
+  } = useQuery<DealWithOrgMembersAndProject[], Error>({
+    queryKey: ['deals', 'all'],
+    queryFn: () =>
+      axios
+        .get<DealWithOrgMembersAndProject[]>('/api/dashboard/deals')
+        .then(res => res.data),
+    enabled: loggedIn,
+  });
+
+  const value = {
+    projects: projectsData ?? [],
+    deals: dealsData ?? [],
+    isLoading: projectsLoading || dealsLoading,
+    isError: projectsError || dealsError,
+    loggedIn,
+    user,
+  };
+
+  return (
+    <DashboardContext.Provider value={value}>
+      {children}
+    </DashboardContext.Provider>
+  );
+}
+
+export function useDashboard() {
+  const context = useContext(DashboardContext);
+  if (context === undefined) {
+    throw new Error('useDashboard must be used within a DashboardProvider');
+  }
+  return context;
+}
+
+export default DashboardContext;

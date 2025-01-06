@@ -2,28 +2,19 @@
 
 import ProjectCard from '@/components/Project/ProjectCard';
 import { Box, Grid, Typography, useMediaQuery } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { toast } from 'react-toastify';
 
 import ProjectPageBanner from '@/components/Project/ProjectPageBanner';
-import { useUser } from '@clerk/nextjs';
-import type { ProjectWithAllNestedData } from '@/libs/types';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
 import { useEffect } from 'react';
 import posthog from 'posthog-js';
 import { useSearchParams } from 'next/navigation';
+import { useDashboard } from '@/components/Dashboard/DashboardContext';
 
 const Dashboard = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const { user } = useUser();
-  const { isLoading, data } = useQuery<ProjectWithAllNestedData[], Error>({
-    queryKey: ['project', 'all'],
-    queryFn: () =>
-      axios
-        .get<ProjectWithAllNestedData[]>('/api/public/projects')
-        .then(res => res.data),
-  });
+
+  const { user, projects, isLoading } = useDashboard();
 
   const searchParams = useSearchParams();
 
@@ -55,7 +46,7 @@ const Dashboard = () => {
     return <div>Loading...</div>;
   }
 
-  if (!data || !Array.isArray(data)) {
+  if (!projects || !Array.isArray(projects)) {
     return <div>No data available</div>;
   }
 
@@ -80,7 +71,7 @@ const Dashboard = () => {
           justifyContent: { xs: 'center', sm: 'flex-start' },
         }}
       >
-        {data.map(project => (
+        {projects.map(project => (
           <ProjectCard key={project.id} project={project} />
         ))}
       </Grid>

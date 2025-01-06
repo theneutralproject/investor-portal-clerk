@@ -13,6 +13,7 @@ import { ToastContainer } from 'react-toastify';
 
 import ChatInterface from '@/components/ChatInterface';
 import { CSPostHogProvider } from './providers';
+import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,17 +37,19 @@ export default function RootLayout({
           <body className={inter.className}>
             <NeutralQueryProvider>
               <NeutralThemeProvider>
-                <Sidebar>{children}</Sidebar>
-                <ToastContainer
-                  position="top-right"
-                  autoClose={5000}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  theme="light"
-                />
+                <DashboardProvider>
+                  <Sidebar>{children}</Sidebar>
+                  <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    theme="light"
+                  />
+                </DashboardProvider>
               </NeutralThemeProvider>
             </NeutralQueryProvider>
 

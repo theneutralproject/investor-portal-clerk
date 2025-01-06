@@ -14,7 +14,6 @@ import { useEffect } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
-import { useUser } from '@clerk/nextjs';
 import posthog from 'posthog-js';
 import type { ProjectWithAllNestedData } from '@/libs/types';
 import InvestmentSummaryBox from '@/components/Project/Overview/InvestmentSummaryBox';
@@ -30,6 +29,8 @@ import CreateAccount from '@/components/Dashboard/CreateAccount';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
 import { useRouter } from 'next/navigation';
 import MobileCTA from '@/components/Project/NewProject/MobileCTA';
+import { useDashboard } from '@/components/Dashboard/DashboardContext';
+import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 
 export type PageProps = {
   params: {
@@ -44,6 +45,7 @@ interface QueryParams {
 }
 
 export default function Page({ params: { slug } }: PageProps) {
+  const { loggedIn, user, deals } = useDashboard();
   const searchParams = useSearchParams();
   const queryParams: QueryParams = {
     afterauth: searchParams.get('afterauth'),
@@ -52,8 +54,6 @@ export default function Page({ params: { slug } }: PageProps) {
   };
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const router = useRouter();
-  const { user } = useUser();
-  const loggedIn = !!user;
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
     ProjectWithAllNestedData[],
@@ -201,7 +201,22 @@ export default function Page({ params: { slug } }: PageProps) {
           <HaveQuestionsNew />
         </Grid>
         <Grid size={{ xs: 12, md: 4 }} sx={{ background: 'unset' }}>
+          {!isMobile && (
+            <CompleteInvestment
+              deals={deals?.filter(
+                deal => deal.projectId === project.id && deal.dealStage < 5
+              )}
+            />
+          )}
           <RightSidebarCTA project={project} onInvest={handleInvest} />
+          {!isMobile && (
+            <CompleteInvestment
+              deals={deals?.filter(
+                deal => deal.projectId === project.id && deal.dealStage >= 5
+              )}
+            />
+          )}
+
           {!loggedIn && <CreateAccount />}
         </Grid>
       </Grid>
