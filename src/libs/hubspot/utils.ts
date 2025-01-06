@@ -36,13 +36,19 @@ export async function createHubspotContact(hubspotContact: HubspotContactCreateU
   if (hsSearchResult.total > 0) {
     console.log("Contact already exists. Updating it instead");
     const hsId = hsSearchResult.results[0]?.id.toString();
+    console.log("hsId", hsId);
     if (!hsId) {
       console.error("ERROR: unable to get Hubspot contact id");
       throw new Error("unable to get hubspot contact id");
     }
     hubspotContact.hubspotId = hsId;
-    await updateHubspotContact(hubspotContact);
-    return hsId;
+    try {
+      await updateHubspotContact(hubspotContact);
+      return hsId;
+    } catch (error) {
+      console.error("Unable to update user in hubspot:\n", error);
+      throw new Error(getErrorMessage(error));
+    }
   }
 
   console.log("Creating new contact in hubspot");
