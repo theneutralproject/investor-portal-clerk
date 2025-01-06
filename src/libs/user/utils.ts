@@ -80,7 +80,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
             const addressId = userAddress.id;
             userCreateData = { ...userCreateData, ...{ address: { connect: userAddress.id }, addressId: addressId } }
         }
-
+        console.log('creating user in db', userCreateData.email);
         const dbUser = await prisma.user.create({
             data: userCreateData,
         });
@@ -108,6 +108,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
         return updatedUser;
 
     } catch (error) {
+        console.error("Unable to create user in DB:\n", getErrorMessage(error));
         throw new Error(getErrorMessage(error));
     }
 }
