@@ -138,7 +138,7 @@ export async function GET(request: NextRequest) {
       dbUser.id,
       deal.id
     );
-
+    
     return jsonResponse({
       project: {
         ...project,

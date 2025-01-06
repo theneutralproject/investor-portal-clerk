@@ -272,7 +272,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     <>
       <Grid container spacing={4} sx={{ mb: 4 }}>
         {metrics.map((metric, index) => (
-          <Grid item xs={3} key={index}>
+          <Grid item xs={6} sm={6} md={3} key={index}>
             <PortfolioMetric
               toDateValue={metric.toDateValue}
               projectedTotalValue={metric.projectedTotalValue}
@@ -283,7 +283,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
         ))}
       </Grid>
 
-      <Box sx={{ height: 300, mt: 4 }}>
+      <Box sx={{ height: 300, mt: 4, display: { xs: 'none', sm: 'block' } }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}

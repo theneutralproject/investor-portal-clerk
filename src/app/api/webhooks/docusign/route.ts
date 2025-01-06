@@ -1,5 +1,5 @@
 import { createDocumentEntry } from '@/libs/admin/utils';
-import { updateDeal } from '@/libs/deal/utils.server';
+import { toUTCMidnight, updateDeal } from '@/libs/deal/utils.server';
 import {
   getEnvelopeAsPdfFileBuffer,
   instantiateApiClient,
@@ -36,13 +36,13 @@ export async function POST(req: NextRequest) {
         message: `Docusign webhook processed for envelopeId ${payload.data.envelopeId}`,
       });
     } catch (error) {
-      console.error('Failed to update docusign event');
-      return jsonResponse(
-        {
-          message: `Failed to update docusign event for envelopeId ${payload.data.envelopeId}`,
-        },
-        500
+      console.warn('Failed to update docusign event 1');
+      console.warn(
+        `The envelopeId ${payload.data.envelopeId} does not exist in the database and can be ignored.`
       );
+      return jsonResponse({
+        message: `Failed to update docusign event recipient-completed for envelopeId ${payload.data.envelopeId}`,
+      });
     }
   } else if (payload.event === 'envelope-completed') {
     // update dealEvent
@@ -55,14 +55,15 @@ export async function POST(req: NextRequest) {
       include: { deal: { include: { investmentStats: true } } },
     });
     if (!dealEvent) {
-      console.error('Failed to update docusign event');
-      return jsonResponse(
-        {
-          message: `Failed to update docusign event for envelopeId ${payload.data.envelopeId}`,
-        },
-        500
+      console.warn('Failed to update docusign event 2');
+      console.warn(
+        `The envelopeId ${payload.data.envelopeId} does not exist in the database and can be ignored.`
       );
+      return jsonResponse({
+        message: `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`,
+      });
     }
+
     const { deal } = dealEvent;
     if (!deal.investmentStats) {
       console.error('Deal has no investment stats');
@@ -89,7 +90,10 @@ export async function POST(req: NextRequest) {
       // update deal and hubspot
       const dealData = {
         hubspotId: deal.hubspotId,
-        signaturesCompletedDate: dealEvent.dateCompleted ?? new Date(),
+        // store as date at UTC midnight
+        signaturesCompletedDate: toUTCMidnight(
+          dealEvent.dateCompleted ?? new Date()
+        ),
         dealStage: 4,
       };
       await updateDeal(dealData, true);

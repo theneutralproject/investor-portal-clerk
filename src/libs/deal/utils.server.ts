@@ -9,6 +9,7 @@ import { isError } from 'lodash';
 import { type DealCreateSchema, type DealUpdateSchema } from './schema';
 import {
   getDebtInterestRate,
+  getDebtUnitType,
   getEquityStatsFromProject,
 } from '../returns/utils';
 import prisma from '../prisma.server';
@@ -23,6 +24,7 @@ import type {
   ProjectWithInvestmentStats,
 } from '../types';
 import { getInvestmentEntity } from './utils';
+import { getErrorMessage } from '../utils';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -91,7 +93,7 @@ export async function createDealForAdmin(
     );
     return newDeal;
   } catch (e) {
-    console.error('Failed to create deal', e);
+    console.error('Failed to create deal', getErrorMessage(e));
     throw e;
   }
 }
@@ -211,7 +213,6 @@ export async function updateDeal(
   console.log('investmentStatsToUpdate', investmentStatsToUpdate);
 
   // first update the stats
-
   let updatedStats: DealInvestmentStats | null = null;
   // Only update investment stats if the deal stage is less than 4 (not yet signed)
   if (existingDeal.dealStage >= 4 && !allowMaintenanceOfCompletedDeals) {
@@ -227,6 +228,7 @@ export async function updateDeal(
         ownershipType,
         ...ignoredInvestmentStats
       } = investmentStatsToUpdate;
+
       for (const key in ignoredInvestmentStats) {
         console.warn(
           `For deal with id ${existingDeal.id}, ignoring to update investmentStat: ${key}, as it can only be updated internally.`
@@ -295,7 +297,6 @@ export async function updateDeal(
   }
 
   // then update the deal
-
   let updatedDeal: DealWithInvestmentStats;
   /* eslint-disable-next-line */
   try {
@@ -370,6 +371,12 @@ export async function populateDealEquityStats(
 
   const minInvestmentAmount = project.investmentStats.equityMinInvestment;
   if (stats.amount < minInvestmentAmount) {
+    console.log(
+      `Increasing minimum investment amount to $${minInvestmentAmount.toLocaleString()}`
+    );
+    stats.amount = minInvestmentAmount;
+  }
+  if (stats.amount < minInvestmentAmount) {
     console.error(
       `The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`
     );
@@ -392,6 +399,7 @@ export function populateDealDebtStats(
     stats.amount,
     project.investmentStats
   );
+  stats.unitType = getDebtUnitType(stats.amount, project.investmentStats);
 
   // set all equity related fields to null
   stats.equityTermMonths = 0;
@@ -399,6 +407,12 @@ export function populateDealDebtStats(
   stats.numberCUnits = 0;
   stats.shareOfEquity = 0;
   const minInvestmentAmount = project.investmentStats.debtMinInvestment;
+  if (stats.amount < minInvestmentAmount) {
+    console.log(
+      `Increasing minimum investment amount to $${minInvestmentAmount.toLocaleString()}`
+    );
+    stats.amount = minInvestmentAmount;
+  }
   if (stats.amount < minInvestmentAmount) {
     console.error(
       `The minimum investment amount for this project is $${minInvestmentAmount.toLocaleString()}`
@@ -408,4 +422,11 @@ export function populateDealDebtStats(
     );
   }
   return stats;
+}
+
+export function toUTCMidnight(date: Date): Date {
+  const utcMidnight = new Date(
+    Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+  );
+  return utcMidnight;
 }

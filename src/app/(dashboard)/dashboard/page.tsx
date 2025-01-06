@@ -1,7 +1,14 @@
 // LearnPage.tsx
 'use client';
 
-import { Box, Card, CardContent, Divider, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Divider,
+  Typography,
+  useMediaQuery,
+} from '@mui/material';
 import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
 import DashboardPortfolio from '@/components/Dashboard/DashboardPortfolio';
 import Grid from '@mui/material/Grid2';
@@ -18,9 +25,11 @@ import DashboardProjects from '@/components/Dashboard/DashboardProjects';
 import { useUser } from '@clerk/nextjs';
 import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 import DashboardDeals from '@/components/Dashboard/DashboardDeals';
+import { theme } from '@/components/Shell/NeutralThemeProvider';
 
 const DashboardPage = () => {
   const { user } = useUser();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const loggedIn = !!user;
 
@@ -61,7 +70,10 @@ const DashboardPage = () => {
         sx={{ mt: 2, background: '#f5f5f5', borderRadius: '8px' }}
       >
         <Grid
-          size={8}
+          size={{
+            xs: 12,
+            md: 8,
+          }}
           display="flex"
           justifyContent="center"
           sx={{ background: '#f5f5f5' }}
@@ -89,10 +101,10 @@ const DashboardPage = () => {
           </Box>
         </Grid>
 
-        <Grid size={4} display="flex" justifyContent="flex-end">
-          <Box sx={{ width: '100%' }}>
+        <Grid size={{ xs: 12, md: 4 }} display="flex" justifyContent="flex-end">
+          <Box sx={{ width: '100%', backgroundColor: '#f5f5f5' }}>
             {!loggedIn && <CreateAccount />}
-            {dealsData && dealsData.length > 0 && (
+            {dealsData && dealsData.length > 0 && !isMobile && (
               <CompleteInvestment deals={dealsData} />
             )}
             <InvestingWithNeutral />

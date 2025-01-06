@@ -1,5 +1,6 @@
+'use server';
 import { getListOfHSDeals } from '@/libs/hubspot/utils';
-import { isAdminUser } from '@/libs/user/utils';
+import { isAdminUser } from '@/libs/maintenance/utils';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs/server';

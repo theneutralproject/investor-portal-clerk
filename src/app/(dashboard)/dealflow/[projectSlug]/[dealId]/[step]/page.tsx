@@ -1,7 +1,7 @@
 'use client';
 import React from 'react';
 import { useParams } from 'next/navigation';
-import { Box } from '@mui/material';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 import DealFlowContainer from '@/components/DealFlow/Shared/DealFlowContainer';
 import {
   DealFlowProvider,
@@ -10,12 +10,34 @@ import {
 import DealFlowHeader from '@/components/DealFlow/Shared/DealFlowHeader';
 import DealFlowSidebar from '@/components/DealFlow/Shared/DealFlowSidebar';
 import Grid from '@mui/material/Grid2';
+import DealFlowGetStartedMobile from '@/components/DealFlow/GetStarted/DealFlowGetStartedMobile';
 
 const DealFlow = () => {
   const { projectSlug, dealId, step } = useParams();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   if (!projectSlug || !dealId) {
     return <div>Error: Missing project slug or deal ID</div>;
+  }
+
+  if (isMobile) {
+    return (
+      <Box
+        sx={{
+          bgcolor: 'background.paper',
+          height: '100%',
+          width: '100%',
+          minHeight: 'calc(100vh - 80px)',
+        }}
+      >
+        <Grid container spacing={2} sx={{ padding: 2 }}>
+          <Grid size={12} display="flex" justifyContent="center">
+            <DealFlowGetStartedMobile />
+          </Grid>
+        </Grid>
+      </Box>
+    );
   }
 
   return (

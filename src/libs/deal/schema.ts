@@ -36,6 +36,7 @@ export const zDealUpdateSchema = z.object({
     .nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
+  transactionId: z.string().optional(),
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
