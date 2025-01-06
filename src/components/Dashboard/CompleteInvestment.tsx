@@ -15,6 +15,7 @@ import {
   type DealWithFullOrgAndProject,
 } from '@/libs/types';
 import { useRouter } from 'next/navigation';
+import { DealFinancingType } from '@prisma/client';
 
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
@@ -123,6 +124,107 @@ const getDealProgress = (deal: DealWithOrgMembersAndProject): number => {
   return (deal.dealStage / MAX_DEAL_STAGE) * 100;
 };
 
+const InProgressDeal = ({
+  deal,
+  handleContinue,
+}: {
+  deal: DealWithOrgMembersAndProject;
+  handleContinue: (deal: DealWithOrgMembersAndProject) => void;
+}) => {
+  return (
+    <Box key={deal.id} sx={{ mb: 3 }}>
+      <ProjectCard>
+        <Avatar
+          src={getProjectPicture(deal as DealWithFullOrgAndProject)}
+          alt={deal.project.name}
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: '8px',
+          }}
+          variant="square"
+        />
+
+        <Box sx={{ flexGrow: 1 }}>
+          <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+            {deal.project.name}
+          </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'rgba(255, 255, 255, 0.7)',
+            }}
+          >
+            {getNextStepDisplay(deal as DealWithFullOrgAndProject)}
+          </Typography>
+          <StyledLinearProgress
+            variant="determinate"
+            value={getDealProgress(deal)}
+          />
+        </Box>
+
+        <ContinueButton
+          variant="contained"
+          onClick={() => handleContinue(deal)}
+        >
+          CONTINUE
+        </ContinueButton>
+      </ProjectCard>
+    </Box>
+  );
+};
+
+const CompletedDeal = ({ deal }: { deal: DealWithOrgMembersAndProject }) => {
+  return (
+    <Box key={deal.id} sx={{ mb: 3 }}>
+      <ProjectCard>
+        <Avatar
+          src={getProjectPicture(deal as DealWithFullOrgAndProject)}
+          alt={deal.project.name}
+          sx={{
+            width: 56,
+            height: 56,
+            borderRadius: '8px',
+          }}
+          variant="square"
+        />
+
+        <Box sx={{ flexGrow: 1 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+              {deal?.organization?.name}
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
+              ${deal?.investmentStats?.amount.toLocaleString()}
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+              }}
+            >
+              {deal?.organization?.ownershipType
+                ?.toLowerCase()
+                .replace(/^\w/, c => c.toUpperCase())}
+            </Typography>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'rgba(255, 255, 255, 0.7)',
+              }}
+            >
+              {deal?.investmentStats?.financingType === DealFinancingType.equity
+                ? 'Equity'
+                : 'Debt'}
+            </Typography>
+          </Box>
+        </Box>
+      </ProjectCard>
+    </Box>
+  );
+};
 const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
   const router = useRouter();
 
@@ -130,7 +232,13 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
     const nextStep = getNextStep(deal as DealWithFullOrgAndProject);
     router.push(`/dealflow/${deal.project.slug}/${deal.id}/${nextStep}`);
   };
+  if (deals.length === 0) {
+    return null;
+  }
 
+  const header = deals?.every(deal => isDealCompleted(deal.dealStage))
+    ? 'Investments'
+    : 'Complete Your Investment';
   return (
     <Card
       sx={{
@@ -148,55 +256,28 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
             mb: 2,
           }}
         >
-          Complete Your Investment
+          {header}
         </Typography>
 
         <Divider sx={{ mb: 2, borderColor: '#3C3C3C' }} />
 
         {deals
-          .filter(deal => !isDealCompleted(deal.dealStage))
           .sort((a, b) => a.id - b.id)
-          .map(deal => (
-            <Box key={deal.id} sx={{ mb: 3 }}>
-              <ProjectCard>
-                <Avatar
-                  src={getProjectPicture(deal as DealWithFullOrgAndProject)}
-                  alt={deal.project.name}
-                  sx={{
-                    width: 56,
-                    height: 56,
-                    borderRadius: '8px',
-                  }}
-                  variant="square"
-                />
-
-                <Box sx={{ flexGrow: 1 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                    {deal.project.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    sx={{
-                      color: 'rgba(255, 255, 255, 0.7)',
-                    }}
-                  >
-                    {getNextStepDisplay(deal as DealWithFullOrgAndProject)}
-                  </Typography>
-                  <StyledLinearProgress
-                    variant="determinate"
-                    value={getDealProgress(deal)}
-                  />
-                </Box>
-
-                <ContinueButton
-                  variant="contained"
-                  onClick={() => handleContinue(deal)}
-                >
-                  CONTINUE
-                </ContinueButton>
-              </ProjectCard>
-            </Box>
-          ))}
+          .map(deal =>
+            isDealCompleted(deal.dealStage) ? (
+              <CompletedDeal
+                key={deal.id}
+                deal={deal}
+                handleContinue={handleContinue}
+              />
+            ) : (
+              <InProgressDeal
+                key={deal.id}
+                deal={deal}
+                handleContinue={handleContinue}
+              />
+            )
+          )}
       </CardContent>
     </Card>
   );

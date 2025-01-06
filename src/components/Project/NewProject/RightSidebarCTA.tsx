@@ -25,16 +25,19 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
 }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const fundingPercentage = Math.round(
-    (project.investmentStats.investmentRaised /
-      project.investmentStats.investmentGoal) *
-      100
+  const fundingPercentage = Math.min(
+    100,
+    Math.round(
+      (project.investmentStats.investmentRaised /
+        project.investmentStats.investmentGoal) *
+        100
+    )
   );
 
   if (isMobile) return null;
 
   return (
-    <Card sx={{ mb: 2, position: 'sticky', top: 80 }}>
+    <Card sx={{ mb: 2, position: 'sticky', top: 80, zIndex: 1000 }}>
       <CardContent>
         <Box
           sx={{
