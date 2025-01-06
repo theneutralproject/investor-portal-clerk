@@ -68,6 +68,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
 
     // create user and address in DB
     let userOrgId: number;
+    let updatedUser: User;
     try {
         let userCreateData = {
             ...userData,
@@ -96,21 +97,25 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
         userOrgId = userOrg.id;
 
         // add orgId to user
-        const updatedUser = await prisma.user.update({ where: { id: dbUser.id }, data: { userOrgId } });
-
-        if (deal) {
-            const res = await associateContactWithDealInHubspot(hsContactId, deal.hubspotId);
-            if (isError(res)) {
-                console.error("Unable to associate user with deal in hubspot:\n", res);
-            }
-        }
-
-        return updatedUser;
-
+        updatedUser = await prisma.user.update({ where: { id: dbUser.id }, data: { userOrgId } });
     } catch (error) {
         console.error("Unable to create user in DB:\n", getErrorMessage(error));
-        throw new Error(getErrorMessage(error));
+        // check if user already exists in DB:
+        const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
+        if (!existingUser) {
+            throw new Error(getErrorMessage(error));
+        } else {
+            updatedUser = existingUser;
+        }
     }
+    if (deal) {
+        const res = await associateContactWithDealInHubspot(hsContactId, deal.hubspotId);
+        if (isError(res)) {
+            console.error("Unable to associate user with deal in hubspot:\n", res);
+        }
+    }
+
+    return updatedUser;
 }
 
 export function sanitizeUser(user: User | UserWithAddress) {
