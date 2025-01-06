@@ -15,6 +15,9 @@ const config = {
       },
     ];
   },
+  eslint: {
+    dirs: ['!src/libs/docusign/utils.ts'],
+  },
   experimental: {
     missingSuspenseWithCSRBailout: false,
     serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],

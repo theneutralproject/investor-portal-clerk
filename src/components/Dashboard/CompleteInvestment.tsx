@@ -265,11 +265,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
           .sort((a, b) => a.id - b.id)
           .map(deal =>
             isDealCompleted(deal.dealStage) ? (
-              <CompletedDeal
-                key={deal.id}
-                deal={deal}
-                handleContinue={handleContinue}
-              />
+              <CompletedDeal key={deal.id} deal={deal} />
             ) : (
               <InProgressDeal
                 key={deal.id}
