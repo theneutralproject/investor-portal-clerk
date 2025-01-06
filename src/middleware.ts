@@ -1,3 +1,4 @@
+export const runtime = 'nodejs';
 import { authMiddleware, redirectToSignUp } from '@clerk/nextjs';
 import { type NextRequest } from 'next/server';
 

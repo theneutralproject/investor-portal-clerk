@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-constructor */
+//This file needs a lot of help with the eslint rules.
+
 // https://www.youtube.com/watch?v=sqx8KbVa6Cw I followed much of this docusign tutorial
 
 import { getIronSession } from 'iron-session';
