@@ -7,7 +7,7 @@ import { DealDocumentType, type Prisma } from "@prisma/client";
 import { storageClient } from "@/libs/supabase";
 
 /**
- * can filter by email, projectName, minDealstage (default = 5), includeDealDocument (default = false)
+ * can filter by email, projectName, minDealstage (default = 5), includeTaxDocument (default = false)
  * @param request 
  * @returns 
  */
@@ -21,91 +21,93 @@ export async function GET(request: NextRequest) {
     let email: string | undefined;
     let projectName: string | undefined;
     let minDealstage: number | undefined;
-    let includeDealDocument = false;
+    let documentType = '';
     try {
         const url = new URL(request.url);
         const queryParams = new URLSearchParams(url.search);
         email = queryParams.get("email") ?? undefined;
         projectName = queryParams.get("projectName") ?? undefined;
         minDealstage = parseInt(queryParams.get("minDealstage") ?? "5");
-        includeDealDocument = queryParams.get("includeDealDocument") === "true";
+        documentType = queryParams.get("documentType") ?? '';
     }
     catch (error) {
         return errorResponse(getErrorMessage(error), 500);
     }
 
-    // return all deals if includeDealDocument is true
-    if (includeDealDocument) {
+    // return all deals if includeTaxDocument is true
+    if (documentType.toLowerCase() === "tax") {
         const allDeals = await prisma.deal.findMany({
             where: {
                 dealStage: { gte: minDealstage, lt: 6 },
             },
             include: {
-                document: { include: { uploadedBy: true } }
+                document: { 
+                    where: { type: DealDocumentType.K1 },
+                    include: { uploadedBy: true } }
             }
         });
 
-        return jsonResponse(allDeals.map(deal => {
-            return {
-                ...deal,
-                document: deal.document.filter(doc => doc.type === DealDocumentType.K1)
-            };
-        }));
+        return jsonResponse(allDeals);
     }
+    else {
+        let projectId: number | undefined;
+        if (projectName) {
+            const project = await prisma.project.findFirst({
+                where: {
+                    name: {
+                        contains: projectName,
+                        mode: "insensitive"
+                    },
+                }
+            });
 
-    let projectId: number | undefined;
-    if (projectName) {
-        const project = await prisma.project.findFirst({
-            where: {
-                name: {
-                    contains: projectName,
-                    mode: "insensitive"
+            if (!project) {
+                return errorResponse(`Project with name containing ${projectName} not found`, 404);
+            }
+            projectId = project.id;
+        }
+
+        let ownerOrgIds: number[] = [];
+        if (email) {
+            const owners = await prisma.user.findMany({
+                where: {
+                    email: {
+                        contains: email,
+                        mode: "insensitive"
+                    },
                 },
+                include: { organizationsOwned: true }
+            });
+
+            ownerOrgIds = owners.map(owner => owner.organizationsOwned.map(org => org.id)).flat();
+            if (!ownerOrgIds.length) {
+                return errorResponse(`User with email containing ${email} not found`, 404);
+            }
+        }
+
+        const where: Prisma.DealWhereInput = {
+            dealStage: { gte: minDealstage, lt: 6 },
+        };
+        if (projectId) {
+            where.projectId = projectId;
+        }
+        if (email) {
+            where.organizationId = { in: ownerOrgIds };
+        }
+
+        const deals = await prisma.deal.findMany({
+            where: where,
+            include: {
+                organization: { include: { ownedBy: true } },
+                investmentStats: true,
+                document: { 
+                    where: { type: DealDocumentType.INVESTMENT_DOCUMENT },
+                    include: { uploadedBy: true }
+                }
             }
         });
-
-        if (!project) {
-            return errorResponse(`Project with name containing ${projectName} not found`, 404);
-        }
-        projectId = project.id;
+        return jsonResponse(deals);
     }
-
-    let ownerOrgIds: number[] = [];
-    if (email) {
-        const owners = await prisma.user.findMany({
-            where: {
-                email: {
-                    contains: email,
-                    mode: "insensitive"
-                },
-            },
-            include: { organizationsOwned: true }
-        });
-
-        ownerOrgIds = owners.map(owner => owner.organizationsOwned.map(org => org.id)).flat();
-        if (!ownerOrgIds.length) {
-            return errorResponse(`User with email containing ${email} not found`, 404);
-        }
-    }
-
-    const where: Prisma.DealWhereInput = {
-        dealStage: { gte: minDealstage, lt: 6 },
-    };
-    if (projectId) {
-        where.projectId = projectId;
-    }
-    if (email) {
-        where.organizationId = { in: ownerOrgIds };
-    }
-
-    const deals = await prisma.deal.findMany({
-        where: where,
-        include: {
-            organization: { include: { ownedBy: true } },
-            investmentStats: true,
-        }
-    });
-    return jsonResponse(deals);
 }
 
 /**
