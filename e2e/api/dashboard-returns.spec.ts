@@ -52,7 +52,6 @@ test.describe("api/dashboard/returns test", () => {
             const response = await request.get('/api/dashboard/returns');
             expect(response.status()).toBe(200);
             const stats = await JSON.parse(await response.text()) as PortfolioReturnsResponse;
-            console.log("stats", stats);
             expect(stats.consolidatedSchedule.length).toBe(48);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
             expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(140000);
@@ -134,9 +133,6 @@ test.describe("api/dashboard/returns test", () => {
             expect(stats.consolidatedSchedule.length).toBe(69);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
 
-            console.log("lastScheduleEntry", lastScheduleEntry);
-            console.log(stats.portfolioStats);
-
             expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(280000);
             expect(lastScheduleEntry?.portfolioValueToDate).toBe(280000);
             expect(stats.portfolioStats?.principalInvested).toBe(200000);
@@ -190,7 +186,6 @@ test.describe("api/dashboard/returns test", () => {
             const response = await request.get('/api/dashboard/returns');
             expect(response.status()).toBe(200);
             const stats = await JSON.parse(await response.text()) as PortfolioReturnsResponse;
-            console.log("stats", stats);
             expect(stats.consolidatedSchedule.length).toBe(60);
             const lastScheduleEntry = stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
             expect(Math.floor(lastScheduleEntry?.equityDistributionCumulative ?? 0)).toBe(193006.00);

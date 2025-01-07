@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
         try {
             putData = zOrganizationMemberUpdateSchema.parse(requestBody);
         } catch (parseError) {
-            console.error("unable to parse PUT body:\n", parseError);
+            console.error("unable to parse org members PUT body:\n", getErrorMessage(parseError));
             return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
         }
 
