@@ -127,6 +127,7 @@ export const zPdfBulkUploadSchema = zfd.formData({
           "Only PDF files are allowed and each file must be less than 4MB",
       }
     ),
+  dealId: z.string().optional(),
 });
 
 export type PdfBulkUploadSchema = z.infer<typeof zPdfBulkUploadSchema>;

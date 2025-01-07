@@ -13,7 +13,7 @@ import { storageClient } from "@/libs/supabase";
  * @returns 
  */
 export async function POST(request: NextRequest) {
-    // check if they are an admin user by checkingthe auth token
+    // check if they are an admin user by checking the auth token
     const adminUser = await getAdminFromRequest(request);
     if (isError(adminUser)) {
         console.error(getErrorMessage(adminUser));
