@@ -230,8 +230,8 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
     return dealId.toString();
   } catch (error) {
-    console.error("No good hs deal making:\n", error);
-    throw new Error(getErrorMessage(error));
+    console.error("hubspot response error:\n", hsDealCreateRespBody);
+    throw new Error(getErrorMessage(getErrorMessage(error)));
   }
 }
 
