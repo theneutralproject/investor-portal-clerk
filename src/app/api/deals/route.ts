@@ -7,7 +7,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import { jsonResponse } from "@/libs/utils";
+import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { createDealForUser, updateDeal } from "@/libs/deal/utils.server";
 
 export const dynamic = "force-dynamic";
@@ -160,11 +160,12 @@ export async function PUT(request: NextRequest) {
     }
 
     let deal: DealUpdateSchema;
+    console.log("requestBody", requestBody);
     try {
       deal = zDealUpdateSchema.parse(requestBody);
 
     } catch (parseError) {
-      console.error("ERROR: unable to parse PUT body:\n", parseError);
+      console.error("ERROR: unable to parse Deal PUT body:\n", getErrorMessage(parseError));
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
 

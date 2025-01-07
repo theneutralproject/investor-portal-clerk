@@ -2,6 +2,7 @@ import { type Deal, DealOwnershipType } from "@prisma/client";
 import { APIRequestContext } from '@playwright/test';
 import prisma from "@/libs/prisma.server";
 import { OrganizationWithMembersAndAddress } from "@/libs/types";
+import { getErrorMessage } from "@/libs/utils";
 
 async function deleteHubspotDeal(hubspotId: string) {
   console.log("begin deleting hubspot deal", hubspotId);
@@ -73,12 +74,17 @@ export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
 }
 
 export async function clearAllTestDeals() {
+  console.log("begin clearing all test deals");
   const testUser = await prisma.user.findFirst({ where: { email: `${process.env.E2E_CLERK_USER_USERNAME}` } });
   if (!testUser) { throw new Error("test user not found in db"); }
   //Find all orgs owned by the test user
   const orgs = await prisma.organization.findMany({ where: { ownerId: testUser.id } });
   //Delete all deals associated with each org
   for (const org of orgs) {
+    try{
     await prisma.deal.deleteMany({ where: { organizationId: org.id } });
+    } catch (e) {
+      console.error("could not delete deals in db", getErrorMessage(e));
+    }
   }
 }
