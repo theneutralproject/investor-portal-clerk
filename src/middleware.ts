@@ -15,8 +15,8 @@ export default authMiddleware({
       '/terms',
       '/support',
       '/dashboard',
-      '/api/public/projects',
       '/projects/(.*)',
+      '/api/public/projects',
     ];
 
     // Use exact path matching or proper pattern matching
