@@ -1,4 +1,3 @@
-'use server';
 import type { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
 
@@ -15,6 +14,9 @@ class ValidationError extends Error {
     this.name = 'ValidationError';
   }
 }
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 // Validate and extract URL parameters
 function extractParams(request: NextRequest): DocuSignParams {

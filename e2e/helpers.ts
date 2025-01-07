@@ -1,7 +1,8 @@
 import { type Deal, DealOwnershipType } from '@prisma/client';
-import { APIRequestContext } from '@playwright/test';
+import { type APIRequestContext } from '@playwright/test';
 import prisma from '@/libs/prisma.server';
-import { OrganizationWithMembersAndAddress } from '@/libs/types';
+import { type OrganizationWithMembersAndAddress } from '@/libs/types';
+import { getErrorMessage } from '@/libs/utils';
 
 async function deleteHubspotDeal(hubspotId: string) {
   console.log('begin deleting hubspot deal', hubspotId);
@@ -66,6 +67,7 @@ export async function resetOrgInDb(
       },
     }
   );
+  /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */
   const body: OrganizationWithMembersAndAddress = await JSON.parse(
     await response.text()
   );
@@ -108,6 +110,10 @@ export async function clearAllTestDeals() {
   });
   //Delete all deals associated with each org
   for (const org of orgs) {
-    await prisma.deal.deleteMany({ where: { organizationId: org.id } });
+    try {
+      await prisma.deal.deleteMany({ where: { organizationId: org.id } });
+    } catch (e) {
+      console.error('could not delete deals in db', getErrorMessage(e));
+    }
   }
 }

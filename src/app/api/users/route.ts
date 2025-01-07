@@ -8,7 +8,6 @@ import {
   type UserUpdateSchema,
   zUserUpdateSchema,
 } from '@/libs/user/schema';
-import { updateHubspotContact } from '@/libs/hubspot/utils';
 import { sanitizeUser } from '@/libs/user/utils';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
@@ -91,9 +90,18 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-      await updateHubspotContact(hsUpdateData);
-    } catch (hsError) {
-      console.log(hsError);
+      putData = zUserUpdateSchema.parse(requestBody);
+    } catch (parseError) {
+      console.error(
+        'ERROR: unable to parse users PUT body:\n',
+        getErrorMessage(parseError)
+      );
+      return jsonResponse(
+        {
+          error: `Input data malformatted: \n${(parseError as Error).message}`,
+        },
+        400
+      );
     }
     try {
       await clerkClient.users.updateUser(clerkUser.id, clerkUpdate);
