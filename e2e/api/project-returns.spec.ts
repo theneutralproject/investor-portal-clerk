@@ -1,6 +1,5 @@
 import {
   ProjectReturnsResponse,
-  ReturnsDateObject,
 } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { DealFinancingType } from '@prisma/client';
@@ -25,7 +24,7 @@ test.describe('api/project/returns test', () => {
       if (!lastScheduleEntry) {
         throw new Error('lastScheduleEntry is undefined');
       }
-      console.log('stats', stats);
+      
       console.log(lastScheduleEntry);
       expect(lastScheduleEntry.equityAccruedPreferredReturn).toBe(50000);
       expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(193006);
@@ -57,14 +56,14 @@ test.describe('api/project/returns test', () => {
       const resp = (await JSON.parse(
         await response.text()
       )) as ProjectReturnsResponse;
-      const { schedule, stats } = resp;
+      const { schedule } = resp;
       expect(schedule.length).toBe(48);
       const lastScheduleEntry = schedule[schedule.length - 1];
       if (!lastScheduleEntry) {
         throw new Error('lastScheduleEntry is undefined');
       }
       console.log('lastScheduleEntry', lastScheduleEntry);
-      console.log('stats', stats);
+      
       expect(lastScheduleEntry.equityDistributionsCurrent).toBe(0);
       expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(140000);
       expect(lastScheduleEntry.debtDistributionsCurrent).toBe(102500);
