@@ -6,6 +6,6 @@ test.describe('authentication view tests', () => {
 
     await expect(page.getByText('Offerings')).toBeVisible();
     await expect(page.getByText('The Edison')).toBeVisible();
-    await expect(page.getByText('Welcome, User')).toBeVisible();
+    await expect(page.getByText('Welcome to Neutral')).toBeVisible();
   });
 });
