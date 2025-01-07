@@ -5,8 +5,7 @@
       "use": "@vercel/node",
       "config": {
         "nodeVersion": "20.18"
-      },
-      "buildCommand": "next build"
+      }
     }
   ]
 }
