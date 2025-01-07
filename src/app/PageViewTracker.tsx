@@ -1,19 +1,12 @@
-// eslint-disable-next-line
-// @ts-nocheck
 'use client';
 import { usePathname, useSearchParams } from 'next/navigation';
-import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
 import { useEffect } from 'react';
+import posthog from 'posthog-js';
 
-if (typeof window !== 'undefined') {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-  });
-}
-export function CSPostHogProvider({ children }) {
+function PageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+
   useEffect(() => {
     if (pathname) {
       let url = `${window.location.origin}${pathname}`;
@@ -23,5 +16,8 @@ export function CSPostHogProvider({ children }) {
       posthog.capture('$pageview', { current_url: url });
     }
   }, [pathname, searchParams]);
-  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
+
+  return null;
 }
+
+export default PageViewTracker;

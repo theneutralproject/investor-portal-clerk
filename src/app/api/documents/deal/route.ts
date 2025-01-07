@@ -1,10 +1,11 @@
-'use server';
 import prisma from '@/libs/prisma.server';
 import { getSupabaseDownloadUrl } from '@/libs/supabase';
 import { jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs';
 import { DealDocumentType } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 /**
  *
  * @param request Get documents for a deal

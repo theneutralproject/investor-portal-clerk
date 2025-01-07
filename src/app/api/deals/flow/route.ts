@@ -1,10 +1,12 @@
-'use server';
 import { type NextRequest } from 'next/server';
 import { currentUser } from '@clerk/nextjs';
 import { errorResponse, jsonResponse } from '@/libs/utils';
 import { z } from 'zod';
 import type { DealFinancingType, Organization } from '@prisma/client';
 import prisma from '@/libs/prisma.server';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const QuerySchema = z.object({
   projectSlug: z.string().min(1),
@@ -138,7 +140,7 @@ export async function GET(request: NextRequest) {
       dbUser.id,
       deal.id
     );
-    
+
     return jsonResponse({
       project: {
         ...project,

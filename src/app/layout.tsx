@@ -12,9 +12,9 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 import ChatInterface from '@/components/ChatInterface';
-import { CSPostHogProvider } from './providers';
 import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
-
+import PageViewTracker from './PageViewTracker';
+import CSPostHogProvider from './CSPostHogProvider';
 const inter = Inter({
   subsets: ['latin'],
 });
@@ -35,6 +35,7 @@ export default function RootLayout({
       <ClerkProvider>
         <html lang="en">
           <body className={inter.className}>
+            <PageViewTracker />
             <NeutralQueryProvider>
               <NeutralThemeProvider>
                 <DashboardProvider>
