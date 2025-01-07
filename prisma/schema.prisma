@@ -16,21 +16,24 @@ model User {
   clerkId                      String?                @unique
   role                         Role                   @default(USER)
   email                        String                 @unique
-  firstName                    String /// @encrypted
-  lastName                     String /// @encrypted
+  /// @encrypted
+  firstName                    String
+  /// @encrypted
+  lastName                     String
   phoneNumber                  String?
   hubspotId                    String
-  ssn                          String?                @unique /// @encrypted?mode=strict
-  dateOfBirth                  DateTime?
+  /// @encrypted?mode=strict
+  ssn                          String?                @unique
   userOrgId                    Int?                   @unique
   referralSource               String?
-  documentEvents               DocumentEvent[]
+  dateOfBirth                  DateTime?
   address                      Address?
-  organizationMember           Member[]
-  organizationsOwned           Organization[]         @relation(name: "userOrg")
   DealDocumentUploaded         DealDocument[]
-  OrganizationDocumentUploaded OrganizationDocument[]
+  documentEvents               DocumentEvent[]
   DocusignEvent                DocusignEvent[]
+  organizationMember           Member[]
+  organizationsOwned           Organization[]         @relation("userOrg")
+  OrganizationDocumentUploaded OrganizationDocument[]
 }
 
 model Deal {
@@ -42,16 +45,16 @@ model Deal {
   /// the project, i.e. Edison LLC
   investmentEntity          String
   organizationId            Int
-  organization              Organization               @relation(fields: [organizationId], references: [id], onDelete: Restrict)
-  project                   Project                    @relation(fields: [projectId], references: [id], onDelete: Restrict)
-  document                  DealDocument[]
-  investmentStats           DealInvestmentStats?
-  accreditationVerification AccreditationVerification?
   closingDate               DateTime?
   signaturesCompletedDate   DateTime?
   dateFundsSent             DateTime?
   paymentMethod             PaymentMethod?
   paymentReferenceId        String?
+  accreditationVerification AccreditationVerification?
+  organization              Organization               @relation(fields: [organizationId], references: [id])
+  project                   Project                    @relation(fields: [projectId], references: [id])
+  document                  DealDocument[]
+  investmentStats           DealInvestmentStats?
   DocusignEvent             DocusignEvent[]
 }
 
@@ -63,62 +66,67 @@ model DealInvestmentStats {
   financingType         DealFinancingType @default(equity)
   unitType              DealUnitType      @default(AUNIT)
   ownershipType         DealOwnershipType @default(INDIVIDUAL)
-  debtInterestRatePerc  Float             @default(0.0)
-  debtTermMonthsMin     Int               @default(0)
-  debtTermMonthsMax     Int               @default(0)
-  debtPaymentFreqMonths Int               @default(0)
-  debtPaymentFreq       String            @default("")
-  equityTermMonths      Int               @default(0)
-  equityPreferredReturn Float             @default(0.0)
-  shareOfEquity         Float             @default(0.0)
   numberAUnits          Float             @default(0.0)
   numberCUnits          Float             @default(0.0)
-  deal                  Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  shareOfEquity         Float             @default(0.0)
+  debtInterestRatePerc  Float             @default(0.0)
+  debtPaymentFreq       String            @default("")
+  debtTermMonthsMax     Int               @default(0)
+  debtTermMonthsMin     Int               @default(0)
+  equityTermMonths      Int               @default(0)
+  debtPaymentFreqMonths Int               @default(0)
+  equityPreferredReturn Float             @default(0.0)
+  deal                  Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade)
 }
 
 model Organization {
   id             Int                    @id @default(autoincrement())
-  name           String /// @encrypted
+  /// @encrypted
+  name           String
   ownerId        Int
-  tin            String? /// @encrypted?mode=strict
+  /// @encrypted?mode=strict
+  tin            String?
   dateOfCreation DateTime?
   juristication  String?
-  isPrimary      Boolean                @default(false) /// used to determine which organization is the primary individual one for the user
   ownershipType  DealOwnershipType      @default(INDIVIDUAL)
-  deals          Deal[]
+  /// used to determine which organization is the primary individual one for the user
+  isPrimary      Boolean                @default(false)
   address        Address?
-  document       OrganizationDocument[]
-  ownedBy        User                   @relation(name: "userOrg", fields: [ownerId], references: [id], onDelete: Cascade)
+  deals          Deal[]
   members        Member[]
+  ownedBy        User                   @relation("userOrg", fields: [ownerId], references: [id], onDelete: Cascade)
+  document       OrganizationDocument[]
 }
 
 model Member {
   id             Int            @id @default(autoincrement())
   userId         Int
   organizationId Int
-  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   type           MembershipType
   title          String?
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model AccreditationVerification {
   id         Int                    @id @default(autoincrement())
-  basis      VerificationBasis
-  method     VerificationMethod
   dealId     Int                    @unique
-  deal       Deal                   @relation(fields: [dealId], references: [id])
   verifierId Int?                   @unique
+  method     VerificationMethod
+  basis      VerificationBasis
+  deal       Deal                   @relation(fields: [dealId], references: [id])
   verifier   AccreditationVerifier? @relation(fields: [verifierId], references: [id])
 }
 
 model AccreditationVerifier {
   id                        Int                        @id @default(autoincrement())
-  firstName                 String /// @encrypted?mode=strict
-  lastName                  String /// @encrypted?mode=strict
-  email                     String
+  /// @encrypted?mode=strict
+  firstName                 String
+  /// @encrypted?mode=strict
+  lastName                  String
   title                     String?
   phoneNumber               String?
+  email                     String
   AccreditationVerification AccreditationVerification?
 }
 
@@ -126,27 +134,27 @@ model AccreditationVerifier {
 model DealDocument {
   id           Int              @id @default(autoincrement())
   name         String
-  path         String
   type         DealDocumentType
   dealId       Int
   dateCreated  DateTime         @default(now())
-  deal         Deal             @relation(fields: [dealId], references: [id])
-  uploadedBy   User             @relation(fields: [uploadedById], references: [id])
+  path         String
   uploadedById Int
   taxYear      Int?
+  deal         Deal             @relation(fields: [dealId], references: [id])
+  uploadedBy   User             @relation(fields: [uploadedById], references: [id])
 }
 
 /// used for business verification letters and such
 model OrganizationDocument {
   id             Int          @id @default(autoincrement())
   name           String
-  path           String
-  key            String       @default("")
   organizationId Int
   dateCreated    DateTime     @default(now())
+  path           String
+  key            String       @default("")
+  uploadedById   Int
   organization   Organization @relation(fields: [organizationId], references: [id])
   uploadedBy     User         @relation(fields: [uploadedById], references: [id])
-  uploadedById   Int
 }
 
 model Project {
@@ -164,9 +172,9 @@ model Project {
   documents          ProjectDocument[]
   investmentStats    ProjectInvestmentStats?
   milestones         ProjectMilestones?
+  projectPaymentInfo ProjectPaymentInfo[]
   pictures           ProjectPicture[]
   propertyStats      ProjectPropertyStats?
-  projectPaymentInfo ProjectPaymentInfo[]
 }
 
 model ProjectPropertyStats {
@@ -184,26 +192,28 @@ model ProjectInvestmentStats {
   cUnitThresholdAmount        Float   @default(200000.0)
   debtMinInvestment           Int     @default(5000)
   debtPaymentFreq             String  @default("quarterly")
-  debtPaymentFreqMonths       Int     @default(3)
-  debtTermMonthsMax           Int     @default(48)
-  debtTermMonthsMin           Int     @default(48)
   equityIRR                   Float   @default(0.0)
   equityMinInvestment         Int     @default(5000)
   equityPaymentFreq           String  @default("quarterly")
-  equityPaymentFreqMonths     Int     @default(3)
   equityTermMonths            Int     @default(60)
-  equityPreferredReturn       Float   @default(0.1)
   investmentGoal              Float   @default(0.0)
   investmentRaised            Float   @default(0.0)
-  interestRateMin             Float   @default(10.0)
-  interestRateMax             Float   @default(12.0)
-  interestRateDollarThreshold Float   @default(250000)
   projectId                   Int     @unique
   targetEquityMultiple        Float   @default(0.0)
   totalAUnitReturn            Float   @default(0.0)
   totalCUnitReturn            Float   @default(0.0)
-  boolEquity                  Boolean @default(true) /// if the project is offering equity
-  boolDebt                    Boolean @default(true) /// if the project is offering debt
+  interestRateDollarThreshold Float   @default(250000)
+  interestRateMax             Float   @default(12.0)
+  interestRateMin             Float   @default(10.0)
+  equityPreferredReturn       Float   @default(0.1)
+  debtPaymentFreqMonths       Int     @default(3)
+  debtTermMonthsMax           Int     @default(48)
+  debtTermMonthsMin           Int     @default(48)
+  equityPaymentFreqMonths     Int     @default(3)
+  /// if the project is offering debt
+  boolDebt                    Boolean @default(true)
+  /// if the project is offering equity
+  boolEquity                  Boolean @default(true)
   project                     Project @relation(fields: [projectId], references: [id])
 }
 
@@ -211,8 +221,10 @@ model ProjectPaymentInfo {
   id               Int     @id @default(autoincrement())
   projectId        Int
   investmentEntity String
-  accountNumber    String /// @encrypted
-  routingNumber    String /// @encrypted
+  /// @encrypted
+  accountNumber    String
+  /// @encrypted
+  routingNumber    String
   project          Project @relation(fields: [projectId], references: [id])
 }
 
@@ -271,17 +283,17 @@ model DocumentEvent {
 }
 
 model DocusignEvent {
-  id                 Int       @id @default(autoincrement())
-  envelopeId         String    @unique
-  templateId         String
-  userId             Int
-  dealId             Int
-  dateSent           DateTime?
-  dateCompleted      DateTime?
-  allSignaturesCompleted Boolean   @default(false)
-  investorSignatureCompleted Boolean @default(false)
-  user               User      @relation(fields: [userId], references: [id])
-  deal               Deal      @relation(fields: [dealId], references: [id])
+  id                         Int       @id @default(autoincrement())
+  envelopeId                 String    @unique
+  templateId                 String
+  userId                     Int
+  dealId                     Int
+  dateSent                   DateTime?
+  dateCompleted              DateTime?
+  allSignaturesCompleted     Boolean   @default(false)
+  investorSignatureCompleted Boolean   @default(false)
+  deal                       Deal      @relation(fields: [dealId], references: [id])
+  user                       User      @relation(fields: [userId], references: [id])
 }
 
 model Address {
@@ -291,10 +303,10 @@ model Address {
   zipcode        String
   state          String
   country        String        @default("United States")
-  organization   Organization? @relation(onDelete: Cascade, fields: [organizationId], references: [id])
   organizationId Int?          @unique
-  user           User?         @relation(onDelete: Cascade, fields: [userId], references: [id])
   userId         Int?          @unique
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum DealDocumentType {
