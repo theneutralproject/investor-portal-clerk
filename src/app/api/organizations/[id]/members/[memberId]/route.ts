@@ -106,10 +106,12 @@ export async function PUT(request: NextRequest) {
     if (!memberId || !isNumber(memberId)) {
       throw new Error('userId is required in url');
     }
+
     const { user: dbUser, organization } = await getUserAndOrg(request, 2);
     if (!organization) {
       return jsonResponse({ error: 'Organization not found' }, 404);
     }
+
     if (!dbUser) {
       return jsonResponse({ error: 'User not found' }, 404);
     }

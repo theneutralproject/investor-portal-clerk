@@ -224,7 +224,6 @@ export async function POST() {
     console.log(allDBDeals.map(deal => deal.hubspotId));
     console.log('extraDBDeals:', extraDBDeals.length);
     console.log(extraDBDeals.map(deal => deal.hubspotId));
-    // return jsonResponse({ missingHubspotDeals, allDBDeals }, 200);
 
     const newDealsArr: DealWithInvestmentStats[] = [];
     // loop through deals and create missing users and deals

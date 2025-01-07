@@ -33,8 +33,11 @@ test.describe('api/dashboard/returns test', () => {
       const dealCreateResponse = await request.post('/api/deals', {
         data: debtDealData1,
       });
+      try{
       debtDeal1 = await JSON.parse(await dealCreateResponse.text());
-
+      } catch(e){
+        console.error('Error parsing response from creating debtDeal1', e);
+      }
       // the put deal route configures the investment stats in the backend.
       const response = await request.put('/api/deals', {
         data: {
@@ -60,7 +63,7 @@ test.describe('api/dashboard/returns test', () => {
       const stats = (await JSON.parse(
         await response.text()
       )) as PortfolioReturnsResponse;
-      console.log('stats', stats);
+      
       expect(stats.consolidatedSchedule.length).toBe(48);
       const lastScheduleEntry =
         stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
@@ -229,7 +232,7 @@ test.describe('api/dashboard/returns test', () => {
       const stats = (await JSON.parse(
         await response.text()
       )) as PortfolioReturnsResponse;
-      console.log('stats', stats);
+      
       expect(stats.consolidatedSchedule.length).toBe(60);
       const lastScheduleEntry =
         stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
