@@ -39,6 +39,16 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    //If no financing type is provided, return all documents
+    if (financingType === '' || !financingType) {
+      const documents = await prisma.projectDocument.findMany({
+        where: { projectId: projectId },
+      });
+      return new Response(JSON.stringify(documents), {
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const isDealFinancingType = Object.values(DealFinancingType).includes(
       financingType as DealFinancingType
     );
