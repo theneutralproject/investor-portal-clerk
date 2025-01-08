@@ -1,6 +1,6 @@
 import { createDocumentEntry, getAdminFromRequest } from "@/libs/admin/utils";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { isError } from "lodash";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { storageClient } from "@/libs/supabase";
@@ -28,31 +28,35 @@ export async function POST(request: NextRequest) {
         }
 
         for (const file of files) {
-            // @ts-expect-error will fix later
-            const { name, type } = file;
-            const { data, error } = await storageClient.from('deal-documents').upload(
-                `deal-${dealId}/${name}`, file,
-                { contentType: type }
-            )
+            if (file instanceof File) {
+                const { name, type } = file;
+                const { data, error } = await storageClient.from('deal-documents').upload(
+                    `deal-${dealId}/${name}`, file,
+                    { contentType: type }
+                )
 
-            if (error) {
-                console.error(`unable to upload file ${file}:`, getErrorMessage(error));
-                return jsonResponse(getErrorMessage(error), 500);
-            }
+                if (error) {
+                    console.error(`unable to upload file ${name}:`, getErrorMessage(error));
+                    return jsonResponse(getErrorMessage(error), 500);
+                }
 
-            try {
-                await createDocumentEntry(
-                    "deal",
-                    parseInt(dealId),
-                    name,
-                    data.path,
-                    "",
-                    adminUser.id,
-                    DealDocumentType.INVESTMENT_DOCUMENT
-                );
-            } catch (error) {
-                console.error('unable to createDocumentEntry:', getErrorMessage(error));
-                return jsonResponse(getErrorMessage(error), 500);
+                try {
+                    await createDocumentEntry(
+                        "deal",
+                        parseInt(dealId),
+                        name,
+                        data.path,
+                        "",
+                        adminUser.id,
+                        DealDocumentType.INVESTMENT_DOCUMENT
+                    );
+                } catch (error) {
+                    console.error('unable to createDocumentEntry:', getErrorMessage(error));
+                    return jsonResponse(getErrorMessage(error), 500);
+                }
+            } else {
+                console.error('invalid file:', file);
+                return jsonResponse('invalid file', 400);
             }
         }
         return jsonResponse({ message: `${files.length} files uploaded successfully` });
