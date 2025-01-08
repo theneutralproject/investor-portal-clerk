@@ -1,6 +1,6 @@
 export const runtime = 'nodejs';
 import { authMiddleware, redirectToSignUp } from '@clerk/nextjs';
-import { type NextRequest } from 'next/server';
+import { type NextRequest, NextResponse } from 'next/server';
 
 export default authMiddleware({
   ignoredRoutes: [
@@ -14,6 +14,8 @@ export default authMiddleware({
     const publicRoutes = [
       '/terms',
       '/support',
+      '/learn',
+      '/contact',
       '/dashboard',
       '/projects/(.*)',
       '/api/public/projects',
@@ -40,6 +42,11 @@ export default authMiddleware({
       }afterauth=true`;
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return redirectToSignUp({ returnBackUrl: returnBackUrl });
+    }
+
+    //Redirect to dashboard if user is logged in and on /login page
+    if (auth.userId && _req.nextUrl.pathname === '/login') {
+      return NextResponse.redirect(new URL('/dashboard', _req.url));
     }
   },
 });
