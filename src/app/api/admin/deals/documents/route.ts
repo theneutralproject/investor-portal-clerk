@@ -104,7 +104,7 @@ export async function GET(request: NextRequest) {
             downloadUrl: string;
         }
 
-        const fullDocsPromise = await dealDocs.map(async doc => {
+        const fullDocsPromise = dealDocs.map(async doc => {
             const fullDoc = doc as docWithUrl;
             const storageRes = await storageClient.from('deal-documents').createSignedUrl(doc.path, 60 * 60 * 24);
             fullDoc.downloadUrl = storageRes.data?.signedUrl ?? '';
