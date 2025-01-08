@@ -1,19 +1,14 @@
 import prisma from "@/libs/prisma.server";
 import { currentUser } from "@clerk/nextjs/server";
 import type { NextRequest } from "next/server";
-import { isError } from "lodash";
-import { DealFinancingType, type DealInvestmentStats } from "@prisma/client";
 import {
   type DealCreateSchema,
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
 } from "../../../libs/deal/schema";
-import { initDealPropsForProject, createHubspotDeal } from "@/libs/hubspot/utils";
-import { jsonResponse } from "@/libs/utils";
-import { updateDeal } from "@/libs/deal/utils.server";
-import { getInvestmentEntity } from "@/libs/deal/utils";
-import { populateDealDebtStats, populateDealEquityStats } from "@/libs/deal/utils.server";
+import { getErrorMessage, jsonResponse } from "@/libs/utils";
+import { createDealForUser, updateDeal } from "@/libs/deal/utils.server";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -36,6 +31,7 @@ export async function GET(request: NextRequest) {
     if (!clerkUser) {
       return jsonResponse({ error: "User not found" }, 404);
     }
+    console.log("clerkUser", clerkUser.id);
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: clerkUser.id },
     });
@@ -108,17 +104,6 @@ export async function POST(request: NextRequest) {
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
 
-    const project = await prisma.project.findUnique({
-      where: { id: dealData.projectId },
-      include: { investmentStats: true },
-    });
-    if (!project?.investmentStats || !project?.equityReturnsFile) {
-      return jsonResponse(
-        { error: `Project with id ${dealData.projectId} not found in DB` },
-        400
-      );
-    }
-
     // only create a deal if the user is the owner of the organization
     if (dealData.organizationId) {
       const org = await prisma.organization.findFirst({
@@ -150,79 +135,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    dealData.transactionId = `${project.name}-${dbUser.lastName}-${Math.floor(
-      Math.random() * 900 + 100
-    )}`
-      .replace(/\s/g, "")
-      .toUpperCase();
-
-    if (!dealData.financingType) dealData.financingType = DealFinancingType.equity;
-    let minInvestmentAmount = 5000;
-    if (dealData.financingType === DealFinancingType.equity) minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
-    else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
-
-    if (!dealData.amount) dealData.amount = minInvestmentAmount;
-
-    let newInvestmentStats = {
-      amount: dealData.amount,
-      financingType: dealData.financingType,
-    } as DealInvestmentStats;
-
-    const { investmentStats, ...projectData } = project;
-    if (dealData.financingType === DealFinancingType.equity) {
-      try {
-        newInvestmentStats = await populateDealEquityStats(newInvestmentStats, { ...projectData, investmentStats });
-      } catch (e) {
-        throw e;
-      }
-    }
-    else {
-      newInvestmentStats = populateDealDebtStats(newInvestmentStats, { ...projectData, investmentStats });
-    }
-
-    const hsDeal = initDealPropsForProject(project.name, dbUser, dealData);
-    if (!hsDeal) {
-      return jsonResponse(
-        {
-          error: "Deal cannot be created. Project not yet supported in Hubspot",
-        },
-        400
-      );
-    }
-
-    const hsDealId = await createHubspotDeal(
-      hsDeal,
-      String(dbUser.hubspotId)
-    );
-    if (isError(hsDealId)) {
-      return jsonResponse({ error: "HS Deal cannot be created." }, 400);
-    }
-
-    const deal = await prisma.deal.create({
-      data: {
-        organizationId: dealData.organizationId,
-        projectId: dealData.projectId,
-        dealStage: dealData.dealStage ?? 0,
-        hubspotId: hsDealId.toString(),
-        transactionId: dealData.transactionId,
-        investmentEntity:
-          getInvestmentEntity(project.name, dealData.financingType) ?? "",
-        investmentStats: {
-          create:
-            newInvestmentStats
-          //   {
-          //   amount: dealData.amount,
-          //   financingType: dealData.financingType,
-          //   unitType,
-          //   shareOfEquity,
-          //   numberAUnits,
-          //   numberCUnits,
-          //   /**all other fields have postgresql defaults */
-          // }
-        }
-      },
-      include: { investmentStats: true }
-    });
+    const deal = await createDealForUser(dealData, dbUser);
 
     return jsonResponse(deal, 201);
   } catch (error) {
@@ -242,16 +155,17 @@ export async function PUT(request: NextRequest) {
 
     const requestBody = await request.json() as DealUpdateSchema;
     // parse the date strings into Date objects for zod to validate
-    if(requestBody.closingDate) {
+    if (requestBody.closingDate) {
       requestBody.closingDate = new Date(Date.parse(requestBody.closingDate.toString()));
     }
 
     let deal: DealUpdateSchema;
+    console.log("requestBody", requestBody);
     try {
       deal = zDealUpdateSchema.parse(requestBody);
 
     } catch (parseError) {
-      console.error("ERROR: unable to parse PUT body:\n", parseError);
+      console.error("ERROR: unable to parse Deal PUT body:\n", getErrorMessage(parseError));
       return jsonResponse({ error: "Input data malformatted" }, 400);
     }
 

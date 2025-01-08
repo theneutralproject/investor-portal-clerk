@@ -1,4 +1,4 @@
-import {  getAdminFromRequest, matchDealWithPdf } from "@/libs/admin/utils";
+import { getAdminFromRequest, matchDealWithPdf } from "@/libs/admin/utils";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
@@ -13,13 +13,13 @@ import { storageClient } from "@/libs/supabase";
  * @returns 
  */
 export async function POST(request: NextRequest) {
-    // check if they are an admin user by checkingthe auth token
+    // check if they are an admin user by checking the auth token
     const adminUser = await getAdminFromRequest(request);
     if (isError(adminUser)) {
         console.error(getErrorMessage(adminUser));
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
-    
+
     // get all deals
     const deals = (await prisma.deal.findMany({
         include: {
@@ -35,11 +35,11 @@ export async function POST(request: NextRequest) {
     try {
         const formData = await request.formData();
         const { files } = zPdfBulkUploadSchema.parse(formData);
-        const {data, error } = await storageClient.from(`deal-documents`).list('tempPdfStorage');
+        const { data, error } = await storageClient.from(`deal-documents`).list('tempPdfStorage');
         if (isError(error)) {
             console.error(getErrorMessage(error));
         }
-        if(data?.length) {
+        if (data?.length) {
             console.log("Deleting all files in tempPdfStorage folder");
             console.log(data.map(file => file.name));
             const deleteResult = await storageClient.from(`deal-documents`).remove(data.map(file => `tempPdfStorage/${file.name}`));
@@ -52,28 +52,33 @@ export async function POST(request: NextRequest) {
 
         const retArr = [] as (MatchResponseObject)[];
         for (const file of files) {
-            const { error } = await storageClient
-            .from(`deal-documents`)
-            // @ts-expect-error will fix later
-            .upload(`tempPdfStorage/${file.name}`, file, {
+            if (file instanceof File) {
+                const { name, type } = file;
+                const { error } = await storageClient
+                    .from(`deal-documents`)
+                    .upload(
+                        `tempPdfStorage/${name}`,
+                        file,
+                        { contentType: type }
+                    );
+                if (error) {
+                    console.error(`unable to upload file ${name} to temp storage:`);
+                    console.error(error.message);
+                    console.error(error);
+                    return jsonResponse({ error: getErrorMessage(error) }, 500);
+                }
+
+                // match the files to the correct deal
                 // @ts-expect-error will fix later
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-                contentType: file.type
-            });
-            if(error) {
-                console.error("unable to upload file to temp storage:");
-                console.error(error.message);
-                console.error(error);
-                return jsonResponse({ error: getErrorMessage(error) }, 500);
+                const match = await matchDealWithPdf(deals, file);
+                retArr.push(match);
+            } else {
+                console.error("file is not instance of File");
+                return jsonResponse({ error: "file is not instance of File" }, 400);
             }
 
-            // match the files to the correct deal
-            // @ts-expect-error will fix later
-            const match = await matchDealWithPdf(deals, file);
-            retArr.push(match);
-        };
-
-        return jsonResponse(retArr);
+            return jsonResponse(retArr);
+        }
     }
     catch (err) {
         console.error(err);

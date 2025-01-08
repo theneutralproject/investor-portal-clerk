@@ -1,88 +1,156 @@
 import { type User, DealFinancingType } from "@prisma/client";
 import axios from "axios";
-import { type HubspotContact, hubspotContactApiResponse, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema, type HsDealCreateResponse } from "./schema";
+import { type HubspotContactCreateUpdateSchema, type HubspotDealPropertiesCollection, zHsDealCreateResponse, type HsDealDocsAccessedUpdateSchema, type HubspotDealUpdate, zHsDealSearchResultsSchema, type HsDealCreateResponse } from "./schema";
 import type { DealUpdateSchema, DealCreateSchema } from "../deal/schema";
 import { getErrorMessage } from "../utils";
 import { getInvestmentEntity } from "../deal/utils";
 import { ProjectName } from "../schema";
 import { Client } from "@hubspot/api-client";
-import { FilterOperatorEnum, type PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/companies";
+import { FilterOperatorEnum, type SimplePublicObject, type PublicObjectSearchRequest } from "@hubspot/api-client/lib/codegen/crm/deals";
 
-const hubspotClient = new Client({"accessToken":process.env.HUBSPOT_ACCESS_TOKEN});
+const hubspotClient = new Client({ "accessToken": process.env.HUBSPOT_ACCESS_TOKEN });
 
-export async function createHubspotContact(hubspotContact: HubspotContact) {
+export async function createHubspotContact(hubspotContact: HubspotContactCreateUpdateSchema) {
+
+  if (!hubspotContact.email) {
+    throw new Error("email is required to create a contact in hubspot")
+  }
+
+  // check if contact already exists. if yes, update it
+  const hsSearchResult = await hubspotClient.crm.contacts.searchApi.doSearch({
+    limit: 1,
+    properties: ["hs_object_id"],
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: "email",
+            operator: FilterOperatorEnum.Eq,
+            value: hubspotContact.email
+          }
+        ]
+      }
+    ]
+  });
+
+  if (hsSearchResult.total > 0) {
+    console.log("Contact already exists. Updating it instead");
+    const hsId = hsSearchResult.results[0]?.id.toString();
+    console.log("hsId", hsId);
+    if (!hsId) {
+      console.error("ERROR: unable to get Hubspot contact id");
+      throw new Error("unable to get hubspot contact id");
+    }
+    hubspotContact.hubspotId = hsId;
+    try {
+      await updateHubspotContact(hubspotContact);
+      return hsId;
+    } catch (error) {
+      console.error("Unable to update user in hubspot:\n", error);
+      throw new Error(getErrorMessage(error));
+    }
+  }
+
+  console.log("Creating new contact in hubspot");
   const signupDate = new Date(new Date().setUTCHours(0, 0, 0, 0))
     .getTime()
     .toString();
-  hubspotContact.properties.push({
-    property: "date_signed_up",
-    value: signupDate,
-  });
-  if (!hubspotContact.email) {
-    return new Error("email is required to create a contact in hubspot")
+
+  hubspotContact.properties.date_signed_up = signupDate;
+  hubspotContact.properties.email = hubspotContact.email;
+  try {
+    const hubspotCreateResponse = await hubspotClient.crm.contacts.basicApi.create(hubspotContact);
+    return hubspotCreateResponse.id;
+  } catch (error) {
+    console.error("Unable to create user in hubspot:\n", error);
+    throw new Error(getErrorMessage(error));
   }
-  return await fetch(
-    `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/createOrUpdate/email/${hubspotContact.email}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(hubspotContact),
-    }
-  ).then(async (response) => {
-    if (response.status >= 300) {
-      console.error("ERROR: unable to update Hubspot contact:\n", response.statusText);
-      console.log("response", response);
-      return new Error("unable to update hubspot contact");
-    }
-
-    try {
-      // eslint-disable-next-line
-      const resJson = await response.json();
-      const hsRes = hubspotContactApiResponse.parse(resJson)
-      return hsRes;
-    } catch (parseError) {
-      console.error("ERROR: unable to parse HS response:\n", parseError);
-      return new Error("unable to parse HS response")
-    }
-
-  }).catch((fetchError) => {
-    console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
-    return new Error("unable to update hubspot contact")
-  })
 };
 
-export async function updateHubspotContact(hubspotContact: HubspotContact) {
+export async function updateHubspotContact(hubspotContact: HubspotContactCreateUpdateSchema) {
   if (!hubspotContact.hubspotId) {
-    return new Error("hubspotId is required to update a contact in hubspot")
+    throw new Error("hubspotId is required to update a contact in hubspot")
   }
-  const hsRes = await fetch(
-    `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vid/${hubspotContact.hubspotId}/profile`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-      },
-      body: JSON.stringify(hubspotContact),
-    }
-  ).then(async (response) => {
-    if (response.status >= 300) {
-      console.error(`ERROR: unable to update Hubspot contact for HS User ID ${hubspotContact.hubspotId}:\n`, response.statusText);
-      // eslint-disable-next-line
-      const resJson = await response.json();
-      console.log("response", resJson);
-      return new Error("unable to update hubspot contact");
-    }
-    return { success: true };
-  }).catch((fetchError) => {
-    console.error("ERROR: unable to update Hubspot contact:\n", fetchError);
-    return new Error("unable to update hubspot contact")
-  });
-  return hsRes;
+
+  try {
+    const hsUpdateRes = await hubspotClient.crm.contacts.basicApi.update(hubspotContact.hubspotId, hubspotContact);
+    return hsUpdateRes.id;
+  } catch (error) {
+    console.error("Unable to update user in hubspot:\n", error);
+    throw new Error(getErrorMessage(error));
+  }
 };
+
+export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
+
+  let deals = [] as SimplePublicObject[];
+  let contacts = [] as SimplePublicObject[];
+  const dealSearchRequest = {
+    limit: 100,
+    properties: ["hs_object_id", "dealname", "dealstage", "amount", "project_name", "associations.contact.id", "associations.contact.vid", "associations.contact.hs_object_id"],
+    filterGroups: [{
+      filters: [
+        {
+          propertyName: "hs_object_id",
+          operator: FilterOperatorEnum.In,
+          values: hsIds
+        }
+      ]
+    }]
+  } as PublicObjectSearchRequest;
+
+  try {
+    const dealSearchRes = await hubspotClient.crm.deals.searchApi.doSearch(dealSearchRequest);
+    console.log(`found ${dealSearchRes.results.length} deals`);
+    deals = dealSearchRes.results ?? [];
+  } catch (e) {
+    console.error("Error", e);
+  }
+
+  const contactSearchRequest = {
+    limit: 100,
+    properties: ["hs_object_id", "email", "firstname", "lastname", "phone", "address", "city", "state", "zip", "country", "associations.deal", "associations.deal.hs_object_id"],
+    filterGroups: [{
+      filters: [
+        {
+          propertyName: "associations.deal",
+          operator: FilterOperatorEnum.In,
+          values: hsIds
+        }
+      ]
+    }]
+  } as PublicObjectSearchRequest;
+
+  try {
+    const contactSearchRes = await hubspotClient.crm.contacts.searchApi.doSearch(contactSearchRequest);
+    console.log(`found ${contactSearchRes.results.length} contacts`);
+    contacts = contactSearchRes.results ?? [];
+  } catch (e) {
+    console.error("Error", e);
+  }
+
+  // associate contacts with deals by dealname
+  interface DealContact {
+    deal: SimplePublicObject | undefined;
+    contact: SimplePublicObject;
+  }
+
+  const dealContacts = contacts.map(c => {
+    const first = c.properties.firstname?.toLowerCase() ?? "ljdfioqwehoeiufnil";
+    const last = c.properties.lastname?.toLowerCase() ?? "ljdfioqwehoeiufnil";
+    const dealmatch = deals.find(d => d.properties.dealname?.toLowerCase().includes(first) && d.properties.dealname?.toLowerCase().includes(last));
+    if (!dealmatch) {
+      console.error(`No deal found for contact ${c.properties.firstname} ${c.properties.lastname}, ${c.properties.hs_object_id}`);
+    }
+
+    return {
+      deal: dealmatch,
+      contact: c
+    } as DealContact;
+  });
+
+  return { deals, contacts, dealContacts }
+}
 
 // export async function getListOfHSContacts(arrVids: string[]) {
 //   ///https://api.hubapi.com/contacts/v1/contact/vids/batch/?vid=3234574&vid=3714024&hapikey=demo
@@ -112,21 +180,22 @@ export async function updateHubspotContact(hubspotContact: HubspotContact) {
 
 export async function getListOfHSDeals() {
   const lostDealstages = ["closedlost", "146586774", "257596003"];
-  const PublicObjectSearchRequest = {
+  const publicObjectSearchRequest = {
     limit: 100,
     properties: ["hs_object_id", "dealname", "dealstage", "amount", "project_name"],
     filterGroups: [{
-    filters: [
-      {
-        propertyName: "dealstage",
-        operator: FilterOperatorEnum.In,
-        values: lostDealstages
-      }
-    ]
-  }] } as PublicObjectSearchRequest;
+      filters: [
+        {
+          propertyName: "dealstage",
+          operator: FilterOperatorEnum.In,
+          values: lostDealstages
+        }
+      ]
+    }]
+  } as PublicObjectSearchRequest;
 
   try {
-    const apiResponse = await hubspotClient.crm.deals.searchApi.doSearch(PublicObjectSearchRequest);
+    const apiResponse = await hubspotClient.crm.deals.searchApi.doSearch(publicObjectSearchRequest);
     return apiResponse.results;
   } catch (e) {
     console.error("Error", e);
@@ -135,7 +204,7 @@ export async function getListOfHSDeals() {
 
 export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollection, contactHubspotId: string) {
   const { properties } = hubspotDeal;
-  console.log("properties", properties);
+  console.log("HS Deal Properties", properties);
   const body = JSON.stringify({
     associations: {
       associatedVids: [
@@ -159,10 +228,10 @@ export async function createHubspotDeal(hubspotDeal: HubspotDealPropertiesCollec
   const hsDealCreateRespBody = (await resBody.json()) as HsDealCreateResponse;
   try {
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
-    return dealId;
+    return dealId.toString();
   } catch (error) {
-    console.error("No good hs deal making:\n", error);
-    return new Error(getErrorMessage(error));
+    console.error("hubspot response error:\n", hsDealCreateRespBody);
+    throw new Error(getErrorMessage(getErrorMessage(error)));
   }
 }
 
@@ -189,7 +258,7 @@ export async function updateHubspotDealProperties(hsDealUpdateData: HubspotDealU
 }
 
 /* eslint-disable */
-export function initDealPropsForProject(projectName: string, user: User, dealData: DealCreateSchema) {
+export function initHubspotDealProps(projectName: string, user: User, dealData: DealCreateSchema) {
   const properties = [
     { name: "dealname", value: `${projectName} | ${user.firstName} ${user.lastName}` },
     { name: "investment_entity", value: getInvestmentEntity(projectName, dealData.financingType ?? DealFinancingType.equity) },

@@ -1,4 +1,5 @@
 'use server';
+import type { HubspotContactCreateUpdateSchema } from "@/libs/hubspot/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
 import prisma from "@/libs/prisma.server";
 import { type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
@@ -64,7 +65,7 @@ export async function PUT(request: NextRequest) {
     try {
         putData = zUserUpdateSchema.parse(requestBody);
     } catch (parseError) {
-        console.error("ERROR: unable to parse PUT body:\n", parseError);
+        console.error("ERROR: unable to parse user/id PUT body:\n", getErrorMessage(parseError));
         return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
 
@@ -77,21 +78,17 @@ export async function PUT(request: NextRequest) {
     //  Check if hubspot needs to be updated
 
     if (hubspotNeedsUpdate) {
-        const hsUserUpdateProps = [];
-        if (userUpdateData.firstName) {
-            hsUserUpdateProps.push({ property: 'firstname', value: userUpdateData.firstName });
+        const hsUpdateData: HubspotContactCreateUpdateSchema = {
+            hubspotId: userToUpdate.hubspotId,
+            properties: {
+            }
         }
-        if (userUpdateData.lastName) {
-            hsUserUpdateProps.push({ property: 'lastname', value: userUpdateData.lastName ?? userToUpdate.lastName });
-        }
-        if (userUpdateData.email) {
-            hsUserUpdateProps.push({ property: 'email', value: userUpdateData.email });
-        }
-        if (userToUpdate.phoneNumber) {
-            hsUserUpdateProps.push({ property: 'phone', value: userUpdateData.phoneNumber! });
-        }
+        if (userUpdateData.firstName) hsUpdateData.properties.firstname = userUpdateData.firstName;
+        if (userUpdateData.lastName) hsUpdateData.properties.lastname = userUpdateData.lastName;
+        if (userUpdateData.email) hsUpdateData.email = userUpdateData.email;
+        if (userUpdateData.phoneNumber) hsUpdateData.properties.phone = userUpdateData.phoneNumber;
         try {
-            await updateHubspotContact({ properties: hsUserUpdateProps, hubspotId: userToUpdate.hubspotId });
+            await updateHubspotContact(hsUpdateData);
         } catch (hsError) {
             console.log(hsError)
         }

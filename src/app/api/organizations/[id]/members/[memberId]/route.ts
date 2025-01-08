@@ -6,7 +6,7 @@ import { getUserAndOrg } from "../helpers";
 import { isNumber } from "lodash";
 import { type OrganizationMemberUpdateSchema, zOrganizationMemberUpdateSchema } from "@/libs/organization/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
-import type { HubspotContact } from "@/libs/hubspot/schema";
+import type { HubspotContactCreateUpdateSchema } from "@/libs/hubspot/schema";
 
 /**
  * Remove one member at the time (but not self)
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
         try {
             putData = zOrganizationMemberUpdateSchema.parse(requestBody);
         } catch (parseError) {
-            console.error("unable to parse PUT body:\n", parseError);
+            console.error("unable to parse org members PUT body:\n", getErrorMessage(parseError));
             return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
         }
 
@@ -141,16 +141,16 @@ export async function PUT(request: NextRequest) {
             });
 
             // also update them in hubspot
-            const hubspotContact: HubspotContact = {
+            const hubspotContact: HubspotContactCreateUpdateSchema = {
                 hubspotId: updatedMember.user.hubspotId,
                 email: updatedMember.user.email,
-                properties: [
-                    { property: `firstname`, value: updatedMember.user.firstName },
-                    { property: `lastname`, value: updatedMember.user.lastName },
-                ]
+                properties: {
+                    firstname: updatedMember.user.firstName,
+                    lastname: updatedMember.user.lastName,
+                }
             };
             if (updatedMember.user.phoneNumber) {
-                hubspotContact.properties.push({ property: `phone`, value: updatedMember.user.phoneNumber });
+                hubspotContact.properties.phone = updatedMember.user.phoneNumber;
             }
             try {
                 const hsRes = await updateHubspotContact(hubspotContact);

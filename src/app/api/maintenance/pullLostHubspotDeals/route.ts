@@ -1,3 +1,4 @@
+'use server';
 import { getListOfHSDeals } from "@/libs/hubspot/utils";
 import { isAdminUser } from "@/libs/maintenance/utils";
 import prisma from "@/libs/prisma.server";

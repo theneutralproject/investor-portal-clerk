@@ -6,6 +6,7 @@ import { getErrorMessage, jsonResponse } from "@/libs/utils";
 import { type ClerkUserUpdateSchema, type UserUpdateSchema, zUserUpdateSchema } from "@/libs/user/schema";
 import { updateHubspotContact } from "@/libs/hubspot/utils";
 import { sanitizeUser } from "@/libs/user/utils";
+import type { HubspotContactCreateUpdateSchema } from "@/libs/hubspot/schema";
 
 /**
  * @param request 
@@ -56,7 +57,7 @@ export async function PUT(request: NextRequest) {
     try {
         putData = zUserUpdateSchema.parse(requestBody)
     } catch (parseError) {
-        console.error("ERROR: unable to parse PUT body:\n", parseError);
+        console.error("ERROR: unable to parse users PUT body:\n", getErrorMessage(parseError));
         return jsonResponse({ error: `Input data malformatted: \n${(parseError as Error).message}` }, 400);
     }
 
@@ -64,18 +65,24 @@ export async function PUT(request: NextRequest) {
     //  Check if hubspot and clerk needs to be updated, and then update them
     // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
     if (userData.firstName || userData.lastName) {
-        const properties = [];
+
         const clerkUpdate: ClerkUserUpdateSchema = {};
+        const hsUpdateData: HubspotContactCreateUpdateSchema = {
+            hubspotId: requestingUser.hubspotId,
+            properties: {
+            }
+        }
         if (userData.firstName) {
-            properties.push({ property: 'firstname', value: userData.firstName });
+            hsUpdateData.properties.firstname = userData.firstName;
             clerkUpdate.firstName = userData.firstName;
         }
         if (userData.lastName) {
-            properties.push({ property: 'lastname', value: userData.lastName });
+            hsUpdateData.properties.lastname = userData.lastName;
             clerkUpdate.lastName = userData.lastName;
         }
+
         try {
-            await updateHubspotContact({ hubspotId: requestingUser.hubspotId, properties });
+            await updateHubspotContact(hsUpdateData);
         } catch (hsError) {
             console.log(hsError)
         }

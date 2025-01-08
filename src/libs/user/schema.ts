@@ -27,11 +27,12 @@ export const zUserCreateSchema = z.object({
   firstName: z.string().max(50),
   lastName: z.string().max(50),
   clerkId: z.string().max(60).optional(),
+  hubspotId: z.string().nullish(),
   ssn: z.string().max(200).optional(),
   referralsource: z.nativeEnum(ReferralSource).optional(),    
   email: z.string().email(),
   phoneNumber: z.string().optional(),
-  address: zAddressCreateSchema.optional()
+  address: zAddressCreateSchema.optional(),
 });
 
 export type UserCreateSchema = z.infer<typeof zUserCreateSchema>;
