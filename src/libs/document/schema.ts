@@ -118,13 +118,13 @@ export const zPdfBulkUploadSchema = zfd.formData({
           if (!hasFileProperties(file)) return false;
           return (
             sizeInMB(file.size) <= MAX_FILE_SIZE &&
-            file.type === "application/pdf"
+            file.type === "application/pdf" || file.type.startsWith("image/")
           );
         });
       },
       {
         message:
-          "Only PDF files are allowed and each file must be less than 4MB",
+          "Only PDF and image files are allowed and each file must be less than 4MB",
       }
     ),
   dealId: z.string().optional(),
