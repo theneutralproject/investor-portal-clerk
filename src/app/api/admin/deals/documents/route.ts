@@ -20,13 +20,26 @@ export async function POST(request: NextRequest) {
         console.error(getErrorMessage(adminUser));
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
+    // const adminUser = { id: 1 }
+
+    let dealId: number | null = null;
+    try {
+        const url = new URL(request.url);
+        const queryParams = new URLSearchParams(url.search);
+        dealId = parseInt(queryParams.get('dealId') ?? '');
+
+    } catch (error) {
+        console.error('unable to read query params:', getErrorMessage(error));
+        return jsonResponse(getErrorMessage(error), 500);
+    }
+
+    if (!dealId) {
+        return jsonResponse('dealId is required', 400);
+    }
 
     try {
         const formData = await request.formData();
-        const { files, dealId } = zPdfBulkUploadSchema.parse(formData);
-        if (!dealId) {
-            return jsonResponse('dealId is required', 400);
-        }
+        const { files } = zPdfBulkUploadSchema.parse(formData);
 
         for (const file of files) {
             if (file instanceof File) {
@@ -45,7 +58,7 @@ export async function POST(request: NextRequest) {
                 try {
                     await createDocumentEntry(
                         "deal",
-                        parseInt(dealId),
+                        dealId,
                         name,
                         data.path,
                         "",
