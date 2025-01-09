@@ -20,6 +20,7 @@ import type {
   ReturnsDateObject,
   PortfolioReturnsResponse,
 } from '@/libs/returns/schema';
+import { CustomLegend } from '../Project/Overview/InvestmentCalculatorNew';
 
 interface MetricData {
   label: string;
@@ -296,7 +297,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               content={<CustomTooltip />}
               labelFormatter={(label: string) => `Quarter: ${label}`}
             />
-            <Legend />
+            <Legend content={<CustomLegend payload={[]} />} />
 
             {/* Areas for historical data */}
             <Area

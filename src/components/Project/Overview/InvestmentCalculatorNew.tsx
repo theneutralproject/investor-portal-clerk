@@ -22,6 +22,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  ComposedChart,
+  Line,
 } from 'recharts';
 import { styled } from '@mui/material/styles';
 
@@ -66,17 +68,19 @@ interface CustomLegendProps {
   payload: LegendPayloadItem[];
 }
 
-const CustomLegend = ({ payload }: CustomLegendProps) => {
+export const CustomLegend = ({ payload }: CustomLegendProps) => {
   return (
     <LegendContainer>
-      {payload.map((entry, index) => (
-        <LegendItem key={`legend-${index}`}>
-          <LegendDot color={entry.color} />
-          <Typography variant="body2" color="text.secondary">
-            {entry.value}
-          </Typography>
-        </LegendItem>
-      ))}
+      {payload
+        .filter(entry => !entry.value.includes('Projected'))
+        .map((entry, index) => (
+          <LegendItem key={`legend-${index}`}>
+            <LegendDot color={entry.color} />
+            <Typography variant="body2" color="text.secondary">
+              {entry.value}
+            </Typography>
+          </LegendItem>
+        ))}
     </LegendContainer>
   );
 };
@@ -284,7 +288,7 @@ const InvestmentCalculatorNew = ({
 
         <Box sx={{ width: '100%', height: 400, mb: 3 }}>
           <ResponsiveContainer>
-            <AreaChart
+            <ComposedChart
               data={getChartData()}
               margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
             >
@@ -299,29 +303,27 @@ const InvestmentCalculatorNew = ({
                 stackId="1"
                 stroke={theme.palette.success.main}
                 fill={theme.palette.success.light}
-                fillOpacity={0.3}
+                fillOpacity={0.2}
               />
               {investmentType === 'Equity' && (
                 <>
-                  <Area
+                  <Line
                     type="monotone"
                     dataKey="S&P 500 (Avg.)"
-                    stackId="2"
                     stroke={theme.palette.primary.main}
-                    fill={theme.palette.primary.light}
-                    fillOpacity={0.3}
+                    strokeWidth={3}
+                    dot={false}
                   />
-                  <Area
+                  <Line
                     type="monotone"
                     dataKey="Real Estate Investment Trust (Avg.)"
-                    stackId="3"
                     stroke={theme.palette.warning.main}
-                    fill={theme.palette.warning.light}
-                    fillOpacity={0.3}
+                    strokeWidth={3}
+                    dot={false}
                   />
                 </>
               )}
-            </AreaChart>
+            </ComposedChart>
           </ResponsiveContainer>
         </Box>
 

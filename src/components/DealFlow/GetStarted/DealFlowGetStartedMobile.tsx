@@ -19,7 +19,7 @@ import { toast } from 'react-toastify';
 const steps = [
   'Visit <b>&nbsp;invest.neutral.us&nbsp;</b> on your desktop',
   'Sign in to your account',
-  'Navigate to the <b>&nbsp;Offerings&nbsp;</b> section on the Dashboard',
+  'Navigate to the <b>&nbsp;Projects&nbsp;</b> section on the Dashboard',
   "Select the project you'd like to invest in",
   'Click <b>&nbsp;Continue Investment&nbsp;</b>',
 ];
