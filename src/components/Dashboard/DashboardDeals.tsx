@@ -77,7 +77,28 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
     }).format(amount);
   };
 
-  if (!data?.dealStats.length) return null;
+  if (!data?.dealStats || data.dealStats.length === 0) {
+    return (
+      <StyledCard>
+        <CardContent
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            py: 4,
+          }}
+        >
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            You don&apos;t have any investments
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Browse active projects below to get started
+          </Typography>
+        </CardContent>
+      </StyledCard>
+    );
+  }
   return (
     <StyledCard>
       <ScrollContainer>
