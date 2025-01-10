@@ -64,7 +64,7 @@ export async function POST(request: NextRequest) {
         deals = (await prisma.deal.findMany({
             where: {
                 dealStage: 5,
-                closingDate: { gte: new Date(`${taxYear}-01-01`), lt: new Date(`${taxYear + 1}-01-01`) }
+                closingDate: { lt: new Date(`${taxYear + 1}-01-01`) }
             },
             include: {
                 organization: {
