@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import { isError } from "lodash";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { storageClient } from "@/libs/supabase";
-import { type DealDocument, DealDocumentType } from "@prisma/client";
+import { type DealDocument, DealDocumentType, Prisma } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
 
 
@@ -94,10 +94,19 @@ export async function GET(request: NextRequest) {
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
     let dealId: number | null = null;
+    let documentTypeStr: string | null = null;
+    let documentType: DealDocumentType | null = null;
     try {
         const url = new URL(request.url);
         const queryParams = new URLSearchParams(url.search);
         dealId = parseInt(queryParams.get('dealId') ?? '');
+        documentTypeStr = queryParams.get('documentType') ?? null;
+
+        if (documentTypeStr && !Object.values(DealDocumentType).includes(documentTypeStr as DealDocumentType)) {
+            return jsonResponse('invalid documentType', 400);
+        } else {
+            documentType = documentTypeStr as DealDocumentType;
+        }
 
     } catch (error) {
         console.error('unable to read query params:', getErrorMessage(error));
@@ -108,10 +117,16 @@ export async function GET(request: NextRequest) {
         return jsonResponse('dealId is required', 400);
     }
     try {
+
+        const where: Prisma.DealDocumentWhereInput = {
+            dealId: dealId
+        };
+        if (documentType) {
+            where.type = documentType;
+        }
+
         const dealDocs = await prisma.dealDocument.findMany({
-            where: {
-                dealId: dealId
-            }
+            where
         });
 
         interface docWithUrl extends DealDocument {
