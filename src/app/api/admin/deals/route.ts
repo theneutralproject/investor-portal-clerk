@@ -3,7 +3,7 @@ import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import { DealDocumentType, DealFinancingType, type Prisma } from "@prisma/client";
+import { DealDocumentType, type DealFinancingType, type Prisma } from "@prisma/client";
 import { storageClient } from "@/libs/supabase";
 
 /**
@@ -108,7 +108,7 @@ export async function GET(request: NextRequest) {
             where.closingDate = { gte: new Date(`${closingYear}-01-01`), lt: new Date(`${closingYear + 1}-01-01`) };
         }
 
-        if (amountStr || financingTypeStr) {
+        if (amountStr ?? financingTypeStr) {
             where.investmentStats = {};
             if (amountStr) {
                 where.investmentStats.amount = parseInt(amountStr);
@@ -153,7 +153,7 @@ export async function POST(request: NextRequest) {
     const newPath = `deal-${dealId}/${pdfName}`;
     const { error } = await storageClient.from(`deal-documents`).move(`tempPdfStorage/${pdfName}`, newPath);
     if (error) {
-        console.error("unable to move file to temp storage:");
+        console.error("unable to move file from temp storage to deal:");
         console.error(getErrorMessage(error));
         return jsonResponse({ error: getErrorMessage(error) }, 500);
     }
