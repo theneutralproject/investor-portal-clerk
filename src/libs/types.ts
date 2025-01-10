@@ -68,6 +68,13 @@ export type DealWithFullOrgAndProject = Deal & {
   project: ProjectWithAllNestedData;
 };
 
+export type DealWithFullOrgAndSlimProject = Deal & {
+  organization: OrganizationWithFullMembersAndAddress & {
+    address: Address | null;
+  };
+  project: Project;
+};
+
 export type DealWithInvestmentStatsAndDocument = DealWithInvestmentStats & {
   document: DealDocument[];
 };
