@@ -16,6 +16,7 @@ interface DashboardContextType {
   isError: boolean;
   loggedIn: boolean;
   user: ReturnType<typeof useUser>['user'];
+  deleteDeal: (dealId: number) => void;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(
@@ -42,6 +43,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     isLoading: dealsLoading,
     isError: dealsError,
     data: dealsData,
+    refetch: refetchDeals,
   } = useQuery<DealWithOrgMembersAndProject[], Error>({
     queryKey: ['deals', 'all'],
     queryFn: () =>
@@ -51,6 +53,11 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     enabled: loggedIn,
   });
 
+  const deleteDeal = async (dealId: number) => {
+    await axios.delete(`/api/dashboard/deals`, { data: { dealId } });
+    void refetchDeals();
+  };
+
   const value = {
     projects: projectsData ?? [],
     deals: dealsData ?? [],
@@ -58,6 +65,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
     isError: projectsError || dealsError,
     loggedIn,
     user,
+    deleteDeal,
   };
 
   return (
