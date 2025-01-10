@@ -70,7 +70,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
     <Card sx={{ borderRadius: '8px', mt: 2 }}>
       <CardContent>
         <Typography variant="h6" sx={{ fontSize: '20px', mb: 2 }}>
-          Offerings
+          Projects
         </Typography>
         <Divider sx={{ mb: 2 }} />
 

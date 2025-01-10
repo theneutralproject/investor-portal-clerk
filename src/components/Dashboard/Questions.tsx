@@ -8,6 +8,7 @@ import {
   Divider,
 } from '@mui/material';
 import Image from 'next/image';
+import ChatInterface from '../ChatInterface';
 
 interface QuestionsProps {
   phoneNumber?: string;
@@ -43,7 +44,7 @@ const Questions: React.FC<QuestionsProps> = ({
         </Stack>
 
         <Stack direction="row" spacing={2}>
-          <Button variant="grayPill">CHAT</Button>
+          <ChatInterface type="DEALFLOW_BUTTON" />
           <Typography
             variant="subtitle2"
             sx={{ display: 'flex', alignItems: 'center' }}

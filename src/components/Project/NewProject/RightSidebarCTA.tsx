@@ -120,6 +120,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
               '&:hover': {
                 backgroundColor: '#d4a33b',
               },
+              borderRadius: '24px',
             }}
           >
             Invest

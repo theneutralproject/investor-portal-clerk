@@ -32,7 +32,7 @@ setup('authenticate', async ({ page }) => {
     },
   });
   await page.goto('/dashboard');
-  await page.getByText('Offerings');
+  await page.getByText('Projects');
 
   const pageContext = await page.context();
 
