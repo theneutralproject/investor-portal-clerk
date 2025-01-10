@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import { isError } from "lodash";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { storageClient } from "@/libs/supabase";
-import { DealDocument, DealDocumentType } from "@prisma/client";
+import { type DealDocument, DealDocumentType } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
 
 
@@ -34,14 +34,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (!dealId) {
-        return jsonResponse('dealId is required', 400);
+        return jsonResponse('dealId query param is required', 400);
     }
 
     try {
         const formData = await request.formData();
-        const { files } = zPdfBulkUploadSchema.parse(formData);
+        const files = formData.getAll('files');
+        const parsedFiles = zPdfBulkUploadSchema.parse(files);
 
-        for (const file of files) {
+        for (const file of parsedFiles) {
             if (file instanceof File) {
                 const { name, type } = file;
                 const { data, error } = await storageClient.from('deal-documents').upload(
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
                 return jsonResponse('invalid file', 400);
             }
         }
-        return jsonResponse({ message: `${files.length} files uploaded successfully` });
+        return jsonResponse({ message: `${parsedFiles.length} files uploaded successfully` });
     } catch (error) {
         console.error('unable to read files:', getErrorMessage(error));
         return jsonResponse(getErrorMessage(error), 500);
