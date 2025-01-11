@@ -20,11 +20,12 @@ import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 import DashboardDeals from '@/components/Dashboard/DashboardDeals';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
+import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 const DashboardPage = () => {
   const { loggedIn, user, projects, deals, isLoading } = useDashboard();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  if (isLoading) return <div>Loading...</div>;
+  if (isLoading) return <DashboardSkeleton />;
 
   const headline = loggedIn
     ? `Welcome to Neutral, ${user?.firstName}`

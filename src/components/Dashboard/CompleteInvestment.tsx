@@ -8,6 +8,7 @@ import {
   Avatar,
   Divider,
   LinearProgress,
+  IconButton,
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import {
@@ -16,21 +17,11 @@ import {
 } from '@/libs/types';
 import { useRouter } from 'next/navigation';
 import { DealFinancingType } from '@prisma/client';
-
+import DeleteDealButton from './DeleteDealButton';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
 }
-
-const ContinueButton = styled(Button)(({}) => ({
-  backgroundColor: 'white',
-  color: 'black',
-  borderRadius: '24px',
-  textTransform: 'none',
-  padding: '8px 24px',
-  '&:hover': {
-    backgroundColor: '#f5f5f5',
-  },
-}));
 
 const ProjectCard = styled(Box)(({ theme }) => ({
   display: 'flex',
@@ -163,12 +154,21 @@ const InProgressDeal = ({
           />
         </Box>
 
-        <ContinueButton
-          variant="contained"
+        <DeleteDealButton dealId={deal.id} />
+
+        <IconButton
           onClick={() => handleContinue(deal)}
+          sx={{
+            backgroundColor: 'white',
+            width: 32,
+            height: 32,
+            '&:hover': {
+              backgroundColor: 'white',
+            },
+          }}
         >
-          CONTINUE
-        </ContinueButton>
+          <ArrowForwardIcon sx={{ color: 'black', fontSize: 20 }} />
+        </IconButton>
       </ProjectCard>
     </Box>
   );

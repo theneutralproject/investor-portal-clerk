@@ -31,6 +31,7 @@ import { useRouter } from 'next/navigation';
 import MobileCTA from '@/components/Project/NewProject/MobileCTA';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
+import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 
 export type PageProps = {
   params: {
@@ -93,9 +94,7 @@ export default function Page({ params: { slug } }: PageProps) {
     }
   }, [projectData]);
 
-  if (projectLoading || !projectData) {
-    return <div>Loading...</div>;
-  }
+  if (projectLoading || !projectData) return <DashboardSkeleton />;
 
   if (
     !projectData ||
