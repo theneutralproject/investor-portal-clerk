@@ -19,6 +19,8 @@ import { useRouter } from 'next/navigation';
 import { DealFinancingType } from '@prisma/client';
 import DeleteDealButton from './DeleteDealButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { usePostHog } from 'posthog-js/react';
+import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
 }
@@ -227,8 +229,16 @@ const CompletedDeal = ({ deal }: { deal: DealWithOrgMembersAndProject }) => {
 };
 const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
   const router = useRouter();
+  const posthog = usePostHog();
 
   const handleContinue = (deal: DealWithOrgMembersAndProject) => {
+    posthog.capture(POSTHOG_EVENTS.DEALFLOW_CONTINUE_CLICKED, {
+      deal_id: deal.id,
+      deal_stage: deal.dealStage,
+      project_id: deal.project.id,
+      project_name: deal.project.name,
+    });
+
     const nextStep = getNextStep(deal as DealWithFullOrgAndProject);
     router.push(`/dealflow/${deal.project.slug}/${deal.id}/${nextStep}`);
   };
