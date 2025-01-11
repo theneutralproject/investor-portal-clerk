@@ -16,7 +16,8 @@ export async function GET(request: NextRequest) {
         const allUsers = await prisma.user.findMany(
             {
                 include: {
-                    organizationsOwned: true
+                    organizationsOwned: true,
+                    address: true,
                 }
             }
         );
