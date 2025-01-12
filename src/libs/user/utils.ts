@@ -60,7 +60,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
         try {
             await updateHubspotContact(hsUserData);
         } catch (error) {
-            console.error("Unable to update user in hubspot:\n", error);
+            console.error("Unable to update user in hubspot1:\n", error);
         }
     }
     else {
