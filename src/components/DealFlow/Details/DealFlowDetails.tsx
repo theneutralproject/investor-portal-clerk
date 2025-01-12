@@ -62,7 +62,7 @@ const DealFlowDetails: React.FC = () => {
         lastName: user.lastName ?? "",
         ssn: user.ssn ?? "",
         phoneNumber: user.phoneNumber ?? "",
-        dateOfBirth: formatDate(user.dateOfBirth),
+        dateOfBirth: user.dateOfBirth,
         address: user.address ?? {
           street: "",
           city: "",
