@@ -1,7 +1,7 @@
 import 'server-only';
 import { isError } from "lodash";
 import type { HubspotContactCreateUpdateSchema } from "../hubspot/schema";
-import { associateContactWithDealInHubspot, createHubspotContact, updateHubspotContact } from "../hubspot/utils";
+import { associateContactWithDealInHubspot, createHubspotContact, ReferralSource, updateHubspotContact } from "../hubspot/utils";
 import prisma from "../prisma.server";
 import type { ClerkUserUpdateSchema, UserCreateSchema, UserUpdateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
@@ -151,6 +151,32 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
                 console.error("ERROR: unable to upsert address:\n", error);
                 throw new Error(getErrorMessage(error));
             });
+        }
+
+        if (userData.ssn) {
+            if (userData.ssn.length === 0) {
+                delete userData.ssn;
+            }
+            else if (userData.ssn.startsWith("***-**")) {
+                delete userData.ssn;
+            }
+            else {
+                const presanitizedSSN = userData.ssn.replace(/\D/g, "");
+                if (presanitizedSSN.length !== 9) {
+                    throw new Error('SSN must be 9 digits');
+                }
+                userData.ssn = presanitizedSSN;
+            }
+        }
+        if (userData.phoneNumber) userData.phoneNumber = userData.phoneNumber.replace(/\D/g, '');
+        if (userData.phoneNumber?.length === 0) delete userData.phoneNumber;
+
+        if (userData.email) delete userData.email; // email is not updatable
+        if (userData.referralsource) {
+            if (userData.referralsource?.length === 0) delete userData.referralsource;
+            else if (ReferralSource[userData.referralsource as unknown as keyof typeof ReferralSource] === undefined) {
+                throw new Error('Invalid referral source');
+            }
         }
 
         // update user

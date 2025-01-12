@@ -34,10 +34,13 @@ export async function PUT(request: NextRequest) {
             });
         }
 
+        if(orgData.name?.length === 0) delete orgData.name;
+
         if (orgData.tin) {
             if (orgData.tin.startsWith("***-**")) {
                 delete orgData.tin;
             }
+            else if(orgData.tin.length === 0) delete orgData.tin;
             else {
                 const presanitizedTIN = orgData.tin.replace(/\D/g, "");
                 if (presanitizedTIN.length !== 9) {

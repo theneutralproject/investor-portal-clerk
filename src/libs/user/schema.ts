@@ -13,7 +13,7 @@ export const zUserUpdateSchema = z.object({
     ssn: z.string().max(200).optional().nullish(),
     referralsource: z.nativeEnum(ReferralSource).optional().nullish(),
     address: zAddressCreateSchema.optional(),
-    dateOfBirth: z.string().optional().nullish()
+    dateOfBirth: z.coerce.date().nullish(),
   });
   
   export type UserUpdateSchema = z.infer<typeof zUserUpdateSchema>;
