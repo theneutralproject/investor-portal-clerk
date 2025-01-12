@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 import { isError } from "lodash";
 import { zPdfBulkUploadSchema } from "@/libs/document/schema";
 import { storageClient } from "@/libs/supabase";
-import { type DealDocument, DealDocumentType, Prisma } from "@prisma/client";
+import { type DealDocument, DealDocumentType, type Prisma } from "@prisma/client";
 import prisma from "@/libs/prisma.server";
 
 

@@ -3,10 +3,34 @@ import { isError } from "lodash";
 import type { HubspotContactCreateUpdateSchema } from "../hubspot/schema";
 import { associateContactWithDealInHubspot, createHubspotContact, updateHubspotContact } from "../hubspot/utils";
 import prisma from "../prisma.server";
-import type { UserCreateSchema } from "./schema";
+import type { ClerkUserUpdateSchema, UserCreateSchema, UserUpdateSchema } from "./schema";
 import { getErrorMessage } from "../utils";
 import { type Deal, MembershipType, type User } from "@prisma/client";
 import type { UserWithAddress } from "../types";
+import type { AddressCreateSchema } from '../address/schema';
+import { clerkClient } from "@clerk/nextjs/server";
+
+
+const getHsUserData = (userData: UserCreateSchema | UserUpdateSchema, address: AddressCreateSchema | undefined) => {
+    const hsUserData: HubspotContactCreateUpdateSchema = {
+        email: userData.email,
+        properties: {},
+    };
+    if (userData.firstName) hsUserData.properties.firstname = userData.firstName;
+    if (userData.lastName) hsUserData.properties.lastname = userData.lastName;
+    if ('clerkId' in userData && userData.clerkId) hsUserData.properties.clerkid = userData.clerkId;
+    if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
+
+    if (address) {
+        hsUserData.properties.address = address.street;
+        hsUserData.properties.state = address.state;
+        hsUserData.properties.city = address.city;
+        hsUserData.properties.zip = address.zipcode;
+        hsUserData.properties.country = address.country;
+    }
+
+    return hsUserData;
+}
 
 /**
  * creates a user in both hubspot and our DB
@@ -26,24 +50,7 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
         }
     }
     /* Upsert user in Hubspot**/
-    const hsUserData: HubspotContactCreateUpdateSchema = {
-        email: userData.email,
-        properties: {
-            userid: userData.clerkId ?? "invitePending",
-            firstname: userData.firstName,
-            lastname: userData.lastName,
-        },
-    };
-    if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
-
-    if (address) {
-        hsUserData.properties.address = address.street;
-        hsUserData.properties.state = address.state;
-        hsUserData.properties.city = address.city;
-        hsUserData.properties.zip = address.zipcode;
-        hsUserData.properties.country = address.country;
-    }
-
+    const hsUserData = getHsUserData(userData, address);
 
     let hsContactId: string;
     if (userData.hubspotId) {
@@ -92,19 +99,24 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
                 name: `${userData.firstName} ${userData.lastName}'s Organization`,
                 ownedBy: { connect: { id: dbUser.id } },
                 members: { create: { userId: dbUser.id, type: MembershipType.OWNER } },
+                isPrimary: true,
             }
         });
         userOrgId = userOrg.id;
 
         // add orgId to user
-        updatedUser = await prisma.user.update({ where: { id: dbUser.id }, data: { userOrgId } });
+        updatedUser = await prisma.user.update({
+            where: { id: dbUser.id }, data: {
+                userOrgId,
+            }
+        });
     } catch (error) {
         // this should only happen if a duplicate webhook is received from clerk
         console.warn("Unable to create user in DB:\n", getErrorMessage(error));
         // check if user already exists in DB:
         const existingUser = await prisma.user.findUnique({ where: { email: userData.email } });
         if (!existingUser) {
-            console.error("User neither created nor found  in DB:\n", getErrorMessage(error));
+            console.error("User neither created nor found in DB - smells fishy!:\n", getErrorMessage(error));
             throw new Error(getErrorMessage(error));
         } else {
             console.warn(`Processing existing user ${existingUser.email}`);
@@ -119,6 +131,52 @@ export async function createUserInDbAndHubspot(data: UserCreateSchema, dealId?: 
     }
 
     return updatedUser;
+}
+
+export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
+    const { address, ...userData } = data;
+    if (!userData.id) {
+        throw new Error('User ID is required to update user');
+    }
+
+    // update user and address in db
+    try {
+        if (address) {
+            // upsert address
+            await prisma.address.upsert({
+                where: { userId: userData.id },
+                create: { ...address, userId: userData.id },
+                update: { ...address, userId: userData.id }
+            }).catch((error) => {
+                console.error("ERROR: unable to upsert address:\n", error);
+                throw new Error(getErrorMessage(error));
+            });
+        }
+
+        // update user
+        const updatedUser = await prisma.user.update({
+            where: { id: userData.id },
+            data: userData,
+            include: { address: true }
+        });
+
+        /* Upsert user in Hubspot**/
+        const hsUserData = getHsUserData(userData, address);
+        hsUserData.hubspotId = updatedUser.hubspotId;
+        await updateHubspotContact(hsUserData);
+
+        // update them in clerk
+        const clerkUpdate: ClerkUserUpdateSchema = {
+            firstName: updatedUser.firstName,
+            lastName: updatedUser.lastName,
+        };
+        await clerkClient.users.updateUser(updatedUser.clerkId!, clerkUpdate)
+
+        return updatedUser;
+    } catch (error) {
+        console.error("ERROR: unable to update user:\n", error);
+        throw new Error(getErrorMessage(error));
+    }
 }
 
 export function sanitizeUser(user: User | UserWithAddress) {

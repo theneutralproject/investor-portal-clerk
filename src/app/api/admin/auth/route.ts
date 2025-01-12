@@ -9,7 +9,6 @@ const GOOGLE_OAUTH_SCOPES = [
 
 export async function GET(request: NextRequest) {
     // TODO: include retool cbURL in state
-    console.log("in get");
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
 
