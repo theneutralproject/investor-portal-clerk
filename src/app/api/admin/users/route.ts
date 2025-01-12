@@ -24,6 +24,8 @@ export async function GET(request: NextRequest) {
                             name: true,
                             address: true,
                             tin: true,
+                            isPrimary: true,
+                            ownershipType: true,
                         }
                     },
                     address: true,
