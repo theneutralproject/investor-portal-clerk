@@ -16,6 +16,7 @@ import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 import PageViewTracker from './PageViewTracker';
 import CSPostHogProvider from './CSPostHogProvider';
 import UserIdentifier from './UserIdentifier';
+import SignInTOSModal from '@/components/Dashboard/SignInTOSModal';
 const inter = Inter({
   subsets: ['latin'],
 });
@@ -52,6 +53,7 @@ export default function RootLayout({
                     draggable
                     theme="light"
                   />
+                  <SignInTOSModal />
                 </DashboardProvider>
               </NeutralThemeProvider>
             </NeutralQueryProvider>
