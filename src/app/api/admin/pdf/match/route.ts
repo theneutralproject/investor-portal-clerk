@@ -6,6 +6,7 @@ import type { NextRequest } from "next/server";
 import type { MatchResponseObject } from "@/libs/admin/schema";
 import prisma from "@/libs/prisma.server";
 import { storageClient } from "@/libs/supabase";
+import type { DealWithFullOrgAndSlimProject } from "@/libs/types";
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -20,28 +21,31 @@ export async function POST(request: NextRequest) {
         return jsonResponse(getErrorMessage(adminUser), 401);
     }
 
-    // get all deals
-    const deals = (await prisma.deal.findMany({
-        include: {
-            organization: {
-                include: {
-                    members: { include: { user: { include: { address: true } } } },
-                    address: true
-                }
-            },
-            project: true,
-        }
-    }))
+    let taxYear: number | null = null;
+    try {
+        const url = new URL(request.url);
+        const queryParams = new URLSearchParams(url.search);
+        taxYear = parseInt(queryParams.get('taxYear') ?? '-1');
+    } catch (error) {
+        console.error('unable to read query params:', getErrorMessage(error));
+        return jsonResponse(getErrorMessage(error), 500);
+    }
+
+    if (!taxYear || taxYear < 2018) {
+        return jsonResponse('taxYear query param is required and must be 2018 or later', 400);
+    }
+
+    let pdfFiles: FormDataEntryValue[] = [];
     try {
         const formData = await request.formData();
-        const { files } = zPdfBulkUploadSchema.parse(formData);
+        const files = formData.getAll('files');
+        pdfFiles = zPdfBulkUploadSchema.parse(files);
         const { data, error } = await storageClient.from(`deal-documents`).list('tempPdfStorage');
         if (isError(error)) {
             console.error(getErrorMessage(error));
         }
         if (data?.length) {
             console.log("Deleting all files in tempPdfStorage folder");
-            console.log(data.map(file => file.name));
             const deleteResult = await storageClient.from(`deal-documents`).remove(data.map(file => `tempPdfStorage/${file.name}`));
             if (deleteResult.error) {
                 console.error("COULD NOT DELETE:")
@@ -49,11 +53,40 @@ export async function POST(request: NextRequest) {
                 return jsonResponse({ error: getErrorMessage(deleteResult.error) }, 500);
             }
         }
+    } catch (error) {
+        console.error("unable to read form data");
+        return jsonResponse({ error: getErrorMessage(error) }, 500);
+    }
 
+    let deals: DealWithFullOrgAndSlimProject[] = [];
+    try {
+        // get all closed deals
+        deals = (await prisma.deal.findMany({
+            where: {
+                dealStage: 5,
+                closingDate: { lt: new Date(`${taxYear + 1}-01-01`) }
+            },
+            include: {
+                organization: {
+                    include: {
+                        members: { include: { user: { include: { address: true } } } },
+                        address: true
+                    }
+                },
+                project: true,
+            }
+        }));
+    } catch (error) {
+        console.error("unable to get deals from database");
+        return jsonResponse({ error: getErrorMessage(error) }, 500);
+    };
+
+    try {
         const retArr = [] as (MatchResponseObject)[];
-        for (const file of files) {
+        const matchPromises = pdfFiles.map(async (file) => {
             if (file instanceof File) {
                 const { name, type } = file;
+                console.log(`Uploading ${name} to temp storage`);
                 const { error } = await storageClient
                     .from(`deal-documents`)
                     .upload(
@@ -69,16 +102,15 @@ export async function POST(request: NextRequest) {
                 }
 
                 // match the files to the correct deal
-                // @ts-expect-error will fix later
                 const match = await matchDealWithPdf(deals, file);
                 retArr.push(match);
             } else {
                 console.error("file is not instance of File");
                 return jsonResponse({ error: "file is not instance of File" }, 400);
             }
-
-            return jsonResponse(retArr);
-        }
+        });
+        await Promise.all(matchPromises);
+        return jsonResponse(retArr);
     }
     catch (err) {
         console.error(err);

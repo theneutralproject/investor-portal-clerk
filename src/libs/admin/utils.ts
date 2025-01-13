@@ -4,7 +4,7 @@ import prisma from "../prisma.server";
 import { DealDocumentType, MembershipType, Role } from "@prisma/client";
 import { type MatchResponseObject, MatchConfidence } from "./schema";
 import { storageClient } from "../supabase";
-import type { DealWithFullOrgAndProject } from "../types";
+import type { DealWithFullOrgAndSlimProject } from "../types";
 
 // eslint-disable-next-line
 const PdfParse = require("pdf-parse");
@@ -42,15 +42,15 @@ export async function getAdminFromRequest(request: NextRequest) {
 function calcConfidenceScore(matchCount: number): MatchConfidence {
     if (matchCount >= 6.5) {
         return MatchConfidence.HIGH;
-    } else if (matchCount >= 3) {
+    } else if (matchCount >= 4) {
         return MatchConfidence.MEDIUM;
-    } else if (matchCount >= 2) {
+    } else if (matchCount >= 3) {
         return MatchConfidence.LOW;
     }
     else return MatchConfidence.NONE;
 }
 
-export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file: File) {
+export async function matchDealWithPdf(deals: DealWithFullOrgAndSlimProject[], file: File) {
     // match the file to the correct deal
     const arrayBuffer = await file.arrayBuffer();
     const dataBuffer = Buffer.from(arrayBuffer);
@@ -117,7 +117,7 @@ export async function matchDealWithPdf(deals: DealWithFullOrgAndProject[], file:
             if (text.toLowerCase().includes(word)) {
                 matchScore += score;
                 matchedWords.push(word);
-                console.log(`found match for ${word}`);
+                // console.log(`found match for ${word}`);
             }
 
         });

@@ -46,7 +46,7 @@ export async function createHubspotContact(hubspotContact: HubspotContactCreateU
       await updateHubspotContact(hubspotContact);
       return hsId;
     } catch (error) {
-      console.error("Unable to update user in hubspot:\n", error);
+      console.error("Unable to update user in hubspot2:\n", error);
       throw new Error(getErrorMessage(error));
     }
   }
@@ -76,7 +76,7 @@ export async function updateHubspotContact(hubspotContact: HubspotContactCreateU
     const hsUpdateRes = await hubspotClient.crm.contacts.basicApi.update(hubspotContact.hubspotId, hubspotContact);
     return hsUpdateRes.id;
   } catch (error) {
-    console.error("Unable to update user in hubspot:\n", error);
+    console.error("Unable to update user in hubspot3:\n", error);
     throw new Error(getErrorMessage(error));
   }
 };

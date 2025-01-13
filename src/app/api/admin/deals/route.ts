@@ -3,7 +3,7 @@ import prisma from "@/libs/prisma.server";
 import { errorResponse, getErrorMessage, jsonResponse } from "@/libs/utils";
 import { isError } from "lodash";
 import type { NextRequest } from "next/server";
-import { DealDocumentType, type Prisma } from "@prisma/client";
+import { DealDocumentType, type DealFinancingType, type Prisma } from "@prisma/client";
 import { storageClient } from "@/libs/supabase";
 
 /**
@@ -22,6 +22,10 @@ export async function GET(request: NextRequest) {
     let projectName: string | undefined;
     let minDealstage: number | undefined;
     let documentType = '';
+    let amountStr: string | undefined;
+    let closingYearStr: string | undefined;
+    let financingTypeStr: string | undefined;
+
     try {
         const url = new URL(request.url);
         const queryParams = new URLSearchParams(url.search);
@@ -29,6 +33,9 @@ export async function GET(request: NextRequest) {
         projectName = queryParams.get("projectName") ?? undefined;
         minDealstage = parseInt(queryParams.get("minDealstage") ?? "5");
         documentType = queryParams.get("documentType") ?? '';
+        amountStr = queryParams.get("amount") ?? undefined;
+        closingYearStr = queryParams.get("closingYear") ?? undefined;
+        financingTypeStr = queryParams.get("financingType") ?? undefined;
     }
     catch (error) {
         return errorResponse(getErrorMessage(error), 500);
@@ -41,9 +48,10 @@ export async function GET(request: NextRequest) {
                 dealStage: { gte: minDealstage, lt: 6 },
             },
             include: {
-                document: { 
+                document: {
                     where: { type: DealDocumentType.K1 },
-                    include: { uploadedBy: true } }
+                    include: { uploadedBy: true }
+                }
             }
         });
 
@@ -95,12 +103,27 @@ export async function GET(request: NextRequest) {
             where.organizationId = { in: ownerOrgIds };
         }
 
+        if (closingYearStr) {
+            const closingYear = parseInt(closingYearStr);
+            where.closingDate = { gte: new Date(`${closingYear}-01-01`), lt: new Date(`${closingYear + 1}-01-01`) };
+        }
+
+        if (amountStr ?? financingTypeStr) {
+            where.investmentStats = {};
+            if (amountStr) {
+                where.investmentStats.amount = parseInt(amountStr);
+            }
+            if (financingTypeStr) {
+                where.investmentStats.financingType = financingTypeStr as DealFinancingType;
+            }
+        }
+
         const deals = await prisma.deal.findMany({
             where: where,
             include: {
                 organization: { include: { ownedBy: true } },
                 investmentStats: true,
-                document: { 
+                document: {
                     where: { type: DealDocumentType.INVESTMENT_DOCUMENT },
                     include: { uploadedBy: true }
                 }
@@ -130,7 +153,7 @@ export async function POST(request: NextRequest) {
     const newPath = `deal-${dealId}/${pdfName}`;
     const { error } = await storageClient.from(`deal-documents`).move(`tempPdfStorage/${pdfName}`, newPath);
     if (error) {
-        console.error("unable to move file to temp storage:");
+        console.error("unable to move file from temp storage to deal:");
         console.error(getErrorMessage(error));
         return jsonResponse({ error: getErrorMessage(error) }, 500);
     }
