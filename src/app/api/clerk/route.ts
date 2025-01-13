@@ -65,6 +65,10 @@ export async function POST(request: Request) {
       }
 
     }
+    case "user.updated": {
+      console.warn("user updated event received - but not yet implemented", data)
+      break;
+    }
     case "session.created": /** FALL THROUGH SWITCHES */
     case "session.ended":
     case "session.revoked":

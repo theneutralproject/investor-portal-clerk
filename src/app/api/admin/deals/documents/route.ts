@@ -23,10 +23,15 @@ export async function POST(request: NextRequest) {
     // const adminUser = { id: 1 }
 
     let dealId: number | null = null;
+    let queryTaxYear: string | null = null;
+    let queryDocumentType: string | null = null;
+    let taxYear: number | undefined = undefined;
     try {
         const url = new URL(request.url);
         const queryParams = new URLSearchParams(url.search);
         dealId = parseInt(queryParams.get('dealId') ?? '');
+        queryDocumentType = queryParams.get('documentType') ?? null;
+        queryTaxYear = queryParams.get('taxYear') ?? null;
 
     } catch (error) {
         console.error('unable to read query params:', getErrorMessage(error));
@@ -41,6 +46,14 @@ export async function POST(request: NextRequest) {
         const formData = await request.formData();
         const files = formData.getAll('files');
         const parsedFiles = zPdfBulkUploadSchema.parse(files);
+        let documentType: DealDocumentType = DealDocumentType.INVESTMENT_DOCUMENT;
+        if(queryDocumentType === "K1") {
+            documentType = DealDocumentType.K1;
+            if(!queryTaxYear) {
+                return jsonResponse('taxYear query param is required for K1 documentType', 400);
+            }
+            taxYear = parseInt(queryTaxYear);
+        }
 
         for (const file of parsedFiles) {
             if (file instanceof File) {
@@ -64,7 +77,8 @@ export async function POST(request: NextRequest) {
                         data.path,
                         "",
                         adminUser.id,
-                        DealDocumentType.INVESTMENT_DOCUMENT
+                        documentType,
+                        taxYear
                     );
                 } catch (error) {
                     console.error('unable to createDocumentEntry:', getErrorMessage(error));
