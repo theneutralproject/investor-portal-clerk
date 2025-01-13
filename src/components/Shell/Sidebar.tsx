@@ -49,6 +49,11 @@ export const ROUTES = [
     path: '/contact',
     icon: MessageIcon,
   },
+  {
+    name: 'Documents',
+    path: '/documents',
+    icon: DescriptionIcon,
+  },
 ];
 
 export const buttonItems = [
