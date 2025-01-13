@@ -42,7 +42,7 @@ export async function POST(request: Request) {
           status: 500,
           headers: { "Content-Type": "application/json" },
         });
-      } 
+      }
       
       const newUserData = {
         clerkId: id,
@@ -58,6 +58,7 @@ export async function POST(request: Request) {
         await createUserInDbAndHubspot(newUserData)
         break;
       } catch (userCreateError) {
+        console.error("Error creating user in DB", userCreateError)
         return new Response(JSON.stringify(userCreateError), {
           status: 500,
           headers: { "Content-Type": "application/json" },
