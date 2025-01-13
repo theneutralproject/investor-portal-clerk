@@ -49,6 +49,27 @@ const DealFlowDetails: React.FC = () => {
     setFormData(prevData => (prevData ? { ...prevData, [name]: value } : null));
   };
 
+  const handleSSNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, '');
+    if (rawValue.length <= 9) {
+      let formatted = rawValue;
+      if (rawValue.length > 3) {
+        formatted = `${rawValue.slice(0, 3)}-${rawValue.slice(3)}`;
+      }
+      if (rawValue.length > 5) {
+        formatted = `${rawValue.slice(0, 3)}-${rawValue.slice(3, 5)}-${rawValue.slice(5)}`;
+      }
+      handleInputChange({
+        ...e,
+        target: {
+          ...e.target,
+          value: formatted,
+          name: 'ssn',
+        },
+      });
+    }
+  };
+
   const handleAddressChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -252,7 +273,7 @@ const DealFlowDetails: React.FC = () => {
             label="Social Security Number"
             name="ssn"
             value={formData.ssn}
-            onChange={handleInputChange}
+            onChange={handleSSNChange}
             placeholder="___-__-____"
           />
         </Grid>
@@ -277,7 +298,7 @@ const DealFlowDetails: React.FC = () => {
         </Grid>
       </Grid>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleSubmit} />
+      <DealFlowFooter onContinue={handleSubmit} />
     </Box>
   );
 };

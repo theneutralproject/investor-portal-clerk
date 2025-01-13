@@ -82,7 +82,7 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
         ))}
       </RadioGroup>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
+      <DealFlowFooter onContinue={handleUpdateDeal} />
     </Box>
   );
 };

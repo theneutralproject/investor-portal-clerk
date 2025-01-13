@@ -87,7 +87,7 @@ const DealFlowReview: React.FC = () => {
       </Card>
 
       <DealFlowFooter
-        onBack={() => null}
+        
         onContinue={toReviewScreen}
         // @ts-expect-error -- type completed
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
