@@ -18,7 +18,7 @@ const getHsUserData = (userData: UserCreateSchema | UserUpdateSchema, address: A
     };
     if (userData.firstName) hsUserData.properties.firstname = userData.firstName;
     if (userData.lastName) hsUserData.properties.lastname = userData.lastName;
-    if ('clerkId' in userData && userData.clerkId) hsUserData.properties.clerkid = userData.clerkId;
+    if ('clerkId' in userData && userData.clerkId) hsUserData.properties.userid = userData.clerkId;
     if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
 
     if (address) {
