@@ -12,11 +12,7 @@ const InfoSidebar = () => {
 
           <HubspotScheduleCall />
           <Link href={`/contact`} passHref>
-            <Button
-              variant="neutralBlack"
-              fullWidth
-              sx={{ mt: 2, height: '42px' }}
-            >
+            <Button variant="grayPill" fullWidth sx={{ mt: 2, height: '42px' }}>
               GET IN TOUCH
             </Button>
           </Link>

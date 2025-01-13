@@ -23,9 +23,14 @@ interface FundACHProps {
     routingNumber: string;
   };
   investmentAmount: number;
+  onBack?: () => void;
 }
 
-const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
+const FundACH: React.FC<FundACHProps> = ({
+  paymentInfo,
+  investmentAmount,
+  onBack,
+}) => {
   const { deal, refetchDeal, updateDeal } = useDealFlow();
   const [copied, setCopied] = useState<string | null>(null);
   const [wireTransferId, setWireTransferId] = useState<string>(
@@ -152,7 +157,7 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
       </Card>
 
       <DealFlowFooter
-        onBack={() => null}
+        onBack={onBack}
         onContinue={fundWireTransferContinue}
         isContinueDisabled={wireTransferId.length === 0}
       />

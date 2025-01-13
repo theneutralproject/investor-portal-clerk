@@ -22,7 +22,7 @@ const DealFlowGetStarted: React.FC = () => {
           title="The Edison in Milwaukee, Wisconsin by The Neutral Project"
         />
       </Box>
-      <DealFlowFooter onBack={() => null} onContinue={createDeal} />
+      <DealFlowFooter  onContinue={createDeal} />
     </Box>
   );
 };

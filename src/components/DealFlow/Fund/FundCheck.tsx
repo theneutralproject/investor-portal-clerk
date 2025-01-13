@@ -18,11 +18,13 @@ interface FundCheckProps {
     mailTo: string;
   };
   investmentAmount: number;
+  onBack?: () => void;
 }
 
 const FundCheck: React.FC<FundCheckProps> = ({
   paymentInfo,
   investmentAmount,
+  onBack,
 }) => {
   const { deal, updateDeal, refetchDeal } = useDealFlow();
 
@@ -68,6 +70,8 @@ const FundCheck: React.FC<FundCheckProps> = ({
     await updateDeal(
       {
         ...deal,
+        paymentReferenceId: checkNumber,
+        dateFundsSent: new Date(),
         paymentMethod: 'CHECK',
       },
       false
@@ -121,7 +125,7 @@ const FundCheck: React.FC<FundCheckProps> = ({
       </Card>
 
       <DealFlowFooter
-        onBack={() => null}
+        onBack={onBack}
         onContinue={fundCheckContinue}
         isContinueDisabled={checkNumber.length === 0}
       />
