@@ -2,13 +2,23 @@
 import React, { useState } from 'react';
 import { Fab, Button, Modal, Box, useTheme } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
+import { usePostHog } from 'posthog-js/react';
+import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 
 const ChatInterface = ({ type }: { type: string }) => {
   const [open, setOpen] = useState(false);
   const theme = useTheme();
+  const posthog = usePostHog();
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    setOpen(true);
+    posthog.capture(POSTHOG_EVENTS.CHAT_OPENED, {
+      type,
+    });
+  };
+  const handleClose = () => {
+    setOpen(false);
+  };
 
   // Determine whether to render FAB or Button based on the type prop
   const renderChatTrigger = () => {

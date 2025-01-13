@@ -13,8 +13,6 @@ import 'react-image-gallery/styles/css/image-gallery.css';
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
-import { useSearchParams } from 'next/navigation';
-import posthog from 'posthog-js';
 import type { ProjectWithAllNestedData } from '@/libs/types';
 import InvestmentSummaryBox from '@/components/Project/Overview/InvestmentSummaryBox';
 import RightSidebarCTA from '@/components/Project/NewProject/RightSidebarCTA';
@@ -27,34 +25,24 @@ import GalleryNew from '@/components/Project/Overview/GalleryNew';
 import HaveQuestionsNew from '@/components/Project/Overview/HaveQuestionsNew';
 import CreateAccount from '@/components/Dashboard/CreateAccount';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
-import { useRouter } from 'next/navigation';
 import MobileCTA from '@/components/Project/NewProject/MobileCTA';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
-
+import { usePostHog } from 'posthog-js/react';
+import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
+import { useRouter } from 'next/navigation';
 export type PageProps = {
   params: {
     slug: string;
   };
 };
 
-interface QueryParams {
-  afterauth: string | null;
-  dealStage: string | null;
-  financingType: string | null;
-}
-
 export default function Page({ params: { slug } }: PageProps) {
   const { loggedIn, user, deals } = useDashboard();
-  const searchParams = useSearchParams();
-  const queryParams: QueryParams = {
-    afterauth: searchParams.get('afterauth'),
-    dealStage: searchParams.get('dealStage'),
-    financingType: searchParams.get('financingType'),
-  };
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const posthog = usePostHog();
   const router = useRouter();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
     ProjectWithAllNestedData[],
@@ -68,17 +56,12 @@ export default function Page({ params: { slug } }: PageProps) {
   });
 
   useEffect(() => {
-    if (user && queryParams.afterauth) {
-      const { id, primaryEmailAddress, firstName, lastName } = user;
-      posthog.identify(primaryEmailAddress?.toString(), {
-        email: primaryEmailAddress?.toString(),
-        firstname: firstName,
-        lastname: lastName,
-        id: id,
-      });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }
-  }, [user, queryParams.afterauth]);
+    posthog.capture(POSTHOG_EVENTS.PROJECT_PAGE_VIEWED, {
+      current_url: window.location.href,
+      user_id: user?.id,
+      logged_in: loggedIn,
+    });
+  }, [user, loggedIn, posthog]);
 
   useEffect(() => {
     if (
@@ -112,6 +95,10 @@ export default function Page({ params: { slug } }: PageProps) {
     project.pictures[0]?.url;
 
   const handleInvest = () => {
+    posthog.capture(POSTHOG_EVENTS.PROJECT_INVEST_CLICKED, {
+      project_id: project.id,
+      project_name: project.name,
+    });
     router.push(`/dealflow/${project.slug}/new/get-started`);
   };
 
