@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { Button, Modal, Box } from '@mui/material';
+import { usePostHog } from 'posthog-js/react';
+import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 
 function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
+  const posthog = usePostHog();
+
+  const handleOpen = () => {
+    setOpen(true);
+    posthog.capture(POSTHOG_EVENTS.SCHEDULE_CALL_CLICKED);
+  };
+
   const handleClose = () => {
     setOpen(false);
 

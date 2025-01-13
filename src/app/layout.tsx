@@ -15,6 +15,7 @@ import ChatInterface from '@/components/ChatInterface';
 import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 import PageViewTracker from './PageViewTracker';
 import CSPostHogProvider from './CSPostHogProvider';
+import UserIdentifier from './UserIdentifier';
 const inter = Inter({
   subsets: ['latin'],
 });
@@ -36,6 +37,7 @@ export default function RootLayout({
         <html lang="en">
           <body className={inter.className}>
             <PageViewTracker />
+            <UserIdentifier />
             <NeutralQueryProvider>
               <NeutralThemeProvider>
                 <DashboardProvider>

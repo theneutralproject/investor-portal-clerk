@@ -5,6 +5,8 @@ import useDocuments from '@/app/hooks/useDocuments';
 import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
 import DocumentCard from '../ProjectDocs/DocumentCard';
 import DocumentViewerModal from '../ProjectDocs/DocumentViewerModal';
+import { usePostHog } from 'posthog-js/react';
+import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 
 // Define a proper error type
 type ApiError = {
@@ -16,6 +18,8 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
   const [currentDocument, setCurrentDocument] = useState<
     DocumentWithCompletion | undefined
   >(undefined);
+
+  const posthog = usePostHog();
 
   const {
     isLoading,
@@ -34,11 +38,23 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
     return <div>Error fetching documents: {error.message}</div>;
 
   const handleViewDocument = (document: DocumentWithCompletion) => {
+    posthog.capture(POSTHOG_EVENTS.DOCUMENT_VIEWED, {
+      document_id: document.id,
+      document_name: document.name,
+      project_id: project.id,
+      project_name: project.name,
+    });
     setCurrentDocument(document);
     setOpenModal(true);
   };
 
   const handleDownloadDocument = (document: DocumentWithCompletion) => {
+    posthog.capture(POSTHOG_EVENTS.DOCUMENT_DOWNLOADED, {
+      document_id: document.id,
+      document_name: document.name,
+      project_id: project.id,
+      project_name: project.name,
+    });
     window.open(document.link, '_blank');
   };
 
