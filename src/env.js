@@ -51,6 +51,7 @@ export const env = createEnv({
     DOCUSIGN_API_ACCOUNT_ID: z.string(),
     DOCUSIGN_INTEGRATION_KEY: z.string(),
     DOCUSIGN_RSA_PRIVATE_KEY: z.string(),
+    CURRENT_TERMS_REVISION: z.string(),
   },
 
   /**
@@ -130,6 +131,7 @@ export const env = createEnv({
     DOCUSIGN_API_ACCOUNT_ID: process.env.DOCUSIGN_API_ACCOUNT_ID,
     DOCUSIGN_INTEGRATION_KEY: process.env.DOCUSIGN_INTEGRATION_KEY,
     DOCUSIGN_RSA_PRIVATE_KEY: process.env.DOCUSIGN_RSA_PRIVATE_KEY,
+    CURRENT_TERMS_REVISION: process.env.CURRENT_TERMS_REVISION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
