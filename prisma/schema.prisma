@@ -34,6 +34,7 @@ model User {
   organizationMember           Member[]
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
+  TermsEvents                  TermsEvents[]
 }
 
 model Deal {
@@ -307,6 +308,14 @@ model Address {
   userId         Int?          @unique
   organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   user           User?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model TermsEvents {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  dateAccepted DateTime
+  revision     Int
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum DealDocumentType {
