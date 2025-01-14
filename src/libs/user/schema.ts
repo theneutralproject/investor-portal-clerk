@@ -5,7 +5,7 @@ import { zAddressCreateSchema } from '../address/schema';
 // we are excluding the email and phoneNumber, since these were previously verified by the user
 // TODO: use clerk API to update and verify phone and email
 export const zUserUpdateSchema = z.object({
-  id: z.number().int(),
+  id: z.number().int().optional(), // if provided, an admin can update any user
   email: z.string().email().optional(),
   phoneNumber: z.string().optional(),
   firstName: z.string().max(50).optional(),
