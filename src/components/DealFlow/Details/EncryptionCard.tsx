@@ -4,7 +4,7 @@ import LockIcon from '@mui/icons-material/Lock';
 
 export const EncryptionCard = () => {
   return (
-    <Card>
+    <Card sx={{ mt: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LockIcon sx={{ fontSize: 20, color: 'text.secondary' }} />

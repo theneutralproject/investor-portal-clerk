@@ -219,7 +219,7 @@ const DealFlowVerifyAccreditation: React.FC = () => {
       )}
 
       <DealFlowFooter
-        onBack={() => null}
+        
         onContinue={handleContinue}
         isContinueDisabled={isContinueDisabled}
       />

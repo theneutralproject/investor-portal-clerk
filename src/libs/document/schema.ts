@@ -9,7 +9,7 @@ const ACCEPTED_FILE_TYPES = [
   'image/jpeg',
 ] as const;
 
-const MAX_FILE_SIZE = 4; // In MegaBytes
+const MAX_FILE_SIZE = 10; // In MegaBytes
 
 const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
   const result = sizeInBytes / (1024 * 1024);
@@ -106,8 +106,29 @@ export type DocumentEventCreateSchema = z.infer<
   typeof zDocumentEventCreateSchema
 >;
 
+export const zPdfBulkUploadSchema = z
+  .array(createFileSchema())
+  .nonempty()
+  .max(20)
+  .refine(
+    files => {
+      return files.every(file => {
+        if (!hasFileProperties(file)) return false;
+        return (
+          (sizeInMB(file.size) <= MAX_FILE_SIZE &&
+            file.type === 'application/pdf') ||
+          file.type.startsWith('image/')
+        );
+      });
+    },
+    {
+      message:
+        'Only PDF and image files are allowed and each file must be less than 4MB',
+    }
+  );
+
 // Schema for bulk file uploads
-export const zPdfBulkUploadSchema = zfd.formData({
+export const zPdfBulkUploadSchemaOld = zfd.formData({
   files: z
     .array(createFileSchema())
     .nonempty()
@@ -117,16 +138,18 @@ export const zPdfBulkUploadSchema = zfd.formData({
         return files.every(file => {
           if (!hasFileProperties(file)) return false;
           return (
-            sizeInMB(file.size) <= MAX_FILE_SIZE &&
-            file.type === 'application/pdf'
+            (sizeInMB(file.size) <= MAX_FILE_SIZE &&
+              file.type === 'application/pdf') ||
+            file.type.startsWith('image/')
           );
         });
       },
       {
         message:
-          'Only PDF files are allowed and each file must be less than 4MB',
+          'Only PDF and image files are allowed and each file must be less than 4.5MB',
       }
     ),
+  dealId: z.string().optional(),
 });
 
 export type PdfBulkUploadSchema = z.infer<typeof zPdfBulkUploadSchema>;

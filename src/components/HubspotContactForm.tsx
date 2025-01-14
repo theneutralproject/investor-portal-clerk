@@ -34,7 +34,7 @@ export function HubspotContactForm({
 
   const defaultTrigger = (
     <Button
-      variant="neutralBlack"
+      variant="grayPill"
       sx={{ p: '4px 20px', borderRadius: '99px' }}
       fullWidth
       onClick={() => {

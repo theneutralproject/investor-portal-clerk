@@ -67,7 +67,6 @@ export async function resetOrgInDb(
       },
     }
   );
-  /* eslint-disable-next-line @typescript-eslint/no-unsafe-assignment */
   const body: OrganizationWithMembersAndAddress = await JSON.parse(
     await response.text()
   );
@@ -98,6 +97,7 @@ export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
 }
 
 export async function clearAllTestDeals() {
+  console.log('begin clearing all test deals');
   const testUser = await prisma.user.findFirst({
     where: { email: `${process.env.E2E_CLERK_USER_USERNAME}` },
   });

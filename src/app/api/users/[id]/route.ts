@@ -88,7 +88,10 @@ export async function PUT(request: NextRequest) {
   try {
     putData = zUserUpdateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error('ERROR: unable to parse PUT body:\n', parseError);
+    console.error(
+      'ERROR: unable to parse user/id PUT body:\n',
+      getErrorMessage(parseError)
+    );
     return jsonResponse(
       { error: `Input data malformatted: \n${(parseError as Error).message}` },
       400

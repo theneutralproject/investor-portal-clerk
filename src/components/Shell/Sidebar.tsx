@@ -40,6 +40,11 @@ export const ROUTES = [
     icon: HomeIcon,
   },
   {
+    name: 'Documents',
+    path: '/documents',
+    icon: DescriptionIcon,
+  },
+  {
     name: 'Learn',
     path: '/learn',
     icon: InfoIcon,

@@ -161,7 +161,7 @@ const DealFlowEntityDetails: React.FC = () => {
       />
       <EncryptionCard />
       <DealFlowFooter
-        onBack={() => null}
+        
         onContinue={handleContinue}
         isContinueDisabled={!allRequiredDocumentsAreUploaded()}
       />
