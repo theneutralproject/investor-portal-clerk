@@ -2,7 +2,19 @@
   "name": "investor-portal-clerk",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
+  "type": "module",  
+  "lint-staged": {
+    "src/*.{ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "engines": {
+    "node": "20.18"
+  },
   "scripts": {
     "build": "next build",
     "db:push": "prisma db push",
