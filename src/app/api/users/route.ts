@@ -8,6 +8,7 @@ import {
   type UserUpdateSchema,
   zUserUpdateSchema,
 } from '@/libs/user/schema';
+import { updateHubspotContact } from '@/libs/hubspot/utils';
 import { sanitizeUser } from '@/libs/user/utils';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
@@ -64,13 +65,17 @@ export async function PUT(request: NextRequest) {
   try {
     putData = zUserUpdateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error('ERROR: unable to parse PUT body:\n', parseError);
+    console.error(
+      'ERROR: unable to parse users PUT body:\n',
+      getErrorMessage(parseError)
+    );
     return jsonResponse(
       { error: `Input data malformatted: \n${(parseError as Error).message}` },
       400
     );
   }
 
+  //TODO: use new updateUserInDbAndHubspot function instead of this, but might need to unsanitize ssn first
   const { address, ...userData } = putData;
   //  Check if hubspot and clerk needs to be updated, and then update them
   // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
@@ -90,18 +95,9 @@ export async function PUT(request: NextRequest) {
     }
 
     try {
-      putData = zUserUpdateSchema.parse(requestBody);
-    } catch (parseError) {
-      console.error(
-        'ERROR: unable to parse users PUT body:\n',
-        getErrorMessage(parseError)
-      );
-      return jsonResponse(
-        {
-          error: `Input data malformatted: \n${(parseError as Error).message}`,
-        },
-        400
-      );
+      await updateHubspotContact(hsUpdateData);
+    } catch (hsError) {
+      console.log(hsError);
     }
     try {
       await clerkClient.users.updateUser(clerkUser.id, clerkUpdate);

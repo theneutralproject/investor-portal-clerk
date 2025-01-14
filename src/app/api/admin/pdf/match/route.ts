@@ -6,6 +6,7 @@ import type { NextRequest } from 'next/server';
 import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
+import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -13,28 +14,35 @@ import { storageClient } from '@/libs/supabase';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  // check if they are an admin user by checkingthe auth token
+  // check if they are an admin user by checking the auth token
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
     return jsonResponse(getErrorMessage(adminUser), 401);
   }
 
-  // get all deals
-  const deals = await prisma.deal.findMany({
-    include: {
-      organization: {
-        include: {
-          members: { include: { user: { include: { address: true } } } },
-          address: true,
-        },
-      },
-      project: true,
-    },
-  });
+  let taxYear: number | null = null;
+  try {
+    const url = new URL(request.url);
+    const queryParams = new URLSearchParams(url.search);
+    taxYear = parseInt(queryParams.get('taxYear') ?? '-1');
+  } catch (error) {
+    console.error('unable to read query params:', getErrorMessage(error));
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+
+  if (!taxYear || taxYear < 2018) {
+    return jsonResponse(
+      'taxYear query param is required and must be 2018 or later',
+      400
+    );
+  }
+
+  let pdfFiles: FormDataEntryValue[] = [];
   try {
     const formData = await request.formData();
-    const { files } = zPdfBulkUploadSchema.parse(formData);
+    const files = formData.getAll('files');
+    pdfFiles = zPdfBulkUploadSchema.parse(files);
     const { data, error } = await storageClient
       .from(`deal-documents`)
       .list('tempPdfStorage');
@@ -43,7 +51,6 @@ export async function POST(request: NextRequest) {
     }
     if (data?.length) {
       console.log('Deleting all files in tempPdfStorage folder');
-      console.log(data.map(file => file.name));
       const deleteResult = await storageClient
         .from(`deal-documents`)
         .remove(data.map(file => `tempPdfStorage/${file.name}`));
@@ -56,30 +63,59 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+  } catch (error) {
+    console.error('unable to read form data');
+    return jsonResponse({ error: getErrorMessage(error) }, 500);
+  }
 
+  let deals: DealWithFullOrgAndSlimProject[] = [];
+  try {
+    // get all closed deals
+    deals = await prisma.deal.findMany({
+      where: {
+        dealStage: 5,
+        closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
+      },
+      include: {
+        organization: {
+          include: {
+            members: { include: { user: { include: { address: true } } } },
+            address: true,
+          },
+        },
+        project: true,
+      },
+    });
+  } catch (error) {
+    console.error('unable to get deals from database');
+    return jsonResponse({ error: getErrorMessage(error) }, 500);
+  }
+
+  try {
     const retArr = [] as MatchResponseObject[];
-    for (const file of files) {
-      const { error } = await storageClient
-        .from(`deal-documents`)
-        // @ts-expect-error will fix later
-        .upload(`tempPdfStorage/${file.name}`, file, {
-          // @ts-expect-error will fix later
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
-          contentType: file.type,
-        });
-      if (error) {
-        console.error('unable to upload file to temp storage:');
-        console.error(error.message);
-        console.error(error);
-        return jsonResponse({ error: getErrorMessage(error) }, 500);
+    const matchPromises = pdfFiles.map(async file => {
+      if (file instanceof File) {
+        const { name, type } = file;
+        console.log(`Uploading ${name} to temp storage`);
+        const { error } = await storageClient
+          .from(`deal-documents`)
+          .upload(`tempPdfStorage/${name}`, file, { contentType: type });
+        if (error) {
+          console.error(`unable to upload file ${name} to temp storage:`);
+          console.error(error.message);
+          console.error(error);
+          return jsonResponse({ error: getErrorMessage(error) }, 500);
+        }
+
+        // match the files to the correct deal
+        const match = await matchDealWithPdf(deals, file);
+        retArr.push(match);
+      } else {
+        console.error('file is not instance of File');
+        return jsonResponse({ error: 'file is not instance of File' }, 400);
       }
-
-      // match the files to the correct deal
-      // @ts-expect-error will fix later
-      const match = await matchDealWithPdf(deals, file);
-      retArr.push(match);
-    }
-
+    });
+    await Promise.all(matchPromises);
     return jsonResponse(retArr);
   } catch (err) {
     console.error(err);

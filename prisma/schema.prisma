@@ -373,6 +373,7 @@ enum DealUnitType {
   AUNIT
   BUNIT
   CUNIT
+  BUNIT
 }
 
 enum VerificationBasis {

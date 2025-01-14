@@ -92,7 +92,7 @@ export const DealOwnershipTypeSchema = z.enum(['INDIVIDUAL','JOINT','CORPORATION
 
 export type DealOwnershipTypeType = `${z.infer<typeof DealOwnershipTypeSchema>}`
 
-export const DealUnitTypeSchema = z.enum(['AUNIT','BUNIT','CUNIT']);
+export const DealUnitTypeSchema = z.enum(['AUNIT','CUNIT','BUNIT']);
 
 export type DealUnitTypeType = `${z.infer<typeof DealUnitTypeSchema>}`
 
