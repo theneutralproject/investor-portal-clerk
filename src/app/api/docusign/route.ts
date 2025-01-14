@@ -40,7 +40,8 @@ async function createNewEnvelopeDefinition(
     );
     return envelopeResponse;
   } catch (err) {
-    console.error('CANNOT CREATE ENVELOPE:', getErrorMessage(err));
+    console.error('CANNOT CREATE ENVELOPE:');
+    console.error(err);
     throw new Error(getErrorMessage(err));
   }
 }
@@ -198,14 +199,14 @@ export async function POST(req: Request) {
         existingDocusignEvent.envelopeId
       );
       if (isError(envelopeResponse)) {
-        console.error('returning error for bad envelopeResponse');
+        console.error('returning error for bad envelopeResponse1');
         return new Response(JSON.stringify('unable to get envelope'), {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
         });
       }
     } catch (err) {
-      console.error('returning error for bad envelopeResponse');
+      console.error('returning error for bad envelopeResponse2');
       return new Response(JSON.stringify('unable to get envelope'), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -222,15 +223,8 @@ export async function POST(req: Request) {
         userWOrgsAndAddress,
         organization
       );
-      if (isError(envelopeResponse)) {
-        console.error('returning error for bad envelopeResponse');
-        return new Response(JSON.stringify('unable to create envelope'), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
     } catch (err) {
-      console.error('returning error for bad envelopeResponse');
+      console.error('returning error for bad envelopeResponse4', getErrorMessage(err));
       return new Response(JSON.stringify('unable to create envelope'), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
@@ -239,7 +233,7 @@ export async function POST(req: Request) {
   }
 
   if (!envelopeResponse.envelopeId) {
-    console.error('returning error for bad envelopeResponse');
+    console.error('returning error for bad envelopeResponse5');
     return new Response(JSON.stringify('unable to get envelope'), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

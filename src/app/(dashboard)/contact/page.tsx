@@ -82,7 +82,7 @@ const ContactMethod = ({
     if (buttonText === 'Visit Learn Page') {
       return (
         <Button
-          variant="neutralBlack"
+          variant="grayPill"
           color="primary"
           sx={{ marginTop: 2, p: '4px 20px', borderRadius: '99px' }}
           onClick={() => router.push('/learn')}
@@ -94,7 +94,7 @@ const ContactMethod = ({
 
     return (
       <Button
-        variant="neutralBlack"
+        variant="grayPill"
         color="primary"
         sx={{ marginTop: 2, p: '4px 20px', borderRadius: '99px' }}
       >

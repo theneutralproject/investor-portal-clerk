@@ -4,13 +4,45 @@ import type { HubspotContactCreateUpdateSchema } from '../hubspot/schema';
 import {
   associateContactWithDealInHubspot,
   createHubspotContact,
+  ReferralSource,
   updateHubspotContact,
 } from '../hubspot/utils';
 import prisma from '../prisma.server';
-import type { UserCreateSchema } from './schema';
+import type {
+  ClerkUserUpdateSchema,
+  UserCreateSchema,
+  UserUpdateSchema,
+} from './schema';
 import { getErrorMessage } from '../utils';
-import { type Deal, MembershipType, Role, type User } from '@prisma/client';
+import { type Deal, MembershipType, type User } from '@prisma/client';
 import type { UserWithAddress } from '../types';
+import type { AddressCreateSchema } from '../address/schema';
+import { clerkClient } from '@clerk/nextjs/server';
+
+const getHsUserData = (
+  userData: UserCreateSchema | UserUpdateSchema,
+  address: AddressCreateSchema | undefined
+) => {
+  const hsUserData: HubspotContactCreateUpdateSchema = {
+    email: userData.email,
+    properties: {},
+  };
+  if (userData.firstName) hsUserData.properties.firstname = userData.firstName;
+  if (userData.lastName) hsUserData.properties.lastname = userData.lastName;
+  if ('clerkId' in userData && userData.clerkId)
+    hsUserData.properties.userid = userData.clerkId;
+  if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
+
+  if (address) {
+    hsUserData.properties.address = address.street;
+    hsUserData.properties.state = address.state;
+    hsUserData.properties.city = address.city;
+    hsUserData.properties.zip = address.zipcode;
+    hsUserData.properties.country = address.country;
+  }
+
+  return hsUserData;
+};
 
 /**
  * creates a user in both hubspot and our DB
@@ -32,23 +64,7 @@ export async function createUserInDbAndHubspot(
     }
   }
   /* Upsert user in Hubspot**/
-  const hsUserData: HubspotContactCreateUpdateSchema = {
-    email: userData.email,
-    properties: {
-      userid: userData.clerkId ?? 'invitePending',
-      firstname: userData.firstName,
-      lastname: userData.lastName,
-    },
-  };
-  if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
-
-  if (address) {
-    hsUserData.properties.address = address.street;
-    hsUserData.properties.state = address.state;
-    hsUserData.properties.city = address.city;
-    hsUserData.properties.zip = address.zipcode;
-    hsUserData.properties.country = address.country;
-  }
+  const hsUserData = getHsUserData(userData, address);
 
   let hsContactId: string;
   if (userData.hubspotId) {
@@ -58,7 +74,7 @@ export async function createUserInDbAndHubspot(
     try {
       await updateHubspotContact(hsUserData);
     } catch (error) {
-      console.error('Unable to update user in hubspot:\n', error);
+      console.error('Unable to update user in hubspot1:\n', error);
     }
   } else {
     // create new user in hubspot
@@ -99,6 +115,7 @@ export async function createUserInDbAndHubspot(
         name: `${userData.firstName} ${userData.lastName}'s Organization`,
         ownedBy: { connect: { id: dbUser.id } },
         members: { create: { userId: dbUser.id, type: MembershipType.OWNER } },
+        isPrimary: true,
       },
     });
     userOrgId = userOrg.id;
@@ -106,7 +123,9 @@ export async function createUserInDbAndHubspot(
     // add orgId to user
     updatedUser = await prisma.user.update({
       where: { id: dbUser.id },
-      data: { userOrgId },
+      data: {
+        userOrgId,
+      },
     });
   } catch (error) {
     // this should only happen if a duplicate webhook is received from clerk
@@ -117,7 +136,7 @@ export async function createUserInDbAndHubspot(
     });
     if (!existingUser) {
       console.error(
-        'User neither created nor found  in DB:\n',
+        'User neither created nor found in DB - smells fishy!:\n',
         getErrorMessage(error)
       );
       throw new Error(getErrorMessage(error));
@@ -139,16 +158,86 @@ export async function createUserInDbAndHubspot(
   return updatedUser;
 }
 
+export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
+  const { address, ...userData } = data;
+  if (!userData.id) {
+    throw new Error('User ID is required to update user');
+  }
+
+  // update user and address in db
+  try {
+    if (address) {
+      // upsert address
+      await prisma.address
+        .upsert({
+          where: { userId: userData.id },
+          create: { ...address, userId: userData.id },
+          update: { ...address, userId: userData.id },
+        })
+        .catch(error => {
+          console.error('ERROR: unable to upsert address:\n', error);
+          throw new Error(getErrorMessage(error));
+        });
+    }
+
+    if (userData.ssn) {
+      if (userData.ssn.length === 0) {
+        delete userData.ssn;
+      } else if (userData.ssn.startsWith('***-**')) {
+        delete userData.ssn;
+      } else {
+        const presanitizedSSN = userData.ssn.replace(/\D/g, '');
+        if (presanitizedSSN.length !== 9) {
+          throw new Error('SSN must be 9 digits');
+        }
+        userData.ssn = presanitizedSSN;
+      }
+    }
+    if (userData.phoneNumber)
+      userData.phoneNumber = userData.phoneNumber.replace(/\D/g, '');
+    if (userData.phoneNumber?.length === 0) delete userData.phoneNumber;
+
+    if (userData.email) delete userData.email; // email is not updatable
+    if (userData.referralsource) {
+      if (userData.referralsource?.length === 0) delete userData.referralsource;
+      else if (
+        ReferralSource[
+          userData.referralsource as unknown as keyof typeof ReferralSource
+        ] === undefined
+      ) {
+        throw new Error('Invalid referral source');
+      }
+    }
+
+    // update user
+    const updatedUser = await prisma.user.update({
+      where: { id: userData.id },
+      data: userData,
+      include: { address: true },
+    });
+
+    /* Upsert user in Hubspot**/
+    const hsUserData = getHsUserData(userData, address);
+    hsUserData.hubspotId = updatedUser.hubspotId;
+    await updateHubspotContact(hsUserData);
+
+    // update them in clerk
+    const clerkUpdate: ClerkUserUpdateSchema = {
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+    };
+    await clerkClient.users.updateUser(updatedUser.clerkId!, clerkUpdate);
+
+    return updatedUser;
+  } catch (error) {
+    console.error('ERROR: unable to update user:\n', error);
+    throw new Error(getErrorMessage(error));
+  }
+}
+
 export function sanitizeUser(user: User | UserWithAddress) {
   return {
     ...user,
     ssn: user.ssn ? `***-**-${user.ssn.slice(-4)}` : null,
   };
-}
-
-export async function isAdminUser(clerkId: string): Promise<boolean> {
-  const user = await prisma.user.findFirst({
-    where: { clerkId, role: Role.ADMIN },
-  });
-  return !!user;
 }
