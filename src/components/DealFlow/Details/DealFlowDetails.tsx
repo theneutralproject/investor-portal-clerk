@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -8,27 +8,27 @@ import {
   Card,
   CardContent,
   Tooltip,
-} from "@mui/material";
-import Grid from "@mui/material/Grid2";
-import { zUserUpdateSchema, type UserUpdateSchema } from "@/libs/user/schema";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import { usStates } from "@components/DealFlow/Helpers/DealFlowHelpers";
-import { type Address } from "@prisma/client";
-import InfoIcon from "@mui/icons-material/Info";
-import LockIcon from "@mui/icons-material/Lock";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+} from '@mui/material';
+import Grid from '@mui/material/Grid2';
+import { zUserUpdateSchema, type UserUpdateSchema } from '@/libs/user/schema';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import { usStates } from '@components/DealFlow/Helpers/DealFlowHelpers';
+import { type Address } from '@prisma/client';
+import InfoIcon from '@mui/icons-material/Info';
+import LockIcon from '@mui/icons-material/Lock';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 
 const EncryptionCard = () => {
   return (
     <Card>
       <CardContent>
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <LockIcon sx={{ fontSize: 20, color: "text.secondary" }} />
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <LockIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
           <Typography
             variant="subtitle1"
             component="div"
-            sx={{ fontWeight: 500, color: "text.primary" }}
+            sx={{ fontWeight: 500, color: 'text.primary' }}
           >
             256-Bit Encryption
           </Typography>
@@ -36,9 +36,9 @@ const EncryptionCard = () => {
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
+            color: 'text.secondary',
             mt: 0.5,
-            pl: "28px",
+            pl: '28px',
           }}
         >
           Neutral uses industry-standard 256-bit encryption to ensure that your
@@ -57,17 +57,17 @@ const DealFlowDetails: React.FC = () => {
     if (user) {
       setFormData({
         id: user.id,
-        firstName: user.firstName ?? "",
-        lastName: user.lastName ?? "",
-        ssn: user.ssn ?? "",
-        phoneNumber: user.phoneNumber ?? "",
+        firstName: user.firstName ?? '',
+        lastName: user.lastName ?? '',
+        ssn: user.ssn ?? '',
+        phoneNumber: user.phoneNumber ?? '',
         dateOfBirth: user.dateOfBirth,
         address: user.address ?? {
-          street: "",
-          city: "",
-          zipcode: "",
-          state: "",
-          country: "United States",
+          street: '',
+          city: '',
+          zipcode: '',
+          state: '',
+          country: 'United States',
         },
       });
     }
@@ -77,16 +77,14 @@ const DealFlowDetails: React.FC = () => {
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setFormData((prevData) =>
-      prevData ? { ...prevData, [name]: value } : null
-    );
+    setFormData(prevData => (prevData ? { ...prevData, [name]: value } : null));
   };
 
   const handleAddressChange = (
     event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = event.target;
-    setFormData((prevData) =>
+    setFormData(prevData =>
       prevData
         ? {
             ...prevData,
@@ -96,11 +94,11 @@ const DealFlowDetails: React.FC = () => {
                   [name]: value,
                 }
               : {
-                  street: "",
-                  city: "",
-                  zipcode: "",
-                  state: "",
-                  country: "United States",
+                  street: '',
+                  city: '',
+                  zipcode: '',
+                  state: '',
+                  country: 'United States',
                   [name]: value,
                 },
           }
@@ -123,7 +121,7 @@ const DealFlowDetails: React.FC = () => {
           : null;
         void updateUser({ ...validatedData, dateOfBirth, address });
       } catch (error) {
-        console.error("Validation error:", error);
+        console.error('Validation error:', error);
       }
     }
   };
@@ -210,7 +208,7 @@ const DealFlowDetails: React.FC = () => {
         <Grid size={6}>
           <Autocomplete
             options={usStates}
-            renderInput={(params) => (
+            renderInput={params => (
               <TextField
                 {...params}
                 label="State"
@@ -221,7 +219,7 @@ const DealFlowDetails: React.FC = () => {
             value={formData.address?.state}
             onChange={(_, newValue) =>
               handleAddressChange({
-                target: { name: "state", value: newValue ?? "" },
+                target: { name: 'state', value: newValue ?? '' },
               } as React.ChangeEvent<HTMLInputElement>)
             }
           />
@@ -241,21 +239,21 @@ const DealFlowDetails: React.FC = () => {
             slotProps={{
               popper: {
                 sx: {
-                  ".MuiTooltip-tooltip": {
-                    backgroundColor: "#ffffff",
-                    boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.15)",
+                  '.MuiTooltip-tooltip': {
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.15)',
                   },
                 },
               },
             }}
             title={
               <Typography variant="body2">
-                If you are investing from abroad, please get in touch with us{" "}
+                If you are investing from abroad, please get in touch with us{' '}
                 <a
                   href="https://neutral.us/contact"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: "inherit", textDecoration: "underline" }}
+                  style={{ color: 'inherit', textDecoration: 'underline' }}
                 >
                   here
                 </a>
@@ -263,7 +261,7 @@ const DealFlowDetails: React.FC = () => {
             }
             placement="right"
           >
-            <Box sx={{ display: "flex", alignItems: "center" }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <TextField
                 fullWidth
                 variant="standard"

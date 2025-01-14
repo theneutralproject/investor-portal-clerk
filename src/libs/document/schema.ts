@@ -1,12 +1,12 @@
-import { DealDocumentType, DocumentEventType } from "@prisma/client";
-import { z } from "zod";
-import * as zfd from "zod-form-data";
+import { DealDocumentType, DocumentEventType } from '@prisma/client';
+import { z } from 'zod';
+import * as zfd from 'zod-form-data';
 
 const ACCEPTED_FILE_TYPES = [
-  "application/pdf",
-  "image/png",
-  "image/jpg",
-  "image/jpeg",
+  'application/pdf',
+  'image/png',
+  'image/jpg',
+  'image/jpeg',
 ] as const;
 
 const MAX_FILE_SIZE = 10; // In MegaBytes
@@ -17,27 +17,27 @@ const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
 };
 
 // Refined type guards and validation
-const isClient = typeof window !== "undefined";
+const isClient = typeof window !== 'undefined';
 const hasFileProperties = (
   value: unknown
 ): value is { size: number; type: string } => {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
-    "size" in value &&
-    "type" in value &&
+    'size' in value &&
+    'type' in value &&
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access , @typescript-eslint/no-explicit-any
-    typeof (value as any).size === "number" &&
+    typeof (value as any).size === 'number' &&
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access , @typescript-eslint/no-explicit-any
-    typeof (value as any).type === "string"
+    typeof (value as any).type === 'string'
   );
 };
 
 // Generic file validation schema that works in both client and server contexts
 const createFileSchema = () =>
-  z.custom<File | FormDataEntryValue>((file) => {
+  z.custom<File | FormDataEntryValue>(file => {
     if (!file) {
-      throw new Error("File is required");
+      throw new Error('File is required');
     }
 
     // Skip detailed validation on server side
@@ -47,7 +47,7 @@ const createFileSchema = () =>
 
     // Client-side validation
     if (!(file instanceof File)) {
-      throw new Error("Invalid file type");
+      throw new Error('Invalid file type');
     }
 
     if (
@@ -56,7 +56,7 @@ const createFileSchema = () =>
       )
     ) {
       throw new Error(
-        `File type must be one of ${ACCEPTED_FILE_TYPES.join(", ")}`
+        `File type must be one of ${ACCEPTED_FILE_TYPES.join(', ')}`
       );
     }
 
@@ -71,7 +71,7 @@ const createFileSchema = () =>
 export const zPdfDocumentCreateSchema = z.object({
   dealId: z
     .union([z.string(), z.number()])
-    .transform((val) => {
+    .transform(val => {
       if (!val) return null;
       const num = Number(val);
       return isNaN(num) ? null : num;
@@ -79,13 +79,13 @@ export const zPdfDocumentCreateSchema = z.object({
     .nullable(),
   organizationId: z
     .union([z.string(), z.number()])
-    .transform((val) => {
+    .transform(val => {
       if (!val) return null;
       const num = Number(val);
       return isNaN(num) ? null : num;
     })
     .nullable(),
-  type: z.string().refine((val) => ["organization", "deal"].includes(val), {
+  type: z.string().refine(val => ['organization', 'deal'].includes(val), {
     message: "Type must be either 'organization' or 'deal'",
   }),
   file: createFileSchema(),
@@ -107,24 +107,25 @@ export type DocumentEventCreateSchema = z.infer<
 >;
 
 export const zPdfBulkUploadSchema = z
-.array(createFileSchema())
-.nonempty()
-.max(20)
-.refine(
-  (files) => {
-    return files.every((file) => {
-      if (!hasFileProperties(file)) return false;
-      return (
-        sizeInMB(file.size) <= MAX_FILE_SIZE &&
-        file.type === "application/pdf" || file.type.startsWith("image/")
-      );
-    });
-  },
-  {
-    message:
-      "Only PDF and image files are allowed and each file must be less than 4MB",
-  }
-);
+  .array(createFileSchema())
+  .nonempty()
+  .max(20)
+  .refine(
+    files => {
+      return files.every(file => {
+        if (!hasFileProperties(file)) return false;
+        return (
+          (sizeInMB(file.size) <= MAX_FILE_SIZE &&
+            file.type === 'application/pdf') ||
+          file.type.startsWith('image/')
+        );
+      });
+    },
+    {
+      message:
+        'Only PDF and image files are allowed and each file must be less than 4MB',
+    }
+  );
 
 // Schema for bulk file uploads
 export const zPdfBulkUploadSchemaOld = zfd.formData({
@@ -133,18 +134,19 @@ export const zPdfBulkUploadSchemaOld = zfd.formData({
     .nonempty()
     .max(20)
     .refine(
-      (files) => {
-        return files.every((file) => {
+      files => {
+        return files.every(file => {
           if (!hasFileProperties(file)) return false;
           return (
-            sizeInMB(file.size) <= MAX_FILE_SIZE &&
-            file.type === "application/pdf" || file.type.startsWith("image/")
+            (sizeInMB(file.size) <= MAX_FILE_SIZE &&
+              file.type === 'application/pdf') ||
+            file.type.startsWith('image/')
           );
         });
       },
       {
         message:
-          "Only PDF and image files are allowed and each file must be less than 4MB",
+          'Only PDF and image files are allowed and each file must be less than 4MB',
       }
     ),
   dealId: z.string().optional(),
