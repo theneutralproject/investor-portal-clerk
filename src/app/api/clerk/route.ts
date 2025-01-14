@@ -34,13 +34,13 @@ export async function POST(request: Request) {
       } = data;
 
       const email = primary_email_address_id
-        ? (email_addresses.find(({ id }) => id === primary_email_address_id)
-            ?.email_address ?? '')
-        : (email_addresses[0]?.email_address ?? '');
+        ? email_addresses.find(({ id }) => id === primary_email_address_id)
+            ?.email_address ?? ''
+        : email_addresses[0]?.email_address ?? '';
       const phonenumber = primary_phone_number_id
-        ? (phone_numbers.find(({ id }) => id === primary_phone_number_id)
-            ?.phone_number ?? '')
-        : (phone_numbers[0]?.phone_number ?? '');
+        ? phone_numbers.find(({ id }) => id === primary_phone_number_id)
+            ?.phone_number ?? ''
+        : phone_numbers[0]?.phone_number ?? '';
       if (email === '') {
         // TODO: log this error. The user will not be created in the DB!
         console.error('No email found for user', data);
@@ -67,11 +67,19 @@ export async function POST(request: Request) {
         await createUserInDbAndHubspot(newUserData);
         break;
       } catch (userCreateError) {
+        console.error('Error creating user in DB', userCreateError);
         return new Response(JSON.stringify(userCreateError), {
           status: 500,
           headers: { 'Content-Type': 'application/json' },
         });
       }
+    }
+    case 'user.updated': {
+      console.warn(
+        'user updated event received - but not yet implemented',
+        data
+      );
+      break;
     }
     case 'session.created': /** FALL THROUGH SWITCHES */
     case 'session.ended':

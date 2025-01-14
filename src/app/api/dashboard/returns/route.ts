@@ -79,16 +79,16 @@ export async function GET() {
   const resolvedSchedules = deals.map(async deal => {
     const { project, investmentStats, closingDate } = deal;
     if (!investmentStats) {
-      console.error(`Investment stats missing for deal ${deal.id}`);
+      console.error(`!!!Investment stats missing for deal ${deal.id}. The deal will not be processed!`);
       return [];
     }
     if (!closingDate) {
-      console.error(`Closing date is missing for deal ${deal.id}`);
+      console.error(`!!!Closing date is missing for deal ${deal.id}. The deal will not be processed!`);
       return [];
     }
     if (!project?.milestones || !project.equityReturnsFile) {
       console.error(
-        `Project milestones or equity returns file not found for project  of deal ${deal.id}`
+        `!!!Project milestones or equity returns file not found for project of deal ${deal.id}. The deal will not be processed!`
       );
       return [];
     }

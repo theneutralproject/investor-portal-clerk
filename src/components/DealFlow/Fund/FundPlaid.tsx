@@ -1,11 +1,20 @@
 import React from 'react';
-import { Box, Card, CardContent, Stack, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
 import PlaidLinkClass from '@/components/DealFlow/Fund/PlaidLink';
 import { useDealFlow } from '@/components/DealFlow/Shared/DealFlowContext';
 import DealFlowTitle from '@/components/DealFlow/Shared/DealFlowTitle';
+import DealFlowFooter from '../Shared/DealFlowFooter';
 
 interface FundPlaidProps {
   merchantId: string;
+  onBack?: () => void;
 }
 
 const PlaidLogo = () => (
@@ -50,7 +59,7 @@ const PlaidLogo = () => (
   </svg>
 );
 
-const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
+const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId, onBack }) => {
   const { deal, refetchDeal, project } = useDealFlow();
   return (
     <Box sx={{ p: 3 }}>
@@ -107,6 +116,10 @@ const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
           </Typography>
         </CardContent>
       </Card>
+
+      <Button variant="blackPill" onClick={onBack}>
+        Back
+      </Button>
     </Box>
   );
 };

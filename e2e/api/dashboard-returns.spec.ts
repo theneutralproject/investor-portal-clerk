@@ -18,6 +18,15 @@ test.describe('api/dashboard/returns test', () => {
     financingType: DealFinancingType.promissory_note_now,
     amount: 100000,
   };
+  
+  const debtDealData2: DealCreateSchema = {
+    organizationId: 4,
+    projectId: 1,
+    dealStage: 1,
+    transactionId: 'test-deal-debt2',
+    financingType: DealFinancingType.promissory_note_now,
+    amount: 100000,
+  };
 
   test.beforeEach(async ({ request }) => {
     try {
@@ -125,14 +134,6 @@ test.describe('api/dashboard/returns test', () => {
   test('[GET] get dashboard returns for multiple DEBT deals starting on offset days', async ({
     request,
   }) => {
-    const debtDealData2: DealCreateSchema = {
-      organizationId: 4,
-      projectId: 1,
-      dealStage: 1,
-      transactionId: 'test-deal-debt2',
-      financingType: DealFinancingType.promissory_note_now,
-      amount: 100000,
-    };
     try {
       // create first debt deal
       const dealCreateResponse = await request.post('/api/deals', {
@@ -321,6 +322,11 @@ test.describe('api/dashboard/returns test', () => {
       financingType: DealFinancingType.equity,
       amount: 5000,
     };
+      // create first debt deal
+      const dealCreateResponse = await request.post('/api/deals', {
+        data: debtDealData2,
+      });
+      debtDeal2 = await JSON.parse(await dealCreateResponse.text());
 
     const equityDealData2: DealCreateSchema = {
       organizationId: 4,

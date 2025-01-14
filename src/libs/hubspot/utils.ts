@@ -12,14 +12,13 @@ import {
 import type { DealUpdateSchema, DealCreateSchema } from '../deal/schema';
 import { getErrorMessage } from '../utils';
 import { getInvestmentEntity } from '../deal/utils';
-import { ProjectName } from '@/libs/project/schema';
-
 import { Client } from '@hubspot/api-client';
 import {
   FilterOperatorEnum,
   type SimplePublicObject,
   type PublicObjectSearchRequest,
 } from '@hubspot/api-client/lib/codegen/crm/deals';
+import { ProjectName } from '../project/schema';
 
 const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
@@ -66,7 +65,7 @@ export async function createHubspotContact(
       await updateHubspotContact(hubspotContact);
       return hsId;
     } catch (error) {
-      console.error('Unable to update user in hubspot:\n', error);
+      console.error('Unable to update user in hubspot2:\n', error);
       throw new Error(getErrorMessage(error));
     }
   }
@@ -100,7 +99,7 @@ export async function updateHubspotContact(
     );
     return hsUpdateRes.id;
   } catch (error) {
-    console.error('Unable to update user in hubspot:\n', error);
+    console.error('Unable to update user in hubspot3:\n', error);
     throw new Error(getErrorMessage(error));
   }
 }
@@ -134,8 +133,9 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   } as PublicObjectSearchRequest;
 
   try {
-    const dealSearchRes =
-      await hubspotClient.crm.deals.searchApi.doSearch(dealSearchRequest);
+    const dealSearchRes = await hubspotClient.crm.deals.searchApi.doSearch(
+      dealSearchRequest
+    );
     console.log(`found ${dealSearchRes.results.length} deals`);
     deals = dealSearchRes.results ?? [];
   } catch (e) {
@@ -299,8 +299,8 @@ export async function createHubspotDeal(
     const { dealId } = zHsDealCreateResponse.parse(hsDealCreateRespBody);
     return dealId.toString();
   } catch (error) {
-    console.error('No good hs deal making:\n', error);
-    throw new Error(getErrorMessage(error));
+    console.error('hubspot response error:\n', hsDealCreateRespBody);
+    throw new Error(getErrorMessage(getErrorMessage(error)));
   }
 }
 
