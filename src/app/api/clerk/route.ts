@@ -19,7 +19,25 @@ async function validateRequest(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { type, data } = await validateRequest(request);
+  let validated;
+  try {
+    validated = await validateRequest(request);
+  } catch (err) {
+    console.error('Validation failed:', err);
+    return new Response(JSON.stringify({ error: 'Invalid request' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  if (!validated) {
+    return new Response(JSON.stringify({ error: 'Validation returned no data' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' },
+    });
+  }
+
+  const { type, data } = validated;
   console.log('clerk webhook received of type:', type);
   switch (type) {
     case 'user.created': {
@@ -67,10 +85,11 @@ export async function POST(request: Request) {
         await createUserInDbAndHubspot(newUserData);
         break;
       } catch (userCreateError) {
-        return new Response(JSON.stringify(userCreateError), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        console.error('Error creating user in DB/HubSpot:', userCreateError);
+        return new Response(
+          JSON.stringify({ message: (userCreateError as Error).message }),
+          { status: 500, headers: { 'Content-Type': 'application/json' } }
+        );
       }
     }
     case 'session.created': /** FALL THROUGH SWITCHES */

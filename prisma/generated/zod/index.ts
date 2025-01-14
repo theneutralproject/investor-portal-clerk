@@ -92,7 +92,7 @@ export const DealOwnershipTypeSchema = z.enum(['INDIVIDUAL','JOINT','CORPORATION
 
 export type DealOwnershipTypeType = `${z.infer<typeof DealOwnershipTypeSchema>}`
 
-export const DealUnitTypeSchema = z.enum(['AUNIT','BUNIT','CUNIT']);
+export const DealUnitTypeSchema = z.enum(['AUNIT','CUNIT','BUNIT']);
 
 export type DealUnitTypeType = `${z.infer<typeof DealUnitTypeSchema>}`
 
@@ -13309,6 +13309,11 @@ export const UserUpdateManyArgsSchema: z.ZodType<Prisma.UserUpdateManyArgs> = z.
   where: UserWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyUserCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyUserCreateManyAndReturnArgs> = z.object({
+  data: z.union([ UserUpdateManyMutationInputSchema,UserUncheckedUpdateManyInputSchema ]),
+  where: UserWhereInputSchema.optional(),
+}).strict() ;
+
 export const UserDeleteManyArgsSchema: z.ZodType<Prisma.UserDeleteManyArgs> = z.object({
   where: UserWhereInputSchema.optional(),
 }).strict() ;
@@ -13351,6 +13356,11 @@ export const DealUpdateArgsSchema: z.ZodType<Prisma.DealUpdateArgs> = z.object({
 }).strict() ;
 
 export const DealUpdateManyArgsSchema: z.ZodType<Prisma.DealUpdateManyArgs> = z.object({
+  data: z.union([ DealUpdateManyMutationInputSchema,DealUncheckedUpdateManyInputSchema ]),
+  where: DealWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyDealCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyDealCreateManyAndReturnArgs> = z.object({
   data: z.union([ DealUpdateManyMutationInputSchema,DealUncheckedUpdateManyInputSchema ]),
   where: DealWhereInputSchema.optional(),
 }).strict() ;
@@ -13401,6 +13411,11 @@ export const DealInvestmentStatsUpdateManyArgsSchema: z.ZodType<Prisma.DealInves
   where: DealInvestmentStatsWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyDealInvestmentStatsCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyDealInvestmentStatsCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DealInvestmentStatsUpdateManyMutationInputSchema,DealInvestmentStatsUncheckedUpdateManyInputSchema ]),
+  where: DealInvestmentStatsWhereInputSchema.optional(),
+}).strict() ;
+
 export const DealInvestmentStatsDeleteManyArgsSchema: z.ZodType<Prisma.DealInvestmentStatsDeleteManyArgs> = z.object({
   where: DealInvestmentStatsWhereInputSchema.optional(),
 }).strict() ;
@@ -13443,6 +13458,11 @@ export const OrganizationUpdateArgsSchema: z.ZodType<Prisma.OrganizationUpdateAr
 }).strict() ;
 
 export const OrganizationUpdateManyArgsSchema: z.ZodType<Prisma.OrganizationUpdateManyArgs> = z.object({
+  data: z.union([ OrganizationUpdateManyMutationInputSchema,OrganizationUncheckedUpdateManyInputSchema ]),
+  where: OrganizationWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyOrganizationCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyOrganizationCreateManyAndReturnArgs> = z.object({
   data: z.union([ OrganizationUpdateManyMutationInputSchema,OrganizationUncheckedUpdateManyInputSchema ]),
   where: OrganizationWhereInputSchema.optional(),
 }).strict() ;
@@ -13493,6 +13513,11 @@ export const MemberUpdateManyArgsSchema: z.ZodType<Prisma.MemberUpdateManyArgs> 
   where: MemberWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyMemberCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyMemberCreateManyAndReturnArgs> = z.object({
+  data: z.union([ MemberUpdateManyMutationInputSchema,MemberUncheckedUpdateManyInputSchema ]),
+  where: MemberWhereInputSchema.optional(),
+}).strict() ;
+
 export const MemberDeleteManyArgsSchema: z.ZodType<Prisma.MemberDeleteManyArgs> = z.object({
   where: MemberWhereInputSchema.optional(),
 }).strict() ;
@@ -13535,6 +13560,11 @@ export const AccreditationVerificationUpdateArgsSchema: z.ZodType<Prisma.Accredi
 }).strict() ;
 
 export const AccreditationVerificationUpdateManyArgsSchema: z.ZodType<Prisma.AccreditationVerificationUpdateManyArgs> = z.object({
+  data: z.union([ AccreditationVerificationUpdateManyMutationInputSchema,AccreditationVerificationUncheckedUpdateManyInputSchema ]),
+  where: AccreditationVerificationWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyAccreditationVerificationCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyAccreditationVerificationCreateManyAndReturnArgs> = z.object({
   data: z.union([ AccreditationVerificationUpdateManyMutationInputSchema,AccreditationVerificationUncheckedUpdateManyInputSchema ]),
   where: AccreditationVerificationWhereInputSchema.optional(),
 }).strict() ;
@@ -13585,6 +13615,11 @@ export const AccreditationVerifierUpdateManyArgsSchema: z.ZodType<Prisma.Accredi
   where: AccreditationVerifierWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyAccreditationVerifierCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyAccreditationVerifierCreateManyAndReturnArgs> = z.object({
+  data: z.union([ AccreditationVerifierUpdateManyMutationInputSchema,AccreditationVerifierUncheckedUpdateManyInputSchema ]),
+  where: AccreditationVerifierWhereInputSchema.optional(),
+}).strict() ;
+
 export const AccreditationVerifierDeleteManyArgsSchema: z.ZodType<Prisma.AccreditationVerifierDeleteManyArgs> = z.object({
   where: AccreditationVerifierWhereInputSchema.optional(),
 }).strict() ;
@@ -13627,6 +13662,11 @@ export const DealDocumentUpdateArgsSchema: z.ZodType<Prisma.DealDocumentUpdateAr
 }).strict() ;
 
 export const DealDocumentUpdateManyArgsSchema: z.ZodType<Prisma.DealDocumentUpdateManyArgs> = z.object({
+  data: z.union([ DealDocumentUpdateManyMutationInputSchema,DealDocumentUncheckedUpdateManyInputSchema ]),
+  where: DealDocumentWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyDealDocumentCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyDealDocumentCreateManyAndReturnArgs> = z.object({
   data: z.union([ DealDocumentUpdateManyMutationInputSchema,DealDocumentUncheckedUpdateManyInputSchema ]),
   where: DealDocumentWhereInputSchema.optional(),
 }).strict() ;
@@ -13677,6 +13717,11 @@ export const OrganizationDocumentUpdateManyArgsSchema: z.ZodType<Prisma.Organiza
   where: OrganizationDocumentWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyOrganizationDocumentCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyOrganizationDocumentCreateManyAndReturnArgs> = z.object({
+  data: z.union([ OrganizationDocumentUpdateManyMutationInputSchema,OrganizationDocumentUncheckedUpdateManyInputSchema ]),
+  where: OrganizationDocumentWhereInputSchema.optional(),
+}).strict() ;
+
 export const OrganizationDocumentDeleteManyArgsSchema: z.ZodType<Prisma.OrganizationDocumentDeleteManyArgs> = z.object({
   where: OrganizationDocumentWhereInputSchema.optional(),
 }).strict() ;
@@ -13719,6 +13764,11 @@ export const ProjectUpdateArgsSchema: z.ZodType<Prisma.ProjectUpdateArgs> = z.ob
 }).strict() ;
 
 export const ProjectUpdateManyArgsSchema: z.ZodType<Prisma.ProjectUpdateManyArgs> = z.object({
+  data: z.union([ ProjectUpdateManyMutationInputSchema,ProjectUncheckedUpdateManyInputSchema ]),
+  where: ProjectWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyProjectCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectCreateManyAndReturnArgs> = z.object({
   data: z.union([ ProjectUpdateManyMutationInputSchema,ProjectUncheckedUpdateManyInputSchema ]),
   where: ProjectWhereInputSchema.optional(),
 }).strict() ;
@@ -13769,6 +13819,11 @@ export const ProjectPropertyStatsUpdateManyArgsSchema: z.ZodType<Prisma.ProjectP
   where: ProjectPropertyStatsWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyProjectPropertyStatsCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectPropertyStatsCreateManyAndReturnArgs> = z.object({
+  data: z.union([ ProjectPropertyStatsUpdateManyMutationInputSchema,ProjectPropertyStatsUncheckedUpdateManyInputSchema ]),
+  where: ProjectPropertyStatsWhereInputSchema.optional(),
+}).strict() ;
+
 export const ProjectPropertyStatsDeleteManyArgsSchema: z.ZodType<Prisma.ProjectPropertyStatsDeleteManyArgs> = z.object({
   where: ProjectPropertyStatsWhereInputSchema.optional(),
 }).strict() ;
@@ -13811,6 +13866,11 @@ export const ProjectInvestmentStatsUpdateArgsSchema: z.ZodType<Prisma.ProjectInv
 }).strict() ;
 
 export const ProjectInvestmentStatsUpdateManyArgsSchema: z.ZodType<Prisma.ProjectInvestmentStatsUpdateManyArgs> = z.object({
+  data: z.union([ ProjectInvestmentStatsUpdateManyMutationInputSchema,ProjectInvestmentStatsUncheckedUpdateManyInputSchema ]),
+  where: ProjectInvestmentStatsWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyProjectInvestmentStatsCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectInvestmentStatsCreateManyAndReturnArgs> = z.object({
   data: z.union([ ProjectInvestmentStatsUpdateManyMutationInputSchema,ProjectInvestmentStatsUncheckedUpdateManyInputSchema ]),
   where: ProjectInvestmentStatsWhereInputSchema.optional(),
 }).strict() ;
@@ -13861,6 +13921,11 @@ export const ProjectPaymentInfoUpdateManyArgsSchema: z.ZodType<Prisma.ProjectPay
   where: ProjectPaymentInfoWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyProjectPaymentInfoCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectPaymentInfoCreateManyAndReturnArgs> = z.object({
+  data: z.union([ ProjectPaymentInfoUpdateManyMutationInputSchema,ProjectPaymentInfoUncheckedUpdateManyInputSchema ]),
+  where: ProjectPaymentInfoWhereInputSchema.optional(),
+}).strict() ;
+
 export const ProjectPaymentInfoDeleteManyArgsSchema: z.ZodType<Prisma.ProjectPaymentInfoDeleteManyArgs> = z.object({
   where: ProjectPaymentInfoWhereInputSchema.optional(),
 }).strict() ;
@@ -13903,6 +13968,11 @@ export const ProjectMilestonesUpdateArgsSchema: z.ZodType<Prisma.ProjectMileston
 }).strict() ;
 
 export const ProjectMilestonesUpdateManyArgsSchema: z.ZodType<Prisma.ProjectMilestonesUpdateManyArgs> = z.object({
+  data: z.union([ ProjectMilestonesUpdateManyMutationInputSchema,ProjectMilestonesUncheckedUpdateManyInputSchema ]),
+  where: ProjectMilestonesWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyProjectMilestonesCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectMilestonesCreateManyAndReturnArgs> = z.object({
   data: z.union([ ProjectMilestonesUpdateManyMutationInputSchema,ProjectMilestonesUncheckedUpdateManyInputSchema ]),
   where: ProjectMilestonesWhereInputSchema.optional(),
 }).strict() ;
@@ -13953,6 +14023,11 @@ export const ProjectPictureUpdateManyArgsSchema: z.ZodType<Prisma.ProjectPicture
   where: ProjectPictureWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyProjectPictureCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectPictureCreateManyAndReturnArgs> = z.object({
+  data: z.union([ ProjectPictureUpdateManyMutationInputSchema,ProjectPictureUncheckedUpdateManyInputSchema ]),
+  where: ProjectPictureWhereInputSchema.optional(),
+}).strict() ;
+
 export const ProjectPictureDeleteManyArgsSchema: z.ZodType<Prisma.ProjectPictureDeleteManyArgs> = z.object({
   where: ProjectPictureWhereInputSchema.optional(),
 }).strict() ;
@@ -13995,6 +14070,11 @@ export const ProjectDocumentUpdateArgsSchema: z.ZodType<Prisma.ProjectDocumentUp
 }).strict() ;
 
 export const ProjectDocumentUpdateManyArgsSchema: z.ZodType<Prisma.ProjectDocumentUpdateManyArgs> = z.object({
+  data: z.union([ ProjectDocumentUpdateManyMutationInputSchema,ProjectDocumentUncheckedUpdateManyInputSchema ]),
+  where: ProjectDocumentWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyProjectDocumentCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyProjectDocumentCreateManyAndReturnArgs> = z.object({
   data: z.union([ ProjectDocumentUpdateManyMutationInputSchema,ProjectDocumentUncheckedUpdateManyInputSchema ]),
   where: ProjectDocumentWhereInputSchema.optional(),
 }).strict() ;
@@ -14045,6 +14125,11 @@ export const DocumentEventUpdateManyArgsSchema: z.ZodType<Prisma.DocumentEventUp
   where: DocumentEventWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyDocumentEventCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyDocumentEventCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DocumentEventUpdateManyMutationInputSchema,DocumentEventUncheckedUpdateManyInputSchema ]),
+  where: DocumentEventWhereInputSchema.optional(),
+}).strict() ;
+
 export const DocumentEventDeleteManyArgsSchema: z.ZodType<Prisma.DocumentEventDeleteManyArgs> = z.object({
   where: DocumentEventWhereInputSchema.optional(),
 }).strict() ;
@@ -14091,6 +14176,11 @@ export const DocusignEventUpdateManyArgsSchema: z.ZodType<Prisma.DocusignEventUp
   where: DocusignEventWhereInputSchema.optional(),
 }).strict() ;
 
+export const updateManyDocusignEventCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyDocusignEventCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DocusignEventUpdateManyMutationInputSchema,DocusignEventUncheckedUpdateManyInputSchema ]),
+  where: DocusignEventWhereInputSchema.optional(),
+}).strict() ;
+
 export const DocusignEventDeleteManyArgsSchema: z.ZodType<Prisma.DocusignEventDeleteManyArgs> = z.object({
   where: DocusignEventWhereInputSchema.optional(),
 }).strict() ;
@@ -14133,6 +14223,11 @@ export const AddressUpdateArgsSchema: z.ZodType<Prisma.AddressUpdateArgs> = z.ob
 }).strict() ;
 
 export const AddressUpdateManyArgsSchema: z.ZodType<Prisma.AddressUpdateManyArgs> = z.object({
+  data: z.union([ AddressUpdateManyMutationInputSchema,AddressUncheckedUpdateManyInputSchema ]),
+  where: AddressWhereInputSchema.optional(),
+}).strict() ;
+
+export const updateManyAddressCreateManyAndReturnArgsSchema: z.ZodType<Prisma.updateManyAddressCreateManyAndReturnArgs> = z.object({
   data: z.union([ AddressUpdateManyMutationInputSchema,AddressUncheckedUpdateManyInputSchema ]),
   where: AddressWhereInputSchema.optional(),
 }).strict() ;
