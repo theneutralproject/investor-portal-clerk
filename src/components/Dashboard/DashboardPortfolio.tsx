@@ -1,5 +1,7 @@
-import React from "react";
-import { Box, Button, Grid, Stack, Typography } from "@mui/material";
+import React from 'react';
+import { Box, Button, Grid, Stack, Typography } from '@mui/material';
+import Link from 'next/link';
+
 import {
   ComposedChart,
   Line,
@@ -10,18 +12,20 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-} from "recharts";
-import PortfolioMetric from "./PortfolioMetric";
-import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
+} from 'recharts';
+import PortfolioMetric from './PortfolioMetric';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import type {
   ReturnsDateObject,
   PortfolioReturnsResponse,
-} from "@/libs/returns/schema";
+} from '@/libs/returns/schema';
+import { CustomLegend } from '../Project/Overview/InvestmentCalculatorNew';
 
 interface MetricData {
   label: string;
-  value: string;
+  toDateValue: string;
+  projectedTotalValue: string;
   color: string;
 }
 
@@ -34,10 +38,25 @@ interface QuarterData {
   isProjected: boolean;
 }
 
+interface TooltipPayloadItem {
+  name: string;
+  value: number;
+  color: string;
+  payload: {
+    isProjected: boolean;
+  };
+}
+
+interface CustomTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadItem[];
+  label?: string;
+}
+
 const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0,
   }).format(value);
@@ -89,6 +108,60 @@ const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
   return Object.values(quarterData);
 };
 
+const CustomTooltip: React.FC<CustomTooltipProps> = ({
+  active,
+  payload,
+  label,
+}) => {
+  if (!active || !payload) return null;
+
+  const isProjected = payload[0]?.payload?.isProjected;
+
+  return (
+    <Box
+      sx={{
+        bgcolor: 'background.paper',
+        p: 2,
+        border: 1,
+        borderColor: 'grey.200',
+        borderRadius: 1,
+        boxShadow: 1,
+      }}
+    >
+      <Typography variant="subtitle2" sx={{ mb: 1 }}>
+        Quarter: {label}
+      </Typography>
+      {payload.map((entry: TooltipPayloadItem) => {
+        if (!isProjected && entry.name.includes('Projected')) return null;
+        if (isProjected && !entry.name.includes('Projected')) return null;
+
+        if (entry.value !== undefined) {
+          return (
+            <Typography
+              key={entry.name}
+              variant="body2"
+              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+            >
+              <Box
+                component="span"
+                sx={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  bgcolor: entry.color,
+                  display: 'inline-block',
+                }}
+              />
+              {entry.name}: {formatCurrency(entry.value)}
+            </Typography>
+          );
+        }
+        return null;
+      })}
+    </Box>
+  );
+};
+
 // Type-safe data accessors for the chart
 const dataAccessors = {
   principal: (data: QuarterData) =>
@@ -111,45 +184,82 @@ const dataAccessors = {
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
-    queryKey: ["dashboard", "portfolio"],
+    queryKey: ['dashboard', 'portfolio'],
     queryFn: async () => {
       const response = await axios.get<PortfolioReturnsResponse>(
-        "/api/dashboard/returns"
+        '/api/dashboard/returns'
       );
       return response.data;
     },
+    enabled: loggedIn,
   });
 
   const metrics: MetricData[] = React.useMemo(() => {
     if (!data) {
       return [
-        { label: "Portfolio Value", value: "$0", color: "#FFB800" },
-        { label: "Debt Distributions", value: "$0", color: "#5AAC6A" },
-        { label: "Equity Distributions", value: "$0", color: "#2196F3" },
-        { label: "Principal", value: "$0", color: "#656565" },
+        {
+          label: 'Portfolio Value',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#FFB800',
+        },
+        {
+          label: 'Debt Distributions',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#5AAC6A',
+        },
+        {
+          label: 'Equity Distributions',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#2196F3',
+        },
+        {
+          label: 'Principal',
+          toDateValue: '$0',
+          projectedTotalValue: '$0',
+          color: '#656565',
+        },
       ];
     }
 
     return [
       {
-        label: "Proj. Portfolio Value",
-        value: formatCurrency(data.portfolioStats.projectedPortfolioValue),
-        color: "#FFB800",
+        label: 'Proj. Portfolio Value',
+        toDateValue: formatCurrency(data.portfolioStats.portfolioValueToDate),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.projectedPortfolioValue
+        ),
+        color: '#FFB800',
       },
       {
-        label: "Proj. Debt Distributions",
-        value: formatCurrency(data.portfolioStats.projectedDebtDistributions),
-        color: "#5AAC6A",
+        label: 'Proj. Debt Distributions',
+        toDateValue: formatCurrency(
+          data.portfolioStats.debtDistributionsToDate
+        ),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.projectedDebtDistributions
+        ),
+        color: '#5AAC6A',
       },
       {
-        label: "Proj. Equity Distributions",
-        value: formatCurrency(data.portfolioStats.projectedEquityDistributions),
-        color: "#2196F3",
+        label: 'Proj. Equity Distributions',
+        toDateValue: formatCurrency(
+          data.portfolioStats.equityDistributionsToDate
+        ),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.projectedEquityDistributions
+        ),
+        color: '#2196F3',
       },
       {
-        label: "Principal",
-        value: formatCurrency(data.portfolioStats.principalInvested),
-        color: "#656565",
+        label: 'Principal',
+        toDateValue: formatCurrency(data.portfolioStats.principalInvested),
+        projectedTotalValue: formatCurrency(
+          data.portfolioStats.principalInvested
+        ),
+        color: '#656565',
       },
     ];
   }, [data]);
@@ -163,9 +273,10 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     <>
       <Grid container spacing={4} sx={{ mb: 4 }}>
         {metrics.map((metric, index) => (
-          <Grid item xs={3} key={index}>
+          <Grid item xs={6} sm={6} md={3} key={index}>
             <PortfolioMetric
-              value={metric.value}
+              toDateValue={metric.toDateValue}
+              projectedTotalValue={metric.projectedTotalValue}
               label={metric.label}
               color={metric.color}
             />
@@ -173,7 +284,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
         ))}
       </Grid>
 
-      <Box sx={{ height: 300, mt: 4 }}>
+      <Box sx={{ height: 300, mt: 4, display: { xs: 'none', sm: 'block' } }}>
         <ResponsiveContainer width="100%" height="100%">
           <ComposedChart
             data={chartData}
@@ -183,10 +294,10 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             <XAxis dataKey="quarter" />
             <YAxis />
             <Tooltip
-              formatter={(value: number) => formatCurrency(value)}
+              content={<CustomTooltip />}
               labelFormatter={(label: string) => `Quarter: ${label}`}
             />
-            <Legend />
+            <Legend content={<CustomLegend payload={[]} />} />
 
             {/* Areas for historical data */}
             <Area
@@ -274,17 +385,17 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
       {!loggedIn && (
         <Box
           sx={{
-            position: "absolute",
+            position: 'absolute',
             top: 80,
             left: 0,
             right: 0,
             bottom: 0,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(255, 255, 255, 0.6)",
-            backdropFilter: "blur(4px)",
-            borderRadius: "8px",
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(255, 255, 255, 0.6)',
+            backdropFilter: 'blur(4px)',
+            borderRadius: '8px',
           }}
         >
           <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
@@ -302,20 +413,24 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               solutions. Sign in or create your account to get started.
             </Typography>
             <Stack direction="row" spacing={2}>
-              <Button variant="neutralYellow">CREATE ACCOUNT</Button>
-              <Button
-                variant="text"
-                sx={{
-                  borderColor: "text.primary",
-                  color: "text.primary",
-                  "&:hover": {
-                    borderColor: "text.primary",
-                    bgcolor: "rgba(0, 0, 0, 0.04)",
-                  },
-                }}
-              >
-                SIGN IN
-              </Button>
+              <Link href="/login" passHref>
+                <Button variant="neutralYellow">CREATE ACCOUNT</Button>
+              </Link>
+              <Link href="/login" passHref>
+                <Button
+                  variant="text"
+                  sx={{
+                    borderColor: 'text.primary',
+                    color: 'text.primary',
+                    '&:hover': {
+                      borderColor: 'text.primary',
+                      bgcolor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                >
+                  SIGN IN
+                </Button>
+              </Link>
             </Stack>
           </Stack>
         </Box>

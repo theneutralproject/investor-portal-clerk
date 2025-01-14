@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Box,
   Typography,
@@ -7,10 +7,10 @@ import {
   Card,
   CardContent,
   Radio,
-} from "@mui/material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
+} from '@mui/material';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 
 const DealFlowEntityDetailsCoInvestor: React.FC = () => {
   const router = useRouter();
@@ -20,7 +20,7 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
   const handleCoInvestorChange = (
     event: React.ChangeEvent<HTMLInputElement>
   ) => {
-    setHasCoInvestors(event.target.value === "true");
+    setHasCoInvestors(event.target.value === 'true');
   };
 
   const handleContinue = () => {
@@ -45,16 +45,16 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
       >
         <Box display="flex" flexDirection="column" gap={2}>
           {[
-            { value: true, label: "Add co-investor(s)" },
+            { value: true, label: 'Add co-investor(s)' },
             { value: false, label: "I don't have co-investors" },
-          ].map((option) => (
+          ].map(option => (
             <Card
               key={option.value.toString()}
               onClick={() => setHasCoInvestors(option.value)}
               sx={{
-                cursor: "pointer",
+                cursor: 'pointer',
                 boxShadow: 0,
-                "&:hover": { boxShadow: 1 },
+                '&:hover': { boxShadow: 1 },
               }}
             >
               <CardContent>
@@ -72,7 +72,7 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
         </Box>
       </RadioGroup>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleContinue} />
+      <DealFlowFooter  onContinue={handleContinue} />
     </Box>
   );
 };

@@ -1,27 +1,32 @@
-import React, { useState } from "react";
-import { Box, Typography } from "@mui/material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import PaymentProcessing from "@components/DealFlow/Fund/PaymentProcessing";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import FundPlaid from "@components/DealFlow/Fund/FundPlaid";
-import FundCheck from "@components/DealFlow/Fund/FundCheck";
-import FundACH from "@components/DealFlow/Fund/FundACH";
+import React, { useState } from 'react';
+import { Box, Typography } from '@mui/material';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import PaymentProcessing from '@components/DealFlow/Fund/PaymentProcessing';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import FundPlaid from '@components/DealFlow/Fund/FundPlaid';
+import FundCheck from '@components/DealFlow/Fund/FundCheck';
+import FundACH from '@components/DealFlow/Fund/FundACH';
 import {
   getPaymentInfo,
   getMerchantId,
   FundingOptions,
-} from "@components/DealFlow/Fund/FundShared";
-import PaymentComplete from "@components/DealFlow/Fund/PaymentComplete";
+} from '@components/DealFlow/Fund/FundShared';
+import PaymentComplete from '@components/DealFlow/Fund/PaymentComplete';
 
 const DealFlowFund: React.FC = () => {
   const { project, deal } = useDealFlow();
-  const [selectedOption, setSelectedOption] = useState<string>("");
+  const [selectedOption, setSelectedOption] = useState<string>('');
   const [showComponent, setShowComponent] = useState(false);
 
   const paymentInfo = getPaymentInfo(project, deal);
   const investmentAmount = deal?.investmentStats?.amount ?? 0;
   const merchantId = getMerchantId(project.slug);
+
+  const handleBack = () => {
+    setSelectedOption('');
+    setShowComponent(false);
+  };
 
   const handleContinue = () => {
     if (selectedOption) {
@@ -39,20 +44,22 @@ const DealFlowFund: React.FC = () => {
 
   if (showComponent) {
     switch (selectedOption) {
-      case "plaid":
-        return <FundPlaid merchantId={merchantId} />;
-      case "check":
+      case 'plaid':
+        return <FundPlaid merchantId={merchantId} onBack={handleBack} />;
+      case 'check':
         return (
           <FundCheck
             paymentInfo={paymentInfo}
             investmentAmount={investmentAmount}
+            onBack={handleBack}
           />
         );
-      case "wire":
+      case 'wire':
         return (
           <FundACH
             paymentInfo={paymentInfo}
             investmentAmount={investmentAmount}
+            onBack={handleBack}
           />
         );
     }
@@ -79,7 +86,6 @@ const DealFlowFund: React.FC = () => {
       />
 
       <DealFlowFooter
-        onBack={() => null}
         onContinue={handleContinue}
         isContinueDisabled={!selectedOption}
       />

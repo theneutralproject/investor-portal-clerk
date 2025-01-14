@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Card,
   CardContent,
@@ -7,7 +7,7 @@ import {
   Stack,
   IconButton,
   Box,
-} from "@mui/material";
+} from '@mui/material';
 import {
   TwitterShareButton,
   LinkedinShareButton,
@@ -15,13 +15,13 @@ import {
   XIcon,
   LinkedinIcon,
   FacebookIcon,
-} from "react-share";
+} from 'react-share';
 
 const ShareOnSocial = () => {
-  const shareUrl = "https://neutral.us";
+  const shareUrl = 'https://neutral.us';
   const title =
-    "I just invested with @Neutral - a sustainable mass timber developer. Check them out";
-  const hashtags = ["sustainability", "investing", "neutral"];
+    'I just invested with @Neutral - a sustainable mass timber developer. Check them out';
+  const hashtags = ['sustainability', 'investing', 'neutral'];
 
   return (
     <Box>
@@ -29,14 +29,14 @@ const ShareOnSocial = () => {
         Share on Social:
       </Typography>
 
-      <Card sx={{ display: "flex", width: "100%" }}>
+      <Card sx={{ display: 'flex', width: '100%' }}>
         <CardMedia
           component="img"
           sx={{
             width: 150,
             height: 150,
-            backgroundColor: "#DBA111",
-            objectFit: "contain",
+            backgroundColor: '#DBA111',
+            objectFit: 'contain',
             flexShrink: 0,
           }}
           image="/socialIcon.png"
@@ -45,25 +45,25 @@ const ShareOnSocial = () => {
 
         <Box
           sx={{
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
             height: 150,
           }}
         >
           <CardContent
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              height: "100%",
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              height: '100%',
               p: 2,
             }}
           >
             <Box>
               <Typography variant="body1" color="text.primary" gutterBottom>
-                {title}{" "}
-                <Box component="span" sx={{ textDecoration: "underline" }}>
+                {title}{' '}
+                <Box component="span" sx={{ textDecoration: 'underline' }}>
                   {shareUrl}
                 </Box>
               </Typography>
@@ -74,7 +74,7 @@ const ShareOnSocial = () => {
                 alignItems="center"
                 sx={{ mt: 1 }}
               >
-                {hashtags.map((hashtag) => (
+                {hashtags.map(hashtag => (
                   <Typography
                     key={hashtag}
                     variant="body2"
@@ -90,7 +90,7 @@ const ShareOnSocial = () => {
               direction="row"
               spacing={1}
               alignItems="center"
-              sx={{ mt: "auto", ml: "auto" }}
+              sx={{ mt: 'auto', ml: 'auto' }}
             >
               <Typography variant="body2" color="text.secondary">
                 Post with:

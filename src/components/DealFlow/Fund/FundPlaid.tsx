@@ -1,11 +1,20 @@
-import React from "react";
-import { Box, Card, CardContent, Stack, Typography } from "@mui/material";
-import PlaidLinkClass from "@/components/DealFlow/Fund/PlaidLink";
-import { useDealFlow } from "@/components/DealFlow/Shared/DealFlowContext";
-import DealFlowTitle from "@/components/DealFlow/Shared/DealFlowTitle";
+import React from 'react';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Stack,
+  Typography,
+} from '@mui/material';
+import PlaidLinkClass from '@/components/DealFlow/Fund/PlaidLink';
+import { useDealFlow } from '@/components/DealFlow/Shared/DealFlowContext';
+import DealFlowTitle from '@/components/DealFlow/Shared/DealFlowTitle';
+import DealFlowFooter from '../Shared/DealFlowFooter';
 
 interface FundPlaidProps {
   merchantId: string;
+  onBack?: () => void;
 }
 
 const PlaidLogo = () => (
@@ -50,7 +59,7 @@ const PlaidLogo = () => (
   </svg>
 );
 
-const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
+const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId, onBack }) => {
   const { deal, refetchDeal, project } = useDealFlow();
   return (
     <Box sx={{ p: 3 }}>
@@ -59,9 +68,9 @@ const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
       <Card
         sx={{
           mb: 3,
-          backgroundColor: "#f5f5f5",
-          borderColor: "#d8d8d8",
-          borderRadius: "20px",
+          backgroundColor: '#f5f5f5',
+          borderColor: '#d8d8d8',
+          borderRadius: '20px',
         }}
       >
         <CardContent>
@@ -69,7 +78,7 @@ const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
             direction="row"
             alignItems="center"
             spacing={2}
-            sx={{ cursor: "pointer" }}
+            sx={{ cursor: 'pointer' }}
           >
             <Typography variant="h6" flex={1}>
               Connect Your Bank Account
@@ -96,7 +105,7 @@ const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
           <Typography
             variant="body2"
             color="text.secondary"
-            sx={{ mt: 2, fontSize: "12px" }}
+            sx={{ mt: 2, fontSize: '12px' }}
           >
             By continuing, you authorize us to initiate an automated clearing
             house (ACH) one-time debit in your name to your bank account
@@ -107,6 +116,10 @@ const FundPlaid: React.FC<FundPlaidProps> = ({ merchantId }) => {
           </Typography>
         </CardContent>
       </Card>
+
+      <Button variant="blackPill" onClick={onBack}>
+        Back
+      </Button>
     </Box>
   );
 };

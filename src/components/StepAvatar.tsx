@@ -1,5 +1,5 @@
-import { Avatar } from "@mui/material";
-import Image from "next/image";
+import { Avatar } from '@mui/material';
+import Image from 'next/image';
 
 const StepAvatar = ({
   isComplete,
@@ -11,15 +11,15 @@ const StepAvatar = ({
   return (
     <Avatar
       sx={{
-        bgcolor: isComplete ? "#626f52" : "#969f7e",
+        bgcolor: isComplete ? '#626f52' : '#969f7e',
         width: 24,
         height: 24,
-        fontSize: isComplete ? undefined : "12px",
+        fontSize: isComplete ? undefined : '12px',
       }}
     >
       {isComplete ? (
         <Image
-          src={"/CheckFilled.png"}
+          src={'/CheckFilled.png'}
           alt="Completed Step"
           width={24}
           height={24}

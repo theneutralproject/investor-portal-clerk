@@ -1,6 +1,6 @@
 /* eslint-disable */
 //@ts-nocheck
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   IconButton,
   List,
@@ -12,20 +12,20 @@ import {
   useMediaQuery,
   ListItemButton,
   ListItemIcon,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import Image from "next/image";
-import { ListItem, ROUTES, buttonItems } from "./Sidebar";
-import { useRouter, usePathname } from "next/navigation";
-import LogoutIcon from "@mui/icons-material/Logout";
-import { useClerk } from "@clerk/nextjs";
-import posthog from "posthog-js";
+} from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu';
+import Image from 'next/image';
+import { ListItem, ROUTES, buttonItems } from './Sidebar';
+import { useRouter, usePathname } from 'next/navigation';
+import LogoutIcon from '@mui/icons-material/Logout';
+import { useClerk } from '@clerk/nextjs';
+import posthog from 'posthog-js';
 
-const MobileSidebar = (props) => {
+const MobileSidebar = props => {
   const { signOut } = useClerk();
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const appBarHeight = 41;
 
   const handleToggleDrawer = () => {
@@ -65,8 +65,8 @@ const MobileSidebar = (props) => {
         <Toolbar
           sx={{
             boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
-            border: "none !important",
-            backgroundColor: "black"
+            border: 'none !important',
+            backgroundColor: 'black',
           }}
         >
           <IconButton
@@ -78,13 +78,13 @@ const MobileSidebar = (props) => {
             <MenuIcon />
           </IconButton>
           <div
-            style={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
+            style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}
           >
             <Image
               width="90"
               height="21"
               src="/Neutral_White_Medium.png"
-              alt={""}
+              alt={''}
             />
           </div>
         </Toolbar>
@@ -98,29 +98,27 @@ const MobileSidebar = (props) => {
           keepMounted: true,
         }}
         sx={{
-          "& .MuiDrawer-paper": {
+          '& .MuiDrawer-paper': {
             top: `${appBarHeight}px`,
-            backgroundColor: "black",
+            backgroundColor: 'black',
           },
         }}
       >
         <List component="nav">
-          {ROUTES.map((route) => (
+          {ROUTES.map(route => (
             <ListItemButton
               key={route.name}
               onClick={() => {
                 handleClick(route.path);
               }}
               sx={{
-                backgroundColor: isActiveRoute(route.path)
-                  ? "gray"
-                  : "black",
+                backgroundColor: isActiveRoute(route.path) ? 'gray' : 'black',
               }}
             >
               <ListItemIcon
                 sx={{
-                  color: isActiveRoute(route.path) ? "white" : "#e2e4e4",
-                  minWidth: "40px",
+                  color: isActiveRoute(route.path) ? 'white' : '#e2e4e4',
+                  minWidth: '40px',
                 }}
               >
                 <route.icon />
@@ -128,24 +126,24 @@ const MobileSidebar = (props) => {
               <ListItemText
                 primary={route.name}
                 sx={{
-                  color: isActiveRoute(route.path) ? "white" : "#e2e4e4",
+                  color: isActiveRoute(route.path) ? 'white' : '#e2e4e4',
                 }}
               />
             </ListItemButton>
           ))}
         </List>
-        <List sx={{ marginTop: "auto" }}>
-          {buttonItems.map((item) => (
+        <List sx={{ marginTop: 'auto' }}>
+          {buttonItems.map(item => (
             <ListItem key={item.key} item={item} />
           ))}
 
           <ListItem
-            key={"signout"}
+            key={'signout'}
             item={{
-              key: "signout",
-              label: "Sign Out",
+              key: 'signout',
+              label: 'Sign Out',
               icon: <LogoutIcon />,
-              path: "/signout",
+              path: '/signout',
               onClick: () => handleSignOut(),
             }}
           />

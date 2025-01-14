@@ -1,20 +1,20 @@
 /* eslint-disable */
 // @ts-nocheck
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { DealFinancingType, ProjectDocument } from "@prisma/client";
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { DealFinancingType, ProjectDocument } from '@prisma/client';
 
 export type DocumentWithCompletion = ProjectDocument & { completed: boolean };
 
 const useDocuments = (
   projectId: number,
-  dealStageCheck: number,
-  financingType: DealFinancingType
+  dealStageCheck?: number,
+  financingType?: DealFinancingType
 ) => {
   const queryClient = useQueryClient();
   const documentsQueryKey = [
-    "documents",
+    'documents',
     projectId,
     dealStageCheck,
     financingType,
@@ -22,9 +22,20 @@ const useDocuments = (
 
   // Query function for fetching all documents within a project
   const fetchDocuments = async () => {
-    const url = `/api/documents/project?projectId=${projectId}&dealStage=${dealStageCheck}&financingType=${financingType}`;
-    const response = await axios.get(url);
-    return response.data;
+    let url = `/api/documents/project?projectId=${projectId}`;
+    if (dealStageCheck) {
+      url += `&dealStage=${dealStageCheck}`;
+    }
+    if (financingType) {
+      url += `&financingType=${financingType}`;
+    }
+    try {
+      const response = await axios.get(url);
+      return response.data;
+    } catch (e) {
+      console.error(e);
+      return [];
+    }
   };
 
   // Using useQuery to manage the fetching of documents
@@ -54,7 +65,7 @@ const useDocuments = (
 
       queryClient.setQueryData(
         documentsQueryKey,
-        previousDocuments.map((doc) =>
+        previousDocuments.map(doc =>
           doc.id === documentId ? { ...doc, completed: true } : doc
         )
       );

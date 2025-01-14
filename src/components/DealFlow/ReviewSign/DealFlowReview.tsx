@@ -1,18 +1,18 @@
-import React, { useEffect, useRef } from "react";
-import { Box, Typography, Card, List } from "@mui/material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import { useUser } from "@clerk/nextjs";
-import { createDocusignEnvelope } from "@/components/Project/Invest/InvestTab";
-import DealFlowFooter from "../Shared/DealFlowFooter";
-import DocumentItem from "@components/DealFlow/ReviewSign/DocumentItem";
-import ReviewingInvestment from "@components/DealFlow/ReviewSign/ReviewingInvestment";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-
+import React, { useEffect, useRef } from 'react';
+import { Box, Typography, Card, List } from '@mui/material';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import { useUser } from '@clerk/nextjs';
+import DealFlowFooter from '../Shared/DealFlowFooter';
+import DocumentItem from '@components/DealFlow/ReviewSign/DocumentItem';
+import ReviewingInvestment from '@components/DealFlow/ReviewSign/ReviewingInvestment';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { createDocusignEnvelope } from '@components/DealFlow/Helpers/DealFlowHelpers';
+import { useRouter } from 'next/navigation';
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const { user } = useUser();
   const hasRunRef = useRef(false);
-
+  const router = useRouter();
   useEffect(() => {
     //Make sure dealStage is 2 when on /review
     const updateDealStage = async () => {
@@ -32,7 +32,7 @@ const DealFlowReview: React.FC = () => {
   }, [deal, updateDeal]); // Include deal in dependencies to wait for it to be valid
 
   const docusignDocuments =
-    project?.documents?.filter((doc) => doc.documentType === "DOCUSIGN") || [];
+    project?.documents?.filter(doc => doc.documentType === 'DOCUSIGN') || [];
 
   const handleSignDocument = (templateId: string) => {
     if (templateId && deal?.id) {
@@ -55,6 +55,11 @@ const DealFlowReview: React.FC = () => {
 
   if (deal.dealStage === 3) {
     return <ReviewingInvestment />;
+  }
+  // Redirect to /fund if dealStage is >= 4
+  if (deal.dealStage >= 4) {
+    router.push(`/dealflow/${project?.slug}/${deal.id}/fund`);
+    return null;
   }
 
   return (
@@ -87,11 +92,10 @@ const DealFlowReview: React.FC = () => {
       </Card>
 
       <DealFlowFooter
-        onBack={() => null}
         onContinue={toReviewScreen}
         // @ts-expect-error -- type completed
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        isContinueDisabled={!docusignDocuments.every((doc) => doc.completed)}
+        isContinueDisabled={!docusignDocuments.every(doc => doc.completed)}
       />
     </Box>
   );

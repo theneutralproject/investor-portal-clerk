@@ -1,13 +1,12 @@
-"use server";
-import { type NextRequest } from "next/server";
-import { currentUser } from "@clerk/nextjs";
-import { errorResponse, jsonResponse } from "@/libs/utils";
-import { z } from "zod";
-import type {
-  DealFinancingType,
-  Organization,
-} from "@prisma/client";
-import prisma from "@/libs/prisma.server";
+import { type NextRequest } from 'next/server';
+import { currentUser } from '@clerk/nextjs';
+import { errorResponse, jsonResponse } from '@/libs/utils';
+import { z } from 'zod';
+import type { DealFinancingType, Organization } from '@prisma/client';
+import prisma from '@/libs/prisma.server';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const QuerySchema = z.object({
   projectSlug: z.string().min(1),
@@ -25,25 +24,28 @@ async function fetchProjectDocuments(
       projectId: projectId,
       ...(financingType
         ? {
-          OR: [
-            { financingTypes: { has: financingType } },
-            { financingTypes: { equals: [] } },
-          ],
-        }
+            OR: [
+              { financingTypes: { has: financingType } },
+              { financingTypes: { equals: [] } },
+            ],
+          }
         : { financingTypes: { equals: [] } }),
-      documentType: "DOCUSIGN",
-    }
+      documentType: 'DOCUSIGN',
+    },
   });
 
   const dealDocusignEvents = await prisma.docusignEvent.findMany({
     where: {
       userId,
       dealId,
-    }
+    },
   });
-  const results = documents.map((doc) => ({
+  const results = documents.map(doc => ({
     ...doc,
-    completed: dealDocusignEvents.find((event) => event.templateId === doc.docusignTemplateId)?.investorSignatureCompleted ?? false,
+    completed:
+      dealDocusignEvents.find(
+        event => event.templateId === doc.docusignTemplateId
+      )?.investorSignatureCompleted ?? false,
   }));
 
   return results;
@@ -88,55 +90,55 @@ export async function GET(request: NextRequest) {
     );
 
     if (!queryResult.success) {
-      return errorResponse("Invalid query parameters", 400);
+      return errorResponse('Invalid query parameters', 400);
     }
 
     const { projectSlug, dealId } = queryResult.data;
 
     const project = await fetchProject(projectSlug);
     if (!project) {
-      return errorResponse("Project not found", 404);
+      return errorResponse('Project not found', 404);
     }
 
     // Return public project data if dealId is not provided or is "new"
-    if (!dealId || dealId.toLowerCase() === "new") {
+    if (!dealId || dealId.toLowerCase() === 'new') {
       return jsonResponse({ project });
     }
 
     const clerkUser = await currentUser();
     if (!clerkUser) {
-      return errorResponse("User not authenticated", 401);
+      return errorResponse('User not authenticated', 401);
     }
 
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: clerkUser.id },
     });
     if (!dbUser) {
-      return errorResponse("User not found", 404);
+      return errorResponse('User not found', 404);
     }
 
     const deal = await fetchDeal(parseInt(dealId, 10));
     if (!deal) {
-      return errorResponse("Deal not found", 404);
+      return errorResponse('Deal not found', 404);
     }
 
     if (deal.projectId !== project.id) {
       return errorResponse(
-        "Deal does not belong to the specified project",
+        'Deal does not belong to the specified project',
         403
       );
     }
 
     const hasAccess = await checkUserAccess(dbUser.id, deal.organization);
     if (!hasAccess) {
-      return errorResponse("You do not have access to this deal", 403);
+      return errorResponse('You do not have access to this deal', 403);
     }
 
     const docusignDocs = await fetchProjectDocuments(
       project.id,
       deal.investmentStats?.financingType ?? null,
       dbUser.id,
-      deal.id,
+      deal.id
     );
 
     return jsonResponse({
@@ -147,7 +149,7 @@ export async function GET(request: NextRequest) {
       deal,
     });
   } catch (error) {
-    console.error("Error in GET /api/deal:", error);
-    return errorResponse("Internal server error", 500);
+    console.error('Error in GET /api/deal:', error);
+    return errorResponse('Internal server error', 500);
   }
 }

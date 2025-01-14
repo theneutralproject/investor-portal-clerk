@@ -1,10 +1,11 @@
-"use server";
-import prisma from "@/libs/prisma.server";
-import { getSupabaseDownloadUrl } from "@/libs/supabase";
-import { jsonResponse } from "@/libs/utils";
-import { currentUser } from "@clerk/nextjs";
-import { DealDocumentType } from "@prisma/client";
+import prisma from '@/libs/prisma.server';
+import { getSupabaseDownloadUrl } from '@/libs/supabase';
+import { jsonResponse } from '@/libs/utils';
+import { currentUser } from '@clerk/nextjs';
+import { DealDocumentType } from '@prisma/client';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 /**
  *
  * @param request Get documents for a deal
@@ -14,9 +15,9 @@ export async function GET() {
   try {
     const user = await currentUser();
     if (!user) {
-      return new Response(JSON.stringify({ error: "User not found" }), {
+      return new Response(JSON.stringify({ error: 'User not found' }), {
         status: 404,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       });
     }
 
@@ -28,16 +29,16 @@ export async function GET() {
 
     if (!neutralUser) {
       return new Response(
-        JSON.stringify({ error: "User not associated with any organization" }),
+        JSON.stringify({ error: 'User not associated with any organization' }),
         {
           status: 404,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
 
     const organizationIds = neutralUser.organizationMember.map(
-      (om) => om.organizationId
+      om => om.organizationId
     );
 
     const dealsWithDocuments = await prisma.deal.findMany({
@@ -57,7 +58,7 @@ export async function GET() {
       for (const doc of deal.document) {
         const downloadUrl = await getSupabaseDownloadUrl(
           doc.path,
-          "deal-documents"
+          'deal-documents'
         );
         const documentWithProjectName = {
           ...doc,
@@ -74,12 +75,12 @@ export async function GET() {
 
     return jsonResponse({ taxDocuments, investmentDocuments });
   } catch (error) {
-    console.error("Error getting deal documents: ", error);
+    console.error('Error getting deal documents: ', error);
     return new Response(
-      JSON.stringify({ error: "Error getting deal documents" }),
+      JSON.stringify({ error: 'Error getting deal documents' }),
       {
         status: 500,
-        headers: { "Content-Type": "application/json" },
+        headers: { 'Content-Type': 'application/json' },
       }
     );
   }

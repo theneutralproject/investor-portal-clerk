@@ -371,8 +371,8 @@ enum DealOwnershipType {
 
 enum DealUnitType {
   AUNIT
-  CUNIT
   BUNIT
+  CUNIT
 }
 
 enum VerificationBasis {

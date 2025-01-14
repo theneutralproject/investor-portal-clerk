@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Typography,
   Box,
@@ -7,14 +7,14 @@ import {
   Stack,
   type Theme,
   type SxProps,
-} from "@mui/material";
+} from '@mui/material';
 import {
   AccountBalance as AccountBalanceIcon,
   Business as BusinessIcon,
   Place as PlaceIcon,
   Person as PersonIcon,
-} from "@mui/icons-material";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
+} from '@mui/icons-material';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 
 // Types
 interface IconTextProps {
@@ -27,19 +27,19 @@ interface IconTextProps {
 const IconText: React.FC<IconTextProps> = ({ icon, text, caption, sx }) => (
   <Stack direction="row" alignItems="center" spacing={1} sx={sx}>
     {React.cloneElement(icon as React.ReactElement, {
-      sx: { color: "#0000004D" },
+      sx: { color: '#0000004D' },
     })}
     <Box>
       {caption && (
         <Typography
           variant="caption"
           display="block"
-          sx={{ color: "#00000099" }}
+          sx={{ color: '#00000099' }}
         >
           {caption}
         </Typography>
       )}
-      <Typography variant="body2" sx={{ color: "#000000DE" }}>
+      <Typography variant="body2" sx={{ color: '#000000DE' }}>
         {text}
       </Typography>
     </Box>
@@ -55,16 +55,16 @@ const DealFlowSidebarDetails: React.FC = () => {
 
   const { ownershipType, name, juristication, members } = organization;
   const { firstName, lastName, email, address, phoneNumber } = user;
-  const isIndividual = ownershipType === "INDIVIDUAL";
+  const isIndividual = ownershipType === 'INDIVIDUAL';
 
   const formatOwnershipType = (type: string) =>
     type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
 
   const formatAddress = (addr: typeof address) => {
-    if (!addr) return "";
+    if (!addr) return '';
 
     const { street, city, state, zipcode } = addr;
-    if (!street || !city || !state || !zipcode) return "";
+    if (!street || !city || !state || !zipcode) return '';
     return `${street}, ${city}, ${state} ${zipcode}`;
   };
 
@@ -73,8 +73,8 @@ const DealFlowSidebarDetails: React.FC = () => {
       <Typography
         variant="subtitle2"
         sx={{
-          color: "#000000DE",
-          fontSize: "14px",
+          color: '#000000DE',
+          fontSize: '14px',
           fontWeight: 600,
         }}
       >
@@ -82,17 +82,17 @@ const DealFlowSidebarDetails: React.FC = () => {
       </Typography>
 
       {/* User Details */}
-      <Stack sx={{ marginTop: "10px !important", p: 0 }} spacing={0.4}>
-        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+      <Stack sx={{ marginTop: '10px !important', p: 0 }} spacing={0.4}>
+        <Typography variant="body2" sx={{ color: '#000000DE' }}>
           {`${firstName} ${lastName}`}
         </Typography>
-        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+        <Typography variant="body2" sx={{ color: '#000000DE' }}>
           {formatAddress(address)}
         </Typography>
-        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+        <Typography variant="body2" sx={{ color: '#000000DE' }}>
           {phoneNumber}
         </Typography>
-        <Typography variant="body2" sx={{ color: "#000000DE" }}>
+        <Typography variant="body2" sx={{ color: '#000000DE' }}>
           {email}
         </Typography>
       </Stack>
@@ -114,8 +114,8 @@ const DealFlowSidebarDetails: React.FC = () => {
           )}
 
           {/* Co-Investors */}
-          {members?.map((investor) => {
-            if (investor.type === "OWNER") return null;
+          {members?.map(investor => {
+            if (investor.type === 'OWNER') return null;
 
             return (
               <Card
@@ -123,7 +123,7 @@ const DealFlowSidebarDetails: React.FC = () => {
                 elevation={0}
                 sx={{
                   p: 1,
-                  bgcolor: "transparent",
+                  bgcolor: 'transparent',
                 }}
               >
                 <IconText
