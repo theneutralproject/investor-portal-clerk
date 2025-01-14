@@ -63,7 +63,6 @@ export async function POST(req: NextRequest) {
         message: `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`,
       });
     }
-
     const { deal } = dealEvent;
     if (!deal.investmentStats) {
       console.error('Deal has no investment stats');

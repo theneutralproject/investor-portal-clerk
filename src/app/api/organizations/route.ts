@@ -5,7 +5,7 @@ import {
 } from '@/libs/organization/schema';
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs/server';
 import { DealOwnershipType, MembershipType } from '@prisma/client';
 import type { NextRequest } from 'next/server';
@@ -80,7 +80,10 @@ export async function POST(request: NextRequest) {
   try {
     postData = zOrganizationCreateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error('ERROR: unable to parse PUT body:\n', parseError);
+    console.error(
+      'ERROR: unable to parse org PUT body:\n',
+      getErrorMessage(parseError)
+    );
     return jsonResponse(
       { error: `Input data malformatted: \n${(parseError as Error).message}` },
       400

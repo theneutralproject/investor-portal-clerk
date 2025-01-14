@@ -66,7 +66,9 @@ export async function DELETE(request: NextRequest) {
         );
         return jsonResponse(
           {
-            error: `The ghost user could not be deleted from the database:\n${getErrorMessage(deleteError)}`,
+            error: `The ghost user could not be deleted from the database:\n${getErrorMessage(
+              deleteError
+            )}`,
           },
           400
         );
@@ -106,12 +108,10 @@ export async function PUT(request: NextRequest) {
     if (!memberId || !isNumber(memberId)) {
       throw new Error('userId is required in url');
     }
-
     const { user: dbUser, organization } = await getUserAndOrg(request, 2);
     if (!organization) {
       return jsonResponse({ error: 'Organization not found' }, 404);
     }
-
     if (!dbUser) {
       return jsonResponse({ error: 'User not found' }, 404);
     }
@@ -137,7 +137,10 @@ export async function PUT(request: NextRequest) {
     try {
       putData = zOrganizationMemberUpdateSchema.parse(requestBody);
     } catch (parseError) {
-      console.error('unable to parse PUT body:\n', parseError);
+      console.error(
+        'unable to parse org members PUT body:\n',
+        getErrorMessage(parseError)
+      );
       return jsonResponse(
         {
           error: `Input data malformatted: \n${(parseError as Error).message}`,
