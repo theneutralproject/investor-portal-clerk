@@ -5,6 +5,7 @@ import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
 
 const InvestingWithNeutral: React.FC = () => {
+  return null;
   return (
     <Card sx={{ borderRadius: '8px' }}>
       <CardContent>
