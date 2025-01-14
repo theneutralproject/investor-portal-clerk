@@ -8,8 +8,9 @@ import { currentUser } from '@clerk/nextjs/server';
 export async function GET() {
   const clerkUser = await currentUser();
   if (!clerkUser) return jsonResponse({ error: 'User not found' }, 404);
-  if (!(await isAdminUser(clerkUser.id)))
+  if (!(await isAdminUser(clerkUser.id))) {
     return jsonResponse({ error: 'User is not an admin' }, 403);
+  }
 
   const allUsers = await prisma.user.findMany();
   const promiseArr = [];
