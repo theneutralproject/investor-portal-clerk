@@ -7,12 +7,12 @@ import DocumentItem from '@components/DealFlow/ReviewSign/DocumentItem';
 import ReviewingInvestment from '@components/DealFlow/ReviewSign/ReviewingInvestment';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { createDocusignEnvelope } from '@components/DealFlow/Helpers/DealFlowHelpers';
-
+import { useRouter } from 'next/navigation';
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const { user } = useUser();
   const hasRunRef = useRef(false);
-
+  const router = useRouter();
   useEffect(() => {
     //Make sure dealStage is 2 when on /review
     const updateDealStage = async () => {
@@ -56,6 +56,11 @@ const DealFlowReview: React.FC = () => {
   if (deal.dealStage === 3) {
     return <ReviewingInvestment />;
   }
+  // Redirect to /fund if dealStage is >= 4
+  if (deal.dealStage >= 4) {
+    router.push(`/dealflow/${project?.slug}/${deal.id}/fund`);
+    return null;
+  }
 
   return (
     <Box sx={{ p: 3 }}>
@@ -87,7 +92,6 @@ const DealFlowReview: React.FC = () => {
       </Card>
 
       <DealFlowFooter
-        onBack={() => null}
         onContinue={toReviewScreen}
         // @ts-expect-error -- type completed
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

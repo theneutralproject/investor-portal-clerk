@@ -109,7 +109,7 @@ const DealFlowType: React.FC = () => {
         </Box>
       </RadioGroup>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
+      <DealFlowFooter  onContinue={handleUpdateDeal} />
     </Box>
   );
 };

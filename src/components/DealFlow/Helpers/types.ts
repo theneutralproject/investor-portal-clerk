@@ -17,6 +17,6 @@ export const questions: Question[] = [
   {
     id: 'verification',
     title: 'Choose Verification Method',
-    options: ['Upload Document', 'Contact Third Party Verifier'],
+    options: ['Contact Third Party Verifier', 'Upload Document'],
   },
 ];

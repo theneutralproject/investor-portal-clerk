@@ -168,7 +168,7 @@ const DealFlowCoInvestor: React.FC = () => {
         </Box>
       )}
       <EncryptionCard />
-      <DealFlowFooter onBack={() => null} onContinue={nextRoute} />
+      <DealFlowFooter onContinue={nextRoute} />
     </Box>
   );
 };

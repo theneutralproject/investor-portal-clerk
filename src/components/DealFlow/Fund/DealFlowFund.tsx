@@ -23,6 +23,11 @@ const DealFlowFund: React.FC = () => {
   const investmentAmount = deal?.investmentStats?.amount ?? 0;
   const merchantId = getMerchantId(project.slug);
 
+  const handleBack = () => {
+    setSelectedOption('');
+    setShowComponent(false);
+  };
+
   const handleContinue = () => {
     if (selectedOption) {
       setShowComponent(true);
@@ -40,12 +45,13 @@ const DealFlowFund: React.FC = () => {
   if (showComponent) {
     switch (selectedOption) {
       case 'plaid':
-        return <FundPlaid merchantId={merchantId} />;
+        return <FundPlaid merchantId={merchantId} onBack={handleBack} />;
       case 'check':
         return (
           <FundCheck
             paymentInfo={paymentInfo}
             investmentAmount={investmentAmount}
+            onBack={handleBack}
           />
         );
       case 'wire':
@@ -53,6 +59,7 @@ const DealFlowFund: React.FC = () => {
           <FundACH
             paymentInfo={paymentInfo}
             investmentAmount={investmentAmount}
+            onBack={handleBack}
           />
         );
     }
@@ -79,7 +86,6 @@ const DealFlowFund: React.FC = () => {
       />
 
       <DealFlowFooter
-        onBack={() => null}
         onContinue={handleContinue}
         isContinueDisabled={!selectedOption}
       />
