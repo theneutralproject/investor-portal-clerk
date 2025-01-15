@@ -3,6 +3,7 @@ import { useClerk, useUser } from '@clerk/nextjs';
 import { Avatar, Menu, MenuItem, IconButton, Button, Box } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DescriptionIcon from '@mui/icons-material/Description';
+import PolicyIcon from '@mui/icons-material/Policy';
 import posthog from 'posthog-js';
 import Link from 'next/link';
 
@@ -68,6 +69,11 @@ const UserAvatar = () => {
         <Link href="/terms" passHref>
           <MenuItem component="a" onClick={handleClose} sx={{ width: '200px' }}>
             <DescriptionIcon sx={{ marginRight: 1 }} /> Terms of Service
+          </MenuItem>
+        </Link>
+        <Link href="/privacy" passHref>
+          <MenuItem component="a" onClick={handleClose} sx={{ width: '200px' }}>
+            <PolicyIcon sx={{ marginRight: 1 }} /> Privacy
           </MenuItem>
         </Link>
         <MenuItem onClick={handleSignOut} sx={{ width: '200px' }}>

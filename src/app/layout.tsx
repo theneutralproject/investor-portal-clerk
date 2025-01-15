@@ -12,10 +12,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 import ChatInterface from '@/components/ChatInterface';
+import SignInTOSModal from '@/components/Dashboard/SignInTOSModal';
 import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 import PageViewTracker from './PageViewTracker';
 import CSPostHogProvider from './CSPostHogProvider';
 import UserIdentifier from './UserIdentifier';
+import { TermsProvider } from '@/app/context/TermsContext';
 const inter = Inter({
   subsets: ['latin'],
 });
@@ -34,38 +36,41 @@ export default function RootLayout({
   return (
     <CSPostHogProvider>
       <ClerkProvider>
-        <html lang="en">
-          <body className={inter.className}>
-            <PageViewTracker />
-            <UserIdentifier />
-            <NeutralQueryProvider>
-              <NeutralThemeProvider>
-                <DashboardProvider>
-                  <Sidebar>{children}</Sidebar>
-                  <ToastContainer
-                    position="top-right"
-                    autoClose={5000}
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    theme="light"
-                  />
-                </DashboardProvider>
-              </NeutralThemeProvider>
-            </NeutralQueryProvider>
+        <TermsProvider>
+          <html lang="en">
+            <body className={inter.className}>
+              <PageViewTracker />
+              <UserIdentifier />
+              <NeutralQueryProvider>
+                <NeutralThemeProvider>
+                  <SignInTOSModal />
+                  <DashboardProvider>
+                    <Sidebar>{children}</Sidebar>
+                    <ToastContainer
+                      position="top-right"
+                      autoClose={5000}
+                      newestOnTop={false}
+                      closeOnClick
+                      rtl={false}
+                      pauseOnFocusLoss
+                      draggable
+                      theme="light"
+                    />
+                  </DashboardProvider>
+                </NeutralThemeProvider>
+              </NeutralQueryProvider>
 
-            <ChatInterface type="FAB" />
-          </body>
+              <ChatInterface type="FAB" />
+            </body>
 
-          <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
-          <script
-            type="text/javascript"
-            src="https://forms.finixpymnts.com/finix.js"
-            async
-          ></script>
-        </html>
+            <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
+            <script
+              type="text/javascript"
+              src="https://forms.finixpymnts.com/finix.js"
+              async
+            ></script>
+          </html>
+        </TermsProvider>
       </ClerkProvider>
     </CSPostHogProvider>
   );
