@@ -143,7 +143,8 @@ const TermsPage = () => {
             AND AGREE THAT WE MAY SHARE PERSONAL INFORMATION ABOUT YOU WHICH WE
             COLLECT FROM THE USE OF TRACKING TECHNOLOGIES WITH OUR THIRD-PARTY
             ANALYTICS PARTNERS. FOR MORE INFORMATION ABOUT HOW WE USE TRACKING
-            TECHNOLOGIES, PLEASE SEE OUR [PRIVACY POLICY].
+            TECHNOLOGIES, PLEASE SEE OUR [<a href="/privacy">PRIVACY POLICY</a>
+            ].
           </span>
         </p>
         <ol>
@@ -270,7 +271,7 @@ const TermsPage = () => {
                   changes, you must promptly update the relevant registration
                   information. All Personal Information collected in the
                   Investor Portal will be handled pursuant to our current
-                  Privacy Policy.
+                  <a href="/privacy">Privacy Policy</a>.
                 </span>
               </li>
               <li>
@@ -311,7 +312,8 @@ const TermsPage = () => {
                 <span>
                   You acknowledge, understand, and agree that you do not have an
                   expectation of privacy in activities related to the Investor
-                  Portal except as described in the Privacy Policy.
+                  Portal except as described in the{' '}
+                  <a href="/privacy">Privacy Policy</a>.
                 </span>
               </li>
             </ol>
@@ -672,7 +674,8 @@ const TermsPage = () => {
                 technology. For information about how we collect, use, share and
                 secure your Personal Information, and to learn how to make
                 choices regarding certain Personal Information collection and
-                processing activities, please see our Privacy Policy.
+                processing activities, please see our{' '}
+                <a href="/privacy">Privacy Policy</a>.
               </span>
             </p>
           </li>
