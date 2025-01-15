@@ -137,8 +137,6 @@ const DealFlowDetails: React.FC = () => {
     !formData.dateOfBirth ||
     !formData.address?.street;
 
-  console.log(formData);
-
   return (
     <Box>
       <DealFlowTitle title="Personal Details" />
