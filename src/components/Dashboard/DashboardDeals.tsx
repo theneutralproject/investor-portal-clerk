@@ -111,6 +111,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
           <StyledHeader>Type</StyledHeader>
           <StyledHeader>Committed</StyledHeader>
           <StyledHeader>Distributions to Date</StyledHeader>
+          <StyledHeader>Projected Return</StyledHeader>
         </TableHeader>
         <CardContent sx={{ p: 0 }}>
           {data.dealStats.map(deal => {
@@ -138,6 +139,9 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                 </Typography>
                 <Typography variant="body2">
                   {formatCurrency(deal.distributionsToDate)}
+                </Typography>
+                <Typography variant="body2">
+                  {formatCurrency(deal.distributionsProjected)}
                 </Typography>
               </TableRow>
             );
