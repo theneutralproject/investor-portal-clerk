@@ -104,6 +104,39 @@ export async function updateHubspotContact(
   }
 }
 
+export async function getHubspotContactsWithoutSignupDate() {
+  const searchBody: PublicObjectSearchRequest = {
+    limit: 100,
+    properties: ['hs_object_id', 'email', 'date_signed_up', 'userid'],
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: 'date_signed_up',
+            operator: FilterOperatorEnum.NotHasProperty,
+          },
+          {
+            propertyName: 'userid',
+            operator: FilterOperatorEnum.HasProperty,
+          },
+        ],
+      },
+    ],
+  };
+  try {
+    const hsSearchResult =
+      await hubspotClient.crm.contacts.searchApi.doSearch(searchBody);
+
+    return hsSearchResult.results;
+  } catch (error) {
+    console.error(
+      'Unable to get contacts without signup date from hubspot:\n',
+      error
+    );
+    throw new Error(getErrorMessage(error));
+  }
+}
+
 export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   let deals = [] as SimplePublicObject[];
   let contacts = [] as SimplePublicObject[];
@@ -133,9 +166,8 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   } as PublicObjectSearchRequest;
 
   try {
-    const dealSearchRes = await hubspotClient.crm.deals.searchApi.doSearch(
-      dealSearchRequest
-    );
+    const dealSearchRes =
+      await hubspotClient.crm.deals.searchApi.doSearch(dealSearchRequest);
     console.log(`found ${dealSearchRes.results.length} deals`);
     deals = dealSearchRes.results ?? [];
   } catch (e) {
