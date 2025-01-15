@@ -298,7 +298,7 @@ const TermsPage = () => {
                   about Finix and its practices, please see Finix’s{' '}
                 </span>
                 <span>
-                  <a href="https://www.google.com/url?q=https://finix.com/terms-and-policies/privacy-policy&sa=D&source=editors&ust=1736961162797840&usg=AOvVaw2H0wrVSCECyQViuKgyYLIm">
+                  <a href="https://finix.com/terms-and-policies/privacy-policy">
                     Privacy Policy
                   </a>
                 </span>
