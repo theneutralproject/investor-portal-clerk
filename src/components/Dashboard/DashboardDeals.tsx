@@ -18,6 +18,10 @@ const StyledCard = styled(Card)({
   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
   borderRadius: 8,
   marginTop: '20px',
+  height: '400px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
 const ProjectImage = styled('img')({
