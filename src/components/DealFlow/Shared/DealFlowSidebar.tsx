@@ -6,12 +6,11 @@ import { DealFinancingType } from '@prisma/client';
 import Image from 'next/image';
 import DealFlowSidebarDetails from './DealFlowSidebarDetails';
 import ChatInterface from '@/components/ChatInterface';
+import { getProjectImage } from '@/components/Dashboard/DashboardProjects';
 const DealFlowSidebar = () => {
   const { project, deal } = useDealFlow();
 
-  const projectPicture = project?.pictures?.find(
-    picture => picture.type === 'HEADER'
-  )?.url;
+  const projectPicture = getProjectImage(project?.pictures);
 
   const investmentAmount = deal?.investmentStats?.amount;
   const displayAmount = investmentAmount

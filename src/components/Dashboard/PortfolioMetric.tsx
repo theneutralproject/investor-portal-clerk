@@ -118,7 +118,7 @@ const PortfolioMetric: React.FC<PortfolioMetricProps> = ({
               fontWeight: 'bold',
             }}
           >
-            {toDateValue}
+            {projectedTotalValue}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
             {label}
