@@ -18,11 +18,14 @@ import Image from 'next/image';
 import { ListItem, ROUTES, buttonItems } from './Sidebar';
 import { useRouter, usePathname } from 'next/navigation';
 import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useClerk } from '@clerk/nextjs';
 import posthog from 'posthog-js';
 
 const MobileSidebar = props => {
-  const { signOut } = useClerk();
+  const { signOut, user } = useClerk();
+  const loggedIn = !!user;
   const [isOpen, setIsOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -51,6 +54,33 @@ const MobileSidebar = props => {
     posthog.reset();
     void signOut();
   };
+
+  const authItems = loggedIn
+    ? [
+        {
+          key: 'signout',
+          label: 'Sign Out',
+          icon: <LogoutIcon />,
+          path: '/signout',
+          onClick: () => handleSignOut(),
+        },
+      ]
+    : [
+        {
+          key: 'login',
+          label: 'Log In',
+          icon: <LoginIcon />,
+          path: '/login',
+          onClick: () => handleClick('/login'),
+        },
+        {
+          key: 'create-account',
+          label: 'Create Account',
+          icon: <PersonAddIcon />,
+          path: '/login',
+          onClick: () => handleClick('/login'),
+        },
+      ];
 
   if (!isMobile) {
     return null;
@@ -137,16 +167,9 @@ const MobileSidebar = props => {
             <ListItem key={item.key} item={item} />
           ))}
 
-          <ListItem
-            key={'signout'}
-            item={{
-              key: 'signout',
-              label: 'Sign Out',
-              icon: <LogoutIcon />,
-              path: '/signout',
-              onClick: () => handleSignOut(),
-            }}
-          />
+          {authItems.map(item => (
+            <ListItem key={item.key} item={item} />
+          ))}
         </List>
       </Drawer>
       <Toolbar />

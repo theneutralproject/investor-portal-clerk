@@ -51,11 +51,6 @@ const PaymentProcessing: React.FC = () => {
               authorization or cancel this payment.
             </Typography>
           )}
-          {deal?.paymentMethod !== PaymentMethod.ACH && (
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Todo for check and wire
-            </Typography>
-          )}
 
           <Button fullWidth variant="neutralBlack" onClick={goToDashboard}>
             GO TO DASHBOARD

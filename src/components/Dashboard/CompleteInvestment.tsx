@@ -21,6 +21,7 @@ import DeleteDealButton from './DeleteDealButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { usePostHog } from 'posthog-js/react';
 import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
+import { getProjectImage } from './DashboardProjects';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
 }
@@ -45,12 +46,10 @@ const StyledLinearProgress = styled(LinearProgress)(({ theme }) => ({
 }));
 
 export const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
-  const headerPicture = deal.project.pictures.find(
-    picture => picture.type === 'HEADER'
-  );
+  const headerPicture = getProjectImage(deal.project.pictures);
 
-  if (headerPicture?.url) {
-    return headerPicture.url;
+  if (headerPicture) {
+    return headerPicture;
   }
 
   // Fallback to first picture if no header
