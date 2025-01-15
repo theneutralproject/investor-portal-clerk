@@ -1,6 +1,6 @@
 import prisma from '@/libs/prisma.server';
 import { currentUser } from '@clerk/nextjs/server';
-import { DealFinancingType, type DocumentEvent } from '@prisma/client';
+import { DealFinancingType, Prisma, type DocumentEvent } from '@prisma/client';
 import { type NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
@@ -40,9 +40,13 @@ export async function GET(request: NextRequest) {
     }
 
     //If no financing type is provided, return all documents
+    const where: Prisma.ProjectDocumentWhereInput = {
+      projectId: projectId
+    }
+    if (dealStage) where.dealStage = dealStage;
     if (financingType === '' || !financingType) {
       const documents = await prisma.projectDocument.findMany({
-        where: { projectId: projectId },
+        where: where,
       });
       return new Response(JSON.stringify(documents), {
         headers: { 'Content-Type': 'application/json' },
@@ -52,7 +56,6 @@ export async function GET(request: NextRequest) {
     const isDealFinancingType = Object.values(DealFinancingType).includes(
       financingType as DealFinancingType
     );
-
     const documents = await prisma.projectDocument.findMany({
       where: {
         projectId: projectId,

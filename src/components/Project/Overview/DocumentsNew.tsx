@@ -26,7 +26,7 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
     isError,
     data = [], // Provide default value
     error,
-  } = useDocuments(project.id) as {
+  } = useDocuments(project.id, 1) as {
     isLoading: boolean;
     isError: boolean;
     data: DocumentWithCompletion[];

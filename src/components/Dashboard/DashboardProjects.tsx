@@ -73,7 +73,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
     <Card sx={{ borderRadius: '8px', mt: 2 }}>
       <CardContent>
         <Typography variant="h6" sx={{ fontSize: '20px', mb: 2 }}>
-          Projects
+          Current Opportunities
         </Typography>
         <Divider sx={{ mb: 2 }} />
 
@@ -130,7 +130,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                           padding: '8px 24px',
                         }}
                       >
-                        VIEW PROJECT
+                        VIEW OPPORTUNITIES
                       </Button>
                     )}
                   </Box>
