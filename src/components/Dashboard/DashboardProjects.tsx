@@ -54,6 +54,7 @@ interface DashboardProjectsProps {
 export const getProjectImage = (
   pictures: ProjectWithAllNestedData['pictures']
 ) => {
+  if (!pictures) return '';
   const projectImage = pictures.find(pic => pic.type === 'CARD')?.url;
   return projectImage ?? pictures[0]?.url;
 };
