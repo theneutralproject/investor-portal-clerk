@@ -30,7 +30,8 @@ const DealFlowDetails: React.FC = () => {
         lastName: user.lastName ?? '',
         ssn: user.ssn ?? '',
         phoneNumber: user.phoneNumber ?? '',
-        dateOfBirth: user.dateOfBirth,
+        // @ts-expect-error dateOfBirth is a string
+        dateOfBirth: formatDate(user.dateOfBirth),
         address: user.address ?? {
           street: '',
           city: '',
@@ -128,6 +129,15 @@ const DealFlowDetails: React.FC = () => {
       </Box>
     );
   }
+
+  const isContinueDisabled =
+    !formData.firstName ||
+    !formData.lastName ||
+    !formData.ssn ||
+    !formData.dateOfBirth ||
+    !formData.address?.street;
+
+  console.log(formData);
 
   return (
     <Box>
@@ -298,7 +308,10 @@ const DealFlowDetails: React.FC = () => {
         </Grid>
       </Grid>
 
-      <DealFlowFooter onContinue={handleSubmit} />
+      <DealFlowFooter
+        onContinue={handleSubmit}
+        isContinueDisabled={isContinueDisabled}
+      />
     </Box>
   );
 };
