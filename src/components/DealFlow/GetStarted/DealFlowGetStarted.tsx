@@ -18,8 +18,8 @@ const DealFlowGetStarted: React.FC = () => {
       </Typography>
       <Box sx={{ width: '100%', maxWidth: '800px', margin: '0 auto' }}>
         <LiteYouTubeEmbed
-          id="ocvR5xUWLP4"
-          title="The Edison in Milwaukee, Wisconsin by The Neutral Project"
+          id="qmnAAS2nias"
+          title="Investor Portal Dealflow Walkthrough"
         />
       </Box>
       <DealFlowFooter  onContinue={createDeal} />

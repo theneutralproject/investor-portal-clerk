@@ -65,7 +65,7 @@ export const buttonItems = [
   },
   {
     key: 'copyright',
-    label: '2024 Neutral Project',
+    label: '2025 Neutral',
     icon: <CopyrightIcon />,
   },
 ];

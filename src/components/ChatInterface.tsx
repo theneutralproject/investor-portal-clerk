@@ -77,7 +77,7 @@ const ChatInterface = ({ type }: { type: string }) => {
         >
           <iframe
             src="https://www.chatbase.co/chatbot-iframe/g9lmo4egbpiJsKnInQrSC"
-            title="Spruce - The Neutral Project Advisor"
+            title="Spruce - The Neutral Advisor"
             width="100%"
             height="100%"
             style={{ border: 'none' }}
