@@ -24,7 +24,6 @@ const CURRENT_REVISION = parseInt(
 const getUser = async (clerkUserId: string) => {
   return await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
-    include: { TermsEvents: true },
     select: {
       id: true,
       TermsEvents: true,

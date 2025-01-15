@@ -545,30 +545,29 @@ const TermsPage = () => {
                     </span>
                   </li>
                 </ol>
-                <li>
-                  <span>
-                    Those portions of the Platform that relate to current
-                    investment opportunities or to making investments offered
-                    therein are available only to certain qualified, registered
-                    and authorized users. Therefore, such portions may not be
-                    available in all jurisdictions.
-                  </span>
-                </li>
-                <li>
-                  <span>
-                    Access to the Platform requires access to the internet. You
-                    are responsible for providing and maintaining all equipment
-                    necessary to establish a connection to the internet, access
-                    to the internet, and any telephone, wireless or other
-                    connection and service fees associated with such access.
-                    Using the Platform may allow you to receive Content on your
-                    mobile phone or other wireless device. The manner in which
-                    that Content is delivered to your phone or device may cause
-                    you to incur extra data, text messaging or other charges
-                    from your wireless carrier, which are your sole
-                    responsibility.
-                  </span>
-                </li>
+              </li>
+              <li>
+                <span>
+                  Those portions of the Platform that relate to current
+                  investment opportunities or to making investments offered
+                  therein are available only to certain qualified, registered
+                  and authorized users. Therefore, such portions may not be
+                  available in all jurisdictions.
+                </span>
+              </li>
+              <li>
+                <span>
+                  Access to the Platform requires access to the internet. You
+                  are responsible for providing and maintaining all equipment
+                  necessary to establish a connection to the internet, access to
+                  the internet, and any telephone, wireless or other connection
+                  and service fees associated with such access. Using the
+                  Platform may allow you to receive Content on your mobile phone
+                  or other wireless device. The manner in which that Content is
+                  delivered to your phone or device may cause you to incur extra
+                  data, text messaging or other charges from your wireless
+                  carrier, which are your sole responsibility.
+                </span>
               </li>
             </ol>
           </li>

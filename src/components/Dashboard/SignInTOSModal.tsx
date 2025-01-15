@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import {
   Button,
   Card,
@@ -11,24 +10,11 @@ import {
   Link,
 } from '@mui/material';
 import { usePathname } from 'next/navigation';
-
-const LOCAL_STORAGE_KEY = 'tos_modal_shown';
+import { useTermsContext } from '@/app/context/TermsContext';
 
 const SignInTOSModal = () => {
-  const [open, setOpen] = useState(false);
+  const { acceptTerms, showModal } = useTermsContext();
   const pathname = usePathname();
-
-  useEffect(() => {
-    const hasShownModal = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (!hasShownModal && pathname !== '/terms' && pathname !== '/privacy') {
-      setOpen(true);
-    }
-  }, [pathname]);
-
-  const handleContinue = () => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, 'true');
-    setOpen(false);
-  };
 
   if (pathname === '/terms' || pathname === '/privacy') {
     return null;
@@ -36,7 +22,7 @@ const SignInTOSModal = () => {
 
   return (
     <Dialog
-      open={open}
+      open={showModal}
       disableEscapeKeyDown
       aria-labelledby="tos-dialog"
       PaperProps={{
@@ -62,11 +48,7 @@ const SignInTOSModal = () => {
           </Typography>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
-          <Button
-            onClick={handleContinue}
-            variant="neutralYellow"
-            color="primary"
-          >
+          <Button onClick={acceptTerms} variant="neutralYellow" color="primary">
             Continue
           </Button>
         </CardActions>
