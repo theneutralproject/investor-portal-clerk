@@ -47,6 +47,60 @@ const ProjectMetric = styled(Box)(({ theme }) => ({
   gap: theme.spacing(0.5),
 }));
 
+const StatusBadge = ({
+  status,
+}: {
+  status: 'ACTIVE' | 'UPCOMING' | 'INACTIVE';
+}) => {
+  const getStatusConfig = () => {
+    switch (status) {
+      case 'ACTIVE':
+        return {
+          text: 'Open for investment',
+          sx: {
+            borderRadius: '100px',
+            background: 'var(--green-50, #E8F5E9)',
+            color: 'var(--green-900, #1B5E20)',
+          },
+        };
+      case 'UPCOMING':
+        return {
+          text: 'Coming soon',
+          sx: {
+            borderRadius: '100px',
+            background: '#FFF8E1',
+            color: '#F57F17',
+          },
+        };
+      case 'INACTIVE':
+        return {
+          text: 'Closed for investment',
+          sx: {
+            borderRadius: '100px',
+            background: 'var(--action-selected, rgba(0, 0, 0, 0.08))',
+            color: 'var(--text-primary, rgba(0, 0, 0, 0.87))',
+          },
+        };
+    }
+  };
+
+  const config = getStatusConfig();
+
+  return (
+    <Box
+      sx={{
+        ...config.sx,
+        padding: '4px 12px',
+        fontSize: '0.75rem',
+        fontWeight: 500,
+        display: 'inline-block',
+      }}
+    >
+      {config.text}
+    </Box>
+  );
+};
+
 interface DashboardProjectsProps {
   projects: ProjectWithAllNestedData[];
 }
@@ -145,59 +199,52 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                   >
                     <ProjectMetric>
                       <Typography variant="h6">
-                        {formatNumber(project.investmentStats.equityIRR)}%
+                        {formatNumber(project.propertyStats.numUnits)}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        IRR
+                        Total Units
                       </Typography>
                     </ProjectMetric>
 
-                    <ProjectMetric>
-                      <Typography variant="h6">
-                        {project.investmentStats.equityTermMonths}mo.
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Term
-                      </Typography>
-                    </ProjectMetric>
+                    {project.investmentStats.boolDebt && (
+                      <ProjectMetric>
+                        <Typography variant="h6">
+                          {formatNumber(
+                            project.investmentStats.interestRateMin
+                          )}
+                          -
+                          {formatNumber(
+                            project.investmentStats.interestRateMax
+                          )}
+                          %
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Debt Return
+                        </Typography>
+                      </ProjectMetric>
+                    )}
 
-                    <ProjectMetric>
-                      <Typography variant="h6">
-                        {formatNumber(
-                          project.investmentStats.targetEquityMultiple
-                        )}
-                        x
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Equity Multiple
-                      </Typography>
-                    </ProjectMetric>
+                    {project.investmentStats.boolEquity && (
+                      <ProjectMetric>
+                        <Typography variant="h6">
+                          {formatNumber(project.investmentStats.equityIRR)}%
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Equity Return
+                        </Typography>
+                      </ProjectMetric>
+                    )}
 
-                    <ProjectMetric>
-                      <Typography variant="h6">
-                        {formatNumber(fundingProgress)}%
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Fund Tracker
-                      </Typography>
+                    <ProjectMetric
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      <StatusBadge status={project.status} />
                     </ProjectMetric>
                   </Box>
-
-                  {!isMobile && (
-                    <LinearProgress
-                      variant="determinate"
-                      value={fundingProgress}
-                      sx={{
-                        height: 4,
-                        borderRadius: 2,
-                        backgroundColor: 'grey.200',
-                        '& .MuiLinearProgress-bar': {
-                          borderRadius: 2,
-                          backgroundColor: '#2f7d32',
-                        },
-                      }}
-                    />
-                  )}
 
                   {isMobile && (
                     <Button

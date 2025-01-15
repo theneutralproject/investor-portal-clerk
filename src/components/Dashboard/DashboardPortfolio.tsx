@@ -284,103 +284,105 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
         ))}
       </Grid>
 
-      <Box sx={{ height: 300, mt: 4, display: { xs: 'none', sm: 'block' } }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <ComposedChart
-            data={chartData}
-            margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-          >
-            <CartesianGrid stroke="#f5f5f5" />
-            <XAxis dataKey="quarter" />
-            <YAxis />
-            <Tooltip
-              content={<CustomTooltip />}
-              labelFormatter={(label: string) => `Quarter: ${label}`}
-            />
-            <Legend content={<CustomLegend payload={[]} />} />
+      {chartData.length > 0 && (
+        <Box sx={{ height: 300, mt: 4, display: { xs: 'none', sm: 'block' } }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <ComposedChart
+              data={chartData}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid stroke="#f5f5f5" />
+              <XAxis dataKey="quarter" />
+              <YAxis />
+              <Tooltip
+                content={<CustomTooltip />}
+                labelFormatter={(label: string) => `Quarter: ${label}`}
+              />
+              <Legend content={<CustomLegend payload={[]} />} />
 
-            {/* Areas for historical data */}
-            <Area
-              type="monotone"
-              dataKey={dataAccessors.principal}
-              stroke="#656565"
-              fill="#656565"
-              fillOpacity={0.1}
-              name="Principal"
-              strokeWidth={3}
-            />
-            <Area
-              type="monotone"
-              dataKey={dataAccessors.equityDistributions}
-              stroke="#2196F3"
-              fill="#2196F3"
-              fillOpacity={0.1}
-              name="Equity Distributions"
-              strokeWidth={3}
-            />
-            <Area
-              type="monotone"
-              dataKey={dataAccessors.debtDistributions}
-              stroke="#5AAC6A"
-              fill="#5AAC6A"
-              fillOpacity={0.1}
-              name="Debt Distributions"
-              strokeWidth={3}
-            />
-            <Area
-              type="monotone"
-              dataKey={dataAccessors.portfolioValue}
-              stroke="#FFB800"
-              fill="#FFB800"
-              fillOpacity={0.1}
-              name="Portfolio Value"
-              strokeWidth={3}
-            />
+              {/* Areas for historical data */}
+              <Area
+                type="monotone"
+                dataKey={dataAccessors.principal}
+                stroke="#656565"
+                fill="#656565"
+                fillOpacity={0.1}
+                name="Principal"
+                strokeWidth={3}
+              />
+              <Area
+                type="monotone"
+                dataKey={dataAccessors.equityDistributions}
+                stroke="#2196F3"
+                fill="#2196F3"
+                fillOpacity={0.1}
+                name="Equity Distributions"
+                strokeWidth={3}
+              />
+              <Area
+                type="monotone"
+                dataKey={dataAccessors.debtDistributions}
+                stroke="#5AAC6A"
+                fill="#5AAC6A"
+                fillOpacity={0.1}
+                name="Debt Distributions"
+                strokeWidth={3}
+              />
+              <Area
+                type="monotone"
+                dataKey={dataAccessors.portfolioValue}
+                stroke="#FFB800"
+                fill="#FFB800"
+                fillOpacity={0.1}
+                name="Portfolio Value"
+                strokeWidth={3}
+              />
 
-            {/* Lines for projected data */}
-            <Line
-              type="monotone"
-              dataKey={dataAccessors.principalProjected}
-              stroke="#656565"
-              name="Principal (Projected)"
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="5"
-              legendType="none"
-            />
-            <Line
-              type="monotone"
-              dataKey={dataAccessors.equityDistributionsProjected}
-              stroke="#2196F3"
-              name="Equity Distributions (Projected)"
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="5"
-              legendType="none"
-            />
-            <Line
-              type="monotone"
-              dataKey={dataAccessors.debtDistributionsProjected}
-              stroke="#5AAC6A"
-              name="Debt Distributions (Projected)"
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="5"
-              legendType="none"
-            />
-            <Line
-              type="monotone"
-              dataKey={dataAccessors.portfolioValueProjected}
-              stroke="#FFB800"
-              name="Portfolio Value (Projected)"
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="5"
-              legendType="none"
-            />
-          </ComposedChart>
-        </ResponsiveContainer>
-      </Box>
+              {/* Lines for projected data */}
+              <Line
+                type="monotone"
+                dataKey={dataAccessors.principalProjected}
+                stroke="#656565"
+                name="Principal (Projected)"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="5"
+                legendType="none"
+              />
+              <Line
+                type="monotone"
+                dataKey={dataAccessors.equityDistributionsProjected}
+                stroke="#2196F3"
+                name="Equity Distributions (Projected)"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="5"
+                legendType="none"
+              />
+              <Line
+                type="monotone"
+                dataKey={dataAccessors.debtDistributionsProjected}
+                stroke="#5AAC6A"
+                name="Debt Distributions (Projected)"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="5"
+                legendType="none"
+              />
+              <Line
+                type="monotone"
+                dataKey={dataAccessors.portfolioValueProjected}
+                stroke="#FFB800"
+                name="Portfolio Value (Projected)"
+                strokeWidth={2}
+                dot={false}
+                strokeDasharray="5"
+                legendType="none"
+              />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </Box>
+      )}
 
       {!loggedIn && (
         <Box

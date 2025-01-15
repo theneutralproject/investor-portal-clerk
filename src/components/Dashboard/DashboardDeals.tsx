@@ -18,6 +18,10 @@ const StyledCard = styled(Card)({
   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
   borderRadius: 8,
   marginTop: '20px',
+  height: '400px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
 const ProjectImage = styled('img')({
@@ -107,6 +111,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
           <StyledHeader>Type</StyledHeader>
           <StyledHeader>Committed</StyledHeader>
           <StyledHeader>Distributions to Date</StyledHeader>
+          <StyledHeader>Projected Return</StyledHeader>
         </TableHeader>
         <CardContent sx={{ p: 0 }}>
           {data.dealStats.map(deal => {
@@ -134,6 +139,9 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                 </Typography>
                 <Typography variant="body2">
                   {formatCurrency(deal.distributionsToDate)}
+                </Typography>
+                <Typography variant="body2">
+                  {formatCurrency(deal.distributionsProjected)}
                 </Typography>
               </TableRow>
             );
