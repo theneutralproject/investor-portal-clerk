@@ -40,7 +40,7 @@ const TermsPage = () => {
           <p>
             <strong>Application</strong> means the software program provided by
             the Company downloaded by You on any electronic device, named The
-            Neutral Project Investor Portal
+            Neutral Investor Portal
           </p>
           <p>
             <strong>Affiliate</strong> means an entity that controls, is

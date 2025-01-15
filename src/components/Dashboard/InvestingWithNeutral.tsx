@@ -24,7 +24,7 @@ const InvestingWithNeutral: React.FC = () => {
       <Box sx={{ width: '100%', margin: '0 auto', p: 2 }}>
         <LiteYouTubeEmbed
           id="ocvR5xUWLP4"
-          title="The Edison in Milwaukee, Wisconsin by The Neutral Project"
+          title="The Edison in Milwaukee, Wisconsin by Neutral"
         />
       </Box>
 

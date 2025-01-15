@@ -22,7 +22,7 @@ const inter = Inter({
 
 export const metadata = {
   title: 'Investor Portal',
-  description: 'Investor Portal | The Neutral Project',
+  description: 'Investor Portal | Neutral',
   icons: [{ rel: 'icon', url: '/favicon.ico' }],
 };
 

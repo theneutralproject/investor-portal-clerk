@@ -15,7 +15,7 @@ describe('InfoSidebar', () => {
     });
     const aboutHeading = screen.getByRole('heading', {
       level: 5,
-      name: 'About The Neutral Project',
+      name: 'About Neutral',
     });
 
     expect(questionHeading).toBeInTheDocument();
