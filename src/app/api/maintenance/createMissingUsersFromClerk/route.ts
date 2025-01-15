@@ -10,9 +10,9 @@ import { User } from '@prisma/client';
 export async function POST() {
   const clerkUser = await currentUser();
   if (!clerkUser) return jsonResponse({ error: 'User not found' }, 404);
-    if (!(await isAdminUser(clerkUser.id))) {
-      return jsonResponse({ error: 'User is not an admin' }, 403);
-    }
+  if (!(await isAdminUser(clerkUser.id))) {
+    return jsonResponse({ error: 'User is not an admin' }, 403);
+  }
 
   // get all users from clerk
   const clerkUsers = await clerkClient.users.getUserList({

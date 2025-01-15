@@ -4,6 +4,7 @@ import type { HubspotContactCreateUpdateSchema } from '../hubspot/schema';
 import {
   associateContactWithDealInHubspot,
   createHubspotContact,
+  formatDateForHubspot,
   ReferralSource,
   updateHubspotContact,
 } from '../hubspot/utils';
@@ -70,6 +71,7 @@ export async function createUserInDbAndHubspot(
   if (userData.hubspotId) {
     hsUserData.hubspotId = userData.hubspotId;
     hsContactId = userData.hubspotId;
+    hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
     // update user in hubspot
     try {
       await updateHubspotContact(hsUserData);
