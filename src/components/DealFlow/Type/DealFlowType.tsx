@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { Box, Typography, RadioGroup, Card, CardContent } from "@mui/material";
-import { DealFinancingType } from "@prisma/client";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import DealFlowFooter from "@components/DealFlow/Shared/DealFlowFooter";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import { MODAL_KEYS } from "../Shared/Modal/DealFlowLearnMoreModal";
+import React, { useState } from 'react';
+import { Box, Typography, RadioGroup, Card, CardContent } from '@mui/material';
+import { DealFinancingType } from '@prisma/client';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { MODAL_KEYS } from '../Shared/Modal/DealFlowLearnMoreModal';
 
 const DealFlowType: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -33,7 +33,7 @@ const DealFlowType: React.FC = () => {
       ? [
           {
             type: DealFinancingType.equity,
-            title: "Equity Investment",
+            title: 'Equity Investment',
             description:
               "Common Equity benefits from the property's performance; in contrast to Common Debt, this type of investment offers higher potential returns and tax optimization. Common Equity does have a higher risk associated with the higher return.",
           },
@@ -43,9 +43,9 @@ const DealFlowType: React.FC = () => {
       ? [
           {
             type: DealFinancingType.promissory_note_now,
-            title: "Debt Investment",
+            title: 'Debt Investment',
             description:
-              "Common Debt provides a fixed rate of return, and it has priority in repayment to Common Equity, making it a less risky investment. Furthermore, Common Debt has a fixed rate of return per annum, distributed quarterly.",
+              'Common Debt provides a fixed rate of return, and it has priority in repayment to Common Equity, making it a less risky investment. Furthermore, Common Debt has a fixed rate of return per annum, distributed quarterly.',
           },
         ]
       : []),
@@ -68,13 +68,13 @@ const DealFlowType: React.FC = () => {
               key={title}
               onClick={() => handleFinancingTypeChange(type)}
               sx={{
-                cursor: "pointer",
+                cursor: 'pointer',
                 border:
                   financingType === type
-                    ? "2px solid #1976d2"
-                    : "1px solid #e0e0e0",
+                    ? '2px solid #1976d2'
+                    : '1px solid #e0e0e0',
                 borderRadius: 2,
-                "&:hover": { boxShadow: 3 },
+                '&:hover': { boxShadow: 3 },
               }}
             >
               <CardContent>
@@ -109,7 +109,7 @@ const DealFlowType: React.FC = () => {
         </Box>
       </RadioGroup>
 
-      <DealFlowFooter onBack={() => null} onContinue={handleUpdateDeal} />
+      <DealFlowFooter  onContinue={handleUpdateDeal} />
     </Box>
   );
 };

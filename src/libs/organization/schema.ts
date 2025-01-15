@@ -1,10 +1,10 @@
-import { DealOwnershipType, MembershipType } from "@prisma/client";
-import { z } from "zod";
-import { zUserCreateSchema, zUserUpdateSchema } from "../user/schema";
-import { zAddressCreateSchema } from "../address/schema";
+import { DealOwnershipType, MembershipType } from '@prisma/client';
+import { z } from 'zod';
+import { zUserCreateSchema, zUserUpdateSchema } from '../user/schema';
+import { zAddressCreateSchema } from '../address/schema';
 
 export const zOrganizationUpdateSchema = z.object({
-    id: z.number().int(),
+    id: z.number().int().optional(), // if provided, an admin can update any organization
     name: z.string().max(120, "120 characters max").optional(),
     tin: z.string().max(200).optional(),
     dateOfCreation: z.coerce.date().optional(),
@@ -12,32 +12,40 @@ export const zOrganizationUpdateSchema = z.object({
     ownershipType: z.nativeEnum(DealOwnershipType).optional(),
     address: zAddressCreateSchema.nullish()
 });
-export type OrganizationUpdateSchema = z.infer<typeof zOrganizationUpdateSchema>;
+export type OrganizationUpdateSchema = z.infer<
+  typeof zOrganizationUpdateSchema
+>;
 
 export const zOrganizationCreateSchema = z.object({
-    name: z.string().max(120, "120 characters max").nullish(),
-    tin: z.string().max(200).nullish(),
-    dateOfCreation: z.coerce.date().nullish(),
-    juristication: z.string().max(120, "120 characters max").nullish(),
-    ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
-    address: zAddressCreateSchema.nullish()
+  name: z.string().max(120, '120 characters max').nullish(),
+  tin: z.string().max(200).nullish(),
+  dateOfCreation: z.coerce.date().nullish(),
+  juristication: z.string().max(120, '120 characters max').nullish(),
+  ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
+  address: zAddressCreateSchema.nullish(),
 });
 
-export type OrganizationCreateSchema = z.infer<typeof zOrganizationCreateSchema>;
+export type OrganizationCreateSchema = z.infer<
+  typeof zOrganizationCreateSchema
+>;
 
 export const zOrganizationMemberCreateSchema = z.object({
-    // organizationId: z.number().int(),
-    dealId: z.number().int().optional(),
-    user: zUserCreateSchema,
-    type: z.nativeEnum(MembershipType),
-    title: z.string().max(120, "120 characters max").optional(),
+  // organizationId: z.number().int(),
+  dealId: z.number().int().optional(),
+  user: zUserCreateSchema,
+  type: z.nativeEnum(MembershipType),
+  title: z.string().max(120, '120 characters max').optional(),
 });
-export type OrganizationMemberCreateSchema = z.infer<typeof zOrganizationMemberCreateSchema>;
+export type OrganizationMemberCreateSchema = z.infer<
+  typeof zOrganizationMemberCreateSchema
+>;
 
 export const zOrganizationMemberUpdateSchema = z.object({
-    dealId: z.number().int().nullish(),
-    user: zUserUpdateSchema.partial().nullish(),
-    type: z.nativeEnum(MembershipType),
-    title: z.string().max(120, "120 characters max").nullish(),
+  dealId: z.number().int().nullish(),
+  user: zUserUpdateSchema.partial().nullish(),
+  type: z.nativeEnum(MembershipType),
+  title: z.string().max(120, '120 characters max').nullish(),
 });
-export type OrganizationMemberUpdateSchema = z.infer<typeof zOrganizationMemberUpdateSchema>;
+export type OrganizationMemberUpdateSchema = z.infer<
+  typeof zOrganizationMemberUpdateSchema
+>;

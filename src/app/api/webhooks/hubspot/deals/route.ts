@@ -1,12 +1,17 @@
 'use server';
-import type { DealUpdateSchema } from "@/libs/deal/schema";
-import { updateDeal } from "@/libs/deal/utils.server";
-import { HSDealPropNames, getDealStageIntFromHSString, getFundingAmount, getProjectSlugFromDealStage } from "@/libs/hubspot/utils";
-import prisma from "@/libs/prisma.server";
-import { getErrorMessage } from "@/libs/utils";
-import { DealFinancingType, type Deal } from "@prisma/client";
-import { isError } from "lodash";
-import { z } from "zod";
+import type { DealUpdateSchema } from '@/libs/deal/schema';
+import { updateDeal } from '@/libs/deal/utils.server';
+import {
+  HSDealPropNames,
+  getDealStageIntFromHSString,
+  getFundingAmount,
+  getProjectSlugFromDealStage,
+} from '@/libs/hubspot/utils';
+import prisma from '@/libs/prisma.server';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import { DealFinancingType, type Deal } from '@prisma/client';
+import { isError } from 'lodash';
+import { z } from 'zod';
 
 const hubspotWHDealRes = z.object({
   objectId: z.number(), // hubspot deal id
@@ -25,54 +30,56 @@ export async function POST(req: Request) {
     const payload = arrHubspotWHRes.parse(await req.json())[0];
     if (
       !(
-        req.headers.get("X-HubSpot-Signature-Version") &&
-        req.headers.get("X-HubSpot-Signature")
+        req.headers.get('X-HubSpot-Signature-Version') &&
+        req.headers.get('X-HubSpot-Signature')
       )
     ) {
       console.error(`HS webhook request is not coming from HS!`);
       return new Response(
-        JSON.stringify({ message: "Ignoring HubSpot webhook" }),
+        JSON.stringify({ message: 'Ignoring HubSpot webhook' }),
         {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
 
     if (
       !payload?.propertyValue ||
-      !(payload?.changeSource === "CRM_UI" || payload?.changeSource === "CRM")
+      !(payload?.changeSource === 'CRM_UI' || payload?.changeSource === 'CRM')
     ) {
       console.log(
         `Ignoring HubSpot webhook: change source ${payload?.changeSource} is not the HS UI, or property value is missing.`
       );
       return new Response(
-        JSON.stringify({ message: "Ignoring HubSpot webhook" }),
+        JSON.stringify({ message: 'Ignoring HubSpot webhook' }),
         {
           status: 200,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
     }
-    console.log("payload", payload);
+    console.log('HS payload:', payload);
     const dealBody: DealUpdateSchema = {
       hubspotId: payload.objectId.toString(),
     };
-    let updateProjectFunding = false; // flag to update project funding tracker 
+    let updateProjectFunding = false; // flag to update project funding tracker
     switch (payload.propertyName) {
       case HSDealPropNames.dealstage.toString():
         dealBody.dealStage = getDealStageIntFromHSString(payload.propertyValue);
         updateProjectFunding = dealBody.dealStage >= 3;
         break;
       case HSDealPropNames.amount.toString():
-        dealBody.investmentStats = { amount: parseFloat(payload.propertyValue) };
+        dealBody.investmentStats = {
+          amount: parseFloat(payload.propertyValue),
+        };
         break;
       case HSDealPropNames.financing_type.toString():
         dealBody.investmentStats = {
           financingType:
             payload.propertyValue in DealFinancingType
               ? (payload.propertyValue as keyof typeof DealFinancingType)
-              : "equity"
+              : 'equity',
         };
         break;
       case HSDealPropNames.closedate.toString():
@@ -96,52 +103,44 @@ export async function POST(req: Request) {
           );
 
           const project = await prisma.project.findUnique({
-            where: { name: projectSlugToUpdate }
+            where: { name: projectSlugToUpdate },
           });
-          if (!project) return new Response(
-            JSON.stringify({ error: `project with name ${projectSlugToUpdate} does not exist` }),
-            {
-              status: 500,
-              headers: { "Content-Type": "application/json" },
-            }
-          );
-          await prisma.projectInvestmentStats
-            .update({
+          if (!project) {
+            console.error(`project for slug ${projectSlugToUpdate} not found`);
+            return errorResponse(
+              `project with name ${projectSlugToUpdate} does not exist`,
+              500
+            );
+          }
+          try {
+            await prisma.projectInvestmentStats.update({
               where: { projectId: project.id },
               data: { investmentRaised: amountRaised },
-            })
-            .catch((error) => {
-              console.error(error);
-              // return Error("Failed to update deal with hubspot data");
             });
+          } catch (error) {
+            console.error(
+              `unable to update project funding tracker for ${projectSlugToUpdate}: ${getErrorMessage(error)}. Continuing to update deal`
+            );
+          }
         }
       }
     }
-
-    const updatedDeal: Deal | Error = await updateDeal(dealBody, false);
-    if (isError(updatedDeal)) {
-      console.error("Error updateDeal response:\n", updateDeal.toString());
-      console.log(`Deal with HS ID ${dealBody.hubspotId} does not exist and was likely manually created in HS`);
-      return new Response(
-        JSON.stringify({ error: getErrorMessage(updatedDeal) }),
-        {
-          status: 500,
-          headers: { "Content-Type": "application/json" },
-        }
+    let updatedDeal: Deal;
+    try {
+      updatedDeal = await updateDeal(dealBody, false);
+    } catch (error) {
+      console.log(
+        `Unable to update deal with HS ID ${dealBody.hubspotId}. It was likely manually created in HS and does not exist in the DB`
+      );
+      return errorResponse(
+        `Unable to update deal with HS ID ${dealBody.hubspotId}. It was likely manually created in HS and does not exist in the DB`,
+        500
       );
     }
 
-    return new Response(JSON.stringify(updatedDeal), {
-      headers: { "Content-Type": "application/json" },
-    });
+    return jsonResponse(updatedDeal);
   } catch (error) {
-    console.error("Error parsing HubSpot webhook: ", error);
-    return new Response(
-      JSON.stringify({ error: "Unable to parse HubSpot webhook" }),
-      {
-        status: 404,
-        headers: { "Content-Type": "application/json" },
-      }
-    );
+    console.error('Catch All Error parsing HubSpot webhook: ', error);
+    return errorResponse('Error parsing HubSpot webhook', 500);
   }
 }

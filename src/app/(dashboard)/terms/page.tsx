@@ -1,9 +1,9 @@
 /* eslint-disable react/no-unescaped-entities */
-"use client";
+'use client';
 
-import { Box, Grid } from "@mui/material";
+import { Box, Grid } from '@mui/material';
 
-import ProjectPageBanner from "@/components/Project/ProjectPageBanner";
+import ProjectPageBanner from '@/components/Project/ProjectPageBanner';
 
 const TermsPage = () => {
   return (
@@ -40,7 +40,7 @@ const TermsPage = () => {
           <p>
             <strong>Application</strong> means the software program provided by
             the Company downloaded by You on any electronic device, named The
-            Neutral Project Investor Portal
+            Neutral Investor Portal
           </p>
           <p>
             <strong>Affiliate</strong> means an entity that controls, is
@@ -433,7 +433,7 @@ const TermsPage = () => {
             contact us:
           </p>
           <li>
-            By visiting this page on our website:{" "}
+            By visiting this page on our website:{' '}
             <a href="https://invest.theneutralproject.com/contact">
               https://invest.theneutralproject.com/contact
             </a>

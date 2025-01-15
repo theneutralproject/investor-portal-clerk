@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -6,9 +6,9 @@ import {
   ListItem,
   Stack,
   CircularProgress,
-} from "@mui/material";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { toast } from "react-toastify";
+} from '@mui/material';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { toast } from 'react-toastify';
 
 interface DocumentItemProps {
   title: string;
@@ -29,7 +29,7 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
 
   const handleClick = () => {
     setIsLoading(true);
-    toast.success("Generating document...");
+    toast.success('Generating document...');
     onSign?.();
   };
 
@@ -39,20 +39,20 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
       sx={{
         py: 2,
         px: 3,
-        display: "flex",
-        alignItems: "center",
+        display: 'flex',
+        alignItems: 'center',
         gap: 2,
-        borderBottom: "1px solid",
-        borderColor: "divider",
-        "&:last-child": {
-          borderBottom: "none",
+        borderBottom: '1px solid',
+        borderColor: 'divider',
+        '&:last-child': {
+          borderBottom: 'none',
         },
       }}
     >
       {isCompleted ? (
         <CheckCircleIcon
           sx={{
-            color: "success.main",
+            color: 'success.main',
             width: 24,
             height: 24,
           }}
@@ -62,13 +62,13 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
           sx={{
             width: 24,
             height: 24,
-            borderRadius: "50%",
-            bgcolor: "grey.100",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            typography: "body2",
-            color: "text.secondary",
+            borderRadius: '50%',
+            bgcolor: 'grey.100',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            typography: 'body2',
+            color: 'text.secondary',
           }}
         >
           {index}
@@ -91,7 +91,7 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
             isLoading ? <CircularProgress size={20} color="inherit" /> : null
           }
         >
-          {isLoading ? "GENERATING..." : "REVIEW & SIGN"}
+          {isLoading ? 'GENERATING...' : 'REVIEW & SIGN'}
         </Button>
       )}
     </ListItem>

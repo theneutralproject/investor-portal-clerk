@@ -1,30 +1,31 @@
-import type { SimplePublicObjectInputForCreate } from "@hubspot/api-client/lib/codegen/crm/contacts";
-import { DealFinancingType, DealUnitType } from "@prisma/client";
-import { z } from "zod";
+import type { SimplePublicObjectInputForCreate } from '@hubspot/api-client/lib/codegen/crm/contacts';
+import { DealFinancingType, DealUnitType } from '@prisma/client';
+import { z } from 'zod';
 
 /**
  * * User types
  * 👇
  */
 
-export type HubspotContactCreateUpdateSchema = SimplePublicObjectInputForCreate &  {
-  email?: string;
-  hubspotId?: string;
-};
+export type HubspotContactCreateUpdateSchema =
+  SimplePublicObjectInputForCreate & {
+    email?: string;
+    hubspotId?: string;
+  };
 
 const zHsContactProperty = z.object({
   property: z.string(),
-  value: z.string()
+  value: z.string(),
 });
 
 export const zHsContactUpdateSchema = z.object({
   email: z.string(),
-  properties: z.array(zHsContactProperty)
+  properties: z.array(zHsContactProperty),
 });
 
 export type HubspotUserCreateResponse = {
-  vid: number,
-  isNew: boolean
+  vid: number;
+  isNew: boolean;
 };
 
 /**
@@ -36,12 +37,12 @@ export type HubspotDealPropertiesCollection = {
 };
 
 export type HubspotDealUpdate = {
-  hubspotDealId: number,
-  properties: { name: string; value: string }[]
+  hubspotDealId: number;
+  properties: { name: string; value: string }[];
 };
 
 export const zHsDealCreateResponse = z.object({
-  dealId: z.number()
+  dealId: z.number(),
 });
 export type HsDealCreateResponse = z.infer<typeof zHsDealCreateResponse>;
 
@@ -52,30 +53,30 @@ export const zHubspotDealUpdateSchema = z.object({
   dealStage: z.number().optional(),
   amount: z.number().optional(),
   financingType: z.nativeEnum(DealFinancingType).optional(),
-  unitType: z.nativeEnum(DealUnitType).optional()
+  unitType: z.nativeEnum(DealUnitType).optional(),
 });
 
 export type HubspotDealUpdateSchema = z.infer<typeof zHubspotDealUpdateSchema>;
 
 export const zHsUpdateDealSchema = z.object({
   hubspotDealId: z.number(),
-  properties: z.array(z.object(
-    {
+  properties: z.array(
+    z.object({
       name: z.string(),
-      value: z.string()
-    }
-  ))
+      value: z.string(),
+    })
+  ),
 });
 
 const zHsDealSearchObjectSchema = z.object({
   properties: z.object({
-    amount: z.string()
-  })
+    amount: z.string(),
+  }),
 });
 
 export const zHsDealSearchResultsSchema = z.object({
   total: z.number(),
-  results: z.array(zHsDealSearchObjectSchema)
+  results: z.array(zHsDealSearchObjectSchema),
 });
 
 export const zHsDealDocsAccessedUpdateSchema = z.object({
@@ -84,4 +85,6 @@ export const zHsDealDocsAccessedUpdateSchema = z.object({
   documentNames: z.string(),
 });
 
-export type HsDealDocsAccessedUpdateSchema = z.infer<typeof zHsDealDocsAccessedUpdateSchema>
+export type HsDealDocsAccessedUpdateSchema = z.infer<
+  typeof zHsDealDocsAccessedUpdateSchema
+>;

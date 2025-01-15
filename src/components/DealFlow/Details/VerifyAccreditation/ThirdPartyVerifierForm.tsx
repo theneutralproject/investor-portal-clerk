@@ -1,8 +1,8 @@
 // ThirdPartyVerifierForm.tsx
 
-import React from "react";
-import { Box, Typography, TextField } from "@mui/material";
-import { type AccreditationVerifier } from "@prisma/client";
+import React from 'react';
+import { Box, Typography, TextField } from '@mui/material';
+import { type AccreditationVerifier } from '@prisma/client';
 
 interface ThirdPartyVerifierFormProps {
   verifierInfo: Partial<AccreditationVerifier>;

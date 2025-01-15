@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -8,14 +8,14 @@ import {
   IconButton,
   Alert,
   TextField,
-} from "@mui/material";
+} from '@mui/material';
 import {
   AccountBalanceWallet as WireIcon,
   ContentCopy as CopyIcon,
-} from "@mui/icons-material";
-import DealFlowFooter from "../Shared/DealFlowFooter";
-import DealFlowTitle from "../Shared/DealFlowTitle";
-import { useDealFlow } from "../Shared/DealFlowContext";
+} from '@mui/icons-material';
+import DealFlowFooter from '../Shared/DealFlowFooter';
+import DealFlowTitle from '../Shared/DealFlowTitle';
+import { useDealFlow } from '../Shared/DealFlowContext';
 
 interface FundACHProps {
   paymentInfo: {
@@ -23,14 +23,19 @@ interface FundACHProps {
     routingNumber: string;
   };
   investmentAmount: number;
+  onBack?: () => void;
 }
 
-const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
+const FundACH: React.FC<FundACHProps> = ({
+  paymentInfo,
+  investmentAmount,
+  onBack,
+}) => {
   const { deal, refetchDeal, updateDeal } = useDealFlow();
   const [copied, setCopied] = useState<string | null>(null);
   const [wireTransferId, setWireTransferId] = useState<string>(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    deal?.paymentReferenceId ?? ""
+    deal?.paymentReferenceId ?? ''
   );
   const copyToClipboard = (text: string, field: string) => {
     void navigator.clipboard.writeText(text);
@@ -52,7 +57,7 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
         ...deal,
         paymentReferenceId: wireTransferId,
         dateFundsSent: new Date(),
-        paymentMethod: "WIRE",
+        paymentMethod: 'WIRE',
       },
       false
     );
@@ -68,9 +73,9 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
       direction="row"
       justifyContent="space-between"
       alignItems="flex-start"
-      sx={{ width: "100%" }}
+      sx={{ width: '100%' }}
     >
-      <Typography variant="body2" sx={{ textTransform: "capitalize" }}>
+      <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
         {label}:
       </Typography>
       <Stack direction="row" alignItems="flex-start" spacing={1}>
@@ -80,9 +85,9 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
         <Typography
           component="pre"
           sx={{
-            fontFamily: "inherit",
+            fontFamily: 'inherit',
             margin: 0,
-            whiteSpace: "pre-line",
+            whiteSpace: 'pre-line',
           }}
         >
           {value}
@@ -92,7 +97,7 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
             size="small"
             onClick={() => copyToClipboard(String(value), label)}
           >
-            <CopyIcon fontSize="small" sx={{ color: "black" }} />
+            <CopyIcon fontSize="small" sx={{ color: 'black' }} />
           </IconButton>
         )}
       </Stack>
@@ -109,9 +114,9 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
             direction="row"
             alignItems="center"
             spacing={2}
-            sx={{ cursor: "pointer" }}
+            sx={{ cursor: 'pointer' }}
           >
-            <WireIcon sx={{ color: "black" }} />
+            <WireIcon sx={{ color: 'black' }} />
             <Typography variant="h6" flex={1}>
               Add Funds via Wire Transfer
             </Typography>
@@ -120,16 +125,16 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
           <Box sx={{ mt: 2 }}>
             <Stack spacing={2}>
               {renderDetailRow(
-                "Amount",
+                'Amount',
                 `$${investmentAmount.toLocaleString()}`
               )}
               {renderDetailRow(
-                "Account Number",
+                'Account Number',
                 paymentInfo.accountNumber,
                 true
               )}
               {renderDetailRow(
-                "Routing Number",
+                'Routing Number',
                 paymentInfo.routingNumber,
                 true
               )}
@@ -152,7 +157,7 @@ const FundACH: React.FC<FundACHProps> = ({ paymentInfo, investmentAmount }) => {
       </Card>
 
       <DealFlowFooter
-        onBack={() => null}
+        onBack={onBack}
         onContinue={fundWireTransferContinue}
         isContinueDisabled={wireTransferId.length === 0}
       />

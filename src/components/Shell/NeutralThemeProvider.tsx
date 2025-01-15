@@ -1,25 +1,25 @@
-"use client";
+'use client';
 
-import { CssBaseline } from "@mui/material";
-import { red } from "@mui/material/colors";
-import { createTheme, ThemeProvider } from "@mui/material/styles";
-import { Inter } from "next/font/google";
-import { Roboto } from "next/font/google";
+import { CssBaseline } from '@mui/material';
+import { red } from '@mui/material/colors';
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { Inter } from 'next/font/google';
+import { Roboto } from 'next/font/google';
 
-declare module "@mui/material/styles" {
+declare module '@mui/material/styles' {
   interface Palette {
-    snowdayGray: Palette["primary"];
-    snowdayText: Palette["primary"];
-    neutralDarkGray: Palette["primary"];
+    snowdayGray: Palette['primary'];
+    snowdayText: Palette['primary'];
+    neutralDarkGray: Palette['primary'];
   }
   interface PaletteOptions {
-    snowdayGray: PaletteOptions["primary"];
-    snowdayText: PaletteOptions["primary"];
-    neutralDarkGray: PaletteOptions["primary"];
+    snowdayGray: PaletteOptions['primary'];
+    snowdayText: PaletteOptions['primary'];
+    neutralDarkGray: PaletteOptions['primary'];
   }
 }
 
-declare module "@mui/material/Button" {
+declare module '@mui/material/Button' {
   interface ButtonPropsVariantOverrides {
     snowdayBlue: true;
     neutralBlack: true;
@@ -32,39 +32,39 @@ declare module "@mui/material/Button" {
 
 const palette = {
   background: {
-    default: "#F3F5F6",
+    default: '#F3F5F6',
   },
   primary: {
-    main: "#556cd6",
+    main: '#556cd6',
   },
   secondary: {
-    main: "#19857b",
+    main: '#19857b',
   },
   error: {
     main: red.A400,
   },
   snowdayGray: {
-    main: "#F8F9FA",
-    dark: "#F8F9FA",
-    light: "#f3f5f9",
+    main: '#F8F9FA',
+    dark: '#F8F9FA',
+    light: '#f3f5f9',
   },
   neutralDarkGray: {
-    main: "#1e2b30",
-    dark: "#1e2b30",
-    light: "#1e2b30",
+    main: '#1e2b30',
+    dark: '#1e2b30',
+    light: '#1e2b30',
   },
   snowdayText: {
-    main: "#212830",
+    main: '#212830',
   },
 };
 
 export const inter = Inter({
-  subsets: ["latin"],
+  subsets: ['latin'],
 });
 
 export const roboto = Roboto({
-  subsets: ["latin"],
-  weight: "400",
+  subsets: ['latin'],
+  weight: '400',
 });
 
 export const theme = createTheme({
@@ -85,7 +85,7 @@ export const theme = createTheme({
     h6: {
       color: `rgba(0, 0, 0, 0.87))`,
       fontFamily: roboto.style.fontFamily,
-      fontSize: "20px",
+      fontSize: '20px',
       fontWeight: 500,
     },
     h3: {
@@ -95,21 +95,21 @@ export const theme = createTheme({
     body2: {
       color: `rgba(0, 0, 0, 0.60)`,
       fontFamily: roboto.style.fontFamily,
-      fontSize: "14px",
+      fontSize: '14px',
       fontWeight: 400,
-      lineHeight: "143%",
-      letterSpacing: "0.17px",
+      lineHeight: '143%',
+      letterSpacing: '0.17px',
     },
     subtitle2: {
-      color: "#000000DE",
+      color: '#000000DE',
       fontFamily: roboto.style.fontFamily,
-      fontSize: "16px",
+      fontSize: '16px',
       fontWeight: 500,
     },
     caption: {
       color: `rgba(0, 0, 0, 0.60)`,
       fontFamily: roboto.style.fontFamily,
-      fontSize: "12px",
+      fontSize: '12px',
       fontWeight: 400,
     },
   },
@@ -117,102 +117,100 @@ export const theme = createTheme({
     MuiGrid2: {
       styleOverrides: {
         root: {
-          backgroundColor: "white",
+          backgroundColor: 'white',
         },
       },
     },
     MuiButton: {
       variants: [
         {
-          props: { variant: "neutralBlack" },
+          props: { variant: 'neutralBlack' },
           style: {
-            color: "#fff",
-            backgroundColor: "#1E2B31",
-            "&:hover": {
-              backgroundColor: "#6e7985",
+            color: '#fff',
+            backgroundColor: '#1E2B31',
+            '&:hover': {
+              backgroundColor: '#6e7985',
             },
-            "&:disabled": {
-              color: "#fff",
-              backgroundColor: "#1E2B31",
+            '&:disabled': {
+              color: '#fff',
+              backgroundColor: '#1E2B31',
               opacity: 0.5,
             },
           },
         },
         {
-          props: { variant: "neutralYellow" },
+          props: { variant: 'neutralYellow' },
           style: {
-            borderRadius: "56px",
-            background: "#feb800",
-            boxShadow:
-              "0px 1px 5px 0px rgba(0, 0, 0, 0.12), 0px 2px 2px 0px rgba(0, 0, 0, 0.14), 0px 3px 1px -2px rgba(0, 0, 0, 0.20)",
-            padding: "6px 20px",
-            color: "#fff",
-            "&:hover": {
-              backgroundColor: "#E6BF69",
+            borderRadius: '56px',
+            background: '#dfaf43',
+            padding: '8px 22px',
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: '#E6BF69',
             },
-            "&:disabled": {
-              color: "#fff",
-              backgroundColor: "#DFAF44",
+            '&:disabled': {
+              color: '#fff',
+              backgroundColor: '#DFAF44',
               opacity: 0.5,
             },
           },
         },
         {
-          props: { variant: "grayCancel" },
+          props: { variant: 'grayCancel' },
           style: {
-            color: "#666",
-            backgroundColor: "transparent",
-            border: "1px solid #D1D5DB",
-            "&:hover": {
-              backgroundColor: "#F3F4F6",
-              border: "1px solid #D1D5DB",
+            color: '#666',
+            backgroundColor: 'transparent',
+            border: '1px solid #D1D5DB',
+            '&:hover': {
+              backgroundColor: '#F3F4F6',
+              border: '1px solid #D1D5DB',
             },
-            "&:disabled": {
-              color: "#666",
-              backgroundColor: "transparent",
-              border: "1px solid #D1D5DB",
+            '&:disabled': {
+              color: '#666',
+              backgroundColor: 'transparent',
+              border: '1px solid #D1D5DB',
               opacity: 0.5,
             },
           },
         },
         {
-          props: { variant: "grayPill" },
+          props: { variant: 'grayPill' },
           style: {
-            color: "#00000099",
-            backgroundColor: "transparent",
-            border: "1px solid rgba(0, 0, 0, 0.12)",
-            fontSize: "13px",
-            borderRadius: "24px",
-            padding: "4px 14px",
-            "&:hover": {
-              backgroundColor: "#F3F4F6",
-              border: "1px solid #D1D5DB",
+            color: '#00000099',
+            backgroundColor: 'transparent',
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+            fontSize: '13px',
+            borderRadius: '24px',
+            padding: '4px 14px',
+            '&:hover': {
+              backgroundColor: '#F3F4F6',
+              border: '1px solid #D1D5DB',
             },
-            "&:disabled": {
-              color: "#666",
-              backgroundColor: "transparent",
-              border: "1px solid #D1D5DB",
+            '&:disabled': {
+              color: '#666',
+              backgroundColor: 'transparent',
+              border: '1px solid #D1D5DB',
               opacity: 0.5,
             },
           },
         },
         {
-          props: { variant: "blackPill" },
+          props: { variant: 'blackPill' },
           style: {
-            color: "#fff",
-            backgroundColor: "#000",
-            border: "1px solid rgba(0, 0, 0, 0.12)",
-            fontSize: "13px",
-            borderRadius: "24px",
-            padding: "4px 14px",
-            "&:hover": {
-              backgroundColor: "#1E2B31",
-              border: "1px solid #D1D5DB",
+            color: '#fff',
+            backgroundColor: '#000',
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+            fontSize: '13px',
+            borderRadius: '24px',
+            padding: '4px 14px',
+            '&:hover': {
+              backgroundColor: '#1E2B31',
+              border: '1px solid #D1D5DB',
             },
-            "&:disabled": {
-              color: "#00000061",
-              backgroundColor: "#0000001F",
-              border: "none !important",
+            '&:disabled': {
+              color: '#00000061',
+              backgroundColor: '#0000001F',
+              border: 'none !important',
             },
           },
         },
@@ -221,10 +219,10 @@ export const theme = createTheme({
     MuiCard: {
       styleOverrides: {
         root: {
-          borderRadius: "4px",
+          borderRadius: '4px',
           border: `1px solid rgba(0, 0, 0, 0.12)`,
           boxShadow:
-            "0 1px 2px rgba(204,210,218,.07), 0 2px 4px rgba(204,210,218,.07), 0 4px 8px rgba(204,210,218,.07), 0 8px 16px rgba(204,210,218,.07), 0 16px 32px rgba(204,210,218,.07), 0 32px 64px rgba(204,210,218,.07)",
+            '0 1px 2px rgba(204,210,218,.07), 0 2px 4px rgba(204,210,218,.07), 0 4px 8px rgba(204,210,218,.07), 0 8px 16px rgba(204,210,218,.07), 0 16px 32px rgba(204,210,218,.07), 0 32px 64px rgba(204,210,218,.07)',
         },
       },
     },
@@ -249,7 +247,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           boxShadow:
-            "1px 0 1px rgba(33,40,48,.01), 4px 0 4px rgba(33,40,48,.01), 16px 0 16px rgba(33,40,48,.01)",
+            '1px 0 1px rgba(33,40,48,.01), 4px 0 4px rgba(33,40,48,.01), 16px 0 16px rgba(33,40,48,.01)',
         },
       },
     },

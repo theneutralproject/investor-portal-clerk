@@ -1,9 +1,17 @@
-import React, { useState } from "react";
-import { Button, Modal, Box } from "@mui/material";
+import React, { useState } from 'react';
+import { Button, Modal, Box } from '@mui/material';
+import { usePostHog } from 'posthog-js/react';
+import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 
 function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
+  const posthog = usePostHog();
+
+  const handleOpen = () => {
+    setOpen(true);
+    posthog.capture(POSTHOG_EVENTS.SCHEDULE_CALL_CLICKED);
+  };
+
   const handleClose = () => {
     setOpen(false);
 
@@ -14,21 +22,21 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
 
   // Styles for the modal to center it
   const style = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
     width: 500,
     height: 700,
-    bgcolor: "#1b323e",
+    bgcolor: '#1b323e',
     p: 2,
   };
 
   return (
     <div>
       <Button
-        variant="neutralBlack"
-        sx={{ p: "4px 20px", borderRadius: "99px" }}
+        variant="grayPill"
+        sx={{ p: '4px 20px', borderRadius: '99px' }}
         fullWidth
         onClick={() => {
           handleOpen();
@@ -45,7 +53,7 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
         <Box sx={style}>
           <iframe
             title="hubspot"
-            style={{ width: "100%", height: "100%" }}
+            style={{ width: '100%', height: '100%' }}
             src="https://meetings.hubspot.com/storm-murphy/investor-portal-meeting?embed=true"
           />
         </Box>

@@ -1,17 +1,17 @@
-import React from "react";
-import { useRouter } from "next/navigation";
+import React from 'react';
+import { useRouter } from 'next/navigation';
 
-import { Card, CardContent, Typography, Button, Box } from "@mui/material";
-import ShareOnSocial from "./ShareOnSocial";
-import DealFlowTitle from "@components/DealFlow/Shared/DealFlowTitle";
-import { useDealFlow } from "@components/DealFlow/Shared/DealFlowContext";
-import { PaymentMethod } from "@prisma/client";
+import { Card, CardContent, Typography, Button, Box } from '@mui/material';
+import ShareOnSocial from './ShareOnSocial';
+import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import { PaymentMethod } from '@prisma/client';
 
 const PaymentProcessing: React.FC = () => {
   const router = useRouter();
   const { deal } = useDealFlow();
   const goToDashboard = () => {
-    router.push("/dashboard");
+    router.push('/dashboard');
   };
 
   return (
@@ -37,7 +37,7 @@ const PaymentProcessing: React.FC = () => {
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Thank you for your payment in the amount of $
-            {deal?.investmentStats?.amount} for your investment with ID{" "}
+            {deal?.investmentStats?.amount} for your investment with ID{' '}
             {deal?.paymentReferenceId}.
           </Typography>
 
