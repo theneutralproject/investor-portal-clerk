@@ -51,17 +51,19 @@ interface DashboardProjectsProps {
   projects: ProjectWithAllNestedData[];
 }
 
+export const getProjectImage = (
+  pictures: ProjectWithAllNestedData['pictures']
+) => {
+  const projectImage = pictures.find(pic => pic.type === 'CARD')?.url;
+  return projectImage ?? pictures[0]?.url;
+};
+
 const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const formatNumber = (num: number) =>
     num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
-
-  const getHeaderImage = (pictures: ProjectWithAllNestedData['pictures']) => {
-    const headerImage = pictures.find(pic => pic.type === 'HEADER')?.url;
-    return headerImage ?? pictures[0]?.url;
-  };
 
   const calculateFundingProgress = (raised: number, goal: number) =>
     Math.min((raised / goal) * 100, 100);
@@ -75,7 +77,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
         <Divider sx={{ mb: 2 }} />
 
         {projects.map(project => {
-          const headerImage = getHeaderImage(project.pictures);
+          const headerImage = getProjectImage(project.pictures);
           const fundingProgress = calculateFundingProgress(
             project.investmentStats.investmentRaised,
             project.investmentStats.investmentGoal
