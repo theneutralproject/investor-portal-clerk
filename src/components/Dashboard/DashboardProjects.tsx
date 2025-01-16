@@ -113,15 +113,26 @@ export const getProjectImage = (
   return projectImage ?? pictures[0]?.url;
 };
 
+export const displayEquityIRR = (project: ProjectWithAllNestedData) => {
+  const { equityIRRMin, equityIRRMax } = project.investmentStats;
+  return equityIRRMin === equityIRRMax
+    ? `${equityIRRMin}%`
+    : `${equityIRRMin}% - ${equityIRRMax}%`;
+};
+
+export const displayDebtInterest = (project: ProjectWithAllNestedData) => {
+  const { interestRateMin, interestRateMax } = project.investmentStats;
+  return interestRateMin === interestRateMax
+    ? `${interestRateMin}%`
+    : `${interestRateMin}% - ${interestRateMax}%`;
+};
+
 const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const formatNumber = (num: number) =>
     num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
-
-  const calculateFundingProgress = (raised: number, goal: number) =>
-    Math.min((raised / goal) * 100, 100);
 
   return (
     <Card sx={{ borderRadius: '8px', mt: 2 }}>
@@ -133,10 +144,6 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
 
         {projects.map(project => {
           const headerImage = getProjectImage(project.pictures);
-          const fundingProgress = calculateFundingProgress(
-            project.investmentStats.investmentRaised,
-            project.investmentStats.investmentGoal
-          );
 
           return (
             <StyledCard key={project.id} elevation={1}>
@@ -189,62 +196,65 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                     )}
                   </Box>
 
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexWrap: 'wrap',
-                      justifyContent: 'space-between',
-                      mb: 1,
-                    }}
-                  >
-                    <ProjectMetric>
-                      <Typography variant="h6">
-                        {formatNumber(project.propertyStats.numUnits)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        Total Units
-                      </Typography>
-                    </ProjectMetric>
-
-                    {project.investmentStats.boolDebt && (
+                  <Grid container spacing={2} sx={{ mb: 1 }}>
+                    {/* Total Units - Always shown */}
+                    <Grid size={{ xs: 3 }}>
                       <ProjectMetric>
                         <Typography variant="h6">
-                          {formatNumber(
-                            project.investmentStats.interestRateMin
-                          )}
-                          -
-                          {formatNumber(
-                            project.investmentStats.interestRateMax
-                          )}
-                          %
+                          {formatNumber(project.propertyStats.numUnits)}
                         </Typography>
                         <Typography variant="body2" color="text.secondary">
-                          Debt Return
+                          Total Units
                         </Typography>
                       </ProjectMetric>
-                    )}
+                    </Grid>
 
-                    {project.investmentStats.boolEquity && (
+                    {/* Debt Return */}
+                    <Grid size={{ xs: 3 }}>
                       <ProjectMetric>
-                        <Typography variant="h6">
-                          {formatNumber(project.investmentStats.equityIRR)}%
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          Equity Return
-                        </Typography>
+                        {project.investmentStats.boolDebt && (
+                          <>
+                            <Typography variant="h6">
+                              {displayDebtInterest(project)}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Debt Return
+                            </Typography>
+                          </>
+                        )}
                       </ProjectMetric>
-                    )}
+                    </Grid>
 
-                    <ProjectMetric
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}
-                    >
-                      <StatusBadge status={project.status} />
-                    </ProjectMetric>
-                  </Box>
+                    {/* Equity Return */}
+                    <Grid size={{ xs: 3 }}>
+                      <ProjectMetric>
+                        {project.investmentStats.boolEquity && (
+                          <>
+                            <Typography variant="h6">
+                              {displayEquityIRR(project)}
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              Equity Return
+                            </Typography>
+                          </>
+                        )}
+                      </ProjectMetric>
+                    </Grid>
+
+                    {/* Status Badge */}
+                    <Grid size={{ xs: 3 }}>
+                      <ProjectMetric
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          height: '100%',
+                        }}
+                      >
+                        <StatusBadge status={project.status} />
+                      </ProjectMetric>
+                    </Grid>
+                  </Grid>
 
                   {isMobile && (
                     <Button

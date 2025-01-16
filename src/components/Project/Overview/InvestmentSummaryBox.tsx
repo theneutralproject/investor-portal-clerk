@@ -1,9 +1,13 @@
 import React from 'react';
 import { Box, Grid, Typography, Divider, Button, Stack } from '@mui/material';
-import type { ProjectWithStats } from '@/libs/types';
+import type { ProjectWithAllNestedData, ProjectWithStats } from '@/libs/types';
 import type { ProjectInvestmentStats } from '@prisma/client';
 import Link from 'next/link';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
+import {
+  displayDebtInterest,
+  displayEquityIRR,
+} from '@/components/Dashboard/DashboardProjects';
 const formatter = new Intl.NumberFormat('en', {
   notation: 'compact',
   maximumFractionDigits: 1,
@@ -37,18 +41,15 @@ export const LineDisplay: React.FC<LineDisplayProps> = ({ name, value }) => (
 
 interface DebtSectionProps {
   investmentStats: ProjectInvestmentStats;
+  project: ProjectWithAllNestedData;
   showAsterisk?: boolean;
 }
 
 const DebtSection: React.FC<DebtSectionProps> = ({
   investmentStats,
+  project,
   showAsterisk = false,
 }) => {
-  const interestRate =
-    investmentStats.interestRateMax !== investmentStats.interestRateMin
-      ? `${investmentStats.interestRateMin}% - ${investmentStats.interestRateMax}%`
-      : `${investmentStats.interestRateMin}%`;
-
   const termString =
     investmentStats.debtTermMonthsMin === investmentStats.debtTermMonthsMax
       ? `${investmentStats.debtTermMonthsMax} month`
@@ -59,7 +60,7 @@ const DebtSection: React.FC<DebtSectionProps> = ({
       <Typography variant="body1">Debt Returns</Typography>
       <LineDisplay
         name="Interest"
-        value={`${interestRate}${showAsterisk ? '***' : ''}`}
+        value={`${displayDebtInterest(project)}${showAsterisk ? '***' : ''}`}
       />
       <LineDisplay
         name="Min. Investment"
@@ -73,12 +74,16 @@ const DebtSection: React.FC<DebtSectionProps> = ({
 
 interface EquitySectionProps {
   investmentStats: ProjectInvestmentStats;
+  project: ProjectWithAllNestedData;
 }
 
-const EquitySection: React.FC<EquitySectionProps> = ({ investmentStats }) => (
+const EquitySection: React.FC<EquitySectionProps> = ({
+  investmentStats,
+  project,
+}) => (
   <>
     <Typography variant="body1">Equity Returns</Typography>
-    <LineDisplay name="IRR" value={`${investmentStats.equityIRR}%`} />
+    <LineDisplay name="IRR" value={displayEquityIRR(project)} />
     <LineDisplay
       name="Min. Investment"
       value={`$${formatter.format(investmentStats.equityMinInvestment)}`}
@@ -126,7 +131,10 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
   if (!data.investmentStats.boolEquity) {
     return (
       <Grid item xs={12} sm={5.5}>
-        <DebtSection investmentStats={data.investmentStats} />
+        <DebtSection
+          investmentStats={data.investmentStats}
+          project={data as ProjectWithAllNestedData}
+        />
       </Grid>
     );
   }
@@ -139,7 +147,10 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
         sx={{ alignItems: 'stretch', height: '100%' }}
       >
         <Grid item xs={12} sm={5.5}>
-          <EquitySection investmentStats={data.investmentStats} />
+          <EquitySection
+            investmentStats={data.investmentStats}
+            project={data as ProjectWithAllNestedData}
+          />
         </Grid>
 
         <Grid
@@ -152,7 +163,11 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
         </Grid>
 
         <Grid item xs={12} sm={5.5}>
-          <DebtSection investmentStats={data.investmentStats} showAsterisk />
+          <DebtSection
+            investmentStats={data.investmentStats}
+            project={data as ProjectWithAllNestedData}
+            showAsterisk
+          />
         </Grid>
 
         <Footnotes investmentStats={data.investmentStats} />

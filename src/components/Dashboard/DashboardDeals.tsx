@@ -18,7 +18,6 @@ const StyledCard = styled(Card)({
   boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
   borderRadius: 8,
   marginTop: '20px',
-  height: '400px',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -83,7 +82,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
 
   if (!data?.dealStats || data.dealStats.length === 0) {
     return (
-      <StyledCard>
+      <StyledCard sx={{ height: '300px' }}>
         <CardContent
           sx={{
             display: 'flex',
