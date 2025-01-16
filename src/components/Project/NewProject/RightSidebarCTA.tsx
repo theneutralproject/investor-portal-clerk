@@ -13,6 +13,10 @@ import {
 import { type ProjectWithAllNestedData } from '@/libs/types';
 import { LineDisplay } from '../Overview/InvestmentSummaryBox';
 import HubspotScheduleCall from '@/components/HubspotScheduleCall';
+import {
+  displayDebtInterest,
+  displayEquityIRR,
+} from '@/components/Dashboard/DashboardProjects';
 
 interface RightSidebarCTAProps {
   project: ProjectWithAllNestedData;
@@ -103,16 +107,10 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
             value={`$${project.investmentStats.equityMinInvestment / 1000}k`}
           />
           {project.investmentStats.boolEquity && (
-            <LineDisplay
-              name="IRR"
-              value={`${project.investmentStats.equityIRR.toFixed(1)}%`}
-            />
+            <LineDisplay name="IRR" value={displayEquityIRR(project)} />
           )}
           {project.investmentStats.boolDebt && (
-            <LineDisplay
-              name="Interest"
-              value={`${project.investmentStats.interestRateMin}-${project.investmentStats.interestRateMax}%`}
-            />
+            <LineDisplay name="Interest" value={displayDebtInterest(project)} />
           )}
         </Box>
         <Divider sx={{ my: 2 }} />
