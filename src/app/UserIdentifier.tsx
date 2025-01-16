@@ -1,10 +1,15 @@
 'use client';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import posthog from 'posthog-js';
+import { useTermsContext } from '@/app/context/TermsContext';
+import useTermsStatus from '@/app/hooks/useTermsStatus';
 
 export default function UserIdentifier() {
   const { user } = useUser();
+  const [loadTermsStatus, setLoadTermStatus] = useState<boolean>(false);
+  const { setTermsStatus } = useTermsContext();
+  const { data, isLoading } = useTermsStatus(!!user && loadTermsStatus);
 
   useEffect(() => {
     if (user) {
@@ -15,8 +20,16 @@ export default function UserIdentifier() {
         lastname: lastName,
         id: id,
       });
+      setLoadTermStatus(true);
     }
   }, [user]);
+
+  useEffect(() => {
+    if (!isLoading && data) {
+      setLoadTermStatus(false);
+      setTermsStatus(data);
+    }
+  }, [isLoading, data]);
 
   return null;
 }

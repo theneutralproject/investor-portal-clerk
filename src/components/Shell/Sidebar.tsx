@@ -8,21 +8,18 @@ import HomeIcon from '@mui/icons-material/Home';
 import MessageIcon from '@mui/icons-material/Message';
 import InfoIcon from '@mui/icons-material/Info';
 import DescriptionIcon from '@mui/icons-material/Description';
-import HelpIcon from '@mui/icons-material/Help';
+import PolicyIcon from '@mui/icons-material/Policy';
 import {
   Button,
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Typography,
   useMediaQuery,
 } from '@mui/material';
 import type { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import MuiAppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Container from '@mui/material/Container';
-import MuiDrawer from '@mui/material/Drawer';
-import List from '@mui/material/List';
 import { styled } from '@mui/material/styles';
 import Toolbar from '@mui/material/Toolbar';
 import Image from 'next/image';
@@ -62,6 +59,12 @@ export const buttonItems = [
     label: 'Terms of Service',
     icon: <DescriptionIcon />,
     path: '/terms',
+  },
+  {
+    key: 'privacy',
+    label: 'Privacy Policy',
+    icon: <PolicyIcon />,
+    path: '/privacy',
   },
   {
     key: 'copyright',

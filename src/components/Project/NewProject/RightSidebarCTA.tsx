@@ -102,12 +102,18 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
             name="Min Investment"
             value={`$${project.investmentStats.equityMinInvestment / 1000}k`}
           />
-          <LineDisplay
-            name="IRR / Interest"
-            value={`${project.investmentStats.equityIRR.toFixed(1)}% / ${project.investmentStats.interestRateMin}-${
-              project.investmentStats.interestRateMax
-            }%`}
-          />
+          {project.investmentStats.boolEquity && (
+            <LineDisplay
+              name="IRR"
+              value={`${project.investmentStats.equityIRR.toFixed(1)}%`}
+            />
+          )}
+          {project.investmentStats.boolDebt && (
+            <LineDisplay
+              name="Interest"
+              value={`${project.investmentStats.interestRateMin}-${project.investmentStats.interestRateMax}%`}
+            />
+          )}
         </Box>
         <Divider sx={{ my: 2 }} />
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
