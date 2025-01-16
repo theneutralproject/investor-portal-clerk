@@ -212,7 +212,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                     {/* Debt Return */}
                     <Grid size={{ xs: 3 }}>
                       <ProjectMetric>
-                        {project.investmentStats.boolDebt ? (
+                        {project.investmentStats.boolDebt && (
                           <>
                             <Typography variant="h6">
                               {displayDebtInterest(project)}
@@ -221,14 +221,14 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                               Debt Return
                             </Typography>
                           </>
-                        ) : null}
+                        )}
                       </ProjectMetric>
                     </Grid>
 
                     {/* Equity Return */}
                     <Grid size={{ xs: 3 }}>
                       <ProjectMetric>
-                        {project.investmentStats.boolEquity ? (
+                        {project.investmentStats.boolEquity && (
                           <>
                             <Typography variant="h6">
                               {displayEquityIRR(project)}
@@ -237,7 +237,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                               Equity Return
                             </Typography>
                           </>
-                        ) : null}
+                        )}
                       </ProjectMetric>
                     </Grid>
 
