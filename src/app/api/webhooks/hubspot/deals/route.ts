@@ -103,7 +103,7 @@ export async function POST(req: Request) {
           );
 
           const project = await prisma.project.findUnique({
-            where: { name: projectSlugToUpdate },
+            where: { slug: projectSlugToUpdate },
           });
           if (!project) {
             console.error(`project for slug ${projectSlugToUpdate} not found`);
