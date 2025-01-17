@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-constructor */
-//This file needs a lot of help with the eslint rules.
+//This file needs a lot of help with the eslint rules because we require('docusign-esign').
 
 // https://www.youtube.com/watch?v=sqx8KbVa6Cw I followed much of this docusign tutorial
 
@@ -441,7 +441,6 @@ export function makeEnvelopeDefinition(
     email: signer.email,
     name: `${signer.firstName} ${signer.lastName}`,
     tabs: signer1Tabs,
-    clientUserId: `signer-${signer.id.toString()}`,
     roleName: 'Signer',
   }) as TemplateRole;
 
@@ -451,7 +450,6 @@ export function makeEnvelopeDefinition(
       email: 'nate@neutral.us',
       name: 'Nate Helbach',
       tabs: neutralSignerTabs,
-      clientUserId: 'nate@neutral.us',
       roleName: 'Neutral Signer',
     }) as TemplateRole;
 
@@ -465,7 +463,6 @@ export function makeEnvelopeDefinition(
       docusign.TemplateRole.constructFromObject({
         email: coSigner!.email,
         name: `${coSigner!.firstName} ${coSigner!.lastName}`,
-        clientUserId: `cosigner-${coSigner!.id.toString()}`,
         roleName: 'Co-Signer',
       }) as TemplateRole;
     env.templateRoles.push(coSignerRole1);
@@ -476,7 +473,6 @@ export function makeEnvelopeDefinition(
       docusign.TemplateRole.constructFromObject({
         email: accreditationVerifier.email,
         name: `${accreditationVerifier.firstName} ${accreditationVerifier.lastName}`,
-        clientUserId: `accver-${accreditationVerifier.id.toString()}`,
         roleName: 'Accreditation Verifier',
       }) as TemplateRole;
     env.templateRoles.push(accreditationVerifierRole);
@@ -499,7 +495,6 @@ export function makeRecipientViewRequest(signer: User, returnUrl: string) {
   // we used to create the envelope.
   viewRequest.email = signer.email;
   viewRequest.userName = `${signer.firstName} ${signer.lastName}`;
-  viewRequest.clientUserId = `signer-${signer.id.toString()}`;
 
   return viewRequest;
 }
@@ -543,6 +538,4 @@ export async function getEnvelopeAsPdfFileBuffer(
   const file = new File([blob], fileName, { type: mimeType });
 
   return file;
-  // return Buffer.from(envelopeAsBase64String, 'base64');
-  // return envelopeAsBase64String
 }
