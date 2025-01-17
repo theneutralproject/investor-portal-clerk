@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
       token: string;
       expires_at: string;
     };
+    console.log('returning Plaid Link token:', data.token);
+    if(!data.token) {
+      return errorResponse('Failed to get Plaid Link token', 500);
+    }
 
     return jsonResponse(data.token);
   } catch (e) {
