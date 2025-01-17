@@ -132,10 +132,20 @@ export async function POST(req: Request) {
       console.log(
         `Unable to update deal with HS ID ${dealBody.hubspotId}. It was likely manually created in HS and does not exist in the DB`
       );
-      return errorResponse(
-        `Unable to update deal with HS ID ${dealBody.hubspotId}. It was likely manually created in HS and does not exist in the DB`,
-        500
-      );
+      const deal = await prisma.deal.findFirst({
+        where: { hubspotId: dealBody.hubspotId },
+      });
+      if (!deal) {
+        return jsonResponse(
+          `Unable to update deal with HS ID ${dealBody.hubspotId}. It was likely manually created in HS and does not exist in the DB`
+        );
+      } else {
+        console.error(error);
+        return errorResponse(
+          `Unable to update deal with HS ID ${dealBody.hubspotId}. It exists in the DB but could not be updated`,
+          500
+        );
+      }
     }
 
     return jsonResponse(updatedDeal);
