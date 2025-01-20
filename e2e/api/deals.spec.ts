@@ -2,7 +2,7 @@ import { DealCreateSchema } from '@/libs/deal/schema';
 import { DealWithInvestmentStats } from '@/libs/types';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType, DealUnitType } from '@prisma/client';
-import { clearAllTestDeals, deleteDealInDbAndHubspot } from 'e2e/helpers';
+import { clearAllTestDeals, deleteDealsFromTestContact } from 'e2e/helpers';
 
 test.describe('api/deals test', () => {
   let edisonTestDeal: Deal | null = null;
@@ -108,16 +108,6 @@ test.describe('api/deals test', () => {
   });
 
   test.afterAll(async () => {
-    if (edisonTestDeal) {
-      await deleteDealInDbAndHubspot(edisonTestDeal);
-      edisonTestDeal = null;
-    } else {
-      console.error('testDeal is null - skipping cleanup');
-    }
-    if (secondDeal) {
-      await deleteDealInDbAndHubspot(secondDeal);
-      secondDeal = null;
-    }
-    return;
+    await deleteDealsFromTestContact();
   });
 });

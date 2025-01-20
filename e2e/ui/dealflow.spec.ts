@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { deleteDealInDbAndHubspot } from 'e2e/helpers';
+import { deleteDealsFromTestContact } from 'e2e/helpers';
 
 test.describe('dealflow logic tests', () => {
   // Store the deal ID for use across tests
@@ -41,6 +41,8 @@ test.describe('dealflow logic tests', () => {
     // Use the stored dealId to navigate directly to the type page
     await page.goto(`/dealflow/edison/${dealId}/type`);
 
+    await page.waitForTimeout(5000);
+
     // Verify the investment options are visible
     await expect(page.getByText('Equity Investment')).toBeVisible();
     await expect(page.getByText('Debt Investment')).toBeVisible();
@@ -66,13 +68,6 @@ test.describe('dealflow logic tests', () => {
   });
 
   test.afterAll(async () => {
-    if (dealId) {
-      await deleteDealInDbAndHubspot(parseInt(dealId));
-      dealId = null;
-    } else {
-      console.error('testDeal is null - skipping cleanup');
-    }
-
-    return;
+    await deleteDealsFromTestContact();
   });
 });

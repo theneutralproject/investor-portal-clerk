@@ -2,7 +2,7 @@ import { DealCreateSchema } from '@/libs/deal/schema';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType } from '@prisma/client';
-import { clearAllTestDeals, deleteDealInDbAndHubspot } from 'e2e/helpers';
+import { clearAllTestDeals, deleteDealInDbAndHubspot, deleteDealsFromTestContact } from 'e2e/helpers';
 
 test.describe('api/dashboard/returns test', () => {
   let debtDeal1: Deal | null = null;
@@ -402,33 +402,6 @@ test.describe('api/dashboard/returns test', () => {
   // TODO: Add test for equity deal that starts after official closing date. Need to talk to finance team to understand how to handle this case.
 
   test.afterEach(async () => {
-    let promises = [];
-    if (debtDeal1) {
-      promises.push(deleteDealInDbAndHubspot(debtDeal1));
-    } else {
-      console.warn('debtDeal1 is null - skipping cleanup');
-    }
-    if (debtDeal2) {
-      promises.push(deleteDealInDbAndHubspot(debtDeal2));
-    }
-    if (equityDeal1) {
-      promises.push(deleteDealInDbAndHubspot(equityDeal1));
-    }
-    if (equityDeal2) {
-      promises.push(deleteDealInDbAndHubspot(equityDeal2));
-    }
-    try {
-      await Promise.all(promises);
-    } catch (e) {
-      console.error(
-        'could not delete deals in api/dashboard/returns afterEach:'
-      );
-      console.error(e);
-    }
-    debtDeal1 = null;
-    debtDeal2 = null;
-    equityDeal1 = null;
-    equityDeal2 = null;
-    return;
+    await deleteDealsFromTestContact();
   });
 });
