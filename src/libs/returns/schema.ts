@@ -72,3 +72,13 @@ export const zProjectReturnsSchema = z.object({
   schedule: z.array(zReturnsDateObjectSchema),
 });
 export type ProjectReturnsResponse = z.infer<typeof zProjectReturnsSchema>;
+
+export const zProjectMilestoneTypeSchema = z.object({
+  date: z.date(),
+  aUnitReturns: z.number(),
+  cUnitReturns: z.number(),
+});
+export type ProjectMilestoneType = z.infer<typeof zProjectMilestoneTypeSchema>;
+
+export const zProjectMilestoneTypeArraySchema = z.array(zPortfolioReturnsSchema);
+export type ProjectMilestoneTypeArray = z.infer<typeof zProjectMilestoneTypeArraySchema>;

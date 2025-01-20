@@ -7,19 +7,20 @@ import {
 } from '@prisma/client';
 import { parse } from 'csv-parse';
 import { add, endOfMonth, startOfMonth } from 'date-fns';
-import type { PortfolioReturnsResponse, ProjectReturnsStats, ReturnsDateObject, ReturnsDealStats, ReturnsPortfolioStats } from './schema';
+import type { PortfolioReturnsResponse, ProjectMilestoneType, ProjectReturnsStats, ReturnsDateObject, ReturnsDealStats, ReturnsPortfolioStats } from './schema';
 import { finished } from 'stream';
 import { promisify } from 'util';
 import { DealWithInvestmentStatsAndProjectWithPics } from '../types';
+import { getIronSession } from 'iron-session';
+import { cookies } from 'next/headers';
+import { SessionData, sessionOptions } from '../session/utils';
 
 const finishedAsync = promisify(finished);
 
-interface MilestoneType {
-  date: Date;
-  aUnitReturns: number;
-  cUnitReturns: number;
-}
 export async function readEquityMilestoneData(csvUrl: string) {
+  // TODO: read this from memory or cache
+    const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+    
   if (!csvUrl) {
     console.error('CSV url not provided');
     throw new Error('CSV url not provided');
@@ -28,12 +29,12 @@ export async function readEquityMilestoneData(csvUrl: string) {
   const text = await response.text();
   const parser = parse(text, { columns: true });
 
-  const milestones: MilestoneType[] = [];
+  const milestones: ProjectMilestoneType[] = [];
   parser.on('readable', function () {
     let record;
     /* eslint-disable */
     while ((record = parser.read()) !== null) {
-      const milestone: MilestoneType = {
+      const milestone: ProjectMilestoneType = {
         date: new Date(Date.parse(record.date)),
         aUnitReturns: 0,
         cUnitReturns: 0,
@@ -252,14 +253,13 @@ export function roundTo(num: number, decimals: number): number {
 export function getEquityPayoutScheduleForDeal(
   stats: DealInvestmentStats,
   projectMilestones: ProjectMilestones,
-  equityMilestones: MilestoneType[]
+  equityMilestones: ProjectMilestoneType[]
 ): ReturnsDateObject[] {
-  const { amount, shareOfEquity, unitType, equityPreferredReturn } = stats;
+  const { amount, unitType, equityPreferredReturn } = stats;
   return _getEquityPayoutSchedule(
     amount,
     projectMilestones,
     equityMilestones,
-    shareOfEquity,
     unitType,
     equityPreferredReturn
   );
@@ -268,7 +268,7 @@ export function getEquityPayoutScheduleForDeal(
 export function getEquityPayoutScheduleForProject(
   amount: number,
   projectMilestones: ProjectMilestones,
-  equityMilestones: MilestoneType[],
+  equityMilestones: ProjectMilestoneType[],
   shareOfEquity: number,
   unitType: DealUnitType,
   preferredReturn: number
@@ -301,7 +301,7 @@ export function getEquityPayoutScheduleForProject(
 function _getEquityPayoutSchedule(
   amount: number,
   projectMilestones: ProjectMilestones,
-  equityMilestones: MilestoneType[],
+  equityMilestones: ProjectMilestoneType[],
   shareOfEquity: number,
   unitType: DealUnitType,
   preferredReturn: number
@@ -418,6 +418,12 @@ export async function getPortfolioReturns(
       try {
         const equityMilestones = await readEquityMilestoneData(
           project.equityReturnsFile
+        );
+
+        const equityDetails = await getEquityStatsFromProject(
+          investmentStats.amount,
+          project.equityReturnsFile,
+          project.investmentStats.cUnitThresholdAmount
         );
         const schedule = getEquityPayoutScheduleForDeal(
           investmentStats,
