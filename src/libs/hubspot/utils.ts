@@ -760,28 +760,16 @@ export const BakersPlaceDealStages = [
 ];
 
 export enum ReferralSource {
-  EVENT_MAILER = 'event_mailer',
-  INVESTOR_EVENT = 'investor_event',
-  REFERRAL = 'referral',
-  NEUTRAL_TEAM_MEMBER = 'neutral_team_member',
-  GOOGLE_SEARCH = 'google',
-  ADVERTISEMENT_ONLINE = 'advertisement_online',
-  NEUTRAL_MAIL = 'neutral_mail',
-  NEWSLETTER = 'newsletter',
-  NEUTRAL_PODCAST = 'neutral_podcast',
-  FACEBOOK = 'facebook',
-  X = 'x',
-  LINKEDIN = 'linkedin',
-  INSTAGRAM = 'instagram',
-  OTHER = 'other',
-  WEBINAR = 'webinar',
-  NEWS_ONLINE_ARTICLE = 'news_online_article',
-  FRIEND_COLLEAGUE = 'friend_colleague',
+  EVENT_SLASH_WEBINAR = 'investor_event',
+  FRIEND_SLASH_COLLEAGUE = 'friend_colleague',
+  NEWS_SLASH_ONLINE_ARTICLE = 'news_online_article',
+  LINKEDIN_AD = 'linkedin',
   GOOGLE_AD = 'google_ad',
-  FACEBOOK_AD = 'facebook_ad',
+  CRE_DAILY_AD = 'cre_daily',
   THESIS_DRIVEN_PODCAST = 'thesis_driven_podcast',
-  CRE_DAILY = 'cre_daily',
+  NEUTRAL_PODCAST = 'neutral_podcast',
   NERDS_EYE_VIEW = 'nerds_eye_view',
+  OTHER = 'other',
 }
 
 export enum HSDealPropNames {
