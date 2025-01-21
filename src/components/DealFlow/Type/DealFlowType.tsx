@@ -52,7 +52,7 @@ const DealFlowType: React.FC = () => {
   ];
 
   return (
-    <Box>
+    <Box id='deal-flow-type-container'>
       <DealFlowTitle
         title="Choose Investment Type"
         modalKey={MODAL_KEYS.CHOOSE_INVESTMENT_TYPE}

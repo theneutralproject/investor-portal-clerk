@@ -41,7 +41,8 @@ test.describe('dealflow logic tests', () => {
     // Use the stored dealId to navigate directly to the type page
     await page.goto(`/dealflow/edison/${dealId}/type`);
 
-    await page.waitForTimeout(5000);
+    const dealFlowContainer = page.locator('#deal-flow-type-container');
+    await dealFlowContainer.waitFor();
 
     // Verify the investment options are visible
     await expect(page.getByText('Equity Investment')).toBeVisible();
