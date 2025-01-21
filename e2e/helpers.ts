@@ -33,6 +33,70 @@ async function deleteHubspotDeal(hubspotId: string) {
     });
 }
 
+export async function getHusbpotContactFromEmail(email: string) {
+  try {
+    const data = await fetch(
+      `${process.env.HUBSPOT_API_BASE_URL}/crm/v3/objects/contacts/${email}?idProperty=email`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+        },
+      }
+    );
+    return await data.json();
+  } catch (error) {
+    console.log(
+      'failed to fetch hubspot contact, error: ',
+      getErrorMessage(error)
+    );
+  }
+}
+
+export async function getDealsFromContactId(contactId: string) {
+  try {
+    const data = await fetch(
+      `${process.env.HUBSPOT_API_BASE_URL}/crm/v4/objects/contact/${contactId}/associations/deals`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+        },
+      }
+    );
+    const { results } = await data.json();
+    return results.map((deal: { toObjectId: string }) => ({
+      id: deal.toObjectId,
+    }));
+  } catch (error) {
+    console.log(
+      'failed to fetch hubspot deals, error: ',
+      getErrorMessage(error)
+    );
+  }
+}
+
+export async function deleteDealsFromTestContact() {
+  try {
+    const contact = await getHusbpotContactFromEmail(
+      'testi+clerk_test@neutral.us'
+    );
+    const deals = await getDealsFromContactId(contact.id);
+    for (let index = 0; index < deals.length; index++) {
+      const deal = deals[index];
+      await deleteHubspotDeal(deal.id);
+    }
+    console.log('all deals have been deleted');
+  } catch (error) {
+    console.log(
+      'failed to delete hubspot deals, error: ',
+      getErrorMessage(error)
+    );
+  }
+}
+
 export async function resetOrgInDb(
   request: APIRequestContext
 ): Promise<OrganizationWithMembersAndAddress> {
@@ -75,25 +139,56 @@ export async function resetOrgInDb(
 }
 
 export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
-  let dealToDelete: Deal | null = null;
   let dealId: number | null = null;
+
+  // Determine deal ID
   if (typeof dealOrDealId === 'number') {
     dealId = dealOrDealId;
   } else {
     dealId = dealOrDealId.id;
   }
-  try {
-    dealToDelete = await prisma.deal.delete({ where: { id: dealId } });
-  } catch (e) {
-    console.error('could not delete deal in db', e);
+
+  if (!dealId) {
+    console.error('Invalid deal ID provided');
+    return { dbDeleted: false, hubspotDeleted: false };
   }
-  if (!dealToDelete) return;
-  const dlHs = await deleteHubspotDeal(dealToDelete.hubspotId);
+
+  let dealToDelete: Deal | null = null;
+  let dbDeleted = false;
+  let hubspotDeleted = false;
+
+  try {
+    // Attempt to delete the deal in the database
+    dealToDelete = await prisma.deal.delete({ where: { id: dealId } });
+    dbDeleted = !!dealToDelete;
+  } catch (error) {
+    console.error(
+      `Failed to delete deal in database for deal ID: ${dealId}`,
+      error
+    );
+  }
+
+  if (dealToDelete) {
+    try {
+      // Attempt to delete the deal in HubSpot
+      const hubspotResponse = await deleteHubspotDeal(dealToDelete.hubspotId);
+      hubspotDeleted = hubspotResponse?.success || false;
+    } catch (error) {
+      console.error(
+        `Failed to delete HubSpot deal for hubspotId: ${dealToDelete.hubspotId}`,
+        error
+      );
+    }
+  }
+
   console.log(
-    'finished deleting deal in db and hubspot - success:',
-    dlHs.success
+    `Deletion results for deal ID ${dealId}:`,
+    `Database - ${dbDeleted ? 'Success' : 'Failed'}`,
+    `HubSpot - ${hubspotDeleted ? 'Success' : 'Failed'}`
   );
-  return;
+
+  // Return the status of deletions
+  return { dbDeleted, hubspotDeleted };
 }
 
 export async function clearAllTestDeals() {
