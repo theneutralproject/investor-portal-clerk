@@ -774,6 +774,14 @@ export enum ReferralSource {
   LINKEDIN = 'linkedin',
   INSTAGRAM = 'instagram',
   OTHER = 'other',
+  WEBINAR = 'webinar',
+  NEWS_ONLINE_ARTICLE = 'news_online_article',
+  FRIEND_COLLEAGUE = 'friend_colleague',
+  GOOGLE_AD = 'google_ad',
+  FACEBOOK_AD = 'facebook_ad',
+  THESIS_DRIVEN_PODCAST = 'thesis_driven_podcast',
+  CRE_DAILY = 'cre_daily',
+  NERDS_EYE_VIEW = 'nerds_eye_view',
 }
 
 export enum HSDealPropNames {
