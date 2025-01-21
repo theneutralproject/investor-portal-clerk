@@ -441,7 +441,7 @@ export function makeEnvelopeDefinition(
     email: signer.email,
     name: `${signer.firstName} ${signer.lastName}`,
     tabs: signer1Tabs,
-    clientUserId: `signer-${signer.id.toString()}`,
+    clientUserId: `signer-${signer.id.toString()}`, // must set this, so they can innitiate signing from our app
     roleName: 'Signer',
   }) as TemplateRole;
 
@@ -451,7 +451,7 @@ export function makeEnvelopeDefinition(
       email: 'nate@neutral.us',
       name: 'Nate Helbach',
       tabs: neutralSignerTabs,
-      clientUserId: 'nate@neutral.us',
+      // clientUserId: 'nate@neutral.us', must not set this, so they receive an email
       roleName: 'Neutral Signer',
     }) as TemplateRole;
 
@@ -465,7 +465,7 @@ export function makeEnvelopeDefinition(
       docusign.TemplateRole.constructFromObject({
         email: coSigner!.email,
         name: `${coSigner!.firstName} ${coSigner!.lastName}`,
-        clientUserId: `cosigner-${coSigner!.id.toString()}`,
+        // clientUserId: `cosigner-${coSigner!.id.toString()}`, must not set this, so they receive an email
         roleName: 'Co-Signer',
       }) as TemplateRole;
     env.templateRoles.push(coSignerRole1);
@@ -476,7 +476,7 @@ export function makeEnvelopeDefinition(
       docusign.TemplateRole.constructFromObject({
         email: accreditationVerifier.email,
         name: `${accreditationVerifier.firstName} ${accreditationVerifier.lastName}`,
-        clientUserId: `accver-${accreditationVerifier.id.toString()}`,
+        // clientUserId: `accver-${accreditationVerifier.id.toString()}`, must not set this, so they receive an email
         roleName: 'Accreditation Verifier',
       }) as TemplateRole;
     env.templateRoles.push(accreditationVerifierRole);

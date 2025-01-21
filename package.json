@@ -79,6 +79,7 @@
     "svix": "^1.21.0",
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
+    "whatwg-fetch": "^3.6.20",
     "zod": "^3.22.4",
     "zod-form-data": "^2.0.2",
     "zod-prisma-types": "^3.1.8"
@@ -101,6 +102,7 @@
     "@types/react": "^18.2.57",
     "@types/react-dom": "^18.2.19",
     "@types/react-image-gallery": "^1.2.4",
+    "@types/whatwg-fetch": "^0.0.33",
     "@typescript-eslint/eslint-plugin": "^7.1.1",
     "@typescript-eslint/parser": "^7.1.1",
     "eslint": "^8.57.0",

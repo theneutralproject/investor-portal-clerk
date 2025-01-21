@@ -19,6 +19,7 @@ export const TermsProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [onAcceptTerms, setOnAcceptTerms] = useState<boolean>(false);
   const [termsStatus, setTermsStatus] = useState<{
     hasAcceptedCurrentRevision: boolean;
   } | null>(null);
@@ -26,7 +27,7 @@ export const TermsProvider: React.FC<{ children: React.ReactNode }> = ({
     data: dataAcceptTerms,
     isLoading: isLoadingAcceptTerms,
     error: errorAcceptTerms,
-  } = useAcceptTerms(showModal);
+  } = useAcceptTerms(onAcceptTerms);
 
   useEffect(() => {
     if (termsStatus && !termsStatus.hasAcceptedCurrentRevision) {
@@ -40,11 +41,13 @@ export const TermsProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     if (dataAcceptTerms?.hasAcceptedCurrentRevision) {
       setShowModal(false);
+      setOnAcceptTerms(false);
     }
   }, [errorAcceptTerms]);
 
   const acceptTerms = () => {
     setShowModal(false);
+    setOnAcceptTerms(true);
   };
 
   return (

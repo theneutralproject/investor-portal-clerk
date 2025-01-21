@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
       return errorResponse('Missing required slug', 400);
     }
     const slug = requestBody.slug;
-
+    console.log(`secrets\t${getFinixUserName(slug)}:${getFinixPassword(slug)}`);
     const response = await fetch(
       `${process.env.FINIX_BASE_URL!}/third_party_tokens`,
       {
@@ -40,6 +40,10 @@ export async function POST(request: NextRequest) {
       token: string;
       expires_at: string;
     };
+    console.log('returning Plaid Link token:', data.token);
+    if (!data.token) {
+      return errorResponse('Failed to get Plaid Link token', 500);
+    }
 
     return jsonResponse(data.token);
   } catch (e) {
