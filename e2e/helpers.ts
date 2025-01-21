@@ -34,7 +34,6 @@ async function deleteHubspotDeal(hubspotId: string) {
 }
 
 export async function getHusbpotContactFromEmail(email: string) {
-  console.log('begin to fetch contact', email);
   try {
     const data = await fetch(
       `${process.env.HUBSPOT_API_BASE_URL}/crm/v3/objects/contacts/${email}?idProperty=email`,
@@ -48,12 +47,14 @@ export async function getHusbpotContactFromEmail(email: string) {
     );
     return await data.json();
   } catch (error) {
-    console.log('failed to fetch hubspot contact, error: ', getErrorMessage(error));
+    console.log(
+      'failed to fetch hubspot contact, error: ',
+      getErrorMessage(error)
+    );
   }
 }
 
 export async function getDealsFromContactId(contactId: string) {
-  console.log('begin to fetch deals', contactId);
   try {
     const data = await fetch(
       `${process.env.HUBSPOT_API_BASE_URL}/crm/v4/objects/contact/${contactId}/associations/deals`,
@@ -66,17 +67,22 @@ export async function getDealsFromContactId(contactId: string) {
       }
     );
     const { results } = await data.json();
-    console.log(results);
-    return results.map((deal: { toObjectId: string; }) => ({ id: deal.toObjectId }));
+    return results.map((deal: { toObjectId: string }) => ({
+      id: deal.toObjectId,
+    }));
   } catch (error) {
-    console.log('failed to fetch hubspot deals, error: ', getErrorMessage(error));
+    console.log(
+      'failed to fetch hubspot deals, error: ',
+      getErrorMessage(error)
+    );
   }
 }
 
 export async function deleteDealsFromTestContact() {
-  console.log('begin to delete deals');
   try {
-    const contact = await getHusbpotContactFromEmail('testi+clerk_test@neutral.us');
+    const contact = await getHusbpotContactFromEmail(
+      'testi+clerk_test@neutral.us'
+    );
     const deals = await getDealsFromContactId(contact.id);
     for (let index = 0; index < deals.length; index++) {
       const deal = deals[index];
@@ -84,7 +90,10 @@ export async function deleteDealsFromTestContact() {
     }
     console.log('all deals have been deleted');
   } catch (error) {
-    console.log('failed to delete hubspot deals, error: ', getErrorMessage(error));
+    console.log(
+      'failed to delete hubspot deals, error: ',
+      getErrorMessage(error)
+    );
   }
 }
 
@@ -153,7 +162,10 @@ export async function deleteDealInDbAndHubspot(dealOrDealId: Deal | number) {
     dealToDelete = await prisma.deal.delete({ where: { id: dealId } });
     dbDeleted = !!dealToDelete;
   } catch (error) {
-    console.error(`Failed to delete deal in database for deal ID: ${dealId}`, error);
+    console.error(
+      `Failed to delete deal in database for deal ID: ${dealId}`,
+      error
+    );
   }
 
   if (dealToDelete) {
