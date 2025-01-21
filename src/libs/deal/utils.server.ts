@@ -356,7 +356,7 @@ export async function populateDealEquityStats(
   }
   const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
   stats.unitType = unitType;
-  stats.shareOfEquity = shareOfEquity;
+  // stats.shareOfEquity = shareOfEquity;
   stats.numberAUnits = numberAUnits;
   stats.numberCUnits = numberCUnits;
   stats.equityTermMonths = project.investmentStats.equityTermMonths;
@@ -405,7 +405,7 @@ export function populateDealDebtStats(
   stats.equityTermMonths = 0;
   stats.numberAUnits = 0;
   stats.numberCUnits = 0;
-  stats.shareOfEquity = 0;
+  // stats.shareOfEquity = 0;
   const minInvestmentAmount = project.investmentStats.debtMinInvestment;
   if (stats.amount < minInvestmentAmount) {
     console.log(

@@ -20,6 +20,4 @@ export interface SessionData {
   userEmail?: string;
   authExpiresAt?: number;
   authJwt?: string;
-  projectMilestones?: {
-    edison: Milestone
 }
