@@ -6,7 +6,6 @@ import { clearAllTestDeals, deleteDealsFromTestContact } from 'e2e/helpers';
 
 test.describe('api/deals test', () => {
   let edisonTestDeal: Deal | null = null;
-  let secondDeal: Deal | null = null;
   const edisonTestDealData: DealCreateSchema = {
     organizationId: 4,
     projectId: 1,
@@ -68,7 +67,6 @@ test.describe('api/deals test', () => {
     const body = (await JSON.parse(
       await response.text()
     )) as DealWithInvestmentStats;
-    secondDeal = body;
     expect(response.status()).toBe(201);
     expect(response.headers()['content-type']).toBe('application/json');
     expect(body.investmentStats.amount).toBe(secondDealData.amount);
@@ -95,6 +93,7 @@ test.describe('api/deals test', () => {
         },
       },
     });
+
     const body = (await JSON.parse(
       await response.text()
     )) as DealWithInvestmentStats;
