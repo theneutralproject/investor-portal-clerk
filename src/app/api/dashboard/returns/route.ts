@@ -1,20 +1,10 @@
 import prisma from '@/libs/prisma.server';
-import type {
-  ReturnsDateObject,
-  ReturnsDealStats,
-  PortfolioReturnsResponse,
-  ReturnsPortfolioStats,
-} from '@/libs/returns/schema';
 import {
-  getDebtPayoutScheduleForDeal,
-  getEquityPayoutScheduleForDeal,
   getPortfolioReturns,
-  readEquityMilestoneData,
 } from '@/libs/returns/utils';
 import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs/server';
-import { DealFinancingType } from '@prisma/client';
 
 export async function GET() {
   // get loggedin user
@@ -37,6 +27,7 @@ export async function GET() {
                     include: {
                       milestones: true,
                       pictures: true,
+                      investmentStats: true,
                     },
                   },
                 },
@@ -71,4 +62,3 @@ export async function GET() {
     return errorResponse(getErrorMessage(error), 500);
   }
 }
-

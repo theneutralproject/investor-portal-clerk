@@ -69,7 +69,6 @@ model DealInvestmentStats {
   ownershipType         DealOwnershipType @default(INDIVIDUAL)
   numberAUnits          Float             @default(0.0)
   numberCUnits          Float             @default(0.0)
-  shareOfEquity         Float             @default(0.0)
   debtInterestRatePerc  Float             @default(0.0)
   debtPaymentFreq       String            @default("")
   debtTermMonthsMax     Int               @default(0)
