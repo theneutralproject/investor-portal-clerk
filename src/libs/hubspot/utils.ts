@@ -760,19 +760,18 @@ export const BakersPlaceDealStages = [
 ];
 
 export enum ReferralSource {
-  EVENT_MAILER = 'event_mailer',
   INVESTOR_EVENT = 'investor_event',
-  REFERRAL = 'referral',
-  NEUTRAL_TEAM_MEMBER = 'neutral_team_member',
-  GOOGLE_SEARCH = 'google',
-  ADVERTISEMENT_ONLINE = 'advertisement_online',
-  NEUTRAL_MAIL = 'neutral_mail',
-  NEWSLETTER = 'newsletter',
+  WEBINAR = 'webinar',
+  EVENT_MAILER = 'event_mailer',
   NEUTRAL_PODCAST = 'neutral_podcast',
-  FACEBOOK = 'facebook',
-  X = 'x',
+  NEWS_SLASH_ONLINE_ARTICLE = 'news_online_article',
+  FRIEND_SLASH_COLLEAGUE = 'friend_colleague',
   LINKEDIN = 'linkedin',
-  INSTAGRAM = 'instagram',
+  GOOGLE_AD = 'google_ad',
+  FACEBOOK_AD = 'facebook_ad',
+  THESIS_DRIVEN_PODCAST = 'thesis_driven_podcast',
+  CRE_DAILY_AD = 'cre_daily',
+  NERDS_EYE_VIEW = 'nerds_eye_view',
   OTHER = 'other',
 }
 

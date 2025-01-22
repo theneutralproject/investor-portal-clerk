@@ -22,7 +22,11 @@ import { type HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 const normalizeLabel = (label: string) => {
   return label
     .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .map(word =>
+      word === 'SLASH'
+        ? '/'
+        : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+    )
     .join(' ');
 };
 
