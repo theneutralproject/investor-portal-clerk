@@ -22,7 +22,7 @@ const DealFlowGetStarted: React.FC = () => {
           title="Investor Portal Dealflow Walkthrough"
         />
       </Box>
-      <DealFlowFooter  onContinue={createDeal} />
+      <DealFlowFooter onContinue={createDeal} />
     </Box>
   );
 };

@@ -107,7 +107,6 @@ const DocumentViewerModal = ({
         >
           <Document
             file={fileUrl}
-            /*eslint-disable-next-line @typescript-eslint/ban-ts-comment*/
             /* @ts-expect-error type*/
             onLoadSuccess={onDocumentLoadSuccess}
             options={options}

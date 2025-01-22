@@ -252,7 +252,7 @@ const DealFlowAmount: React.FC = () => {
         )}
       </Box>
 
-      <DealFlowFooter  onContinue={handleUpdateDeal} />
+      <DealFlowFooter onContinue={handleUpdateDeal} />
     </Box>
   );
 };

@@ -23,11 +23,10 @@ const InfoSidebar = () => {
         <CardContent>
           <Typography variant="h5">About Neutral</Typography>
           <Typography variant="caption">
-            Neutral is a regenerative and sustainable real estate
-            company. Our leadership team has successfully completed numerous
-            projects and is committed to maximizing investors’ alpha while
-            maintaining our thesis of developing sustainable and regenerative
-            buildings.
+            Neutral is a regenerative and sustainable real estate company. Our
+            leadership team has successfully completed numerous projects and is
+            committed to maximizing investors’ alpha while maintaining our
+            thesis of developing sustainable and regenerative buildings.
           </Typography>
         </CardContent>
       </Card>

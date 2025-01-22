@@ -26,9 +26,7 @@ const hasFileProperties = (
     value !== null &&
     'size' in value &&
     'type' in value &&
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access , @typescript-eslint/no-explicit-any
     typeof (value as any).size === 'number' &&
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access , @typescript-eslint/no-explicit-any
     typeof (value as any).type === 'string'
   );
 };

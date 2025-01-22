@@ -29,7 +29,6 @@ const FundCheck: React.FC<FundCheckProps> = ({
   const { deal, updateDeal, refetchDeal } = useDealFlow();
 
   const [checkNumber, setCheckNumber] = useState<string>(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     deal?.paymentReferenceId ?? ''
   );
 

@@ -368,7 +368,6 @@ export async function updateHubspotDealProperties(
   return hsRes;
 }
 
-/* eslint-disable */
 export function initHubspotDealProps(
   projectName: string,
   user: User,
@@ -452,7 +451,6 @@ export function initHubspotDealProps(
     }
   }
 }
-/* eslint-enable */
 
 export function getHsDealPropsFromDeal(
   deal: DealUpdateSchema,
@@ -634,7 +632,6 @@ export async function getFundingAmount(projectSlug: string) {
     }
   }
 
-  /* eslint-disable-next-line */
   let totalAmountRaised = 0;
   let dealsFetched = 0;
   let totalDeals = 100;
@@ -656,7 +653,6 @@ export async function getFundingAmount(projectSlug: string) {
       }
     );
 
-    /* eslint-disable-next-line */
     const hsDealCreateRespBody = await resBody.json();
     try {
       const { results, total } =

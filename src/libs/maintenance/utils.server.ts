@@ -79,7 +79,6 @@ export async function getDealsFromCsv(filePath: string) {
   const dealRecords: DealRecord[] = [];
 
   parser.on('readable', () => {
-    /* eslint-disable */
     let record;
     while ((record = parser.read())) {
       let dealRecord: DealRecord | null = null;
@@ -101,7 +100,6 @@ export async function getDealsFromCsv(filePath: string) {
           debtMaxTerm: getNumbersFromString(record['PN Max Term Months']),
         };
         if (dealRecord.V2 === 'TRUE') dealRecords.push(dealRecord);
-        /* eslint-enable */
       } catch (e) {
         console.error(
           'unable to create deal record - skipping to next one:\n',

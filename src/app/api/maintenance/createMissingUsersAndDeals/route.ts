@@ -104,7 +104,6 @@ async function getDealsFromCsv() {
   const dealRecords: DealRecord[] = [];
 
   parser.on('readable', () => {
-    /* eslint-disable */
     let record;
     while ((record = parser.read())) {
       let dealRecord: DealRecord | null = null;
@@ -128,7 +127,6 @@ async function getDealsFromCsv() {
         };
         if (dealRecord.V2 === 'TRUE' && dealRecord.addedInV2 !== 'TRUE')
           dealRecords.push(dealRecord);
-        /* eslint-enable */
       } catch (e) {
         console.error(
           'unable to create deal record - skipping to next one:\n',
@@ -224,7 +222,7 @@ export async function POST() {
         dbUserData.hubspotId = dbUserData.hubspotId ?? '';
 
         dealOwner = await createUserInDbAndHubspot(dbUserData);
-      } catch (e) {
+      } catch (__e) {
         console.error(`Error creating Clerk user with email ${email}`);
       }
     }
@@ -351,7 +349,7 @@ export async function POST() {
     try {
       const newDeal = await createDealForAdmin(dealCreateData, dealOwner);
       newDealsArr.push(newDeal);
-    } catch (e) {
+    } catch (__e) {
       console.error('Error creating deal above');
       continue;
     }

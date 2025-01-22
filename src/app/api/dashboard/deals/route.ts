@@ -51,9 +51,7 @@ export async function GET() {
   return jsonResponse(filteredDeals);
 }
 export async function DELETE(req: Request) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const body = await req.json();
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const dealId = Number(body.dealId);
 
   if (!dealId || isNaN(dealId)) {

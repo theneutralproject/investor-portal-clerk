@@ -78,7 +78,6 @@ export async function PUT(request: NextRequest) {
   //TODO: use new updateUserInDbAndHubspot function instead of this, but might need to unsanitize ssn first
   const { address, ...userData } = putData;
   //  Check if hubspot and clerk needs to be updated, and then update them
-  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
   if (userData.firstName || userData.lastName) {
     const clerkUpdate: ClerkUserUpdateSchema = {};
     const hsUpdateData: HubspotContactCreateUpdateSchema = {

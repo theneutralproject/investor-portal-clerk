@@ -23,12 +23,15 @@ type DocusignWebhookPayload = {
 
 export async function POST(req: NextRequest) {
   const payload = (await req.json()) as DocusignWebhookPayload;
-  
+
   const existingEvent = await prisma.docusignEvent.findUnique({
     where: { envelopeId: payload.data.envelopeId },
   });
   if (!existingEvent) {
-    console.warn('Failed to find existing docusign event for envelopeId - this envelope was likely created outside of the investor portal and can be ignored', payload.data.envelopeId);
+    console.warn(
+      'Failed to find existing docusign event for envelopeId - this envelope was likely created outside of the investor portal and can be ignored',
+      payload.data.envelopeId
+    );
     console.log('Docusign Payload:', payload.data);
     return jsonResponse({
       message: `Failed to find existing docusign event for envelopeId ${payload.data.envelopeId}`,
@@ -36,7 +39,6 @@ export async function POST(req: NextRequest) {
   }
 
   if (payload.event === 'recipient-completed') {
-
     // update dealEvent
     try {
       await prisma.docusignEvent.update({
@@ -48,8 +50,10 @@ export async function POST(req: NextRequest) {
       return jsonResponse({
         message: `Docusign webhook processed for envelopeId ${payload.data.envelopeId}`,
       });
-    } catch (error) {
-      console.warn(`Failed to update docusign event 1 for envelopeId ${payload.data.envelopeId}`);
+    } catch (__error) {
+      console.warn(
+        `Failed to update docusign event 1 for envelopeId ${payload.data.envelopeId}`
+      );
       console.warn(
         `The envelopeId ${payload.data.envelopeId} does not exist in the database and can be ignored.`
       );

@@ -41,8 +41,8 @@ export async function GET(request: NextRequest) {
 
     //If no financing type is provided, return all documents
     const where: Prisma.ProjectDocumentWhereInput = {
-      projectId: projectId
-    }
+      projectId: projectId,
+    };
     if (dealStage) where.dealStage = dealStage;
     if (financingType === '' || !financingType) {
       const documents = await prisma.projectDocument.findMany({

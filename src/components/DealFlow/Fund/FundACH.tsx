@@ -34,7 +34,6 @@ const FundACH: React.FC<FundACHProps> = ({
   const { deal, refetchDeal, updateDeal } = useDealFlow();
   const [copied, setCopied] = useState<string | null>(null);
   const [wireTransferId, setWireTransferId] = useState<string>(
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     deal?.paymentReferenceId ?? ''
   );
   const copyToClipboard = (text: string, field: string) => {
