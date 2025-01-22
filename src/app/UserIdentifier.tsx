@@ -29,6 +29,7 @@ export default function UserIdentifier() {
       setLoadTermStatus(false);
       setTermsStatus(data);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoading, data]);
 
   return null;

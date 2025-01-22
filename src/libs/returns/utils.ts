@@ -36,7 +36,7 @@ export async function readEquityMilestoneData(csvUrl: string) {
   const milestones: ProjectMilestoneType[] = [];
   parser.on('readable', function () {
     let record;
-    /* eslint-disable */
+
     while ((record = parser.read()) !== null) {
       const milestone: ProjectMilestoneType = {
         date: new Date(Date.parse(record.date)),
@@ -49,7 +49,7 @@ export async function readEquityMilestoneData(csvUrl: string) {
       milestone.cUnitReturns = parseFloat(
         record['cUnitReturns'].replace('$', '').replaceAll(',', '')
       );
-      /* eslint-enable */
+
       milestones.push(milestone);
     }
   });
@@ -604,4 +604,4 @@ export async function validateEquityMilestonesFile(
     return false;
   }
   return true;
-}
+};

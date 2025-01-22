@@ -80,5 +80,9 @@ export const zProjectMilestoneTypeSchema = z.object({
 });
 export type ProjectMilestoneType = z.infer<typeof zProjectMilestoneTypeSchema>;
 
-export const zProjectMilestoneTypeArraySchema = z.array(zPortfolioReturnsSchema);
-export type ProjectMilestoneTypeArray = z.infer<typeof zProjectMilestoneTypeArraySchema>;
+export const zProjectMilestoneTypeArraySchema = z.array(
+  zPortfolioReturnsSchema
+);
+export type ProjectMilestoneTypeArray = z.infer<
+  typeof zProjectMilestoneTypeArraySchema
+>;

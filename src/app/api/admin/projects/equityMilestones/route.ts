@@ -8,7 +8,6 @@ import { NextRequest } from 'next/server';
 
 const projectDocsBucket = 'project-documents';
 
-
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
   // check if they are an admin user by checking the auth token
@@ -88,7 +87,7 @@ export async function POST(request: NextRequest) {
       await storageClient
         .from(projectDocsBucket)
         .remove([`${project.slug}/${fileName}`]);
-    } catch (error) {
+    } catch (__error) {
       // if the file does not exist, we can ignore the error
     }
 

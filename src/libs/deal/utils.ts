@@ -26,7 +26,6 @@ export function getInvestmentEntity(
   projectName: string,
   financingType: DealFinancingType
 ) {
-  /* eslint-disable */
   switch (projectName) {
     case ProjectName['The Edison']:
     case ProjectName['519 W Main']:
@@ -40,5 +39,4 @@ export function getInvestmentEntity(
       return null;
     }
   }
-  /* eslint-enable */
 }

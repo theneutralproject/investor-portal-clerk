@@ -36,7 +36,7 @@ export async function getAdminFromRequest(request: NextRequest) {
       throw new Error('Admin user not found');
     }
     return adminUser;
-  } catch (error) {
+  } catch (__error) {
     return new Error('Invalid or Expired token');
   }
 }
@@ -58,7 +58,7 @@ export async function matchDealWithPdf(
   // match the file to the correct deal
   const arrayBuffer = await file.arrayBuffer();
   const dataBuffer = Buffer.from(arrayBuffer);
-  // eslint-disable-next-line
+
   const { text } = (await PdfParse(dataBuffer)) as { text: string };
   let i = 0;
   let bestMatch: MatchResponseObject = {

@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { type AccreditationVerificationCreateSchema } from '@/libs/accreditationVerification/schema';
 import {
   type OrganizationWithDocuments,
@@ -624,7 +623,6 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     setError(null);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { data } = await axios.put<MemberWithUser>(
         `/api/organizations/${organization.id}/members/${memberId}`,
         updateData

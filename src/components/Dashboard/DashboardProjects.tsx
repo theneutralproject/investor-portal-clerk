@@ -7,7 +7,6 @@ import {
   Button,
   styled,
   Divider,
-  LinearProgress,
   useTheme,
   useMediaQuery,
 } from '@mui/material';

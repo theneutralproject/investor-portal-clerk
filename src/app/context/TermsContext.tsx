@@ -43,6 +43,7 @@ export const TermsProvider: React.FC<{ children: React.ReactNode }> = ({
       setShowModal(false);
       setOnAcceptTerms(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [errorAcceptTerms]);
 
   const acceptTerms = () => {

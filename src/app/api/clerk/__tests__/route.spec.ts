@@ -17,7 +17,7 @@ jest.mock('svix', () => ({
 // Mock svix headers
 jest.mock('next/headers', () => ({
   headers: jest.fn(() => ({
-    get: jest.fn((headerName) => {
+    get: jest.fn(headerName => {
       const headersMap: Record<string, string> = {
         'svix-id': 'test-svix-id',
         'svix-timestamp': 'test-timestamp',
@@ -31,7 +31,7 @@ jest.mock('next/headers', () => ({
 const createMockRequest = (body: string = '{}'): Request =>
   ({
     text: jest.fn().mockResolvedValueOnce(body),
-  } as unknown as Request);
+  }) as unknown as Request;
 
 describe('POST handler', () => {
   beforeEach(() => {
@@ -46,7 +46,9 @@ describe('POST handler', () => {
       data: {
         id: 'user123',
         primary_email_address_id: 'email123',
-        email_addresses: [{ id: 'email123', email_address: 'test@example.com' }],
+        email_addresses: [
+          { id: 'email123', email_address: 'test@example.com' },
+        ],
         primary_phone_number_id: 'phone123',
         phone_numbers: [{ id: 'phone123', phone_number: '+1234567890' }],
         first_name: 'John',
@@ -123,7 +125,9 @@ describe('POST handler', () => {
       data: {
         id: 'user123',
         primary_email_address_id: 'email123',
-        email_addresses: [{ id: 'email123', email_address: 'test@example.com' }],
+        email_addresses: [
+          { id: 'email123', email_address: 'test@example.com' },
+        ],
         primary_phone_number_id: 'phone123',
         phone_numbers: [{ id: 'phone123', phone_number: '+1234567890' }],
         first_name: 'John',

@@ -1,7 +1,7 @@
 /* eslint-disable react/no-unescaped-entities */
 'use client';
 
-import { Box, Grid } from '@mui/material';
+import { Box } from '@mui/material';
 import styled from 'styled-components';
 
 import ProjectPageBanner from '@/components/Project/ProjectPageBanner';
