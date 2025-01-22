@@ -4,3 +4,14 @@ build
 dist
 .vercel
 public
+prisma
+# typescript
+*.tsbuildinfo
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+# csvs and such
+/seedData/

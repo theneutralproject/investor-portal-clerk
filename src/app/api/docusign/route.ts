@@ -224,7 +224,10 @@ export async function POST(req: Request) {
         organization
       );
     } catch (err) {
-      console.error('returning error for bad envelopeResponse4', getErrorMessage(err));
+      console.error(
+        'returning error for bad envelopeResponse4',
+        getErrorMessage(err)
+      );
       return new Response(JSON.stringify('unable to create envelope'), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },

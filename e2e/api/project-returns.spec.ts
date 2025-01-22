@@ -1,6 +1,4 @@
-import {
-  ProjectReturnsResponse,
-} from '@/libs/returns/schema';
+import { ProjectReturnsResponse } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { DealFinancingType } from '@prisma/client';
 
@@ -24,7 +22,7 @@ test.describe('api/project/returns test', () => {
       if (!lastScheduleEntry) {
         throw new Error('lastScheduleEntry is undefined');
       }
-      
+
       console.log(lastScheduleEntry);
       expect(lastScheduleEntry.equityAccruedPreferredReturn).toBe(50000);
       expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(193006);
@@ -63,7 +61,7 @@ test.describe('api/project/returns test', () => {
         throw new Error('lastScheduleEntry is undefined');
       }
       console.log('lastScheduleEntry', lastScheduleEntry);
-      
+
       expect(lastScheduleEntry.equityDistributionsCurrent).toBe(0);
       expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(140000);
       expect(lastScheduleEntry.debtDistributionsCurrent).toBe(102500);

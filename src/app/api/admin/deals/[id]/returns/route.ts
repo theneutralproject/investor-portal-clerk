@@ -11,12 +11,12 @@ import { NextRequest } from 'next/server';
  * @returns return information
  */
 export async function GET(request: NextRequest) {
-    //   const adminUser = await getAdminFromRequest(request);
-    //   if (isError(adminUser)) {
-    //     console.error(getErrorMessage(adminUser));
-    //     return errorResponse(getErrorMessage(adminUser), 401);
-    //   }
-      
+  //   const adminUser = await getAdminFromRequest(request);
+  //   if (isError(adminUser)) {
+  //     console.error(getErrorMessage(adminUser));
+  //     return errorResponse(getErrorMessage(adminUser), 401);
+  //   }
+
   let dealId: number;
   try {
     const url = new URL(request.url);

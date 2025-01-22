@@ -52,7 +52,7 @@ const DealFlowType: React.FC = () => {
   ];
 
   return (
-    <Box id='deal-flow-type-container'>
+    <Box id="deal-flow-type-container">
       <DealFlowTitle
         title="Choose Investment Type"
         modalKey={MODAL_KEYS.CHOOSE_INVESTMENT_TYPE}
@@ -109,7 +109,7 @@ const DealFlowType: React.FC = () => {
         </Box>
       </RadioGroup>
 
-      <DealFlowFooter  onContinue={handleUpdateDeal} />
+      <DealFlowFooter onContinue={handleUpdateDeal} />
     </Box>
   );
 };

@@ -47,7 +47,7 @@ export async function POST() {
           date_signed_up: formatDateForHubspot(new Date(clerkUser.createdAt)),
         },
       };
-        await updateHubspotContact(hsUserData);
+      await updateHubspotContact(hsUserData);
     }
 
     return jsonResponse(contactsWoDate);

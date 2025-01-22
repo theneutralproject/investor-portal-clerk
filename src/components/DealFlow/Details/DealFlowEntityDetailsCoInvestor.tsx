@@ -72,7 +72,7 @@ const DealFlowEntityDetailsCoInvestor: React.FC = () => {
         </Box>
       </RadioGroup>
 
-      <DealFlowFooter  onContinue={handleContinue} />
+      <DealFlowFooter onContinue={handleContinue} />
     </Box>
   );
 };

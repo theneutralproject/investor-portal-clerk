@@ -7,7 +7,13 @@ import {
 } from '@prisma/client';
 import { parse } from 'csv-parse';
 import { add, endOfMonth, startOfMonth } from 'date-fns';
-import type { PortfolioReturnsResponse, ProjectReturnsStats, ReturnsDateObject, ReturnsDealStats, ReturnsPortfolioStats } from './schema';
+import type {
+  PortfolioReturnsResponse,
+  ProjectReturnsStats,
+  ReturnsDateObject,
+  ReturnsDealStats,
+  ReturnsPortfolioStats,
+} from './schema';
 import { finished } from 'stream';
 import { promisify } from 'util';
 import { DealWithInvestmentStatsAndProjectWithPics } from '../types';
@@ -356,7 +362,6 @@ function _getEquityPayoutSchedule(
   }, []);
 }
 
-
 export async function getPortfolioReturns(
   deals: DealWithInvestmentStatsAndProjectWithPics[]
 ): Promise<PortfolioReturnsResponse> {
@@ -562,5 +567,4 @@ export async function getPortfolioReturns(
     portfolioStats,
     dealStats,
   } as PortfolioReturnsResponse;
-};
-
+}

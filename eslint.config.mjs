@@ -13,14 +13,14 @@ const eslintConfig = [
   ...compat.config({
     extends: ['next', 'next/core-web-vitals', 'next/typescript', 'prettier'],
     rules: {
-      'semi': ['error'],
-      '@typescript-eslint/no-explicit-any': ['off']
+      semi: ['error'],
+      '@typescript-eslint/no-explicit-any': ['off'],
     },
     ignorePatterns: [
       'playwright-report/*',
       'src/libs/docusign/utils.ts',
-      'prisma/*'
-    ]
+      'prisma/*',
+    ],
   }),
 ];
 

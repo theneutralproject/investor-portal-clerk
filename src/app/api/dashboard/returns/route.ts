@@ -63,12 +63,11 @@ export async function GET() {
       }
     }
   }
-  try{
-  const portfolioReturns = await getPortfolioReturns(deals);
-  return jsonResponse(portfolioReturns);
+  try {
+    const portfolioReturns = await getPortfolioReturns(deals);
+    return jsonResponse(portfolioReturns);
   } catch (error) {
     console.error(`unable to get portfolio returns: ${error}`);
     return errorResponse(getErrorMessage(error), 500);
   }
 }
-

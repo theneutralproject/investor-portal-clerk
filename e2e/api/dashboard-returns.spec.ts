@@ -2,7 +2,11 @@ import { DealCreateSchema } from '@/libs/deal/schema';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { test, expect } from '@playwright/test';
 import { Deal, DealFinancingType } from '@prisma/client';
-import { clearAllTestDeals, deleteDealInDbAndHubspot, deleteDealsFromTestContact } from 'e2e/helpers';
+import {
+  clearAllTestDeals,
+  deleteDealInDbAndHubspot,
+  deleteDealsFromTestContact,
+} from 'e2e/helpers';
 
 test.describe('api/dashboard/returns test', () => {
   let debtDeal1: Deal | null = null;
@@ -18,7 +22,7 @@ test.describe('api/dashboard/returns test', () => {
     financingType: DealFinancingType.promissory_note_now,
     amount: 100000,
   };
-  
+
   const debtDealData2: DealCreateSchema = {
     organizationId: 4,
     projectId: 1,
@@ -42,9 +46,9 @@ test.describe('api/dashboard/returns test', () => {
       const dealCreateResponse = await request.post('/api/deals', {
         data: debtDealData1,
       });
-      try{
-      debtDeal1 = await JSON.parse(await dealCreateResponse.text());
-      } catch(e){
+      try {
+        debtDeal1 = await JSON.parse(await dealCreateResponse.text());
+      } catch (e) {
         console.error('Error parsing response from creating debtDeal1', e);
       }
       // the put deal route configures the investment stats in the backend.
@@ -72,7 +76,7 @@ test.describe('api/dashboard/returns test', () => {
       const stats = (await JSON.parse(
         await response.text()
       )) as PortfolioReturnsResponse;
-      
+
       expect(stats.consolidatedSchedule.length).toBe(48);
       const lastScheduleEntry =
         stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
@@ -233,7 +237,7 @@ test.describe('api/dashboard/returns test', () => {
       const stats = (await JSON.parse(
         await response.text()
       )) as PortfolioReturnsResponse;
-      
+
       expect(stats.consolidatedSchedule.length).toBe(60);
       const lastScheduleEntry =
         stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
@@ -322,11 +326,11 @@ test.describe('api/dashboard/returns test', () => {
       financingType: DealFinancingType.equity,
       amount: 5000,
     };
-      // create first debt deal
-      const dealCreateResponse = await request.post('/api/deals', {
-        data: debtDealData2,
-      });
-      debtDeal2 = await JSON.parse(await dealCreateResponse.text());
+    // create first debt deal
+    const dealCreateResponse = await request.post('/api/deals', {
+      data: debtDealData2,
+    });
+    debtDeal2 = await JSON.parse(await dealCreateResponse.text());
 
     const equityDealData2: DealCreateSchema = {
       organizationId: 4,
