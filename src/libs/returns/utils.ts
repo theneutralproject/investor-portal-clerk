@@ -9,6 +9,7 @@ import { parse } from 'csv-parse';
 import { add, endOfMonth, startOfMonth } from 'date-fns';
 import type {
   PortfolioReturnsResponse,
+  ProjectMilestoneType,
   ProjectReturnsStats,
   ReturnsDateObject,
   ReturnsDealStats,
