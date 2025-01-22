@@ -22,6 +22,7 @@
     "dev": "next dev",
     "postinstall": "prisma generate",
     "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "prebuild": "tsc --noEmit && eslint && prisma generate && prisma migrate deploy",
     "precommit": "tsc && eslint && prisma generate",

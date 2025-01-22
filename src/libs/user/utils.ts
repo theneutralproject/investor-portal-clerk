@@ -53,7 +53,6 @@ export async function createUserInDbAndHubspot(
   data: UserCreateSchema,
   dealId?: number
 ) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { address, ...userData } = data;
 
   let deal: Deal | null = null;

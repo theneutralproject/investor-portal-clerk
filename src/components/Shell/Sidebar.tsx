@@ -1,6 +1,5 @@
 'use client';
 
-/* eslint-disable */
 //@ts-nocheck
 
 import CopyrightIcon from '@mui/icons-material/Copyright';

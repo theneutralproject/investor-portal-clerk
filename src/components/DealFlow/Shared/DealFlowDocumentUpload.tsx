@@ -73,11 +73,9 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           body: formData,
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const responseData = await response.json();
 
         if (!response.ok) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
           throw new Error(responseData?.error || 'Upload failed');
         }
 

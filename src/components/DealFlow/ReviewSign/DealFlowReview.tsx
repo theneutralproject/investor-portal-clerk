@@ -79,7 +79,7 @@ const DealFlowReview: React.FC = () => {
               title={doc.name}
               fileName={doc.fileName}
               // @ts-expect-error -- type completed
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
               isCompleted={doc.completed}
               onSign={() =>
                 doc.docusignTemplateId &&
@@ -94,7 +94,7 @@ const DealFlowReview: React.FC = () => {
       <DealFlowFooter
         onContinue={toReviewScreen}
         // @ts-expect-error -- type completed
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+
         isContinueDisabled={!docusignDocuments.every(doc => doc.completed)}
       />
     </Box>

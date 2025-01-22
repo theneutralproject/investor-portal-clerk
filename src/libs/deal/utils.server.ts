@@ -298,7 +298,7 @@ export async function updateDeal(
 
   // then update the deal
   let updatedDeal: DealWithInvestmentStats;
-  /* eslint-disable-next-line */
+
   try {
     updatedDeal = (await prisma.deal.update({
       where: { hubspotId: dealData.hubspotId },

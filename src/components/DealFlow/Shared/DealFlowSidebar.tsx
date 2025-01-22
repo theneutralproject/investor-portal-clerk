@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import React from 'react';
 import { Typography, Box, Divider, Chip } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
