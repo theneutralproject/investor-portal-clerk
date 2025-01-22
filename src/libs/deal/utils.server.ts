@@ -403,7 +403,7 @@ export function populateDealDebtStats(
   stats.equityTermMonths = 0;
   stats.numberAUnits = 0;
   stats.numberCUnits = 0;
-  
+
   const minInvestmentAmount = project.investmentStats.debtMinInvestment;
   if (stats.amount < minInvestmentAmount) {
     console.log(

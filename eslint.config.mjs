@@ -15,14 +15,14 @@ const eslintConfig = [
     rules: {
       semi: ['error'],
       '@typescript-eslint/no-explicit-any': ['off'],
-      "@typescript-eslint/no-unused-vars": [
-        "error", // or "error"
+      '@typescript-eslint/no-unused-vars': [
+        'error', // or "error"
         {
-          "argsIgnorePattern": "^_",
-          "varsIgnorePattern": "^_",
-          "caughtErrorsIgnorePattern": "^_"
-        }
-      ]
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
     },
     ignorePatterns: [
       'playwright-report/*',
