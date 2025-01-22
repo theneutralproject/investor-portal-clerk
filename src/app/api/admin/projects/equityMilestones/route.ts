@@ -7,14 +7,16 @@ import { isError } from 'lodash';
 import { NextRequest } from 'next/server';
 
 const projectDocsBucket = 'project-documents';
+
+
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
   // check if they are an admin user by checking the auth token
-  //   const adminUser = await getAdminFromRequest(request);
-  //   if (isError(adminUser)) {
-  //     console.error(getErrorMessage(adminUser));
-  //     return jsonResponse(getErrorMessage(adminUser), 401);
-  //   }
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse(getErrorMessage(adminUser), 401);
+  }
 
   let projectId: number | null = null;
   try {
