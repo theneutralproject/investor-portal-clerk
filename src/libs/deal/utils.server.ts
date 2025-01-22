@@ -300,7 +300,6 @@ export async function updateDeal(
   let updatedDeal: DealWithInvestmentStats;
   /* eslint-disable-next-line */
   try {
-    // console.log("Updating deal with this data:", dealData);
     updatedDeal = (await prisma.deal.update({
       where: { hubspotId: dealData.hubspotId },
       data: dealData,
@@ -354,9 +353,8 @@ export async function populateDealEquityStats(
     console.error(equityDetails);
     throw equityDetails;
   }
-  const { unitType, shareOfEquity, numberAUnits, numberCUnits } = equityDetails;
+  const { unitType, numberAUnits, numberCUnits } = equityDetails;
   stats.unitType = unitType;
-  stats.shareOfEquity = shareOfEquity;
   stats.numberAUnits = numberAUnits;
   stats.numberCUnits = numberCUnits;
   stats.equityTermMonths = project.investmentStats.equityTermMonths;
@@ -405,7 +403,7 @@ export function populateDealDebtStats(
   stats.equityTermMonths = 0;
   stats.numberAUnits = 0;
   stats.numberCUnits = 0;
-  stats.shareOfEquity = 0;
+  
   const minInvestmentAmount = project.investmentStats.debtMinInvestment;
   if (stats.amount < minInvestmentAmount) {
     console.log(

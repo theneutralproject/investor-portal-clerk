@@ -13,7 +13,6 @@ export const zDealInvestmentStatsUpdateSchema = z.object({
   unitType: z.nativeEnum(DealUnitType).optional(),
   numberAUnits: z.number().min(0).optional(),
   numberCUnits: z.number().min(0).optional(),
-  shareOfEquity: z.number().min(0).optional(),
 });
 
 export type DealInvestmentStatsUpdateSchema = z.infer<

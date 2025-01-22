@@ -25,6 +25,7 @@ export async function GET() {
                     include: {
                       milestones: true,
                       pictures: true,
+                      investmentStats: true,
                     },
                   },
                 },

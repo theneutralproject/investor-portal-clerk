@@ -16,15 +16,13 @@ import type {
 } from './schema';
 import { finished } from 'stream';
 import { promisify } from 'util';
-import { DealWithInvestmentStatsAndProjectWithPics } from '../types';
+import {
+  DealWithInvestmentStatsAndProjectWithPics,
+  ProjectWithInvestmentStats,
+} from '../types';
 
 const finishedAsync = promisify(finished);
 
-interface MilestoneType {
-  date: Date;
-  aUnitReturns: number;
-  cUnitReturns: number;
-}
 export async function readEquityMilestoneData(csvUrl: string) {
   if (!csvUrl) {
     console.error('CSV url not provided');
@@ -34,12 +32,12 @@ export async function readEquityMilestoneData(csvUrl: string) {
   const text = await response.text();
   const parser = parse(text, { columns: true });
 
-  const milestones: MilestoneType[] = [];
+  const milestones: ProjectMilestoneType[] = [];
   parser.on('readable', function () {
     let record;
-    /* eslint-disable */
+
     while ((record = parser.read()) !== null) {
-      const milestone: MilestoneType = {
+      const milestone: ProjectMilestoneType = {
         date: new Date(Date.parse(record.date)),
         aUnitReturns: 0,
         cUnitReturns: 0,
@@ -50,7 +48,7 @@ export async function readEquityMilestoneData(csvUrl: string) {
       milestone.cUnitReturns = parseFloat(
         record['cUnitReturns'].replace('$', '').replaceAll(',', '')
       );
-      /* eslint-enable */
+
       milestones.push(milestone);
     }
   });
@@ -77,10 +75,11 @@ export async function getEquityStatsFromProject(
   let numberCUnits = 0;
   let numberAUnits = 0;
   let shareOfEquity = 0;
-  try {
-    const equityMilestones =
-      await readEquityMilestoneData(equityReturnsFileUrl);
 
+  let equityMilestones: ProjectMilestoneType[] | undefined = undefined;
+  equityMilestones = await readEquityMilestoneData(equityReturnsFileUrl);
+
+  try {
     const firstMilestone = equityMilestones?.[0];
     if (!firstMilestone?.aUnitReturns || !firstMilestone?.cUnitReturns) {
       console.error('Milestone data not found in equity returns file');
@@ -258,9 +257,10 @@ export function roundTo(num: number, decimals: number): number {
 export function getEquityPayoutScheduleForDeal(
   stats: DealInvestmentStats,
   projectMilestones: ProjectMilestones,
-  equityMilestones: MilestoneType[]
+  equityMilestones: ProjectMilestoneType[],
+  shareOfEquity: number
 ): ReturnsDateObject[] {
-  const { amount, shareOfEquity, unitType, equityPreferredReturn } = stats;
+  const { amount, unitType, equityPreferredReturn } = stats;
   return _getEquityPayoutSchedule(
     amount,
     projectMilestones,
@@ -274,7 +274,7 @@ export function getEquityPayoutScheduleForDeal(
 export function getEquityPayoutScheduleForProject(
   amount: number,
   projectMilestones: ProjectMilestones,
-  equityMilestones: MilestoneType[],
+  equityMilestones: ProjectMilestoneType[],
   shareOfEquity: number,
   unitType: DealUnitType,
   preferredReturn: number
@@ -307,7 +307,7 @@ export function getEquityPayoutScheduleForProject(
 function _getEquityPayoutSchedule(
   amount: number,
   projectMilestones: ProjectMilestones,
-  equityMilestones: MilestoneType[],
+  equityMilestones: ProjectMilestoneType[],
   shareOfEquity: number,
   unitType: DealUnitType,
   preferredReturn: number
@@ -399,6 +399,12 @@ export async function getPortfolioReturns(
       );
       return [];
     }
+    if (!project.investmentStats) {
+      console.error(
+        `!!!Project investment stats not found for project of deal ${deal.id}. The deal will not be processed!`
+      );
+      return [];
+    }
 
     const dealSummary: ReturnsDealStats = {
       dealId: deal.id,
@@ -424,10 +430,17 @@ export async function getPortfolioReturns(
         const equityMilestones = await readEquityMilestoneData(
           project.equityReturnsFile
         );
+
+        const projectEquityStats = await getEquityStatsFromProject(
+          investmentStats.amount,
+          project.equityReturnsFile,
+          project.investmentStats.cUnitThresholdAmount
+        );
         const schedule = getEquityPayoutScheduleForDeal(
           investmentStats,
           project.milestones,
-          equityMilestones
+          equityMilestones,
+          projectEquityStats.shareOfEquity
         );
 
         schedule.forEach((dateObject, i) => {
@@ -567,4 +580,27 @@ export async function getPortfolioReturns(
     portfolioStats,
     dealStats,
   } as PortfolioReturnsResponse;
+}
+
+export async function validateEquityMilestonesFile(
+  storageUrl: string,
+  project: ProjectWithInvestmentStats
+) {
+  // parse the csv file with some test data
+  const projectEquityStats = await getEquityStatsFromProject(
+    100000,
+    storageUrl,
+    200000
+  );
+  const { equityMilestones } = projectEquityStats;
+  if (
+    equityMilestones.length !==
+    project.investmentStats?.equityTermMonths + 1
+  ) {
+    console.log(
+      `milestones length: ${equityMilestones.length}, project term: ${project.investmentStats?.equityTermMonths}`
+    );
+    return false;
+  }
+  return true;
 }

@@ -55,6 +55,7 @@ export type DealWithInvestmentStatsAndProjectWithPics = Deal & {
     | (Project & {
         milestones: ProjectMilestones | null;
         pictures: ProjectPicture[] | null;
+        investmentStats: ProjectInvestmentStats | null;
       })
     | null;
 };
