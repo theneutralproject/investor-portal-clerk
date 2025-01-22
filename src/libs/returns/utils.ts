@@ -604,4 +604,4 @@ export async function validateEquityMilestonesFile(
     return false;
   }
   return true;
-}
+};
