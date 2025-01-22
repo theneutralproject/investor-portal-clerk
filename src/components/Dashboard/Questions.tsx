@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  Card,
-  CardContent,
-  Typography,
-  Button,
-  Stack,
-  Divider,
-} from '@mui/material';
+import { Card, CardContent, Typography, Stack, Divider } from '@mui/material';
 import Image from 'next/image';
 import ChatInterface from '../ChatInterface';
 

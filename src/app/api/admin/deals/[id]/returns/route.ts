@@ -1,8 +1,7 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
 import prisma from '@/libs/prisma.server';
 import { getPortfolioReturns } from '@/libs/returns/utils';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
-import { isError, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 /**
@@ -24,7 +23,7 @@ export async function GET(request: NextRequest) {
     if (!dealId || !isNumber(dealId)) {
       throw new Error('dealId is required in url');
     }
-  } catch (error: unknown) {
+  } catch (__error) {
     return jsonResponse({ error: `dealId is required in url` }, 400);
   }
 

@@ -1,20 +1,8 @@
 import prisma from '@/libs/prisma.server';
-import type {
-  ReturnsDateObject,
-  ReturnsDealStats,
-  PortfolioReturnsResponse,
-  ReturnsPortfolioStats,
-} from '@/libs/returns/schema';
-import {
-  getDebtPayoutScheduleForDeal,
-  getEquityPayoutScheduleForDeal,
-  getPortfolioReturns,
-  readEquityMilestoneData,
-} from '@/libs/returns/utils';
+import { getPortfolioReturns } from '@/libs/returns/utils';
 import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs/server';
-import { DealFinancingType } from '@prisma/client';
 
 export async function GET() {
   // get loggedin user

@@ -29,7 +29,7 @@ export async function POST() {
       let clerkUser: User | null = null;
       try {
         clerkUser = await clerkClient.users.getUser(contact.properties.userid);
-      } catch (error) {
+      } catch (__error) {
         console.error(
           `Error fetching clerk user with id ${contact.properties.userid}`
         );

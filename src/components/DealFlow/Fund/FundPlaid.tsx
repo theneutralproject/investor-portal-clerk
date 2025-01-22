@@ -10,7 +10,6 @@ import {
 import PlaidLinkClass from '@/components/DealFlow/Fund/PlaidLink';
 import { useDealFlow } from '@/components/DealFlow/Shared/DealFlowContext';
 import DealFlowTitle from '@/components/DealFlow/Shared/DealFlowTitle';
-import DealFlowFooter from '../Shared/DealFlowFooter';
 
 interface FundPlaidProps {
   merchantId: string;

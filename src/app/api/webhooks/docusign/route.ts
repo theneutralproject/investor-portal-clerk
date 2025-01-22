@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return jsonResponse({
         message: `Docusign webhook processed for envelopeId ${payload.data.envelopeId}`,
       });
-    } catch (error) {
+    } catch (__error) {
       console.warn('Failed to update docusign event 1');
       console.warn(
         `The envelopeId ${payload.data.envelopeId} does not exist in the database and can be ignored.`

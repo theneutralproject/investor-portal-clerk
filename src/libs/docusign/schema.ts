@@ -20,7 +20,7 @@ export type DocusignEnvelopeCreateSchema = z.infer<
   typeof zDocusignEvelopeCreate
 >;
 
-const zDocusignSigner = z.object({
+export const zDocusignSigner = z.object({
   id: z.number(),
   fullName: z.string(),
   email: z.string().email(),

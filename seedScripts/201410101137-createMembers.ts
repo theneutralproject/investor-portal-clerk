@@ -8,7 +8,7 @@ async function main() {
   try {
     // for each organization, create a member
     for (const organization of allOrganizations) {
-      const { id: organizationId, name, ownerId } = organization;
+      const { id: organizationId, ownerId } = organization;
       await prisma.member.create({
         data: {
           organizationId,

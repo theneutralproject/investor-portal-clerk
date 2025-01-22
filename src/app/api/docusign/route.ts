@@ -205,7 +205,7 @@ export async function POST(req: Request) {
           headers: { 'Content-Type': 'application/json' },
         });
       }
-    } catch (err) {
+    } catch (__err) {
       console.error('returning error for bad envelopeResponse2');
       return new Response(JSON.stringify('unable to get envelope'), {
         status: 500,
