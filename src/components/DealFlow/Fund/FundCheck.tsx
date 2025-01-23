@@ -103,7 +103,7 @@ const FundCheck: React.FC<FundCheckProps> = ({
                 'Amount',
                 `$${investmentAmount.toLocaleString()}`
               )}
-              {renderDetailRow('Memo', `Deal ID: ${deal?.id}`)}
+              {renderDetailRow('Memo', `${deal?.transactionId}`)}
               {renderDetailRow('Mail to', paymentInfo.mailTo)}
             </Stack>
           </Box>
