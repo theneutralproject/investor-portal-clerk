@@ -33,6 +33,7 @@ import { docusignOwnershipTypeEnum } from './schema';
 import { type SessionData, sessionOptions } from '../session/utils';
 import { toWords } from 'number-to-words';
 import { isNull } from 'lodash';
+import { getErrorMessage } from '../utils';
 
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -124,6 +125,48 @@ export async function instantiateApiClient(accessToken: string) {
   dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
   dsApiClient.addDefaultHeader('Authorization', 'Bearer ' + accessToken);
   return new EnvelopesApi(dsApiClient);
+}
+
+export async function createNewEnvelopeDefinition(
+  envelopesApi: EnvelopesApi,
+  templateId: string,
+  deal: DealWithInvestmentStatsAndVerification,
+  userWOrgsAndAddress: UserWithAddress,
+  organization: OrganizationWithFullMembersAndAddress
+) {
+  const envelope = makeEnvelopeDefinition(
+    templateId,
+    organization,
+    deal,
+    userWOrgsAndAddress
+  );
+  try {
+    const envelopeResponse = await envelopesApi.createEnvelope(
+      process.env.DOCUSIGN_API_ACCOUNT_ID!,
+      { envelopeDefinition: envelope }
+    );
+    return envelopeResponse;
+  } catch (err) {
+    console.error('CANNOT CREATE ENVELOPE:');
+    console.error(err);
+    throw new Error(getErrorMessage(err));
+  }
+}
+
+export async function getExistingEnvelopeDefinition(
+  envelopesApi: EnvelopesApi,
+  envelopeId: string
+) {
+  try {
+    const envelopeResponse = await envelopesApi.getEnvelope(
+      process.env.DOCUSIGN_API_ACCOUNT_ID!,
+      envelopeId
+    );
+    return envelopeResponse;
+  } catch (err) {
+    console.error('CANNOT GET ENVELOPE:', getErrorMessage(err));
+    throw new Error(getErrorMessage(err));
+  }
 }
 
 const addressToCityStateZip = (a: Address | null) => {
