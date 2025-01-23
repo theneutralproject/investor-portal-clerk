@@ -4,9 +4,9 @@ import { ProjectName } from '@/libs/project/schema';
 const InvestmentEntity = {
   'The Edison': {
     equity: 'Edison Project LLC',
-    promissory_note_now: 'North Edison LLC',
+    promissory_note_now: 'Edison Project LLC',
     promissory_note_at_closing: 'Edison Project LLC',
-    promissory_to_equity: 'North Edison LLC',
+    promissory_to_equity: 'Edison Project LLC',
   },
   '519 W Main': {
     equity: 'Vanilla 301 LLC',
