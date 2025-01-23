@@ -290,10 +290,7 @@ export async function POST(req: Request) {
 
   if (isError(viewRequestResponse)) {
     console.error('returning error for bad makeRecipientViewRequest');
-    return new Response(JSON.stringify(viewRequestResponse.message), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return errorResponse(`${viewRequestResponse}`, 500);
   }
   // store docusignEvent:
   if (!existingDocusignEvent) {
@@ -308,7 +305,7 @@ export async function POST(req: Request) {
         },
       });
 
-      return jsonResponse(docusignEvent, 201);
+      return jsonResponse(viewRequestResponse, 200);
     } catch (err) {
       console.error('Error creating new docusignEvent:', err);
       return errorResponse('Error creating new docusignEvent', 500);

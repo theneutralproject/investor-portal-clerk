@@ -82,8 +82,8 @@ export async function refreshDocusignAccessToken(
           if (errMessage === 'consent_required') {
             ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
             //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
-            // TODO: redirect_uri to dealflow/[dealid]/[projectslug]/review
-            const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dealflow/${projectSlug}/${dealId}/review`;
+            // TODO: redirect to a page that lets user know they can return to the signing process
+            const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
             return { body: { consentUrl } };
           } else {
             console.error(err);
