@@ -37,10 +37,7 @@ import { isNull } from 'lodash';
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
-export async function refreshDocusignAccessToken(
-  projectSlug: string,
-  dealId: number
-) {
+export async function refreshAccessToken() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   const responseObj = {
@@ -82,8 +79,7 @@ export async function refreshDocusignAccessToken(
           if (errMessage === 'consent_required') {
             ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
             //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
-            // TODO: redirect_uri to dealflow/[dealid]/[projectslug]/review
-            const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dealflow/${projectSlug}/${dealId}/review`;
+            const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
             return { body: { consentUrl } };
           } else {
             console.error(err);
