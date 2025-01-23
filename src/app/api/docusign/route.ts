@@ -9,17 +9,11 @@ import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import {
   refreshAccessToken,
   instantiateApiClient,
-  makeEnvelopeDefinition,
   makeRecipientViewRequest,
   getExistingEnvelopeDefinition,
   createNewEnvelopeDefinition,
 } from '@/libs/docusign/utils';
 import { currentUser } from '@clerk/nextjs/server';
-import type {
-  DealWithInvestmentStatsAndVerification,
-  OrganizationWithFullMembersAndAddress,
-  UserWithAddress,
-} from '@/libs/types';
 import type {
   Envelope,
   EnvelopesApi,
