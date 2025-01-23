@@ -11,6 +11,8 @@ import {
   instantiateApiClient,
   makeEnvelopeDefinition,
   makeRecipientViewRequest,
+  getExistingEnvelopeDefinition,
+  createNewEnvelopeDefinition,
 } from '@/libs/docusign/utils';
 import { currentUser } from '@clerk/nextjs/server';
 import type {
@@ -25,48 +27,6 @@ import type {
   ViewUrl,
 } from 'docusign-esign';
 import { DocusignEvent } from '@prisma/client';
-
-async function createNewEnvelopeDefinition(
-  envelopesApi: EnvelopesApi,
-  templateId: string,
-  deal: DealWithInvestmentStatsAndVerification,
-  userWOrgsAndAddress: UserWithAddress,
-  organization: OrganizationWithFullMembersAndAddress
-) {
-  const envelope = makeEnvelopeDefinition(
-    templateId,
-    organization,
-    deal,
-    userWOrgsAndAddress
-  );
-  try {
-    const envelopeResponse = await envelopesApi.createEnvelope(
-      process.env.DOCUSIGN_API_ACCOUNT_ID!,
-      { envelopeDefinition: envelope }
-    );
-    return envelopeResponse;
-  } catch (err) {
-    console.error('CANNOT CREATE ENVELOPE:');
-    console.error(err);
-    throw new Error(getErrorMessage(err));
-  }
-}
-
-async function getExistingEnvelopeDefinition(
-  envelopesApi: EnvelopesApi,
-  envelopeId: string
-) {
-  try {
-    const envelopeResponse = await envelopesApi.getEnvelope(
-      process.env.DOCUSIGN_API_ACCOUNT_ID!,
-      envelopeId
-    );
-    return envelopeResponse;
-  } catch (err) {
-    console.error('CANNOT GET ENVELOPE:', getErrorMessage(err));
-    throw new Error(getErrorMessage(err));
-  }
-}
 
 // create new envelope or get existing envelope, and display recipient view to user
 export async function POST(req: Request) {
@@ -97,13 +57,11 @@ export async function POST(req: Request) {
   }
 
   let payload: DocusignEnvelopeCreateSchema;
+  // console.log('Docusign POST payload:', await req.json());
   try {
     payload = zDocusignEvelopeCreate.parse(await req.json());
   } catch (err) {
-    console.error(
-      'Error parsing Docusign POST payload: ',
-      getErrorMessage(err)
-    );
+    console.error('Error parsing Docusign POST payload: ', err);
     return new Response(
       JSON.stringify({ error: 'Unable to parse Docusign POST payload:', err }),
       {
@@ -176,7 +134,7 @@ export async function POST(req: Request) {
       // we need to get consent from the user to share their data with docusign.
       console.log(
         'need to get consent from user to use docusign',
-        accessTokenResponse.consentUrl
+        accessTokenResponse
       );
       return new Response(
         JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),
@@ -287,15 +245,12 @@ export async function POST(req: Request) {
 
   if (isError(viewRequestResponse)) {
     console.error('returning error for bad makeRecipientViewRequest');
-    return new Response(JSON.stringify(viewRequestResponse.message), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return errorResponse(`${viewRequestResponse}`, 500);
   }
   // store docusignEvent:
   if (!existingDocusignEvent) {
     try {
-      const docusignEvent = await prisma.docusignEvent.create({
+      await prisma.docusignEvent.create({
         data: {
           envelopeId: envelopeResponse.envelopeId,
           templateId: documentTemplateId,
@@ -305,10 +260,24 @@ export async function POST(req: Request) {
         },
       });
 
-      return jsonResponse(docusignEvent, 201);
+      return jsonResponse(viewRequestResponse, 200);
     } catch (err) {
       console.error('Error creating new docusignEvent:', err);
       return errorResponse('Error creating new docusignEvent', 500);
+    }
+  } else {
+    try {
+      await prisma.docusignEvent.update({
+        where: { id: existingDocusignEvent.id },
+        data: {
+          envelopeId: envelopeResponse.envelopeId,
+          dateSent: new Date(),
+        },
+      });
+      return jsonResponse(viewRequestResponse, 200);
+    } catch (err) {
+      console.error('Error updating existing docusignEvent:', err);
+      return errorResponse('Error updating existing docusignEvent', 500);
     }
   }
 }

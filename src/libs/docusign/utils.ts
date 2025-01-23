@@ -33,6 +33,7 @@ import { docusignOwnershipTypeEnum } from './schema';
 import { type SessionData, sessionOptions } from '../session/utils';
 import { toWords } from 'number-to-words';
 import { isNull } from 'lodash';
+import { getErrorMessage } from '../utils';
 
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -66,7 +67,7 @@ export async function refreshAccessToken() {
         .requestJWTUserToken(
           process.env.DOCUSIGN_INTEGRATION_KEY!,
           process.env.DOCUSIGN_USER_ID!,
-          ['signature'],
+          ['signature', 'impersonation'],
           // fs.readFileSync(path.join(__dirname, "private.key")), //TODO: save as DB file instead of secret
           Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
           3600
@@ -75,10 +76,11 @@ export async function refreshAccessToken() {
           // The user is not logged in
           const errMessage = err.response.data.error;
 
-          // DocuSign API problem
+          // expected DocuSign API problem - every user will see this once.
           if (errMessage === 'consent_required') {
             ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
-            //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
+            // https://www.youtube.com/watch?v=sBziZ2TfFVs
+            // TODO: redirect to a page that lets user know they can return to the signing process
             const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
             return { body: { consentUrl } };
           } else {
@@ -119,6 +121,48 @@ export async function instantiateApiClient(accessToken: string) {
   dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
   dsApiClient.addDefaultHeader('Authorization', 'Bearer ' + accessToken);
   return new EnvelopesApi(dsApiClient);
+}
+
+export async function createNewEnvelopeDefinition(
+  envelopesApi: EnvelopesApi,
+  templateId: string,
+  deal: DealWithInvestmentStatsAndVerification,
+  userWOrgsAndAddress: UserWithAddress,
+  organization: OrganizationWithFullMembersAndAddress
+) {
+  const envelope = makeEnvelopeDefinition(
+    templateId,
+    organization,
+    deal,
+    userWOrgsAndAddress
+  );
+  try {
+    const envelopeResponse = await envelopesApi.createEnvelope(
+      process.env.DOCUSIGN_API_ACCOUNT_ID!,
+      { envelopeDefinition: envelope }
+    );
+    return envelopeResponse;
+  } catch (err) {
+    console.error('CANNOT CREATE ENVELOPE:');
+    console.error(err);
+    throw new Error(getErrorMessage(err));
+  }
+}
+
+export async function getExistingEnvelopeDefinition(
+  envelopesApi: EnvelopesApi,
+  envelopeId: string
+) {
+  try {
+    const envelopeResponse = await envelopesApi.getEnvelope(
+      process.env.DOCUSIGN_API_ACCOUNT_ID!,
+      envelopeId
+    );
+    return envelopeResponse;
+  } catch (err) {
+    console.error('CANNOT GET ENVELOPE:', getErrorMessage(err));
+    throw new Error(getErrorMessage(err));
+  }
 }
 
 const addressToCityStateZip = (a: Address | null) => {
