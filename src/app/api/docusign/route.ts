@@ -179,7 +179,7 @@ export async function POST(req: Request) {
       // we need to get consent from the user to share their data with docusign.
       console.log(
         'need to get consent from user to use docusign',
-        accessTokenResponse.consentUrl
+        accessTokenResponse
       );
       return new Response(
         JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),

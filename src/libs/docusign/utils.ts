@@ -69,7 +69,7 @@ export async function refreshDocusignAccessToken(
         .requestJWTUserToken(
           process.env.DOCUSIGN_INTEGRATION_KEY!,
           process.env.DOCUSIGN_USER_ID!,
-          ['signature'],
+          ['signature', 'impersonation'],
           // fs.readFileSync(path.join(__dirname, "private.key")), //TODO: save as DB file instead of secret
           Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
           3600
@@ -81,6 +81,7 @@ export async function refreshDocusignAccessToken(
           // DocuSign API problem
           if (errMessage === 'consent_required') {
             ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
+            // https://www.youtube.com/watch?v=sBziZ2TfFVs
             //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
             // TODO: redirect to a page that lets user know they can return to the signing process
             const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
