@@ -3,7 +3,7 @@ import { toUTCMidnight, updateDeal } from '@/libs/deal/utils.server';
 import {
   getEnvelopeAsPdfFileBuffer,
   instantiateApiClient,
-  refreshDocusignAccessToken,
+  refreshAccessToken,
 } from '@/libs/docusign/utils';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils';
@@ -119,13 +119,6 @@ export async function POST(req: NextRequest) {
         where: {
           docusignTemplateId: dealEvent.templateId,
         },
-        include: {
-          project: {
-            select: {
-              slug: true,
-            },
-          },
-        },
       });
       if (!projectDoc) {
         console.error(
@@ -144,10 +137,7 @@ export async function POST(req: NextRequest) {
         fileName += '.pdf';
       }
 
-      const accessTokenResponse = await refreshDocusignAccessToken(
-        projectDoc.project.slug,
-        dealEvent.dealId
-      );
+      const accessTokenResponse = await refreshAccessToken();
       if (accessTokenResponse.consentUrl) {
         // we need to get consent from the user to share their data with docusign.
         // this should never happen as we already did this when the user signed the document

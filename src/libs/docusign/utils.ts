@@ -38,10 +38,7 @@ import { getErrorMessage } from '../utils';
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
-export async function refreshDocusignAccessToken(
-  projectSlug: string,
-  dealId: number
-) {
+export async function refreshAccessToken() {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
 
   const responseObj = {
@@ -79,11 +76,10 @@ export async function refreshDocusignAccessToken(
           // The user is not logged in
           const errMessage = err.response.data.error;
 
-          // DocuSign API problem
+          // expected DocuSign API problem - every user will see this once.
           if (errMessage === 'consent_required') {
             ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
             // https://www.youtube.com/watch?v=sBziZ2TfFVs
-            //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
             // TODO: redirect to a page that lets user know they can return to the signing process
             const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
             return { body: { consentUrl } };
