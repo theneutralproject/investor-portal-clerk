@@ -7,7 +7,7 @@ import {
 } from '@/libs/docusign/schema';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import {
-  refreshDocusignAccessToken,
+  refreshAccessToken,
   instantiateApiClient,
   makeEnvelopeDefinition,
   makeRecipientViewRequest,
@@ -171,10 +171,7 @@ export async function POST(req: Request) {
   let accessTokenResponse: { consentUrl?: string; accessToken?: string };
   try {
     // get access token and instantiate api client
-    accessTokenResponse = await refreshDocusignAccessToken(
-      project.slug,
-      deal.id
-    );
+    accessTokenResponse = await refreshAccessToken();
     if (accessTokenResponse.consentUrl) {
       // we need to get consent from the user to share their data with docusign.
       console.log(
