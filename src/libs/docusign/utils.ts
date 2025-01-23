@@ -47,37 +47,50 @@ export async function refreshAccessToken() {
   if (!(session.docusignJwt && (session.docusignExpiresAt ?? 0) > Date.now())) {
     console.log('generating a new DS access token');
     const dsApiClient: ApiClient = new ApiClient();
-    dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
+    try {
+      dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
+    } catch (err) {
+      console.error(`Error setting base path for DocuSign API client: ${err}`);
+      throw new Error(
+        `Error setting base path for DocuSign API client: ${err}`
+      );
+    }
     // dsApiClient.addDefaultHeader('Authorization', 'Bearer ' + process.env.DOCUSIGN_INTEGRATION_KEY);
     /* eslint-disable-next-line*/
-    const results: {
+
+    let results: {
       body: { consentUrl?: string; access_token?: string; expires_in?: number };
-    } = await dsApiClient
-      .requestJWTUserToken(
-        process.env.DOCUSIGN_INTEGRATION_KEY!,
-        process.env.DOCUSIGN_USER_ID!,
-        ['signature'],
-        // fs.readFileSync(path.join(__dirname, "private.key")), //TODO: save as DB file instead of secret
-        Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
-        3600
-      )
-      .catch((err: { response: { data: { error: string } } }) => {
-        // The user is not logged in
-        const errMessage = err.response.data.error;
+    };
+    try {
+      results = await dsApiClient
+        .requestJWTUserToken(
+          process.env.DOCUSIGN_INTEGRATION_KEY!,
+          process.env.DOCUSIGN_USER_ID!,
+          ['signature'],
+          // fs.readFileSync(path.join(__dirname, "private.key")), //TODO: save as DB file instead of secret
+          Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
+          3600
+        )
+        .catch((err: { response: { data: { error: string } } }) => {
+          // The user is not logged in
+          const errMessage = err.response.data.error;
 
-        // DocuSign API problem
-        if (errMessage === 'consent_required') {
-          ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
-          //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
-          const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
-          return { body: { consentUrl } };
-        } else {
-          console.error(err);
-          return new Error('unknown Docusign error');
-        }
-      });
+          // DocuSign API problem
+          if (errMessage === 'consent_required') {
+            ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
+            //SERVER/oauth/auth?response_type=code &scope=signature%20impersonation&client_id=CLIENT_ID &redirect_uri=REDIRECT_URI
+            const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
+            return { body: { consentUrl } };
+          } else {
+            console.error(err);
+            throw new Error('unknown Docusign error');
+          }
+        });
+    } catch (err) {
+      console.error(`Error getting Docusign JWT token: ${err}`);
+      throw new Error(`Error getting Docusign JWT token: ${err}`);
+    }
 
-    /* eslint-disable */
     if (results.body.consentUrl) {
       responseObj.consentUrl = results.body.consentUrl;
     } else {
@@ -85,17 +98,18 @@ export async function refreshAccessToken() {
         access_token: string;
         expires_in: number;
       };
-      /* eslint-enable */
 
       // store jwt in session
       session.docusignJwt = access_token;
       session.docusignExpiresAt = Date.now() + expires_in * 1000 - 60;
       await session.save();
+
+      console.log('DS access token generated and saved to session!');
       responseObj.accessToken = access_token;
     }
   } else {
-    console.log('reusing unexpired DS access token');
     responseObj.accessToken = session.docusignJwt!;
+    console.log('reusing unexpired DS access token: ', session.docusignJwt);
   }
   return responseObj;
 }

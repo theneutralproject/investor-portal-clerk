@@ -5,7 +5,7 @@ import {
   type DocusignEnvelopeCreateSchema,
   zDocusignEvelopeCreate,
 } from '@/libs/docusign/schema';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import {
   refreshAccessToken,
   instantiateApiClient,
@@ -18,7 +18,13 @@ import type {
   OrganizationWithFullMembersAndAddress,
   UserWithAddress,
 } from '@/libs/types';
-import type { Envelope, EnvelopesApi, EnvelopeSummary } from 'docusign-esign';
+import type {
+  Envelope,
+  EnvelopesApi,
+  EnvelopeSummary,
+  ViewUrl,
+} from 'docusign-esign';
+import { DocusignEvent } from '@prisma/client';
 
 async function createNewEnvelopeDefinition(
   envelopesApi: EnvelopesApi,
@@ -162,55 +168,81 @@ export async function POST(req: Request) {
       404
     );
   }
-
-  const accessTokenResponse = await refreshAccessToken();
-  if (accessTokenResponse.consentUrl) {
-    // we need to get consent from the user to share their data with docusign.
-    return new Response(
-      JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),
-      {
-        status: 201,
-        headers: { 'Content-Type': 'application/json' },
-      }
-    );
+  let accessTokenResponse: { consentUrl?: string; accessToken?: string };
+  try {
+    // get access token and instantiate api client
+    accessTokenResponse = await refreshAccessToken();
+    if (accessTokenResponse.consentUrl) {
+      // we need to get consent from the user to share their data with docusign.
+      console.log(
+        'need to get consent from user to use docusign',
+        accessTokenResponse.consentUrl
+      );
+      return new Response(
+        JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),
+        {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' },
+        }
+      );
+    }
+    if (!accessTokenResponse.accessToken) {
+      // this is unexpected
+      console.error('No access token found after consent flow');
+      return errorResponse('No access token found after consent flow', 500);
+    }
+  } catch (err) {
+    console.error('Error refreshing access token', getErrorMessage(err));
+    return errorResponse('Error refreshing access token', 500);
   }
-  const envelopesApi = await instantiateApiClient(
+  // we do not need consent anymore, so we can instantiate the api client
+  console.log(
+    'instantiating api client with access token',
     accessTokenResponse.accessToken
   );
 
-  // check if a docusign envelope already exists for this deal, so that we dont duplicate it
-
-  // if yes, create a recipient view and return it
-  const existingDocusignEvent = await prisma.docusignEvent.findFirst({
-    where: {
-      dealId: payload.dealId,
-      userId: userWOrgsAndAddress.id,
-      templateId: payload.templateId,
-    },
-  });
+  let envelopesApi: EnvelopesApi | null = null;
+  try {
+    envelopesApi = await instantiateApiClient(accessTokenResponse.accessToken);
+  } catch (err) {
+    console.error('Error instantiating envelopesApi', getErrorMessage(err));
+    return errorResponse('Error instantiating envelopesApi', 500);
+  }
 
   let envelopeResponse: EnvelopeSummary | Envelope;
+  let existingDocusignEvent: DocusignEvent | null = null;
+
+  // check if a docusign envelope already exists for this deal, so that we dont duplicate it
+  try {
+    // if yes, create a recipient view and return it
+    existingDocusignEvent = await prisma.docusignEvent.findFirst({
+      where: {
+        dealId: payload.dealId,
+        userId: userWOrgsAndAddress.id,
+        templateId: payload.templateId,
+      },
+    });
+  } catch (err) {
+    console.error(
+      'Error finding existing docusign event',
+      getErrorMessage(err)
+    );
+    return errorResponse('Error finding existing docusign event', 500);
+  }
 
   if (existingDocusignEvent) {
-    console.log('Displaying existing envelope for deal', deal.id);
+    console.log('Reusing existing envelope:', existingDocusignEvent);
     try {
       envelopeResponse = await getExistingEnvelopeDefinition(
         envelopesApi,
         existingDocusignEvent.envelopeId
       );
-      if (isError(envelopeResponse)) {
-        console.error('returning error for bad envelopeResponse1');
-        return new Response(JSON.stringify('unable to get envelope'), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-    } catch (__err) {
-      console.error('returning error for bad envelopeResponse2');
-      return new Response(JSON.stringify('unable to get envelope'), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+    } catch (err) {
+      console.error('Unable to get existing envelope from Docusign', err);
+      return errorResponse(
+        'Unable to get existing envelope from Docusign',
+        500
+      );
     }
   } else {
     // if no, create a new envelope
@@ -224,23 +256,14 @@ export async function POST(req: Request) {
         organization
       );
     } catch (err) {
-      console.error(
-        'returning error for bad envelopeResponse4',
-        getErrorMessage(err)
-      );
-      return new Response(JSON.stringify('unable to create envelope'), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      console.error('Unable to create new envelope in Docusign', err);
+      return errorResponse('Unable to create new envelope in Docusign', 500);
     }
   }
 
   if (!envelopeResponse.envelopeId) {
-    console.error('returning error for bad envelopeResponse5');
-    return new Response(JSON.stringify('unable to get envelope'), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    console.error('docusign envelope response is falsy:', envelopeResponse);
+    return errorResponse('Docusign envelope response is falsy', 500);
   }
 
   const documentTemplateId = payload.templateId;
@@ -248,17 +271,19 @@ export async function POST(req: Request) {
 
   const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentTemplateId=${documentTemplateId}&userId=${userId}&dealId=${deal.id}`;
   // Create the recipient view for the Signing Ceremony
+  console.log('Creating recipient view with returnUrl', returnUrl);
   const viewRequest = makeRecipientViewRequest(userWOrgsAndAddress, returnUrl);
-  const viewRequestResponse = await envelopesApi
-    .createRecipientView(
+  let viewRequestResponse: ViewUrl | Error;
+  try {
+    viewRequestResponse = await envelopesApi.createRecipientView(
       process.env.DOCUSIGN_API_ACCOUNT_ID!,
       envelopeResponse.envelopeId,
       { recipientViewRequest: viewRequest }
-    )
-    .catch(err => {
-      console.error('CANNOT CREATE RECIPIENT VIEW:', getErrorMessage(err));
-      return new Error(getErrorMessage(err));
-    });
+    );
+  } catch (err) {
+    console.error('CANNOT CREATE RECIPIENT VIEW:', err);
+    return errorResponse('CANNOT CREATE RECIPIENT VIEW', 500);
+  }
 
   if (isError(viewRequestResponse)) {
     console.error('returning error for bad makeRecipientViewRequest');
@@ -270,7 +295,7 @@ export async function POST(req: Request) {
   // store docusignEvent:
   if (!existingDocusignEvent) {
     try {
-      await prisma.docusignEvent.create({
+      const docusignEvent = await prisma.docusignEvent.create({
         data: {
           envelopeId: envelopeResponse.envelopeId,
           templateId: documentTemplateId,
@@ -279,13 +304,11 @@ export async function POST(req: Request) {
           dateSent: new Date(),
         },
       });
+
+      return jsonResponse(docusignEvent, 201);
     } catch (err) {
-      console.error('Error creating docusignEvent:', getErrorMessage(err));
+      console.error('Error creating new docusignEvent:', err);
+      return errorResponse('Error creating new docusignEvent', 500);
     }
   }
-
-  return new Response(JSON.stringify(viewRequestResponse), {
-    status: 201,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }
