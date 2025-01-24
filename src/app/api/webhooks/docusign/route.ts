@@ -6,7 +6,7 @@ import {
   refreshAccessToken,
 } from '@/libs/docusign/utils';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils';
 import { DocumentType, DealDocumentType } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 import { storageClient } from '@/libs/supabase';
@@ -21,6 +21,11 @@ type DocusignWebhookPayload = {
   };
 };
 
+/**
+ * This webhook is called by DocuSign when a signature or an envelope is completed.
+ * @param req
+ * @returns
+ */
 export async function POST(req: NextRequest) {
   const payload = (await req.json()) as DocusignWebhookPayload;
 
@@ -69,7 +74,10 @@ export async function POST(req: NextRequest) {
         dateCompleted: new Date(),
         allSignaturesCompleted: true,
       },
-      include: { deal: { include: { investmentStats: true } } },
+      include: {
+        deal: { include: { investmentStats: true } },
+        user: true,
+      },
     });
     if (!dealEvent) {
       console.warn('Failed to update docusign event 2');
@@ -80,10 +88,15 @@ export async function POST(req: NextRequest) {
         message: `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`,
       });
     }
-    const { deal } = dealEvent;
+    const { deal, user } = dealEvent;
     if (!deal.investmentStats) {
-      console.error('Deal has no investment stats');
-      return jsonResponse({ message: `Deal has no investment stats` }, 500);
+      console.error(
+        `Deal with id ${deal.id} has no investment stats and cannot be updated`
+      );
+      return errorResponse(
+        `Deal with id ${deal.id} has no investment stats and cannot be updated`,
+        500
+      );
     }
 
     // check if all envelopes for this deal are completed
@@ -94,6 +107,7 @@ export async function POST(req: NextRequest) {
         financingTypes: { has: deal.investmentStats.financingType },
         documentType: DocumentType.DOCUSIGN,
       },
+      include: { project: { select: { slug: true, id: true } } },
     });
 
     // get docusignevents
@@ -136,8 +150,12 @@ export async function POST(req: NextRequest) {
       if (!fileName.toLowerCase().endsWith('.pdf')) {
         fileName += '.pdf';
       }
-
-      const accessTokenResponse = await refreshAccessToken();
+      const { slug } = dealDocuments[0]!.project;
+      const accessTokenResponse = await refreshAccessToken(
+        user.email,
+        deal.id,
+        slug
+      );
       if (accessTokenResponse.consentUrl) {
         // we need to get consent from the user to share their data with docusign.
         // this should never happen as we already did this when the user signed the document

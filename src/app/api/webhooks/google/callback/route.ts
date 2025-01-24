@@ -69,9 +69,9 @@ export async function GET(request: NextRequest) {
   }
 
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  session.userId = user.id;
-  session.userEmail = user.email;
-  session.authExpiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
+  session.adminUserId = user.id;
+  session.adminUserEmail = user.email;
+  session.adminAuthExpiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
   const token = jwt.sign(
     { id: user.id, email: user.email },
     process.env.JWT_SECRET!,
