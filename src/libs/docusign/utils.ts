@@ -143,13 +143,11 @@ export async function accessTokenFromCode(code: string) {
   }
   try {
     let docusignAccessTokenRes: {
-      exports: {
-        accessToken?: string;
-        expiresIn?: string;
-        refreshToken?: string;
-        scope?: string;
-        tokenType?: string;
-      };
+      accessToken?: string;
+      expiresIn?: string;
+      refreshToken?: string;
+      scope?: string;
+      tokenType?: string;
     };
     console.log('getting docusignAccessTokenRes1');
     docusignAccessTokenRes = await dsApiClient.generateAccessToken(
@@ -158,15 +156,15 @@ export async function accessTokenFromCode(code: string) {
       code
     );
 
-    console.log('getting docusignAccessTokenRes2');
+    console.log(docusignAccessTokenRes);
     const session = await getIronSession<SessionData>(
       cookies(),
       sessionOptions
     );
-    session.docusignJwt = docusignAccessTokenRes.exports.accessToken;
+    session.docusignJwt = docusignAccessTokenRes.accessToken;
     session.docusignExpiresAt =
       Date.now() +
-      parseInt(docusignAccessTokenRes.exports.expiresIn ?? '3600') * 1000 -
+      parseInt(docusignAccessTokenRes.expiresIn ?? '3600') * 1000 -
       60;
     await session.save();
 
