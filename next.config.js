@@ -33,8 +33,8 @@ const nextConfig = {
 
 // Make sure adding Sentry options is the last code to run before exporting
 export default withSentryConfig(nextConfig, {
-  org: "neutral-39",
-  project: "investor-portal",
+  org: 'neutral-39',
+  project: 'investor-portal',
 
   // An auth token is required for uploading source maps.
   authToken: process.env.SENTRY_AUTH_TOKEN,
