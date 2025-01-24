@@ -54,7 +54,7 @@ export async function refreshAccessToken(
     consentUrl: '',
   };
   // session.docusignJwt = undefined; // TODO: delete this - only used for debugging
-  if (session.docusignJwt && (session.docusignExpiresAt ?? 0) <= Date.now()) {
+  if (session.docusignJwt && (session.docusignExpiresAt ?? 0) >= Date.now()) {
     console.log('reusing unexpired DS access token from session cookie');
     responseObj.accessToken = session.docusignJwt;
     return responseObj;
