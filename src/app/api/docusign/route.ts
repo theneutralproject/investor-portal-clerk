@@ -123,7 +123,11 @@ export async function POST(req: Request) {
   let accessTokenResponse: { consentUrl?: string; accessToken?: string };
   try {
     // get access token and instantiate api client
-    accessTokenResponse = await refreshAccessToken();
+    accessTokenResponse = await refreshAccessToken(
+      userWOrgsAndAddress.email,
+      deal.id,
+      project.slug
+    );
     if (accessTokenResponse.consentUrl) {
       // we need to get consent from the user to share their data with docusign.
       console.log(
@@ -207,8 +211,8 @@ export async function POST(req: Request) {
         userWOrgsAndAddress,
         organization
       );
-    } catch (err) {
-      console.error('Unable to create new envelope in Docusign', err);
+    } catch (__err) {
+      console.error('Unable to create new envelope in Docusign');
       return errorResponse('Unable to create new envelope in Docusign', 500);
     }
   }

@@ -38,80 +38,101 @@ import { getErrorMessage } from '../utils';
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
 
-export async function refreshAccessToken() {
+/**
+ * Retreives access token from session cookie, and if not found, returns a consentUrl that can be used to redirect user to give consent and return an access token.
+ * @returns { accessToken: string; consentUrl: string; }
+ */
+export async function refreshAccessToken(
+  userEmail: string,
+  dealId: number,
+  projectSlug: string
+) {
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-
+  console.log('session', session);
   const responseObj = {
     accessToken: '',
     consentUrl: '',
   };
-  if (!(session.docusignJwt && (session.docusignExpiresAt ?? 0) > Date.now())) {
-    console.log('generating a new DS access token');
-    const dsApiClient: ApiClient = new ApiClient();
-    try {
-      dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
-    } catch (err) {
-      console.error(`Error setting base path for DocuSign API client: ${err}`);
-      throw new Error(
-        `Error setting base path for DocuSign API client: ${err}`
-      );
-    }
-    // dsApiClient.addDefaultHeader('Authorization', 'Bearer ' + process.env.DOCUSIGN_INTEGRATION_KEY);
-    /* eslint-disable-next-line*/
+  // session.docusignJwt = undefined; // TODO: delete this - only used for debugging
+  if (session.docusignJwt && (session.docusignExpiresAt ?? 0) <= Date.now()) {
+    console.log('reusing unexpired DS access token from session cookie');
+    responseObj.accessToken = session.docusignJwt;
+    return responseObj;
+  }
 
-    let results: {
-      body: { consentUrl?: string; access_token?: string; expires_in?: number };
-    };
-    try {
-      results = await dsApiClient
-        .requestJWTUserToken(
-          process.env.DOCUSIGN_INTEGRATION_KEY!,
-          process.env.DOCUSIGN_USER_ID!,
-          ['signature', 'impersonation'],
-          // fs.readFileSync(path.join(__dirname, "private.key")), //TODO: save as DB file instead of secret
-          Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
-          3600
-        )
-        .catch((err: { response: { data: { error: string } } }) => {
-          // The user is not logged in
-          const errMessage = err.response.data.error;
+  // if the access token is expired, generate a new one:
+  console.log('generating a new DS access token');
+  const dsApiClient: ApiClient = new ApiClient();
+  try {
+    dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
+  } catch (err) {
+    console.error(`Error setting base path for DocuSign API client: ${err}`);
+    throw new Error(`Error setting base path for DocuSign API client: ${err}`);
+  }
 
-          // expected DocuSign API problem - every user will see this once.
-          if (errMessage === 'consent_required') {
-            ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
-            // https://www.youtube.com/watch?v=sBziZ2TfFVs
-            // TODO: redirect to a page that lets user know they can return to the signing process
-            const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
-            return { body: { consentUrl } };
-          } else {
-            console.error(err);
-            throw new Error('unknown Docusign error');
-          }
-        });
-    } catch (err) {
-      console.error(`Error getting Docusign JWT token: ${err}`);
-      throw new Error(`Error getting Docusign JWT token: ${err}`);
-    }
+  let docusignJwtRes: {
+    body: { consentUrl?: string; access_token?: string; expires_in?: number };
+  };
+  try {
+    docusignJwtRes = await dsApiClient
+      .requestJWTUserToken(
+        process.env.DOCUSIGN_INTEGRATION_KEY!,
+        process.env.DOCUSIGN_USER_ID!,
+        ['signature', 'impersonation'],
+        Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
+        3600
+      )
+      .catch((err: { response: { data: { error: string } } }) => {
+        // The user is not logged in
+        const errMessage = err.response.data.error;
 
-    if (results.body.consentUrl) {
-      responseObj.consentUrl = results.body.consentUrl;
-    } else {
-      const { access_token, expires_in } = results.body as {
-        access_token: string;
-        expires_in: number;
-      };
+        // expected DocuSign API problem - every user will see this once.
+        if (errMessage === 'consent_required') {
+          ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
+          // https://www.youtube.com/watch?v=sBziZ2TfFVs
+          // TODO: redirect to a page that lets user know they can return to the signing process
+          const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth
+              ?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}
+              &redirect_uri=${process.env.BASE_URL}/api/docusign/tokenFromCode
+              &login_hint=${userEmail}
+              &state=dealId${dealId}projectSlug${projectSlug}`;
+          // const consentUrl = `https://account.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
+          return { body: { consentUrl } };
+        } else {
+          //
+          console.error(
+            'caught unknown docusign error - consider deleting the token:',
+            errMessage
+          );
+          console.error(err.response.data);
+          throw new Error(errMessage);
+        }
+      });
+  } catch (err) {
+    console.error(`Error getting Docusign JWT token: ${err}`);
+    throw new Error(`Error getting Docusign JWT token: ${err}`);
+  }
 
-      // store jwt in session
-      session.docusignJwt = access_token;
-      session.docusignExpiresAt = Date.now() + expires_in * 1000 - 60;
-      await session.save();
-
-      console.log('DS access token generated and saved to session!');
-      responseObj.accessToken = access_token;
-    }
+  if (docusignJwtRes.body.consentUrl) {
+    console.warn('User needs to give consent to use docusign');
+    responseObj.consentUrl = docusignJwtRes.body.consentUrl;
   } else {
-    responseObj.accessToken = session.docusignJwt!;
-    console.log('reusing unexpired DS access token: ', session.docusignJwt);
+    console.log(
+      'DS JWT response with valid access token:',
+      docusignJwtRes.body
+    );
+    const { access_token, expires_in } = docusignJwtRes.body as {
+      access_token: string;
+      expires_in: number;
+    };
+
+    // store jwt in session
+    session.docusignJwt = access_token;
+    session.docusignExpiresAt = Date.now() + expires_in * 1000 - 60;
+    await session.save();
+
+    console.log('DS access token generated and saved to session!');
+    responseObj.accessToken = access_token;
   }
   return responseObj;
 }
@@ -143,9 +164,24 @@ export async function createNewEnvelopeDefinition(
     );
     return envelopeResponse;
   } catch (err) {
-    console.error('CANNOT CREATE ENVELOPE:');
-    console.error(err);
-    throw new Error(getErrorMessage(err));
+    console.error('CANNOT CREATE ENVELOPE:', err);
+    // const { errorCode, message } = (
+    //   err as { data: { errorCode: string; message: string } }
+    // ).data;
+    // console.log('errorCode', errorCode, message);
+    // if (errorCode === 'USER_AUTHENTICATION_FAILED') {
+    //   console.error(
+    //     "'USER_AUTHENTICATION_FAILED' - need to clear session and re-authenticate"
+    //   );
+    //   const session = await getIronSession<SessionData>(
+    //     cookies(),
+    //     sessionOptions
+    //   );
+    //   session.docusignJwt = undefined;
+    //   session.docusignExpiresAt = undefined;
+    //   throw new Error('JWT was invalid and has been deleted. Try again');
+    // } else {
+    throw new Error('Failed to create envelope');
   }
 }
 
@@ -160,7 +196,7 @@ export async function getExistingEnvelopeDefinition(
     );
     return envelopeResponse;
   } catch (err) {
-    console.error('CANNOT GET ENVELOPE:', getErrorMessage(err));
+    console.error('CANNOT GET ENVELOPE:', err);
     throw new Error(getErrorMessage(err));
   }
 }
