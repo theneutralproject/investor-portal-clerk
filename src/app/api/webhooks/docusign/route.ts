@@ -17,6 +17,7 @@ import {
 import type { NextRequest } from 'next/server';
 import { storageClient } from '@/libs/supabase';
 import { DealWithInvestmentStats } from '@/libs/types';
+import { json } from 'stream/consumers';
 
 type DocusignWebhookPayload = {
   event: string;
@@ -252,9 +253,11 @@ export async function POST(req: NextRequest) {
   }
   switch (payload.event) {
     case 'recipient-completed':
-      return await storeRecipientCompletedEvent(payload);
+      const recipientResult = await storeRecipientCompletedEvent(payload);
+      return jsonResponse(recipientResult);
     case 'envelope-completed':
-      return await handleEnvelopeCompletedEvent(payload);
+      const envelopeResult = await handleEnvelopeCompletedEvent(payload);
+      return jsonResponse(envelopeResult);
     default:
       console.log('Ignoring Docusign webhook:', payload.event);
       return jsonResponse({ message: 'Ignoring Docusign webhook' });
