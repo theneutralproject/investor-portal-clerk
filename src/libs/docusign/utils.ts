@@ -91,11 +91,7 @@ export async function refreshAccessToken(
           ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
           // https://www.youtube.com/watch?v=sBziZ2TfFVs
           // TODO: redirect to a page that lets user know they can return to the signing process
-          const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth
-              ?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}
-              &redirect_uri=${process.env.BASE_URL}/api/docusign/tokenFromCode
-              &login_hint=${userEmail}
-              &state=dealId${dealId}projectSlug${projectSlug}`;
+          const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/api/docusign/tokenFromCode&login_hint=${userEmail}&state=dealId${dealId}projectSlug${projectSlug}`;
           // const consentUrl = `https://account.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/dashboard`;
           return { body: { consentUrl } };
         } else {
