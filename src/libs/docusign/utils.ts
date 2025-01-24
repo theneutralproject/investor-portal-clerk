@@ -84,18 +84,19 @@ export async function refreshAccessToken(
       .requestJWTUserToken(
         process.env.DOCUSIGN_INTEGRATION_KEY!,
         process.env.DOCUSIGN_USER_ID!,
-        // ['signature', 'impersonation'],
-        ['signature'],
+        ['signature', 'impersonation'],
         Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
         3600
       )
       .catch((err: { response: { data: { error: string } } }) => {
         // The user is not logged in
         const errMessage = err.response.data.error;
-
+        console.log(err.response.data);
         // expected DocuSign API problem - every user will see this once.
         if (errMessage === 'consent_required') {
-          console.log('consent required - redirecting to consent page');
+          console.log(
+            'caught error: consent required - redirecting to consent page'
+          );
           ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
           // https://www.youtube.com/watch?v=sBziZ2TfFVs
           // TODO: redirect to /tokenFromCode
@@ -115,7 +116,7 @@ export async function refreshAccessToken(
     console.error(`Error getting Docusign JWT token: ${err}`);
     throw new Error(`Error getting Docusign JWT token: ${err}`);
   }
-  console.log('docusignJwtRes', docusignJwtRes.body);
+  console.log('docusignJwtRes:', docusignJwtRes.body);
   if (docusignJwtRes.body.consentUrl) {
     console.warn('User needs to give consent to use docusign');
     responseObj.consentUrl = docusignJwtRes.body.consentUrl;
