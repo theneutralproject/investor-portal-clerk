@@ -71,14 +71,21 @@ export async function refreshAccessToken(
   }
 
   let docusignJwtRes: {
-    body: { consentUrl?: string; access_token?: string; expires_in?: number };
+    body: {
+      consentUrl?: string;
+      access_token?: string;
+      expires_in?: number;
+      accessToken?: string;
+      expiresIn?: number;
+    };
   };
   try {
     docusignJwtRes = await dsApiClient
       .requestJWTUserToken(
         process.env.DOCUSIGN_INTEGRATION_KEY!,
         process.env.DOCUSIGN_USER_ID!,
-        ['signature', 'impersonation'],
+        // ['signature', 'impersonation'],
+        ['signature'],
         Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
         3600
       )
@@ -88,16 +95,16 @@ export async function refreshAccessToken(
 
         // expected DocuSign API problem - every user will see this once.
         if (errMessage === 'consent_required') {
+          console.log('consent required - redirecting to consent page');
           ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
           // https://www.youtube.com/watch?v=sBziZ2TfFVs
-          // TODO: redirect to a page that directs user back to dealflow once jwt has been recorded from code
-          // const consentUrl = `https://account${process.env.NODE_ENV === 'production' ? '' : '-d'}.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/api/docusign/tokenFromCode&login_hint=${userEmail}&state=dealId${dealId}projectSlug${projectSlug}`;
+          // TODO: redirect to /tokenFromCode
           const consentUrl = `https://account.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/api/docusign/tokenFromCode&login_hint=${userEmail}&state=dealId${dealId}projectSlug${projectSlug}`;
           return { body: { consentUrl } };
         } else {
           //
           console.error(
-            'caught unknown docusign error - consider deleting the token:',
+            'caught unknown docusign error - donno why',
             errMessage
           );
           console.error(err.response.data);
@@ -108,7 +115,7 @@ export async function refreshAccessToken(
     console.error(`Error getting Docusign JWT token: ${err}`);
     throw new Error(`Error getting Docusign JWT token: ${err}`);
   }
-
+  console.log('docusignJwtRes', docusignJwtRes.body);
   if (docusignJwtRes.body.consentUrl) {
     console.warn('User needs to give consent to use docusign');
     responseObj.consentUrl = docusignJwtRes.body.consentUrl;
@@ -133,7 +140,7 @@ export async function refreshAccessToken(
   return responseObj;
 }
 
-export async function accessTokenFromCode(code: string) {
+export async function refreshAccessTokenFromCode(code: string) {
   const dsApiClient: ApiClient = new ApiClient();
   try {
     dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
@@ -166,6 +173,7 @@ export async function accessTokenFromCode(code: string) {
       Date.now() +
       parseInt(docusignAccessTokenRes.expiresIn ?? '3600') * 1000 -
       60;
+    console.log('session has been updated:', session);
     await session.save();
 
     return docusignAccessTokenRes;
