@@ -15,7 +15,6 @@ import { redirect } from 'next/navigation';
  * @returns
  */
 export async function GET(request: NextRequest) {
-  console.log('google callback received');
   // ?state=some_state
   // &code=4%2F0AVG7fiTk6IBM5YAKoMRpTzX4cQan33skMDsJUTJj2HYK0GofXNsr7MbFddFml3Ya_19BQA
   // &scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=0
