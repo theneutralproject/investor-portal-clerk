@@ -211,7 +211,7 @@ export async function POST(req: Request) {
         userWOrgsAndAddress,
         organization
       );
-    } catch (err) {
+    } catch (__err) {
       console.error('Unable to create new envelope in Docusign');
       return errorResponse('Unable to create new envelope in Docusign', 500);
     }

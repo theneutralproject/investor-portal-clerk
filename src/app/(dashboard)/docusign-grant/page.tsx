@@ -17,7 +17,7 @@ export default function RedirectPage() {
 
         // Redirect to the destination page
         router.push(destination);
-    }, [router]);
+    }, [router, searchParams]);
 
     return null; // This page doesn't render any content
 }
