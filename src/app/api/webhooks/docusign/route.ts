@@ -17,7 +17,6 @@ import {
 import type { NextRequest } from 'next/server';
 import { storageClient } from '@/libs/supabase';
 import { DealWithInvestmentStats } from '@/libs/types';
-import { json } from 'stream/consumers';
 
 type DocusignWebhookPayload = {
   event: string;
