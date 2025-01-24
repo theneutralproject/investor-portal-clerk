@@ -1,4 +1,5 @@
 import { buildRedirectUrl } from '@/libs/dealflow/utils.server';
+import { accessTokenFromCode } from '@/libs/docusign/utils';
 import { NextRequest } from 'next/server';
 
 // GET route that accepts a code as queryparam and returns an access token
@@ -10,44 +11,20 @@ export async function GET(request: NextRequest) {
 
   if (state)
     [dealId, slug] = state
-      .replace('dealId:', '')
-      .replace('slug:', ',')
+      .replace('dealId', '')
+      .replace('projectSlug', ',')
       .split(',');
-
-  console.log(
-    'THIS ROUTE IS INCOMPLETE: code and state from query:',
-    code,
-    state
-  );
-  const tokenResponse = await fetch(
-    `${process.env.DOCUSIGN_BASE_PATH}/oauth/token?grant_type=authorization_code&code=${code}`,
-    {
-      method: 'POST',
-      headers: {
-        Authorization: `Basic ${Buffer.from(
-          `${process.env.DOCUSIGN_CLIENT_ID}:${process.env.DOCUSIGN_CLIENT_SECRET}`
-        ).toString('base64')}`,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
+  try {
+    await accessTokenFromCode(code!);
+    if (dealId && slug) {
+      const redirectUrl = buildRedirectUrl(slug, dealId);
+      console.log('redirectUrl:', redirectUrl.toString());
+      return Response.redirect(redirectUrl.toString(), 303);
     }
-  );
 
-  if (!tokenResponse.ok) {
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to exchange code for access token',
-      }),
-      { status: 400 }
-    );
+    return Response.redirect('/dashboard', 303);
+  } catch (error) {
+    console.error('Error in docusign tokenFromCode route:', error);
+    return Response.redirect('/dashboard', 500);
   }
-
-  const tokenData = await tokenResponse.json();
-  console.log('tokenData not yet stored to session (3600):', tokenData);
-
-  if (dealId && slug) {
-    const redirectUrl = buildRedirectUrl(slug, dealId);
-    return Response.redirect(redirectUrl.toString(), 303);
-  }
-
-  return Response.redirect('/dashboard', 303);
 }

@@ -133,6 +133,50 @@ export async function refreshAccessToken(
   return responseObj;
 }
 
+export async function accessTokenFromCode(code: string) {
+  const dsApiClient: ApiClient = new ApiClient();
+  try {
+    dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
+  } catch (err) {
+    console.error(`Error setting base path for DocuSign API client: ${err}`);
+    throw new Error(`Error setting base path for DocuSign API client: ${err}`);
+  }
+  try {
+    let docusignAccessTokenRes: {
+      exports: {
+        accessToken?: string;
+        expiresIn?: string;
+        refreshToken?: string;
+        scope?: string;
+        tokenType?: string;
+      };
+    };
+    console.log('getting docusignAccessTokenRes1');
+    docusignAccessTokenRes = await dsApiClient.generateAccessToken(
+      process.env.DOCUSIGN_INTEGRATION_KEY!,
+      process.env.DOCUSIGN_SECRET_KEY!,
+      code
+    );
+
+    console.log('getting docusignAccessTokenRes2');
+    const session = await getIronSession<SessionData>(
+      cookies(),
+      sessionOptions
+    );
+    session.docusignJwt = docusignAccessTokenRes.exports.accessToken;
+    session.docusignExpiresAt =
+      Date.now() +
+      parseInt(docusignAccessTokenRes.exports.expiresIn ?? '3600') * 1000 -
+      60;
+    await session.save();
+
+    return docusignAccessTokenRes;
+  } catch (err) {
+    console.error(`Error getting Docusign JWT token: ${err}`);
+    return err;
+  }
+}
+
 export async function instantiateApiClient(accessToken: string) {
   const dsApiClient = new ApiClient();
   dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
