@@ -6,7 +6,7 @@ import {
   refreshAccessToken,
 } from '@/libs/docusign/utils';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils';
 import {
   DocumentType,
   DealDocumentType,
@@ -17,7 +17,6 @@ import {
 import type { NextRequest } from 'next/server';
 import { storageClient } from '@/libs/supabase';
 import { DealWithInvestmentStats } from '@/libs/types';
-import { template } from 'lodash';
 
 type DocusignWebhookPayload = {
   event: string;
