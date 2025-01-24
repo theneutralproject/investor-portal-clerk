@@ -158,7 +158,7 @@ export async function accessTokenFromCode(code: string) {
       code
     );
 
-    console.log('getting docusignAccessTokenRes2');
+    console.log(docusignAccessTokenRes);
     const session = await getIronSession<SessionData>(
       cookies(),
       sessionOptions
