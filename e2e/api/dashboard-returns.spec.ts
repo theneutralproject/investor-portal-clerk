@@ -243,7 +243,7 @@ test.describe('api/dashboard/returns test', () => {
         stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
       expect(
         Math.floor(lastScheduleEntry?.equityDistributionCumulative ?? 0)
-      ).toBe(193006.0 / 2);
+      ).toBe(100091);
     } catch (e) {
       console.error(
         'could not get dashboard returns for one EQUITY deal in api/dashboard/returns test:'

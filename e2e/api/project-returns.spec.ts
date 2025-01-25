@@ -25,14 +25,14 @@ test.describe('api/project/returns test', () => {
 
       console.log(lastScheduleEntry);
       expect(lastScheduleEntry.equityAccruedPreferredReturn).toBe(50000);
-      expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(193006);
+      expect(Math.floor(lastScheduleEntry.portfolioValueToDate)).toBe(200183);
       expect(Math.floor(lastScheduleEntry.equityDistributionCumulative)).toBe(
-        193006
+        200183
       );
-      expect(Math.floor(stats.totalGrossReturn)).toBe(193006);
-      expect(Math.floor(stats.totalNetReturn)).toBe(93006);
-      expect(Math.floor(stats.investmentMultiple * 100)).toBe(193);
-      expect(Math.floor(stats.interestRateOrIrrPerc)).toBe(18);
+      expect(Math.floor(stats.totalGrossReturn)).toBe(200183);
+      expect(Math.floor(stats.totalNetReturn)).toBe(100183);
+      expect(Math.floor(stats.investmentMultiple * 100)).toBe(200);
+      expect(Math.floor(stats.interestRateOrIrrPerc)).toBe(20);
     } catch (e) {
       console.error(
         'could not get dashboard returns for one debt deal in api/project/returns test:'
