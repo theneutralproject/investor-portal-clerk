@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
@@ -8,13 +8,13 @@ import {
   CircularProgress,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import { toast } from 'react-toastify';
 
 interface DocumentItemProps {
   title: string;
   fileName: string;
   isCompleted: boolean;
-  onSign?: () => void;
+  isLoading: boolean;
+  handleClick: () => void;
   index: number;
 }
 
@@ -22,17 +22,10 @@ const DocumentItem: React.FC<DocumentItemProps> = ({
   title,
   fileName,
   isCompleted,
-  onSign,
+  isLoading,
+  handleClick,
   index,
 }) => {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const handleClick = () => {
-    setIsLoading(true);
-    toast.success('Generating document...');
-    onSign?.();
-  };
-
   return (
     <ListItem
       disableGutters

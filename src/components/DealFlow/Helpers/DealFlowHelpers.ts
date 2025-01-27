@@ -59,6 +59,9 @@ export const usStates = [
 
 export default usStates;
 
+const docusignErrorMessage =
+  'We are unable to process the Docusign document. Please refresh your browser window and try again. Contact a member of the team if the problem persists.';
+
 export const createDocusignEnvelope = async (
   envelopeId: string,
   dealId: number,
@@ -66,8 +69,10 @@ export const createDocusignEnvelope = async (
 ) => {
   const url = `/api/docusign`;
   if (!user) {
-    console.log('!user');
-    return null;
+    return {
+      message: docusignErrorMessage,
+      code: 499,
+    };
   }
   const body: DocusignEnvelopeCreateSchema = {
     dealId: dealId,
@@ -81,14 +86,26 @@ export const createDocusignEnvelope = async (
     } else {
       console.log('\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n', error);
     }
-    return error;
+    if (!user) {
+      return {
+        message: docusignErrorMessage,
+        code: 599,
+      };
+    }
   });
+  let returnUrl = '';
   if (docusignResponse?.data?.consentUrl) {
     console.log('must authenticate using consentUrl');
-    window.location.assign(docusignResponse.data.consentUrl);
+    returnUrl = docusignResponse.data.consentUrl;
   }
 
   if (docusignResponse?.data?.url) {
-    window.location.assign(docusignResponse.data.url);
+    returnUrl = docusignResponse.data.url;
   }
+
+  return {
+    message: 'Redirecting to Docusign...',
+    url: returnUrl,
+    code: 200,
+  };
 };
