@@ -87,6 +87,8 @@ jobs:
           GOOGLE_CALLBACK_URL_SUBDIRECTORY: ${{ secrets.GOOGLE_CALLBACK_URL_SUBDIRECTORY }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           CURRENT_TERMS_REVISION: ${{ secrets.CURRENT_TERMS_REVISION }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
         run: DEBUG=pw:browser npx playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
