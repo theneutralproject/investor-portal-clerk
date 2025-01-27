@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
   let email: string | undefined;
   let projectName: string | undefined;
   let minDealstage: number | undefined;
+  let maxDealstage: number | undefined;
   let documentType = '';
   let amountStr: string | undefined;
   let closingYearStr: string | undefined;
@@ -36,6 +37,7 @@ export async function GET(request: NextRequest) {
     email = queryParams.get('email') ?? undefined;
     projectName = queryParams.get('projectName') ?? undefined;
     minDealstage = parseInt(queryParams.get('minDealstage') ?? '5');
+    maxDealstage = parseInt(queryParams.get('maxDealstage') ?? '5');
     documentType = queryParams.get('documentType') ?? '';
     amountStr = queryParams.get('amount') ?? undefined;
     closingYearStr = queryParams.get('closingYear') ?? undefined;
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
   if (documentType.toLowerCase() === 'tax') {
     const allDeals = await prisma.deal.findMany({
       where: {
-        dealStage: { gte: minDealstage, lt: 6 },
+        dealStage: { gte: minDealstage, lte: maxDealstage ?? 5 },
       },
       include: {
         document: {
