@@ -7,7 +7,7 @@ import * as Sentry from '@sentry/nextjs';
 import posthog from 'posthog-js';
 
 Sentry.init({
-  dsn: 'https://8f4e01663caf1aa267fd9dca63a81ece@o4508699975352320.ingest.us.sentry.io/4508700177465344',
+  dsn: process.env.SENTRY_DSN,
 
   // Define how likely traces are sampled. Adjust this value in production, or use tracesSampler for greater control.
   tracesSampleRate: 1,

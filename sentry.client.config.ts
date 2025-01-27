@@ -6,7 +6,7 @@ import posthog from 'posthog-js';
 import * as Sentry from '@sentry/nextjs';
 
 Sentry.init({
-  dsn: 'https://8f4e01663caf1aa267fd9dca63a81ece@o4508699975352320.ingest.us.sentry.io/4508700177465344',
+  dsn: process.env.SENTRY_DSN,
 
   // Add optional integrations for additional features
   integrations: [Sentry.replayIntegration()],
