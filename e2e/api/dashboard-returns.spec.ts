@@ -101,9 +101,8 @@ test.describe('api/dashboard/returns test', () => {
     request,
   }) => {
     try {
-      let dealCreateResponse: APIResponse;
       // create first debt deal
-      dealCreateResponse = await request.post('/api/deals', {
+      const dealCreateResponse = await request.post('/api/deals', {
         data: debtDealData1,
       });
       debtDeal2 = await JSON.parse(await dealCreateResponse.text());
