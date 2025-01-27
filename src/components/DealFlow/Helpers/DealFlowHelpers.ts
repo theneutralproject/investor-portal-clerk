@@ -80,18 +80,10 @@ export const createDocusignEnvelope = async (
   };
 
   const docusignResponse = await axios.post(url, body).catch(error => {
-    if (error.response) {
-      // TODO: handle error and alert user
-      console.log('\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n', error.response);
-    } else {
-      console.log('\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n', error);
-    }
-    if (!user) {
-      return {
-        message: docusignErrorMessage,
-        code: 599,
-      };
-    }
+    console.log('\n\n\nDOCUSIGN AXIOS NOT HAPPY:\n', error.response || error);
+    return {
+      data: { message: docusignErrorMessage, code: 599 },
+    };
   });
   let returnUrl = '';
   if (docusignResponse?.data?.consentUrl) {
