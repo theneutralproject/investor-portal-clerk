@@ -3,15 +3,6 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "lint-staged": {
-    "src/*.{ts,tsx}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.{json,md}": [
-      "prettier --write"
-    ]
-  },
   "engines": {
     "node": "20.18"
   },
