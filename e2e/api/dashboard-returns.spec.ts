@@ -85,7 +85,11 @@ test.describe('api/dashboard/returns test', () => {
     const stats = (await JSON.parse(
       await response.text()
     )) as PortfolioReturnsResponse;
-
+    console.log(
+      'stats consolidated schedule length: ',
+      stats.consolidatedSchedule.length
+    );
+    console.log('stats', stats.consolidatedSchedule);
     expect(stats.consolidatedSchedule.length).toBe(48);
     const lastScheduleEntry =
       stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
@@ -97,9 +101,8 @@ test.describe('api/dashboard/returns test', () => {
     request,
   }) => {
     try {
-      let dealCreateResponse: APIResponse;
       // create first debt deal
-      dealCreateResponse = await request.post('/api/deals', {
+      const dealCreateResponse = await request.post('/api/deals', {
         data: debtDealData1,
       });
       debtDeal2 = await JSON.parse(await dealCreateResponse.text());
