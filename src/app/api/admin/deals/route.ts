@@ -16,11 +16,11 @@ import { storageClient } from '@/libs/supabase';
  * @returns
  */
 export async function GET(request: NextRequest) {
-  // const adminUser = await getAdminFromRequest(request);
-  // if (isError(adminUser)) {
-  //   console.error(getErrorMessage(adminUser));
-  //   return errorResponse(getErrorMessage(adminUser), 401);
-  // }
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return errorResponse(getErrorMessage(adminUser), 401);
+  }
 
   let email: string | undefined;
   let projectSlug: string | undefined;

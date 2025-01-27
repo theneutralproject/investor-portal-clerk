@@ -1,6 +1,6 @@
 import { DealCreateSchema } from '@/libs/deal/schema';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
-import { test, expect } from '@playwright/test';
+import { test, expect, APIResponse } from '@playwright/test';
 import { Deal, DealFinancingType } from '@prisma/client';
 import {
   clearAllTestDeals,
@@ -70,32 +70,36 @@ test.describe('api/dashboard/returns test', () => {
   });
 
   test('[GET] get dashboard returns for one debt deal', async ({ request }) => {
+    let response: APIResponse;
     try {
-      const response = await request.get('/api/dashboard/returns');
-      expect(response.status()).toBe(200);
-      const stats = (await JSON.parse(
-        await response.text()
-      )) as PortfolioReturnsResponse;
-
-      expect(stats.consolidatedSchedule.length).toBe(48);
-      const lastScheduleEntry =
-        stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-      expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(140000);
-      expect(lastScheduleEntry?.portfolioValueToDate).toBe(140000);
+      response = await request.get('/api/dashboard/returns');
     } catch (e) {
       console.error(
         'could not get dashboard returns for one debt deal in api/dashboard/returns test:'
       );
       console.error(e);
+      test.fail();
+      return;
     }
+    expect(response.status()).toBe(200);
+    const stats = (await JSON.parse(
+      await response.text()
+    )) as PortfolioReturnsResponse;
+
+    expect(stats.consolidatedSchedule.length).toBe(48);
+    const lastScheduleEntry =
+      stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
+    expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(140000);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBe(140000);
   });
 
   test('[GET] get dashboard returns for multiple DEBT deals starting on the same day', async ({
     request,
   }) => {
     try {
+      let dealCreateResponse: APIResponse;
       // create first debt deal
-      const dealCreateResponse = await request.post('/api/deals', {
+      dealCreateResponse = await request.post('/api/deals', {
         data: debtDealData1,
       });
       debtDeal2 = await JSON.parse(await dealCreateResponse.text());
@@ -105,9 +109,10 @@ test.describe('api/dashboard/returns test', () => {
       );
       console.error(e);
     }
+    let dealUpdateResponse: APIResponse;
     try {
       // the put deal route configures the investment stats in the backend.
-      const dealUpdateResponse = await request.put('/api/deals', {
+      dealUpdateResponse = await request.put('/api/deals', {
         data: {
           hubspotId: debtDeal2!.hubspotId,
           dealStage: 5,
@@ -116,23 +121,25 @@ test.describe('api/dashboard/returns test', () => {
       });
 
       debtDeal2 = await JSON.parse(await dealUpdateResponse.text());
-
-      const response = await request.get('/api/dashboard/returns');
-      expect(response.status()).toBe(200);
-      const stats = (await JSON.parse(
-        await response.text()
-      )) as PortfolioReturnsResponse;
-      expect(stats.consolidatedSchedule.length).toBe(48);
-      const lastScheduleEntry =
-        stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-      expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(280000);
-      expect(lastScheduleEntry?.portfolioValueToDate).toBe(280000);
     } catch (e) {
       console.error(
         'could not get dashboard returns for multiple DEBT deals starting on the same day in api/dashboard/returns test:'
       );
       console.error(e);
+      test.fail();
+      return;
     }
+
+    const response = await request.get('/api/dashboard/returns');
+    expect(response.status()).toBe(200);
+    const stats = (await JSON.parse(
+      await response.text()
+    )) as PortfolioReturnsResponse;
+    expect(stats.consolidatedSchedule.length).toBe(48);
+    const lastScheduleEntry =
+      stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
+    expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(280000);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBe(280000);
   });
 
   test('[GET] get dashboard returns for multiple DEBT deals starting on offset days', async ({
@@ -161,29 +168,29 @@ test.describe('api/dashboard/returns test', () => {
       );
       console.error(e);
     }
+    let response: APIResponse;
     try {
-      const response = await request.get('/api/dashboard/returns');
-      expect(response.status()).toBe(200);
-      const stats = (await JSON.parse(
-        await response.text()
-      )) as PortfolioReturnsResponse;
-      expect(stats.consolidatedSchedule.length).toBe(69);
-      const lastScheduleEntry =
-        stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-
-      console.log('lastScheduleEntry', lastScheduleEntry);
-      console.log(stats.portfolioStats);
-
-      expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(280000);
-      expect(lastScheduleEntry?.portfolioValueToDate).toBe(280000);
-      expect(stats.portfolioStats?.principalInvested).toBe(200000);
-      expect(stats.portfolioStats?.projectedDebtDistributions).toBe(280000);
+      response = await request.get('/api/dashboard/returns');
     } catch (e) {
       console.error(
         'could not get dashboard returns for multiple DEBT deals starting on offset days in api/dashboard/returns test:'
       );
       console.error(e);
+      test.fail();
+      return;
     }
+    expect(response.status()).toBe(200);
+    const stats = (await JSON.parse(
+      await response.text()
+    )) as PortfolioReturnsResponse;
+    expect(stats.consolidatedSchedule.length).toBe(69);
+    const lastScheduleEntry =
+      stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
+
+    expect(lastScheduleEntry?.debtDistributionsCumulative).toBe(280000);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBe(280000);
+    expect(stats.portfolioStats?.principalInvested).toBe(200000);
+    expect(stats.portfolioStats?.projectedDebtDistributions).toBe(280000);
   });
 
   test('[GET] get dashboard returns for one EQUITY deal', async ({
@@ -231,25 +238,28 @@ test.describe('api/dashboard/returns test', () => {
       );
       console.error(e);
     }
+    let response: APIResponse;
     try {
-      const response = await request.get('/api/dashboard/returns');
-      expect(response.status()).toBe(200);
-      const stats = (await JSON.parse(
-        await response.text()
-      )) as PortfolioReturnsResponse;
-
-      expect(stats.consolidatedSchedule.length).toBe(60);
-      const lastScheduleEntry =
-        stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
-      expect(
-        Math.floor(lastScheduleEntry?.equityDistributionCumulative ?? 0)
-      ).toBe(100091);
+      response = await request.get('/api/dashboard/returns');
     } catch (e) {
       console.error(
         'could not get dashboard returns for one EQUITY deal in api/dashboard/returns test:'
       );
       console.error(e);
+      test.fail();
+      return;
     }
+
+    expect(response.status()).toBe(200);
+    const stats = (await JSON.parse(
+      await response.text()
+    )) as PortfolioReturnsResponse;
+    expect(stats.consolidatedSchedule.length).toBe(60);
+    const lastScheduleEntry =
+      stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
+    expect(
+      Math.floor(lastScheduleEntry?.equityDistributionCumulative ?? 0)
+    ).toBe(100091);
   });
 
   test('[GET] get dashboard returns for one DEBT and one EQUITY deal', async ({
@@ -285,20 +295,23 @@ test.describe('api/dashboard/returns test', () => {
       },
     });
     let stats: PortfolioReturnsResponse | null = null;
+    let response: APIResponse;
     try {
       equityDeal1 = await JSON.parse(await dealUpdateResponse.text());
-
-      const response = await request.get('/api/dashboard/returns');
-      expect(response.status()).toBe(200);
-      stats = (await JSON.parse(
-        await response.text()
-      )) as PortfolioReturnsResponse;
+      response = await request.get('/api/dashboard/returns');
     } catch (e) {
       console.error(
         'could not get dashboard returns for one DEBT and one EQUITY deal in api/dashboard/returns test:'
       );
       console.error(e);
+      test.fail();
+      return;
     }
+    expect(response.status()).toBe(200);
+    stats = (await JSON.parse(
+      await response.text()
+    )) as PortfolioReturnsResponse;
+
     if (!stats?.consolidatedSchedule) {
       console.error('no good response from API');
       test.skip();
@@ -380,20 +393,23 @@ test.describe('api/dashboard/returns test', () => {
     });
 
     let stats: PortfolioReturnsResponse | null = null;
+    let response: APIResponse;
     try {
-      const response = await request.get('/api/dashboard/returns');
-      expect(response.status()).toBe(200);
-      stats = (await JSON.parse(
-        await response.text()
-      )) as PortfolioReturnsResponse;
-      console.log('stats1', stats.dealStats);
-      console.log('stats2', stats.portfolioStats);
+      response = await request.get('/api/dashboard/returns');
     } catch (e) {
       console.error(
         'could not get dashboard returns for two EQUITY deals in api/dashboard/returns test:'
       );
       console.error(e);
+      test.fail();
+      return;
     }
+    expect(response.status()).toBe(200);
+    stats = (await JSON.parse(
+      await response.text()
+    )) as PortfolioReturnsResponse;
+    console.log('stats1', stats.dealStats);
+    console.log('stats2', stats.portfolioStats);
     expect(stats?.portfolioStats.portfolioValueToDate).toBe(50000);
     expect(stats?.portfolioStats.distributionsToDate).toBe(0);
     expect(stats?.portfolioStats.projectedDebtDistributions).toBe(0);
