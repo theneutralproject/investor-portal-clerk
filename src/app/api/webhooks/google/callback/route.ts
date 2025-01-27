@@ -15,7 +15,6 @@ import { redirect } from 'next/navigation';
  * @returns
  */
 export async function GET(request: NextRequest) {
-  console.log('google callback received');
   // ?state=some_state
   // &code=4%2F0AVG7fiTk6IBM5YAKoMRpTzX4cQan33skMDsJUTJj2HYK0GofXNsr7MbFddFml3Ya_19BQA
   // &scope=email+profile+openid+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.profile+https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fuserinfo.email&authuser=0
@@ -69,9 +68,9 @@ export async function GET(request: NextRequest) {
   }
 
   const session = await getIronSession<SessionData>(cookies(), sessionOptions);
-  session.userId = user.id;
-  session.userEmail = user.email;
-  session.authExpiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
+  session.adminUserId = user.id;
+  session.adminUserEmail = user.email;
+  session.adminAuthExpiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours
   const token = jwt.sign(
     { id: user.id, email: user.email },
     process.env.JWT_SECRET!,

@@ -7,6 +7,7 @@ export default authMiddleware({
     '/api/webhooks/(.*)',
     '/api/admin/(.*)',
     '/api/docusign/return',
+    '/api/docusign/tokenFromCode',
     '/api/finix/webhooks',
     '/api/clerk',
   ],

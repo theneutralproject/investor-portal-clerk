@@ -50,3 +50,5 @@ node_modules/
 
 # csvs and such
 /seedData/
+# Sentry Config File
+.env.sentry-build-plugin

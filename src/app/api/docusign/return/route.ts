@@ -1,5 +1,6 @@
 import type { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
+import { buildRedirectUrl } from '@/libs/dealflow/utils.server';
 
 interface DocuSignParams {
   documentTemplateId: string;
@@ -90,15 +91,6 @@ async function createDocumentEvent(params: DocuSignParams) {
       return;
     }
   }
-}
-
-// Build redirect URL
-function buildRedirectUrl(projectSlug: string, dealId: string): URL {
-  const baseUrl = process.env.BASE_URL;
-  if (!baseUrl) {
-    throw new Error('BASE_URL environment variable is not set');
-  }
-  return new URL(`/dealflow/${projectSlug}/${dealId}/review`, baseUrl);
 }
 
 // Create error response

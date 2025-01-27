@@ -8,6 +8,7 @@ export const env = createEnv({
    */
   server: {
     DATABASE_URL: z.string().url(),
+    DIRECT_URL: z.string().url(),
     NODE_ENV: z
       .enum(['development', 'test', 'production'])
       .default('development'),
@@ -50,6 +51,7 @@ export const env = createEnv({
     DOCUSIGN_USER_ID: z.string(),
     DOCUSIGN_API_ACCOUNT_ID: z.string(),
     DOCUSIGN_INTEGRATION_KEY: z.string(),
+    DOCUSIGN_SECRET_KEY: z.string(),
     DOCUSIGN_RSA_PRIVATE_KEY: z.string(),
     CURRENT_TERMS_REVISION: z.string(),
   },
@@ -75,6 +77,7 @@ export const env = createEnv({
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
+    DIRECT_URL: process.env.DIRECT_URL,
     NODE_ENV: process.env.NODE_ENV,
     NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY:
       process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
@@ -130,6 +133,7 @@ export const env = createEnv({
     DOCUSIGN_USER_ID: process.env.DOCUSIGN_USER_ID,
     DOCUSIGN_API_ACCOUNT_ID: process.env.DOCUSIGN_API_ACCOUNT_ID,
     DOCUSIGN_INTEGRATION_KEY: process.env.DOCUSIGN_INTEGRATION_KEY,
+    DOCUSIGN_SECRET_KEY: process.env.DOCUSIGN_SECRET_KEY,
     DOCUSIGN_RSA_PRIVATE_KEY: process.env.DOCUSIGN_RSA_PRIVATE_KEY,
     CURRENT_TERMS_REVISION: process.env.CURRENT_TERMS_REVISION,
   },

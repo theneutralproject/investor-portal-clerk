@@ -11,20 +11,21 @@ import {
 import { storageClient } from '@/libs/supabase';
 
 /**
- * can filter by email, projectName, minDealstage (default = 5), includeTaxDocument (default = false)
+ * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
  * @param request
  * @returns
  */
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401);
-  }
+  // const adminUser = await getAdminFromRequest(request);
+  // if (isError(adminUser)) {
+  //   console.error(getErrorMessage(adminUser));
+  //   return errorResponse(getErrorMessage(adminUser), 401);
+  // }
 
   let email: string | undefined;
-  let projectName: string | undefined;
+  let projectSlug: string | undefined;
   let minDealstage: number | undefined;
+  let maxDealstage: number | undefined;
   let documentType = '';
   let amountStr: string | undefined;
   let closingYearStr: string | undefined;
@@ -34,8 +35,9 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
     email = queryParams.get('email') ?? undefined;
-    projectName = queryParams.get('projectName') ?? undefined;
+    projectSlug = queryParams.get('projectSlug') ?? undefined;
     minDealstage = parseInt(queryParams.get('minDealstage') ?? '5');
+    maxDealstage = parseInt(queryParams.get('maxDealstage') ?? '5');
     documentType = queryParams.get('documentType') ?? '';
     amountStr = queryParams.get('amount') ?? undefined;
     closingYearStr = queryParams.get('closingYear') ?? undefined;
@@ -48,7 +50,7 @@ export async function GET(request: NextRequest) {
   if (documentType.toLowerCase() === 'tax') {
     const allDeals = await prisma.deal.findMany({
       where: {
-        dealStage: { gte: minDealstage, lt: 6 },
+        dealStage: { gte: minDealstage, lte: maxDealstage ?? 5 },
       },
       include: {
         document: {
@@ -61,11 +63,11 @@ export async function GET(request: NextRequest) {
     return jsonResponse(allDeals);
   } else {
     let projectId: number | undefined;
-    if (projectName) {
+    if (projectSlug) {
       const project = await prisma.project.findFirst({
         where: {
-          name: {
-            contains: projectName,
+          slug: {
+            contains: projectSlug,
             mode: 'insensitive',
           },
         },
@@ -73,7 +75,7 @@ export async function GET(request: NextRequest) {
 
       if (!project) {
         return errorResponse(
-          `Project with name containing ${projectName} not found`,
+          `Project with name containing ${projectSlug} not found`,
           404
         );
       }
@@ -104,7 +106,7 @@ export async function GET(request: NextRequest) {
     }
 
     const where: Prisma.DealWhereInput = {
-      dealStage: { gte: minDealstage, lt: 6 },
+      dealStage: { gte: minDealstage, lte: maxDealstage ?? 5 },
     };
     if (projectId) {
       where.projectId = projectId;
