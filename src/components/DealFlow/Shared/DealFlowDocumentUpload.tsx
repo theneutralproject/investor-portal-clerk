@@ -111,11 +111,17 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   );
 
   const handleFileSelect = useCallback(
-    async (key: string, file: File) => {
+    async (key: string, inputFile: File) => {
       if (!organization?.id || !deal?.id) {
         console.error('Missing organization or deal ID');
         return;
       }
+
+      //Normalize file name, only allow alphanumeric, dashes, and underscores
+      const normalizedFileName = inputFile.name.replace(/[^a-zA-Z0-9_-]/g, '');
+      const file = new File([inputFile], normalizedFileName, {
+        type: inputFile.type,
+      });
 
       console.log('File select triggered:', {
         key,
