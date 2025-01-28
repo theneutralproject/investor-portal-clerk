@@ -1,4 +1,4 @@
-import { createDocumentEntry, getAdminFromRequest } from '@/libs/admin/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { isError } from 'lodash';
@@ -8,7 +8,6 @@ import {
   type DealFinancingType,
   type Prisma,
 } from '@prisma/client';
-import { storageClient } from '@/libs/supabase';
 
 /**
  * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
@@ -150,9 +149,8 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Store PDF matched with deal
+ * create a new deal
  * @param request
- * @returns
  */
 export async function POST(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
@@ -161,42 +159,23 @@ export async function POST(request: NextRequest) {
     return errorResponse(getErrorMessage(adminUser), 401);
   }
 
-  const requestBody = (await request.json()) as {
-    dealId: number;
-    pdfName: string;
-    taxYear: number;
-  };
-  const { dealId, pdfName, taxYear } = requestBody;
-  if (!dealId) {
-    return errorResponse('Missing required dealId', 400);
-  }
-  const newPath = `deal-${dealId}/${pdfName}`;
-  const { error } = await storageClient
-    .from(`deal-documents`)
-    .move(`tempPdfStorage/${pdfName}`, newPath);
-  if (error) {
-    console.error('unable to move file from temp storage to deal:');
-    console.error(getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
-  }
-  try {
-    const newDocEntry = await createDocumentEntry(
-      'deal',
-      dealId,
-      pdfName,
-      newPath,
-      '',
-      adminUser.id,
-      DealDocumentType.K1,
-      taxYear
-    );
+  // let postData: Prisma.DealCreateInput;
+  // try {
+  //   const requestBody = (await request.json()) as Prisma.DealCreateInput;
+  //   postData = requestBody;
+  // } catch (parseError) {
+  //   console.error(
+  //     'ERROR: unable to parse deals POST body:\n',
+  //     getErrorMessage(parseError)
+  //   );
+  //   return errorResponse(getErrorMessage(parseError), 400);
+  // }
 
-    return jsonResponse({
-      success: true,
-      document: newDocEntry,
-    });
-  } catch (error) {
-    console.error('Error processing upload:', error);
-    return errorResponse(getErrorMessage(error), 500);
-  }
+  // try {
+  //   const newDeal = await prisma.deal.create({ data: postData });
+  //   return jsonResponse(newDeal);
+  // } catch (error) {
+  //   console.error('unable to create deal:', getErrorMessage(error));
+  //   return errorResponse(getErrorMessage(error), 500);
+  // }
 }

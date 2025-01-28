@@ -1,0 +1,47 @@
+import { getAdminFromRequest } from '@/libs/admin/utils';
+import prisma from '@/libs/prisma.server';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import { NextRequest } from 'next/server';
+import { isError } from 'lodash';
+
+export async function GET(request: NextRequest) {
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  }
+  let email: string;
+  try {
+    const url = new URL(request.url);
+    email = url.pathname.split('/')[4] ?? '';
+    console.log('email:', email);
+    if (!email) {
+      throw new Error('dealId is required in url');
+    }
+  } catch (__error) {
+    return errorResponse(`dealId is required in url`, 400);
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { email },
+      include: {
+        organizationsOwned: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            tin: true,
+            isPrimary: true,
+            ownershipType: true,
+          },
+        },
+        address: true,
+      },
+    });
+    return jsonResponse(user);
+  } catch (error) {
+    console.error('unable to fetch users:', getErrorMessage(error));
+    return jsonResponse({ error: getErrorMessage(error) }, 500);
+  }
+}

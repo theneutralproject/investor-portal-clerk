@@ -137,6 +137,33 @@ export async function getHubspotContactsWithoutSignupDate() {
   }
 }
 
+export async function getHubspotContactByEmail(email: string) {
+  const searchBody: PublicObjectSearchRequest = {
+    limit: 1,
+    properties: ['hs_object_id', 'email', 'date_signed_up', 'userid'],
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: 'email',
+            operator: FilterOperatorEnum.Eq,
+            value: email,
+          },
+        ],
+      },
+    ],
+  };
+  try {
+    const hsSearchResult =
+      await hubspotClient.crm.contacts.searchApi.doSearch(searchBody);
+
+    return hsSearchResult.results[0] ?? null;
+  } catch (error) {
+    console.error('Unable to get contact from hubspot:\n', error);
+    throw new Error(getErrorMessage(error));
+  }
+}
+
 export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   let deals = [] as SimplePublicObject[];
   let contacts = [] as SimplePublicObject[];
