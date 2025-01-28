@@ -19,5 +19,11 @@ module.exports = {
         'test',
       ],
     ],
+    // Make type optional
+    'type-empty': [0],
+    // Make the subject optional
+    'subject-empty': [0],
+    // Allow any case
+    'subject-case': [0],
   },
 };
