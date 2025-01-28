@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Box, Typography, Card, List } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { useUser } from '@clerk/nextjs';
@@ -8,8 +8,10 @@ import ReviewingInvestment from '@components/DealFlow/ReviewSign/ReviewingInvest
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { createDocusignEnvelope } from '@components/DealFlow/Helpers/DealFlowHelpers';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
+  const [docsLoading, setDocsLoading] = useState({});
   const { user } = useUser();
   const hasRunRef = useRef(false);
   const router = useRouter();
@@ -34,9 +36,19 @@ const DealFlowReview: React.FC = () => {
   const docusignDocuments =
     project?.documents?.filter(doc => doc.documentType === 'DOCUSIGN') || [];
 
-  const handleSignDocument = (templateId: string) => {
+  const handleSignDocument = async (templateId: string) => {
     if (templateId && deal?.id) {
-      void createDocusignEnvelope(templateId, deal.id, user);
+      setDocsLoading(prev => ({ ...prev, [templateId]: true }));
+      toast.success('Generating document...');
+      const res = await createDocusignEnvelope(templateId, deal.id, user);
+
+      //Correct path if we get a response to show the user
+      if (res.url && res.url.length > 0) {
+        window.location.assign(res.url);
+      } else {
+        toast.error(res.message);
+      }
+      setDocsLoading(prev => ({ ...prev, [templateId]: false }));
     }
   };
 
@@ -73,21 +85,24 @@ const DealFlowReview: React.FC = () => {
 
       <Card variant="outlined">
         <List disablePadding>
-          {docusignDocuments.map((doc, index) => (
-            <DocumentItem
-              key={doc.id}
-              title={doc.name}
-              fileName={doc.fileName}
-              // @ts-expect-error -- type completed
-
-              isCompleted={doc.completed}
-              onSign={() =>
-                doc.docusignTemplateId &&
-                handleSignDocument(doc.docusignTemplateId)
-              }
-              index={index + 1}
-            />
-          ))}
+          {docusignDocuments.map((doc, index) => {
+            if (!doc.docusignTemplateId) return null;
+            const isLoading =
+              docsLoading[doc.docusignTemplateId as keyof typeof docsLoading] ??
+              false;
+            return (
+              <DocumentItem
+                key={doc.id}
+                title={doc.name}
+                fileName={doc.fileName}
+                // @ts-expect-error -- type completed
+                isCompleted={doc.completed}
+                isLoading={isLoading}
+                handleClick={() => handleSignDocument(doc.docusignTemplateId!)}
+                index={index + 1}
+              />
+            );
+          })}
         </List>
       </Card>
 
