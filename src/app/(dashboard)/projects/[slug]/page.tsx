@@ -103,7 +103,10 @@ export default function Page({ params: { slug } }: PageProps) {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container
+      maxWidth="lg"
+      sx={{ paddingBottom: isMobile ? '150px' : undefined }}
+    >
       <Box
         sx={{
           background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 70.16%, rgba(0, 0, 0, 0.40) 100%), url("${projectImage}") lightgray 0px -637.293px / 100% 294.465% no-repeat`,
