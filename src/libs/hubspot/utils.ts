@@ -796,6 +796,7 @@ export enum ReferralSource {
   CRE_DAILY_AD = 'cre_daily',
   NERDS_EYE_VIEW = 'nerds_eye_view',
   OTHER = 'other',
+  UNKNOWN = 'unknown',
 }
 
 export enum HSDealPropNames {
