@@ -23,6 +23,7 @@ export const zOrganizationCreateSchema = z.object({
   juristication: z.string().max(120, '120 characters max').nullish(),
   ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
   address: zAddressCreateSchema.nullish(),
+  ownerId: z.number().int().nullish(), // used in admin route
 });
 
 export type OrganizationCreateSchema = z.infer<

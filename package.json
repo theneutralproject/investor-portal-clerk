@@ -20,7 +20,8 @@
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:e2e": "npx playwright test --ui"
+    "test:e2e": "npx playwright test --ui",
+    "prepare": "husky"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.31.5",

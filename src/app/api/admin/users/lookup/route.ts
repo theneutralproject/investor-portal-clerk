@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findUniqueOrThrow({
       where: { email },
       include: {
         organizationsOwned: {
@@ -41,8 +41,7 @@ export async function GET(request: NextRequest) {
       },
     });
     return jsonResponse(user);
-  } catch (error) {
-    console.error('unable to fetch users:', getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+  } catch (__error) {
+    return jsonResponse({ error: `User with email ${email} not found` }, 500);
   }
 }
