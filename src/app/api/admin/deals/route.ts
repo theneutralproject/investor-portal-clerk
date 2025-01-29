@@ -19,7 +19,12 @@ export async function GET(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401);
+    return errorResponse(getErrorMessage(adminUser), 401, {
+      request,
+      extra: {
+        log: 'failed at GET admin/deals -> getAdminFromRequest',
+      },
+    });
   }
 
   let email: string | undefined;
@@ -32,7 +37,7 @@ export async function GET(request: NextRequest) {
   let financingTypeStr: string | undefined;
 
   try {
-    const url = new URL(request.url);
+    const url = new URL('hasfaaaaaaa');
     const queryParams = new URLSearchParams(url.search);
     email = queryParams.get('email') ?? undefined;
     projectSlug = queryParams.get('projectSlug') ?? undefined;
@@ -43,7 +48,12 @@ export async function GET(request: NextRequest) {
     closingYearStr = queryParams.get('closingYear') ?? undefined;
     financingTypeStr = queryParams.get('financingType') ?? undefined;
   } catch (error) {
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: {
+        log: 'failed at GET admin/deals -> URL',
+      },
+    });
   }
 
   // return all deals if includeTaxDocument is true
@@ -76,7 +86,13 @@ export async function GET(request: NextRequest) {
       if (!project) {
         return errorResponse(
           `Project with name containing ${projectSlug} not found`,
-          404
+          404,
+          {
+            request,
+            extra: {
+              log: 'failed at GET admin/deals -> prisma.project.findFirst',
+            },
+          }
         );
       }
       projectId = project.id;
@@ -100,7 +116,13 @@ export async function GET(request: NextRequest) {
       if (!ownerOrgIds.length) {
         return errorResponse(
           `User with email containing ${email} not found`,
-          404
+          404,
+          {
+            request,
+            extra: {
+              log: 'failed at GET admin/deals -> ownerOrgIds.length',
+            },
+          }
         );
       }
     }
@@ -158,7 +180,12 @@ export async function POST(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401);
+    return errorResponse(getErrorMessage(adminUser), 401, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> getAdminFromRequest',
+      },
+    });
   }
 
   const requestBody = (await request.json()) as {
@@ -168,7 +195,12 @@ export async function POST(request: NextRequest) {
   };
   const { dealId, pdfName, taxYear } = requestBody;
   if (!dealId) {
-    return errorResponse('Missing required dealId', 400);
+    return errorResponse('Missing required dealId', 400, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> dealId',
+      },
+    });
   }
   const newPath = `deal-${dealId}/${pdfName}`;
   const { error } = await storageClient
@@ -197,6 +229,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error processing upload:', error);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> createDocumentEntry',
+      },
+    });
   }
 }

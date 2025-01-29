@@ -18,14 +18,19 @@ class Logger {
     extra: Record<string, unknown> = {}
   ): void {
     const logData = {
-      level: 'info',
+      level: 'debug',
       message,
       request: this.getRequestDetails(req),
       extra,
     };
 
-    console.log(JSON.stringify(logData, null, 2)); // Pretty-print log
-    Sentry.captureMessage(message, { extra: logData });
+    console.log(JSON.stringify(logData, null, 4)); // Pretty-print log
+    Sentry.addBreadcrumb({
+      category: 'log',
+      message,
+      level: 'info',
+      data: logData,
+    });
   }
 
   /**
@@ -37,7 +42,7 @@ class Logger {
   static error(
     req: NextRequest,
     error: Error,
-    extra: Record<string, unknown> = {}
+    extra: Record<string, unknown | Sentry.SeverityLevel> = {}
   ): void {
     const logData = {
       level: 'error',
@@ -48,7 +53,7 @@ class Logger {
     };
 
     console.error(JSON.stringify(logData, null, 2)); // Pretty-print error log
-    Sentry.captureException(error, { extra: logData });
+    Sentry.captureException(error, { level: 'error', extra: logData });
   }
 
   /**

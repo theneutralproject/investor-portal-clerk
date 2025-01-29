@@ -1,14 +1,18 @@
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs';
+import { NextRequest } from 'next/server';
 
 // get deals by logged in user
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clerkUser = await currentUser();
   if (!clerkUser) {
     console.log('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
+
+  Logger.log(request, 'Log from GET /dashboard/deals', { clerkUser });
 
   // Get the user from the database
   const dbUser = await prisma.user.findUnique({
