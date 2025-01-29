@@ -7,7 +7,7 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from '../../../libs/deal/schema';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
 
 export const dynamic = 'force-dynamic';
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
   const slug = new URLSearchParams(url.search).get('slug');
 
   if (!slug) {
-    return jsonResponse({ error: 'Project slug is required' }, 400);
+    return errorResponse('Project slug is required', 400);
   }
 
   try {
