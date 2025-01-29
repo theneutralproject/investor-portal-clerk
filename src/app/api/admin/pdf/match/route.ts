@@ -1,12 +1,17 @@
-import { getAdminFromRequest, matchDealWithPdf } from '@/libs/admin/utils';
+import {
+  createDocumentEntry,
+  getAdminFromRequest,
+  matchDealWithPdf,
+} from '@/libs/admin/utils';
 import { zPdfBulkUploadSchema } from '@/libs/document/schema';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
+import { DealDocumentType } from '@prisma/client';
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -120,5 +125,57 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error(err);
     return jsonResponse({ error: getErrorMessage(err) }, 500);
+  }
+}
+
+/**
+ * Store PDF matched with deal
+ * @param request
+ * @returns
+ */
+export async function PUT(request: NextRequest) {
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return errorResponse(getErrorMessage(adminUser), 401);
+  }
+
+  const requestBody = (await request.json()) as {
+    dealId: number;
+    pdfName: string;
+    taxYear: number;
+  };
+  const { dealId, pdfName, taxYear } = requestBody;
+  if (!dealId) {
+    return errorResponse('Missing required dealId', 400);
+  }
+  const newPath = `deal-${dealId}/${pdfName}`;
+  const { error } = await storageClient
+    .from(`deal-documents`)
+    .move(`tempPdfStorage/${pdfName}`, newPath);
+  if (error) {
+    console.error('unable to move file from temp storage to deal:');
+    console.error(getErrorMessage(error));
+    return jsonResponse({ error: getErrorMessage(error) }, 500);
+  }
+  try {
+    const newDocEntry = await createDocumentEntry(
+      'deal',
+      dealId,
+      pdfName,
+      newPath,
+      '',
+      adminUser.id,
+      DealDocumentType.K1,
+      taxYear
+    );
+
+    return jsonResponse({
+      success: true,
+      document: newDocEntry,
+    });
+  } catch (error) {
+    console.error('Error processing upload:', error);
+    return errorResponse(getErrorMessage(error), 500);
   }
 }

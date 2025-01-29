@@ -1,7 +1,16 @@
 import { getAdminFromRequest } from '@/libs/admin/utils';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
 import prisma from '@/libs/prisma.server';
-import { type UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
-import { updateUserInDbAndHubspotAndClerk } from '@/libs/user/utils';
+import {
+  UserCreateSchema,
+  type UserUpdateSchema,
+  zUserCreateSchema,
+  zUserUpdateSchema,
+} from '@/libs/user/schema';
+import {
+  createUserInDbAndHubspot,
+  updateUserInDbAndHubspotAndClerk,
+} from '@/libs/user/utils';
 import { getErrorMessage, jsonResponse } from '@/libs/utils';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
@@ -33,6 +42,43 @@ export async function GET(request: NextRequest) {
     return jsonResponse(allUsers);
   } catch (error) {
     console.error('unable to fetch users:', getErrorMessage(error));
+    return jsonResponse({ error: getErrorMessage(error) }, 500);
+  }
+}
+
+export async function POST(request: NextRequest) {
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  }
+
+  let postData: UserCreateSchema;
+  try {
+    const requestBody = (await request.json()) as UserCreateSchema;
+    postData = zUserCreateSchema.parse(requestBody);
+  } catch (parseError) {
+    console.error(
+      'ERROR: unable to parse users POST body:\n',
+      getErrorMessage(parseError)
+    );
+    return jsonResponse({ error: getErrorMessage(parseError) }, 400);
+  }
+
+  try {
+    const cleanPhone = postData.phoneNumber?.replace(/\D/g, '');
+    const clerkUser = await findOrCreateClerkUser(
+      postData.email,
+      postData.firstName,
+      postData.lastName,
+      cleanPhone
+    );
+    postData.clerkId = clerkUser?.id;
+    postData.phoneNumber = cleanPhone;
+    const newUser = await createUserInDbAndHubspot(postData);
+    return jsonResponse(newUser);
+  } catch (error) {
+    console.error('unable to create user:', getErrorMessage(error));
     return jsonResponse({ error: getErrorMessage(error) }, 500);
   }
 }
