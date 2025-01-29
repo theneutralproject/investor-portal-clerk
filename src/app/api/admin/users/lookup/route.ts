@@ -13,7 +13,8 @@ export async function GET(request: NextRequest) {
   let email: string;
   try {
     const url = new URL(request.url);
-    email = url.pathname.split('/')[4] ?? '';
+    const queryParams = new URLSearchParams(url.search);
+    email = queryParams.get('email') ?? '';
     console.log('email:', email);
     if (!email) {
       throw new Error('dealId is required in url');
