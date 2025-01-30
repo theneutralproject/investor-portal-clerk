@@ -2,6 +2,9 @@ import * as Sentry from '@sentry/nextjs';
 import type { NextRequest } from 'next/server';
 import { parseSessionFromCookie } from './session/utils';
 
+type MetaData =
+  | { message?: string; extra: Record<string, unknown> | object }
+  | undefined;
 /**
  * Logger utility for structured logging.
  */
@@ -12,22 +15,20 @@ class Logger {
    * @param message - Log message.
    * @param extra - Additional metadata for the log.
    */
-  static log(
-    req: NextRequest,
-    message: string,
-    extra: Record<string, unknown> = {}
-  ): void {
+  static log(req: NextRequest, metadata: MetaData = { extra: {} }): void {
+    const apiMessage = `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`;
     const logData = {
-      level: 'debug',
-      message,
+      apiMessage,
+      level: 'log',
+      message: metadata.message || '',
       request: this.getRequestDetails(req),
-      extra,
+      extra: metadata.extra,
     };
 
     console.log(JSON.stringify(logData, null, 4)); // Pretty-print log
     Sentry.addBreadcrumb({
       category: 'log',
-      message,
+      message: apiMessage,
       level: 'info',
       data: logData,
     });
