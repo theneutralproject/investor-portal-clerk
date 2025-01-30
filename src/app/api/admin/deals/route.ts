@@ -8,6 +8,8 @@ import {
   type DealFinancingType,
   type Prisma,
 } from '@prisma/client';
+import { DealCreateSchema } from '@/libs/deal/schema';
+import { createDealForUser } from '@/libs/deal/utils.server';
 
 /**
  * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
@@ -175,34 +177,89 @@ export async function GET(request: NextRequest) {
  * @param request
  */
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401, {
+  // const adminUser = await getAdminFromRequest(request);
+  // if (isError(adminUser)) {
+  //   console.error(getErrorMessage(adminUser));
+  //   return errorResponse(getErrorMessage(adminUser), 401);
+  // }
+
+  let postData: DealCreateSchema;
+  try {
+    const requestBody = (await request.json()) as DealCreateSchema;
+    postData = requestBody;
+  } catch (parseError) {
+    console.error(
+      'ERROR: unable to parse deals POST body:\n',
+      getErrorMessage(parseError)
+    );
+    return errorResponse(getErrorMessage(parseError), 400, {
       request,
       extra: {
-        log: 'failed at POST admin/deals -> getAdminFromRequest',
+        log: 'failed at POST admin/deals -> parseError',
       },
     });
   }
 
-  // let postData: Prisma.DealCreateInput;
-  // try {
-  //   const requestBody = (await request.json()) as Prisma.DealCreateInput;
-  //   postData = requestBody;
-  // } catch (parseError) {
-  //   console.error(
-  //     'ERROR: unable to parse deals POST body:\n',
-  //     getErrorMessage(parseError)
-  //   );
-  //   return errorResponse(getErrorMessage(parseError), 400);
-  // }
+  if (!postData.amount)
+    return errorResponse('amount is required', 400, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> postData.amount',
+      },
+    });
+  if (!postData.organizationId)
+    return errorResponse('organizationId is required', 400, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> postData.organizationId',
+      },
+    });
+  if (!postData.financingType)
+    return errorResponse('financingType is required', 400, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> postData.financingType',
+      },
+    });
+  if (!postData.closingDate)
+    return errorResponse('closingDate is required', 400, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> postData.closingDate',
+      },
+    });
+  postData.dealStage = postData.dealStage ?? 5;
+  postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
+  postData.signaturesCompletedDate =
+    postData.signaturesCompletedDate ?? postData.closingDate;
 
-  // try {
-  //   const newDeal = await prisma.deal.create({ data: postData });
-  //   return jsonResponse(newDeal);
-  // } catch (error) {
-  //   console.error('unable to create deal:', getErrorMessage(error));
-  //   return errorResponse(getErrorMessage(error), 500);
-  // }
+  const ownerOrg = await prisma.organization.findUnique({
+    where: { id: postData.organizationId },
+    include: { ownedBy: true },
+  });
+
+  if (!ownerOrg?.ownedBy)
+    return errorResponse(
+      `organization owner for org id ${postData.organizationId} not found`,
+      404,
+      {
+        request,
+        extra: {
+          log: 'failed at POST admin/deals -> ownerOrg?.ownedBy',
+        },
+      }
+    );
+
+  try {
+    const newDeal = await createDealForUser(postData, ownerOrg.ownedBy);
+    return jsonResponse(newDeal);
+  } catch (error) {
+    console.error('unable to create deal:', getErrorMessage(error));
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: {
+        log: 'failed at POST admin/deals -> createDealForUser',
+      },
+    });
+  }
 }
