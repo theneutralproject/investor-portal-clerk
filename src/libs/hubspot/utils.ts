@@ -294,6 +294,16 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
 //   return Object.keys(data);
 // }
 
+export async function getHubspotDealById(hsDealId: string) {
+  try {
+    const hsDeal = await hubspotClient.crm.deals.basicApi.getById(hsDealId);
+    return hsDeal;
+  } catch (error) {
+    console.error('unable to get deal from hubspot:\n', error);
+    throw new Error(getErrorMessage(error));
+  }
+}
+
 export async function getListOfHSDeals() {
   const lostDealstages = ['closedlost', '146586774', '257596003'];
   const publicObjectSearchRequest = {

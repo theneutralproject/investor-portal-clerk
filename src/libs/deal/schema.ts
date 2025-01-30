@@ -56,9 +56,9 @@ export const zDealCreateSchema = z.object({
     .nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
-  debtMinTerm: z.number().int().nullish(),
-  debtMaxTerm: z.number().int().nullish(),
-  debtInterestRatePerc: z.number().nullish(),
+  debtMinTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals
+  debtMaxTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals
+  debtInterestRatePerc: z.number().nullish(), //used for maintenance scripts to create old deals
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;
