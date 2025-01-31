@@ -9,7 +9,7 @@ export const getFinixUserName = (projectSlug: string) => {
     case '519':
       return process.env.FINIX_USERNAME_519!;
     default:
-      throw new Error('Invalid project slug');
+      throw new Error('Invalid project slug in getFinixUserName');
   }
 };
 
@@ -22,6 +22,6 @@ export const getFinixPassword = (projectSlug: string) => {
     case '519':
       return process.env.FINIX_PASSWORD_519!;
     default:
-      throw new Error('Invalid project slug');
+      throw new Error('Invalid project slug in getFinixPassword');
   }
 };

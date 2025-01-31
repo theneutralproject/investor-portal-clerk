@@ -4,12 +4,13 @@ import { updateDeal } from '@/libs/deal/utils.server';
 import {
   HSDealPropNames,
   getDealStageIntFromHSString,
+  getFinancingType,
   getFundingAmount,
   getProjectSlugFromDealStage,
 } from '@/libs/hubspot/utils';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
-import { DealFinancingType, type Deal } from '@prisma/client';
+import { type Deal } from '@prisma/client';
 import { isError } from 'lodash';
 import { z } from 'zod';
 
@@ -76,10 +77,7 @@ export async function POST(req: Request) {
         break;
       case HSDealPropNames.financing_type.toString():
         dealBody.investmentStats = {
-          financingType:
-            payload.propertyValue in DealFinancingType
-              ? (payload.propertyValue as keyof typeof DealFinancingType)
-              : 'equity',
+          financingType: getFinancingType(payload.propertyValue),
         };
         break;
       case HSDealPropNames.closedate.toString():
