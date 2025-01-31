@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,12 +10,11 @@ import {
   Button,
   Box,
   Container,
+  CircularProgress,
 } from '@mui/material';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { type User } from '@prisma/client';
-import { useQuery } from '@tanstack/react-query';
 import { ReferralSource } from '@/libs/hubspot/utils';
 import { type HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
@@ -32,28 +31,19 @@ const normalizeLabel = (label: string) => {
 
 const Referral: React.FC = () => {
   const [referralSource, setReferralSource] = useState<ReferralSource | ''>('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { user } = useUser();
-
-  const { isLoading, data } = useQuery<User, Error>({
-    queryKey: ['user'],
-    queryFn: () => axios.get<User>('/api/users').then(res => res.data),
-  });
-
-  useEffect(() => {
-    if (data?.referralSource) {
-      router.push('/dashboard');
-    }
-  }, [data?.referralSource, router]);
-
-  if (isLoading) return <div>Loading...</div>;
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!referralSource) return;
 
+    setIsLoading(true);
+
     try {
-      await axios.put('/api/users', { referralSource });
+      const userResponse = await axios.put('/api/users', { referralSource });
+      const data = userResponse.data;
       const email = user?.primaryEmailAddress
         ? user.primaryEmailAddress.emailAddress
         : (user?.emailAddresses[0]?.emailAddress ?? null);
@@ -61,17 +51,22 @@ const Referral: React.FC = () => {
         throw new Error('User email address not found');
       }
 
+      const hubspotId = data?.hubspotId;
+      if (!hubspotId) {
+        throw new Error('User hubspotId not found');
+      }
+
       const hsUser: HubspotContactCreateUpdateSchema = {
         email,
         properties: { referral_source: referralSource },
       };
 
-      await axios.put('/api/users/hubspot', hsUser);
-
-      router.push('/dashboard');
+      await axios.put(`/api/users/${hubspotId}`, hsUser);
     } catch (error) {
       console.error('Error updating user information:', error);
     }
+
+    router.push('/dashboard');
   };
 
   return (
@@ -111,8 +106,11 @@ const Referral: React.FC = () => {
         <Button
           type="submit"
           variant="neutralYellow"
-          disabled={!referralSource}
+          disabled={!referralSource || isLoading}
           onClick={handleSubmit}
+          startIcon={
+            isLoading && <CircularProgress size={20} color="inherit" />
+          }
         >
           Continue
         </Button>
