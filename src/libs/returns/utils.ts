@@ -419,7 +419,7 @@ export async function getPortfolioReturns(
           : 'debt',
       project: {
         id: project.id,
-        name: project.name,
+        name: project.displayName,
         location: project.location,
         pictures: project.pictures,
       },

@@ -132,7 +132,7 @@ export default function Page({ params: { slug } }: PageProps) {
               fontWeight: 500,
             }}
           >
-            {project.name}
+            {project.displayName}
           </Typography>
           <Typography
             variant="h5"
