@@ -177,7 +177,7 @@ const InvestmentCalculatorNew = ({
 
       data.push({
         year: year === 0 ? '0' : `${year}yrs`,
-        [`${project.name} (Target Return)`]: Number(
+        [`${project.displayName} (Target Return)`]: Number(
           ((targetValue / investment - 1) * 100).toFixed(1)
         ),
         'S&P 500 (Avg.)': Number(
@@ -204,7 +204,7 @@ const InvestmentCalculatorNew = ({
       const reitValue = investment * Math.pow(1 + reitMonthlyRate, months);
       data.push({
         year: year === 0 ? '0' : `${year}yrs`,
-        [`${project.name} (Target Return)`]: Number(
+        [`${project.displayName} (Target Return)`]: Number(
           ((targetValue / investment - 1) * 100).toFixed(1)
         ),
         'S&P 500 (Avg.)': Number(
@@ -298,7 +298,7 @@ const InvestmentCalculatorNew = ({
               <Legend content={<CustomLegend payload={[]} />} />
               <Area
                 type="monotone"
-                dataKey={`${project.name} (Target Return)`}
+                dataKey={`${project.displayName} (Target Return)`}
                 stackId="1"
                 stroke={theme.palette.success.main}
                 fill={theme.palette.success.light}
