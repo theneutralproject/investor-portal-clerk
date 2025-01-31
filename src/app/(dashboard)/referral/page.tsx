@@ -35,18 +35,16 @@ const Referral: React.FC = () => {
   const router = useRouter();
   const { user } = useUser();
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!referralSource) return;
-
-    setIsLoading(true);
-
+  const updateUserAndHubspot = async (source: ReferralSource) => {
     try {
-      const userResponse = await axios.put('/api/users', { referralSource });
+      const userResponse = await axios.put('/api/users', {
+        referralSource: source,
+      });
       const data = userResponse.data;
-      const email = user?.primaryEmailAddress
-        ? user.primaryEmailAddress.emailAddress
-        : (user?.emailAddresses[0]?.emailAddress ?? null);
+      const email =
+        user?.primaryEmailAddress?.emailAddress ??
+        user?.emailAddresses[0]?.emailAddress;
+
       if (!email) {
         throw new Error('User email address not found');
       }
@@ -58,7 +56,7 @@ const Referral: React.FC = () => {
 
       const hsUser: HubspotContactCreateUpdateSchema = {
         email,
-        properties: { referral_source: referralSource },
+        properties: { referral_source: source },
       };
 
       await axios.put(`/api/users/${hubspotId}`, hsUser);
@@ -67,6 +65,20 @@ const Referral: React.FC = () => {
     }
 
     router.push('/dashboard');
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!referralSource) return;
+
+    setIsLoading(true);
+    await updateUserAndHubspot(referralSource);
+  };
+
+  const handleSkip = async () => {
+    setIsLoading(true);
+    setReferralSource(ReferralSource.UNKNOWN);
+    await updateUserAndHubspot(ReferralSource.UNKNOWN);
   };
 
   return (
@@ -90,19 +102,29 @@ const Referral: React.FC = () => {
                 setReferralSource(e.target.value as ReferralSource)
               }
             >
-              {Object.entries(ReferralSource).map(([key, value]) => (
-                <FormControlLabel
-                  key={key}
-                  value={value}
-                  control={<Radio />}
-                  label={normalizeLabel(key)}
-                />
-              ))}
+              {Object.entries(ReferralSource)
+                .filter(([key]) => key !== 'UNKNOWN')
+                .map(([key, value]) => (
+                  <FormControlLabel
+                    key={key}
+                    value={value}
+                    control={<Radio />}
+                    label={normalizeLabel(key)}
+                  />
+                ))}
             </RadioGroup>
           </form>
         </CardContent>
       </Card>
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Button
+          variant="text"
+          onClick={handleSkip}
+          disabled={isLoading}
+          sx={{ color: 'grey.500' }}
+        >
+          Skip
+        </Button>
         <Button
           type="submit"
           variant="neutralYellow"
