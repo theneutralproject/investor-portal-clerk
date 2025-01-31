@@ -16,7 +16,6 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { ReferralSource } from '@/libs/hubspot/utils';
-import { type HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
 const normalizeLabel = (label: string) => {
   return label
@@ -37,10 +36,6 @@ const Referral: React.FC = () => {
 
   const updateUserAndHubspot = async (source: ReferralSource) => {
     try {
-      const userResponse = await axios.put('/api/users', {
-        referralSource: source,
-      });
-      const data = userResponse.data;
       const email =
         user?.primaryEmailAddress?.emailAddress ??
         user?.emailAddresses[0]?.emailAddress;
@@ -49,17 +44,11 @@ const Referral: React.FC = () => {
         throw new Error('User email address not found');
       }
 
-      const hubspotId = data?.hubspotId;
-      if (!hubspotId) {
-        throw new Error('User hubspotId not found');
-      }
-
-      const hsUser: HubspotContactCreateUpdateSchema = {
+      await axios.put('/api/users', {
         email,
         properties: { referral_source: source },
-      };
-
-      await axios.put(`/api/users/${hubspotId}`, hsUser);
+        referralSource: source,
+      });
     } catch (error) {
       console.error('Error updating user information:', error);
     }
