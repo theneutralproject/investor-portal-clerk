@@ -1,6 +1,6 @@
 // AccreditationQuestion.tsx
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Accordion,
   AccordionSummary,
@@ -12,7 +12,6 @@ import {
   Card,
   CardContent,
   Box,
-  Button,
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { type Question } from '@/components/DealFlow/Helpers/types';
@@ -32,15 +31,6 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
   expanded,
   onToggle,
 }) => {
-  const [showAllOptions, setShowAllOptions] = useState(false);
-
-  const isVerificationQuestion = question.id === 'verification';
-  const shouldHideUploadOption = isVerificationQuestion && !showAllOptions;
-
-  const visibleOptions = shouldHideUploadOption
-    ? question.options.filter(option => option !== 'Upload Document')
-    : question.options;
-
   return (
     <Accordion
       expanded={expanded}
@@ -70,7 +60,7 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
           value={answer || ''}
           onChange={e => onChange(question.id, e.target.value)}
         >
-          {visibleOptions.map(option => (
+          {question.options.map(option => (
             <Card key={option} sx={{ mb: 1, '&:hover': { boxShadow: 3 } }}>
               <CardContent>
                 <FormControlLabel
@@ -82,23 +72,6 @@ const AccreditationQuestion: React.FC<AccreditationQuestionProps> = ({
             </Card>
           ))}
         </RadioGroup>
-        {isVerificationQuestion && !showAllOptions && (
-          <Button
-            onClick={() => setShowAllOptions(true)}
-            sx={{
-              mt: 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: '100%',
-              color: 'rgba(0, 0, 0, 0.54)',
-            }}
-            variant="text"
-          >
-            Show more options
-            <ExpandMoreIcon sx={{ ml: 1 }} />
-          </Button>
-        )}
       </AccordionDetails>
     </Accordion>
   );

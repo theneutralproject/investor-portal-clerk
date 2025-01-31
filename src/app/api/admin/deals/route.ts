@@ -1,4 +1,4 @@
-import { createDocumentEntry, getAdminFromRequest } from '@/libs/admin/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { isError } from 'lodash';
@@ -8,7 +8,8 @@ import {
   type DealFinancingType,
   type Prisma,
 } from '@prisma/client';
-import { storageClient } from '@/libs/supabase';
+import { DealCreateSchema } from '@/libs/deal/schema';
+import { createDealForUser } from '@/libs/deal/utils.server';
 
 /**
  * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
@@ -150,53 +151,56 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * Store PDF matched with deal
+ * create a new deal
  * @param request
- * @returns
  */
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401);
+  // const adminUser = await getAdminFromRequest(request);
+  // if (isError(adminUser)) {
+  //   console.error(getErrorMessage(adminUser));
+  //   return errorResponse(getErrorMessage(adminUser), 401);
+  // }
+
+  let postData: DealCreateSchema;
+  try {
+    const requestBody = (await request.json()) as DealCreateSchema;
+    postData = requestBody;
+  } catch (parseError) {
+    console.error(
+      'ERROR: unable to parse deals POST body:\n',
+      getErrorMessage(parseError)
+    );
+    return errorResponse(getErrorMessage(parseError), 400);
   }
 
-  const requestBody = (await request.json()) as {
-    dealId: number;
-    pdfName: string;
-    taxYear: number;
-  };
-  const { dealId, pdfName, taxYear } = requestBody;
-  if (!dealId) {
-    return errorResponse('Missing required dealId', 400);
-  }
-  const newPath = `deal-${dealId}/${pdfName}`;
-  const { error } = await storageClient
-    .from(`deal-documents`)
-    .move(`tempPdfStorage/${pdfName}`, newPath);
-  if (error) {
-    console.error('unable to move file from temp storage to deal:');
-    console.error(getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
-  }
-  try {
-    const newDocEntry = await createDocumentEntry(
-      'deal',
-      dealId,
-      pdfName,
-      newPath,
-      '',
-      adminUser.id,
-      DealDocumentType.K1,
-      taxYear
+  if (!postData.amount) return errorResponse('amount is required', 400);
+  if (!postData.organizationId)
+    return errorResponse('organizationId is required', 400);
+  if (!postData.financingType)
+    return errorResponse('financingType is required', 400);
+  if (!postData.closingDate)
+    return errorResponse('closingDate is required', 400);
+  postData.dealStage = postData.dealStage ?? 5;
+  postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
+  postData.signaturesCompletedDate =
+    postData.signaturesCompletedDate ?? postData.closingDate;
+
+  const ownerOrg = await prisma.organization.findUnique({
+    where: { id: postData.organizationId },
+    include: { ownedBy: true },
+  });
+
+  if (!ownerOrg?.ownedBy)
+    return errorResponse(
+      `organization owner for org id ${postData.organizationId} not found`,
+      404
     );
 
-    return jsonResponse({
-      success: true,
-      document: newDocEntry,
-    });
+  try {
+    const newDeal = await createDealForUser(postData, ownerOrg.ownedBy);
+    return jsonResponse(newDeal);
   } catch (error) {
-    console.error('Error processing upload:', error);
+    console.error('unable to create deal:', getErrorMessage(error));
     return errorResponse(getErrorMessage(error), 500);
   }
 }

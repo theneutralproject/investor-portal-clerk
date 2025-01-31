@@ -137,6 +137,33 @@ export async function getHubspotContactsWithoutSignupDate() {
   }
 }
 
+export async function getHubspotContactByEmail(email: string) {
+  const searchBody: PublicObjectSearchRequest = {
+    limit: 1,
+    properties: ['hs_object_id', 'email', 'date_signed_up', 'userid'],
+    filterGroups: [
+      {
+        filters: [
+          {
+            propertyName: 'email',
+            operator: FilterOperatorEnum.Eq,
+            value: email,
+          },
+        ],
+      },
+    ],
+  };
+  try {
+    const hsSearchResult =
+      await hubspotClient.crm.contacts.searchApi.doSearch(searchBody);
+
+    return hsSearchResult.results[0] ?? null;
+  } catch (error) {
+    console.error('Unable to get contact from hubspot:\n', error);
+    throw new Error(getErrorMessage(error));
+  }
+}
+
 export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   let deals = [] as SimplePublicObject[];
   let contacts = [] as SimplePublicObject[];
@@ -266,6 +293,16 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
 //   // console.log("data", data.keys());
 //   return Object.keys(data);
 // }
+
+export async function getHubspotDealById(hsDealId: string) {
+  try {
+    const hsDeal = await hubspotClient.crm.deals.basicApi.getById(hsDealId);
+    return hsDeal;
+  } catch (error) {
+    console.error('unable to get deal from hubspot:\n', error);
+    throw new Error(getErrorMessage(error));
+  }
+}
 
 export async function getListOfHSDeals() {
   const lostDealstages = ['closedlost', '146586774', '257596003'];
@@ -769,6 +806,7 @@ export enum ReferralSource {
   CRE_DAILY_AD = 'cre_daily',
   NERDS_EYE_VIEW = 'nerds_eye_view',
   OTHER = 'other',
+  UNKNOWN = 'unknown',
 }
 
 export enum HSDealPropNames {
