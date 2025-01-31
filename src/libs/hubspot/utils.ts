@@ -296,7 +296,13 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
 
 export async function getHubspotDealById(hsDealId: string) {
   try {
-    const hsDeal = await hubspotClient.crm.deals.basicApi.getById(hsDealId);
+    const hsDeal = await hubspotClient.crm.deals.basicApi.getById(hsDealId, [
+      'financing_type',
+      'dealstage',
+      'amount',
+      'closedate',
+      'date_signatures_completed',
+    ]);
     return hsDeal;
   } catch (error) {
     console.error('unable to get deal from hubspot:\n', error);
@@ -762,7 +768,15 @@ export function getProjectSlugFromDealStage(dealstage: string) {
     return '519';
   if (BakersPlaceDealStages.map(e => e.value).indexOf(dealstage) > -1)
     return 'bakers';
-  return new Error('project not yet supported');
+  throw new Error(
+    'project not yet supported by getProjectSlugFromDealStage function'
+  );
+}
+
+export function getFinancingType(hsFinancingType: string) {
+  return hsFinancingType in DealFinancingType
+    ? (hsFinancingType as keyof typeof DealFinancingType)
+    : null;
 }
 
 export const EdisonDealStages = [
@@ -814,10 +828,4 @@ export enum HSDealPropNames {
   amount = 'amount',
   financing_type = 'financing_type',
   closedate = 'closedate',
-}
-
-export enum DealToHubspotDealEnum {
-  amount = 'amount',
-  financingType = 'financing_type',
-  dealStage = 'dealstage',
 }

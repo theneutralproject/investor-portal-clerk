@@ -89,7 +89,7 @@ test.describe('api/dashboard/returns test', () => {
       'stats consolidated schedule length: ',
       stats.consolidatedSchedule.length
     );
-    console.log('stats', stats.consolidatedSchedule);
+
     expect(stats.consolidatedSchedule.length).toBe(48);
     const lastScheduleEntry =
       stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
@@ -411,8 +411,7 @@ test.describe('api/dashboard/returns test', () => {
     stats = (await JSON.parse(
       await response.text()
     )) as PortfolioReturnsResponse;
-    console.log('stats1', stats.dealStats);
-    console.log('stats2', stats.portfolioStats);
+
     expect(stats?.portfolioStats.portfolioValueToDate).toBe(50000);
     expect(stats?.portfolioStats.distributionsToDate).toBe(0);
     expect(stats?.portfolioStats.projectedDebtDistributions).toBe(0);
