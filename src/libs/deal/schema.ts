@@ -9,7 +9,7 @@ import { z } from 'zod';
 export const zDealInvestmentStatsUpdateSchema = z.object({
   amount: z.number().optional(),
   ownershipType: z.nativeEnum(DealOwnershipType).optional(),
-  financingType: z.nativeEnum(DealFinancingType).nullish(),
+  financingType: z.nativeEnum(DealFinancingType).optional(),
   unitType: z.nativeEnum(DealUnitType).optional(),
   numberAUnits: z.number().min(0).optional(),
   numberCUnits: z.number().min(0).optional(),
@@ -24,7 +24,7 @@ export const zDealUpdateSchema = z.object({
   hubspotId: z.string(),
   projectId: z.number().int().optional(),
   organizationId: z.number().optional(),
-  dealStage: z.number().min(0).max(6).nullish(),
+  dealStage: z.number().min(0).max(6).optional(),
   accreditationVerifierId: z.number().optional().nullable(),
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
   closingDate: z.date().nullish(),
