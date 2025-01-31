@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Card,
   CardContent,
@@ -10,12 +10,11 @@ import {
   Button,
   Box,
   Container,
+  CircularProgress,
 } from '@mui/material';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { type User } from '@prisma/client';
-import { useQuery } from '@tanstack/react-query';
 import { ReferralSource } from '@/libs/hubspot/utils';
 import { type HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
@@ -32,46 +31,54 @@ const normalizeLabel = (label: string) => {
 
 const Referral: React.FC = () => {
   const [referralSource, setReferralSource] = useState<ReferralSource | ''>('');
+  const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { user } = useUser();
 
-  const { isLoading, data } = useQuery<User, Error>({
-    queryKey: ['user'],
-    queryFn: () => axios.get<User>('/api/users').then(res => res.data),
-  });
+  const updateUserAndHubspot = async (source: ReferralSource) => {
+    try {
+      const userResponse = await axios.put('/api/users', {
+        referralSource: source,
+      });
+      const data = userResponse.data;
+      const email =
+        user?.primaryEmailAddress?.emailAddress ??
+        user?.emailAddresses[0]?.emailAddress;
 
-  useEffect(() => {
-    if (data?.referralSource) {
-      router.push('/dashboard');
+      if (!email) {
+        throw new Error('User email address not found');
+      }
+
+      const hubspotId = data?.hubspotId;
+      if (!hubspotId) {
+        throw new Error('User hubspotId not found');
+      }
+
+      const hsUser: HubspotContactCreateUpdateSchema = {
+        email,
+        properties: { referral_source: source },
+      };
+
+      await axios.put(`/api/users/${hubspotId}`, hsUser);
+    } catch (error) {
+      console.error('Error updating user information:', error);
     }
-  }, [data?.referralSource, router]);
 
-  if (isLoading) return <div>Loading...</div>;
+    router.push('/dashboard');
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     if (!referralSource) return;
 
-    try {
-      await axios.put('/api/users', { referralSource });
-      const email = user?.primaryEmailAddress
-        ? user.primaryEmailAddress.emailAddress
-        : (user?.emailAddresses[0]?.emailAddress ?? null);
-      if (!email) {
-        throw new Error('User email address not found');
-      }
+    setIsLoading(true);
+    await updateUserAndHubspot(referralSource);
+  };
 
-      const hsUser: HubspotContactCreateUpdateSchema = {
-        email,
-        properties: { referral_source: referralSource },
-      };
-
-      await axios.put('/api/users/hubspot', hsUser);
-
-      router.push('/dashboard');
-    } catch (error) {
-      console.error('Error updating user information:', error);
-    }
+  const handleSkip = async () => {
+    setIsLoading(true);
+    setReferralSource(ReferralSource.UNKNOWN);
+    await updateUserAndHubspot(ReferralSource.UNKNOWN);
   };
 
   return (
@@ -95,24 +102,37 @@ const Referral: React.FC = () => {
                 setReferralSource(e.target.value as ReferralSource)
               }
             >
-              {Object.entries(ReferralSource).map(([key, value]) => (
-                <FormControlLabel
-                  key={key}
-                  value={value}
-                  control={<Radio />}
-                  label={normalizeLabel(key)}
-                />
-              ))}
+              {Object.entries(ReferralSource)
+                .filter(([key]) => key !== 'UNKNOWN')
+                .map(([key, value]) => (
+                  <FormControlLabel
+                    key={key}
+                    value={value}
+                    control={<Radio />}
+                    label={normalizeLabel(key)}
+                  />
+                ))}
             </RadioGroup>
           </form>
         </CardContent>
       </Card>
-      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end' }}>
+      <Box sx={{ mt: 2, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
+        <Button
+          variant="text"
+          onClick={handleSkip}
+          disabled={isLoading}
+          sx={{ color: 'grey.500' }}
+        >
+          Skip
+        </Button>
         <Button
           type="submit"
           variant="neutralYellow"
-          disabled={!referralSource}
+          disabled={!referralSource || isLoading}
           onClick={handleSubmit}
+          startIcon={
+            isLoading && <CircularProgress size={20} color="inherit" />
+          }
         >
           Continue
         </Button>

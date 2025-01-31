@@ -11,7 +11,7 @@ export const zUserUpdateSchema = z.object({
   firstName: z.string().max(50).optional(),
   lastName: z.string().max(50).optional(),
   ssn: z.string().max(200).optional().nullish(),
-  referralsource: z.nativeEnum(ReferralSource).optional().nullish(),
+  referralSource: z.nativeEnum(ReferralSource).optional().nullish(),
   address: zAddressCreateSchema.optional(),
   dateOfBirth: z.coerce.date().nullish(),
 });
@@ -29,7 +29,7 @@ export const zUserCreateSchema = z.object({
   clerkId: z.string().max(60).optional(),
   hubspotId: z.string().nullish(),
   ssn: z.string().max(200).optional(),
-  referralsource: z.nativeEnum(ReferralSource).optional(),
+  referralSource: z.nativeEnum(ReferralSource).optional(),
   email: z.string().email(),
   phoneNumber: z.string().optional(),
   address: zAddressCreateSchema.optional(),
