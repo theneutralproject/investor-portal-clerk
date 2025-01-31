@@ -11,7 +11,7 @@ export const zUserUpdateSchema = z.object({
   firstName: z.string().max(50).optional(),
   lastName: z.string().max(50).optional(),
   ssn: z.string().max(200).optional().nullish(),
-  referralsource: z.nativeEnum(ReferralSource).optional().nullish(),
+  referralSource: z.nativeEnum(ReferralSource).optional().nullish(),
   address: zAddressCreateSchema.optional(),
   dateOfBirth: z.coerce.date().nullish(),
 });

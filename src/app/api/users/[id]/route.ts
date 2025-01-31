@@ -99,25 +99,32 @@ export async function PUT(request: NextRequest) {
   }
 
   const { address, ...userUpdateData } = putData;
+  //  Check if hubspot needs to be updated
   let hubspotNeedsUpdate = false;
-  if (userUpdateData.email && userToUpdate.email !== userUpdateData.email)
+  if (userUpdateData.email && userToUpdate.email !== userUpdateData.email) {
     hubspotNeedsUpdate = true;
+  }
   if (
     userUpdateData.phoneNumber &&
     userToUpdate.phoneNumber !== userUpdateData.phoneNumber
-  )
+  ) {
     hubspotNeedsUpdate = true;
+  }
   if (
     userUpdateData.firstName &&
     userToUpdate.firstName !== userUpdateData.firstName
-  )
+  ) {
     hubspotNeedsUpdate = true;
+  }
   if (
     userUpdateData.lastName &&
     userToUpdate.lastName !== userUpdateData.lastName
-  )
+  ) {
     hubspotNeedsUpdate = true;
-  //  Check if hubspot needs to be updated
+  }
+  if (userToUpdate.referralSource !== userUpdateData.referralSource) {
+    hubspotNeedsUpdate = true;
+  }
 
   if (hubspotNeedsUpdate) {
     const hsUpdateData: HubspotContactCreateUpdateSchema = {
