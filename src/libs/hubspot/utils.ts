@@ -776,7 +776,7 @@ export function getProjectSlugFromDealStage(dealstage: string) {
 export function getFinancingType(hsFinancingType: string) {
   return hsFinancingType in DealFinancingType
     ? (hsFinancingType as keyof typeof DealFinancingType)
-    : null;
+    : undefined;
 }
 
 export const EdisonDealStages = [
