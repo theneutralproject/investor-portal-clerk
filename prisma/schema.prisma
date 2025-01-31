@@ -161,6 +161,7 @@ model OrganizationDocument {
 model Project {
   id                 Int                     @id @default(autoincrement())
   name               String                  @unique
+  displayName        String                  @default("")
   location           String
   tags               String                  @default("")
   status             Status                  @default(ACTIVE)

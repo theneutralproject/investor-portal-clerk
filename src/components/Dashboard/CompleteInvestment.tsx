@@ -138,7 +138,7 @@ const InProgressDeal = ({
 
         <Box sx={{ flexGrow: 1 }}>
           <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-            {deal.project.name}
+            {deal.project.displayName}
           </Typography>
           <Typography
             variant="body2"
