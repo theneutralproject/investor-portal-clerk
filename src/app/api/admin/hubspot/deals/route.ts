@@ -1,4 +1,7 @@
-import { getHubspotDealById } from '@/libs/hubspot/utils';
+import {
+  getDealStageIntFromHSString,
+  getHubspotDealById,
+} from '@/libs/hubspot/utils';
 import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 import { NextRequest } from 'next/server';
 
@@ -10,6 +13,9 @@ export async function GET(request: NextRequest) {
   }
   try {
     const hsDeal = await getHubspotDealById(hubspotId);
+    hsDeal.properties.dealstageInt = hsDeal.properties.dealstage
+      ? getDealStageIntFromHSString(hsDeal.properties.dealstage).toString()
+      : null;
     return jsonResponse(hsDeal);
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);
