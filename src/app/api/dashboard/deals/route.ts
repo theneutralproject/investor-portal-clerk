@@ -1,14 +1,22 @@
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils';
 import { currentUser } from '@clerk/nextjs';
+import { NextRequest } from 'next/server';
 
 // get deals by logged in user
-export async function GET() {
+export async function GET(request: NextRequest) {
   const clerkUser = await currentUser();
   if (!clerkUser) {
     console.log('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
+
+  Logger.log(request, {
+    extra: {
+      user: { clerkUserId: clerkUser.id, email: clerkUser.emailAddresses[0] },
+    },
+  });
 
   // Get the user from the database
   const dbUser = await prisma.user.findUnique({
@@ -16,8 +24,12 @@ export async function GET() {
   });
 
   if (!dbUser) {
-    console.log('User not found in database');
-    return errorResponse('User not found in database', 404);
+    return errorResponse('User not found in database', 404, {
+      request,
+      extra: {
+        method: 'prisma.user.findUnique',
+      },
+    });
   }
 
   // Get all organizations where user is a member
@@ -50,17 +62,22 @@ export async function GET() {
 
   return jsonResponse(filteredDeals);
 }
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   const body = await req.json();
   const dealId = Number(body.dealId);
+  Logger.log(req, { extra: body });
 
   if (!dealId || isNaN(dealId)) {
-    return errorResponse('Invalid deal ID', 400);
+    return errorResponse('Invalid deal ID', 400, {
+      request: req,
+    });
   }
 
   const clerkUser = await currentUser();
   if (!clerkUser) {
-    return errorResponse('User not authenticated', 401);
+    return errorResponse('User not authenticated', 401, {
+      request: req,
+    });
   }
 
   const dbUser = await prisma.user.findUnique({
@@ -68,7 +85,12 @@ export async function DELETE(req: Request) {
   });
 
   if (!dbUser) {
-    return errorResponse('User not found in database', 404);
+    return errorResponse('User not found in database', 404, {
+      request: req,
+      extra: {
+        method: 'prisma.user.findUnique',
+      },
+    });
   }
 
   const deal = await prisma.deal.findUnique({
@@ -77,7 +99,12 @@ export async function DELETE(req: Request) {
   });
 
   if (!deal) {
-    return errorResponse('Deal not found', 404);
+    return errorResponse('Deal not found', 404, {
+      request: req,
+      extra: {
+        method: 'prisma.deal.findUnique',
+      },
+    });
   }
 
   // Verify user owns the organization
@@ -89,7 +116,12 @@ export async function DELETE(req: Request) {
   });
 
   if (!isOwner) {
-    return errorResponse('Unauthorized to cancel this deal', 403);
+    return errorResponse('Unauthorized to cancel this deal', 403, {
+      request: req,
+      extra: {
+        method: 'prisma.organization.findUnique',
+      },
+    });
   }
 
   await prisma.deal.update({

@@ -20,7 +20,12 @@ export async function GET(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401);
+    return errorResponse(getErrorMessage(adminUser), 401, {
+      request,
+      extra: {
+        method: 'getAdminFromRequest',
+      },
+    });
   }
 
   let email: string | undefined;
@@ -44,7 +49,12 @@ export async function GET(request: NextRequest) {
     closingYearStr = queryParams.get('closingYear') ?? undefined;
     financingTypeStr = queryParams.get('financingType') ?? undefined;
   } catch (error) {
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: {
+        method: 'URL',
+      },
+    });
   }
 
   // return all deals if includeTaxDocument is true
@@ -77,7 +87,13 @@ export async function GET(request: NextRequest) {
       if (!project) {
         return errorResponse(
           `Project with name containing ${projectSlug} not found`,
-          404
+          404,
+          {
+            request,
+            extra: {
+              method: 'prisma.project.findFirst',
+            },
+          }
         );
       }
       projectId = project.id;
@@ -101,7 +117,13 @@ export async function GET(request: NextRequest) {
       if (!ownerOrgIds.length) {
         return errorResponse(
           `User with email containing ${email} not found`,
-          404
+          404,
+          {
+            request,
+            extra: {
+              method: 'ownerOrgIds.length',
+            },
+          }
         );
       }
     }
@@ -170,16 +192,33 @@ export async function POST(request: NextRequest) {
       'ERROR: unable to parse deals POST body:\n',
       getErrorMessage(parseError)
     );
-    return errorResponse(getErrorMessage(parseError), 400);
+    return errorResponse(getErrorMessage(parseError), 400, {
+      request,
+      extra: {
+        method: 'parseError',
+      },
+    });
   }
 
-  if (!postData.amount) return errorResponse('amount is required', 400);
+  if (!postData.amount)
+    return errorResponse('amount is required', 400, {
+      request,
+      extra: {
+        method: 'postData.amount',
+      },
+    });
   if (!postData.organizationId)
-    return errorResponse('organizationId is required', 400);
+    return errorResponse('organizationId is required', 400, {
+      request,
+    });
   if (!postData.financingType)
-    return errorResponse('financingType is required', 400);
+    return errorResponse('financingType is required', 400, {
+      request,
+    });
   if (!postData.closingDate)
-    return errorResponse('closingDate is required', 400);
+    return errorResponse('closingDate is required', 400, {
+      request,
+    });
   postData.dealStage = postData.dealStage ?? 5;
   postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
   postData.signaturesCompletedDate =
@@ -193,7 +232,13 @@ export async function POST(request: NextRequest) {
   if (!ownerOrg?.ownedBy)
     return errorResponse(
       `organization owner for org id ${postData.organizationId} not found`,
-      404
+      404,
+      {
+        request,
+        extra: {
+          method: 'ownerOrg?.ownedBy',
+        },
+      }
     );
 
   try {
@@ -201,6 +246,11 @@ export async function POST(request: NextRequest) {
     return jsonResponse(newDeal);
   } catch (error) {
     console.error('unable to create deal:', getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: {
+        method: 'createDealForUser',
+      },
+    });
   }
 }
