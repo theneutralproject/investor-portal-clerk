@@ -52,7 +52,7 @@ async function fetchAllDealsFromHubspot() {
 }
 
 async function main() {
-  const deals = await prisma.deal.findMany();
+  const deals = await prisma.deal.findMany({ where: { dateCreated: null } });
   console.log(`${deals.length} deals found in database.`);
   const hubspotDeals = await fetchAllDealsFromHubspot();
   console.log(

@@ -52,7 +52,7 @@ async function fetchAllUsersFromHubspot() {
 }
 
 async function main() {
-  const users = await prisma.user.findMany();
+  const users = await prisma.user.findMany({ where: { dateCreated: null } });
   console.log(`${users.length} users found in database.`);
   const hubspotUsers = await fetchAllUsersFromHubspot();
   console.log(
