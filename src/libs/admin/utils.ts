@@ -148,6 +148,8 @@ export async function matchDealWithPdf(
             dateFundsSent: deal.dateFundsSent,
             paymentMethod: deal.paymentMethod,
             paymentReferenceId: deal.paymentReferenceId,
+            dateCreated: deal.dateCreated,
+            dateUpdated: deal.dateUpdated,
           },
           owner: owner.user,
           organization,
