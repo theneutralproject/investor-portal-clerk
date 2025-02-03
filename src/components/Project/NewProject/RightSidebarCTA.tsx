@@ -54,7 +54,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
         >
           <Box>
             <Typography variant="h6" fontWeight="bold">
-              {project.name}
+              {project.displayName}
             </Typography>
             <Typography color="text.secondary" sx={{ fontSize: '0.875rem' }}>
               {project.location}

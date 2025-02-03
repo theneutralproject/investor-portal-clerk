@@ -199,11 +199,11 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
     if (userData.phoneNumber?.length === 0) delete userData.phoneNumber;
 
     if (userData.email) delete userData.email; // email is not updatable
-    if (userData.referralsource) {
-      if (userData.referralsource?.length === 0) delete userData.referralsource;
+    if (userData.referralSource) {
+      if (userData.referralSource?.length === 0) delete userData.referralSource;
       else if (
         ReferralSource[
-          userData.referralsource as unknown as keyof typeof ReferralSource
+          userData.referralSource as unknown as keyof typeof ReferralSource
         ] === undefined
       ) {
         throw new Error('Invalid referral source');

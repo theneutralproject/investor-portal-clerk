@@ -49,7 +49,7 @@ const ProjectCard: React.FC<{ project: ProjectWithAllNestedData }> = ({
         <Box display="flex" justifyContent="space-between" alignItems="center">
           <Box>
             <Typography variant="h5" component="div">
-              {project.name}
+              {project.displayName}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {project.location}

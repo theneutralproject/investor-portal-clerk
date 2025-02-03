@@ -173,7 +173,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                   >
                     <Box sx={{ width: '100%' }}>
                       <Typography variant="h6" sx={{ mb: 0.5 }}>
-                        {project.name}
+                        {project.displayName}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {project.location}

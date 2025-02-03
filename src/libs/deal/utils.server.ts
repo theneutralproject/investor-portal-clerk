@@ -25,6 +25,7 @@ import type {
 } from '../types';
 import { getInvestmentEntity } from './utils';
 import { getErrorMessage } from '../utils';
+import { HubspotDealUpdate } from '../hubspot/schema';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -45,25 +46,40 @@ export async function createDealForUser(
       `Project with id ${dealData.projectId} does not have investment stats.`
     );
   }
+  if (!dealOwner.hubspotId) {
+    const hsDealInput = initHubspotDealProps(project.name, dealOwner, dealData);
+    if (!hsDealInput) {
+      throw new Error(
+        'Deal cannot be created. Project not yet supported in Hubspot'
+      );
+    }
 
-  const hsDealInput = initHubspotDealProps(project.name, dealOwner, dealData);
-  if (!hsDealInput) {
-    throw new Error(
-      'Deal cannot be created. Project not yet supported in Hubspot'
+    const hsDealId = await createHubspotDeal(
+      hsDealInput,
+      String(dealOwner.hubspotId)
     );
+    dealData.hubspotId = hsDealId;
   }
-
-  const hsDealId = await createHubspotDeal(
-    hsDealInput,
-    String(dealOwner.hubspotId)
-  );
-  dealData.hubspotId = hsDealId;
   try {
     const newDeal = await _createDeal(
       dealData,
       dealOwner,
       project as ProjectWithInvestmentStats
     );
+
+    if (dealData.hubspotId) {
+      const hsDeal: HubspotDealUpdate = {
+        hubspotDealId: parseInt(dealData.hubspotId, 10),
+        properties: [
+          {
+            name: 'transaction_id',
+            value: newDeal.transactionId,
+          },
+        ],
+      };
+      updateHubspotDealProperties(hsDeal);
+    }
+
     return newDeal;
   } catch (e) {
     console.error('Failed to create deal', e);

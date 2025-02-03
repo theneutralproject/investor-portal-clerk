@@ -78,7 +78,7 @@ export async function PUT(request: NextRequest) {
   //TODO: use new updateUserInDbAndHubspot function instead of this, but might need to unsanitize ssn first
   const { address, ...userData } = putData;
   //  Check if hubspot and clerk needs to be updated, and then update them
-  if (userData.firstName || userData.lastName) {
+  if (userData.firstName || userData.lastName || userData.referralSource) {
     const clerkUpdate: ClerkUserUpdateSchema = {};
     const hsUpdateData: HubspotContactCreateUpdateSchema = {
       hubspotId: requestingUser.hubspotId,
@@ -91,6 +91,9 @@ export async function PUT(request: NextRequest) {
     if (userData.lastName) {
       hsUpdateData.properties.lastname = userData.lastName;
       clerkUpdate.lastName = userData.lastName;
+    }
+    if (userData.referralSource) {
+      hsUpdateData.properties.referral_source = userData.referralSource;
     }
 
     try {

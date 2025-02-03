@@ -30,7 +30,7 @@ export const DealDocumentScalarFieldEnumSchema = z.enum(['id','name','type','dea
 
 export const OrganizationDocumentScalarFieldEnumSchema = z.enum(['id','name','organizationId','dateCreated','path','key','uploadedById']);
 
-export const ProjectScalarFieldEnumSchema = z.enum(['id','name','location','tags','status','description','marketHighlights','youtubeUrl','slug','equityReturnsFile']);
+export const ProjectScalarFieldEnumSchema = z.enum(['id','name','displayName','location','tags','status','description','marketHighlights','youtubeUrl','slug','equityReturnsFile']);
 
 export const ProjectPropertyStatsScalarFieldEnumSchema = z.enum(['id','avgRent','avgUnitSize','commercialSqFt','numUnits','projectId']);
 
@@ -317,6 +317,7 @@ export const ProjectSchema = z.object({
   status: StatusSchema,
   id: z.number().int(),
   name: z.string(),
+  displayName: z.string(),
   location: z.string(),
   tags: z.string(),
   description: z.string(),
@@ -867,6 +868,7 @@ export const ProjectCountOutputTypeSelectSchema: z.ZodType<Prisma.ProjectCountOu
 export const ProjectSelectSchema: z.ZodType<Prisma.ProjectSelect> = z.object({
   id: z.boolean().optional(),
   name: z.boolean().optional(),
+  displayName: z.boolean().optional(),
   location: z.boolean().optional(),
   tags: z.boolean().optional(),
   status: z.boolean().optional(),
@@ -2113,6 +2115,7 @@ export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.ob
   NOT: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  displayName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   location: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tags: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   status: z.union([ z.lazy(() => EnumStatusFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
@@ -2133,6 +2136,7 @@ export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.ob
 export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  displayName: z.lazy(() => SortOrderSchema).optional(),
   location: z.lazy(() => SortOrderSchema).optional(),
   tags: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
@@ -2185,6 +2189,7 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
   AND: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ProjectWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectWhereInputSchema),z.lazy(() => ProjectWhereInputSchema).array() ]).optional(),
+  displayName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   location: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   tags: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   status: z.union([ z.lazy(() => EnumStatusFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
@@ -2204,6 +2209,7 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
 export const ProjectOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  displayName: z.lazy(() => SortOrderSchema).optional(),
   location: z.lazy(() => SortOrderSchema).optional(),
   tags: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
@@ -2225,6 +2231,7 @@ export const ProjectScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.Proje
   NOT: z.union([ z.lazy(() => ProjectScalarWhereWithAggregatesInputSchema),z.lazy(() => ProjectScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  displayName: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   location: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   tags: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   status: z.union([ z.lazy(() => EnumStatusWithAggregatesFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
@@ -3874,6 +3881,7 @@ export const OrganizationDocumentUncheckedUpdateManyInputSchema: z.ZodType<Prism
 
 export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -3894,6 +3902,7 @@ export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.
 export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -3913,6 +3922,7 @@ export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUnchecke
 
 export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3933,6 +3943,7 @@ export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.
 export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3953,6 +3964,7 @@ export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUnchecke
 export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -3965,6 +3977,7 @@ export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInp
 
 export const ProjectUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectUpdateManyMutationInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -3978,6 +3991,7 @@ export const ProjectUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectUpdat
 export const ProjectUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5767,6 +5781,7 @@ export const ProjectPictureOrderByRelationAggregateInputSchema: z.ZodType<Prisma
 export const ProjectCountOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  displayName: z.lazy(() => SortOrderSchema).optional(),
   location: z.lazy(() => SortOrderSchema).optional(),
   tags: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
@@ -5784,6 +5799,7 @@ export const ProjectAvgOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectAvgO
 export const ProjectMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  displayName: z.lazy(() => SortOrderSchema).optional(),
   location: z.lazy(() => SortOrderSchema).optional(),
   tags: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
@@ -5797,6 +5813,7 @@ export const ProjectMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectMaxO
 export const ProjectMinOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
   name: z.lazy(() => SortOrderSchema).optional(),
+  displayName: z.lazy(() => SortOrderSchema).optional(),
   location: z.lazy(() => SortOrderSchema).optional(),
   tags: z.lazy(() => SortOrderSchema).optional(),
   status: z.lazy(() => SortOrderSchema).optional(),
@@ -8777,6 +8794,7 @@ export const OrganizationCreateOrConnectWithoutDealsInputSchema: z.ZodType<Prism
 
 export const ProjectCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutDealsInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -8796,6 +8814,7 @@ export const ProjectCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreat
 export const ProjectUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutDealsInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -8990,6 +9009,7 @@ export const ProjectUpdateToOneWithWhereWithoutDealsInputSchema: z.ZodType<Prism
 
 export const ProjectUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutDealsInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -9009,6 +9029,7 @@ export const ProjectUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUpdat
 export const ProjectUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutDealsInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10687,6 +10708,7 @@ export const ProjectPropertyStatsUncheckedUpdateWithoutProjectInputSchema: z.Zod
 
 export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPropertyStatsInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10706,6 +10728,7 @@ export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
 export const ProjectUncheckedCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutPropertyStatsInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10740,6 +10763,7 @@ export const ProjectUpdateToOneWithWhereWithoutPropertyStatsInputSchema: z.ZodTy
 
 export const ProjectUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutPropertyStatsInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10759,6 +10783,7 @@ export const ProjectUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
 export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutPropertyStatsInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10777,6 +10802,7 @@ export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Pr
 
 export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutInvestmentStatsInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10796,6 +10822,7 @@ export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
 export const ProjectUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutInvestmentStatsInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10830,6 +10857,7 @@ export const ProjectUpdateToOneWithWhereWithoutInvestmentStatsInputSchema: z.Zod
 
 export const ProjectUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutInvestmentStatsInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10849,6 +10877,7 @@ export const ProjectUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
 export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutInvestmentStatsInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10867,6 +10896,7 @@ export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<
 
 export const ProjectCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectCreateWithoutProjectPaymentInfoInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10886,6 +10916,7 @@ export const ProjectCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma
 export const ProjectUncheckedCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutProjectPaymentInfoInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10920,6 +10951,7 @@ export const ProjectUpdateToOneWithWhereWithoutProjectPaymentInfoInputSchema: z.
 
 export const ProjectUpdateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutProjectPaymentInfoInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10939,6 +10971,7 @@ export const ProjectUpdateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma
 export const ProjectUncheckedUpdateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutProjectPaymentInfoInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -10957,6 +10990,7 @@ export const ProjectUncheckedUpdateWithoutProjectPaymentInfoInputSchema: z.ZodTy
 
 export const ProjectCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutMilestonesInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -10976,6 +11010,7 @@ export const ProjectCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
 export const ProjectUncheckedCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutMilestonesInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -11010,6 +11045,7 @@ export const ProjectUpdateToOneWithWhereWithoutMilestonesInputSchema: z.ZodType<
 
 export const ProjectUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutMilestonesInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -11029,6 +11065,7 @@ export const ProjectUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
 export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutMilestonesInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -11047,6 +11084,7 @@ export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prism
 
 export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPicturesInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -11066,6 +11104,7 @@ export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCr
 export const ProjectUncheckedCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutPicturesInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -11100,6 +11139,7 @@ export const ProjectUpdateToOneWithWhereWithoutPicturesInputSchema: z.ZodType<Pr
 
 export const ProjectUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutPicturesInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -11119,6 +11159,7 @@ export const ProjectUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUp
 export const ProjectUncheckedUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutPicturesInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -11160,6 +11201,7 @@ export const DocumentEventCreateManyDocumentInputEnvelopeSchema: z.ZodType<Prism
 
 export const ProjectCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutDocumentsInput> = z.object({
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -11179,6 +11221,7 @@ export const ProjectCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectC
 export const ProjectUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutDocumentsInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
+  displayName: z.string().optional(),
   location: z.string(),
   tags: z.string().optional(),
   status: z.lazy(() => StatusSchema).optional(),
@@ -11229,6 +11272,7 @@ export const ProjectUpdateToOneWithWhereWithoutDocumentsInputSchema: z.ZodType<P
 
 export const ProjectUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutDocumentsInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
@@ -11248,6 +11292,7 @@ export const ProjectUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectU
 export const ProjectUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutDocumentsInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
