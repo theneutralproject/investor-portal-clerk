@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
     return errorResponse('User not found in database', 404, {
       request,
       extra: {
-        log: 'failed at GET dashboard/deals -> prisma.user.findUnique',
+        method: 'prisma.user.findUnique',
       },
     });
   }
@@ -70,9 +70,6 @@ export async function DELETE(req: NextRequest) {
   if (!dealId || isNaN(dealId)) {
     return errorResponse('Invalid deal ID', 400, {
       request: req,
-      extra: {
-        log: 'failed at DELETE dashboard/deals -> dealId',
-      },
     });
   }
 
@@ -80,9 +77,6 @@ export async function DELETE(req: NextRequest) {
   if (!clerkUser) {
     return errorResponse('User not authenticated', 401, {
       request: req,
-      extra: {
-        log: 'failed at DELETE dashboard/deals -> clerkUser',
-      },
     });
   }
 
@@ -94,7 +88,7 @@ export async function DELETE(req: NextRequest) {
     return errorResponse('User not found in database', 404, {
       request: req,
       extra: {
-        log: 'failed at DELETE dashboard/deals -> prisma.user.findUnique',
+        method: 'prisma.user.findUnique',
       },
     });
   }
@@ -108,7 +102,7 @@ export async function DELETE(req: NextRequest) {
     return errorResponse('Deal not found', 404, {
       request: req,
       extra: {
-        log: 'failed at DELETE dashboard/deals -> prisma.deal.findUnique',
+        method: 'prisma.deal.findUnique',
       },
     });
   }
@@ -125,7 +119,7 @@ export async function DELETE(req: NextRequest) {
     return errorResponse('Unauthorized to cancel this deal', 403, {
       request: req,
       extra: {
-        log: 'failed at DELETE dashboard/deals -> prisma.organization.findUnique',
+        method: 'prisma.organization.findUnique',
       },
     });
   }

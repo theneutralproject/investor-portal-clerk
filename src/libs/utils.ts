@@ -16,7 +16,7 @@ export function jsonResponse(data: unknown, status = 200) {
 export function errorResponse(
   message: string,
   status: number,
-  metadata?: { request: NextRequest; extra: Record<string, unknown> }
+  metadata?: { request: NextRequest; extra?: Record<string, unknown> }
 ) {
   if (metadata?.request) {
     Logger.error(metadata.request, new Error(message), metadata.extra);

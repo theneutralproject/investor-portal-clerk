@@ -45,11 +45,14 @@ class Logger {
     error: Error,
     extra: Record<string, unknown | Sentry.SeverityLevel> = {}
   ): void {
+    const apiMessage = `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`;
     const logData = {
+      apiMessage,
       level: 'error',
       message: error.message,
       stack: error.stack,
       request: this.getRequestDetails(req),
+      log: this.getLogError(req, error, extra.method),
       extra,
     };
 
@@ -71,6 +74,25 @@ class Logger {
       body: req.body || {},
     };
   }
+
+  /**
+   * Generates a structured error log message including the HTTP method, request path, and function name.
+   * Extracts the function name from the stack trace automatically.
+   *
+   * @param {NextRequest} req - The Next.js request object containing method and URL information.
+   * @param {any} error - The error object to extract the message from.
+   * @param {string} method - [Optional] The method where the issue failed.
+   * @returns {string} - A formatted log message indicating where the failure occurred.
+   */
+  private static getLogError = (
+    req: NextRequest,
+    error: any,
+    method?: string | unknown
+  ) => {
+    const stack = new Error().stack?.split('\n')[2] || '';
+    const functionName = stack.match(/at (\w+)/)?.[1] || 'unknown function';
+    return `Failed at ${req.method} ${req.nextUrl.pathname} -> ${method || functionName}: ${error.message}`;
+  };
 }
 
 export default Logger;

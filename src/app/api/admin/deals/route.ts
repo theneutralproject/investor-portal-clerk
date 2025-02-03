@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     return errorResponse(getErrorMessage(adminUser), 401, {
       request,
       extra: {
-        log: 'failed at GET admin/deals -> getAdminFromRequest',
+        method: 'getAdminFromRequest',
       },
     });
   }
@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
     return errorResponse(getErrorMessage(error), 500, {
       request,
       extra: {
-        log: 'failed at GET admin/deals -> URL',
+        method: 'URL',
       },
     });
   }
@@ -91,7 +91,7 @@ export async function GET(request: NextRequest) {
           {
             request,
             extra: {
-              log: 'failed at GET admin/deals -> prisma.project.findFirst',
+              method: 'prisma.project.findFirst',
             },
           }
         );
@@ -121,7 +121,7 @@ export async function GET(request: NextRequest) {
           {
             request,
             extra: {
-              log: 'failed at GET admin/deals -> ownerOrgIds.length',
+              method: 'ownerOrgIds.length',
             },
           }
         );
@@ -195,7 +195,7 @@ export async function POST(request: NextRequest) {
     return errorResponse(getErrorMessage(parseError), 400, {
       request,
       extra: {
-        log: 'failed at POST admin/deals -> parseError',
+        method: 'parseError',
       },
     });
   }
@@ -204,29 +204,20 @@ export async function POST(request: NextRequest) {
     return errorResponse('amount is required', 400, {
       request,
       extra: {
-        log: 'failed at POST admin/deals -> postData.amount',
+        method: 'postData.amount',
       },
     });
   if (!postData.organizationId)
     return errorResponse('organizationId is required', 400, {
       request,
-      extra: {
-        log: 'failed at POST admin/deals -> postData.organizationId',
-      },
     });
   if (!postData.financingType)
     return errorResponse('financingType is required', 400, {
       request,
-      extra: {
-        log: 'failed at POST admin/deals -> postData.financingType',
-      },
     });
   if (!postData.closingDate)
     return errorResponse('closingDate is required', 400, {
       request,
-      extra: {
-        log: 'failed at POST admin/deals -> postData.closingDate',
-      },
     });
   postData.dealStage = postData.dealStage ?? 5;
   postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
@@ -245,7 +236,7 @@ export async function POST(request: NextRequest) {
       {
         request,
         extra: {
-          log: 'failed at POST admin/deals -> ownerOrg?.ownedBy',
+          method: 'ownerOrg?.ownedBy',
         },
       }
     );
@@ -258,7 +249,7 @@ export async function POST(request: NextRequest) {
     return errorResponse(getErrorMessage(error), 500, {
       request,
       extra: {
-        log: 'failed at POST admin/deals -> createDealForUser',
+        method: 'createDealForUser',
       },
     });
   }
