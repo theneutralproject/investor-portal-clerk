@@ -21,7 +21,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:e2e": "npx playwright test --ui",
-    "prepare": "husky"
+    "prepare": "husky",
+    "prisma:backfill-deals-dates": "tsx seedScripts/202502022334-backfill-dates.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^4.31.5",
