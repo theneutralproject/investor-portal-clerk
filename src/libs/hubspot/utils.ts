@@ -411,6 +411,13 @@ export async function updateHubspotDealProperties(
   return hsRes;
 }
 
+/**
+ * generate hubspot deal name based on user and project, and populate deal properties based on project
+ * @param projectName
+ * @param user
+ * @param dealData
+ * @returns
+ */
 export function initHubspotDealProps(
   projectName: string,
   user: User,
