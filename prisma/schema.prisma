@@ -29,6 +29,8 @@ model User {
   referralSource               String?
   dateOfBirth                  DateTime?
   address                      Address?
+  dateCreated                  DateTime?              @default(now())
+  dateUpdated                  DateTime?              @updatedAt
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
   DocusignEvent                DocusignEvent[]
@@ -53,6 +55,8 @@ model Deal {
   paymentMethod             PaymentMethod?
   paymentReferenceId        String?
   accreditationVerification AccreditationVerification?
+  dateCreated               DateTime?                  @default(now())
+  dateUpdated               DateTime?                  @updatedAt
   organization              Organization               @relation(fields: [organizationId], references: [id])
   project                   Project                    @relation(fields: [projectId], references: [id])
   document                  DealDocument[]
@@ -77,6 +81,8 @@ model DealInvestmentStats {
   equityTermMonths      Int               @default(0)
   debtPaymentFreqMonths Int               @default(0)
   equityPreferredReturn Float             @default(0.0)
+  dateCreated           DateTime?         @default(now())
+  dateUpdated           DateTime?         @updatedAt
   deal                  Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade)
 }
 
@@ -276,13 +282,15 @@ model ProjectDocument {
 
 /// used to track who accessed which document when
 model DocumentEvent {
-  id         Int               @id @default(autoincrement())
-  userId     Int
-  documentId Int
-  date       DateTime
-  type       DocumentEventType
-  document   ProjectDocument   @relation(fields: [documentId], references: [id])
-  user       User              @relation(fields: [userId], references: [id])
+  id          Int               @id @default(autoincrement())
+  userId      Int
+  documentId  Int
+  date        DateTime
+  type        DocumentEventType
+  dateCreated DateTime?         @default(now())
+  dateUpdated DateTime?         @updatedAt
+  document    ProjectDocument   @relation(fields: [documentId], references: [id])
+  user        User              @relation(fields: [userId], references: [id])
 }
 
 model DocusignEvent {
@@ -295,6 +303,8 @@ model DocusignEvent {
   dateCompleted              DateTime?
   allSignaturesCompleted     Boolean   @default(false)
   investorSignatureCompleted Boolean   @default(false)
+  dateCreated                DateTime? @default(now())
+  dateUpdated                DateTime? @updatedAt
   deal                       Deal      @relation(fields: [dealId], references: [id])
   user                       User      @relation(fields: [userId], references: [id])
 }

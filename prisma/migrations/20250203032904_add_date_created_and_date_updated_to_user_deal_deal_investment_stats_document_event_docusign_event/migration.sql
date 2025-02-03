@@ -1,0 +1,19 @@
+-- AlterTable
+ALTER TABLE "Deal" ADD COLUMN     "dateCreated" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "dateUpdated" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "DealInvestmentStats" ADD COLUMN     "dateCreated" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "dateUpdated" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "DocumentEvent" ADD COLUMN     "dateCreated" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "dateUpdated" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "DocusignEvent" ADD COLUMN     "dateCreated" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "dateUpdated" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "dateCreated" TIMESTAMP(3) DEFAULT CURRENT_TIMESTAMP,
+ADD COLUMN     "dateUpdated" TIMESTAMP(3);
