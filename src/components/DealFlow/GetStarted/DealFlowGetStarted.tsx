@@ -20,6 +20,7 @@ const DealFlowGetStarted: React.FC = () => {
         <LiteYouTubeEmbed
           id="7xao7xXOSL4"
           title="Investor Portal Dealflow Walkthrough"
+          thumbnail="https://wozumwkyltloehxggvzc.supabase.co/storage/v1/object/public/pictures/misc/videoframe_160801.png"
         />
       </Box>
       <DealFlowFooter onContinue={createDeal} />
