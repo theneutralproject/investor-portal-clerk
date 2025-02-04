@@ -1,16 +1,10 @@
 import React, { useState } from 'react';
-import {
-  Card,
-  CardContent,
-  Stack,
-  Typography,
-  Box,
-  TextField,
-} from '@mui/material';
-import { Payment as PaymentIcon } from '@mui/icons-material';
+import { Box } from '@mui/material';
 import DealFlowFooter from '../Shared/DealFlowFooter';
 import DealFlowTitle from '../Shared/DealFlowTitle';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
+import PaymentDetailsCard from './PaymentDetailsCard';
+import ReferenceNumberInput from './ReferenceNumberInput';
 
 interface FundCheckProps {
   paymentInfo: {
@@ -27,7 +21,6 @@ const FundCheck: React.FC<FundCheckProps> = ({
   onBack,
 }) => {
   const { deal, updateDeal, refetchDeal } = useDealFlow();
-
   const [checkNumber, setCheckNumber] = useState<string>(
     deal?.paymentReferenceId ?? ''
   );
@@ -37,31 +30,6 @@ const FundCheck: React.FC<FundCheckProps> = ({
   ) => {
     setCheckNumber(event.target.value);
   };
-
-  const renderDetailRow = (label: string, value: string | number) => (
-    <Stack
-      direction="row"
-      justifyContent="space-between"
-      alignItems="flex-start"
-      sx={{ width: '100%' }}
-    >
-      <Typography variant="body2" sx={{ textTransform: 'capitalize' }}>
-        {label}:
-      </Typography>
-      <Stack direction="row" alignItems="flex-start" spacing={1}>
-        <Typography
-          component="pre"
-          sx={{
-            fontFamily: 'inherit',
-            margin: 0,
-            whiteSpace: 'pre-line',
-          }}
-        >
-          {value}
-        </Typography>
-      </Stack>
-    </Stack>
-  );
 
   const fundCheckContinue = async () => {
     if (!deal) return;
@@ -78,50 +46,42 @@ const FundCheck: React.FC<FundCheckProps> = ({
     await refetchDeal();
   };
 
+  const details = [
+    {
+      label: 'Pay to',
+      value: paymentInfo.companyName,
+    },
+    {
+      label: 'Amount',
+      value: `$${investmentAmount.toLocaleString()}`,
+    },
+    {
+      label: 'Memo',
+      value: deal?.transactionId ?? '',
+    },
+    {
+      label: 'Mail to',
+      value: paymentInfo.mailTo,
+    },
+  ];
+
   return (
     <Box sx={{ p: 3 }}>
       <DealFlowTitle title="Fund Your Investment" />
 
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Stack
-            direction="row"
-            alignItems="center"
-            spacing={2}
-            sx={{ cursor: 'pointer' }}
-          >
-            <PaymentIcon sx={{ color: 'black' }} />
-            <Typography variant="h6" flex={1}>
-              Add Funds by Check
-            </Typography>
-          </Stack>
+      <PaymentDetailsCard
+        title="Add Funds by Check"
+        paymentType="check"
+        details={details}
+        copied={null}
+      />
 
-          <Box sx={{ mt: 2 }}>
-            <Stack spacing={2}>
-              {renderDetailRow('Pay to', paymentInfo.companyName)}
-              {renderDetailRow(
-                'Amount',
-                `$${investmentAmount.toLocaleString()}`
-              )}
-              {renderDetailRow('Memo', `${deal?.transactionId}`)}
-              {renderDetailRow('Mail to', paymentInfo.mailTo)}
-            </Stack>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardContent>
-          <TextField
-            fullWidth
-            variant="outlined"
-            label="Check Number"
-            helperText="Please enter your check number for tracking purposes"
-            value={checkNumber}
-            onChange={handleCheckNumberChange}
-          />
-        </CardContent>
-      </Card>
+      <ReferenceNumberInput
+        value={checkNumber}
+        onChange={handleCheckNumberChange}
+        label="Check Number"
+        helperText="Please enter your check number for tracking purposes"
+      />
 
       <DealFlowFooter
         onBack={onBack}
