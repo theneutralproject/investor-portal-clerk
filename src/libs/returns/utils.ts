@@ -555,6 +555,7 @@ export async function getPortfolioReturns(
         acc.equityDistributionCumulative += curr.equityDistributionCumulative;
         acc.portfolioValueToDate += curr.portfolioValueToDate;
         acc.principalInvestedCurrent += curr.principalInvestedCurrent;
+        acc.principalInvestedToDate += curr.principalInvestedToDate;
         return acc;
       });
 
