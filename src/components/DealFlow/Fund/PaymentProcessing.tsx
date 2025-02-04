@@ -6,13 +6,75 @@ import ShareOnSocial from './ShareOnSocial';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { PaymentMethod } from '@prisma/client';
+import PaymentDetailsCard from './PaymentDetailsCard';
+import { getPaymentInfo } from './FundShared';
 
 const PaymentProcessing: React.FC = () => {
   const router = useRouter();
-  const { deal } = useDealFlow();
+  const { deal, project } = useDealFlow();
+
   const goToDashboard = () => {
     router.push('/dashboard');
   };
+
+  const getPaymentDetails = () => {
+    if (!deal || !project) return null;
+
+    const paymentInfo = getPaymentInfo(project, deal);
+    const amount = {
+      label: 'Amount',
+      value: `$${deal.investmentStats?.amount?.toLocaleString()}`,
+    };
+
+    const referenceId = {
+      label:
+        deal.paymentMethod === PaymentMethod.CHECK
+          ? 'Check Number'
+          : 'Reference ID',
+      value: deal.paymentReferenceId ?? '',
+    };
+
+    switch (deal.paymentMethod) {
+      case PaymentMethod.WIRE:
+        return {
+          title: 'Wire Transfer Details',
+          paymentType: 'wire' as const,
+          details: [
+            amount,
+            {
+              label: 'Account Number',
+              value: paymentInfo.accountNumber,
+            },
+            {
+              label: 'Routing Number',
+              value: paymentInfo.routingNumber,
+            },
+            referenceId,
+          ],
+        };
+      case PaymentMethod.CHECK:
+        return {
+          title: 'Check Payment Details',
+          paymentType: 'check' as const,
+          details: [
+            amount,
+            {
+              label: 'Pay to',
+              value: paymentInfo.companyName,
+            },
+            {
+              label: 'Mail to',
+              value: paymentInfo.mailTo,
+            },
+            referenceId,
+          ],
+        };
+      default:
+        return null;
+    }
+  };
+
+  const paymentDetails = getPaymentDetails();
 
   return (
     <Box sx={{ p: 3 }}>
@@ -37,13 +99,13 @@ const PaymentProcessing: React.FC = () => {
 
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             Thank you for your payment in the amount of $
-            {deal?.investmentStats?.amount} for your investment with ID{' '}
-            {deal?.paymentReferenceId}.
+            {deal?.investmentStats?.amount?.toLocaleString()} for your
+            investment with ID {deal?.paymentReferenceId}.
           </Typography>
 
           {deal?.paymentMethod === PaymentMethod.ACH && (
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Please print this authorization for your records.You have
+              Please print this authorization for your records. You have
               authorized us to initiate an automated clearing house (ACH)
               one-time debit in your name to your bank account. This transaction
               will be presented to your financial institution by the next
@@ -57,6 +119,17 @@ const PaymentProcessing: React.FC = () => {
           </Button>
         </CardContent>
       </Card>
+
+      <Box sx={{ mt: 2 }}>
+        {paymentDetails && (
+          <PaymentDetailsCard
+            title={paymentDetails.title}
+            paymentType={paymentDetails.paymentType}
+            details={paymentDetails.details}
+            copied={null}
+          />
+        )}
+      </Box>
 
       <ShareOnSocial />
     </Box>
