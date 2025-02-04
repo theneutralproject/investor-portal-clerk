@@ -55,12 +55,32 @@ export async function GET(request: NextRequest) {
       given_name: string;
       family_name: string;
     };
+  if (!email) {
+    console.error(
+      'Email not found in token_info_response:',
+      token_info_response
+    );
+    return jsonResponse({ error: 'Email not found in token' }, 400);
+  }
 
   const user = await prisma.user.findUnique({
     where: { email, role: Role.ADMIN },
   });
   if (!user) {
-    return jsonResponse({ error: 'Admin User not found' }, 404);
+    const nonAdmin = await prisma.user.findUnique({
+      where: { email },
+    });
+    if (nonAdmin) {
+      return jsonResponse(
+        { error: `User with email ${email} is not an admin: ${nonAdmin.role}` },
+        403
+      );
+    } else {
+      return jsonResponse(
+        { error: `Admin User with email ${email} not found` },
+        404
+      );
+    }
   }
   if (user.lastName !== family_name || user.firstName !== given_name) {
     console.error(email, given_name, family_name);

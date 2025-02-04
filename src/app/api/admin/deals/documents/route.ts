@@ -21,9 +21,8 @@ export async function POST(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
   }
-  // const adminUser = { id: 1 }
 
   let dealId: number | null = null;
   let queryTaxYear: string | null = null;
@@ -114,7 +113,7 @@ export async function GET(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
   }
   let dealId: number | null = null;
   let includeTaxDocuments: string | null = null;
@@ -178,7 +177,7 @@ export async function DELETE(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
   }
 
   let fileId: number | null = null;

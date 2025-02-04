@@ -194,8 +194,6 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
         userData.ssn = presanitizedSSN;
       }
     }
-    if (userData.phoneNumber)
-      userData.phoneNumber = userData.phoneNumber.replace(/\D/g, '');
     if (userData.phoneNumber?.length === 0) delete userData.phoneNumber;
 
     if (userData.email) delete userData.email; // email is not updatable
@@ -209,7 +207,7 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
         throw new Error('Invalid referral source');
       }
     }
-
+    console.log('updating user in db', userData);
     // update user
     const updatedUser = await prisma.user.update({
       where: { id: userData.id },
