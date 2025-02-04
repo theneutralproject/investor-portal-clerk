@@ -25,7 +25,6 @@ import type {
 } from '../types';
 import { getInvestmentEntity } from './utils';
 import { getErrorMessage } from '../utils';
-import { HubspotDealUpdate } from '../hubspot/schema';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -46,7 +45,15 @@ export async function createDealForUser(
       `Project with id ${dealData.projectId} does not have investment stats.`
     );
   }
-  if (!dealOwner.hubspotId) {
+
+  //   generate transaction id
+  dealData.transactionId = `${project.name}-${dealOwner.lastName}-${Math.floor(
+    Math.random() * 900 + 100
+  )}`
+    .replace(/\s/g, '')
+    .toUpperCase();
+
+  if (!dealData.hubspotId) {
     const hsDealInput = initHubspotDealProps(project.name, dealOwner, dealData);
     if (!hsDealInput) {
       throw new Error(
@@ -67,19 +74,6 @@ export async function createDealForUser(
       project as ProjectWithInvestmentStats
     );
 
-    if (dealData.hubspotId) {
-      const hsDeal: HubspotDealUpdate = {
-        hubspotDealId: parseInt(dealData.hubspotId, 10),
-        properties: [
-          {
-            name: 'transaction_id',
-            value: newDeal.transactionId,
-          },
-        ],
-      };
-      updateHubspotDealProperties(hsDeal);
-    }
-
     return newDeal;
   } catch (e) {
     console.error('Failed to create deal', e);
@@ -95,6 +89,12 @@ export async function createDealForAdmin(
     where: { id: dealData.projectId },
     include: { investmentStats: true },
   });
+  //   generate transaction id
+  dealData.transactionId = `${project?.name}-${dealOwner.lastName}-${Math.floor(
+    Math.random() * 900 + 100
+  )}`
+    .replace(/\s/g, '')
+    .toUpperCase();
 
   if (!project?.investmentStats) {
     throw new Error(
@@ -119,13 +119,6 @@ async function _createDeal(
   user: User,
   project: ProjectWithInvestmentStats
 ): Promise<DealWithInvestmentStats> {
-  //   generate transaction id
-  dealData.transactionId = `${project.name}-${user.lastName}-${Math.floor(
-    Math.random() * 900 + 100
-  )}`
-    .replace(/\s/g, '')
-    .toUpperCase();
-
   //   get investment stats from project
   if (!dealData.financingType)
     dealData.financingType = DealFinancingType.equity;

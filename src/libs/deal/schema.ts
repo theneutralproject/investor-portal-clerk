@@ -47,7 +47,7 @@ export const zDealCreateSchema = z.object({
   hubspotId: z.string().nullish(),
   dealStage: z.number().min(0).max(6).nullish(),
   financingType: z.nativeEnum(DealFinancingType).nullish(),
-  transactionId: z.string().nullish(),
+  transactionId: z.string().optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
   dateFundsSent: z
