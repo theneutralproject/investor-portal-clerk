@@ -30,7 +30,7 @@ export async function getAdminFromRequest(request: NextRequest) {
       throw new Error('No email found in token');
     }
     const adminUser = await prisma.user.findUnique({
-      where: { email, role: Role.ADMIN },
+      where: { email: email.toLowerCase(), role: Role.ADMIN },
     });
     if (!adminUser) {
       throw new Error('Admin user not found');

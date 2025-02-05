@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
   try {
     const cleanPhone = postData.phoneNumber?.replace(/\D/g, '');
     const clerkUser = await findOrCreateClerkUser(
-      postData.email,
+      postData.email.toLocaleLowerCase(),
       postData.firstName,
       postData.lastName,
       cleanPhone
