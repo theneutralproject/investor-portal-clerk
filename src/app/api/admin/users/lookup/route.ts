@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
-    email = queryParams.get('email') ?? '';
+    email = queryParams.get('email')?.toLowerCase() ?? '';
     console.log('email:', email);
     if (!email) {
       throw new Error('dealId is required in url');
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const user = await prisma.user.findUniqueOrThrow({
+    const user = await prisma.user.findUnique({
       where: { email },
       include: {
         organizationsOwned: {
@@ -40,6 +40,8 @@ export async function GET(request: NextRequest) {
         address: true,
       },
     });
+    if (!user)
+      console.log(`User with email ${email} not found in lookup route`);
     return jsonResponse(user);
   } catch (__error) {
     return jsonResponse({ error: `User with email ${email} not found` }, 500);
