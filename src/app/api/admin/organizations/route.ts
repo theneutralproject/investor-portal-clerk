@@ -93,7 +93,7 @@ export async function PUT(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401);
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
   }
 
   let putData: OrganizationUpdateSchema;

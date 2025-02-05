@@ -20,12 +20,7 @@ export async function GET(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
     console.error(getErrorMessage(adminUser));
-    return errorResponse(getErrorMessage(adminUser), 401, {
-      request,
-      extra: {
-        method: 'getAdminFromRequest',
-      },
-    });
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
   }
 
   let email: string | undefined;
@@ -177,11 +172,11 @@ export async function GET(request: NextRequest) {
  * @param request
  */
 export async function POST(request: NextRequest) {
-  // const adminUser = await getAdminFromRequest(request);
-  // if (isError(adminUser)) {
-  //   console.error(getErrorMessage(adminUser));
-  //   return errorResponse(getErrorMessage(adminUser), 401);
-  // }
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  }
 
   let postData: DealCreateSchema;
   try {

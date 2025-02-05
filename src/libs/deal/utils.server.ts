@@ -54,7 +54,7 @@ export async function createDealForUser(
     .toUpperCase();
 
   if (!dealData.hubspotId) {
-    const hsDealInput = initHubspotDealProps(project.name, dealOwner, dealData);
+    const hsDealInput = initHubspotDealProps(project, dealOwner, dealData);
     if (!hsDealInput) {
       throw new Error(
         'Deal cannot be created. Project not yet supported in Hubspot'
@@ -127,7 +127,7 @@ async function _createDeal(
     minInvestmentAmount = project.investmentStats?.equityMinInvestment ?? 5000;
   else minInvestmentAmount = project.investmentStats?.debtMinInvestment ?? 5000;
 
-  if (!dealData.amount) dealData.amount = minInvestmentAmount;
+  if (!dealData.amount) dealData.amount = minInvestmentAmount; // set default amount to min investment amount
 
   let newInvestmentStats = {
     amount: dealData.amount,
