@@ -1,4 +1,4 @@
-import { type User, DealFinancingType } from '@prisma/client';
+import { type User, DealFinancingType, Project } from '@prisma/client';
 import axios from 'axios';
 import {
   type HubspotContactCreateUpdateSchema,
@@ -18,7 +18,6 @@ import {
   type SimplePublicObject,
   type PublicObjectSearchRequest,
 } from '@hubspot/api-client/lib/codegen/crm/deals';
-import { ProjectName } from '../project/schema';
 
 const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
@@ -419,87 +418,46 @@ export async function updateHubspotDealProperties(
  * @returns
  */
 export function initHubspotDealProps(
-  projectName: string,
+  project: Project,
   user: User,
   dealData: DealCreateSchema
 ) {
   const properties = [
     {
       name: 'dealname',
-      value: `${projectName} | ${user.firstName} ${user.lastName}`,
+      value: `${project.displayName} | ${user.firstName} ${user.lastName}`,
     },
     {
       name: 'investment_entity',
       value: getInvestmentEntity(
-        projectName,
+        project.name,
         dealData.financingType ?? DealFinancingType.equity
       ),
     },
-    { name: 'project_name', value: projectName },
+    { name: 'project_name', value: project.name },
     { name: 'amount', value: `${dealData.amount ?? 0}` },
     { name: 'transaction_id', value: dealData.transactionId! },
     { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
   ];
-  switch (projectName) {
-    case ProjectName['The Edison']: {
-      return {
-        properties: [
-          ...properties,
-          ...[
-            {
-              name: 'dealstage',
-              value: EdisonDealStages[dealData.dealStage ?? 1]?.value ?? '',
-            },
-            {
-              name: 'financing_type',
-              value: dealData.financingType ?? 'equity',
-            },
-          ],
-        ],
-      } as HubspotDealPropertiesCollection;
-    }
-    case ProjectName['519 W Main']: {
-      return {
-        properties: [
-          ...properties,
-          ...[
-            {
-              name: 'dealstage',
-              value: _519WMainDealStages[dealData.dealStage ?? 1]?.value ?? '',
-            },
-            {
-              name: 'financing_type',
-              value: dealData.financingType ?? 'equity',
-            },
-          ],
-        ],
-      } as HubspotDealPropertiesCollection;
-    }
-    case ProjectName['Bakers Place']: {
-      return {
-        properties: [
-          ...properties,
-          ...[
-            {
-              name: 'dealstage',
-              value:
-                BakersPlaceDealStages[dealData.dealStage ?? 1]?.value ?? '',
-            },
-            {
-              name: 'financing_type',
-              value: dealData.financingType ?? 'promissory_note_now',
-            },
-          ],
-        ],
-      } as HubspotDealPropertiesCollection;
-    }
-    default: {
-      console.error(
-        `The project with name ${projectName} is not yet supported in getDealPropsForProject()`
-      );
-      return null;
-    }
-  }
+  const hsDealStageString = getHsDealStageStrFromInt(
+    dealData.dealStage ?? 1,
+    project.slug
+  );
+  return {
+    properties: [
+      ...properties,
+      ...[
+        {
+          name: 'dealstage',
+          value: hsDealStageString,
+        },
+        {
+          name: 'financing_type',
+          value: dealData.financingType ?? 'equity',
+        },
+      ],
+    ],
+  } as HubspotDealPropertiesCollection;
 }
 
 export function getHsDealPropsFromDeal(
@@ -748,7 +706,7 @@ export function getHsDealStageStrFromInt(
     console.error(`dealStage ${dealStage} is not valid`);
     return 'null';
   }
-  if (dealStage > 0) dealStage -= 1;
+  if (dealStage > 0) dealStage -= 1; // convert to 0 based index
   switch (projectSlug) {
     case 'edison': {
       return EdisonDealStages[dealStage]?.value ?? 'null';
