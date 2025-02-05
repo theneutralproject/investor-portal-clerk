@@ -54,6 +54,7 @@ export async function createUserInDbAndHubspot(
   dealId?: number
 ) {
   const { address, ...userData } = data;
+  userData.email = userData.email.toLowerCase();
 
   let deal: Deal | null = null;
   if (dealId) {
