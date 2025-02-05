@@ -158,8 +158,16 @@ export async function GET(request: NextRequest) {
         organization: { include: { ownedBy: true } },
         investmentStats: true,
         document: {
-          where: { type: DealDocumentType.INVESTMENT_DOCUMENT },
-          include: { uploadedBy: true },
+          include: {
+            uploadedBy: {
+              select: {
+                email: true,
+                firstName: true,
+                lastName: true,
+                id: true,
+              },
+            },
+          },
         },
       },
     });
