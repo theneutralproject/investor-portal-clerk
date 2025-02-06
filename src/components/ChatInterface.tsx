@@ -4,7 +4,7 @@ import { Fab, Button, useTheme } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import { usePostHog } from 'posthog-js/react';
 import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
-import { useHubspotChat } from '@/hooks/useHubspotChat';
+import { useHubspotChat } from '@/components/HubspotChatProvider';
 
 const ChatInterface = ({ type }: { type: string }) => {
   const theme = useTheme();
