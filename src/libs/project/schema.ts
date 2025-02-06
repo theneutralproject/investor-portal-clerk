@@ -6,3 +6,9 @@ export enum ProjectName {
   'The Bloom' = 'The Bloom',
   '519 W Main' = '519 W Main',
 }
+
+export enum InvestmentEntity {
+  'The Edison' = 'The Edison Project LLC',
+  'Bakers Place' = 'Bakers Place Investment LLC',
+  '519 W Main' = 'Vanilla 301 LLC',
+}

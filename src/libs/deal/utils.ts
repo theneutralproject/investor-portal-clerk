@@ -1,24 +1,24 @@
 import type { DealFinancingType } from '@prisma/client';
-import { ProjectName } from '@/libs/project/schema';
+import { InvestmentEntity, ProjectName } from '@/libs/project/schema';
 
-const InvestmentEntity = {
+const _investmentEntity = {
   'The Edison': {
-    equity: 'Edison Project LLC',
-    promissory_note_now: 'Edison Project LLC',
-    promissory_note_at_closing: 'Edison Project LLC',
-    promissory_to_equity: 'Edison Project LLC',
+    equity: InvestmentEntity['The Edison'],
+    promissory_note_now: InvestmentEntity['The Edison'],
+    promissory_note_at_closing: InvestmentEntity['The Edison'],
+    promissory_to_equity: InvestmentEntity['The Edison'],
   },
   '519 W Main': {
-    equity: 'Vanilla 301 LLC',
-    promissory_note_now: 'Vanilla 301 LLC',
-    promissory_note_at_closing: 'Vanilla 301 LLC',
-    promissory_to_equity: 'Vanilla 301 LLC',
+    equity: InvestmentEntity['519 W Main'],
+    promissory_note_now: InvestmentEntity['519 W Main'],
+    promissory_note_at_closing: InvestmentEntity['519 W Main'],
+    promissory_to_equity: InvestmentEntity['519 W Main'],
   },
   'Bakers Place': {
-    equity: 'Bakers Place Investment LLC',
-    promissory_note_now: 'Bakers Place Investment LLC',
-    promissory_note_at_closing: 'Bakers Place Investment LLC',
-    promissory_to_equity: 'Bakers Place Investment LLC',
+    equity: InvestmentEntity['Bakers Place'],
+    promissory_note_now: InvestmentEntity['Bakers Place'],
+    promissory_note_at_closing: InvestmentEntity['Bakers Place'],
+    promissory_to_equity: InvestmentEntity['Bakers Place'],
   },
 };
 
@@ -30,7 +30,7 @@ export function getInvestmentEntity(
     case ProjectName['The Edison']:
     case ProjectName['519 W Main']:
     case ProjectName['Bakers Place']: {
-      return InvestmentEntity[projectName][financingType];
+      return _investmentEntity[projectName][financingType];
     }
     default: {
       console.error(

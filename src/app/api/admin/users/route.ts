@@ -76,7 +76,23 @@ export async function POST(request: NextRequest) {
     postData.clerkId = clerkUser?.id;
     postData.phoneNumber = cleanPhone;
     const newUser = await createUserInDbAndHubspot(postData);
-    return jsonResponse(newUser);
+    const userWithOrgs = await prisma.user.findUnique({
+      where: { id: newUser.id },
+      include: {
+        organizationsOwned: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            tin: true,
+            isPrimary: true,
+            ownershipType: true,
+          },
+        },
+        address: true,
+      },
+    });
+    return jsonResponse(userWithOrgs);
   } catch (error) {
     console.error('unable to create user:', getErrorMessage(error));
     return jsonResponse({ error: getErrorMessage(error) }, 500);

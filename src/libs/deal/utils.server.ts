@@ -305,8 +305,16 @@ export async function updateDeal(
     }
   }
 
-  // then update the deal
+  // then update the deal without the investment stats
   let updatedDeal: DealWithInvestmentStats;
+
+  if (dealData.dealStage === 5 && !existingDeal.closingDate) {
+    console.log(
+      'Setting closing date to today for deal with id',
+      existingDeal.id
+    );
+    dealData.closingDate = new Date();
+  }
 
   try {
     updatedDeal = (await prisma.deal.update({

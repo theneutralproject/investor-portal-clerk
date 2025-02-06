@@ -62,13 +62,13 @@ export async function GET(request: NextRequest) {
     );
     return jsonResponse({ error: 'Email not found in token' }, 400);
   }
-
+  const lowerCaseEmail = email.toLowerCase();
   const user = await prisma.user.findUnique({
-    where: { email, role: Role.ADMIN },
+    where: { email: lowerCaseEmail, role: Role.ADMIN },
   });
   if (!user) {
     const nonAdmin = await prisma.user.findUnique({
-      where: { email },
+      where: { email: lowerCaseEmail },
     });
     if (nonAdmin) {
       return jsonResponse(
