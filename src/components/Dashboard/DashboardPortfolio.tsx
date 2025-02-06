@@ -12,6 +12,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
 } from 'recharts';
 import PortfolioMetric from './PortfolioMetric';
 import { useQuery } from '@tanstack/react-query';
@@ -269,6 +270,11 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     return groupByQuarter(data.consolidatedSchedule);
   }, [data]);
 
+  // Find the first projected quarter index
+  const projectedStartIndex = React.useMemo(() => {
+    return chartData.findIndex(data => data.isProjected);
+  }, [chartData]);
+
   return (
     <>
       <Grid container spacing={4} sx={{ mb: 4 }}>
@@ -299,6 +305,13 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
                 labelFormatter={(label: string) => `Quarter: ${label}`}
               />
               <Legend content={<CustomLegend payload={[]} />} />
+              {/* Vertical divider between historic and projected data */}
+              {projectedStartIndex > 0 && (
+                <ReferenceLine
+                  x={chartData[projectedStartIndex]?.quarter}
+                  stroke="#656565"
+                />
+              )}
 
               {/* Areas for historical data */}
               <Area
