@@ -11,13 +11,14 @@ import 'react-toastify/dist/ReactToastify.css';
 
 import { ToastContainer } from 'react-toastify';
 
-import ChatInterface from '@/components/ChatInterface';
 import SignInTOSModal from '@/components/Dashboard/SignInTOSModal';
 import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 import PageViewTracker from './PageViewTracker';
 import CSPostHogProvider from './CSPostHogProvider';
 import UserIdentifier from './UserIdentifier';
 import { TermsProvider } from '@/app/context/TermsContext';
+import { HubspotChatProvider } from '@/components/HubspotChatProvider';
+
 const inter = Inter({
   subsets: ['latin'],
 });
@@ -43,24 +44,24 @@ export default function RootLayout({
               <UserIdentifier />
               <NeutralQueryProvider>
                 <NeutralThemeProvider>
-                  <SignInTOSModal />
-                  <DashboardProvider>
-                    <Sidebar>{children}</Sidebar>
-                    <ToastContainer
-                      position="top-right"
-                      autoClose={5000}
-                      newestOnTop={false}
-                      closeOnClick
-                      rtl={false}
-                      pauseOnFocusLoss
-                      draggable
-                      theme="light"
-                    />
-                  </DashboardProvider>
+                  <HubspotChatProvider>
+                    <SignInTOSModal />
+                    <DashboardProvider>
+                      <Sidebar>{children}</Sidebar>
+                      <ToastContainer
+                        position="top-right"
+                        autoClose={5000}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        theme="light"
+                      />
+                    </DashboardProvider>
+                  </HubspotChatProvider>
                 </NeutralThemeProvider>
               </NeutralQueryProvider>
-
-              <ChatInterface type="FAB" />
             </body>
 
             <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
