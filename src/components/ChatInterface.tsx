@@ -6,12 +6,6 @@ import { usePostHog } from 'posthog-js/react';
 import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 import { useHubspotChat } from '@/hooks/useHubspotChat';
 
-declare global {
-  interface Window {
-    HubSpotConversations?: any;
-  }
-}
-
 const ChatInterface = ({ type }: { type: string }) => {
   const theme = useTheme();
   const posthog = usePostHog();
