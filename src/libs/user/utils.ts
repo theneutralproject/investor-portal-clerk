@@ -20,6 +20,18 @@ import type { UserWithAddress } from '../types';
 import type { AddressCreateSchema } from '../address/schema';
 import { clerkClient } from '@clerk/nextjs/server';
 
+interface ClerkAPIErrorResponse {
+  clerkError: boolean;
+  errors: ClerkAPIError[];
+}
+
+interface ClerkAPIError {
+  code: string;
+  message: string;
+  longMessage: string;
+  meta: Record<string, any>;
+}
+
 const getHsUserData = (
   userData: UserCreateSchema | UserUpdateSchema,
   address: AddressCreateSchema | undefined
@@ -160,6 +172,56 @@ export async function createUserInDbAndHubspot(
   return updatedUser;
 }
 
+async function updateUserInClerk(userData: User) {
+  const clerkUpdate: ClerkUserUpdateSchema = {
+    firstName: userData.firstName,
+    lastName: userData.lastName,
+  };
+  if (userData.email) {
+    try {
+      await clerkClient.emailAddresses.createEmailAddress({
+        userId: userData.clerkId!,
+        emailAddress: userData.email,
+        primary: false,
+        verified: false,
+      });
+    } catch (error) {
+      if ((error as ClerkAPIErrorResponse).clerkError) {
+        console.error('Clerk API Error :)');
+        // Handle Clerk API errors
+        const clerkErrors = (error as ClerkAPIErrorResponse).errors;
+        clerkErrors.forEach(async err => {
+          console.error(`Clerk API Error: ${err.code} - ${err.message}`);
+          // Implement specific error handling based on err.code
+          if (err.code === 'form_identifier_exists') {
+            console.error(
+              `This email address already exists for user ${userData.clerkId}`,
+              err.message
+            );
+
+            // check if this email address is associated with the user we are looking to update:
+            const existingUsers = await clerkClient.users.getUserList({
+              emailAddress: [userData.email],
+            });
+            if (existingUsers[0]?.id === userData.clerkId) {
+              console.log(
+                `Email address ${userData.email} is already associated with user ${userData.clerkId}. We will still update Hubspot and DB.`
+              );
+            }
+            return existingUsers[0];
+          }
+          throw new Error(err.message);
+        });
+      } else {
+        // Handle other types of errors
+        console.error('An unexpected Clerk error occurred:', error);
+        throw error;
+      }
+    }
+  }
+  return await clerkClient.users.updateUser(userData.clerkId!, clerkUpdate);
+}
+
 export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
   const { address, ...userData } = data;
   if (!userData.id) {
@@ -197,7 +259,6 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
     }
     if (userData.phoneNumber?.length === 0) delete userData.phoneNumber;
 
-    if (userData.email) delete userData.email; // email is not updatable
     if (userData.referralSource) {
       if (userData.referralSource?.length === 0) delete userData.referralSource;
       else if (
@@ -208,26 +269,28 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
         throw new Error('Invalid referral source');
       }
     }
+    const userToUpdate = await prisma.user.findUnique({
+      where: { id: userData.id },
+    });
+    if (!userToUpdate) {
+      throw new Error(`User with id ${userData.id} not found`);
+    }
+
+    /* First update user in clerk**/
+    await updateUserInClerk(userToUpdate);
+
+    /* Second Upsert user in Hubspot**/
+    const hsUserData = getHsUserData(userData, address);
+    hsUserData.hubspotId = userToUpdate.hubspotId;
+    await updateHubspotContact(hsUserData);
+
+    /* Third update user in DB**/
     console.log('updating user in db', userData);
-    // update user
     const updatedUser = await prisma.user.update({
       where: { id: userData.id },
       data: userData,
       include: { address: true },
     });
-
-    /* Upsert user in Hubspot**/
-    const hsUserData = getHsUserData(userData, address);
-    hsUserData.hubspotId = updatedUser.hubspotId;
-    await updateHubspotContact(hsUserData);
-
-    // update them in clerk
-    const clerkUpdate: ClerkUserUpdateSchema = {
-      firstName: updatedUser.firstName,
-      lastName: updatedUser.lastName,
-    };
-    await clerkClient.users.updateUser(updatedUser.clerkId!, clerkUpdate);
-
     return updatedUser;
   } catch (error) {
     console.error('ERROR: unable to update user:\n', error);
