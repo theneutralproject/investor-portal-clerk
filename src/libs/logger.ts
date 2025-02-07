@@ -1,17 +1,16 @@
 import * as Sentry from '@sentry/nextjs';
-import { createLogger, format, transports } from 'winston';
+import pino from 'pino';
 import type { NextRequest } from 'next/server';
 import { parseSessionFromCookie } from './session/utils';
 
-const logger = createLogger({
+const logger = pino({
   level: 'info',
-  format: format.combine(
-    format.errors({ stack: true }),
-    format.colorize({ all: true }),
-    format.timestamp(),
-    format.json()
-  ),
-  transports: [new transports.Console()],
+  formatters: {
+    level(label) {
+      return { level: label.toUpperCase() };
+    },
+  },
+  timestamp: pino.stdTimeFunctions.isoTime, // Similar to Winston timestamp
 });
 
 type MetaData =
@@ -28,17 +27,20 @@ class Logger {
    * @param message - Log message.
    * @param extra - Additional metadata for the log.
    */
-  static log(req: NextRequest, metadata: MetaData = { extra: {} }): void {
-    const apiMessage = `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`;
+  static log(metadata: MetaData = { extra: {} }, req?: NextRequest): void {
+    const apiMessage =
+      metadata.message ||
+      (req &&
+        `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`);
     const logData = {
       apiMessage,
       level: 'log',
       message: metadata.message || '',
-      request: this.getRequestDetails(req),
+      request: req ? this.getRequestDetails(req) : null,
       extra: metadata.extra,
     };
 
-    logger.info(logData.apiMessage, logData);
+    logger.info(logData, logData.apiMessage);
     Sentry.addBreadcrumb({
       category: 'log',
       message: apiMessage,
@@ -54,20 +56,22 @@ class Logger {
    * @param extra - Additional metadata for the log.
    */
   static warn(
-    req: NextRequest,
     message: string,
+    req?: NextRequest,
     extra: Record<string, unknown> = {}
   ): void {
-    const apiMessage = `Warning from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`;
+    const apiMessage = req
+      ? `Warning from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
+      : '';
     const logData = {
       apiMessage,
       level: 'warn',
       message,
-      request: this.getRequestDetails(req),
+      request: req ? this.getRequestDetails(req) : null,
       extra,
     };
 
-    logger.warn(logData.apiMessage, logData);
+    logger.warn(logData, logData.apiMessage);
     Sentry.addBreadcrumb({
       category: 'log',
       message: apiMessage,
@@ -83,24 +87,27 @@ class Logger {
    * @param extra - Additional metadata for the log.
    */
   static error(
-    req: NextRequest,
     error: Error,
+    req?: NextRequest,
     extra: Record<string, unknown | Sentry.SeverityLevel> = {}
   ): void {
-    const apiMessage = `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`;
+    const apiMessage = req
+      ? `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
+      : `An error has ocurred: ${error.message}`;
+    const traces = error.stack?.split('\n    ') || [];
     const logData = {
       apiMessage,
       level: 'error',
       message: error.message,
-      stack: error.stack,
-      request: this.getRequestDetails(req),
-      log: this.getLogError(req, error, extra.method),
+      stack: [traces[0], traces[1]].join(' ').replaceAll('\n', ''),
+      request: req ? this.getRequestDetails(req) : null,
+      log: this.getLogError(error, req, extra.method),
       extra,
     };
 
     logger.error(
-      `Error '${logData.message}' ocurred at ${logData.apiMessage}`,
-      logData
+      logData,
+      `Error '${logData.message}' ocurred at ${logData.apiMessage}`
     );
     Sentry.captureException(error, { level: 'error', extra: logData });
   }
@@ -130,13 +137,15 @@ class Logger {
    * @returns {string} - A formatted log message indicating where the failure occurred.
    */
   private static getLogError = (
-    req: NextRequest,
     error: any,
+    req?: NextRequest,
     method?: string | unknown
   ) => {
     const stack = new Error().stack?.split('\n')[2] || '';
     const functionName = stack.match(/at (\w+)/)?.[1] || 'unknown function';
-    return `Failed at ${req.method} ${req.nextUrl.pathname} -> ${method || functionName}: ${error.message}`;
+    return req
+      ? `Failed at ${req.method} ${req.nextUrl.pathname} -> ${method || functionName}: ${error.message}`
+      : `Failed at ${method || functionName}: ${error.message}`;
   };
 }
 

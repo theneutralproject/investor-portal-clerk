@@ -37,7 +37,7 @@ export default authMiddleware({
 
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
-      Logger.log(_req, { extra: auth, message: `Not logged in: ${_req.url}` });
+      Logger.log({ extra: auth, message: `Not logged in: ${_req.url}` }, _req);
       const returnBackUrl = `${_req.url}${
         _req.url.includes('?') ? '&' : '?'
       }afterauth=true`;

@@ -57,6 +57,7 @@
     "number-to-words": "^1.2.4",
     "pdf-parse": "^1.1.1",
     "pdfjs-dist": "^4.8.69",
+    "pino": "^9.6.0",
     "posthog-js": "^1.165.0",
     "prisma-field-encryption": "^1.6.0",
     "react": "18.3.1",
@@ -76,7 +77,6 @@
     "ts-jest": "^29.2.5",
     "ts-node": "^10.9.2",
     "whatwg-fetch": "^3.6.20",
-    "winston": "^3.17.0",
     "zod": "^3.22.4",
     "zod-form-data": "^2.0.2",
     "zod-prisma-types": "^3.1.8"
