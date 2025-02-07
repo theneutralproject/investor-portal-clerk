@@ -9,11 +9,7 @@ import {
   updateHubspotContact,
 } from '../hubspot/utils';
 import prisma from '../prisma.server';
-import type {
-  ClerkUserUpdateSchema,
-  UserCreateSchema,
-  UserUpdateSchema,
-} from './schema';
+import type { UserCreateSchema, UserUpdateSchema } from './schema';
 import { getErrorMessage } from '../utils';
 import { type Deal, MembershipType, type User } from '@prisma/client';
 import type { UserWithAddress } from '../types';
@@ -172,16 +168,17 @@ export async function createUserInDbAndHubspot(
   return updatedUser;
 }
 
-async function updateUserInClerk(userData: User) {
-  const clerkUpdate: ClerkUserUpdateSchema = {
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-  };
-  if (userData.email) {
+async function updateUserInClerk(
+  clerkId: string,
+  firstName?: string,
+  lastName?: string,
+  email?: string
+) {
+  if (email) {
     try {
       await clerkClient.emailAddresses.createEmailAddress({
-        userId: userData.clerkId!,
-        emailAddress: userData.email,
+        userId: clerkId!,
+        emailAddress: email,
         primary: false,
         verified: false,
       });
@@ -196,11 +193,11 @@ async function updateUserInClerk(userData: User) {
           if (err.code === 'form_identifier_exists') {
             // check if this email address is associated with the user we are looking to update:
             const existingUsers = await clerkClient.users.getUserList({
-              emailAddress: [userData.email],
+              emailAddress: [email],
             });
-            if (existingUsers[0]?.id === userData.clerkId) {
+            if (existingUsers[0]?.id === clerkId) {
               console.log(
-                `Email address ${userData.email} is already associated with user ${userData.clerkId}. We will still update Hubspot and DB.`
+                `Email address ${email} is already associated with user ${clerkId}. We will still update Hubspot and DB.`
               );
             }
             return existingUsers[0];
@@ -214,7 +211,7 @@ async function updateUserInClerk(userData: User) {
       }
     }
   }
-  return await clerkClient.users.updateUser(userData.clerkId!, clerkUpdate);
+  return await clerkClient.users.updateUser(clerkId, { firstName, lastName });
 }
 
 export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
@@ -264,19 +261,26 @@ export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
         throw new Error('Invalid referral source');
       }
     }
-    const userToUpdate = await prisma.user.findUnique({
+    const foundUser = await prisma.user.findUnique({
       where: { id: userData.id },
     });
-    if (!userToUpdate) {
-      throw new Error(`User with id ${userData.id} not found`);
+    if (!foundUser?.clerkId) {
+      throw new Error(
+        `User with id ${userData.id} not found, or clerkId is missing`
+      );
     }
 
     /* First update user in clerk**/
-    await updateUserInClerk(userToUpdate);
+    await updateUserInClerk(
+      foundUser.clerkId,
+      userData.firstName,
+      userData.lastName,
+      userData.email
+    );
 
     /* Second Upsert user in Hubspot**/
     const hsUserData = getHsUserData(userData, address);
-    hsUserData.hubspotId = userToUpdate.hubspotId;
+    hsUserData.hubspotId = foundUser.hubspotId;
     await updateHubspotContact(hsUserData);
 
     /* Third update user in DB**/
