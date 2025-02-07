@@ -165,8 +165,6 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    // const dealData = await request.json() as DealUpdateSchema;
-
     const requestBody = (await request.json()) as DealUpdateSchema;
     // parse the date strings into Date objects for zod to validate
     if (requestBody.closingDate) {
@@ -176,7 +174,7 @@ export async function PUT(request: NextRequest) {
     }
 
     let deal: DealUpdateSchema;
-    console.log('requestBody', requestBody);
+    console.log('PUT requestBody', requestBody);
     try {
       deal = zDealUpdateSchema.parse(requestBody);
     } catch (parseError) {
