@@ -11,13 +11,7 @@ const logger = createLogger({
     format.timestamp(),
     format.json()
   ),
-  transports: [
-    new transports.Console(),
-    new transports.File({
-      filename: 'error.log',
-      level: 'error',
-    }),
-  ],
+  transports: [new transports.Console()],
 });
 
 type MetaData =
