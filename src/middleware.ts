@@ -1,6 +1,7 @@
 export const runtime = 'nodejs';
 import { authMiddleware, redirectToSignUp } from '@clerk/nextjs';
 import { type NextRequest, NextResponse } from 'next/server';
+import Logger from './libs/logger';
 
 export default authMiddleware({
   ignoredRoutes: [
@@ -36,7 +37,7 @@ export default authMiddleware({
 
   afterAuth(auth, _req) {
     if (!auth.userId && !auth.isPublicRoute) {
-      console.log('not logged in:', _req.url);
+      Logger.log(_req, { extra: auth, message: `Not logged in: ${_req.url}` });
       const returnBackUrl = `${_req.url}${
         _req.url.includes('?') ? '&' : '?'
       }afterauth=true`;

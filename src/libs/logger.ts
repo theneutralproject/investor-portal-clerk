@@ -1,10 +1,29 @@
 import * as Sentry from '@sentry/nextjs';
+import { createLogger, format, transports } from 'winston';
 import type { NextRequest } from 'next/server';
 import { parseSessionFromCookie } from './session/utils';
 
+const logger = createLogger({
+  level: 'info',
+  format: format.combine(
+    format.errors({ stack: true }),
+    format.colorize({ all: true }),
+    format.timestamp(),
+    format.json()
+  ),
+  transports: [
+    new transports.Console(),
+    new transports.File({
+      filename: 'error.log',
+      level: 'error',
+    }),
+  ],
+});
+
 type MetaData =
-  | { message?: string; extra: Record<string, unknown> | object }
+  | { message?: string; extra?: Record<string, unknown> | object }
   | undefined;
+
 /**
  * Logger utility for structured logging.
  */
@@ -25,11 +44,40 @@ class Logger {
       extra: metadata.extra,
     };
 
-    console.log(JSON.stringify(logData, null, 4)); // Pretty-print log
+    logger.info(logData.apiMessage, logData);
     Sentry.addBreadcrumb({
       category: 'log',
       message: apiMessage,
       level: 'info',
+      data: logData,
+    });
+  }
+
+  /**
+   * Logs warnings with user & request details.
+   * @param req - The Next.js request object.
+   * @param message - Warning message.
+   * @param extra - Additional metadata for the log.
+   */
+  static warn(
+    req: NextRequest,
+    message: string,
+    extra: Record<string, unknown> = {}
+  ): void {
+    const apiMessage = `Warning from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`;
+    const logData = {
+      apiMessage,
+      level: 'warn',
+      message,
+      request: this.getRequestDetails(req),
+      extra,
+    };
+
+    logger.warn(logData.apiMessage, logData);
+    Sentry.addBreadcrumb({
+      category: 'log',
+      message: apiMessage,
+      level: 'warning',
       data: logData,
     });
   }
@@ -56,7 +104,10 @@ class Logger {
       extra,
     };
 
-    console.error(JSON.stringify(logData, null, 2)); // Pretty-print error log
+    logger.error(
+      `Error '${logData.message}' ocurred at ${logData.apiMessage}`,
+      logData
+    );
     Sentry.captureException(error, { level: 'error', extra: logData });
   }
 
