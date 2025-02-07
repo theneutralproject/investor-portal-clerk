@@ -194,11 +194,6 @@ async function updateUserInClerk(userData: User) {
           console.error(`Clerk API Error: ${err.code} - ${err.message}`);
           // Implement specific error handling based on err.code
           if (err.code === 'form_identifier_exists') {
-            console.error(
-              `This email address already exists for user ${userData.clerkId}`,
-              err.message
-            );
-
             // check if this email address is associated with the user we are looking to update:
             const existingUsers = await clerkClient.users.getUserList({
               emailAddress: [userData.email],
