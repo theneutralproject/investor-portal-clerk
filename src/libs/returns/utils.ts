@@ -417,6 +417,7 @@ export async function getPortfolioReturns(
         investmentStats.financingType === DealFinancingType.equity
           ? 'equity'
           : 'debt',
+      closingDate: closingDate,
       project: {
         id: project.id,
         name: project.displayName,
