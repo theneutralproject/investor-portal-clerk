@@ -577,7 +577,8 @@ const PrivacyPolicyPage = () => {
                    will not prevent us from using other analytics tools and will
                   not prevent data from being sent to the Platform itself or to
                   Google. Opting out will not affect your use of the Platform.
-                  For more information on how Google uses Personal Data, visit{' '}
+                  For more information on how Google uses Personal Data,
+                  visit{' '}
                 </span>
                 <a href="https://policies.google.com/privacy?hl=en">
                   Google’s Privacy Policy
