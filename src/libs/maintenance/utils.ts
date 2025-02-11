@@ -28,14 +28,15 @@ export async function findOrCreateClerkUser(
   };
 
   if (phone) clerkData.phoneNumber = [phone];
+  const authClient = await clerkClient();
 
   try {
-    const exisingClerkUsers = await clerkClient.users.getUserList({
+    const exisingClerkUsers = await authClient.users.getUserList({
       emailAddress: [email],
     });
-    if (exisingClerkUsers[0]) {
+    if (exisingClerkUsers.data[0]) {
       console.log('User already exists in Clerk', email);
-      return exisingClerkUsers[0];
+      return exisingClerkUsers.data[0];
     }
 
     if (!phone) {
@@ -45,7 +46,7 @@ export async function findOrCreateClerkUser(
       );
       return null;
     }
-    const newClerkUser = await clerkClient.users.createUser(clerkData);
+    const newClerkUser = await authClient.users.createUser(clerkData);
     if (!newClerkUser) {
       throw new Error('Error creating Clerk user');
     }

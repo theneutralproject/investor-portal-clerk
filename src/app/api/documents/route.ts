@@ -1,4 +1,7 @@
 'use server';
+import { getAuth } from '@clerk/nextjs/server';
+import type { NextRequest } from 'next/server';
+import { z } from 'zod';
 import {
   uploadFile,
   getFileDetails,
@@ -8,23 +11,20 @@ import { zPdfDocumentCreateSchema } from '@/libs/document/schema';
 import prisma from '@/libs/prisma.server';
 import type { UserWithOrganizations } from '@/libs/types';
 import { jsonResponse, errorResponse, getErrorMessage } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs';
-import type { NextRequest } from 'next/server';
-import { z } from 'zod';
 
-async function validateUser() {
-  const user = await currentUser();
-  if (!user) {
+async function validateUser(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     throw new Error('User not found');
   }
 
   const dbUser = (await prisma.user.findUnique({
-    where: { clerkId: user.id },
+    where: { clerkId: userId },
     include: { organizationsOwned: true },
   })) as UserWithOrganizations;
 
   if (!dbUser) {
-    throw new Error(`User record with clerkid ${user.id} not found in prisma`);
+    throw new Error(`User record with clerkid ${userId} not found in prisma`);
   }
 
   return dbUser;
@@ -58,7 +58,7 @@ async function validateAccess(
 
 export async function POST(request: NextRequest) {
   try {
-    const dbUser = await validateUser();
+    const dbUser = await validateUser(request);
     const formData = await request.formData();
 
     console.log('Received form data:', {

@@ -15,7 +15,9 @@ export async function POST() {
   }
 
   // get all users from clerk
-  const clerkUsers = await clerkClient.users.getUserList({
+  const clerkUsers = await (
+    await clerkClient()
+  ).users.getUserList({
     limit: 400,
     offset: 400,
   });
@@ -24,7 +26,7 @@ export async function POST() {
   const dbUsers = await prisma.user.findMany();
 
   // find clerkusers that are unaccounted for in db
-  const missingUsers = clerkUsers.filter(
+  const missingUsers = clerkUsers.data.filter(
     clerkUser => !dbUsers.find(dbUser => dbUser.clerkId === clerkUser.id)
   );
   const createPromisesArr: Promise<User>[] = [];

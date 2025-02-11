@@ -1,24 +1,23 @@
 'use server';
 import type { DocumentEventCreateSchema } from '@/libs/document/schema';
 import prisma from '@/libs/prisma.server';
-import { currentUser } from '@clerk/nextjs';
+import { getAuth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
 // Create a DocumentEvent for the given document and user
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
+    const { userId } = getAuth(request);
 
-    if (!user) {
+    if (!userId) {
       return new Response(JSON.stringify({ error: 'User not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const { id } = user;
     const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: id },
+      where: { clerkId: userId },
     });
 
     if (!neutralUser) {

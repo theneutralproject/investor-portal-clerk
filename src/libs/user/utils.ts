@@ -174,9 +174,10 @@ async function updateUserInClerk(
   lastName?: string,
   email?: string
 ) {
+  const authClient = await clerkClient();
   if (email) {
     try {
-      await clerkClient.emailAddresses.createEmailAddress({
+      await authClient.emailAddresses.createEmailAddress({
         userId: clerkId!,
         emailAddress: email,
         primary: false,
@@ -192,15 +193,15 @@ async function updateUserInClerk(
           // Implement specific error handling based on err.code
           if (err.code === 'form_identifier_exists') {
             // check if this email address is associated with the user we are looking to update:
-            const existingUsers = await clerkClient.users.getUserList({
+            const existingUsers = await authClient.users.getUserList({
               emailAddress: [email],
             });
-            if (existingUsers[0]?.id === clerkId) {
+            if (existingUsers?.data[0]?.id === clerkId) {
               console.log(
                 `Email address ${email} is already associated with user ${clerkId}. We will still update Hubspot and DB.`
               );
             }
-            return existingUsers[0];
+            return existingUsers?.data[0];
           }
           throw new Error(err.message);
         });
@@ -211,7 +212,7 @@ async function updateUserInClerk(
       }
     }
   }
-  return await clerkClient.users.updateUser(clerkId, { firstName, lastName });
+  return authClient.users.updateUser(clerkId, { firstName, lastName });
 }
 
 export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
