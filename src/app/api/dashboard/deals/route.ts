@@ -12,11 +12,14 @@ export async function GET(request: NextRequest) {
     return errorResponse('User not authenticated', 401);
   }
 
-  Logger.log(request, {
-    extra: {
-      user: { clerkUserId: clerkUser.id, email: clerkUser.emailAddresses[0] },
+  Logger.log(
+    {
+      extra: {
+        user: { clerkUserId: clerkUser.id, email: clerkUser.emailAddresses[0] },
+      },
     },
-  });
+    request
+  );
 
   // Get the user from the database
   const dbUser = await prisma.user.findUnique({
@@ -65,7 +68,7 @@ export async function GET(request: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const body = await req.json();
   const dealId = Number(body.dealId);
-  Logger.log(req, { extra: body });
+  Logger.log({ extra: body }, req);
 
   if (!dealId || isNaN(dealId)) {
     return errorResponse('Invalid deal ID', 400, {
