@@ -1,10 +1,8 @@
 import type { WebhookEvent } from '@clerk/nextjs/server';
 import { headers } from 'next/headers';
 import { Webhook } from 'svix';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import type { UserCreateSchema } from '@/libs/user/schema';
-import Logger from '@/libs/logger';
-import { NextRequest } from 'next/server';
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
@@ -20,7 +18,7 @@ async function validateRequest(request: Request) {
   return wh.verify(payloadString, svixHeaders) as WebhookEvent;
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   let webhookRequest;
   try {
     webhookRequest = await validateRequest(request);
@@ -55,10 +53,6 @@ export async function POST(request: NextRequest) {
             ?.phone_number ?? '')
         : (phone_numbers[0]?.phone_number ?? '');
       if (email === '') {
-        Logger.error(
-          request,
-          new Error('No email found for new clerk user!!!')
-        );
         console.error('No email found for new clerk user:', data);
         return new Response(
           JSON.stringify({ error: `No email found for new clerk user!!!` }),

@@ -9,7 +9,7 @@ import {
   zUserUpdateSchema,
 } from '@/libs/user/schema';
 import { updateHubspotContact } from '@/libs/hubspot/utils.server';
-import { sanitizeUser } from '@/libs/user/utils';
+import { sanitizeUser } from '@/libs/user/utils.server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
 /**

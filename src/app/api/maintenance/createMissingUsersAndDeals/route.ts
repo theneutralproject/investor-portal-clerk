@@ -15,7 +15,7 @@ import { jsonResponse } from '@/libs/utils.server';
 import prisma from '@/libs/prisma.server';
 import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils.server';
 import type { UserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import type { DealCreateSchema } from '@/libs/deal/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';

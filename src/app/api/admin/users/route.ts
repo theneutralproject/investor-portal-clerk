@@ -10,7 +10,7 @@ import {
 import {
   createUserInDbAndHubspot,
   updateUserInDbAndHubspotAndClerk,
-} from '@/libs/user/utils';
+} from '@/libs/user/utils.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';

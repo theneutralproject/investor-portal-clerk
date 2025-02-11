@@ -1,5 +1,5 @@
 import { POST } from '../route';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 
 // Mock our user utils createUserInDbAndHubspot
 jest.mock('@/libs/user/utils', () => ({

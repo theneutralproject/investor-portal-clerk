@@ -2,7 +2,7 @@
 import { isAdminUser } from '@/libs/maintenance/utils';
 import prisma from '@/libs/prisma.server';
 import { UserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { User } from '@prisma/client';
