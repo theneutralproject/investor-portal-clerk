@@ -2,7 +2,7 @@ import { type Deal, DealOwnershipType } from '@prisma/client';
 import { type APIRequestContext } from '@playwright/test';
 import prisma from '@/libs/prisma.server';
 import { type OrganizationWithMembersAndAddress } from '@/libs/types';
-import { getErrorMessage } from '@/libs/utils';
+import { getErrorMessage } from '@/libs/utils.server';
 
 async function deleteHubspotDeal(hubspotId: string) {
   console.log('begin deleting hubspot deal', hubspotId);

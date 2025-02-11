@@ -1,6 +1,6 @@
 'use server';
-import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 

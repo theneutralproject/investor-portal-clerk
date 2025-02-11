@@ -1,6 +1,6 @@
 'use server';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 import { getUserAndOrg } from '../helpers';
 import { isNumber } from 'lodash';
@@ -8,7 +8,7 @@ import {
   type OrganizationMemberUpdateSchema,
   zOrganizationMemberUpdateSchema,
 } from '@/libs/organization/schema';
-import { updateHubspotContact } from '@/libs/hubspot/utils';
+import { updateHubspotContact } from '@/libs/hubspot/utils.server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
 /**

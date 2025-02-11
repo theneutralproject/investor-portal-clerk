@@ -5,7 +5,7 @@ import {
 } from '@/libs/organization/schema';
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 import { DealOwnershipType, MembershipType } from '@prisma/client';
 import type { NextRequest } from 'next/server';

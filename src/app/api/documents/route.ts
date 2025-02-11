@@ -3,11 +3,15 @@ import {
   uploadFile,
   getFileDetails,
   createDocumentEntry,
-} from '@/libs/admin/utils';
+} from '@/libs/admin/utils.server';
 import { zPdfDocumentCreateSchema } from '@/libs/document/schema';
 import prisma from '@/libs/prisma.server';
 import type { UserWithOrganizations } from '@/libs/types';
-import { jsonResponse, errorResponse, getErrorMessage } from '@/libs/utils';
+import {
+  jsonResponse,
+  errorResponse,
+  getErrorMessage,
+} from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs';
 import type { NextRequest } from 'next/server';
 import { z } from 'zod';

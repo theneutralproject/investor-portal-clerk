@@ -1,6 +1,6 @@
 import prisma from '@/libs/prisma.server';
 import { getSupabaseDownloadUrl } from '@/libs/supabase';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs';
 import { DealDocumentType } from '@prisma/client';
 

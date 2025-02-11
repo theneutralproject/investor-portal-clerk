@@ -1,7 +1,7 @@
 import { Role } from '@prisma/client';
 import prisma from '../prisma.server';
 import { clerkClient } from '@clerk/nextjs/server';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 
 export async function isAdminUser(clerkId: string): Promise<boolean> {
   const user = await prisma.user.findFirst({

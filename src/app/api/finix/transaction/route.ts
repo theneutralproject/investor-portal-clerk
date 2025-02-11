@@ -1,9 +1,9 @@
 'use server';
 import { updateDeal } from '@/libs/deal/utils.server';
-import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils';
+import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils.server';
 import prisma from '@/libs/prisma.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 import { PaymentMethod, type User } from '@prisma/client';
 import { isError } from 'lodash';

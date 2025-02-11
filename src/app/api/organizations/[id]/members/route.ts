@@ -5,7 +5,7 @@ import {
 } from '@/libs/organization/schema';
 import prisma from '@/libs/prisma.server';
 import { createUserInDbAndHubspot, sanitizeUser } from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import type { User } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 import { getUserAndOrg } from './helpers';

@@ -1,7 +1,11 @@
 import prisma from '@/libs/prisma.server';
-import { getPortfolioReturns } from '@/libs/returns/utils';
+import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET() {

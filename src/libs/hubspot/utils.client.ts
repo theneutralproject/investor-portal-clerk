@@ -1,0 +1,16 @@
+export enum ReferralSource {
+  INVESTOR_EVENT = 'investor_event',
+  WEBINAR = 'webinar',
+  EVENT_MAILER = 'event_mailer',
+  NEUTRAL_PODCAST = 'neutral_podcast',
+  NEWS_SLASH_ONLINE_ARTICLE = 'news_online_article',
+  FRIEND_SLASH_COLLEAGUE = 'friend_colleague',
+  LINKEDIN = 'linkedin',
+  GOOGLE_AD = 'google_ad',
+  FACEBOOK_AD = 'facebook_ad',
+  THESIS_DRIVEN_PODCAST = 'thesis_driven_podcast',
+  CRE_DAILY_AD = 'cre_daily',
+  NERDS_EYE_VIEW = 'nerds_eye_view',
+  OTHER = 'other',
+  UNKNOWN = 'unknown',
+}

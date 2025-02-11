@@ -5,14 +5,19 @@ import {
   type DocusignEnvelopeCreateSchema,
   zDocusignEvelopeCreate,
 } from '@/libs/docusign/schema';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import {
   refreshAccessToken,
   instantiateApiClient,
   makeRecipientViewRequest,
   getExistingEnvelopeDefinition,
   createNewEnvelopeDefinition,
-} from '@/libs/docusign/utils';
+  AccessTokenResponse,
+} from '@/libs/docusign/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 import type {
   Envelope,
@@ -120,7 +125,7 @@ export async function POST(req: Request) {
       404
     );
   }
-  let accessTokenResponse: { consentUrl?: string; accessToken?: string };
+  let accessTokenResponse: AccessTokenResponse;
   try {
     // get access token and instantiate api client
     accessTokenResponse = await refreshAccessToken(

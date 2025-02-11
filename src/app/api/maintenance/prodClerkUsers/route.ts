@@ -1,7 +1,7 @@
 'use server';
 import prisma from '@/libs/prisma.server';
-import { createHubspotContact } from '@/libs/hubspot/utils';
-import { jsonResponse } from '@/libs/utils';
+import { createHubspotContact } from '@/libs/hubspot/utils.server';
+import { jsonResponse } from '@/libs/utils.server';
 import { findOrCreateClerkUser, isAdminUser } from '@/libs/maintenance/utils';
 import { currentUser } from '@clerk/nextjs/server';
 

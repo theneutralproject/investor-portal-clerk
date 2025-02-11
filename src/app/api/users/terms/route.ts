@@ -1,7 +1,11 @@
 'use server';
 import { currentUser } from '@clerk/nextjs/server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 
 /**
  * Current terms revision number from environment variable.

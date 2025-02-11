@@ -1,4 +1,4 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
 import prisma from '@/libs/prisma.server';
 import {
@@ -11,7 +11,7 @@ import {
   createUserInDbAndHubspot,
   updateUserInDbAndHubspotAndClerk,
 } from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 

@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 import { currentUser } from '@clerk/nextjs';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { z } from 'zod';
 import type { DealFinancingType, Organization } from '@prisma/client';
 import prisma from '@/libs/prisma.server';

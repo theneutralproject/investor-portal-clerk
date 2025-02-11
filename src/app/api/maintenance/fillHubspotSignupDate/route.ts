@@ -3,9 +3,13 @@ import {
   formatDateForHubspot,
   getHubspotContactsWithoutSignupDate,
   updateHubspotContact,
-} from '@/libs/hubspot/utils';
+} from '@/libs/hubspot/utils.server';
 import { isAdminUser } from '@/libs/maintenance/utils';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { clerkClient, currentUser, User } from '@clerk/nextjs/server';
 
 export async function POST() {

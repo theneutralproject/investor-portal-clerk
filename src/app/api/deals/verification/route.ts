@@ -4,7 +4,7 @@ import {
   zAccreditationVerificationCreateSchema,
 } from '@/libs/accreditationVerification/schema';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 import type { AccreditationVerifier } from '@prisma/client';
 import type { NextRequest } from 'next/server';

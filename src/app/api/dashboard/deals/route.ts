@@ -1,6 +1,6 @@
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs';
 import { NextRequest } from 'next/server';
 

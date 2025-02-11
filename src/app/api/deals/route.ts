@@ -7,7 +7,11 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from '../../../libs/deal/schema';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
 
 export const dynamic = 'force-dynamic';

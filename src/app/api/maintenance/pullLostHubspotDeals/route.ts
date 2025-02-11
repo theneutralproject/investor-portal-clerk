@@ -1,8 +1,8 @@
 'use server';
-import { getListOfHSDeals } from '@/libs/hubspot/utils';
+import { getListOfHSDeals } from '@/libs/hubspot/utils.server';
 import { isAdminUser } from '@/libs/maintenance/utils';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 
 export async function GET() {
