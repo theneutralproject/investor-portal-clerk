@@ -67,12 +67,12 @@ const UserAvatar = () => {
         onClose={handleClose}
       >
         <Link href="/terms" passHref>
-          <MenuItem component="a" onClick={handleClose} sx={{ width: '200px' }}>
+          <MenuItem onClick={handleClose} sx={{ width: '200px' }}>
             <DescriptionIcon sx={{ marginRight: 1 }} /> Terms of Service
           </MenuItem>
         </Link>
         <Link href="/privacy" passHref>
-          <MenuItem component="a" onClick={handleClose} sx={{ width: '200px' }}>
+          <MenuItem onClick={handleClose} sx={{ width: '200px' }}>
             <PolicyIcon sx={{ marginRight: 1 }} /> Privacy
           </MenuItem>
         </Link>

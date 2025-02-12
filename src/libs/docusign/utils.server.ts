@@ -48,7 +48,10 @@ export async function refreshAccessToken(
   dealId: number,
   projectSlug: string
 ) {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(
+    await cookies(),
+    sessionOptions
+  );
   console.log('session', session);
   const responseObj = {
     accessToken: '',
@@ -154,7 +157,7 @@ export async function refreshAccessTokenFromCode(code: string) {
 
     console.log(docusignAccessTokenRes);
     const session = await getIronSession<SessionData>(
-      cookies(),
+      await cookies(),
       sessionOptions
     );
     session.docusignJwt = docusignAccessTokenRes.accessToken;

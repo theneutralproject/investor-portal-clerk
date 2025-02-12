@@ -1,5 +1,5 @@
 import { type NextRequest } from 'next/server';
-import { currentUser } from '@clerk/nextjs';
+import { getAuth } from '@clerk/nextjs/server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { z } from 'zod';
 import type { DealFinancingType, Organization } from '@prisma/client';
@@ -35,10 +35,7 @@ async function fetchProjectDocuments(
   });
 
   const dealDocusignEvents = await prisma.docusignEvent.findMany({
-    where: {
-      userId,
-      dealId,
-    },
+    where: { userId, dealId },
   });
   const results = documents.map(doc => ({
     ...doc,
@@ -67,11 +64,7 @@ async function fetchProject(slug: string) {
 async function fetchDeal(id: number) {
   return prisma.deal.findUnique({
     where: { id },
-    include: {
-      investmentStats: true,
-      organization: true,
-      document: true,
-    },
+    include: { investmentStats: true, organization: true, document: true },
   });
 }
 
@@ -105,13 +98,13 @@ export async function GET(request: NextRequest) {
       return jsonResponse({ project });
     }
 
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
+    const { userId: clerkUserId } = getAuth(request);
+    if (!clerkUserId) {
       return errorResponse('User not authenticated', 401);
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { clerkId: clerkUserId },
     });
     if (!dbUser) {
       return errorResponse('User not found', 404);
@@ -142,10 +135,7 @@ export async function GET(request: NextRequest) {
     );
 
     return jsonResponse({
-      project: {
-        ...project,
-        documents: docusignDocs,
-      },
+      project: { ...project, documents: docusignDocs },
       deal,
     });
   } catch (error) {

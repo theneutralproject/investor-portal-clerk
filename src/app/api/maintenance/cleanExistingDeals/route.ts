@@ -1,23 +1,22 @@
 'use server';
+import { getAuth } from '@clerk/nextjs/server';
+import { type Deal, PaymentMethod } from '@prisma/client';
+import { NextRequest } from 'next/server';
 import type { DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
-import { isAdminUser } from '@/libs/maintenance/utils';
+import { isAdminUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils.server';
-import { currentUser } from '@clerk/nextjs/server';
-import { type Deal, PaymentMethod } from '@prisma/client';
 
-export async function POST() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) return jsonResponse({ error: 'User not found' }, 404);
-  if (!(await isAdminUser(clerkUser.id)))
+export async function POST(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) return jsonResponse({ error: 'User not found' }, 404);
+  if (!(await isAdminUser(userId)))
     return jsonResponse({ error: 'User is not an admin' }, 403);
 
   // get all deals
   const deals = await prisma.deal.findMany({
-    include: {
-      investmentStats: true,
-    },
+    include: { investmentStats: true },
     take: 30,
     skip: 0,
   });

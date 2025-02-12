@@ -2,13 +2,17 @@
 import prisma from '@/libs/prisma.server';
 import { createHubspotContact } from '@/libs/hubspot/utils.server';
 import { jsonResponse } from '@/libs/utils.server';
-import { findOrCreateClerkUser, isAdminUser } from '@/libs/maintenance/utils';
-import { currentUser } from '@clerk/nextjs/server';
+import {
+  findOrCreateClerkUser,
+  isAdminUser,
+} from '@/libs/maintenance/utils.server';
+import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 
-export async function GET() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) return jsonResponse({ error: 'User not found' }, 404);
-  if (!(await isAdminUser(clerkUser.id))) {
+export async function GET(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) return jsonResponse({ error: 'User not found' }, 404);
+  if (!(await isAdminUser(userId))) {
     return jsonResponse({ error: 'User is not an admin' }, 403);
   }
 
@@ -51,13 +55,8 @@ export async function GET() {
         });
 
         await prisma.user.update({
-          where: {
-            id: user.id,
-          },
-          data: {
-            clerkId: clerkUser.id,
-            hubspotId: hsId,
-          },
+          where: { id: user.id },
+          data: { clerkId: clerkUser.id, hubspotId: hsId },
         });
         promiseArr.push({ id: hsId, status: 'updated' });
       } catch (error) {

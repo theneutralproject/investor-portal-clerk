@@ -10,7 +10,7 @@ const logger = pino({
       return { level: label.toUpperCase() };
     },
   },
-  timestamp: pino.stdTimeFunctions.isoTime, // Similar to Winston timestamp
+  timestamp: pino.stdTimeFunctions.isoTime, // Uses ISO timestamp format
 });
 
 type MetaData =
@@ -18,14 +18,14 @@ type MetaData =
   | undefined;
 
 /**
- * Logger utility for structured logging.
+ * Logger utility for structured logging with Sentry integration.
  */
 class Logger {
   /**
-   * Logs general information with user & request details.
-   * @param req - The Next.js request object.
-   * @param message - Log message.
-   * @param extra - Additional metadata for the log.
+   * Logs general information with optional request details.
+   *
+   * @param {MetaData} metadata - Log message and additional metadata.
+   * @param {NextRequest} [req] - The Next.js request object (optional).
    */
   static log(metadata: MetaData = { extra: {} }, req?: NextRequest): void {
     const apiMessage =
@@ -50,10 +50,11 @@ class Logger {
   }
 
   /**
-   * Logs warnings with user & request details.
-   * @param req - The Next.js request object.
-   * @param message - Warning message.
-   * @param extra - Additional metadata for the log.
+   * Logs warnings with optional request details.
+   *
+   * @param {string} message - Warning message.
+   * @param {NextRequest} [req] - The Next.js request object (optional).
+   * @param {Record<string, unknown>} [extra] - Additional metadata (optional).
    */
   static warn(
     message: string,
@@ -81,10 +82,11 @@ class Logger {
   }
 
   /**
-   * Logs errors and sends them to Sentry with request & user details.
-   * @param req - The Next.js request object.
-   * @param error - The error object.
-   * @param extra - Additional metadata for the log.
+   * Logs errors and sends them to Sentry with optional request details.
+   *
+   * @param {Error} error - The error object to log.
+   * @param {NextRequest} [req] - The Next.js request object (optional).
+   * @param {Record<string, unknown | Sentry.SeverityLevel>} [extra] - Additional metadata (optional).
    */
   static error(
     error: Error,
@@ -93,7 +95,7 @@ class Logger {
   ): void {
     const apiMessage = req
       ? `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
-      : `An error has ocurred: ${error.message}`;
+      : `An error has occurred: ${error.message}`;
     const traces = error.stack?.split('\n    ') || [];
     const logData = {
       apiMessage,
@@ -107,17 +109,18 @@ class Logger {
 
     logger.error(
       logData,
-      `Error '${logData.message}' ocurred at ${logData.apiMessage}`
+      `Error '${logData.message}' occurred at ${logData.apiMessage}`
     );
     Sentry.captureException(error, { level: 'error', extra: logData });
   }
 
   /**
-   * Extracts useful request details including user info.
-   * @param req - The Next.js request object.
-   * @returns Extracted request details.
+   * Extracts useful request details including user session information.
+   *
+   * @param {NextRequest} req - The Next.js request object.
+   * @returns {Object} Extracted request details.
    */
-  private static getRequestDetails(req: NextRequest) {
+  private static getRequestDetails(req: NextRequest): object {
     return {
       method: req.method,
       url: req.url,
@@ -128,19 +131,18 @@ class Logger {
   }
 
   /**
-   * Generates a structured error log message including the HTTP method, request path, and function name.
-   * Extracts the function name from the stack trace automatically.
+   * Generates a structured error log message, extracting the function name automatically.
    *
-   * @param {NextRequest} req - The Next.js request object containing method and URL information.
-   * @param {any} error - The error object to extract the message from.
-   * @param {string} method - [Optional] The method where the issue failed.
+   * @param {Error} error - The error object to extract the message from.
+   * @param {NextRequest} [req] - The Next.js request object (optional).
+   * @param {string} [method] - The method where the issue failed (optional).
    * @returns {string} - A formatted log message indicating where the failure occurred.
    */
   private static getLogError = (
-    error: any,
+    error: Error,
     req?: NextRequest,
     method?: string | unknown
-  ) => {
+  ): string => {
     const stack = new Error().stack?.split('\n')[2] || '';
     const functionName = stack.match(/at (\w+)/)?.[1] || 'unknown function';
     return req

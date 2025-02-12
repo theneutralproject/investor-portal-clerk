@@ -5,7 +5,7 @@ import {
 } from '@/libs/accreditationVerification/schema';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils.server';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import type { AccreditationVerifier } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 
@@ -15,18 +15,16 @@ import type { NextRequest } from 'next/server';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-  });
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) {
     return jsonResponse(
       {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (POST)`,
+        error: `User record with clerkid ${userId} not found in prisma (POST)`,
       },
       404
     );

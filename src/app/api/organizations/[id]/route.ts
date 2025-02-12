@@ -1,4 +1,8 @@
 'use server';
+import { getAuth } from '@clerk/nextjs/server';
+import { DealOwnershipType } from '@prisma/client';
+import { isNumber } from 'lodash';
+import type { NextRequest } from 'next/server';
 import {
   type OrganizationUpdateSchema,
   zOrganizationUpdateSchema,
@@ -6,10 +10,6 @@ import {
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
-import { currentUser } from '@clerk/nextjs/server';
-import { DealOwnershipType } from '@prisma/client';
-import { isNumber } from 'lodash';
-import type { NextRequest } from 'next/server';
 
 async function getUserAndOrg(request: NextRequest) {
   const url = new URL(request.url);
@@ -18,40 +18,31 @@ async function getUserAndOrg(request: NextRequest) {
     throw new Error('id is required in url');
   }
 
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     throw new Error('Clerk user not found');
   }
 
   const user = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-    include: {
-      address: true,
-      organizationMember: true,
-    },
+    where: { clerkId: userId },
+    include: { address: true, organizationMember: true },
   });
 
   if (!user) {
     console.error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (GET)`
+      `User record with clerkid ${userId} not found in prisma (GET)`
     );
     throw new Error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (GET)`
+      `User record with clerkid ${userId} not found in prisma (GET)`
     );
   }
 
   // get org by id if they are a member
   const organization = await prisma.organization.findFirst({
-    where: {
-      AND: [{ members: { some: { userId: user.id } } }, { id: id }],
-    },
+    where: { AND: [{ members: { some: { userId: user.id } } }, { id: id }] },
     include: {
       address: true,
-      members: {
-        include: {
-          user: true,
-        },
-      },
+      members: { include: { user: true } },
       document: true,
     },
   });
@@ -140,10 +131,7 @@ export async function PUT(request: NextRequest) {
 
     const updatedOrg = await prisma.organization
       .update({
-        where: {
-          ownerId: user.id,
-          id: orgToUpdate.id,
-        },
+        where: { ownerId: user.id, id: orgToUpdate.id },
         data: orgData,
         include: { members: true, address: true },
       })

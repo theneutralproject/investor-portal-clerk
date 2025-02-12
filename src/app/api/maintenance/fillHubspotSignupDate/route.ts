@@ -1,22 +1,23 @@
+import { clerkClient, getAuth, User } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 import { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 import {
   formatDateForHubspot,
   getHubspotContactsWithoutSignupDate,
   updateHubspotContact,
 } from '@/libs/hubspot/utils.server';
-import { isAdminUser } from '@/libs/maintenance/utils';
+import { isAdminUser } from '@/libs/maintenance/utils.server';
 import {
   errorResponse,
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
-import { clerkClient, currentUser, User } from '@clerk/nextjs/server';
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   console.log('Filling Hubspot signup date for contacts without signup date');
-  const clerkUser = await currentUser();
-  if (!clerkUser) return jsonResponse({ error: 'User not found' }, 404);
-  if (!(await isAdminUser(clerkUser.id))) {
+  const { userId } = getAuth(request);
+  if (!userId) return jsonResponse({ error: 'User not found' }, 404);
+  if (!(await isAdminUser(userId))) {
     return jsonResponse({ error: 'User is not an admin' }, 403);
   }
   try {
@@ -31,8 +32,10 @@ export async function POST() {
       );
 
       let clerkUser: User | null = null;
+
       try {
-        clerkUser = await clerkClient.users.getUser(contact.properties.userid);
+        const authClient = await clerkClient();
+        clerkUser = await authClient.users.getUser(contact.properties.userid);
       } catch (__error) {
         console.error(
           `Error fetching clerk user with id ${contact.properties.userid}`

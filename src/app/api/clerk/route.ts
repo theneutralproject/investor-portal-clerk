@@ -6,7 +6,7 @@ import type { UserCreateSchema } from '@/libs/user/schema';
 
 async function validateRequest(request: Request) {
   const payloadString = await request.text();
-  const headerPayload = headers();
+  const headerPayload = await headers();
 
   const svixHeaders = {
     'svix-id': headerPayload.get('svix-id')!,

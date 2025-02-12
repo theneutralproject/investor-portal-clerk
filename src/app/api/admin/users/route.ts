@@ -1,5 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import {
   UserCreateSchema,

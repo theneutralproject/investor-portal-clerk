@@ -3,8 +3,8 @@
 // Note that this config is unrelated to the Vercel Edge Runtime and is also required when running locally.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { initPosthog } from '@/libs/posthog';
 import * as Sentry from '@sentry/nextjs';
-import posthog from 'posthog-js';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -17,7 +17,5 @@ Sentry.init({
 });
 
 if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-  });
+  initPosthog();
 }

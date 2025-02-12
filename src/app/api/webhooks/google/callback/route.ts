@@ -87,7 +87,10 @@ export async function GET(request: NextRequest) {
     return jsonResponse({ error: 'User information does not match' }, 400);
   }
 
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(
+    await cookies(),
+    sessionOptions
+  );
   session.adminUserId = user.id;
   session.adminUserEmail = user.email;
   session.adminAuthExpiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours

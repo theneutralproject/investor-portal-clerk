@@ -1,5 +1,14 @@
 'use server';
 import { isError } from 'lodash';
+import { NextRequest } from 'next/server';
+import { getAuth } from '@clerk/nextjs/server';
+import type {
+  Envelope,
+  EnvelopesApi,
+  EnvelopeSummary,
+  ViewUrl,
+} from 'docusign-esign';
+import { DocusignEvent } from '@prisma/client';
 import prisma from '@/libs/prisma.server';
 import {
   type DocusignEnvelopeCreateSchema,
@@ -11,45 +20,30 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import {
-  refreshAccessToken,
+  AccessTokenResponse,
+  createNewEnvelopeDefinition,
+  getExistingEnvelopeDefinition,
   instantiateApiClient,
   makeRecipientViewRequest,
-  getExistingEnvelopeDefinition,
-  createNewEnvelopeDefinition,
-  AccessTokenResponse,
+  refreshAccessToken,
 } from '@/libs/docusign/utils.server';
-import { currentUser } from '@clerk/nextjs/server';
-import type {
-  Envelope,
-  EnvelopesApi,
-  EnvelopeSummary,
-  ViewUrl,
-} from 'docusign-esign';
-import { DocusignEvent } from '@prisma/client';
 
 // create new envelope or get existing envelope, and display recipient view to user
-export async function POST(req: Request) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+export async function POST(req: NextRequest) {
+  const { userId: clerkUserId } = getAuth(req);
+  if (!clerkUserId) {
     return jsonResponse({ error: 'User not found' }, 404);
   }
 
   const userWOrgsAndAddress = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-    include: {
-      address: true,
-      organizationMember: {
-        include: {
-          user: true,
-        },
-      },
-    },
+    where: { clerkId: clerkUserId },
+    include: { address: true, organizationMember: { include: { user: true } } },
   });
   if (!userWOrgsAndAddress) {
     console.error('Neutral user not found in api/docusign');
     return jsonResponse(
       {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
+        error: `User record with clerkid ${clerkUserId} not found in prisma (GET)`,
       },
       404
     );
@@ -63,10 +57,7 @@ export async function POST(req: Request) {
     console.error('Error parsing Docusign POST payload: ', err);
     return new Response(
       JSON.stringify({ error: 'Unable to parse Docusign POST payload:', err }),
-      {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      { status: 404, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
@@ -141,10 +132,7 @@ export async function POST(req: Request) {
       );
       return new Response(
         JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),
-        {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { status: 201, headers: { 'Content-Type': 'application/json' } }
       );
     }
     if (!accessTokenResponse.accessToken) {
@@ -272,10 +260,7 @@ export async function POST(req: Request) {
     try {
       await prisma.docusignEvent.update({
         where: { id: existingDocusignEvent.id },
-        data: {
-          envelopeId: envelopeResponse.envelopeId,
-          dateSent: new Date(),
-        },
+        data: { envelopeId: envelopeResponse.envelopeId, dateSent: new Date() },
       });
       return jsonResponse(viewRequestResponse, 200);
     } catch (err) {
