@@ -69,21 +69,19 @@ const DocumentList = ({
   documents: Document[];
   isLoading: boolean;
 }) => {
-  const groupDocumentsByYear = (docs: Document[]) => {
+  const groupDocumentsByProject = (docs: Document[]) => {
     return docs.reduce((acc: Record<string, Document[]>, doc) => {
-      const year = doc.taxYear ?? new Date(doc.dateCreated).getFullYear();
-      if (!acc[year]) {
-        acc[year] = [];
+      const project = doc.projectName || 'Other';
+      if (!acc[project]) {
+        acc[project] = [];
       }
-      acc[year].push(doc);
+      acc[project].push(doc);
       return acc;
     }, {});
   };
 
-  const groupedDocs = groupDocumentsByYear(documents);
-  const sortedYears = Object.keys(groupedDocs).sort(
-    (a, b) => Number(b) - Number(a)
-  );
+  const groupedDocs = groupDocumentsByProject(documents);
+  const sortedProjects = Object.keys(groupedDocs).sort();
 
   if (isLoading) {
     return (
@@ -126,9 +124,9 @@ const DocumentList = ({
 
   return (
     <Box>
-      {sortedYears.map(year => (
+      {sortedProjects.map(project => (
         <Accordion
-          key={year}
+          key={project}
           defaultExpanded
           sx={{
             mb: 2,
@@ -158,7 +156,7 @@ const DocumentList = ({
                 fontWeight: 600,
               }}
             >
-              {year}
+              {project}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>
@@ -166,16 +164,18 @@ const DocumentList = ({
               <TableHead>
                 <TableRow>
                   <TableCell>Document Name</TableCell>
-                  <TableCell>Project</TableCell>
+                  <TableCell>Tax Year</TableCell>
                   <TableCell>Date Created</TableCell>
                   <TableCell align="right">Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {groupedDocs[year]?.map(doc => (
+                {groupedDocs[project]?.map(doc => (
                   <TableRow key={doc.id}>
                     <TableCell>{doc.name}</TableCell>
-                    <TableCell>{doc.projectName}</TableCell>
+                    <TableCell>
+                      {doc.taxYear || new Date(doc.dateCreated).getFullYear()}
+                    </TableCell>
                     <TableCell>
                       {format(new Date(doc.dateCreated), 'MMM d, yyyy')}
                     </TableCell>
