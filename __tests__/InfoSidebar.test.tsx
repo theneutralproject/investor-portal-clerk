@@ -2,7 +2,6 @@
  * @jest-environment jsdom
  */
 import InfoSidebar from '@/components/InfoSidebar';
-import '@testing-library/jest-dom';
 import { render, screen } from '@testing-library/react';
 
 describe('InfoSidebar', () => {

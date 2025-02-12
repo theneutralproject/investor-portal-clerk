@@ -10,7 +10,7 @@ import path from 'path';
 import fs from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import { jsonResponse } from '@/libs/utils';
 import prisma from '@/libs/prisma.server';
 import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils';
@@ -21,6 +21,7 @@ import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
 import { ProjectName } from '@/libs/project/schema';
+import { NextRequest } from 'next/server';
 
 const finishedAsync = promisify(finished);
 
@@ -148,10 +149,9 @@ async function getDealsFromCsv() {
   return dealRecords;
 }
 
-export async function POST() {
-  const requestingClerkUser = await currentUser();
-  if (!requestingClerkUser)
-    return jsonResponse({ error: 'Clerk User not found' }, 404);
+export async function POST(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) return jsonResponse({ error: 'Clerk User not found' }, 404);
   // if (! await isAdminUser(requestingClerkUser.id)) return jsonResponse({ error: "User is not an admin" }, 403);
 
   const dealInputs = await getDealsFromCsv();

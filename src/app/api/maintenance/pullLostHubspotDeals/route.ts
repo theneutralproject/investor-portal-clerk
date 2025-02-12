@@ -1,14 +1,15 @@
 'use server';
+import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 import { getListOfHSDeals } from '@/libs/hubspot/utils';
 import { isAdminUser } from '@/libs/maintenance/utils';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs/server';
 
-export async function GET() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) return jsonResponse({ error: 'User not found' }, 404);
-  if (!(await isAdminUser(clerkUser.id)))
+export async function GET(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) return jsonResponse({ error: 'User not found' }, 404);
+  if (!(await isAdminUser(userId)))
     return jsonResponse({ error: 'User is not an admin' }, 403);
 
   const lostHsDeals = await getListOfHSDeals();

@@ -1,12 +1,12 @@
 'use server';
 import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils';
 import { errorResponse, jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const user = await currentUser();
-  if (!user) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return errorResponse('User not found', 401);
   }
   try {

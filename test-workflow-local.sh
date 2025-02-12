@@ -22,7 +22,7 @@ set +a
 
 
 # Install npm dependencies
-npm ci
+npm install
 
 # Install Playwright browser
 npx playwright install-deps chromium

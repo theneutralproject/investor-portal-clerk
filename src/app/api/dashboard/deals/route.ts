@@ -1,13 +1,13 @@
+import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs';
-import { NextRequest } from 'next/server';
 
 // get deals by logged in user
 export async function GET(request: NextRequest) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId, sessionId } = getAuth(request);
+  if (!sessionId) {
     console.log('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   Logger.log(
     {
       extra: {
-        user: { clerkUserId: clerkUser.id, email: clerkUser.emailAddresses[0] },
+        user: { clerkUserId: userId, sessionId },
       },
     },
     request
@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
 
   // Get the user from the database
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: userId },
   });
 
   if (!dbUser) {
@@ -76,15 +76,15 @@ export async function DELETE(req: NextRequest) {
     });
   }
 
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId, sessionId } = getAuth(req);
+  if (!sessionId) {
     return errorResponse('User not authenticated', 401, {
       request: req,
     });
   }
 
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: userId },
   });
 
   if (!dbUser) {

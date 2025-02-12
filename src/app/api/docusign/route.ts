@@ -1,11 +1,6 @@
 'use server';
 import { isError } from 'lodash';
-import prisma from '@/libs/prisma.server';
-import {
-  type DocusignEnvelopeCreateSchema,
-  zDocusignEvelopeCreate,
-} from '@/libs/docusign/schema';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import { NextRequest } from 'next/server';
 import {
   refreshAccessToken,
   instantiateApiClient,
@@ -13,7 +8,7 @@ import {
   getExistingEnvelopeDefinition,
   createNewEnvelopeDefinition,
 } from '@/libs/docusign/utils';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import type {
   Envelope,
   EnvelopesApi,
@@ -21,16 +16,22 @@ import type {
   ViewUrl,
 } from 'docusign-esign';
 import { DocusignEvent } from '@prisma/client';
+import prisma from '@/libs/prisma.server';
+import {
+  type DocusignEnvelopeCreateSchema,
+  zDocusignEvelopeCreate,
+} from '@/libs/docusign/schema';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
 
 // create new envelope or get existing envelope, and display recipient view to user
-export async function POST(req: Request) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+export async function POST(req: NextRequest) {
+  const { userId: clerkUserId } = getAuth(req);
+  if (!clerkUserId) {
     return jsonResponse({ error: 'User not found' }, 404);
   }
 
   const userWOrgsAndAddress = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: clerkUserId },
     include: {
       address: true,
       organizationMember: {
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
     console.error('Neutral user not found in api/docusign');
     return jsonResponse(
       {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
+        error: `User record with clerkid ${clerkUserId} not found in prisma (GET)`,
       },
       404
     );
