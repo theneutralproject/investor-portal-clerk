@@ -11,15 +11,15 @@ import fs from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
 import { getAuth } from '@clerk/nextjs/server';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils';
+import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils.server';
 import type { UserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import type { DealCreateSchema } from '@/libs/deal/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import { ProjectName } from '@/libs/project/schema';
 import { NextRequest } from 'next/server';
 
@@ -302,10 +302,7 @@ export async function POST(request: NextRequest) {
           ownershipType: dealInput.ownershipType,
           ownerId: dealOwner.id,
           members: {
-            create: {
-              type: MembershipType.OWNER,
-              userId: dealOwner.id,
-            },
+            create: { type: MembershipType.OWNER, userId: dealOwner.id },
           },
         };
         try {

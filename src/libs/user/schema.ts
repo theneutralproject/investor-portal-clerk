@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ReferralSource } from '../hubspot/utils';
+import { ReferralSource } from '../hubspot/utils.client';
 import { zAddressCreateSchema } from '../address/schema';
 
 // we are excluding the email and phoneNumber, since these were previously verified by the user

@@ -1,6 +1,6 @@
 import type { DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { PaymentMethod } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 

@@ -7,9 +7,13 @@ import {
   getFinancingType,
   getFundingAmount,
   getProjectSlugFromDealStage,
-} from '@/libs/hubspot/utils';
+} from '@/libs/hubspot/utils.server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { type Deal } from '@prisma/client';
 import { isError } from 'lodash';
 import { z } from 'zod';

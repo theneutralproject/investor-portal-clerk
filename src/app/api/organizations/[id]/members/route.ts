@@ -4,8 +4,11 @@ import {
   zOrganizationMemberCreateSchema,
 } from '@/libs/organization/schema';
 import prisma from '@/libs/prisma.server';
-import { createUserInDbAndHubspot, sanitizeUser } from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  createUserInDbAndHubspot,
+  sanitizeUser,
+} from '@/libs/user/utils.server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import type { User } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 import { getUserAndOrg } from './helpers';

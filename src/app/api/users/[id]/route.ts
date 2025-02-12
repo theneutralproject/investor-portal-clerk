@@ -1,10 +1,10 @@
 'use server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
-import { updateHubspotContact } from '@/libs/hubspot/utils';
+import { updateHubspotContact } from '@/libs/hubspot/utils.server';
 import prisma from '@/libs/prisma.server';
 import { type UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
-import { sanitizeUser } from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { sanitizeUser } from '@/libs/user/utils.server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import { isNumber } from 'lodash';
 import type { NextRequest } from 'next/server';

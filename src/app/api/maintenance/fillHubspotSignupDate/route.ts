@@ -5,9 +5,13 @@ import {
   formatDateForHubspot,
   getHubspotContactsWithoutSignupDate,
   updateHubspotContact,
-} from '@/libs/hubspot/utils';
-import { isAdminUser } from '@/libs/maintenance/utils';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+} from '@/libs/hubspot/utils.server';
+import { isAdminUser } from '@/libs/maintenance/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 
 export async function POST(request: NextRequest) {
   console.log('Filling Hubspot signup date for contacts without signup date');

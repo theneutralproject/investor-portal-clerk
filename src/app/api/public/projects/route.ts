@@ -1,5 +1,5 @@
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { type NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';

@@ -4,7 +4,7 @@ import {
   zAccreditationVerificationCreateSchema,
 } from '@/libs/accreditationVerification/schema';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import type { AccreditationVerifier } from '@prisma/client';
 import type { NextRequest } from 'next/server';
@@ -20,9 +20,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
-  });
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) {
     return jsonResponse(
       {

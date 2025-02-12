@@ -4,8 +4,8 @@ import {
   type HsDealDocsAccessedUpdateSchema,
   zHsDealDocsAccessedUpdateSchema,
 } from '@/libs/hubspot/schema';
-import { updateHubspotDealProperties } from '@/libs/hubspot/utils';
-import { jsonResponse } from '@/libs/utils';
+import { updateHubspotDealProperties } from '@/libs/hubspot/utils.server';
+import { jsonResponse } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 /**
  * This function is used to update any of the deal properties in hubspot

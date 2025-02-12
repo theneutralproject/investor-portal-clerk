@@ -1,6 +1,6 @@
 import { type NextRequest } from 'next/server';
 import { getAuth } from '@clerk/nextjs/server';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { z } from 'zod';
 import type { DealFinancingType, Organization } from '@prisma/client';
 import prisma from '@/libs/prisma.server';
@@ -35,10 +35,7 @@ async function fetchProjectDocuments(
   });
 
   const dealDocusignEvents = await prisma.docusignEvent.findMany({
-    where: {
-      userId,
-      dealId,
-    },
+    where: { userId, dealId },
   });
   const results = documents.map(doc => ({
     ...doc,
@@ -67,11 +64,7 @@ async function fetchProject(slug: string) {
 async function fetchDeal(id: number) {
   return prisma.deal.findUnique({
     where: { id },
-    include: {
-      investmentStats: true,
-      organization: true,
-      document: true,
-    },
+    include: { investmentStats: true, organization: true, document: true },
   });
 }
 
@@ -142,10 +135,7 @@ export async function GET(request: NextRequest) {
     );
 
     return jsonResponse({
-      project: {
-        ...project,
-        documents: docusignDocs,
-      },
+      project: { ...project, documents: docusignDocs },
       deal,
     });
   } catch (error) {

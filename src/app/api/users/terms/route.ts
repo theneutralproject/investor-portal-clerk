@@ -1,7 +1,11 @@
 'use server';
 import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
 
 /**
@@ -25,10 +29,7 @@ const CURRENT_REVISION = parseInt(
 const getUser = async (clerkUserId: string) => {
   return await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
-    select: {
-      id: true,
-      TermsEvents: true,
-    },
+    select: { id: true, TermsEvents: true },
   });
 };
 
@@ -51,9 +52,7 @@ export async function GET(request: NextRequest) {
       `User record with clerkid ${userId} not found in prisma (GET)`
     );
     return jsonResponse(
-      {
-        error: `User record with clerkid ${userId} not found in prisma (GET)`,
-      },
+      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
       404
     );
   }
@@ -102,12 +101,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return jsonResponse(
-      {
-        termEvent: newTermEvent,
-      },
-      201
-    );
+    return jsonResponse({ termEvent: newTermEvent }, 201);
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);
   }

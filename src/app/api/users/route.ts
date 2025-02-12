@@ -2,14 +2,14 @@
 import { clerkClient, getAuth } from '@clerk/nextjs/server';
 import { type NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import {
   type ClerkUserUpdateSchema,
   type UserUpdateSchema,
   zUserUpdateSchema,
 } from '@/libs/user/schema';
-import { updateHubspotContact } from '@/libs/hubspot/utils';
-import { sanitizeUser } from '@/libs/user/utils';
+import { updateHubspotContact } from '@/libs/hubspot/utils.server';
+import { sanitizeUser } from '@/libs/user/utils.server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
 /**

@@ -1,13 +1,6 @@
 'use server';
 import { isError } from 'lodash';
 import { NextRequest } from 'next/server';
-import {
-  refreshAccessToken,
-  instantiateApiClient,
-  makeRecipientViewRequest,
-  getExistingEnvelopeDefinition,
-  createNewEnvelopeDefinition,
-} from '@/libs/docusign/utils';
 import { getAuth } from '@clerk/nextjs/server';
 import type {
   Envelope,
@@ -21,7 +14,19 @@ import {
   type DocusignEnvelopeCreateSchema,
   zDocusignEvelopeCreate,
 } from '@/libs/docusign/schema';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
+import {
+  AccessTokenResponse,
+  createNewEnvelopeDefinition,
+  getExistingEnvelopeDefinition,
+  instantiateApiClient,
+  makeRecipientViewRequest,
+  refreshAccessToken,
+} from '@/libs/docusign/utils.server';
 
 // create new envelope or get existing envelope, and display recipient view to user
 export async function POST(req: NextRequest) {
@@ -32,14 +37,7 @@ export async function POST(req: NextRequest) {
 
   const userWOrgsAndAddress = await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
-    include: {
-      address: true,
-      organizationMember: {
-        include: {
-          user: true,
-        },
-      },
-    },
+    include: { address: true, organizationMember: { include: { user: true } } },
   });
   if (!userWOrgsAndAddress) {
     console.error('Neutral user not found in api/docusign');
@@ -59,10 +57,7 @@ export async function POST(req: NextRequest) {
     console.error('Error parsing Docusign POST payload: ', err);
     return new Response(
       JSON.stringify({ error: 'Unable to parse Docusign POST payload:', err }),
-      {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      { status: 404, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
@@ -121,7 +116,7 @@ export async function POST(req: NextRequest) {
       404
     );
   }
-  let accessTokenResponse: { consentUrl?: string; accessToken?: string };
+  let accessTokenResponse: AccessTokenResponse;
   try {
     // get access token and instantiate api client
     accessTokenResponse = await refreshAccessToken(
@@ -137,10 +132,7 @@ export async function POST(req: NextRequest) {
       );
       return new Response(
         JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),
-        {
-          status: 201,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { status: 201, headers: { 'Content-Type': 'application/json' } }
       );
     }
     if (!accessTokenResponse.accessToken) {
@@ -268,10 +260,7 @@ export async function POST(req: NextRequest) {
     try {
       await prisma.docusignEvent.update({
         where: { id: existingDocusignEvent.id },
-        data: {
-          envelopeId: envelopeResponse.envelopeId,
-          dateSent: new Date(),
-        },
+        data: { envelopeId: envelopeResponse.envelopeId, dateSent: new Date() },
       });
       return jsonResponse(viewRequestResponse, 200);
     } catch (err) {

@@ -1,8 +1,8 @@
-import { getAdminFromRequest, getFileDetails } from '@/libs/admin/utils';
+import { getAdminFromRequest, getFileDetails } from '@/libs/admin/utils.server';
 import prisma from '@/libs/prisma.server';
-import { validateEquityMilestonesFile } from '@/libs/returns/utils';
+import { validateEquityMilestonesFile } from '@/libs/returns/utils.server';
 import { storageClient } from '@/libs/supabase';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError } from 'lodash';
 import { NextRequest } from 'next/server';
 

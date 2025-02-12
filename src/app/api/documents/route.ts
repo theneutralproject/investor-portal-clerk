@@ -6,11 +6,15 @@ import {
   uploadFile,
   getFileDetails,
   createDocumentEntry,
-} from '@/libs/admin/utils';
+} from '@/libs/admin/utils.server';
 import { zPdfDocumentCreateSchema } from '@/libs/document/schema';
 import prisma from '@/libs/prisma.server';
 import type { UserWithOrganizations } from '@/libs/types';
-import { jsonResponse, errorResponse, getErrorMessage } from '@/libs/utils';
+import {
+  jsonResponse,
+  errorResponse,
+  getErrorMessage,
+} from '@/libs/utils.server';
 
 async function validateUser(request: NextRequest) {
   const { userId } = getAuth(request);
@@ -120,19 +124,13 @@ export async function POST(request: NextRequest) {
       dealDocumentType
     );
 
-    return jsonResponse({
-      success: true,
-      document: newDocEntry,
-    });
+    return jsonResponse({ success: true, document: newDocEntry });
   } catch (error) {
     console.error('Error processing upload:', error);
 
     if (error instanceof z.ZodError) {
       return jsonResponse(
-        {
-          error: 'Invalid data format',
-          details: error.errors,
-        },
+        { error: 'Invalid data format', details: error.errors },
         400
       );
     }

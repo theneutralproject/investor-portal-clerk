@@ -1,5 +1,5 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import {
   UserCreateSchema,
@@ -10,8 +10,8 @@ import {
 import {
   createUserInDbAndHubspot,
   updateUserInDbAndHubspotAndClerk,
-} from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+} from '@/libs/user/utils.server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 

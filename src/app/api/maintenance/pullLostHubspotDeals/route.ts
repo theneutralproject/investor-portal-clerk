@@ -1,10 +1,10 @@
 'use server';
 import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
-import { getListOfHSDeals } from '@/libs/hubspot/utils';
-import { isAdminUser } from '@/libs/maintenance/utils';
+import { getListOfHSDeals } from '@/libs/hubspot/utils.server';
+import { isAdminUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 
 export async function GET(request: NextRequest) {
   const { userId } = getAuth(request);
@@ -17,15 +17,9 @@ export async function GET(request: NextRequest) {
   const hsIds = lostHsDeals.map(deal => deal.id);
   console.log(hsIds);
   const updatedDeals = await prisma.deal.updateMany({
-    where: {
-      hubspotId: {
-        in: hsIds,
-      },
-    },
+    where: { hubspotId: { in: hsIds } },
     data: {
-      dealStage: {
-        set: 6,
-      },
+      dealStage: { set: 6 },
       paymentMethod: { set: null },
       dateFundsSent: { set: null },
       signaturesCompletedDate: { set: null },

@@ -1,7 +1,7 @@
 'use server';
 import prisma from '@/libs/prisma.server';
 import { type SessionData, sessionOptions } from '@/libs/session/utils';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import { Role } from '@prisma/client';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';

@@ -9,7 +9,7 @@ import {
 } from '@/libs/organization/schema';
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 
 async function getUserAndOrg(request: NextRequest) {
   const url = new URL(request.url);
@@ -25,10 +25,7 @@ async function getUserAndOrg(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
-    include: {
-      address: true,
-      organizationMember: true,
-    },
+    include: { address: true, organizationMember: true },
   });
 
   if (!user) {
@@ -42,16 +39,10 @@ async function getUserAndOrg(request: NextRequest) {
 
   // get org by id if they are a member
   const organization = await prisma.organization.findFirst({
-    where: {
-      AND: [{ members: { some: { userId: user.id } } }, { id: id }],
-    },
+    where: { AND: [{ members: { some: { userId: user.id } } }, { id: id }] },
     include: {
       address: true,
-      members: {
-        include: {
-          user: true,
-        },
-      },
+      members: { include: { user: true } },
       document: true,
     },
   });
@@ -140,10 +131,7 @@ export async function PUT(request: NextRequest) {
 
     const updatedOrg = await prisma.organization
       .update({
-        where: {
-          ownerId: user.id,
-          id: orgToUpdate.id,
-        },
+        where: { ownerId: user.id, id: orgToUpdate.id },
         data: orgData,
         include: { members: true, address: true },
       })

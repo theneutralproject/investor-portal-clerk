@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-constructor */
+import 'server-only';
+/* @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-constructor */
 //This file needs a lot of help with the eslint rules.
 
 // https://www.youtube.com/watch?v=sqx8KbVa6Cw I followed much of this docusign tutorial
@@ -33,7 +34,7 @@ import { docusignOwnershipTypeEnum } from './schema';
 import { type SessionData, sessionOptions } from '../session/utils';
 import { toWords } from 'number-to-words';
 import { isNull } from 'lodash';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -119,15 +120,11 @@ export async function refreshAccessToken(
     console.error(`Error getting Docusign JWT token: ${err}`);
     throw new Error(`Error getting Docusign JWT token: ${err}`);
   }
-  console.log('docusignJwtRes:', docusignJwtRes.body);
+
   if (docusignJwtRes.body.consentUrl) {
     console.warn('User needs to give consent to use docusign');
     responseObj.consentUrl = docusignJwtRes.body.consentUrl;
   } else {
-    console.log(
-      'DS JWT response with valid access token:',
-      docusignJwtRes.body
-    );
     const { access_token, expires_in } = docusignJwtRes.body as {
       access_token: string;
       expires_in: number;
@@ -137,8 +134,6 @@ export async function refreshAccessToken(
     session.docusignJwt = access_token;
     session.docusignExpiresAt = Date.now() + expires_in * 1000 - 60;
     await session.save();
-
-    console.log('DS access token generated and saved to session!');
     responseObj.accessToken = access_token;
   }
   return responseObj;
@@ -153,15 +148,8 @@ export async function refreshAccessTokenFromCode(code: string) {
     throw new Error(`Error setting base path for DocuSign API client: ${err}`);
   }
   try {
-    let docusignAccessTokenRes: {
-      accessToken?: string;
-      expiresIn?: string;
-      refreshToken?: string;
-      scope?: string;
-      tokenType?: string;
-    };
     console.log('getting docusignAccessTokenRes1');
-    docusignAccessTokenRes = await dsApiClient.generateAccessToken(
+    const docusignAccessTokenRes = await dsApiClient.generateAccessToken(
       process.env.DOCUSIGN_INTEGRATION_KEY!,
       process.env.DOCUSIGN_SECRET_KEY!,
       code
@@ -251,6 +239,50 @@ export async function getExistingEnvelopeDefinition(
   }
 }
 
+/**
+ * Fetch signing order of an envelope from DocuSign
+ * @param {string} envelopeId - The ID of the envelope to fetch signing order
+ * @returns {Promise<object>} - The signing order details
+ */
+export async function getSigningOrder(
+  envelopesApi: EnvelopesApi,
+  envelopeId: string
+) {
+  const accountId = process.env.DOCUSIGN_API_ACCOUNT_ID!;
+  try {
+    // Get envelope details
+    const envelopeDetails = await envelopesApi.listRecipients(
+      accountId,
+      envelopeId
+    );
+
+    // Extract signing order
+    const signers = envelopeDetails.signers ?? [];
+    const signingOrder = signers
+      .map(signer => ({
+        name: signer.name,
+        email: signer.email,
+        routingOrder: signer.routingOrder,
+        status: signer.status,
+        role: signer.roleName,
+        recipientId: signer.recipientId,
+        dateSigned: signer.signedDateTime,
+        // dateViewed: signer.deliveredDateTime,
+        // dateSent: signer.sentDateTime,
+      }))
+      .sort(
+        (a, b) =>
+          parseInt(a.routingOrder ?? '1', 10) -
+          parseInt(b.routingOrder ?? '2', 10)
+      );
+
+    return signingOrder;
+  } catch (error) {
+    console.error('Error fetching signing order:', error);
+    throw error;
+  }
+}
+
 const addressToCityStateZip = (a: Address | null) => {
   return a ? `${a.city}, ${a.state} ${a.zipcode}` : '';
 };
@@ -314,7 +346,6 @@ const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
       break;
   }
 
-  /* eslint-disable-next-line*/
   const companyOrIndividualTab: InitialHere =
     docusign.InitialHere.constructFromObject({
       tabLabel: tabname,
@@ -326,7 +357,7 @@ const getInitialHereTabs = (deal: DealWithInvestmentStatsAndVerification) => {
     basis = 'init_verifier_income';
   if (deal.accreditationVerification?.basis === 'OTHER')
     basis = 'init_verifier_other';
-  /* eslint-disable-next-line*/
+
   const VerificationBasisTab: InitialHere =
     docusign.InitialHere.constructFromObject({
       // TODO: this is not yet hooked up to the deal.accreditationVerification
@@ -359,7 +390,6 @@ const getSignerCheckboxTabs = (
       break;
   }
 
-  /* eslint-disable-next-line*/
   const verificationMethodTab: Checkbox = docusign.Checkbox.constructFromObject(
     {
       tabLabel,
@@ -374,7 +404,6 @@ const getSignerCompanyDetailsTabs = (
   deal: DealWithInvestmentStatsAndVerification,
   user: UserWithAddress
 ) => {
-  /* eslint-disable-next-line*/
   const stateNotOrgTab = docusign.Text.constructFromObject({
     tabLabel: 'stateNotOrg',
     value: getAddress(org, deal, user)?.state ?? '',
@@ -389,21 +418,19 @@ const getSignerCompanyDetailsTabs = (
       return [stateNotOrgTab];
     default:
       console.log('getting company details tabs', org.address);
-      /* eslint-disable-next-line*/
+
       const corporationStateTab: DSText = docusign.Text.constructFromObject({
         tabLabel: 'corporationState',
         value: getAddress(org, deal, user)?.state ?? '',
         required: 'true',
       }) as DSText;
 
-      /* eslint-disable-next-line*/
       const corporationCityTab: DSText = docusign.Text.constructFromObject({
         tabLabel: 'corporationCity',
         value: getAddress(org, deal, user)?.city ?? '',
         required: 'true',
       }) as DSText;
 
-      /* eslint-disable-next-line*/
       const corporationFormationDateTab: DSText =
         docusign.Text.constructFromObject({
           tabLabel: 'corporationFormationDate',
@@ -435,50 +462,42 @@ export function makeEnvelopeDefinition(
   const amountSpelledOut = toWords(amount);
   const investingEntityName = getInvestingEntityName(org, deal, signer);
 
-  /* eslint-disable-next-line*/
   const env: EnvelopeDefinition =
     new docusign.EnvelopeDefinition() as EnvelopeDefinition;
   env.templateId = templateId;
 
   // SHARED TABS
 
-  /* eslint-disable-next-line*/
   const amountTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'amount',
     value: amount.toString(),
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const amountSpelledOutTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'amountSpelledOut',
     value: amountSpelledOut,
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const numberAUnitsTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'numberAUnits',
     value: numberAUnits?.toString() ?? '',
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const numberCUnitsTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'numberCUnits',
     value: numberCUnits?.toString() ?? '',
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const interestTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'interest',
     value: amount >= 250000 ? '12' : '10',
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const interestSpelledOutTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'interestSpelledOut',
     value: amount >= 250000 ? `Twelve Percent` : `Ten Percent`,
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const investingEntityNameTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'investingEntityName',
     value: investingEntityName,
@@ -494,38 +513,32 @@ export function makeEnvelopeDefinition(
     interestSpelledOutTab,
   ];
 
-  /* eslint-disable-next-line*/
   const signer1SsnTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'ssn',
     value: getSsnOrTin(org, deal, signer),
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const signer1AddressStreetTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'addressStreet',
     value: getAddress(org, deal, signer)?.street ?? '',
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const signer1AddressCityStateZipTab: DSText =
     docusign.Text.constructFromObject({
       tabLabel: 'addressCityStateZip',
       value: addressToCityStateZip(getAddress(org, deal, signer)),
     }) as DSText;
 
-  /* eslint-disable-next-line*/
   const signer1AddressOneLineTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'addressOneLine',
     value: addressToOneLine(getAddress(org, deal, signer)),
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const signer1State: DSText = docusign.Text.constructFromObject({
     tabLabel: 'state',
     value: getAddress(org, deal, signer)?.state,
   }) as DSText;
 
-  /* eslint-disable-next-line*/
   const signer1PhoneNumberTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'phoneNumber',
     value: signer.phoneNumber,
@@ -535,11 +548,11 @@ export function makeEnvelopeDefinition(
   const ownershipType = getOwnershipTypeFromDeal(
     deal.investmentStats.ownershipType
   );
-  /* eslint-disable-next-line*/
+
   const signer1OwnershipTypeTab: RadioGroup =
     docusign.RadioGroup.constructFromObject({
       groupName: 'ownershipType',
-      /* eslint-disable-next-line*/
+
       radios: [
         docusign.Radio.constructFromObject({
           value: ownershipType,
@@ -570,17 +583,16 @@ export function makeEnvelopeDefinition(
     initialHereTabs: getInitialHereTabs(deal),
     checkboxTabs: getSignerCheckboxTabs(deal),
   }) as Tabs;
-  /* eslint-disable-next-line*/
+
   const neutralSignerTitleTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'title',
     value: 'Authorized Agent',
   }) as DSText;
-  /* eslint-disable-next-line*/
+
   const neutralSignerTabs: Tabs = docusign.Tabs.constructFromObject({
     textTabs: [...sharedTextTabs, ...[neutralSignerTitleTab]],
   });
 
-  /* eslint-disable-next-line*/
   const signer1Role: TemplateRole = docusign.TemplateRole.constructFromObject({
     email: signer.email,
     name: `${signer.firstName} ${signer.lastName}`,
@@ -589,7 +601,6 @@ export function makeEnvelopeDefinition(
     roleName: 'Signer',
   }) as TemplateRole;
 
-  /* eslint-disable-next-line*/
   const neutralSignerRole: TemplateRole =
     docusign.TemplateRole.constructFromObject({
       email: 'nate@neutral.us',
@@ -604,7 +615,7 @@ export function makeEnvelopeDefinition(
   // co-signer
   if (coSigners.length > 0) {
     const coSigner = coSigners[0];
-    /* eslint-disable-next-line*/
+
     const coSignerRole1: TemplateRole =
       docusign.TemplateRole.constructFromObject({
         email: coSigner!.email,
@@ -615,7 +626,6 @@ export function makeEnvelopeDefinition(
     env.templateRoles.push(coSignerRole1);
   }
   if (accreditationVerifier) {
-    /* eslint-disable-next-line*/
     const accreditationVerifierRole: TemplateRole =
       docusign.TemplateRole.constructFromObject({
         email: accreditationVerifier.email,
@@ -689,4 +699,9 @@ export async function getEnvelopeAsPdfFileBuffer(
   return file;
   // return Buffer.from(envelopeAsBase64String, 'base64');
   // return envelopeAsBase64String
+}
+
+export interface AccessTokenResponse {
+  consentUrl?: string;
+  accessToken?: string;
 }

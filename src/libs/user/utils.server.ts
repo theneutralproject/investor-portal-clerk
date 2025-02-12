@@ -5,16 +5,16 @@ import {
   associateContactWithDealInHubspot,
   createHubspotContact,
   formatDateForHubspot,
-  ReferralSource,
   updateHubspotContact,
-} from '../hubspot/utils';
+} from '../hubspot/utils.server';
 import prisma from '../prisma.server';
 import type { UserCreateSchema, UserUpdateSchema } from './schema';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 import { type Deal, MembershipType, type User } from '@prisma/client';
 import type { UserWithAddress } from '../types';
 import type { AddressCreateSchema } from '../address/schema';
 import { clerkClient } from '@clerk/nextjs/server';
+import { ReferralSource } from '../hubspot/utils.client';
 
 interface ClerkAPIErrorResponse {
   clerkError: boolean;
