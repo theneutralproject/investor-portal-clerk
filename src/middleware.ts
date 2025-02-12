@@ -13,9 +13,23 @@ const publicRoutes = [
   '/api/public/projects',
 ];
 
+const ignoredRoutes = [
+  '/api/webhooks/(.*)',
+  '/api/admin/(.*)',
+  '/api/docusign/return',
+  '/api/docusign/tokenFromCode',
+  '/api/finix/webhooks',
+  '/api/clerk',
+];
+
 const isPublicRoute = createRouteMatcher(publicRoutes);
+const isIgnoredRoute = createRouteMatcher(ignoredRoutes);
 
 export default clerkMiddleware(async (auth, request) => {
+  if (isIgnoredRoute(request)) {
+    return NextResponse.next();
+  }
+
   const { userId } = await auth();
 
   if (!userId && !isPublicRoute(request)) {
@@ -34,7 +48,7 @@ export const config = {
   matcher: [
     // Skip Next.js internals and all static files, unless found in search params
     '/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)',
-    // Always run for API routes
+    // Always run for API routes except ignored ones
     '/(api|trpc)(.*)',
   ],
 };
