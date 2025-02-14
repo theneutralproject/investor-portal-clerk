@@ -78,13 +78,3 @@ export const zHsDealSearchResultsSchema = z.object({
   total: z.number(),
   results: z.array(zHsDealSearchObjectSchema),
 });
-
-export const zHsDealDocsAccessedUpdateSchema = z.object({
-  dealId: z.number(),
-  dealStage: z.number().min(1).max(6),
-  documentNames: z.string(),
-});
-
-export type HsDealDocsAccessedUpdateSchema = z.infer<
-  typeof zHsDealDocsAccessedUpdateSchema
->;
