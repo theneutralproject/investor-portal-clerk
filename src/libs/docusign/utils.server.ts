@@ -20,6 +20,7 @@ import {
   type Checkbox,
 } from 'docusign-esign';
 import {
+  Deal,
   DealOwnershipType,
   VerificationBasis,
   type Address,
@@ -175,7 +176,43 @@ export async function refreshAccessTokenFromCode(code: string) {
   }
 }
 
-export async function instantiateApiClient(accessToken: string) {
+/**
+ *
+ * @param deal Deal that the envelope is associated with
+ * @param email Email of the deal owner
+ * @param slug slug of the project the deal is associated with
+ * @param envelopeId envelopeId in question
+ * @returns
+ */
+export async function instantiateApiClientFromUserAndDeal(
+  deal: Deal,
+  email: string,
+  slug: string,
+  envelopeId: string
+) {
+  const accessTokenResponse = await refreshAccessToken(email, deal.id, slug);
+
+  if (accessTokenResponse.consentUrl) {
+    // we need to get consent from the user to share their data with docusign.
+    // this should never happen as we already did this when the user signed the document
+    const errorMessage = `Consent required to share data with docusign for envelopeId: ${envelopeId} - THIS SHOULD NEVER HAPPEN!`;
+    console.error(errorMessage);
+    throw new Error(errorMessage);
+  }
+
+  let envelopesApi;
+  try {
+    envelopesApi = await instantiateApiClientFromAccessToken(
+      accessTokenResponse.accessToken
+    );
+  } catch (error) {
+    console.error('Error instantiating envelopesApi:', getErrorMessage(error));
+    throw error;
+  }
+  return envelopesApi;
+}
+
+export async function instantiateApiClientFromAccessToken(accessToken: string) {
   const dsApiClient = new ApiClient();
   dsApiClient.setBasePath(process.env.DOCUSIGN_BASE_PATH!);
   dsApiClient.addDefaultHeader('Authorization', 'Bearer ' + accessToken);

@@ -9,7 +9,7 @@ import {
   type HsDealCreateResponse,
 } from './schema';
 import type { DealUpdateSchema, DealCreateSchema } from '../deal/schema';
-import { getErrorMessage, jsonResponse } from '../utils.server';
+import { getErrorMessage } from '../utils.server';
 import { getInvestmentEntity } from '../deal/utils';
 import { Client } from '@hubspot/api-client';
 import {
@@ -19,8 +19,7 @@ import {
 } from '@hubspot/api-client/lib/codegen/crm/deals';
 import {
   getSigningOrder,
-  instantiateApiClient,
-  refreshAccessToken,
+  instantiateApiClientFromUserAndDeal,
 } from '../docusign/utils.server';
 import { Signer } from 'docusign-esign';
 
@@ -301,32 +300,6 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   return { deals, contacts, dealContacts };
 }
 
-// export async function getListOfHSContacts(arrVids: string[]) {
-//   ///https://api.hubapi.com/contacts/v1/contact/vids/batch/?vid=3234574&vid=3714024&hapikey=demo
-//   const firstVid = arrVids.shift();
-//   const vids = arrVids.map(v => v.trim()).join("&vid=");
-
-//   console.log(`/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`);
-
-//   const response = await fetch(
-//     `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`,
-//     {
-//       method: "GET",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-//       },
-//     }
-//   )
-//   const data = JSON.parse(await response.text());
-//   if (response.status >= 300) {
-//     console.error("ERROR: unable to get Hubspot contacts:\n", data);
-//     throw new Error("unable to get hubspot contacts");
-//   }
-//   // console.log("data", data.keys());
-//   return Object.keys(data);
-// }
-
 export async function getHubspotDealById(hsDealId: string) {
   try {
     const hsDeal = await hubspotClient.crm.deals.basicApi.getById(hsDealId, [
@@ -456,37 +429,12 @@ export async function updateHubspotDealFromDocusignEvent(
    * if there are remaining signatures:
    */
 
-  // get signer info from docusign
-  const accessTokenResponse = await refreshAccessToken(
+  const envelopesApi = await instantiateApiClientFromUserAndDeal(
+    deal,
     email,
-    deal.id,
-    projectSlug
+    projectSlug,
+    envelopeId
   );
-
-  if (accessTokenResponse.consentUrl) {
-    // this should never happen as we already did this when the user signed the document
-    const errorMessage = `Consent required to share data with docusign for envelopeId: ${envelopeId} - THIS SHOULD NEVER HAPPEN!`;
-    console.error(errorMessage);
-    throw new Error(errorMessage);
-  }
-
-  let envelopesApi;
-  try {
-    envelopesApi = await instantiateApiClient(accessTokenResponse.accessToken);
-  } catch (error) {
-    console.error('Error instantiating envelopesApi:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
-  }
-  // const docusignStatusEnum = [
-  //   'created',
-  //   'sent',
-  //   'delivered',
-  //   'signed',
-  //   'completed',
-  //   'declined',
-  //   'faxpending',
-  //   'autoresponded',
-  // ];
 
   const signingOrder = await getSigningOrder(envelopesApi, envelopeId);
   const numberSignaturesRemaining =
@@ -494,7 +442,7 @@ export async function updateHubspotDealFromDocusignEvent(
   console.log('signingOrder', signingOrder);
   let currentSigner: Signer | undefined = undefined;
   const previousSigner = signingOrder
-    .filter(s => s.status === 'completed' || s.status === 'completed')
+    .filter(s => s.status === 'completed' || s.status === 'signed')
     .pop(); // get last signer that has signed
 
   if (!previousSigner) {
