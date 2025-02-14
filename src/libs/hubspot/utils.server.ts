@@ -1,11 +1,9 @@
 import 'server-only';
 import { type User, Deal, DealFinancingType, Project } from '@prisma/client';
-import axios from 'axios';
 import {
   type HubspotContactCreateUpdateSchema,
   type HubspotDealPropertiesCollection,
   zHsDealCreateResponse,
-  type HsDealDocsAccessedUpdateSchema,
   type HubspotDealUpdate,
   zHsDealSearchResultsSchema,
   type HsDealCreateResponse,
@@ -137,6 +135,35 @@ export async function getHubspotContactsWithoutSignupDate() {
   } catch (error) {
     console.error(
       'Unable to get contacts without signup date from hubspot:\n',
+      error
+    );
+    throw new Error(getErrorMessage(error));
+  }
+}
+
+export async function shareProjectDocsWithUser(
+  userHubspotId: number,
+  slug: string
+) {
+  const body = JSON.stringify({
+    hubspotId: userHubspotId,
+    slug,
+  });
+  const url = process.env.HUBSPOT_SHARE_PROJECT_DOCS_WEBHOOK_URL!;
+  console.log('url', url);
+  try {
+    const hsRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    });
+    return await hsRes.json();
+  } catch (error) {
+    console.error(
+      'Unable to share project docs with user in hubspot:\n',
       error
     );
     throw new Error(getErrorMessage(error));
@@ -383,12 +410,6 @@ export async function createHubspotDeal(
     console.error('hubspot response error:\n', hsDealCreateRespBody);
     throw new Error(getErrorMessage(getErrorMessage(error)));
   }
-}
-
-export async function updateHubspotDealDocsAccessed(
-  hsDealUpdateData: HsDealDocsAccessedUpdateSchema
-) {
-  return await axios.post('/api/deals/hubspot', hsDealUpdateData);
 }
 
 /**
