@@ -28,6 +28,7 @@ export async function GET(request: NextRequest) {
   let dealId: number;
   try {
     const url = new URL(request.url);
+    console.log(url.pathname.split('/'));
     dealId = parseInt(url.pathname.split('/')[4] ?? '');
     if (!dealId || !isNumber(dealId)) {
       throw new Error('dealId is required in url');
@@ -45,11 +46,6 @@ export async function GET(request: NextRequest) {
           investmentStats: true,
           milestones: true,
           pictures: true,
-        },
-        select: {
-          id: true,
-          slug: true,
-          name: true,
         },
       },
       organization: {
