@@ -23,7 +23,7 @@ import {
   AccessTokenResponse,
   createNewEnvelopeDefinition,
   getExistingEnvelopeDefinition,
-  instantiateApiClient,
+  instantiateApiClientFromAccessToken,
   makeRecipientViewRequest,
   refreshAccessToken,
 } from '@/libs/docusign/utils.server';
@@ -152,7 +152,9 @@ export async function POST(req: NextRequest) {
 
   let envelopesApi: EnvelopesApi | null = null;
   try {
-    envelopesApi = await instantiateApiClient(accessTokenResponse.accessToken);
+    envelopesApi = await instantiateApiClientFromAccessToken(
+      accessTokenResponse.accessToken
+    );
   } catch (err) {
     console.error('Error instantiating envelopesApi', getErrorMessage(err));
     return errorResponse('Error instantiating envelopesApi', 500);
