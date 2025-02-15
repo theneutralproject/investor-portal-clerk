@@ -2,8 +2,8 @@
 // The config you add here will be used whenever the server handles a request.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
+import { initPosthog } from '@/libs/posthog';
 import * as Sentry from '@sentry/nextjs';
-import posthog from 'posthog-js';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -16,7 +16,5 @@ Sentry.init({
 });
 
 if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-  posthog.init(process.env.NEXT_PUBLIC_POSTHOG_KEY, {
-    api_host: process.env.NEXT_PUBLIC_POSTHOG_HOST,
-  });
+  initPosthog();
 }

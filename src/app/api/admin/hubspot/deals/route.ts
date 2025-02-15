@@ -3,9 +3,13 @@ import {
   getFinancingType,
   getHubspotDealById,
   getProjectSlugFromDealStage,
-} from '@/libs/hubspot/utils';
+} from '@/libs/hubspot/utils.server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { SimplePublicObjectWithAssociations } from '@hubspot/api-client/lib/codegen/crm/contacts';
 import { NextRequest } from 'next/server';
 

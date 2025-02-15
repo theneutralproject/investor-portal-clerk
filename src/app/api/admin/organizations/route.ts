@@ -1,11 +1,15 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import {
   OrganizationCreateSchema,
   type OrganizationUpdateSchema,
   zOrganizationUpdateSchema,
 } from '@/libs/organization/schema';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { MembershipType, Prisma } from '@prisma/client';
 import { User } from '@sentry/nextjs';
 import { isError, startCase } from 'lodash';

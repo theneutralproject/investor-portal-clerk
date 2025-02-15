@@ -1,7 +1,11 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getPortfolioReturns } from '@/libs/returns/utils';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getPortfolioReturns } from '@/libs/returns/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { isError, isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 

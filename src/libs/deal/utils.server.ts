@@ -11,20 +11,20 @@ import {
   getDebtInterestRate,
   getDebtUnitType,
   getEquityStatsFromProject,
-} from '../returns/utils';
+} from '../returns/utils.server';
 import prisma from '../prisma.server';
 import {
   createHubspotDeal,
   getHsDealPropsFromDeal,
   initHubspotDealProps,
   updateHubspotDealProperties,
-} from '../hubspot/utils';
+} from '../hubspot/utils.server';
 import type {
   DealWithInvestmentStats,
   ProjectWithInvestmentStats,
 } from '../types';
 import { getInvestmentEntity } from './utils';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 
 /**
  * creates a deal in the db, and in hubspot

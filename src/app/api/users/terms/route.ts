@@ -1,7 +1,12 @@
 'use server';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
+import { NextRequest } from 'next/server';
 
 /**
  * Current terms revision number from environment variable.
@@ -24,10 +29,7 @@ const CURRENT_REVISION = parseInt(
 const getUser = async (clerkUserId: string) => {
   return await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
-    select: {
-      id: true,
-      TermsEvents: true,
-    },
+    select: { id: true, TermsEvents: true },
   });
 };
 
@@ -38,21 +40,19 @@ const getUser = async (clerkUserId: string) => {
  * @function GET
  * @returns {Promise<Response>} A JSON response indicating whether the user has accepted the current revision.
  */
-export async function GET() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+export async function GET(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
-  const user = await getUser(clerkUser.id);
+  const user = await getUser(userId);
 
   if (!user) {
     console.error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (GET)`
+      `User record with clerkid ${userId} not found in prisma (GET)`
     );
     return jsonResponse(
-      {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
-      },
+      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
       404
     );
   }
@@ -73,20 +73,20 @@ export async function GET() {
  * @function POST
  * @returns {Promise<Response>} A JSON response indicating success or failure of the operation.
  */
-export async function POST() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+export async function POST(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
-  const user = await getUser(clerkUser.id);
+  const user = await getUser(userId);
 
   if (!user) {
     console.error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (POST)`
+      `User record with clerkid ${userId} not found in prisma (POST)`
     );
     return jsonResponse(
       {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (POST)`,
+        error: `User record with clerkid ${userId} not found in prisma (POST)`,
       },
       404
     );
@@ -101,12 +101,7 @@ export async function POST() {
       },
     });
 
-    return jsonResponse(
-      {
-        termEvent: newTermEvent,
-      },
-      201
-    );
+    return jsonResponse({ termEvent: newTermEvent }, 201);
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);
   }

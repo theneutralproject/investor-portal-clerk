@@ -1,5 +1,6 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { shareProjectDocsWithUser } from '@/libs/hubspot/utils.server';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import {
   UserCreateSchema,
@@ -10,12 +11,12 @@ import {
 import {
   createUserInDbAndHubspot,
   updateUserInDbAndHubspotAndClerk,
-} from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+} from '@/libs/user/utils.server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 
-// test route to get user if correct jwt is provided
+// get all users with their orgs
 export async function GET(request: NextRequest) {
   const adminUser = await getAdminFromRequest(request);
   if (isError(adminUser)) {
@@ -92,6 +93,15 @@ export async function POST(request: NextRequest) {
         address: true,
       },
     });
+
+    if (postData.projectSlug) {
+      // invite user to review project documents
+      shareProjectDocsWithUser(
+        parseInt(newUser.hubspotId, 10),
+        postData.projectSlug
+      );
+    }
+
     return jsonResponse(userWithOrgs);
   } catch (error) {
     console.error('unable to create user:', getErrorMessage(error));

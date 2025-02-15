@@ -5,16 +5,17 @@ import {
   associateContactWithDealInHubspot,
   createHubspotContact,
   formatDateForHubspot,
-  ReferralSource,
   updateHubspotContact,
-} from '../hubspot/utils';
+} from '../hubspot/utils.server';
 import prisma from '../prisma.server';
 import type { UserCreateSchema, UserUpdateSchema } from './schema';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 import { type Deal, MembershipType, type User } from '@prisma/client';
 import type { UserWithAddress } from '../types';
 import type { AddressCreateSchema } from '../address/schema';
 import { clerkClient } from '@clerk/nextjs/server';
+import { ReferralSource } from '../hubspot/utils.client';
+import Logger from '../logger';
 
 interface ClerkAPIErrorResponse {
   clerkError: boolean;
@@ -114,7 +115,7 @@ export async function createUserInDbAndHubspot(
         ...{ address: { connect: userAddress.id }, addressId: addressId },
       };
     }
-    console.log('creating user in db', userCreateData.email);
+    Logger.log({ message: 'begin creating user in db', extra: userCreateData });
     const dbUser = await prisma.user.create({
       data: userCreateData,
     });
@@ -164,7 +165,10 @@ export async function createUserInDbAndHubspot(
       console.error('Unable to associate user with deal in hubspot:\n', res);
     }
   }
-
+  Logger.log({
+    message: 'done creating user with org in db and hubspot',
+    extra: updatedUser,
+  });
   return updatedUser;
 }
 
@@ -174,9 +178,10 @@ async function updateUserInClerk(
   lastName?: string,
   email?: string
 ) {
+  const authClient = await clerkClient();
   if (email) {
     try {
-      await clerkClient.emailAddresses.createEmailAddress({
+      await authClient.emailAddresses.createEmailAddress({
         userId: clerkId!,
         emailAddress: email,
         primary: false,
@@ -192,15 +197,15 @@ async function updateUserInClerk(
           // Implement specific error handling based on err.code
           if (err.code === 'form_identifier_exists') {
             // check if this email address is associated with the user we are looking to update:
-            const existingUsers = await clerkClient.users.getUserList({
+            const existingUsers = await authClient.users.getUserList({
               emailAddress: [email],
             });
-            if (existingUsers[0]?.id === clerkId) {
+            if (existingUsers?.data[0]?.id === clerkId) {
               console.log(
                 `Email address ${email} is already associated with user ${clerkId}. We will still update Hubspot and DB.`
               );
             }
-            return existingUsers[0];
+            return existingUsers?.data[0];
           }
           throw new Error(err.message);
         });
@@ -211,7 +216,7 @@ async function updateUserInClerk(
       }
     }
   }
-  return await clerkClient.users.updateUser(clerkId, { firstName, lastName });
+  return authClient.users.updateUser(clerkId, { firstName, lastName });
 }
 
 export async function updateUserInDbAndHubspotAndClerk(data: UserUpdateSchema) {
