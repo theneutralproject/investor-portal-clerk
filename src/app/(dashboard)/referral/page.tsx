@@ -13,7 +13,7 @@ import {
   CircularProgress,
 } from '@mui/material';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
 import { ReferralSource } from '@/libs/hubspot/utils.client';
 
@@ -32,7 +32,10 @@ const Referral: React.FC = () => {
   const [referralSource, setReferralSource] = useState<ReferralSource | ''>('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { user } = useUser();
+
+  const redirectUrl = searchParams.get('redirectUrl');
 
   const updateUserAndHubspot = async (source: ReferralSource) => {
     try {
@@ -53,7 +56,7 @@ const Referral: React.FC = () => {
       console.error('Error updating user information:', error);
     }
 
-    router.push('/dashboard');
+    router.push(redirectUrl ? redirectUrl : '/dashboard');
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
