@@ -11,20 +11,20 @@ import {
   getDebtInterestRate,
   getDebtUnitType,
   getEquityStatsFromProject,
-} from '../returns/utils';
+} from '../returns/utils.server';
 import prisma from '../prisma.server';
 import {
   createHubspotDeal,
   getHsDealPropsFromDeal,
   initHubspotDealProps,
   updateHubspotDealProperties,
-} from '../hubspot/utils';
+} from '../hubspot/utils.server';
 import type {
   DealWithInvestmentStats,
   ProjectWithInvestmentStats,
 } from '../types';
 import { getInvestmentEntity } from './utils';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -308,7 +308,11 @@ export async function updateDeal(
   // then update the deal without the investment stats
   let updatedDeal: DealWithInvestmentStats;
 
-  if (dealData.dealStage === 5 && !existingDeal.closingDate) {
+  if (
+    dealData.dealStage === 5 &&
+    !existingDeal.closingDate &&
+    !dealData.closingDate
+  ) {
     console.log(
       'Setting closing date to today for deal with id',
       existingDeal.id

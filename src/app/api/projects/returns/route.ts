@@ -1,13 +1,13 @@
 'use server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, jsonResponse } from '@/libs/utils';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealFinancingType } from '@prisma/client';
 import { type NextRequest } from 'next/server';
 import {
   getDebtPayoutScheduleForProject as getDebtPayoutScheduleAndStatsForProject,
   getEquityPayoutScheduleForProject as getEquityPayoutScheduleAndStatsForProject,
   getEquityStatsFromProject,
-} from '@/libs/returns/utils';
+} from '@/libs/returns/utils.server';
 
 type RequestBody = {
   projectId: number;

@@ -1,17 +1,22 @@
+import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
-import { getPortfolioReturns } from '@/libs/returns/utils';
+import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs/server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   // get loggedin user
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return errorResponse('User not authenticated', 401);
   }
   const user = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: userId },
     include: {
       organizationMember: {
         include: {

@@ -1,23 +1,21 @@
 'use server';
 import { updateDeal } from '@/libs/deal/utils.server';
-import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils';
+import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils.server';
 import prisma from '@/libs/prisma.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
-import { errorResponse, jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs/server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
+import { getAuth } from '@clerk/nextjs/server';
 import { PaymentMethod, type User } from '@prisma/client';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return errorResponse('User not found', 404);
   }
 
-  const user = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-  });
+  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) {
     return errorResponse('User not found', 404);
   }

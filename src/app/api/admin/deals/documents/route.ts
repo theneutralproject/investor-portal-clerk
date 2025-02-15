@@ -1,5 +1,8 @@
-import { createDocumentEntry, getAdminFromRequest } from '@/libs/admin/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  createDocumentEntry,
+  getAdminFromRequest,
+} from '@/libs/admin/utils.server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 import { isError } from 'lodash';
 import { zPdfBulkUploadSchema } from '@/libs/document/schema';

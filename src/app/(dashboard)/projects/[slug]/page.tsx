@@ -10,7 +10,7 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import 'react-image-gallery/styles/css/image-gallery.css';
-import { useEffect } from 'react';
+import { use, useEffect } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import type { ProjectWithAllNestedData } from '@/libs/types';
@@ -32,13 +32,10 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { usePostHog } from 'posthog-js/react';
 import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 import { useRouter } from 'next/navigation';
-export type PageProps = {
-  params: {
-    slug: string;
-  };
-};
+import { NextClientPage } from '@/types/page';
 
-export default function Page({ params: { slug } }: PageProps) {
+export default function Page({ params }: NextClientPage) {
+  const { slug } = use(params);
   const { loggedIn, user, deals } = useDashboard();
   const posthog = usePostHog();
   const router = useRouter();

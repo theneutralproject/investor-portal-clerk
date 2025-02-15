@@ -1,40 +1,35 @@
 'use server';
+import { getAuth } from '@clerk/nextjs/server';
+import { DealOwnershipType, MembershipType } from '@prisma/client';
+import type { NextRequest } from 'next/server';
 import {
   type OrganizationCreateSchema,
   zOrganizationCreateSchema,
 } from '@/libs/organization/schema';
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs/server';
-import { DealOwnershipType, MembershipType } from '@prisma/client';
-import type { NextRequest } from 'next/server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 
 /**
  * @param request GET all organizations that a user is a member of
  */
-export async function GET() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+export async function GET(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
 
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-    include: {
-      address: true,
-      organizationMember: true,
-    },
+    where: { clerkId: userId },
+    include: { address: true, organizationMember: true },
   });
 
   if (!dbUser) {
     console.error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (GET)`
+      `User record with clerkid ${userId} not found in prisma (GET)`
     );
     return jsonResponse(
-      {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
-      },
+      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
       404
     );
   }
@@ -53,24 +48,22 @@ export async function GET() {
  * @param request POST create a new organization
  */
 export async function POST(request: NextRequest) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
 
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: userId },
     include: { address: true },
   });
 
   if (!dbUser) {
     console.error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (GET)`
+      `User record with clerkid ${userId} not found in prisma (GET)`
     );
     return jsonResponse(
-      {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
-      },
+      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
       404
     );
   }
@@ -126,17 +119,10 @@ export async function POST(request: NextRequest) {
     tin: postData.tin,
     dateOfCreation: postData.dateOfCreation,
     juristication: postData.juristication,
-    members: {
-      create: {
-        type: MembershipType.OWNER,
-        userId: dbUser.id,
-      },
-    },
+    members: { create: { type: MembershipType.OWNER, userId: dbUser.id } },
   };
   try {
-    const newOrg = await prisma.organization.create({
-      data: orgCreateData,
-    });
+    const newOrg = await prisma.organization.create({ data: orgCreateData });
     return jsonResponse(sanitizeOrganization(newOrg), 201);
   } catch (dbError) {
     console.error('ERROR: unable to update org:\n', dbError);

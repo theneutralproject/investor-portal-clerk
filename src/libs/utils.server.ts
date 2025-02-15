@@ -19,7 +19,7 @@ export function errorResponse(
   metadata?: { request: NextRequest; extra?: Record<string, unknown> }
 ) {
   if (metadata?.request) {
-    Logger.error(metadata.request, new Error(message), metadata.extra);
+    Logger.error(new Error(message), metadata.request, metadata.extra);
   }
   return jsonResponse({ error: message }, status);
 }

@@ -1,16 +1,15 @@
-import { type User, DealFinancingType, Project } from '@prisma/client';
-import axios from 'axios';
+import 'server-only';
+import { type User, Deal, DealFinancingType, Project } from '@prisma/client';
 import {
   type HubspotContactCreateUpdateSchema,
   type HubspotDealPropertiesCollection,
   zHsDealCreateResponse,
-  type HsDealDocsAccessedUpdateSchema,
   type HubspotDealUpdate,
   zHsDealSearchResultsSchema,
   type HsDealCreateResponse,
 } from './schema';
 import type { DealUpdateSchema, DealCreateSchema } from '../deal/schema';
-import { getErrorMessage } from '../utils';
+import { getErrorMessage } from '../utils.server';
 import { getInvestmentEntity } from '../deal/utils';
 import { Client } from '@hubspot/api-client';
 import {
@@ -18,6 +17,11 @@ import {
   type SimplePublicObject,
   type PublicObjectSearchRequest,
 } from '@hubspot/api-client/lib/codegen/crm/deals';
+import {
+  getSigningOrder,
+  instantiateApiClientFromUserAndDeal,
+} from '../docusign/utils.server';
+import { Signer } from 'docusign-esign';
 
 const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
@@ -130,6 +134,35 @@ export async function getHubspotContactsWithoutSignupDate() {
   } catch (error) {
     console.error(
       'Unable to get contacts without signup date from hubspot:\n',
+      error
+    );
+    throw new Error(getErrorMessage(error));
+  }
+}
+
+export async function shareProjectDocsWithUser(
+  userHubspotId: number,
+  slug: string
+) {
+  const body = JSON.stringify({
+    hubspotId: userHubspotId,
+    slug,
+  });
+  const url = process.env.HUBSPOT_SHARE_PROJECT_DOCS_WEBHOOK_URL!;
+  console.log('url', url);
+  try {
+    const hsRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    });
+    return await hsRes.json();
+  } catch (error) {
+    console.error(
+      'Unable to share project docs with user in hubspot:\n',
       error
     );
     throw new Error(getErrorMessage(error));
@@ -267,32 +300,6 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
   return { deals, contacts, dealContacts };
 }
 
-// export async function getListOfHSContacts(arrVids: string[]) {
-//   ///https://api.hubapi.com/contacts/v1/contact/vids/batch/?vid=3234574&vid=3714024&hapikey=demo
-//   const firstVid = arrVids.shift();
-//   const vids = arrVids.map(v => v.trim()).join("&vid=");
-
-//   console.log(`/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`);
-
-//   const response = await fetch(
-//     `${process.env.HUBSPOT_API_BASE_URL}/contacts/v1/contact/vids/batch/?vid=${firstVid}&vid=${vids}`,
-//     {
-//       method: "GET",
-//       headers: {
-//         "Content-Type": "application/json",
-//         Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
-//       },
-//     }
-//   )
-//   const data = JSON.parse(await response.text());
-//   if (response.status >= 300) {
-//     console.error("ERROR: unable to get Hubspot contacts:\n", data);
-//     throw new Error("unable to get hubspot contacts");
-//   }
-//   // console.log("data", data.keys());
-//   return Object.keys(data);
-// }
-
 export async function getHubspotDealById(hsDealId: string) {
   try {
     const hsDeal = await hubspotClient.crm.deals.basicApi.getById(hsDealId, [
@@ -378,10 +385,99 @@ export async function createHubspotDeal(
   }
 }
 
-export async function updateHubspotDealDocsAccessed(
-  hsDealUpdateData: HsDealDocsAccessedUpdateSchema
+/**
+ * This function is used to trigger an (internal) Hubspot email notification when a signature is received in Docusign.
+ * The hubspot deal has docusign specific properties that are updated by this function.
+ * Then, a Hubspot workflow that monitors these properties is triggered to send an email notification.
+ * @param deal
+ * @param projectSlug
+ * @param email
+ * @param envelopeId
+ * @param allSignaturesCompleted
+ * @returns
+ */
+export async function updateHubspotDealFromDocusignEvent(
+  deal: Deal,
+  projectSlug: string,
+  email: string,
+  envelopeId: string,
+  allSignaturesCompleted: boolean = false
 ) {
-  return await axios.post('/api/deals/hubspot', hsDealUpdateData);
+  const hsDealProps = {
+    hubspotDealId: parseInt(deal.hubspotId, 10),
+    properties: [
+      {
+        name: 'envelope_id1',
+        value: envelopeId,
+      },
+    ],
+  } as HubspotDealUpdate;
+
+  if (allSignaturesCompleted) {
+    // just update the deal in hubspot without checking for signer info
+    hsDealProps.properties.push({
+      name: 'all_signatures_completed',
+      value: 'true',
+    });
+    hsDealProps.properties.push({
+      name: 'number_signatures_remaining',
+      value: '0',
+    });
+    return await updateHubspotDealProperties(hsDealProps);
+  }
+  /**********************************
+   * if there are remaining signatures:
+   */
+
+  const envelopesApi = await instantiateApiClientFromUserAndDeal(
+    deal,
+    email,
+    projectSlug,
+    envelopeId
+  );
+
+  const signingOrder = await getSigningOrder(envelopesApi, envelopeId);
+  const numberSignaturesRemaining =
+    signingOrder.length - signingOrder.map(s => s.status).indexOf('sent');
+  console.log('signingOrder', signingOrder);
+  let currentSigner: Signer | undefined = undefined;
+  const previousSigner = signingOrder
+    .filter(s => s.status === 'completed' || s.status === 'signed')
+    .pop(); // get last signer that has signed
+
+  if (!previousSigner) {
+    // no signatures yet. This should not be the case, but just in case
+    currentSigner = signingOrder[0];
+  } else {
+    if (numberSignaturesRemaining !== 0) {
+      currentSigner =
+        signingOrder[signingOrder.length - numberSignaturesRemaining];
+    }
+  }
+
+  hsDealProps.properties = hsDealProps.properties.concat([
+    {
+      name: 'current_signer_email',
+      value: currentSigner?.email ?? 'N/A',
+    },
+    {
+      name: 'previous_signer_email',
+      value: previousSigner?.email ?? 'N/A',
+    },
+    {
+      name: 'all_deal_signatures_complete', // TODO: check if this is correct
+      value:
+        signingOrder.filter(s => s.status === 'completed').length === 0
+          ? 'true'
+          : 'false',
+    },
+    {
+      name: 'number_signatures_remaining',
+      value: numberSignaturesRemaining.toString(),
+    },
+  ]);
+
+  return await updateHubspotDealProperties(hsDealProps);
 }
 
 export async function updateHubspotDealProperties(
@@ -770,23 +866,6 @@ export const BakersPlaceDealStages = [
   { key: 'eFunded', value: '257596001', intVal: 5 },
   { key: 'fClosedLost', value: '257596003', intVal: 6 },
 ];
-
-export enum ReferralSource {
-  INVESTOR_EVENT = 'investor_event',
-  WEBINAR = 'webinar',
-  EVENT_MAILER = 'event_mailer',
-  NEUTRAL_PODCAST = 'neutral_podcast',
-  NEWS_SLASH_ONLINE_ARTICLE = 'news_online_article',
-  FRIEND_SLASH_COLLEAGUE = 'friend_colleague',
-  LINKEDIN = 'linkedin',
-  GOOGLE_AD = 'google_ad',
-  FACEBOOK_AD = 'facebook_ad',
-  THESIS_DRIVEN_PODCAST = 'thesis_driven_podcast',
-  CRE_DAILY_AD = 'cre_daily',
-  NERDS_EYE_VIEW = 'nerds_eye_view',
-  OTHER = 'other',
-  UNKNOWN = 'unknown',
-}
 
 export enum HSDealPropNames {
   dealstage = 'dealstage',

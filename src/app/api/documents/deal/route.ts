@@ -1,8 +1,9 @@
 import prisma from '@/libs/prisma.server';
 import { getSupabaseDownloadUrl } from '@/libs/supabase';
-import { jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs';
+import { jsonResponse } from '@/libs/utils.server';
+import { getAuth } from '@clerk/nextjs/server';
 import { DealDocumentType } from '@prisma/client';
+import { NextRequest } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -11,29 +12,25 @@ export const revalidate = 0;
  * @param request Get documents for a deal
  * @returns
  */
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const { userId } = getAuth(request);
+    if (!userId) {
       return new Response(JSON.stringify({ error: 'User not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const { id } = user;
     const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: id },
+      where: { clerkId: userId },
       include: { organizationMember: true },
     });
 
     if (!neutralUser) {
       return new Response(
         JSON.stringify({ error: 'User not associated with any organization' }),
-        {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { status: 404, headers: { 'Content-Type': 'application/json' } }
       );
     }
 
@@ -42,13 +39,8 @@ export async function GET() {
     );
 
     const dealsWithDocuments = await prisma.deal.findMany({
-      where: {
-        organizationId: { in: organizationIds },
-      },
-      include: {
-        document: true,
-        project: true,
-      },
+      where: { organizationId: { in: organizationIds } },
+      include: { document: true, project: true },
     });
 
     const taxDocuments = [];
@@ -78,10 +70,7 @@ export async function GET() {
     console.error('Error getting deal documents: ', error);
     return new Response(
       JSON.stringify({ error: 'Error getting deal documents' }),
-      {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      }
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }

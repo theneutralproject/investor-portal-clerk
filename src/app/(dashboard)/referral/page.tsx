@@ -15,7 +15,7 @@ import {
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
-import { ReferralSource } from '@/libs/hubspot/utils';
+import { ReferralSource } from '@/libs/hubspot/utils.client';
 
 const normalizeLabel = (label: string) => {
   return label

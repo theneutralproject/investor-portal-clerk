@@ -1,5 +1,5 @@
 import prisma from '@/libs/prisma.server';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import {
   type DealCreateSchema,
@@ -7,7 +7,11 @@ import {
   zDealCreateSchema,
   zDealUpdateSchema,
 } from '../../../libs/deal/schema';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
 
 export const dynamic = 'force-dynamic';
@@ -27,19 +31,19 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
+    const { userId } = getAuth(request);
+    if (!userId) {
       return jsonResponse({ error: 'User not found' }, 404);
     }
-    console.log('clerkUser', clerkUser.id);
+    console.log('clerkUser', userId);
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { clerkId: userId },
     });
     if (!dbUser) {
       console.error('Neutral user not found in api/deals');
       return jsonResponse(
         {
-          error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
+          error: `User record with clerkid ${userId} not found in prisma (GET)`,
         },
         404
       );
@@ -92,18 +96,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const { userId } = getAuth(request);
+    if (!userId) {
       return jsonResponse({ error: 'User not found' }, 404);
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: user.id },
+      where: { clerkId: userId },
     });
     if (!dbUser) {
       return jsonResponse(
         {
-          error: `User record with clerkid ${user.id} not found in prisma (POST)`,
+          error: `User record with clerkid ${userId} not found in prisma (POST)`,
         },
         404
       );
@@ -165,8 +169,6 @@ export async function POST(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   try {
-    // const dealData = await request.json() as DealUpdateSchema;
-
     const requestBody = (await request.json()) as DealUpdateSchema;
     // parse the date strings into Date objects for zod to validate
     if (requestBody.closingDate) {
@@ -176,7 +178,7 @@ export async function PUT(request: NextRequest) {
     }
 
     let deal: DealUpdateSchema;
-    console.log('requestBody', requestBody);
+    console.log('PUT requestBody', requestBody);
     try {
       deal = zDealUpdateSchema.parse(requestBody);
     } catch (parseError) {

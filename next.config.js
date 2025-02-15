@@ -19,10 +19,7 @@ const nextConfig = {
   eslint: {
     dirs: ['!src/libs/docusign/utils.ts'],
   },
-  experimental: {
-    missingSuspenseWithCSRBailout: false,
-    serverComponentsExternalPackages: ['docusign-esign', 'pdf-parse'],
-  },
+  serverExternalPackages: ['docusign-esign', 'pdf-parse'],
   webpack: config => {
     config.externals.push({
       'node:crypto': 'commonjs crypto',

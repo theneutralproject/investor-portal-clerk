@@ -1,5 +1,5 @@
 import { buildRedirectUrl } from '@/libs/dealflow/utils.server';
-import { refreshAccessTokenFromCode } from '@/libs/docusign/utils';
+import { refreshAccessTokenFromCode } from '@/libs/docusign/utils.server';
 import { NextRequest } from 'next/server';
 
 /**

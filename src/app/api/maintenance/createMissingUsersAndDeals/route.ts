@@ -10,17 +10,18 @@ import path from 'path';
 import fs from 'fs';
 import { finished } from 'stream';
 import { promisify } from 'util';
-import { currentUser } from '@clerk/nextjs/server';
-import { jsonResponse } from '@/libs/utils';
+import { getAuth } from '@clerk/nextjs/server';
+import { jsonResponse } from '@/libs/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils';
+import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils.server';
 import type { UserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import type { DealCreateSchema } from '@/libs/deal/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import { ProjectName } from '@/libs/project/schema';
+import { NextRequest } from 'next/server';
 
 const finishedAsync = promisify(finished);
 
@@ -148,10 +149,9 @@ async function getDealsFromCsv() {
   return dealRecords;
 }
 
-export async function POST() {
-  const requestingClerkUser = await currentUser();
-  if (!requestingClerkUser)
-    return jsonResponse({ error: 'Clerk User not found' }, 404);
+export async function POST(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) return jsonResponse({ error: 'Clerk User not found' }, 404);
   // if (! await isAdminUser(requestingClerkUser.id)) return jsonResponse({ error: "User is not an admin" }, 403);
 
   const dealInputs = await getDealsFromCsv();
@@ -302,10 +302,7 @@ export async function POST() {
           ownershipType: dealInput.ownershipType,
           ownerId: dealOwner.id,
           members: {
-            create: {
-              type: MembershipType.OWNER,
-              userId: dealOwner.id,
-            },
+            create: { type: MembershipType.OWNER, userId: dealOwner.id },
           },
         };
         try {

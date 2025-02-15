@@ -1,9 +1,9 @@
 'use server';
-import { isAdminUser } from '@/libs/maintenance/utils';
+import { isAdminUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import { UserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { clerkClient, currentUser } from '@clerk/nextjs/server';
 import { User } from '@prisma/client';
 
@@ -15,16 +15,15 @@ export async function POST() {
   }
 
   // get all users from clerk
-  const clerkUsers = await clerkClient.users.getUserList({
-    limit: 400,
-    offset: 400,
-  });
+  const clerkUsers = await (
+    await clerkClient()
+  ).users.getUserList({ limit: 400, offset: 400 });
 
   // get all users from db
   const dbUsers = await prisma.user.findMany();
 
   // find clerkusers that are unaccounted for in db
-  const missingUsers = clerkUsers.filter(
+  const missingUsers = clerkUsers.data.filter(
     clerkUser => !dbUsers.find(dbUser => dbUser.clerkId === clerkUser.id)
   );
   const createPromisesArr: Promise<User>[] = [];
@@ -52,10 +51,7 @@ export async function POST() {
       console.error('No email found for user', missingUser.id);
       return new Response(
         JSON.stringify({ error: `No email found for new clerk user!!!` }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' },
-        }
+        { status: 500, headers: { 'Content-Type': 'application/json' } }
       );
     }
 

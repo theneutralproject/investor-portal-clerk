@@ -1,6 +1,10 @@
-import { getAdminFromRequest } from '@/libs/admin/utils';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, getErrorMessage, jsonResponse } from '@/libs/utils';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 import {

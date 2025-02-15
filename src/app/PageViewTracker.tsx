@@ -1,9 +1,9 @@
 'use client';
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import posthog from 'posthog-js';
 
-function PageViewTracker() {
+function PostHogCapture() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
@@ -19,5 +19,13 @@ function PageViewTracker() {
 
   return null;
 }
+
+const PageViewTracker = () => {
+  return (
+    <Suspense>
+      <PostHogCapture />
+    </Suspense>
+  );
+};
 
 export default PageViewTracker;

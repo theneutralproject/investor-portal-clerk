@@ -1,3 +1,4 @@
+import 'server-only';
 import {
   DealFinancingType,
   type DealInvestmentStats,
@@ -417,6 +418,7 @@ export async function getPortfolioReturns(
         investmentStats.financingType === DealFinancingType.equity
           ? 'equity'
           : 'debt',
+      closingDate: closingDate,
       project: {
         id: project.id,
         name: project.displayName,

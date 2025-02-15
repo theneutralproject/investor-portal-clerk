@@ -1,38 +1,38 @@
 'use server';
-import { clerkClient, currentUser } from '@clerk/nextjs/server';
+import { clerkClient, getAuth } from '@clerk/nextjs/server';
 import { type NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils';
+import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import {
   type ClerkUserUpdateSchema,
   type UserUpdateSchema,
   zUserUpdateSchema,
 } from '@/libs/user/schema';
-import { updateHubspotContact } from '@/libs/hubspot/utils';
-import { sanitizeUser } from '@/libs/user/utils';
+import { updateHubspotContact } from '@/libs/hubspot/utils.server';
+import { sanitizeUser } from '@/libs/user/utils.server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 
 /**
  * @param request
  * @returns the full user data for the currently logged in user
  */
-export async function GET() {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+export async function GET(request: NextRequest) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
   const user = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: userId },
     include: { address: true },
   });
 
   if (!user) {
     console.error(
-      `User record with clerkid ${clerkUser.id} not found in prisma (GET)`
+      `User record with clerkid ${userId} not found in prisma (GET)`
     );
     return jsonResponse(
       {
-        error: `User record with clerkid ${clerkUser.id} not found in prisma (GET)`,
+        error: `User record with clerkid ${userId} not found in prisma (GET)`,
       },
       404
     );
@@ -49,12 +49,12 @@ export async function GET() {
  */
 export async function PUT(request: NextRequest) {
   // user can only update their own information
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     return jsonResponse({ error: 'Clerk user not found' }, 404);
   }
   const requestingUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
+    where: { clerkId: userId },
   });
   if (!requestingUser) {
     return jsonResponse({ error: 'Requesting user not found' }, 404);
@@ -102,7 +102,7 @@ export async function PUT(request: NextRequest) {
       console.log(hsError);
     }
     try {
-      await clerkClient.users.updateUser(clerkUser.id, clerkUpdate);
+      await (await clerkClient()).users.updateUser(userId, clerkUpdate);
     } catch (clerkError) {
       console.log(clerkError);
     }
@@ -123,7 +123,7 @@ export async function PUT(request: NextRequest) {
 
   if (address) {
     const existingUser = await prisma.user.findUnique({
-      where: { clerkId: clerkUser.id },
+      where: { clerkId: userId },
     });
     if (!existingUser) {
       return jsonResponse({ error: 'User not found' }, 404);
@@ -146,7 +146,7 @@ export async function PUT(request: NextRequest) {
 
     try {
       const updatedUser = await prisma.user.update({
-        where: { clerkId: clerkUser.id },
+        where: { clerkId: userId },
         data: userData,
         include: { address: true },
       });
@@ -159,7 +159,7 @@ export async function PUT(request: NextRequest) {
     // no address to update, just update user data
     try {
       const updatedUser = await prisma.user.update({
-        where: { clerkId: clerkUser.id },
+        where: { clerkId: userId },
         data: userData,
         include: { address: true },
       });

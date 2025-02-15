@@ -1,7 +1,7 @@
 'use server';
 import prisma from '@/libs/prisma.server';
 import { type SessionData, sessionOptions } from '@/libs/session/utils';
-import { jsonResponse } from '@/libs/utils';
+import { jsonResponse } from '@/libs/utils.server';
 import { Role } from '@prisma/client';
 import { getIronSession } from 'iron-session';
 import { cookies } from 'next/headers';
@@ -87,7 +87,10 @@ export async function GET(request: NextRequest) {
     return jsonResponse({ error: 'User information does not match' }, 400);
   }
 
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const session = await getIronSession<SessionData>(
+    await cookies(),
+    sessionOptions
+  );
   session.adminUserId = user.id;
   session.adminUserEmail = user.email;
   session.adminAuthExpiresAt = Date.now() + 1000 * 60 * 60 * 24; // 24 hours

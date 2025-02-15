@@ -1,5 +1,5 @@
 import prisma from '@/libs/prisma.server';
-import { currentUser } from '@clerk/nextjs/server';
+import { getAuth } from '@clerk/nextjs/server';
 import { DealFinancingType, Prisma, type DocumentEvent } from '@prisma/client';
 import { type NextRequest } from 'next/server';
 
@@ -13,17 +13,16 @@ export const revalidate = 0;
  */
 export async function GET(request: NextRequest) {
   try {
-    const user = await currentUser();
-    if (!user) {
+    const { userId } = getAuth(request);
+    if (!userId) {
       return new Response(JSON.stringify({ error: 'User not found' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
 
-    const { id } = user;
     const neutralUser = await prisma.user.findUnique({
-      where: { clerkId: id },
+      where: { clerkId: userId },
     });
 
     const url = new URL(request.url);

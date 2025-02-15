@@ -1,34 +1,26 @@
+import { getAuth } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, jsonResponse } from '@/libs/utils';
-import { currentUser } from '@clerk/nextjs';
-import { NextRequest } from 'next/server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 
 // get deals by logged in user
 export async function GET(request: NextRequest) {
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
+  const { userId, sessionId } = getAuth(request);
+  if (!sessionId) {
     console.log('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
 
-  Logger.log(request, {
-    extra: {
-      user: { clerkUserId: clerkUser.id, email: clerkUser.emailAddresses[0] },
-    },
-  });
+  Logger.log({ extra: { user: { clerkUserId: userId, sessionId } } }, request);
 
   // Get the user from the database
-  const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-  });
+  const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
 
   if (!dbUser) {
     return errorResponse('User not found in database', 404, {
       request,
-      extra: {
-        method: 'prisma.user.findUnique',
-      },
+      extra: { method: 'prisma.user.findUnique' },
     });
   }
 
@@ -45,11 +37,7 @@ export async function GET(request: NextRequest) {
     },
     include: {
       organization: true,
-      project: {
-        include: {
-          pictures: true,
-        },
-      },
+      project: { include: { pictures: true } },
       investmentStats: true,
     },
   });
@@ -65,31 +53,23 @@ export async function GET(request: NextRequest) {
 export async function DELETE(req: NextRequest) {
   const body = await req.json();
   const dealId = Number(body.dealId);
-  Logger.log(req, { extra: body });
+  Logger.log({ extra: body }, req);
 
   if (!dealId || isNaN(dealId)) {
-    return errorResponse('Invalid deal ID', 400, {
-      request: req,
-    });
+    return errorResponse('Invalid deal ID', 400, { request: req });
   }
 
-  const clerkUser = await currentUser();
-  if (!clerkUser) {
-    return errorResponse('User not authenticated', 401, {
-      request: req,
-    });
+  const { userId, sessionId } = getAuth(req);
+  if (!sessionId) {
+    return errorResponse('User not authenticated', 401, { request: req });
   }
 
-  const dbUser = await prisma.user.findUnique({
-    where: { clerkId: clerkUser.id },
-  });
+  const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
 
   if (!dbUser) {
     return errorResponse('User not found in database', 404, {
       request: req,
-      extra: {
-        method: 'prisma.user.findUnique',
-      },
+      extra: { method: 'prisma.user.findUnique' },
     });
   }
 
@@ -101,35 +81,23 @@ export async function DELETE(req: NextRequest) {
   if (!deal) {
     return errorResponse('Deal not found', 404, {
       request: req,
-      extra: {
-        method: 'prisma.deal.findUnique',
-      },
+      extra: { method: 'prisma.deal.findUnique' },
     });
   }
 
   // Verify user owns the organization
   const isOwner = await prisma.organization.findFirst({
-    where: {
-      id: deal.organizationId,
-      ownerId: dbUser.id,
-    },
+    where: { id: deal.organizationId, ownerId: dbUser.id },
   });
 
   if (!isOwner) {
     return errorResponse('Unauthorized to cancel this deal', 403, {
       request: req,
-      extra: {
-        method: 'prisma.organization.findUnique',
-      },
+      extra: { method: 'prisma.organization.findUnique' },
     });
   }
 
-  await prisma.deal.update({
-    where: { id: dealId },
-    data: {
-      dealStage: 6,
-    },
-  });
+  await prisma.deal.update({ where: { id: dealId }, data: { dealStage: 6 } });
 
   return jsonResponse({ message: 'Deal cancelled' });
 }
