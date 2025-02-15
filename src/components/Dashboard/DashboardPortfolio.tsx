@@ -43,9 +43,7 @@ interface TooltipPayloadItem {
   name: string;
   value: number;
   color: string;
-  payload: {
-    isProjected: boolean;
-  };
+  payload: { isProjected: boolean };
 }
 
 interface CustomTooltipProps {
@@ -272,7 +270,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
 
   // Find the first projected quarter index
   const projectedStartIndex = React.useMemo(() => {
-    return chartData.findIndex(data => data.isProjected);
+    return chartData.findIndex(data => data.isProjected) - 1;
   }, [chartData]);
 
   return (
