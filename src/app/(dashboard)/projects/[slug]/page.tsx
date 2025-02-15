@@ -118,27 +118,20 @@ export default function Page({ params }: NextClientPage) {
           textAlign: 'left',
           position: 'relative',
           padding: isMobile ? '10px 20px' : '20px 40px',
+          borderRadius: '8px',
         }}
       >
         <Box>
           <Typography
             variant="h3"
-            sx={{
-              color: 'white',
-              fontSize: '64px',
-              fontWeight: 500,
-            }}
+            sx={{ color: 'white', fontSize: '64px', fontWeight: 500 }}
           >
             {project.displayName}
           </Typography>
           <Typography
             variant="h5"
             component="h2"
-            sx={{
-              color: 'white',
-              fontSize: '18px',
-              fontWeight: 400,
-            }}
+            sx={{ color: 'white', fontSize: '18px', fontWeight: 400 }}
           >
             {project.location}
           </Typography>
