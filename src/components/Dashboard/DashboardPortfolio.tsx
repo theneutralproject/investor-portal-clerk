@@ -17,95 +17,17 @@ import {
 import PortfolioMetric from './PortfolioMetric';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import type {
-  ReturnsDateObject,
-  PortfolioReturnsResponse,
-} from '@/libs/returns/schema';
+import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { CustomLegend } from '../Project/Overview/InvestmentCalculatorNew';
-
-interface MetricData {
-  label: string;
-  toDateValue: string;
-  projectedTotalValue: string;
-  color: string;
-}
-
-interface QuarterData {
-  quarter: string;
-  principal: number;
-  equityDistributions: number;
-  debtDistributions: number;
-  portfolioValue: number;
-  isProjected: boolean;
-}
-
-interface TooltipPayloadItem {
-  name: string;
-  value: number;
-  color: string;
-  payload: { isProjected: boolean };
-}
-
-interface CustomTooltipProps {
-  active?: boolean;
-  payload?: TooltipPayloadItem[];
-  label?: string;
-}
-
-const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(value);
-};
-
-const formatQuarter = (dateString: string): string => {
-  const date = new Date(dateString);
-  const quarter = Math.floor(date.getMonth() / 3) + 1;
-  const year = date.getFullYear().toString().slice(-2);
-  return `Q${quarter} '${year}`;
-};
-
-const groupByQuarter = (schedule: ReturnsDateObject[]): QuarterData[] => {
-  const currentDate = new Date();
-  const quarterData = schedule.reduce<Record<string, QuarterData>>(
-    (acc, curr) => {
-      const quarterKey = formatQuarter(curr.date.toString());
-      const isProjected = new Date(curr.date) > currentDate;
-
-      if (!acc[quarterKey]) {
-        acc[quarterKey] = {
-          quarter: quarterKey,
-          principal: curr.principalInvestedToDate,
-          equityDistributions: 0,
-          debtDistributions: 0,
-          portfolioValue: curr.portfolioValueToDate,
-          isProjected,
-        };
-      } else {
-        acc[quarterKey].isProjected =
-          acc[quarterKey].isProjected || isProjected;
-      }
-
-      acc[quarterKey].debtDistributions = Math.max(
-        acc[quarterKey].debtDistributions,
-        curr.debtDistributionsCumulative
-      );
-      acc[quarterKey].equityDistributions = Math.max(
-        0,
-        curr.equityDistributionCumulative
-      );
-      acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
-
-      return acc;
-    },
-    {}
-  );
-
-  return Object.values(quarterData);
-};
+import {
+  getChartData,
+  getMetrics,
+  dataAccessors,
+  CustomTooltipProps,
+  TooltipPayloadItem,
+  formatCurrency,
+  calculateTodayLinePosition,
+} from './Portfolio/portfolioHelpers';
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
   active,
@@ -161,26 +83,6 @@ const CustomTooltip: React.FC<CustomTooltipProps> = ({
   );
 };
 
-// Type-safe data accessors for the chart
-const dataAccessors = {
-  principal: (data: QuarterData) =>
-    data.isProjected ? undefined : data.principal,
-  principalProjected: (data: QuarterData) =>
-    data.isProjected ? data.principal : data.principal,
-  equityDistributions: (data: QuarterData) =>
-    data.isProjected ? undefined : data.equityDistributions,
-  equityDistributionsProjected: (data: QuarterData) =>
-    data.isProjected ? data.equityDistributions : data.equityDistributions,
-  debtDistributions: (data: QuarterData) =>
-    data.isProjected ? undefined : data.debtDistributions,
-  debtDistributionsProjected: (data: QuarterData) =>
-    data.isProjected ? data.debtDistributions : data.debtDistributions,
-  portfolioValue: (data: QuarterData) =>
-    data.isProjected ? undefined : data.portfolioValue,
-  portfolioValueProjected: (data: QuarterData) =>
-    data.isProjected ? data.portfolioValue : data.portfolioValue,
-};
-
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
     queryKey: ['dashboard', 'portfolio'],
@@ -193,86 +95,11 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     enabled: loggedIn,
   });
 
-  const metrics: MetricData[] = React.useMemo(() => {
-    if (!data) {
-      return [
-        {
-          label: 'Portfolio Value',
-          toDateValue: '$0',
-          projectedTotalValue: '$0',
-          color: '#FFB800',
-        },
-        {
-          label: 'Debt Distributions',
-          toDateValue: '$0',
-          projectedTotalValue: '$0',
-          color: '#5AAC6A',
-        },
-        {
-          label: 'Equity Distributions',
-          toDateValue: '$0',
-          projectedTotalValue: '$0',
-          color: '#2196F3',
-        },
-        {
-          label: 'Principal',
-          toDateValue: '$0',
-          projectedTotalValue: '$0',
-          color: '#656565',
-        },
-      ];
-    }
+  if (!data) return null;
 
-    return [
-      {
-        label: 'Proj. Portfolio Value',
-        toDateValue: formatCurrency(data.portfolioStats.portfolioValueToDate),
-        projectedTotalValue: formatCurrency(
-          data.portfolioStats.projectedPortfolioValue
-        ),
-        color: '#FFB800',
-      },
-      {
-        label: 'Proj. Debt Distributions',
-        toDateValue: formatCurrency(
-          data.portfolioStats.debtDistributionsToDate
-        ),
-        projectedTotalValue: formatCurrency(
-          data.portfolioStats.projectedDebtDistributions
-        ),
-        color: '#5AAC6A',
-      },
-      {
-        label: 'Proj. Equity Distributions',
-        toDateValue: formatCurrency(
-          data.portfolioStats.equityDistributionsToDate
-        ),
-        projectedTotalValue: formatCurrency(
-          data.portfolioStats.projectedEquityDistributions
-        ),
-        color: '#2196F3',
-      },
-      {
-        label: 'Principal',
-        toDateValue: formatCurrency(data.portfolioStats.principalInvested),
-        projectedTotalValue: formatCurrency(
-          data.portfolioStats.principalInvested
-        ),
-        color: '#656565',
-      },
-    ];
-  }, [data]);
-
-  const chartData = React.useMemo(() => {
-    if (!data) return [];
-    return groupByQuarter(data.consolidatedSchedule);
-  }, [data]);
-
-  // Find the first projected quarter index
-  const projectedStartIndex = React.useMemo(() => {
-    return chartData.findIndex(data => data.isProjected) - 1;
-  }, [chartData]);
-
+  const metrics = getMetrics(data);
+  const chartData = getChartData(data);
+  const todayLinePosition = calculateTodayLinePosition(chartData);
   return (
     <>
       <Grid container spacing={4} sx={{ mb: 4 }}>
@@ -303,11 +130,23 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
                 labelFormatter={(label: string) => `Quarter: ${label}`}
               />
               <Legend content={<CustomLegend payload={[]} />} />
-              {/* Vertical divider between historic and projected data */}
-              {projectedStartIndex > 0 && (
+              <XAxis
+                xAxisId="percentageAxis"
+                type="number"
+                domain={[0, 100]}
+                hide
+              />
+
+              {todayLinePosition !== null && (
                 <ReferenceLine
-                  x={chartData[projectedStartIndex]?.quarter}
+                  xAxisId="percentageAxis"
+                  x={todayLinePosition}
                   stroke="#656565"
+                  label={{
+                    value: 'Today',
+                    position: 'insideTopLeft',
+                    fill: '#656565',
+                  }}
                 />
               )}
 
