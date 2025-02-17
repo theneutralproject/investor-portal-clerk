@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
       ownerId: user.id,
     },
     select: {
+      deals: true,
       id: true,
       name: true,
       ownerId: true,

@@ -63,6 +63,7 @@ interface CoInvestorCardProps {
   expanded: boolean;
   onExpand: (index: number) => void;
   deleteOrganizationMember?: (memberId: number) => void;
+  organizationReadOnly: boolean;
 }
 
 const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
@@ -74,6 +75,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
   expanded,
   onExpand,
   deleteOrganizationMember,
+  organizationReadOnly,
 }) => {
   // Track which fields have been touched
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
@@ -134,7 +136,8 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
   };
 
   const investorType = coInvestor.type === 'OWNER' ? 'Investor' : 'Co-Investor';
-  const readOnly = coInvestor.type === MembershipType.OWNER;
+  const readOnly =
+    coInvestor.type === MembershipType.OWNER || organizationReadOnly;
   const showDelete = coInvestor.id && deleteOrganizationMember && !readOnly;
   const isRegisteredUser =
     coInvestor?.user?.clerkId !== undefined && coInvestor.user.clerkId !== null;

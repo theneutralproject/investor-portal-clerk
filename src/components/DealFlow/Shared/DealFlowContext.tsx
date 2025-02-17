@@ -5,7 +5,7 @@ import {
   type UserWithAddress,
   type DealWithInvestmentStatsAndDocument,
   type MemberWithUser,
-  OrganizationWithFullMembers,
+  OrganizationWithMembersAndDeals,
 } from '@/libs/types';
 import {
   DealOwnershipType,
@@ -199,7 +199,7 @@ interface DealFlowContextType {
   deal: DealWithInvestmentStatsAndDocument;
   user: UserWithAddress;
   organization: OrganizationWithDocuments;
-  organizationsOwned: OrganizationWithFullMembers[];
+  organizationsOwned: OrganizationWithMembersAndDeals[];
   isLoading: boolean;
   error: string | null;
   updateDeal: (
@@ -255,7 +255,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const [organization, setOrganization] =
     useState<OrganizationWithDocuments | null>(null);
   const [organizationsOwned, setOrganizationsOwned] = useState<
-    OrganizationWithFullMembers[]
+    OrganizationWithMembersAndDeals[]
   >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -380,7 +380,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         setProject(dealData.project as ProjectWithAllNestedData);
         setDeal(dealData.deal);
         setUser(userData);
-        const organizationsOwnedData: OrganizationWithFullMembers[] =
+        const organizationsOwnedData: OrganizationWithMembersAndDeals[] =
           await organizationsOwnedResponse.json();
         setOrganizationsOwned(organizationsOwnedData);
 

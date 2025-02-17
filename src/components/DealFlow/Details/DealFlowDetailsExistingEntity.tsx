@@ -14,7 +14,7 @@ import {
   Divider,
 } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
-import { MemberWithUser, OrganizationWithFullMembers } from '@/libs/types';
+import { MemberWithUser, OrganizationWithMembersAndDeals } from '@/libs/types';
 import { useDealFlow } from '../Shared/DealFlowContext';
 import DealFlowFooter from '../Shared/DealFlowFooter';
 import DealFlowTitle from '../Shared/DealFlowTitle';
@@ -58,7 +58,7 @@ const OrganizationCard = ({
   isSelected,
   onSelect,
 }: {
-  org: OrganizationWithFullMembers;
+  org: OrganizationWithMembersAndDeals;
   isSelected: boolean;
   onSelect: (id: number) => void;
 }) => (
