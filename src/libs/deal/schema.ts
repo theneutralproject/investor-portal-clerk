@@ -59,6 +59,7 @@ export const zDealCreateSchema = z.object({
   debtMinTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals
   debtMaxTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals
   debtInterestRatePerc: z.number().nullish(), //used for maintenance scripts to create old deals
+  investmentEntity: z.string().optional(), //used for maintenance scripts to create old deals
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;

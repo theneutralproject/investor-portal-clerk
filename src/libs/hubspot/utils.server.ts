@@ -521,7 +521,7 @@ export function initHubspotDealProps(
   const properties = [
     {
       name: 'dealname',
-      value: `${project.displayName} | ${user.firstName} ${user.lastName}`,
+      value: `IP | ${project.displayName} | ${user.firstName} ${user.lastName}`,
     },
     {
       name: 'investment_entity',
