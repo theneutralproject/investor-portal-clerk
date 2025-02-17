@@ -1,5 +1,5 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import {
   Card,
   CardContent,
@@ -28,7 +28,7 @@ const normalizeLabel = (label: string) => {
     .join(' ');
 };
 
-const Referral: React.FC = () => {
+function ReferralForm() {
   const [referralSource, setReferralSource] = useState<ReferralSource | ''>('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -130,6 +130,14 @@ const Referral: React.FC = () => {
         </Button>
       </Box>
     </Container>
+  );
+}
+
+const Referral: React.FC = () => {
+  return (
+    <Suspense>
+      <ReferralForm />
+    </Suspense>
   );
 };
 
