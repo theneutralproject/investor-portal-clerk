@@ -5,6 +5,7 @@ import {
   type UserWithAddress,
   type DealWithInvestmentStatsAndDocument,
   type MemberWithUser,
+  OrganizationWithFullMembers,
 } from '@/libs/types';
 import {
   DealOwnershipType,
@@ -33,12 +34,14 @@ import {
 import DealFlowReview from '@components/DealFlow/ReviewSign/DealFlowReview';
 import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
 import type { DealCreateSchema } from '@/libs/deal/schema';
+import DealFlowDetailsExistingEntity from '../Details/DealFlowDetailsExistingEntity';
 // Define the step types
 export type StepType =
   | 'get-started'
   | 'type'
   | 'amount'
   | 'details'
+  | 'details-existing-entity'
   | 'details-ownership-type'
   | 'co-investor'
   | 'entity-details'
@@ -88,11 +91,18 @@ export const steps: Step[] = [
     progress: 30,
   },
   {
+    value: 'details-existing-entity',
+    display: 'Existing Entity',
+    component: DealFlowDetailsExistingEntity,
+    majorParent: 'details',
+    progress: 40,
+  },
+  {
     value: 'details-ownership-type',
     display: 'Ownership Type',
     component: DealFlowDetailsOwnershipType,
     majorParent: 'details',
-    progress: 40,
+    progress: 45,
   },
   {
     value: 'co-investor',
@@ -189,6 +199,7 @@ interface DealFlowContextType {
   deal: DealWithInvestmentStatsAndDocument;
   user: UserWithAddress;
   organization: OrganizationWithDocuments;
+  organizationsOwned: OrganizationWithFullMembers[];
   isLoading: boolean;
   error: string | null;
   updateDeal: (
@@ -243,19 +254,28 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const [user, setUser] = useState<UserWithAddress | null>(null);
   const [organization, setOrganization] =
     useState<OrganizationWithDocuments | null>(null);
+  const [organizationsOwned, setOrganizationsOwned] = useState<
+    OrganizationWithFullMembers[]
+  >([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [step, setStep] = useState<StepType>(initialStep);
   const router = useRouter();
   const pathname = usePathname();
-  const getNextStep = (currentStep: StepType): StepType | null => {
+  const getNextStep = (
+    currentStep: StepType,
+    deal?: DealWithInvestmentStatsAndDocument | null | undefined
+  ): StepType | null => {
     const currentIndex = steps.findIndex(s => s.value === currentStep);
 
     const nextStep = steps[currentIndex + 1]?.value ?? null;
 
     //Note: NEXT STEP DEPENDS ON ANSWER
-    if (currentStep === 'details-ownership-type') {
+    if (
+      currentStep === 'details-ownership-type' ||
+      currentStep === 'details-existing-entity'
+    ) {
       const ownershipType = deal?.investmentStats?.ownershipType;
 
       if (!ownershipType) {
@@ -335,14 +355,16 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       setError(null);
 
       try {
-        const [dealResponse, userResponse] = await Promise.all([
-          fetch(
-            `/api/deals/flow?projectSlug=${encodeURIComponent(
-              projectSlug
-            )}&dealId=${encodeURIComponent(dealId)}`
-          ),
-          fetch('/api/users'),
-        ]);
+        const [dealResponse, userResponse, organizationsOwnedResponse] =
+          await Promise.all([
+            fetch(
+              `/api/deals/flow?projectSlug=${encodeURIComponent(
+                projectSlug
+              )}&dealId=${encodeURIComponent(dealId)}`
+            ),
+            fetch('/api/users'),
+            fetch('/api/organizations/owned'),
+          ]);
 
         if (!dealResponse.ok || !userResponse.ok) {
           throw new Error(
@@ -358,6 +380,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         setProject(dealData.project as ProjectWithAllNestedData);
         setDeal(dealData.deal);
         setUser(userData);
+        const organizationsOwnedData: OrganizationWithFullMembers[] =
+          await organizationsOwnedResponse.json();
+        setOrganizationsOwned(organizationsOwnedData);
 
         if (dealData.deal?.organizationId) {
           const organizationResponse = await fetch(
@@ -401,7 +426,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       );
       setDeal(data);
 
-      const nextStep = getNextStep(step);
+      const nextStep = getNextStep(step, data);
       if (nextStep && incrementStep) {
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
@@ -677,6 +702,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     deal: deal!,
     user: user!,
     organization: organization!,
+    organizationsOwned: organizationsOwned,
     isLoading,
     error,
     updateDeal,
