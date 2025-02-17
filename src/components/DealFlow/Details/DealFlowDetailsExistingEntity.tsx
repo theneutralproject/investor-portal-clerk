@@ -18,6 +18,7 @@ import { MemberWithUser, OrganizationWithFullMembers } from '@/libs/types';
 import { useDealFlow } from '../Shared/DealFlowContext';
 import DealFlowFooter from '../Shared/DealFlowFooter';
 import DealFlowTitle from '../Shared/DealFlowTitle';
+import { useRouter } from 'next/navigation';
 
 const formatDate = (date: Date | null | undefined | string): string => {
   if (!date) return '';
@@ -112,10 +113,12 @@ const OrganizationCard = ({
 );
 
 const DealFlowDetailsExistingEntity = () => {
-  const { organizationsOwned, organization, deal, updateDeal } = useDealFlow();
+  const { organizationsOwned, organization, deal, project, updateDeal } =
+    useDealFlow();
   const [selectedOrganizationId, setSelectedOrganizationId] = useState<number>(
     organization.id ?? -1
   );
+  const router = useRouter();
 
   const handleContinue = async () => {
     console.log('Selected organization:', selectedOrganizationId);
@@ -131,6 +134,13 @@ const DealFlowDetailsExistingEntity = () => {
           ownershipType: org.ownershipType,
         },
       });
+    }
+
+    //New entity is normal flow
+    if (selectedOrganizationId === -1) {
+      router.push(
+        `/dealflow/${project?.slug}/${deal?.id}/details-ownership-type`
+      );
     }
   };
 
