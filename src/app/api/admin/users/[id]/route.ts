@@ -20,19 +20,39 @@ export async function GET(request: NextRequest) {
       throw new Error('userId is required in url');
     }
   } catch (__error) {
-    return jsonResponse({ error: `userid is required in url` }, 400);
+    return jsonResponse({ error: `userId is required in url` }, 400);
   }
   try {
     const detailedUser = await prisma.user.findUnique({
       where: { id: userId },
-      include: {
+      select: {
+        organizationsOwned: {
+          select: {
+            id: true,
+            name: true,
+            address: true,
+            tin: true,
+            isPrimary: true,
+            ownershipType: true,
+          },
+        },
+        address: true,
         organizationMember: {
-          include: {
+          select: {
             organization: {
-              include: {
+              select: {
                 deals: {
-                  include: {
+                  select: {
                     document: true,
+                    project: {
+                      select: {
+                        id: true,
+                        name: true,
+                        pictures: {
+                          where: { type: 'CARD' },
+                        },
+                      },
+                    },
                   },
                 },
               },
