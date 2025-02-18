@@ -215,7 +215,6 @@ export async function updateDeal(
     },
   });
   if (!existingDeal) {
-    console.error(`Failed to find deal with hubspot id ${dealData.hubspotId}.`);
     throw Error('The deal does not exist in the database');
   }
 
