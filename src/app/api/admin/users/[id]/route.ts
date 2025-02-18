@@ -95,10 +95,22 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  // const adminUser = await getAdminFromRequest(request);
+  // if (isError(adminUser)) {
+  //   console.error(getErrorMessage(adminUser));
+  //   return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  // }
+
+  let userId: number;
+  try {
+    const url = new URL(request.url);
+    console.log(url.pathname.split('/'));
+    userId = parseInt(url.pathname.split('/')[4] ?? '');
+    if (!userId || !isNumber(userId)) {
+      throw new Error('userId is required in url');
+    }
+  } catch (__error) {
+    return jsonResponse({ error: `userId is required in url` }, 400);
   }
 
   let putData: UserUpdateSchema;
@@ -114,7 +126,7 @@ export async function PUT(request: NextRequest) {
   }
 
   try {
-    putData.id = parseInt(request.url.split('/')[4] ?? '');
+    putData.id = userId;
     const updatedUser = await updateUserInDbAndHubspotAndClerk(putData);
     return jsonResponse(updatedUser);
   } catch (error) {
