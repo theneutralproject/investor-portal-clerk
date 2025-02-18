@@ -70,7 +70,6 @@ export const env = createEnv({
     NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON: z.string(),
     NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS: z.string(),
     NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: z.string(),
-    NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT: z.string(),
   },
 
   /**
@@ -138,8 +137,6 @@ export const env = createEnv({
     CURRENT_TERMS_REVISION: process.env.CURRENT_TERMS_REVISION,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     SENTRY_DSN: process.env.SENTRY_DSN,
-    NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT:
-      process.env.NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -10,7 +10,6 @@ const RedirectPage = () => {
   const router = useRouter();
   const { data } = useRegisterUser();
   useEffect(() => {
-    console.log('waiting for redirect');
     if (data) {
       router.push('/dashboard');
     }

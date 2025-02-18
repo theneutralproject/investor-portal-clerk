@@ -36,16 +36,7 @@ export default function RootLayout({
 }) {
   return (
     <CSPostHogProvider>
-      <ClerkProvider
-        signInForceRedirectUrl={process.env.NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT}
-        signUpForceRedirectUrl={process.env.NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT}
-        signInFallbackRedirectUrl={
-          process.env.NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT
-        }
-        signUpFallbackRedirectUrl={
-          process.env.NEXT_PUBLIC_CLERK_SIGNUP_REDIRECT
-        }
-      >
+      <ClerkProvider>
         <TermsProvider>
           <html lang="en">
             <body className={inter.className}>

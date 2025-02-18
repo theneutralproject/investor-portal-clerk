@@ -15,7 +15,7 @@ export const useRegisterUser = () => {
         const response = await axios.post('/api/clerk/post-signup');
         setData(response.data);
       } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to accept terms');
+        setError(err.response?.data?.error || 'Failed to register user');
       } finally {
         setIsLoading(false);
       }
