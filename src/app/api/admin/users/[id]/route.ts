@@ -26,6 +26,15 @@ export async function GET(request: NextRequest) {
     const detailedUser = await prisma.user.findUnique({
       where: { id: userId },
       select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        role: true,
+        hubspotId: true,
+        referralSource: true,
+        ssn: true,
+        dateCreated: true,
         organizationsOwned: {
           select: {
             id: true,
@@ -41,9 +50,22 @@ export async function GET(request: NextRequest) {
           select: {
             organization: {
               select: {
+                id: true,
+                name: true,
+                address: true,
+                tin: true,
+                isPrimary: true,
+                ownershipType: true,
                 deals: {
                   select: {
+                    id: true,
+                    transactionId: true,
+                    dealStage: true,
                     document: true,
+                    hubspotId: true,
+                    investmentEntity: true,
+                    closingDate: true,
+                    signaturesCompletedDate: true,
                     project: {
                       select: {
                         id: true,
@@ -53,6 +75,7 @@ export async function GET(request: NextRequest) {
                         },
                       },
                     },
+                    investmentStats: true,
                   },
                 },
               },
