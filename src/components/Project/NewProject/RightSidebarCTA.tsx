@@ -121,10 +121,9 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
             onClick={onInvest}
             sx={{
               backgroundColor: '#F0B642',
-              '&:hover': {
-                backgroundColor: '#d4a33b',
-              },
+              '&:hover': { backgroundColor: '#d4a33b' },
               borderRadius: '24px',
+              boxShadow: 'none',
             }}
           >
             Invest

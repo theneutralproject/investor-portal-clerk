@@ -18,9 +18,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   padding: theme.spacing(3),
   boxShadow: 'none',
   transition: 'box-shadow 0.2s',
-  '&:hover': {
-    boxShadow: theme.shadows[4],
-  },
+  '&:hover': { boxShadow: theme.shadows[4] },
 }));
 
 const ProjectImage = styled(Box)(({ theme }) => ({
@@ -28,15 +26,8 @@ const ProjectImage = styled(Box)(({ theme }) => ({
   height: 240,
   borderRadius: theme.shape.borderRadius,
   overflow: 'hidden',
-  [theme.breakpoints.up('sm')]: {
-    width: 120,
-    height: 120,
-  },
-  '& img': {
-    width: '100%',
-    height: '100%',
-    objectFit: 'cover',
-  },
+  [theme.breakpoints.up('sm')]: { width: 120, height: 120 },
+  '& img': { width: '100%', height: '100%', objectFit: 'cover' },
 }));
 
 const ProjectMetric = styled(Box)(({ theme }) => ({
@@ -187,10 +178,10 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                         sx={{
                           alignSelf: 'flex-start',
                           whiteSpace: 'nowrap',
-                          padding: '8px 24px',
+                          padding: '8px 32px',
                         }}
                       >
-                        VIEW OPPORTUNITIES
+                        VIEW DETAILS
                       </Button>
                     )}
                   </Box>
@@ -260,10 +251,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                       variant="neutralYellow"
                       href={`/projects/${project.slug}`}
                       fullWidth
-                      sx={{
-                        mt: 2,
-                        padding: '8px 16px',
-                      }}
+                      sx={{ mt: 2, padding: '8px 16px' }}
                     >
                       VIEW PROJECT
                     </Button>
