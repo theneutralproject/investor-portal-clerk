@@ -26,6 +26,7 @@ export async function GET(request: NextRequest) {
     const detailedUser = await prisma.user.findUnique({
       where: { id: userId },
       select: {
+        id: true,
         firstName: true,
         lastName: true,
         email: true,
@@ -34,6 +35,7 @@ export async function GET(request: NextRequest) {
         hubspotId: true,
         referralSource: true,
         ssn: true,
+        dateOfBirth: true,
         dateCreated: true,
         organizationsOwned: {
           select: {
