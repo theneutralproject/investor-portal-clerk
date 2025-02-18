@@ -50,6 +50,12 @@ export async function GET(request: NextRequest) {
           select: {
             organization: {
               select: {
+                id: true,
+                name: true,
+                address: true,
+                tin: true,
+                isPrimary: true,
+                ownershipType: true,
                 deals: {
                   select: {
                     document: true,
