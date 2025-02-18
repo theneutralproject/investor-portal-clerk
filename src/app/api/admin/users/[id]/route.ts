@@ -1,5 +1,7 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import prisma from '@/libs/prisma.server';
+import { UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
+import { updateUserInDbAndHubspotAndClerk } from '@/libs/user/utils.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError, isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
@@ -89,5 +91,34 @@ export async function GET(request: NextRequest) {
     return jsonResponse(detailedUser);
   } catch (error) {
     return jsonResponse(error, 404);
+  }
+}
+
+export async function PUT(request: NextRequest) {
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  }
+
+  let putData: UserUpdateSchema;
+  try {
+    const requestBody = (await request.json()) as UserUpdateSchema;
+    putData = zUserUpdateSchema.parse(requestBody);
+  } catch (parseError) {
+    console.error(
+      'ERROR: unable to parse users PUT body:\n',
+      getErrorMessage(parseError)
+    );
+    return jsonResponse({ error: getErrorMessage(parseError) }, 400);
+  }
+
+  try {
+    putData.id = parseInt(request.url.split('/')[4] ?? '');
+    const updatedUser = await updateUserInDbAndHubspotAndClerk(putData);
+    return jsonResponse(updatedUser);
+  } catch (error) {
+    console.error('unable to update user:', getErrorMessage(error));
+    return jsonResponse({ error: getErrorMessage(error) }, 500);
   }
 }
