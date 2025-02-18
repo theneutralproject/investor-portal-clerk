@@ -38,7 +38,7 @@ export default clerkMiddleware(async (auth, request) => {
   }
 
   if (userId && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/redirect', request.url));
   }
 
   return NextResponse.next();
