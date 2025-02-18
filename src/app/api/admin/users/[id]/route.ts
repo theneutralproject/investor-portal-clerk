@@ -58,7 +58,14 @@ export async function GET(request: NextRequest) {
                 ownershipType: true,
                 deals: {
                   select: {
+                    id: true,
+                    transactionId: true,
+                    dealStage: true,
                     document: true,
+                    hubspotId: true,
+                    investmentEntity: true,
+                    closingDate: true,
+                    signaturesCompletedDate: true,
                     project: {
                       select: {
                         id: true,
@@ -68,6 +75,7 @@ export async function GET(request: NextRequest) {
                         },
                       },
                     },
+                    investmentStats: true,
                   },
                 },
               },
