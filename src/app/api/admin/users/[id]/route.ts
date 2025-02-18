@@ -26,6 +26,15 @@ export async function GET(request: NextRequest) {
     const detailedUser = await prisma.user.findUnique({
       where: { id: userId },
       select: {
+        firstName: true,
+        lastName: true,
+        email: true,
+        phoneNumber: true,
+        role: true,
+        hubspotId: true,
+        referralSource: true,
+        ssn: true,
+        dateCreated: true,
         organizationsOwned: {
           select: {
             id: true,
