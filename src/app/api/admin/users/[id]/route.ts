@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
       throw new Error('userId is required in url');
     }
   } catch (__error) {
-    return jsonResponse({ error: `userid is required in url` }, 400);
+    return jsonResponse({ error: `userId is required in url` }, 400);
   }
   try {
     const detailedUser = await prisma.user.findUnique({
