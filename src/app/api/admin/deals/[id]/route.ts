@@ -4,7 +4,7 @@ import {
   instantiateApiClientFromUserAndDeal,
 } from '@/libs/docusign/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getPortfolioReturns } from '@/libs/returns/utils.server';
+// import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import {
   errorResponse,
   getErrorMessage,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const returns = await getPortfolioReturns([deal]);
+    // const returns = await getPortfolioReturns([deal]);
     let signingOrders: Awaited<ReturnType<typeof getSigningOrder>>[] = [];
     // if deal is not closed, get signing order
     if (deal.dealStage < 5) {
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
 
     return jsonResponse({
       deal: dealData,
-      returns,
+      // returns,
       investmentStats,
       signingOrders,
       organization,
