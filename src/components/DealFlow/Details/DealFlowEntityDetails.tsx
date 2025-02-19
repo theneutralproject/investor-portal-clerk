@@ -9,6 +9,10 @@ import DealFlowFooter from '../Shared/DealFlowFooter';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { DealDocumentType } from '@prisma/client';
 import { EncryptionCard } from './EncryptionCard';
+import {
+  isOrganizationReadOnly,
+  LockedEntityAlert,
+} from './DealFlowCoInvestor';
 
 const REQUIRED_DOCUMENTS = [
   {
@@ -36,8 +40,18 @@ export const formatDate = (date: Date | null | undefined | string): string => {
 };
 
 const DealFlowEntityDetails: React.FC = () => {
-  const { organization, updateOrganization, project, deal } = useDealFlow();
+  const {
+    organization,
+    updateOrganization,
+    project,
+    deal,
+    organizationsOwned,
+  } = useDealFlow();
   const router = useRouter();
+  const organizationReadOnly = isOrganizationReadOnly(
+    organizationsOwned,
+    organization
+  );
 
   const [formData, setFormData] = useState<FormData>({
     name: organization?.name ?? '',
@@ -87,6 +101,8 @@ const DealFlowEntityDetails: React.FC = () => {
     <Box>
       <DealFlowTitle title="Ownership Information" />
 
+      {organizationReadOnly && <LockedEntityAlert />}
+
       <Grid container spacing={2}>
         <Grid size={6}>
           <TextField
@@ -98,6 +114,7 @@ const DealFlowEntityDetails: React.FC = () => {
             value={formData.name}
             onChange={handleInputChange}
             required
+            disabled={organizationReadOnly}
           />
         </Grid>
 
@@ -110,6 +127,7 @@ const DealFlowEntityDetails: React.FC = () => {
             name="tin"
             value={formData.tin}
             onChange={handleInputChange}
+            disabled={organizationReadOnly}
           />
         </Grid>
 
@@ -124,6 +142,7 @@ const DealFlowEntityDetails: React.FC = () => {
             value={formData.dateOfCreation}
             onChange={handleInputChange}
             InputLabelProps={{ shrink: true }}
+            disabled={organizationReadOnly}
           />
         </Grid>
 
@@ -150,6 +169,7 @@ const DealFlowEntityDetails: React.FC = () => {
                 target: { name: 'juristication', value: newValue ?? '' },
               } as React.ChangeEvent<HTMLInputElement>)
             }
+            disabled={organizationReadOnly}
           />
         </Grid>
       </Grid>
@@ -162,7 +182,10 @@ const DealFlowEntityDetails: React.FC = () => {
       <EncryptionCard />
       <DealFlowFooter
         onContinue={handleContinue}
-        isContinueDisabled={!allRequiredDocumentsAreUploaded()}
+        isContinueDisabled={
+          !allRequiredDocumentsAreUploaded() && !organizationReadOnly
+        }
+        onBack={() => router.back()}
       />
     </Box>
   );
