@@ -11,6 +11,13 @@ export enum docusignOwnershipTypeEnum {
   Partnership = 'ownershipTypePartnership',
 }
 
+export enum docusignSigningRoleEnum {
+  SIGNER = 'Signer',
+  COSIGNER = 'Co-Signer',
+  NEUTRALSIGNER = 'Neutral Signer',
+  ACCREDITATIONVERIFIER = 'Accreditation Verifier',
+}
+
 export const zDocusignEvelopeCreate = z.object({
   templateId: z.string(),
   dealId: z.number().int(),
@@ -28,5 +35,4 @@ export const zDocusignSigner = z.object({
   title: z.string().nullable(),
   ssn: z.string().nullable(),
 });
-
 export type DocusignSignerSchema = z.infer<typeof zDocusignSigner>;

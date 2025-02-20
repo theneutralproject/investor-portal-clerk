@@ -36,7 +36,6 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
       });
     } else {
       await createOrganization({
-        tin: '123456789',
         dateOfCreation: new Date(),
         ownershipType: ownershipType,
       });

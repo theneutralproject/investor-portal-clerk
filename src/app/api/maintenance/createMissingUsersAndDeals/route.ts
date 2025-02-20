@@ -25,8 +25,8 @@ import { NextRequest } from 'next/server';
 
 const finishedAsync = promisify(finished);
 
-const projectName: ProjectName = ProjectName['519 W Main'];
-// const projectName: ProjectName = ProjectName["Bakers Place"];
+// const projectName: ProjectName = ProjectName['519 W Main'];
+const projectName: ProjectName = ProjectName['Bakers Place'];
 const filePath = path.join(
   './seedData',
   `Investor Cap Table - ${projectName}.csv`
@@ -45,7 +45,6 @@ interface DealRecord {
   dateFunded: Date;
   equityUnitType?: string;
   debtInterestRatePerc?: number;
-  linkToDocumentFolder: string;
   debtMinTerm?: number;
   debtMaxTerm?: number;
 }
@@ -120,7 +119,6 @@ async function getDealsFromCsv() {
           dateFunded: new Date(record['Effective/Funded Date']),
           equityUnitType: getEquityUnitType(record['Equity Unit']),
           debtInterestRatePerc: getNumbersFromString(record['PN Unit']),
-          linkToDocumentFolder: record['Link to Documents'],
           V2: record.V2,
           addedInV2: record['Added in V2'],
           debtMinTerm: getNumbersFromString(record['PN Min Term Months']),
@@ -323,6 +321,7 @@ export async function POST(request: NextRequest) {
       'deal amount:',
       dealInput.dealAmount
     );
+    // TODO: get investmentEntity from spreadsheet
     const dealCreateData: DealCreateSchema = {
       amount: dealInput.dealAmount,
       projectId: projectId,

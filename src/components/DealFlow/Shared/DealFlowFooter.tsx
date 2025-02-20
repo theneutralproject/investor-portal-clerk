@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Button } from '@mui/material';
+import { Box, Button, CircularProgress } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { useRouter } from 'next/navigation';
 interface DealFlowFooterProps {
@@ -21,9 +21,7 @@ const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
       <Button
         variant="text"
         onClick={() => router.push('/dashboard')}
-        sx={{
-          color: '#00000061',
-        }}
+        sx={{ color: '#00000061' }}
       >
         FINISH LATER
       </Button>
@@ -44,12 +42,15 @@ const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
             borderRadius: '25px',
             padding: '8px 25px',
             textTransform: 'uppercase',
-            '&:hover': {
-              backgroundColor: '#e0a83a',
-            },
+            '&:hover': { backgroundColor: '#e0a83a' },
+            minWidth: '120px',
           }}
         >
-          Continue
+          {isLoading ? (
+            <CircularProgress size={24} sx={{ color: 'white' }} />
+          ) : (
+            'Continue'
+          )}
         </Button>
       </Box>
     </Box>

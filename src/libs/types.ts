@@ -106,6 +106,10 @@ export type OrganizationWithDocuments = OrganizationWithFullMembers & {
   document: OrganizationDocument[];
 };
 
+export type OrganizationWithMembersAndDeals = OrganizationWithFullMembers & {
+  deals: Deal[];
+};
+
 export type OrganizationWithFullMembersAndAddress = Organization & {
   members: MemberWithFullUser[];
   address: Address | null;

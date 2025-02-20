@@ -15,6 +15,7 @@ import type { UserWithAddress } from '../types';
 import type { AddressCreateSchema } from '../address/schema';
 import { clerkClient } from '@clerk/nextjs/server';
 import { ReferralSource } from '../hubspot/utils.client';
+import Logger from '../logger';
 
 interface ClerkAPIErrorResponse {
   clerkError: boolean;
@@ -114,7 +115,7 @@ export async function createUserInDbAndHubspot(
         ...{ address: { connect: userAddress.id }, addressId: addressId },
       };
     }
-    console.log('creating user in db', userCreateData.email);
+    Logger.log({ message: 'begin creating user in db', extra: userCreateData });
     const dbUser = await prisma.user.create({
       data: userCreateData,
     });
@@ -164,7 +165,10 @@ export async function createUserInDbAndHubspot(
       console.error('Unable to associate user with deal in hubspot:\n', res);
     }
   }
-
+  Logger.log({
+    message: 'done creating user with org in db and hubspot',
+    extra: updatedUser,
+  });
   return updatedUser;
 }
 

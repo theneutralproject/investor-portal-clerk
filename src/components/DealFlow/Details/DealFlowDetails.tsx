@@ -62,11 +62,7 @@ const DealFlowDetails: React.FC = () => {
       }
       handleInputChange({
         ...e,
-        target: {
-          ...e.target,
-          value: formatted,
-          name: 'ssn',
-        },
+        target: { ...e.target, value: formatted, name: 'ssn' },
       });
     }
   };
@@ -80,10 +76,7 @@ const DealFlowDetails: React.FC = () => {
         ? {
             ...prevData,
             address: prevData.address
-              ? {
-                  ...prevData.address,
-                  [name]: value,
-                }
+              ? { ...prevData.address, [name]: value }
               : {
                   street: '',
                   city: '',
@@ -100,9 +93,7 @@ const DealFlowDetails: React.FC = () => {
   const handleSubmit = () => {
     if (formData) {
       try {
-        const validatedData = zUserUpdateSchema.parse({
-          ...formData,
-        });
+        const validatedData = zUserUpdateSchema.parse({ ...formData });
 
         const dateOfBirth = formData.dateOfBirth
           ? new Date(formData.dateOfBirth)
@@ -294,10 +285,14 @@ const DealFlowDetails: React.FC = () => {
             type="date"
             value={formData.dateOfBirth}
             onChange={handleInputChange}
-            InputLabelProps={{
-              shrink: true,
-            }}
+            InputLabelProps={{ shrink: true }}
             placeholder="MM/DD/YYYY"
+            sx={{
+              '& input::-webkit-datetime-edit': { color: 'rgba(0, 0, 0, 0.6)' },
+              '& input:not([value=""])::-webkit-datetime-edit': {
+                color: 'inherit',
+              },
+            }}
           />
         </Grid>
 
