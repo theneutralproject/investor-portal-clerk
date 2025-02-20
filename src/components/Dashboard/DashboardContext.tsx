@@ -4,6 +4,7 @@ import React, { createContext, useContext } from 'react';
 import axios from 'axios';
 import { useQuery } from '@tanstack/react-query';
 import { useUser } from '@clerk/nextjs';
+import { usePathname } from 'next/navigation';
 import type {
   DealWithOrgMembersAndProject,
   ProjectWithAllNestedData,
@@ -25,7 +26,10 @@ const DashboardContext = createContext<DashboardContextType | undefined>(
 
 export function DashboardProvider({ children }: { children: React.ReactNode }) {
   const { user } = useUser();
+
+  const pathname = usePathname();
   const loggedIn = !!user;
+  const isRequestEnabled = pathname !== '/onboarding' && loggedIn;
 
   const {
     isLoading: projectsLoading,
@@ -37,6 +41,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       axios
         .get<ProjectWithAllNestedData[]>('/api/public/projects')
         .then(res => res.data),
+    enabled: isRequestEnabled,
   });
 
   const {
@@ -50,7 +55,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       axios
         .get<DealWithOrgMembersAndProject[]>('/api/dashboard/deals')
         .then(res => res.data),
-    enabled: loggedIn,
+    enabled: isRequestEnabled,
   });
 
   const deleteDeal = async (dealId: number) => {

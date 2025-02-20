@@ -3,10 +3,11 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import posthog from 'posthog-js';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
+import Logger from '@/libs/logger';
 
 /**
  * UserIdentifier component is responsible for:
@@ -20,9 +21,13 @@ import axios from 'axios';
 export default function UserIdentifier() {
   const { user } = useUser();
   const router = useRouter();
+  const pathname = usePathname();
+  const isOnboarding = pathname === '/onboarding';
   const [loadTermsStatus, setLoadTermStatus] = useState<boolean>(false);
   const { setTermsStatus } = useTermsContext();
-  const { data, isLoading } = useTermsStatus(!!user && loadTermsStatus);
+  const { data, isLoading } = useTermsStatus(
+    !!user && loadTermsStatus && !isOnboarding
+  );
 
   /**
    * Effect that runs when a user logs in.
@@ -57,22 +62,18 @@ export default function UserIdentifier() {
           if (!userData.referralSource || userData.referralSource.length <= 1) {
             router.push('/referral');
           }
-        } catch (_error) {
-          // Create new user if not found
-          const newUserResponse = await axios.post('/api/clerk/post-signup');
-          const newUser = newUserResponse.data;
-          setLoadTermStatus(true);
-
-          // Force redirect to /referral if the new user has no referral source
-          if (!newUser.referralSource || newUser.referralSource.length <= 1) {
-            router.push('/referral');
-          }
+        } catch (error) {
+          Logger.error(error, null, {
+            message: 'Error fetching user data:',
+          });
         }
       };
 
-      void fetchUser();
+      if (!isOnboarding) {
+        void fetchUser();
+      }
     }
-  }, [user, router]);
+  }, [user, router, pathname, isOnboarding]);
 
   /**
    * Effect that updates the terms acceptance status when data is available.

@@ -89,21 +89,22 @@ class Logger {
    * @param {Record<string, unknown | Sentry.SeverityLevel>} [extra] - Additional metadata (optional).
    */
   static error(
-    error: Error,
-    req?: NextRequest,
+    error: Error | unknown,
+    req?: NextRequest | null,
     extra: Record<string, unknown | Sentry.SeverityLevel> = {}
   ): void {
+    const _error = error as Error;
     const apiMessage = req
       ? `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
-      : `An error has occurred: ${error.message}`;
-    const traces = error.stack?.split('\n    ') || [];
+      : `An error has occurred: ${_error.message}`;
+    const traces = _error.stack?.split('\n    ') || [];
     const logData = {
       apiMessage,
       level: 'error',
-      message: error.message,
+      message: _error.message,
       stack: [traces[0], traces[1]].join(' ').replaceAll('\n', ''),
       request: req ? this.getRequestDetails(req) : null,
-      log: this.getLogError(error, req, extra.method),
+      log: this.getLogError(_error, req, extra.method),
       extra,
     };
 
@@ -140,7 +141,7 @@ class Logger {
    */
   private static getLogError = (
     error: Error,
-    req?: NextRequest,
+    req?: NextRequest | null,
     method?: string | unknown
   ): string => {
     const stack = new Error().stack?.split('\n')[2] || '';
