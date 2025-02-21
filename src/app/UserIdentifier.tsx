@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import posthog from 'posthog-js';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
@@ -21,6 +21,8 @@ import Logger from '@/libs/logger';
 export default function UserIdentifier() {
   const { user } = useUser();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get('redirectUrl');
   const pathname = usePathname();
   const isOnboarding = pathname === '/onboarding';
   const [loadTermsStatus, setLoadTermStatus] = useState<boolean>(false);
@@ -62,7 +64,7 @@ export default function UserIdentifier() {
           if (!userData.referralSource || userData.referralSource.length <= 1) {
             const currentPath = window.location.pathname;
             router.push(
-              `/referral?redirectUrl=${encodeURIComponent(currentPath)}`
+              `/referral?redirectUrl=${redirectUrl || encodeURIComponent(currentPath)}`
             );
           }
         } catch (error) {
@@ -76,7 +78,7 @@ export default function UserIdentifier() {
         void fetchUser();
       }
     }
-  }, [user, router, pathname, isOnboarding]);
+  }, [user, router, pathname, isOnboarding, redirectUrl]);
 
   /**
    * Effect that updates the terms acceptance status when data is available.

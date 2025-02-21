@@ -8,7 +8,6 @@ const publicRoutes = [
   '/contact',
   '/dashboard',
   '/projects/(.*)',
-  '/api/public/projects',
 ];
 
 const ignoredRoutes = [
@@ -18,6 +17,7 @@ const ignoredRoutes = [
   '/api/docusign/tokenFromCode',
   '/api/finix/webhooks',
   '/api/clerk',
+  '/api/public/projects',
 ];
 
 const isIgnoredRoute = createRouteMatcher(ignoredRoutes);
@@ -28,13 +28,7 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   if (isIgnoredRoute(request)) {
     return NextResponse.next();
   }
-  const { userId, sessionClaims, getToken } = await auth();
-
-  console.log({
-    token: await getToken(),
-    sessionClaims,
-    metadata: sessionClaims?.metadata,
-  });
+  const { userId, sessionClaims } = await auth();
 
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(request)) {

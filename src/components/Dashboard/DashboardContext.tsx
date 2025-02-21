@@ -41,7 +41,6 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
       axios
         .get<ProjectWithAllNestedData[]>('/api/public/projects')
         .then(res => res.data),
-    enabled: isRequestEnabled,
   });
 
   const {
