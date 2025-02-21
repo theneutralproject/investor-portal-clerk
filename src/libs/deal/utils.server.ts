@@ -170,7 +170,11 @@ async function _createDeal(
     hubspotId: dealData.hubspotId,
     transactionId: dealData.transactionId,
     investmentEntity:
-      getInvestmentEntity(project.name, dealData.financingType) ?? '',
+      getInvestmentEntity(
+        project.name,
+        dealData.financingType,
+        dealData.investmentEntity
+      ) ?? '',
     investmentStats: {
       create: newInvestmentStats,
     },
@@ -211,7 +215,6 @@ export async function updateDeal(
     },
   });
   if (!existingDeal) {
-    console.error(`Failed to find deal with hubspot id ${dealData.hubspotId}.`);
     throw Error('The deal does not exist in the database');
   }
 

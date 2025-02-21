@@ -60,7 +60,10 @@ export default function UserIdentifier() {
 
           // Force redirect to /referral if the user has no referral source
           if (!userData.referralSource || userData.referralSource.length <= 1) {
-            router.push('/referral');
+            const currentPath = window.location.pathname;
+            router.push(
+              `/referral?redirectUrl=${encodeURIComponent(currentPath)}`
+            );
           }
         } catch (error) {
           Logger.error(error, null, {

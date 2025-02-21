@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Box, Button } from '@mui/material';
+import { Alert, AlertTitle, Box, Button } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import CoInvestorCard from '@components/DealFlow/Details/CoInvestorCard';
@@ -9,10 +9,57 @@ import {
   type UserCreateSchema,
   type UserUpdateSchema,
 } from '@/libs/user/schema';
-import type { MemberWithPartialUser, MemberWithUser } from '@/libs/types';
+import type {
+  MemberWithPartialUser,
+  MemberWithUser,
+  OrganizationWithMembersAndDeals,
+  OrganizationWithDocuments,
+} from '@/libs/types';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { EncryptionCard } from './EncryptionCard';
 import { MODAL_KEYS } from '../Shared/Modal/DealFlowLearnMoreModal';
+import { InfoIcon } from 'lucide-react';
+
+export const LockedEntityAlert = () => {
+  return (
+    <Box sx={{ mt: 2, mb: 2 }}>
+      <Alert
+        severity="info"
+        icon={<InfoIcon />}
+        sx={{
+          backgroundColor: '#f5f9ff',
+          '& .MuiAlert-icon': {
+            color: '#1976d2',
+          },
+        }}
+      >
+        <AlertTitle sx={{ fontWeight: 600 }}>Entity details locked</AlertTitle>
+        You cannot edit entity details used in an existing investment. To make
+        changes, return to the preview screen and create a new investment
+        entity.
+      </Alert>
+    </Box>
+  );
+};
+
+// Checks if the organization is read only by checking if the organization has completed deals
+export const isOrganizationReadOnly = (
+  organizationsOwned: OrganizationWithMembersAndDeals[],
+  currentOrganization: OrganizationWithDocuments
+) => {
+  if (!currentOrganization || !organizationsOwned) return false;
+
+  const organizationWithDeals = organizationsOwned?.find(
+    org => org.id === currentOrganization.id
+  );
+
+  const completedDeals = organizationWithDeals?.deals?.filter(
+    deal => deal.dealStage === 5
+  );
+  if (!completedDeals) return false;
+
+  return completedDeals.length > 0;
+};
 
 const DealFlowCoInvestor: React.FC = () => {
   const {
@@ -22,12 +69,18 @@ const DealFlowCoInvestor: React.FC = () => {
     createOrganizationMember,
     updateOrganizationMember,
     deleteOrganizationMember,
+    organizationsOwned,
   } = useDealFlow();
   const [expandedCards, setExpandedCards] = useState<number[]>([]);
   const [localMembers, setLocalMembers] = useState<
     Partial<MemberWithPartialUser>[]
   >([]);
   const router = useRouter();
+
+  const organizationReadOnly = isOrganizationReadOnly(
+    organizationsOwned,
+    organization
+  );
 
   useEffect(() => {
     if (organization?.members) {
@@ -142,6 +195,8 @@ const DealFlowCoInvestor: React.FC = () => {
         modalKey={MODAL_KEYS.ADD_CO_INVESTORS}
       />
 
+      {organizationReadOnly && <LockedEntityAlert />}
+
       {localMembers.map((coInvestor, index) => (
         <CoInvestorCard
           key={`${coInvestor.id ?? index}`}
@@ -153,10 +208,11 @@ const DealFlowCoInvestor: React.FC = () => {
           expanded={expandedCards.includes(index)}
           onExpand={handleExpandCard}
           deleteOrganizationMember={deleteOrganizationMember}
+          organizationReadOnly={organizationReadOnly}
         />
       ))}
 
-      {expandedCards.length === 0 && (
+      {expandedCards.length === 0 && !organizationReadOnly && (
         <Box mt={2}>
           <Button
             variant="grayPill"
@@ -168,7 +224,7 @@ const DealFlowCoInvestor: React.FC = () => {
         </Box>
       )}
       <EncryptionCard />
-      <DealFlowFooter onContinue={nextRoute} />
+      <DealFlowFooter onContinue={nextRoute} onBack={() => router.back()} />
     </Box>
   );
 };

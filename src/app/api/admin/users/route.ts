@@ -2,16 +2,8 @@ import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { shareProjectDocsWithUser } from '@/libs/hubspot/utils.server';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
-import {
-  UserCreateSchema,
-  type UserUpdateSchema,
-  zUserCreateSchema,
-  zUserUpdateSchema,
-} from '@/libs/user/schema';
-import {
-  createUserInDbAndHubspot,
-  updateUserInDbAndHubspotAndClerk,
-} from '@/libs/user/utils.server';
+import { UserCreateSchema, zUserCreateSchema } from '@/libs/user/schema';
+import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
@@ -105,34 +97,6 @@ export async function POST(request: NextRequest) {
     return jsonResponse(userWithOrgs);
   } catch (error) {
     console.error('unable to create user:', getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
-  }
-}
-
-export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
-  }
-
-  let putData: UserUpdateSchema;
-  try {
-    const requestBody = (await request.json()) as UserUpdateSchema;
-    putData = zUserUpdateSchema.parse(requestBody);
-  } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse users PUT body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse({ error: getErrorMessage(parseError) }, 400);
-  }
-
-  try {
-    const updatedUser = await updateUserInDbAndHubspotAndClerk(putData);
-    return jsonResponse(updatedUser);
-  } catch (error) {
-    console.error('unable to update user:', getErrorMessage(error));
     return jsonResponse({ error: getErrorMessage(error) }, 500);
   }
 }
