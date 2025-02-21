@@ -25,10 +25,16 @@ const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isPublicRoute = createRouteMatcher(publicRoutes);
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
-  const { userId, sessionClaims, redirectToSignIn } = await auth();
   if (isIgnoredRoute(request)) {
     return NextResponse.next();
   }
+  const { userId, sessionClaims, getToken } = await auth();
+
+  console.log({
+    token: await getToken(),
+    sessionClaims,
+    metadata: sessionClaims?.metadata,
+  });
 
   // For users visiting /onboarding, don't try to redirect
   if (userId && isOnboardingRoute(request)) {
@@ -36,15 +42,14 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   }
 
   // If the user isn't signed in and the route is private, redirect to sign-in
-  if (!userId && !isPublicRoute(request))
-    return redirectToSignIn({ returnBackUrl: request.url });
+  if (!userId && !isPublicRoute(request)) {
+    await auth.protect();
+  }
 
   // Catch users who do not have `onboardingComplete: true` in their publicMetadata
   // Redirect them to the /onboading route to complete onboarding
-  console.log(sessionClaims);
   if (userId && !sessionClaims?.metadata?.onboardingComplete) {
-    const onboardingUrl = new URL('/onboarding', request.url);
-    return NextResponse.redirect(onboardingUrl);
+    return NextResponse.redirect(new URL('/onboarding', request.url));
   }
 
   // If the user is logged in and the route is protected, let them view.
@@ -52,10 +57,13 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
-  // If the user is logged in and the route is protected, let them view.
-  if (userId && request.nextUrl.pathname === '/onboarding') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
-  }
+  // If the user is logged in and the route is onboarding, redirect to dashboard.
+  // if (userId && request.nextUrl.pathname === '/onboarding') {
+  //   return NextResponse.redirect(new URL('/dashboard', request.url));
+  // }
+
+  // User is authenticated, let them view.
+  return NextResponse.next();
 });
 
 export const config = {
