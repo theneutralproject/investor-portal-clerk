@@ -22,10 +22,16 @@ const _investmentEntity = {
   },
 };
 
+// This function is used to get the investment entity for a given project and financing type
+// If the investment entity is provided, it will return that (used to import old deals)
 export function getInvestmentEntity(
   projectName: string,
-  financingType: DealFinancingType
+  financingType: DealFinancingType,
+  investmentEntity?: string
 ) {
+  if (investmentEntity) {
+    return investmentEntity;
+  }
   switch (projectName) {
     case ProjectName['The Edison']:
     case ProjectName['519 W Main']:

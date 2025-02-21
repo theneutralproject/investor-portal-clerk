@@ -107,9 +107,8 @@ const MobileCTA = ({ project, onInvest }: MobileCTAProps) => {
               onClick={onInvest}
               sx={{
                 backgroundColor: '#F0B642',
-                '&:hover': {
-                  backgroundColor: '#d4a33b',
-                },
+                '&:hover': { backgroundColor: '#d4a33b' },
+                boxShadow: 'none',
               }}
             >
               Invest
