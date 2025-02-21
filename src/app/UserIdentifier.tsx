@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import posthog from 'posthog-js';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
@@ -21,8 +21,6 @@ import Logger from '@/libs/logger';
 export default function UserIdentifier() {
   const { user } = useUser();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirectUrl');
   const pathname = usePathname();
   const isOnboarding = pathname === '/onboarding';
   const [loadTermsStatus, setLoadTermStatus] = useState<boolean>(false);
@@ -30,6 +28,17 @@ export default function UserIdentifier() {
   const { data, isLoading } = useTermsStatus(
     !!user && loadTermsStatus && !isOnboarding
   );
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+
+  /**
+   * Extracts `redirectUrl` from the window location.
+   */
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      setRedirectUrl(urlParams.get('redirectUrl'));
+    }
+  }, []);
 
   /**
    * Effect that runs when a user logs in.
