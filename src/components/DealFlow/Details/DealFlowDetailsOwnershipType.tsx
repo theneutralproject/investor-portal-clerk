@@ -41,7 +41,6 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
       });
 
       if (
-        ownershipType === DealOwnershipType.PARTNERSHIP ||
         ownershipType === DealOwnershipType.MARITAL ||
         ownershipType === DealOwnershipType.JOINT
       ) {

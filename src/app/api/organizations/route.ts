@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         return `Corporation of ${dbUser.firstName} ${dbUser.lastName}`;
       }
       case DealOwnershipType.PARTNERSHIP: {
-        return `${dbUser.firstName} ${dbUser.lastName}'s Parnership Organization`;
+        return `${dbUser.firstName} ${dbUser.lastName}'s Partnership Organization`;
       }
       case DealOwnershipType.MARITAL: {
         return `${dbUser.firstName} ${dbUser.lastName}'s Marital Organization`;
