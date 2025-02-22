@@ -91,7 +91,10 @@ export async function POST(request: NextRequest) {
     if (isError(achTransferResponseData)) {
       console.error('Error transferring money 1:');
       console.error(achTransferResponseData);
-      return errorResponse('Error transferring money 1', 500);
+      return errorResponse('Error transferring money 1', 500, {
+        request,
+        extra: { response: achTransferResponseData },
+      });
     }
 
     if (!achTransferResponseData.state && achTransferResponseData._embedded) {
@@ -102,7 +105,8 @@ export async function POST(request: NextRequest) {
       return errorResponse(
         achTransferResponseData._embedded.errors[0]?.message ??
           'The ACH transfer failed. Please contact your Neutral Representative',
-        500
+        500,
+        { request, extra: { response: achTransferResponseData } }
       );
     }
 
@@ -126,7 +130,8 @@ export async function POST(request: NextRequest) {
     } else if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
       return errorResponse(
         'The ACH transfer failed. Please contact your Neutral Representative',
-        400
+        400,
+        { request, extra: { response: achTransferResponseData } }
       );
     } else {
       try {
@@ -146,7 +151,10 @@ export async function POST(request: NextRequest) {
     }
   } catch (error) {
     console.error('Finix transaction error 2', error);
-    return errorResponse('Error transferring money 2', 500);
+    return errorResponse('Error transferring money 2', 500, {
+      request,
+      extra: { error },
+    });
   }
 }
 
