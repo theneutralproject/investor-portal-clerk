@@ -20,126 +20,103 @@ const DocusignSignerRow: React.FC<DocusignSignerRowProps> = ({
   signer,
   isLast,
 }) => {
-  //TODO What are the valid roles?
-  const getRoleLabel = (role: string): string => {
-    const roleMap: Record<string, string> = {
-      Signer: '(You)',
-      'Neutral Signer': '(Neutral)',
-      'Co-investor': '(Co-investor)',
-    };
+  const roleLabels: Record<string, string> = {
+    Signer: '(You)',
+    'Neutral Signer': '(Neutral)',
+    'Co-investor': '(Co-investor)',
+  };
 
+  const getRoleLabel = (role: string): string => {
     if (role.includes('Verification') || role.includes('Verifier')) {
       return '(Accreditation Verifier)';
     }
-
-    return roleMap[role] || '';
+    return roleLabels[role] || '';
   };
 
-  const getStatusIcon = (status: DocusignStatus): React.ReactNode => {
+  const statusStyles = {
+    waiting: { color: '#9e9e9e', text: 'WAITING', icon: <MoreHorizIcon /> },
+    signed: { color: '#4caf50', text: 'SIGNED', icon: <CheckIcon /> },
+    declined: { color: '#f44336', text: 'DECLINED', icon: <CloseIcon /> },
+  };
+
+  const statusDotStyles = {
+    filled: (color: string) => ({
+      width: 12,
+      height: 12,
+      borderRadius: '50%',
+      bgcolor: color,
+    }),
+    outlined: {
+      width: 12,
+      height: 12,
+      borderRadius: '50%',
+      border: '2px solid #BDBDBD',
+      bgcolor: 'transparent',
+    },
+  };
+
+  const getStatusInfo = (status: DocusignStatus) => {
     switch (status) {
       case DocusignStatus.SENT:
       case DocusignStatus.DELIVERED:
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <MoreHorizIcon sx={{ color: '#9e9e9e', fontWeight: 'medium' }} />
-            <Typography
-              variant="body2"
-              sx={{ color: '#9e9e9e', fontWeight: 'medium' }}
-            >
-              WAITING
-            </Typography>
-          </Box>
-        );
+        return {
+          dot: statusDotStyles.filled('#BDBDBD'),
+          status: statusStyles.waiting,
+        };
 
       case DocusignStatus.SIGNED:
       case DocusignStatus.COMPLETED:
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CheckIcon sx={{ color: '#4caf50', fontWeight: 'medium' }} />
-            <Typography
-              variant="body2"
-              sx={{ color: '#4caf50', fontWeight: 'medium' }}
-            >
-              SIGNED
-            </Typography>
-          </Box>
-        );
+        return {
+          dot: statusDotStyles.filled('#4CAF50'),
+          status: statusStyles.signed,
+        };
 
       case DocusignStatus.DECLINED:
-        return (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CloseIcon sx={{ color: '#f44336', fontWeight: 'medium' }} />
-            <Typography
-              variant="body2"
-              sx={{ color: '#f44336', fontWeight: 'medium' }}
-            >
-              DECLINED
-            </Typography>
-          </Box>
-        );
-
-      default:
-        return null;
-    }
-  };
-  const renderStatusDot = (status: DocusignStatus) => {
-    switch (status) {
-      case DocusignStatus.SENT:
-      case DocusignStatus.DELIVERED:
-        return (
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              bgcolor: '#BDBDBD',
-            }}
-          />
-        );
-
-      case DocusignStatus.SIGNED:
-      case DocusignStatus.COMPLETED:
-        return (
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              bgcolor: '#4CAF50',
-            }}
-          />
-        );
-
-      case DocusignStatus.DECLINED:
-        return (
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              bgcolor: '#F44336',
-            }}
-          />
-        );
+        return {
+          dot: statusDotStyles.filled('#F44336'),
+          status: statusStyles.declined,
+        };
 
       case DocusignStatus.FAX_PENDING:
       case DocusignStatus.AUTO_RESPONDED:
-        return (
-          <Box
-            sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '50%',
-              border: '2px solid #BDBDBD',
-              bgcolor: 'transparent',
-            }}
-          />
-        );
+        return {
+          dot: statusDotStyles.outlined,
+          status: null,
+        };
 
       default:
-        return null;
+        return {
+          dot: null,
+          status: null,
+        };
     }
   };
+
+  const renderStatusIcon = (
+    style:
+      | typeof statusStyles.waiting
+      | typeof statusStyles.signed
+      | typeof statusStyles.declined
+      | null
+  ) => {
+    if (!style) return null;
+
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {React.cloneElement(style.icon, {
+          sx: { color: style.color, fontWeight: 'medium' },
+        })}
+        <Typography
+          variant="body2"
+          sx={{ color: style.color, fontWeight: 'medium' }}
+        >
+          {style.text}
+        </Typography>
+      </Box>
+    );
+  };
+
+  const { dot, status } = getStatusInfo(signer.status);
 
   return (
     <React.Fragment>
@@ -147,7 +124,7 @@ const DocusignSignerRow: React.FC<DocusignSignerRowProps> = ({
         <ListItemIcon
           sx={{ minWidth: 40, display: 'flex', alignItems: 'center' }}
         >
-          {renderStatusDot(signer.status)}
+          {dot && <Box sx={dot} />}
         </ListItemIcon>
         <ListItemText
           primary={
@@ -162,7 +139,7 @@ const DocusignSignerRow: React.FC<DocusignSignerRowProps> = ({
               <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
                 {signer.name} {getRoleLabel(signer.role)}
               </Typography>
-              {getStatusIcon(signer.status)}
+              {renderStatusIcon(status)}
             </Box>
           }
           secondary={
