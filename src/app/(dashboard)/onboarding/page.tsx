@@ -22,9 +22,11 @@ const Onboarding = () => {
   useEffect(() => {
     async function onboardedProcess() {
       if (data) {
+        console.log('reloading user');
         await user?.reload();
-        router.push(redirectUrl || '/dashboard');
       }
+      console.log('redirecting');
+      router.push(redirectUrl || '/dashboard');
     }
 
     onboardedProcess();
