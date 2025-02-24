@@ -1,36 +1,36 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import useRegisterUser from '@/app/hooks/useRegisterUser';
 import { useUser } from '@clerk/nextjs';
 
 const Onboarding = () => {
+  const router = useRouter();
   const { user } = useUser();
   const { data } = useRegisterUser();
-  const searchParams = useSearchParams();
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const url =
-      searchParams.get('redirect_url') || searchParams.get('redirectUrl');
-    setRedirectUrl(url);
-  }, [searchParams]);
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      setRedirectUrl(params.get('redirect_url') || params.get('redirectUrl'));
+    }
+  }, []);
 
   useEffect(() => {
     async function onboardedProcess() {
-      if (data) {
-        console.log('reloading user');
-        await user?.reload();
-      }
+      console.log('reloading user');
+      await user?.reload();
       console.log('redirecting');
-
-      window.location.assign(redirectUrl || '/dashboard');
+      router.push(redirectUrl || '/dashboard');
     }
 
-    onboardedProcess();
-  }, [data, user, redirectUrl]);
+    if (data) {
+      void onboardedProcess();
+    }
+  }, [router, data, user, redirectUrl]);
 
   return <DashboardSkeleton />;
 };
