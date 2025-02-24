@@ -24,7 +24,6 @@ const OnboardingPage = () => {
       console.log('router ready, reloading user');
       await user?.reload();
       console.log('redirecting', redirectUrl || '/dashboard');
-      window.location.href = redirectUrl || '/dashboard';
       setTimeout(() => {
         router?.push(redirectUrl || '/dashboard');
       }, 1000);
