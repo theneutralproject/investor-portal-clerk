@@ -21,12 +21,8 @@ const OnboardingPage = () => {
 
   useEffect(() => {
     async function onboardedProcess() {
-      console.log('router ready, reloading user');
       await user?.reload();
-      console.log('redirecting', redirectUrl || '/dashboard');
-      setTimeout(() => {
-        router?.push(redirectUrl || '/dashboard');
-      }, 1000);
+      router.push(redirectUrl || '/dashboard');
     }
 
     if (data) {
