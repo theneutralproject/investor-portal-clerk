@@ -1,110 +1,117 @@
-import type { WebhookEvent } from '@clerk/nextjs/server';
-import { headers } from 'next/headers';
-import { Webhook } from 'svix';
+import { getAuth, clerkClient, User } from '@clerk/nextjs/server';
+import { NextRequest } from 'next/server';
+import Logger from '@/libs/logger';
+import prisma from '@/libs/prisma.server';
+import { UserCreateSchema } from '@/libs/user/schema';
 import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
-import type { UserCreateSchema } from '@/libs/user/schema';
+import { errorResponse } from '@/libs/utils.server';
 
-async function validateRequest(request: Request) {
-  const payloadString = await request.text();
-  const headerPayload = await headers();
+/**
+ * Handles a POST request to check if a user exists in the database.
+ * If the user does not exist, it retrieves their information from Clerk
+ * and creates a new record in the database and HubSpot.
+ *
+ * @param {NextRequest} request - The incoming request object.
+ * @returns {Promise<Response>} A JSON response indicating whether the user exists or was created.
+ */
+export async function POST(request: NextRequest): Promise<Response> {
+  const { userId } = getAuth(request);
 
-  const svixHeaders = {
-    'svix-id': headerPayload.get('svix-id')!,
-    'svix-timestamp': headerPayload.get('svix-timestamp')!,
-    'svix-signature': headerPayload.get('svix-signature')!,
-  };
+  if (!userId) {
+    return errorResponse('User not authenticated', 401);
+  }
 
-  const wh = new Webhook(process.env.CLERK_WEBHOOK_SECRET ?? ``);
-  return wh.verify(payloadString, svixHeaders) as WebhookEvent;
-}
+  // Check if the user already exists in the database
+  const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
 
-export async function POST(request: Request) {
-  let webhookRequest;
-  try {
-    webhookRequest = await validateRequest(request);
-  } catch (err) {
-    console.error('Validation failed:', err);
-    return new Response(JSON.stringify({ error: 'Invalid request' }), {
-      status: 400,
+  if (dbUser) {
+    return new Response(JSON.stringify({ data: 'User exists' }), {
+      status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  }
+  } else {
+    let clerkUser: User | null = null;
+    // Fetch user details from Clerk
+    const authClient = await clerkClient();
 
-  const { type, data } = webhookRequest;
-  console.log('clerk webhook received of type:', type);
-  switch (type) {
-    case 'user.created': {
-      const {
-        id,
-        primary_email_address_id,
-        email_addresses,
-        primary_phone_number_id,
-        first_name,
-        last_name,
-        phone_numbers,
-      } = data;
-
-      const email = primary_email_address_id
-        ? (email_addresses.find(({ id }) => id === primary_email_address_id)
-            ?.email_address ?? '')
-        : (email_addresses[0]?.email_address ?? '');
-      const phonenumber = primary_phone_number_id
-        ? (phone_numbers.find(({ id }) => id === primary_phone_number_id)
-            ?.phone_number ?? '')
-        : (phone_numbers[0]?.phone_number ?? '');
-      if (email === '') {
-        console.error('No email found for new clerk user:', data);
-        return new Response(
-          JSON.stringify({ error: `No email found for new clerk user!!!` }),
-          {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          }
-        );
-      }
-
-      const newUserData = {
-        clerkId: id,
-        email: email.toLowerCase(),
-        firstName: first_name,
-        lastName: last_name,
-        phoneNumber: phonenumber,
-        address: undefined,
-      } as UserCreateSchema;
-
-      /* Store user in DB**/
-      try {
-        await createUserInDbAndHubspot(newUserData);
-        break;
-      } catch (userCreateError) {
-        console.error('Error creating user in DB/HubSpot:', userCreateError);
-        return new Response(
-          JSON.stringify({ message: (userCreateError as Error).message }),
-          { status: 500, headers: { 'Content-Type': 'application/json' } }
-        );
-      }
+    try {
+      clerkUser = await authClient.users.getUser(userId);
+    } catch (__error) {
+      return errorResponse('User not found', 401);
     }
-    case 'user.updated': {
-      console.warn(
-        'user updated event received - but not yet implemented',
-        data
+
+    Logger.log({
+      message: `User Clerk: ${userId}`,
+      extra: clerkUser,
+    });
+
+    const {
+      primaryEmailAddressId,
+      emailAddresses,
+      primaryPhoneNumberId,
+      phoneNumbers,
+    } = clerkUser;
+
+    // Extract email and phone number from Clerk data
+    const email = primaryEmailAddressId
+      ? (emailAddresses.find(({ id }) => id === primaryEmailAddressId)
+          ?.emailAddress ?? '')
+      : (emailAddresses[0]?.emailAddress ?? '');
+
+    const phoneNumber = primaryPhoneNumberId
+      ? (phoneNumbers.find(({ id }) => id === primaryPhoneNumberId)
+          ?.phoneNumber ?? '')
+      : (phoneNumbers[0]?.phoneNumber ?? '');
+
+    // Create a new user object
+    const newUserData: UserCreateSchema = {
+      clerkId: userId,
+      email,
+      firstName: clerkUser?.firstName || '',
+      lastName: clerkUser?.lastName || '',
+      phoneNumber,
+      address: undefined,
+    };
+
+    if (!email) {
+      return errorResponse(`No email found for new clerk user: ${userId}`, 500);
+    }
+
+    Logger.log({
+      message: `User DB: ${newUserData.clerkId}`,
+      extra: newUserData,
+    });
+
+    // Store the user in the database and HubSpot
+    const user = await createUserInDbAndHubspot(newUserData);
+
+    try {
+      await authClient.users.updateUser(userId, {
+        publicMetadata: {
+          onboardingComplete: true,
+          investortPortalId: user.id,
+        },
+      });
+    } catch (_err) {
+      return errorResponse(
+        'There was an error updating the user metadata.',
+        500
       );
-      break;
-    }
-    case 'session.created': /** FALL THROUGH SWITCHES */
-    case 'session.ended':
-    case 'session.revoked':
-    case 'session.removed': {
-      break;
     }
 
-    default: {
-      console.error(`The event type: ${type} is not configured`);
-    }
+    return new Response(
+      JSON.stringify({
+        data: {
+          id: user.id,
+          clerkId: user.clerkId,
+          referralSource: user.referralSource,
+          hubspotId: user.hubspotId,
+        },
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
-
-  return new Response(JSON.stringify({ message: 'success' }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  });
 }
