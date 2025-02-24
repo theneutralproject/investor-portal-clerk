@@ -1,13 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import useRegisterUser from '@/app/hooks/useRegisterUser';
 import { useUser } from '@clerk/nextjs';
 
 const OnboardingPage = () => {
-  const router = useRouter();
   const { user } = useUser();
   const { data } = useRegisterUser();
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
@@ -21,16 +19,16 @@ const OnboardingPage = () => {
 
   useEffect(() => {
     async function onboardedProcess() {
-      console.log('reloading user');
+      console.log('router ready, reloading user');
       await user?.reload();
       console.log('redirecting', redirectUrl || '/dashboard');
-      router.push(redirectUrl || '/dashboard');
+      window.location.href = redirectUrl || '/dashboard';
     }
 
     if (data) {
       void onboardedProcess();
     }
-  }, [router, data, user, redirectUrl]);
+  }, [data, user, redirectUrl]);
 
   return <DashboardSkeleton />;
 };
