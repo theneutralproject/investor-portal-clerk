@@ -23,23 +23,30 @@ export async function POST(request: NextRequest): Promise<Response> {
 
   // Check if the user already exists in the database
   const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
+  let clerkUser: User | null = null;
+  // Fetch user details from Clerk
+  const authClient = await clerkClient();
+
+  try {
+    clerkUser = await authClient.users.getUser(userId);
+  } catch (__error) {
+    return errorResponse('User not found', 401);
+  }
 
   if (dbUser) {
+    if (!clerkUser.publicMetadata.onboardingComplete) {
+      await authClient.users.updateUser(userId, {
+        publicMetadata: {
+          onboardingComplete: true,
+          investortPortalId: dbUser.id,
+        },
+      });
+    }
     return new Response(JSON.stringify({ data: 'User exists' }), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
   } else {
-    let clerkUser: User | null = null;
-    // Fetch user details from Clerk
-    const authClient = await clerkClient();
-
-    try {
-      clerkUser = await authClient.users.getUser(userId);
-    } catch (__error) {
-      return errorResponse('User not found', 401);
-    }
-
     Logger.log({
       message: `User Clerk: ${userId}`,
       extra: clerkUser,

@@ -83,6 +83,26 @@ describe('POST /api/user', () => {
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({
       clerkId: mockClerkUser.id,
     });
+    (clerkClient as jest.Mock).mockReturnValue({
+      users: {
+        getUser: jest.fn().mockResolvedValue({
+          ...mockClerkUser,
+          primaryEmailAddressId: null,
+          emailAddresses: [],
+          publicMetadata: {
+            onboardingComplete: false,
+          },
+        }),
+        updateUser: jest.fn().mockResolvedValue({
+          ...mockClerkUser,
+          primaryEmailAddressId: null,
+          emailAddresses: [],
+          publicMetadata: {
+            onboardingComplete: true,
+          },
+        }),
+      },
+    });
 
     const response = await POST(createMockRequest() as NextRequest);
     const json = await response.json();
