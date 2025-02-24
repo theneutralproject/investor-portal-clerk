@@ -27,9 +27,7 @@ const Onboarding = () => {
       }
     }
 
-    if (redirectUrl !== null) {
-      onboardedProcess();
-    }
+    onboardedProcess();
   }, [router, data, user, redirectUrl]);
 
   return <DashboardSkeleton />;
