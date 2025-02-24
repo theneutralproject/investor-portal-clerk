@@ -1,13 +1,12 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import useRegisterUser from '@/app/hooks/useRegisterUser';
 import { useUser } from '@clerk/nextjs';
 
 const Onboarding = () => {
-  const router = useRouter();
   const { user } = useUser();
   const { data } = useRegisterUser();
   const searchParams = useSearchParams();
@@ -26,11 +25,12 @@ const Onboarding = () => {
         await user?.reload();
       }
       console.log('redirecting');
-      router.push(redirectUrl || '/dashboard');
+
+      window.location.assign(redirectUrl || '/dashboard');
     }
 
     onboardedProcess();
-  }, [router, data, user, redirectUrl]);
+  }, [data, user, redirectUrl]);
 
   return <DashboardSkeleton />;
 };
