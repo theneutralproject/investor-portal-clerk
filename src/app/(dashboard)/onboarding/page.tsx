@@ -23,7 +23,7 @@ const OnboardingPage = () => {
     async function onboardedProcess() {
       console.log('reloading user');
       await user?.reload();
-      console.log('redirecting');
+      console.log('redirecting', redirectUrl || '/dashboard');
       router.push(redirectUrl || '/dashboard');
     }
 
