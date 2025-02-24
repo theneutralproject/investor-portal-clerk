@@ -56,7 +56,9 @@ function ReferralForm() {
       console.error('Error updating user information:', error);
     }
 
-    router.push(redirectUrl ? redirectUrl : '/dashboard');
+    router.push(
+      redirectUrl && redirectUrl !== 'referral' ? redirectUrl : '/dashboard'
+    );
   };
 
   const handleSubmit = async (event: React.FormEvent) => {

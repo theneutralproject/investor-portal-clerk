@@ -23,8 +23,9 @@
     "test:watch": "jest --watch",
     "test:e2e": "npx playwright test --ui",
     "prepare": "husky",
-    "prisma:backfill-deals-dates": "tsx seedScripts/202502022334-backfill-deals-dates.ts",
-    "prisma:backfill-users-dates": "tsx seedScripts/202502030006-backfill-users-dates.ts"
+    "prisma:backfill-deals-dates": "tsx scripts/prisma/202502022334-backfill-deals-dates.ts",
+    "prisma:backfill-users-dates": "tsx scripts/prisma/202502030006-backfill-users-dates.ts",
+    "clerk:update-metadata": "tsx scripts/clerk/updateMetadata.ts"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.11.2",
@@ -85,6 +86,7 @@
     "@clerk/testing": "^1.4.21",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.0",
+    "@faker-js/faker": "^9.5.0",
     "@ianvs/prettier-plugin-sort-imports": "^4.4.0",
     "@playwright/test": "^1.49.0",
     "@prisma/client": "^6.1.0",

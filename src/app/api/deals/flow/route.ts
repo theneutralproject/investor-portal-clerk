@@ -64,7 +64,12 @@ async function fetchProject(slug: string) {
 async function fetchDeal(id: number) {
   return prisma.deal.findUnique({
     where: { id },
-    include: { investmentStats: true, organization: true, document: true },
+    include: {
+      investmentStats: true,
+      organization: true,
+      document: true,
+      DocusignEvent: true,
+    },
   });
 }
 

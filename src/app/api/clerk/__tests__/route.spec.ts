@@ -1,149 +1,193 @@
 import { POST } from '../route';
-import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { getAuth, clerkClient } from '@clerk/nextjs/server';
+import prisma from '@/libs/prisma.server';
+import * as utils from '@/libs/user/utils.server';
+import { NextRequest } from 'next/server';
+import { ReferralSource } from '@/libs/hubspot/utils.client';
 
-// Mock our user utils createUserInDbAndHubspot
 jest.mock('@/libs/user/utils.server', () => ({
   createUserInDbAndHubspot: jest.fn(),
 }));
 
-// Mock svix verify request
-const mockVerify = jest.fn();
-jest.mock('svix', () => ({
-  Webhook: jest.fn().mockImplementation(() => ({
-    verify: mockVerify,
+jest.mock('@clerk/nextjs/server', () => ({
+  getAuth: jest.fn(),
+  clerkClient: jest.fn(() => ({
+    users: {
+      getUser: jest.fn(),
+      updateUser: jest.fn(),
+    },
   })),
 }));
 
-// Mock svix headers
-jest.mock('next/headers', () => ({
-  headers: jest.fn(() => ({
-    get: jest.fn(headerName => {
-      const headersMap: Record<string, string> = {
-        'svix-id': 'test-svix-id',
-        'svix-timestamp': 'test-timestamp',
-        'svix-signature': 'test-signature',
-      };
-      return headersMap[headerName];
-    }),
-  })),
+jest.mock('@/libs/prisma.server', () => ({
+  user: {
+    findUnique: jest.fn(),
+  },
 }));
 
-const createMockRequest = (body: string = '{}'): Request =>
-  ({
-    text: jest.fn().mockResolvedValueOnce(body),
-  }) as unknown as Request;
+jest.mock('@/libs/utils.server', () => ({
+  errorResponse: jest.fn(
+    (message, status) =>
+      new Response(JSON.stringify({ error: message }), { status })
+  ),
+}));
 
-describe('POST handler', () => {
+const createMockRequest = (
+  body: Record<string, unknown> = {}
+): Partial<NextRequest> => ({
+  json: jest.fn().mockResolvedValue(body),
+  headers: new Headers(),
+});
+
+const mockClerkUser = {
+  id: 'user_123',
+  primaryEmailAddressId: 'email_1',
+  emailAddresses: [{ id: 'email_1', emailAddress: 'test@example.com' }],
+  primaryPhoneNumberId: 'phone_1',
+  phoneNumbers: [{ id: 'phone_1', phoneNumber: '+1234567890' }],
+  firstName: 'John',
+  lastName: 'Doe',
+};
+
+const mockUser: any = {
+  firstName: 'John',
+  lastName: 'Doe',
+  clerkId: mockClerkUser.id,
+  hubspotId: null,
+  ssn: '123-45-6789',
+  referralSource: ReferralSource.GOOGLE_AD,
+  email: 'johndoe@example.com',
+  phoneNumber: '+1234567890',
+  address: null,
+  dateOfBirth: new Date('1990-01-01'),
+  projectSlug: 'sample-project',
+};
+
+describe('POST /api/user', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should handle user.created event and store user data', async () => {
-    const mockRequest = createMockRequest('{}');
+  it('should return 401 if user is not authenticated', async () => {
+    (getAuth as jest.Mock).mockReturnValue({ userId: null });
 
-    mockVerify.mockReturnValueOnce({
-      type: 'user.created',
-      data: {
-        id: 'user123',
-        primary_email_address_id: 'email123',
-        email_addresses: [
-          { id: 'email123', email_address: 'test@example.com' },
-        ],
-        primary_phone_number_id: 'phone123',
-        phone_numbers: [{ id: 'phone123', phone_number: '+1234567890' }],
-        first_name: 'John',
-        last_name: 'Doe',
+    const response = await POST(createMockRequest() as NextRequest);
+    const json = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(json).toEqual({ error: 'User not authenticated' });
+  });
+
+  it('should return 200 if user already exists in the database', async () => {
+    (getAuth as jest.Mock).mockReturnValue({ userId: mockClerkUser.id });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue({
+      clerkId: mockClerkUser.id,
+    });
+
+    const response = await POST(createMockRequest() as NextRequest);
+    const json = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(json).toEqual({ data: 'User exists' });
+  });
+
+  it('should create a new user if not found in the database', async () => {
+    (getAuth as jest.Mock).mockReturnValue({ userId: mockClerkUser.id });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+    (clerkClient as jest.Mock).mockReturnValue({
+      users: {
+        getUser: jest.fn().mockResolvedValue(mockClerkUser),
+        updateUser: jest.fn().mockResolvedValue(mockClerkUser),
       },
     });
+    const createUserInDbAndHubspotSpy = jest.spyOn(
+      utils,
+      'createUserInDbAndHubspot'
+    );
+    createUserInDbAndHubspotSpy.mockResolvedValue(mockUser);
 
-    const response = await POST(mockRequest);
+    const response = await POST(createMockRequest() as NextRequest);
+    const json = await response.json();
 
-    expect(mockVerify).toHaveBeenCalledWith('{}', {
-      'svix-id': 'test-svix-id',
-      'svix-timestamp': 'test-timestamp',
-      'svix-signature': 'test-signature',
-    });
-    expect(createUserInDbAndHubspot).toHaveBeenCalledWith({
-      clerkId: 'user123',
-      email: 'test@example.com',
-      firstName: 'John',
-      lastName: 'Doe',
-      phoneNumber: '+1234567890',
+    expect(response.status).toBe(200);
+    expect(createUserInDbAndHubspotSpy).toHaveBeenCalledWith({
+      clerkId: mockClerkUser.id,
+      email: mockClerkUser.emailAddresses[0]?.emailAddress,
+      firstName: mockClerkUser.firstName,
+      lastName: mockClerkUser.lastName,
+      phoneNumber: mockClerkUser.phoneNumbers[0]?.phoneNumber,
       address: undefined,
     });
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ message: 'success' });
-  });
-
-  it('should handle unsupported event types gracefully', async () => {
-    const mockRequest = createMockRequest('{}');
-
-    mockVerify.mockReturnValueOnce({
-      type: 'unsupported.event',
-      data: {},
-    });
-
-    const response = await POST(mockRequest);
-
-    expect(mockVerify).toHaveBeenCalled();
-    expect(createUserInDbAndHubspot).not.toHaveBeenCalled();
-    expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ message: 'success' });
-  });
-
-  it('should return 500 if email is not found in user.created event', async () => {
-    const mockRequest = createMockRequest('{}');
-
-    mockVerify.mockReturnValueOnce({
-      type: 'user.created',
+    expect(json).toEqual({
       data: {
-        id: 'user123',
-        primary_email_address_id: null,
-        email_addresses: [],
-        primary_phone_number_id: null,
-        phone_numbers: [],
-        first_name: 'John',
-        last_name: 'Doe',
+        id: mockUser.id,
+        clerkId: mockUser.clerkId,
+        referralSource: mockUser.referralSource,
+        hubspotId: mockUser.hubspotId,
+      },
+    });
+  });
+
+  it('should return 401 if Clerk user lookup fails', async () => {
+    (getAuth as jest.Mock).mockReturnValue({ userId: 'user_123' });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+    (clerkClient as jest.Mock).mockReturnValue({
+      users: {
+        getUser: jest.fn().mockRejectedValue(new Error('User not found')),
       },
     });
 
-    const response = await POST(mockRequest);
+    const response = await POST(createMockRequest() as NextRequest);
+    const json = await response.json();
 
-    expect(mockVerify).toHaveBeenCalled();
-    expect(createUserInDbAndHubspot).not.toHaveBeenCalled();
+    expect(response.status).toBe(401);
+    expect(json).toEqual({ error: 'User not found' });
+  });
+
+  it('should return 500 if no email is found in user data', async () => {
+    (getAuth as jest.Mock).mockReturnValue({ userId: mockClerkUser.id });
+    jest.spyOn(prisma.user, 'findUnique').mockResolvedValue(null);
+    (clerkClient as jest.Mock).mockReturnValue({
+      users: {
+        getUser: jest.fn().mockResolvedValue({
+          ...mockClerkUser,
+          primaryEmailAddressId: null,
+          emailAddresses: [],
+        }),
+        updateUser: jest.fn().mockResolvedValue({
+          ...mockClerkUser,
+          primaryEmailAddressId: null,
+          emailAddresses: [],
+        }),
+      },
+    });
+
+    const response = await POST(createMockRequest() as NextRequest);
+    const json = await response.json();
+
     expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({
-      error: 'No email found for new clerk user!!!',
+    expect(json).toEqual({
+      error: `No email found for new clerk user: ${mockClerkUser.id}`,
     });
   });
 
-  it('should return 500 on createUserInDbAndHubspot error', async () => {
-    const mockRequest = createMockRequest('{}');
-
-    mockVerify.mockReturnValueOnce({
-      type: 'user.created',
-      data: {
-        id: 'user123',
-        primary_email_address_id: 'email123',
-        email_addresses: [
-          { id: 'email123', email_address: 'test@example.com' },
-        ],
-        primary_phone_number_id: 'phone123',
-        phone_numbers: [{ id: 'phone123', phone_number: '+1234567890' }],
-        first_name: 'John',
-        last_name: 'Doe',
+  it('should return 500 if user creation in DB fails', async () => {
+    (getAuth as jest.Mock).mockReturnValue({ userId: 'user_123' });
+    (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+    (clerkClient as jest.Mock).mockReturnValue({
+      users: {
+        getUser: jest.fn().mockResolvedValue(mockClerkUser),
       },
     });
-
-    (createUserInDbAndHubspot as jest.Mock).mockRejectedValueOnce(
-      new Error('Database error')
+    const createUserInDbAndHubspotSpy = jest.spyOn(
+      utils,
+      'createUserInDbAndHubspot'
     );
+    const dbError = new Error('Database error');
+    createUserInDbAndHubspotSpy.mockRejectedValue(dbError);
 
-    const response = await POST(mockRequest);
-
-    expect(mockVerify).toHaveBeenCalled();
-    expect(createUserInDbAndHubspot).toHaveBeenCalled();
-    expect(response.status).toBe(500);
-    expect(await response.json()).toEqual({ message: 'Database error' });
+    await expect(POST(createMockRequest() as NextRequest)).rejects.toBe(
+      dbError
+    );
   });
 });

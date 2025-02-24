@@ -1,7 +1,5 @@
-import { NextResponse } from 'next/server';
-import Logger from './libs/logger';
-
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextRequest, NextResponse } from 'next/server';
 
 const publicRoutes = [
   '/terms',
@@ -10,7 +8,6 @@ const publicRoutes = [
   '/contact',
   '/dashboard',
   '/projects/(.*)',
-  '/api/public/projects',
 ];
 
 const ignoredRoutes = [
@@ -20,27 +17,46 @@ const ignoredRoutes = [
   '/api/docusign/tokenFromCode',
   '/api/finix/webhooks',
   '/api/clerk',
+  '/api/public/projects',
 ];
 
-const isPublicRoute = createRouteMatcher(publicRoutes);
 const isIgnoredRoute = createRouteMatcher(ignoredRoutes);
+const isOnboardingRoute = createRouteMatcher(['/onboarding']);
+const isPublicRoute = createRouteMatcher(publicRoutes);
 
-export default clerkMiddleware(async (auth, request) => {
+export default clerkMiddleware(async (auth, request: NextRequest) => {
   if (isIgnoredRoute(request)) {
     return NextResponse.next();
   }
+  const { userId, sessionClaims } = await auth();
 
-  const { userId } = await auth();
+  // For users visiting /onboarding, don't try to redirect
+  if (userId && isOnboardingRoute(request)) {
+    return NextResponse.next();
+  }
 
+  // If the user isn't signed in and the route is private, redirect to sign-in
   if (!userId && !isPublicRoute(request)) {
-    Logger.log({ message: `Not logged in: ${request.url}` });
     await auth.protect();
   }
 
+  // Catch users who do not have `onboardingComplete: true` in their publicMetadata
+  // Redirect them to the /onboading route to complete onboarding
+  if (userId && !sessionClaims?.metadata?.onboardingComplete) {
+    return NextResponse.redirect(new URL('/onboarding', request.url));
+  }
+
+  // If the user is logged in and the route is protected, let them view.
   if (userId && request.nextUrl.pathname === '/login') {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
+  // If the user is logged in and the route is onboarding, redirect to dashboard.
+  // if (userId && request.nextUrl.pathname === '/onboarding') {
+  //   return NextResponse.redirect(new URL('/dashboard', request.url));
+  // }
+
+  // User is authenticated, let them view.
   return NextResponse.next();
 });
 

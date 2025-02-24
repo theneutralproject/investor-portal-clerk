@@ -37,6 +37,8 @@ interface CreateAccountProps {
 }
 
 const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
+  const redirectUrl = encodeURIComponent(window.location.pathname);
+  const loginUrl = `/login?redirectUrl=${redirectUrl}`;
   return (
     <Card
       sx={{
@@ -65,9 +67,9 @@ const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
           </Typography>
 
           <Stack direction="row" spacing={2} mt={2} alignItems="center">
-            <CreateButton href="/login">CREATE ACCOUNT</CreateButton>
+            <CreateButton href={loginUrl}>CREATE ACCOUNT</CreateButton>
 
-            <SignInLink href="/login">SIGN IN</SignInLink>
+            <SignInLink href={loginUrl}>SIGN IN</SignInLink>
           </Stack>
         </Box>
       </CardContent>
