@@ -10,6 +10,17 @@ export async function GET(request: NextRequest) {
     console.error(getErrorMessage(adminUser));
     return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
   }
-  const projects = await prisma.project.findMany();
+  const projects = await prisma.project.findMany({
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      milestones: true,
+      investmentStats: true,
+      propertyStats: true,
+      equityReturnsFile: true,
+      status: true,
+    },
+  });
   return jsonResponse(projects);
 }
