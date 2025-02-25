@@ -214,7 +214,7 @@ interface DealFlowContextType {
   updateOrganization: (
     organizationId: number,
     updatedOrganization: Partial<OrganizationWithDocuments>
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   createOrganizationMember: (
     createData: OrganizationMemberCreateSchema
   ) => Promise<void>;
@@ -570,7 +570,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     organizationId: number,
     updatedOrganizationData: Partial<Organization>
   ) => {
-    if (!organization) return;
+    if (!organization) return false;
     setIsLoading(true);
     setError(null);
 
@@ -585,12 +585,14 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       if (nextStep) {
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
+      setIsLoading(false);
+      return true;
     } catch (error) {
       console.error('Error updating organization:', error);
       setError('Failed to update organization. Please try again.');
       toast.error('Failed to update organization. Please try again.');
-    } finally {
       setIsLoading(false);
+      return false;
     }
   };
 

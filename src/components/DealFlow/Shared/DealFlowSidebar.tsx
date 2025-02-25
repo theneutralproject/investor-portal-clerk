@@ -6,8 +6,9 @@ import Image from 'next/image';
 import DealFlowSidebarDetails from './DealFlowSidebarDetails';
 import ChatInterface from '@/components/ChatInterface';
 import { getProjectImage } from '@/components/Dashboard/DashboardProjects';
+import DealFlowSidebarLoading from './DealFlowSidebarLoading';
 const DealFlowSidebar = () => {
-  const { project, deal } = useDealFlow();
+  const { project, deal, isLoading } = useDealFlow();
 
   const projectPicture = getProjectImage(project?.pictures);
 
@@ -15,6 +16,10 @@ const DealFlowSidebar = () => {
   const displayAmount = investmentAmount
     ? `$${investmentAmount.toLocaleString()}`
     : '$0';
+
+  if (isLoading) {
+    return <DealFlowSidebarLoading />;
+  }
 
   return (
     <Box
