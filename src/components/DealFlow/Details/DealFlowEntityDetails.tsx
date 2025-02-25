@@ -76,10 +76,15 @@ const DealFlowEntityDetails: React.FC = () => {
             ? new Date(formData.dateOfCreation)
             : undefined,
         };
-        await updateOrganization(organization.id, updatedFormData);
-        router.push(
-          `/dealflow/${project?.slug}/${deal?.id}/entity-details-co-investor`
+        const response = await updateOrganization(
+          organization.id,
+          updatedFormData
         );
+        if (response.success) {
+          router.push(
+            `/dealflow/${project?.slug}/${deal?.id}/entity-details-co-investor`
+          );
+        }
       }
     } catch (error) {
       console.error('Error updating organization:', error);

@@ -214,7 +214,7 @@ interface DealFlowContextType {
   updateOrganization: (
     organizationId: number,
     updatedOrganization: Partial<OrganizationWithDocuments>
-  ) => Promise<void>;
+  ) => Promise<{ success: boolean; error?: string }>;
   createOrganizationMember: (
     createData: OrganizationMemberCreateSchema
   ) => Promise<void>;
@@ -569,8 +569,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const updateOrganization = async (
     organizationId: number,
     updatedOrganizationData: Partial<Organization>
-  ) => {
-    if (!organization) return;
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!organization)
+      return { success: false, error: 'Organization not found' };
     setIsLoading(true);
     setError(null);
 
@@ -585,12 +586,33 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       if (nextStep) {
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
-    } catch (error) {
-      console.error('Error updating organization:', error);
-      setError('Failed to update organization. Please try again.');
-      toast.error('Failed to update organization. Please try again.');
-    } finally {
       setIsLoading(false);
+
+      return { success: true };
+    } catch (error: unknown) {
+      console.error('Error updating organization:', error);
+
+      // Type checking for better error handling
+      let errorMessage = 'Failed to update organization. Please try again.';
+
+      if (
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        error.response &&
+        typeof error.response === 'object' &&
+        'data' in error.response &&
+        error.response.data &&
+        typeof error.response.data === 'object' &&
+        'error' in error.response.data
+      ) {
+        errorMessage = `Error updating organization: ${error.response.data.error}`;
+      }
+
+      setError(errorMessage);
+      toast.error(errorMessage);
+      setIsLoading(false);
+      return { success: false, error: errorMessage };
     }
   };
 
