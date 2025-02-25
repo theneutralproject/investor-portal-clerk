@@ -76,11 +76,11 @@ const DealFlowEntityDetails: React.FC = () => {
             ? new Date(formData.dateOfCreation)
             : undefined,
         };
-        const validResponse = await updateOrganization(
+        const response = await updateOrganization(
           organization.id,
           updatedFormData
         );
-        if (validResponse) {
+        if (response.success) {
           router.push(
             `/dealflow/${project?.slug}/${deal?.id}/entity-details-co-investor`
           );

@@ -214,7 +214,7 @@ interface DealFlowContextType {
   updateOrganization: (
     organizationId: number,
     updatedOrganization: Partial<OrganizationWithDocuments>
-  ) => Promise<boolean>;
+  ) => Promise<{ success: boolean; error?: string }>;
   createOrganizationMember: (
     createData: OrganizationMemberCreateSchema
   ) => Promise<void>;
@@ -569,8 +569,9 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const updateOrganization = async (
     organizationId: number,
     updatedOrganizationData: Partial<Organization>
-  ) => {
-    if (!organization) return false;
+  ): Promise<{ success: boolean; error?: string }> => {
+    if (!organization)
+      return { success: false, error: 'Organization not found' };
     setIsLoading(true);
     setError(null);
 
@@ -586,13 +587,32 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         router.push(`/dealflow/${projectSlug}/${dealId}/${nextStep}`);
       }
       setIsLoading(false);
-      return true;
-    } catch (error) {
+
+      return { success: true };
+    } catch (error: unknown) {
       console.error('Error updating organization:', error);
-      setError('Failed to update organization. Please try again.');
-      toast.error('Failed to update organization. Please try again.');
+
+      // Type checking for better error handling
+      let errorMessage = 'Failed to update organization. Please try again.';
+
+      if (
+        error &&
+        typeof error === 'object' &&
+        'response' in error &&
+        error.response &&
+        typeof error.response === 'object' &&
+        'data' in error.response &&
+        error.response.data &&
+        typeof error.response.data === 'object' &&
+        'error' in error.response.data
+      ) {
+        errorMessage = `Error updating organization: ${error.response.data.error}`;
+      }
+
+      setError(errorMessage);
+      toast.error(errorMessage);
       setIsLoading(false);
-      return false;
+      return { success: false, error: errorMessage };
     }
   };
 
