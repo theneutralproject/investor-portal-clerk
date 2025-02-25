@@ -132,6 +132,8 @@ export function getDebtUnitType(
 
 // find last day of first month of next quarter
 export function getPayoutScheduleStartDate(closingDate: Date) {
+  if (!closingDate) throw new Error('Closing date not provided');
+
   const thisQuarter = Math.ceil(closingDate.getUTCMonth() / 3);
   const firstDayOfNextQuarter = new Date(
     closingDate.getUTCFullYear(),
@@ -273,6 +275,7 @@ export function getEquityPayoutScheduleForDeal(
     equityPreferredReturn
   );
 }
+
 // used to simulate returns for equity financing
 export function getEquityPayoutScheduleForProject(
   amount: number,
