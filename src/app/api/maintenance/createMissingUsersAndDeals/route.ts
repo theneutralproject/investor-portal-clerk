@@ -27,6 +27,7 @@ const finishedAsync = promisify(finished);
 
 // const projectName: ProjectName = ProjectName['519 W Main'];
 const projectName: ProjectName = ProjectName['Bakers Place'];
+const projectId = 2;
 const filePath = path.join(
   './seedData',
   `Investor Cap Table - ${projectName}.csv`
@@ -40,6 +41,7 @@ interface DealRecord {
   dealHubspotId: string;
   financingType: DealFinancingType;
   ownershipType: DealOwnershipType;
+  investmentEntity?: string;
   dealAmount?: number;
   dateSigned: Date;
   dateFunded: Date;
@@ -118,9 +120,10 @@ async function getDealsFromCsv() {
           dateSigned: new Date(record['Date Investor Signed']),
           dateFunded: new Date(record['Effective/Funded Date']),
           equityUnitType: getEquityUnitType(record['Equity Unit']),
+          investmentEntity: record['Entity Name'],
           debtInterestRatePerc: getNumbersFromString(record['PN Unit']),
           V2: record.V2,
-          addedInV2: record['Added in V2'],
+          addedInV2: record['addedInV2'],
           debtMinTerm: getNumbersFromString(record['PN Min Term Months']),
           debtMaxTerm: getNumbersFromString(record['PN Max Term Months']),
         };
@@ -166,7 +169,7 @@ export async function POST(request: NextRequest) {
 
   // find all deals in db
   const allDBDeals = await prisma.deal.findMany({
-    where: { projectId: 2, dealStage: 5 },
+    where: { projectId, dealStage: 5 },
     // select: { hubspotId: true }
   });
   // filter out deals that are already in the db
@@ -199,7 +202,6 @@ export async function POST(request: NextRequest) {
     }
     const cleanPhone = phone?.replace(/\D/g, '');
     let dealOwner = await prisma.user.findFirst({ where: { email } });
-    console.log('dealOwner:', dealOwner?.firstName, dealOwner?.lastName);
     if (!dealOwner) {
       try {
         const clerkUser = await findOrCreateClerkUser(
@@ -321,7 +323,7 @@ export async function POST(request: NextRequest) {
       'deal amount:',
       dealInput.dealAmount
     );
-    // TODO: get investmentEntity from spreadsheet
+
     const dealCreateData: DealCreateSchema = {
       amount: dealInput.dealAmount,
       projectId: projectId,
@@ -334,6 +336,7 @@ export async function POST(request: NextRequest) {
       dateFundsSent: dealInput.dateFunded,
       paymentMethod: PaymentMethod.CHECK,
       paymentReferenceId: 'N/A',
+      investmentEntity: dealInput.investmentEntity,
     };
     if (dealInput.debtMinTerm)
       dealCreateData.debtMinTerm = dealInput.debtMinTerm;
@@ -346,7 +349,7 @@ export async function POST(request: NextRequest) {
       const newDeal = await createDealForAdmin(dealCreateData, dealOwner);
       newDealsArr.push(newDeal);
     } catch (__e) {
-      console.error('Error creating deal above');
+      console.error('Error creating deal above', dealOwner);
       continue;
     }
   }
