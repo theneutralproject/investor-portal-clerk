@@ -2,7 +2,6 @@
 // The config you add here will be used whenever a users loads a page in their browser.
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 import * as Sentry from '@sentry/nextjs';
-import { initPosthog } from '@/libs/posthog';
 
 Sentry.init({
   dsn: process.env.SENTRY_DSN,
@@ -24,7 +23,3 @@ Sentry.init({
   // Setting this option to true will print useful information to the console while you're setting up Sentry.
   debug: false,
 });
-
-if (process.env.NEXT_PUBLIC_POSTHOG_KEY) {
-  initPosthog();
-}
