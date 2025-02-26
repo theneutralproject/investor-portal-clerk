@@ -34,10 +34,8 @@ export default function UserIdentifier() {
    * Extracts `redirectUrl` from the window location.
    */
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      setRedirectUrl(urlParams.get('redirectUrl'));
-    }
+    const urlParams = new URLSearchParams(window.location.search);
+    setRedirectUrl(urlParams.get('redirectUrl'));
   }, []);
 
   /**
