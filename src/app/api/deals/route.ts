@@ -33,11 +33,20 @@ export async function GET(request: NextRequest) {
   try {
     const { userId: clerkId, sessionClaims } = getAuth(request);
     if (!clerkId) {
+      console.error('User not authenticated');
       return errorResponse('userId not found in getAuth()', 404);
     }
-    const dbUserId = sessionClaims?.metadata?.investorPortalId;
+    let dbUserId = sessionClaims?.metadata?.investorPortalId;
     if (!dbUserId) {
-      return errorResponse('investorPortalId not found in getAuth()', 404);
+      console.error('investorPortalId not found in getAuth()');
+      // return errorResponse('investorPortalId not found in getAuth()', 404);
+      const dbUser = await prisma.user.findUnique({
+        where: { clerkId: clerkId },
+      });
+      dbUserId = dbUser?.id;
+      if (!dbUserId) {
+        return errorResponse('investorPortalId not found in getAuth()', 404);
+      }
     }
 
     // Find the project based on the slug

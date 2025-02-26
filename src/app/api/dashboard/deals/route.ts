@@ -51,6 +51,6 @@ export async function GET(request: NextRequest) {
       org => org.id === deal.organizationId && org.ownerId === dbUser.id
     )
   );
-  console.log('filteredDeals', filteredDeals);
+
   return jsonResponse(filteredDeals);
 }
