@@ -299,12 +299,13 @@ export function getEquityPayoutScheduleForProject(
     throw new Error('No last entry found in equity payout');
   }
   const investmentMultiple = lastEntry.equityDistributionCumulative / amount;
-  const irr = (investmentMultiple - 1) / ((schedule.length - 1) / 12);
+  const periods = schedule.length - 1;
+  const irr = periods > 0 ? (investmentMultiple - 1) / (periods / 12) : 0;
   const stats = {
     investmentMultiple,
     interestRateOrIrrPerc: roundTo(irr * 100, 2),
-    totalGrossReturn: lastEntry.equityDistributionCumulative,
-    totalNetReturn: lastEntry.equityDistributionCumulative - amount,
+    totalGrossReturn: roundTo(lastEntry.equityDistributionCumulative, 2),
+    totalNetReturn: roundTo(lastEntry.equityDistributionCumulative - amount, 2),
   } as ProjectReturnsStats;
 
   return { schedule, stats };

@@ -6,3 +6,9 @@ export const statsFixture: any = {
   unitType: DealUnitType.AUNIT,
   equityPreferredReturn: faker.number.int({ min: 8, max: 36 }),
 };
+
+export const baseStats: any = {
+  amount: 1000000, // $1M Investment
+  unitType: DealUnitType.CUNIT, // Base case for CUNIT
+  equityPreferredReturn: 0.08, // 8% preferred return
+};
