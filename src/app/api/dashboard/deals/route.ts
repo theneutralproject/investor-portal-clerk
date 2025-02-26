@@ -25,7 +25,6 @@ export async function GET(request: NextRequest) {
       extra: { method: 'prisma.user.findUnique' },
     });
   }
-  console.log('dbUser', dbUser);
   // Get all organizations where user is a member
   const userOrgs = await prisma.organization.findMany({
     where: { members: { some: { userId: dbUser.id } } },
