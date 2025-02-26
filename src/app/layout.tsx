@@ -7,7 +7,6 @@ import NeutralThemeProvider from '@/components/Shell/NeutralThemeProvider';
 import Sidebar from '@/components/Shell/Sidebar';
 import NeutralQueryProvider from '@/components/QueryClientProvider';
 import { ClerkProvider } from '@clerk/nextjs';
-import 'react-toastify/dist/ReactToastify.css';
 
 import { ToastContainer } from 'react-toastify';
 
