@@ -131,27 +131,13 @@ export async function matchDealWithPdf(
         // console.log(`found match for ${word}`);
       }
     });
+    deal.organizationId = organization.id;
     if (matchScore >= 3) {
       if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
         console.log(`\t-->best match so far: ${transactionId}`);
         bestMatch = {
           pdfName: file.name,
-          deal: {
-            id: deal.id,
-            transactionId,
-            organizationId: organization.id,
-            projectId: deal.project.id,
-            dealStage: deal.dealStage,
-            hubspotId: deal.hubspotId,
-            investmentEntity: deal.investmentEntity,
-            closingDate: deal.closingDate,
-            signaturesCompletedDate: deal.signaturesCompletedDate,
-            dateFundsSent: deal.dateFundsSent,
-            paymentMethod: deal.paymentMethod,
-            paymentReferenceId: deal.paymentReferenceId,
-            dateCreated: deal.dateCreated,
-            dateUpdated: deal.dateUpdated,
-          },
+          deal: deal,
           owner: owner.user,
           organization,
           projectName,
