@@ -13,10 +13,8 @@ const OnboardingPage = () => {
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const params = new URLSearchParams(window.location.search);
-      setRedirectUrl(params.get('redirect_url') || params.get('redirectUrl'));
-    }
+    const params = new URLSearchParams(window.location.search);
+    setRedirectUrl(params.get('redirect_url') || params.get('redirectUrl'));
   }, []);
 
   useEffect(() => {
