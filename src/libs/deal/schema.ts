@@ -66,3 +66,12 @@ export const zDealCreateSchema = z.object({
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;
+
+export const zDealConversionCreateSchema = z.object({
+  startDealId: z.number().int(),
+  endDealId: z.number().int(),
+});
+
+export type DealConversionCreateSchema = z.infer<
+  typeof zDealConversionCreateSchema
+>;

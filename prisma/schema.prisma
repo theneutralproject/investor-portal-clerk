@@ -43,7 +43,7 @@ model User {
 model Deal {
   id                        Int                        @id @default(autoincrement())
   projectId                 Int
-  dealStage                 Int
+  dealStage                 Int                        @default(0)
   hubspotId                 String                     @unique
   transactionId             String                     @default("")
   /// the project, i.e. Edison LLC
@@ -57,7 +57,6 @@ model Deal {
   paymentMethod             PaymentMethod?
   paymentReferenceId        String?
   accreditationVerification AccreditationVerification?
-  conversionId              Int?
   dateCreated               DateTime?                  @default(now())
   dateUpdated               DateTime?                  @updatedAt
   organization              Organization               @relation(fields: [organizationId], references: [id])
@@ -65,7 +64,8 @@ model Deal {
   document                  DealDocument[]
   investmentStats           DealInvestmentStats?
   DocusignEvent             DocusignEvent[]
-  conversion                DealConversion?            @relation(fields: [conversionId], references: [id])
+  startDealConversion       DealConversion?            @relation("StartDealRelation")
+  endDealConversion         DealConversion?            @relation("EndDealRelation")
 }
 
 /// used to manifest the agreed upon terms of the deal
@@ -94,9 +94,10 @@ model DealConversion {
   id          Int       @id @default(autoincrement())
   startDealId Int       @unique
   endDealId   Int       @unique
+  startDeal   Deal?     @relation("StartDealRelation", fields: [startDealId], references: [id])
+  endDeal     Deal?     @relation("EndDealRelation", fields: [endDealId], references: [id])
   dateCreated DateTime? @default(now())
   dateUpdated DateTime? @updatedAt
-  deals       Deal[]
 }
 
 model Organization {

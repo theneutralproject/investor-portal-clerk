@@ -33,7 +33,7 @@ export async function GET(request: NextRequest) {
   try {
     const { userId: clerkId, sessionClaims } = getAuth(request);
     if (!clerkId) {
-      return errorResponse('sessionId not found in getAuth()', 404);
+      return errorResponse('userId not found in getAuth()', 404);
     }
     const dbUserId = sessionClaims?.metadata?.investorPortalId;
     if (!dbUserId) {
@@ -89,18 +89,17 @@ export async function POST(request: NextRequest) {
   try {
     const { userId: clerkId } = getAuth(request);
     if (!clerkId) {
-      return jsonResponse({ error: 'User not found' }, 404);
+      return errorResponse('User not found', 404, { request });
     }
 
     const dbUser = await prisma.user.findUnique({
       where: { clerkId: clerkId },
     });
     if (!dbUser) {
-      return jsonResponse(
-        {
-          error: `User record with clerkid ${clerkId} not found in prisma (POST)`,
-        },
-        404
+      return errorResponse(
+        `User record with clerkid ${clerkId} not found in prisma (POST)`,
+        404,
+        { request }
       );
     }
 
@@ -110,7 +109,9 @@ export async function POST(request: NextRequest) {
       dealData = zDealCreateSchema.parse(requestBody);
     } catch (parseError) {
       console.error('ERROR: unable to parse POST body:\n', parseError);
-      return jsonResponse({ error: 'Input data malformatted' }, 400);
+      return errorResponse('zDealCreateSchema Input data malformatted', 400, {
+        request,
+      });
     }
 
     // only create a deal if the user is the owner of the organization
@@ -119,11 +120,10 @@ export async function POST(request: NextRequest) {
         where: { id: dealData.organizationId, ownerId: dbUser.id },
       });
       if (!org) {
-        return jsonResponse(
-          {
-            error: `Deal cannot be created. User is not the owner of the organization`,
-          },
-          403
+        return errorResponse(
+          `Deal cannot be created. User is not the owner of the organization`,
+          403,
+          { request }
         );
       }
     }
@@ -149,7 +149,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(deal, 201);
   } catch (error) {
     console.error(error);
-    return jsonResponse({ error }, 500);
+    return errorResponse(getErrorMessage(error), 500, { request });
   }
 }
 
@@ -188,4 +188,56 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating deal:', error);
     return jsonResponse({ error: 'Error updating deal' }, 500);
   }
+}
+
+/**
+ * Delete in-progress deal by setting it to dealstage 6)
+ * @param request
+ * @returns
+ */
+export async function DELETE(req: NextRequest) {
+  const body = await req.json();
+  const dealId = Number(body.dealId);
+
+  if (!dealId || isNaN(dealId)) {
+    return errorResponse('Invalid deal ID', 400, { request: req });
+  }
+
+  const { userId: clerkId, sessionClaims } = getAuth(req);
+  if (!clerkId) {
+    return errorResponse('User not authenticated', 401, { request: req });
+  }
+
+  const dbUserId = sessionClaims?.metadata?.investorPortalId;
+  if (!dbUserId) {
+    return errorResponse('investorPortalId not found in getAuth()', 404);
+  }
+
+  const deal = await prisma.deal.findUnique({
+    where: { id: dealId, dealStage: { lt: 5 } },
+    include: { organization: true },
+  });
+
+  if (!deal) {
+    return errorResponse('Deal not found', 404, {
+      request: req,
+      extra: { method: 'prisma.deal.findUnique' },
+    });
+  }
+
+  // Verify user owns the organization
+  const isOwner = await prisma.organization.findFirst({
+    where: { id: deal.organizationId, ownerId: dbUserId },
+  });
+
+  if (!isOwner) {
+    return errorResponse('Unauthorized to cancel this deal', 403, {
+      request: req,
+      extra: { method: 'prisma.organization.findUnique' },
+    });
+  }
+
+  await prisma.deal.update({ where: { id: dealId }, data: { dealStage: 6 } });
+
+  return jsonResponse({ message: 'Deal cancelled' });
 }

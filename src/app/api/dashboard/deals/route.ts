@@ -8,13 +8,13 @@ import { DealStatus } from '@prisma/client';
 
 // get deals by logged in user
 export async function GET(request: NextRequest) {
-  const { userId, sessionId } = getAuth(request);
-  if (!sessionId) {
+  const { userId } = getAuth(request);
+  if (!userId) {
     console.log('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
 
-  Logger.log({ extra: { user: { clerkUserId: userId, sessionId } } }, request);
+  Logger.log({ extra: { user: { clerkUserId: userId } } }, request);
 
   // Get the user from the database
   const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
@@ -41,6 +41,8 @@ export async function GET(request: NextRequest) {
       organization: true,
       project: { include: { pictures: true } },
       investmentStats: true,
+      startDealConversion: true,
+      endDealConversion: true,
     },
   });
 
@@ -51,55 +53,4 @@ export async function GET(request: NextRequest) {
   );
   console.log('filteredDeals', filteredDeals);
   return jsonResponse(filteredDeals);
-}
-export async function DELETE(req: NextRequest) {
-  const body = await req.json();
-  const dealId = Number(body.dealId);
-  Logger.log({ extra: body }, req);
-
-  if (!dealId || isNaN(dealId)) {
-    return errorResponse('Invalid deal ID', 400, { request: req });
-  }
-
-  const { userId, sessionId } = getAuth(req);
-  if (!sessionId) {
-    return errorResponse('User not authenticated', 401, { request: req });
-  }
-
-  const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
-
-  if (!dbUser) {
-    return errorResponse('User not found in database', 404, {
-      request: req,
-      extra: { method: 'prisma.user.findUnique' },
-    });
-  }
-
-  const deal = await prisma.deal.findUnique({
-    where: { id: dealId },
-    include: { organization: true },
-  });
-
-  if (!deal) {
-    return errorResponse('Deal not found', 404, {
-      request: req,
-      extra: { method: 'prisma.deal.findUnique' },
-    });
-  }
-
-  // Verify user owns the organization
-  const isOwner = await prisma.organization.findFirst({
-    where: { id: deal.organizationId, ownerId: dbUser.id },
-  });
-
-  if (!isOwner) {
-    return errorResponse('Unauthorized to cancel this deal', 403, {
-      request: req,
-      extra: { method: 'prisma.organization.findUnique' },
-    });
-  }
-
-  await prisma.deal.update({ where: { id: dealId }, data: { dealStage: 6 } });
-
-  return jsonResponse({ message: 'Deal cancelled' });
 }
