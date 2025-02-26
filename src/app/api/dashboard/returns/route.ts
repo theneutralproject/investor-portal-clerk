@@ -23,7 +23,10 @@ export async function GET(request: NextRequest) {
           organization: {
             include: {
               deals: {
-                where: { dealStage: 5 },
+                where: {
+                  dealStage: 5,
+                  status: { notIn: ['MATURED', 'PENDING'] },
+                },
                 include: {
                   investmentStats: true,
                   project: {

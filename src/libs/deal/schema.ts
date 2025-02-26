@@ -3,6 +3,7 @@ import {
   DealFinancingType,
   DealUnitType,
   PaymentMethod,
+  DealStatus,
 } from '@prisma/client';
 import { z } from 'zod';
 
@@ -36,6 +37,7 @@ export const zDealUpdateSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
   transactionId: z.string().optional(),
+  status: z.nativeEnum(DealStatus).optional(),
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
@@ -60,6 +62,7 @@ export const zDealCreateSchema = z.object({
   debtMaxTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals
   debtInterestRatePerc: z.number().nullish(), //used for maintenance scripts to create old deals
   investmentEntity: z.string().optional(), //used for maintenance scripts to create old deals
+  status: z.nativeEnum(DealStatus).optional(), //used to create deals with conversions
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;

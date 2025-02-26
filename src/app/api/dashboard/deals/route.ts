@@ -1,8 +1,10 @@
+'use server';
 import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
+import { DealStatus } from '@prisma/client';
 
 // get deals by logged in user
 export async function GET(request: NextRequest) {
@@ -23,7 +25,7 @@ export async function GET(request: NextRequest) {
       extra: { method: 'prisma.user.findUnique' },
     });
   }
-
+  console.log('dbUser', dbUser);
   // Get all organizations where user is a member
   const userOrgs = await prisma.organization.findMany({
     where: { members: { some: { userId: dbUser.id } } },
@@ -34,6 +36,7 @@ export async function GET(request: NextRequest) {
     where: {
       organizationId: { in: userOrgs.map(org => org.id) },
       dealStage: { lte: 5 }, //Ignore lost deals
+      status: { notIn: [DealStatus.MATURED, DealStatus.PENDING] }, //Ignore Converted and Future Conversion deals
     },
     include: {
       organization: true,
@@ -47,7 +50,7 @@ export async function GET(request: NextRequest) {
       org => org.id === deal.organizationId && org.ownerId === dbUser.id
     )
   );
-
+  console.log('filteredDeals', filteredDeals);
   return jsonResponse(filteredDeals);
 }
 export async function DELETE(req: NextRequest) {

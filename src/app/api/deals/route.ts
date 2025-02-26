@@ -31,22 +31,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { userId } = getAuth(request);
-    if (!userId) {
-      return jsonResponse({ error: 'User not found' }, 404);
+    const { userId: clerkId, sessionClaims } = getAuth(request);
+    if (!clerkId) {
+      return errorResponse('sessionId not found in getAuth()', 404);
     }
-    console.log('clerkUser', userId);
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-    if (!dbUser) {
-      console.error('Neutral user not found in api/deals');
-      return jsonResponse(
-        {
-          error: `User record with clerkid ${userId} not found in prisma (GET)`,
-        },
-        404
-      );
+    const dbUserId = sessionClaims?.metadata?.investorPortalId;
+    if (!dbUserId) {
+      return errorResponse('investorPortalId not found in getAuth()', 404);
     }
 
     // Find the project based on the slug
@@ -62,7 +53,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userOrgs = await prisma.organization.findMany({
-      where: { members: { some: { userId: dbUser.id } } },
+      where: { members: { some: { userId: dbUserId } } },
     });
 
     const deals = await prisma.deal.findMany({
@@ -83,7 +74,7 @@ export async function GET(request: NextRequest) {
         deal =>
           deal.dealStage === 5 ||
           userOrgs.some(
-            org => org.id === deal.organizationId && org.ownerId === dbUser.id
+            org => org.id === deal.organizationId && org.ownerId === dbUserId
           )
       )[0] ?? null
     );
@@ -96,18 +87,18 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
-    if (!userId) {
+    const { userId: clerkId } = getAuth(request);
+    if (!clerkId) {
       return jsonResponse({ error: 'User not found' }, 404);
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { clerkId: clerkId },
     });
     if (!dbUser) {
       return jsonResponse(
         {
-          error: `User record with clerkid ${userId} not found in prisma (POST)`,
+          error: `User record with clerkid ${clerkId} not found in prisma (POST)`,
         },
         404
       );

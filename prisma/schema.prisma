@@ -49,12 +49,15 @@ model Deal {
   /// the project, i.e. Edison LLC
   investmentEntity          String
   organizationId            Int
+  status                    DealStatus?                @default(ACTIVE)
   closingDate               DateTime?
   signaturesCompletedDate   DateTime?
   dateFundsSent             DateTime?
+  dateMatured               DateTime?
   paymentMethod             PaymentMethod?
   paymentReferenceId        String?
   accreditationVerification AccreditationVerification?
+  conversionId              Int?
   dateCreated               DateTime?                  @default(now())
   dateUpdated               DateTime?                  @updatedAt
   organization              Organization               @relation(fields: [organizationId], references: [id])
@@ -62,6 +65,7 @@ model Deal {
   document                  DealDocument[]
   investmentStats           DealInvestmentStats?
   DocusignEvent             DocusignEvent[]
+  conversion                DealConversion?            @relation(fields: [conversionId], references: [id])
 }
 
 /// used to manifest the agreed upon terms of the deal
@@ -84,6 +88,15 @@ model DealInvestmentStats {
   dateCreated           DateTime?         @default(now())
   dateUpdated           DateTime?         @updatedAt
   deal                  Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade)
+}
+
+model DealConversion {
+  id          Int       @id @default(autoincrement())
+  startDealId Int       @unique
+  endDealId   Int       @unique
+  dateCreated DateTime? @default(now())
+  dateUpdated DateTime? @updatedAt
+  deals       Deal[]
 }
 
 model Organization {
@@ -394,6 +407,12 @@ enum DealUnitType {
   AUNIT
   BUNIT
   CUNIT
+}
+
+enum DealStatus {
+  ACTIVE
+  PENDING
+  MATURED
 }
 
 enum VerificationBasis {
