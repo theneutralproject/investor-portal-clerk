@@ -27,7 +27,7 @@ import Logger from '../logger';
 const finishedAsync = promisify(finished);
 
 export async function readEquityMilestoneData(csvUrl: string) {
-  console.log(csvUrl);
+  Logger.log({ message: csvUrl, extra: { csvUrl } });
   if (!csvUrl) {
     console.error('CSV url not provided');
     throw new Error('CSV url not provided');

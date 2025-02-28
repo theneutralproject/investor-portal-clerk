@@ -690,7 +690,6 @@ describe('utils.server', () => {
       jest
         .spyOn(global, 'fetch')
         .mockImplementationOnce(textFetchMock(undefined as any));
-      jest.spyOn(global.console, 'error').mockImplementation(() => {});
 
       const faultyDeal = {
         ...equityDealFixture,

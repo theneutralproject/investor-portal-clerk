@@ -1,5 +1,6 @@
 import type { DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
+import Logger from '@/libs/logger';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { PaymentMethod } from '@prisma/client';
 import type { NextRequest } from 'next/server';
@@ -9,7 +10,9 @@ function validateAuthHeader(request: NextRequest) {
     .get('Authorization')
     ?.split(' ')[1];
   if (!base64EncodedString) {
-    console.log('Authorization header is required for finix webhook\n\n');
+    Logger.log({
+      message: 'Authorization header is required for finix webhook\n\n',
+    });
     return {
       valid: false,
       message: 'Authorization header is required',
@@ -23,8 +26,13 @@ function validateAuthHeader(request: NextRequest) {
       password === process.env.FINIX_WH_PASSWORD
     )
   ) {
-    console.log('Invalid finix credentials\n\n');
-    console.log(username, password);
+    Logger.log(
+      {
+        message: 'Invalid finix credentials\n\n',
+        extra: { username, password },
+      },
+      request
+    );
     return {
       valid: false,
       message: 'Invalid credentials',
@@ -38,7 +46,7 @@ function validateAuthHeader(request: NextRequest) {
 
 // FINIX sends multiple webhook events for the same transaction - the subtype differs
 export async function POST(request: NextRequest) {
-  console.log('\nBEGIN Finix Webhook:');
+  Logger.log({ message: '\nBEGIN Finix Webhook:' }, request);
   const { valid, message } = validateAuthHeader(request);
 
   if (!valid) {
@@ -70,52 +78,74 @@ export async function POST(request: NextRequest) {
       };
     };
 
-    if (body._embedded.transfers.length > 0) {
-      const transfer = body._embedded.transfers[0];
-      if (transfer.subtype !== 'API') {
-        console.log('ignoring the Webhook because the subtype is not "API"');
-        return jsonResponse({ message: 'ignoring the Webhook' });
-      }
-      if (transfer.state?.toUpperCase() === 'SUCCEEDED') {
-        console.log('Processing Transfer Succeeded Webhook: ', transfer);
-        const { dealHubspotId } = transfer.tags;
-        if (!dealHubspotId) {
-          console.error(
-            'The ACH transfer was NOT successful because the tags were missing',
-            transfer.tags
-          );
-          return errorResponse(
-            'The ACH transfer was NOT successful because the tags were missing',
-            500
-          );
+    if (!body._embedded.transfers.length) {
+      Logger.error(
+        'Webhook not processed due to missing transfer data or because transaction was CANCELLED',
+        request,
+        {
+          extra: body,
         }
-
-        try {
-          const dealData = {
-            hubspotId: dealHubspotId,
-            dealStage: 5,
-            closingDate: new Date(Date.now()),
-            dateFundsSent: new Date(Date.now()),
-            paymentMethod: PaymentMethod.ACH,
-            paymentReferenceId: transfer.id,
-          } as DealUpdateSchema;
-          await updateDeal(dealData, true);
-        } catch (error) {
-          console.error(
-            'unable to set deal stage to 5 in webhook route',
-            error
-          );
-          return errorResponse('The ACH transfer was NOT successful', 500);
-        }
-        return jsonResponse({ message: 'The ACH transfer was successful' });
-      }
+      );
+      return jsonResponse({
+        message:
+          'Webhook not processed due to missing transfer data or because transaction was CANCELLED',
+        body,
+      });
     }
-    console.error(
-      'Webhook not processed due to missing transfer data or because transaction was CANCELLED:'
-    );
-    console.error(body);
+
+    const transfer = body._embedded.transfers[0];
+    if (transfer.subtype !== 'API') {
+      Logger.log({
+        message: 'ignoring the Webhook because the subtype is not "API"',
+      });
+      return jsonResponse({ message: 'ignoring the Webhook' });
+    }
+    if (transfer.state?.toUpperCase() === 'SUCCEEDED') {
+      Logger.log({
+        message: 'Processing Transfer Succeeded Webhook: ',
+        extra: transfer,
+      });
+      const { dealHubspotId } = transfer.tags;
+      if (!dealHubspotId) {
+        Logger.error(
+          'The ACH transfer was NOT successful because the tags were missing',
+          request,
+          {
+            extra: transfer.tags,
+          }
+        );
+        return errorResponse(
+          'The ACH transfer was NOT successful because the tags were missing',
+          500
+        );
+      }
+
+      try {
+        const dealData = {
+          hubspotId: dealHubspotId,
+          dealStage: 5,
+          closingDate: new Date(Date.now()),
+          dateFundsSent: new Date(Date.now()),
+          paymentMethod: PaymentMethod.ACH,
+          paymentReferenceId: transfer.id,
+        } as DealUpdateSchema;
+        await updateDeal(dealData, true);
+      } catch (error) {
+        Logger.error(
+          'unable to set deal stage to 5 in webhook route',
+          request,
+          {
+            extra: error,
+          }
+        );
+        return errorResponse('The ACH transfer was NOT successful', 500);
+      }
+      return jsonResponse({ message: 'The ACH transfer was successful' });
+    }
   } catch (error) {
-    console.error('Webhook not processed due to error:', error);
+    Logger.error('Webhook not processed due to error:', request, {
+      extra: error,
+    });
     return jsonResponse({ message: 'Webhook not processed' });
   }
 }

@@ -128,3 +128,13 @@ export type MemberWithUser = Member & {
 export type MemberWithFullUser = Member & {
   user: User & { address: Address | null };
 };
+
+export interface FinixTransferResponse {
+  type?: string;
+  state?: string;
+  id?: string;
+  trace_id: string;
+  failure_code: string;
+  failure_message: string;
+  _embedded?: { errors: { message: string }[] };
+}
