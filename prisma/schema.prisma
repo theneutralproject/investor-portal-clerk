@@ -158,6 +158,7 @@ model DealDocument {
   type         DealDocumentType
   dealId       Int
   dateCreated  DateTime         @default(now())
+  dateUpdated  DateTime?        @updatedAt
   path         String
   uploadedById Int
   taxYear      Int?
@@ -287,6 +288,8 @@ model ProjectDocument {
   link               String
   projectId          Int
   dealStage          Int
+  dateCreated        DateTime?           @default(now())
+  dateUpdated        DateTime?           @updatedAt
   financingTypes     DealFinancingType[] @default([])
   documentType       DocumentType        @default(DOCUMENT)
   docusignTemplateId String?
@@ -348,6 +351,7 @@ enum DealDocumentType {
   K1
   VERIFICATION_ACCREDITATION
   INVESTMENT_DOCUMENT
+  REPORT
 }
 
 enum Role {
