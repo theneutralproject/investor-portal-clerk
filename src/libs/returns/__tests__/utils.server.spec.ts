@@ -9,13 +9,14 @@ import {
   roundTo,
   getEquityPayoutScheduleForDeal,
   getEquityPayoutScheduleForProject,
+  getPortfolioReturns,
 } from '../utils.server';
-import 'whatwg-fetch';
-import { DealUnitType } from '@prisma/client';
+import { DealFinancingType, DealUnitType } from '@prisma/client';
 import { jest } from '@jest/globals';
 import { textFetchMock } from '@/mocks/fetch.mock';
 import {
   equityMilestoneData,
+  equityMilestoneDataSmall,
   equityMilestoneEmptyData,
 } from '@/fixtures/equityMilestone/equityMilestone.csv';
 import { add, endOfMonth, startOfDay, startOfMonth } from 'date-fns';
@@ -24,6 +25,11 @@ import {
   projectInvestmentStatsFixture,
 } from '@/fixtures/investmentsStats/investmentStats.fixture';
 import { baseStats } from '@/fixtures/stats/stats.fixture';
+import Logger from '@/libs/logger';
+import {
+  debtDealFixture,
+  equityDealFixture,
+} from '@/fixtures/deals/deals.fixture';
 
 describe('utils.server', () => {
   afterEach(() => {
@@ -36,7 +42,7 @@ describe('utils.server', () => {
     beforeEach(() => {
       jest
         .spyOn(global, 'fetch')
-        .mockImplementationOnce(textFetchMock(equityMilestoneData));
+        .mockImplementationOnce(textFetchMock(equityMilestoneDataSmall));
     });
 
     afterEach(() => {
@@ -68,7 +74,7 @@ describe('utils.server', () => {
     it('should return correct equity stats for AUNIT', async () => {
       jest
         .spyOn(global, 'fetch')
-        .mockImplementationOnce(textFetchMock(equityMilestoneData));
+        .mockImplementationOnce(textFetchMock(equityMilestoneDataSmall));
 
       const result = await getEquityStatsFromProject(
         200000,
@@ -87,7 +93,7 @@ describe('utils.server', () => {
     it('should return correct equity stats for CUNIT', async () => {
       jest
         .spyOn(global, 'fetch')
-        .mockImplementationOnce(textFetchMock(equityMilestoneData));
+        .mockImplementationOnce(textFetchMock(equityMilestoneDataSmall));
 
       const result = await getEquityStatsFromProject(
         400000,
@@ -427,6 +433,276 @@ describe('utils.server', () => {
       expect(stats.interestRateOrIrrPerc).toBe(0);
       expect(stats.totalGrossReturn).toBe(0);
       expect(stats.totalNetReturn).toBe(-baseAmount);
+    });
+  });
+
+  describe('getPortfolioReturns', () => {
+    beforeEach(() => {
+      jest.restoreAllMocks(); // Ensure fresh mocks before every test
+    });
+
+    it('should return correct dashboard returns for one debt deal', async () => {
+      const result = await getPortfolioReturns([debtDealFixture]);
+
+      expect(result.consolidatedSchedule.length).toBe(48);
+      const lastScheduleEntry = result.consolidatedSchedule.at(-1);
+      expect(lastScheduleEntry).toBeDefined();
+      expect(lastScheduleEntry!.debtDistributionsCumulative).toBe(140000);
+      expect(lastScheduleEntry!.portfolioValueToDate).toBe(140000);
+    });
+
+    it('should return correct dashboard returns for multiple DEBT deals starting on the same day', async () => {
+      const result = await getPortfolioReturns([
+        debtDealFixture,
+        debtDealFixture,
+      ]);
+
+      expect(result.consolidatedSchedule.length).toBe(48);
+      const lastScheduleEntry = result.consolidatedSchedule.at(-1);
+
+      expect(lastScheduleEntry).toBeDefined();
+      expect(lastScheduleEntry!.debtDistributionsCumulative).toBe(280000);
+      expect(lastScheduleEntry!.portfolioValueToDate).toBe(280000);
+    });
+
+    it('should return correct dashboard returns for multiple DEBT deals with different start dates', async () => {
+      const debtDeal2Fixture = {
+        ...debtDealFixture,
+        closingDate: new Date('2024-12-01'),
+      };
+
+      const result = await getPortfolioReturns([
+        debtDealFixture,
+        debtDeal2Fixture,
+      ]);
+
+      expect(result.consolidatedSchedule.length).toBe(69);
+      const lastScheduleEntry = result.consolidatedSchedule.at(-1);
+
+      expect(lastScheduleEntry).toBeDefined();
+      expect(lastScheduleEntry!.debtDistributionsCumulative).toBe(280000);
+      expect(lastScheduleEntry!.portfolioValueToDate).toBe(280000);
+      expect(result.portfolioStats.principalInvested).toBe(200000);
+      expect(result.portfolioStats.projectedDebtDistributions).toBe(280000);
+    });
+
+    it('should return correct dashboard returns for one EQUITY deal', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(textFetchMock(equityMilestoneData));
+
+      const result = await getPortfolioReturns([equityDealFixture]);
+
+      expect(result.consolidatedSchedule.length).toBe(60);
+      const lastScheduleEntry = result.consolidatedSchedule.at(-1);
+
+      expect(lastScheduleEntry).toBeDefined();
+      expect(
+        Math.floor(lastScheduleEntry!.equityDistributionCumulative ?? 0)
+      ).toBe(100091);
+    });
+
+    it('should return correct dashboard returns for one DEBT and one EQUITY deal', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(textFetchMock(equityMilestoneData));
+
+      const newEquityDealFixture = {
+        ...equityDealFixture,
+        investmentStats: {
+          ...equityDealFixture.investmentStats,
+          amount: 10000,
+        },
+      };
+
+      const result = await getPortfolioReturns([
+        debtDealFixture,
+        newEquityDealFixture,
+      ]);
+
+      expect(result.consolidatedSchedule.length).toBeGreaterThanOrEqual(79);
+      expect(result.consolidatedSchedule.length).toBeLessThanOrEqual(80);
+
+      const lastScheduleEntry =
+        result.consolidatedSchedule[result.consolidatedSchedule.length - 1];
+
+      console.log(lastScheduleEntry);
+      const cumulativeDistribution =
+        (lastScheduleEntry?.debtDistributionsCumulative ?? 0) +
+        (lastScheduleEntry?.equityDistributionCumulative ?? 0);
+      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 20018.0);
+    });
+
+    it('should return correct dashboard returns for two EQUITY deals', async () => {
+      const equityDeal1Fixture = {
+        ...equityDealFixture,
+        organizationId: 4,
+        projectId: 1,
+        dealStage: 1,
+        transactionId: 'test-deal-equity1',
+        investmentStats: {
+          ...equityDealFixture.investmentStats,
+          amount: 5000,
+          financingType: DealFinancingType.equity,
+        },
+      };
+      const equityDeal2Fixture = {
+        ...equityDealFixture,
+        organizationId: 4,
+        projectId: 1,
+        dealStage: 1,
+        transactionId: 'test-deal-equity2',
+        investmentStats: {
+          ...equityDealFixture.investmentStats,
+          amount: 45000,
+          financingType: DealFinancingType.equity,
+        },
+      };
+
+      jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(textFetchMock(equityMilestoneData));
+
+      const result = await getPortfolioReturns([
+        equityDeal1Fixture,
+        equityDeal2Fixture,
+      ]);
+
+      expect(result.portfolioStats.portfolioValueToDate).toBe(50000);
+      expect(result.portfolioStats.distributionsToDate).toBe(0);
+      expect(result.portfolioStats.projectedDebtDistributions).toBe(0);
+      expect(
+        Math.floor(result.portfolioStats.projectedEquityDistributions ?? 0)
+      ).toBe(100091);
+      expect(result.consolidatedSchedule.length).toBe(60);
+    });
+
+    it('should handle missing investment stats gracefully', async () => {
+      const invalidDeals = [{ ...equityDealFixture, investmentStats: null }];
+      const loggerWarnSpy = jest
+        .spyOn(Logger, 'warn')
+        .mockImplementation(() => {});
+
+      const result = await getPortfolioReturns(invalidDeals);
+
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Investment stats missing for deal')
+      );
+      expect(result.dealStats).toHaveLength(0);
+    });
+
+    it('should handle missing closing dates correctly', async () => {
+      const invalidDeals = [{ ...equityDealFixture, closingDate: null }];
+      const loggerWarnSpy = jest
+        .spyOn(Logger, 'warn')
+        .mockImplementation(() => {});
+
+      const result = await getPortfolioReturns(invalidDeals);
+
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('Closing date is missing for deal')
+      );
+      expect(result.dealStats).toHaveLength(0);
+    });
+
+    it('should handle missing project milestones and equity return files', async () => {
+      const invalidDeals = [
+        {
+          ...equityDealFixture,
+          project: {
+            ...equityDealFixture.project,
+            milestones: null,
+            equityReturnsFile: null,
+          },
+        },
+      ];
+      const loggerWarnSpy = jest
+        .spyOn(Logger, 'warn')
+        .mockImplementation(() => {});
+
+      const result = await getPortfolioReturns(invalidDeals);
+
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Project milestones or equity returns file not found'
+        )
+      );
+      expect(result.dealStats).toHaveLength(0);
+    });
+
+    it('should correctly aggregate payout schedules', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockImplementation(textFetchMock(equityMilestoneData));
+
+      const result = await getPortfolioReturns([
+        debtDealFixture,
+        equityDealFixture,
+      ]);
+
+      expect(result.consolidatedSchedule).toHaveLength(80);
+      const [consolidatedSchedule] = result.consolidatedSchedule;
+
+      expect(consolidatedSchedule).not.toBeNull();
+      expect(consolidatedSchedule?.date).toEqual(expect.any(Date));
+      expect(consolidatedSchedule?.date.getFullYear()).toBe(
+        consolidatedSchedule?.date.getFullYear()
+      );
+      expect(consolidatedSchedule?.date.getMonth()).toBe(
+        consolidatedSchedule?.date.getMonth()
+      );
+      expect(consolidatedSchedule?.date.getDate()).toBe(
+        consolidatedSchedule?.date.getDate()
+      );
+
+      expect(consolidatedSchedule).toMatchObject({
+        debtDistributionsCurrent: expect.any(Number),
+        equityDistributionsCurrent: expect.any(Number),
+        portfolioValueToDate: expect.any(Number),
+      });
+    });
+
+    it('should handle unsupported financing types', async () => {
+      const invalidFinancingType = 'unsupported-type';
+      const invalidDeals = [
+        {
+          ...debtDealFixture,
+          investmentStats: {
+            ...debtDealFixture.investmentStats,
+            financingType: invalidFinancingType,
+          },
+        },
+      ];
+      const loggerWarnSpy = jest
+        .spyOn(Logger, 'warn')
+        .mockImplementation(() => {});
+
+      await getPortfolioReturns(invalidDeals);
+
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
+        expect.stringContaining(
+          `Financing type ${invalidFinancingType} not supported for dashboard graph`
+        )
+      );
+    });
+
+    it('should handle failed equity stats fetch gracefully', async () => {
+      jest
+        .spyOn(global, 'fetch')
+        .mockImplementationOnce(textFetchMock(undefined as any));
+      jest.spyOn(global.console, 'error').mockImplementation(() => {});
+
+      const faultyDeal = {
+        ...equityDealFixture,
+        project: {
+          ...equityDealFixture.project,
+          equityReturnsFile: 'invalid-file',
+        },
+      };
+
+      await expect(getPortfolioReturns([faultyDeal])).rejects.toThrow(
+        'Equity stats processing failed for deal'
+      );
     });
   });
 });

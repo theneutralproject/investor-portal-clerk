@@ -58,7 +58,7 @@ class Logger {
    */
   static warn(
     message: string,
-    req?: NextRequest,
+    req?: NextRequest | null,
     extra: Record<string, unknown> = {}
   ): void {
     const apiMessage = req
