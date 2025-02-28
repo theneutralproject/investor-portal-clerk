@@ -131,10 +131,10 @@ export async function matchDealWithPdf(
         // console.log(`found match for ${word}`);
       }
     });
-    deal.organizationId = organization.id;
     if (matchScore >= 3) {
       if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
         console.log(`\t-->best match so far: ${transactionId}`);
+        deal.organizationId = organization.id;
         bestMatch = {
           pdfName: file.name,
           deal: deal,
