@@ -5,6 +5,7 @@ import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealStatus } from '@prisma/client';
+import { DealStage } from '@/libs/deal/schema';
 
 // get deals by logged in user
 export async function GET(request: NextRequest) {
@@ -34,8 +35,8 @@ export async function GET(request: NextRequest) {
   const deals = await prisma.deal.findMany({
     where: {
       organizationId: { in: userOrgs.map(org => org.id) },
-      dealStage: { lte: 5 }, //Ignore lost deals
-      status: { notIn: [DealStatus.MATURED, DealStatus.PENDING] }, //Ignore Converted and Future Conversion deals
+      dealStage: { lt: DealStage.CLOSED_LOST }, //Ignore lost deals
+      status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
     },
     include: {
       organization: true,

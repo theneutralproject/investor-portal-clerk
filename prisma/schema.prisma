@@ -414,6 +414,7 @@ enum DealStatus {
   ACTIVE
   PENDING
   MATURED
+  LOST
 }
 
 enum VerificationBasis {

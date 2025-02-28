@@ -37,10 +37,37 @@ export async function GET(request: NextRequest) {
     const conversion = await prisma.dealConversion.findUnique({
       where: { id: conversionId },
       include: {
-        startDeal: true,
-        endDeal: true,
+        startDeal: {
+          include: {
+            organization: {
+              include: { members: true },
+            },
+          },
+        },
+        endDeal: {
+          include: {
+            organization: {
+              include: { members: true },
+            },
+          },
+        },
       },
     });
+
+    // Check if user is authorized to view this conversion
+    if (!conversion) {
+      return errorResponse('Conversion not found', 404);
+    }
+    const startOrgMembers = conversion.startDeal?.organization?.members ?? [];
+    const endOrg = conversion.endDeal?.organization?.members ?? [];
+
+    if (
+      !startOrgMembers.some(member => member.userId === dbUserId) &&
+      !endOrg.some(member => member.userId === dbUserId)
+    ) {
+      return errorResponse('User not authorized to view this conversion', 403);
+    }
+
     return jsonResponse(conversion);
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);

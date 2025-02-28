@@ -16,6 +16,7 @@ import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
 import { DealDocumentType } from '@prisma/client';
+import { DealStage } from '@/libs/deal/schema';
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
     // get all closed deals
     deals = await prisma.deal.findMany({
       where: {
-        dealStage: 5,
+        dealStage: DealStage.CLOSED,
         closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
       },
       include: {

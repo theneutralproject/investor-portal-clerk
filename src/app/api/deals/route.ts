@@ -3,6 +3,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import {
   type DealCreateSchema,
+  DealStage,
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
@@ -13,6 +14,7 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
+import { DealStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -81,7 +83,7 @@ export async function GET(request: NextRequest) {
     return jsonResponse(
       deals.filter(
         deal =>
-          deal.dealStage === 5 ||
+          deal.dealStage === DealStage.CLOSED ||
           userOrgs.some(
             org => org.id === deal.organizationId && org.ownerId === dbUserId
           )
@@ -223,7 +225,7 @@ export async function DELETE(req: NextRequest) {
   }
 
   const deal = await prisma.deal.findUnique({
-    where: { id: dealId, dealStage: { lt: 5 } },
+    where: { id: dealId, dealStage: { lt: DealStage.CLOSED } },
     include: { organization: true },
   });
 
@@ -246,7 +248,10 @@ export async function DELETE(req: NextRequest) {
     });
   }
 
-  await prisma.deal.update({ where: { id: dealId }, data: { dealStage: 6 } });
+  await prisma.deal.update({
+    where: { id: dealId },
+    data: { dealStage: DealStage.CLOSED_LOST, status: DealStatus.LOST },
+  });
 
   return jsonResponse({ message: 'Deal cancelled' });
 }

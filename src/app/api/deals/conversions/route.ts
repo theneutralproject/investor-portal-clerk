@@ -46,6 +46,36 @@ export async function POST(request: NextRequest) {
       request,
     });
   }
+
+  // Check if user is authorized to create this conversion
+  const startDeal = await prisma.deal.findUnique({
+    where: { id: conversionData.startDealId },
+    include: { organization: { include: { members: true } } },
+  });
+  if (!startDeal) {
+    return errorResponse('startDeal not found', 404, { request });
+  }
+  const endDeal = await prisma.deal.findUnique({
+    where: { id: conversionData.endDealId },
+    include: { organization: { include: { members: true } } },
+  });
+  if (!endDeal) {
+    return errorResponse('endDeal not found', 404, { request });
+  }
+  if (
+    startDeal.organization.members.some(member => member.userId === dbUserId)
+  ) {
+    return errorResponse('User not authorized to create this conversion', 403, {
+      request,
+    });
+  }
+
+  if (endDeal.organization.members.some(member => member.userId === dbUserId)) {
+    return errorResponse('User not authorized to create this conversion', 403, {
+      request,
+    });
+  }
+
   try {
     const DealConversion = await prisma.dealConversion.create({
       data: conversionData,

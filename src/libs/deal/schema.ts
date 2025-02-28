@@ -82,3 +82,13 @@ export type DealWithConversion = Deal & {
   startDealConversion?: DealConversion;
   endDealConversion?: DealConversion;
 };
+
+export enum DealStage {
+  'LEAD' = 0,
+  'STARTED' = 1,
+  'DETAILS_SUBMITTED' = 2,
+  'DOCUMENT_REVIEW' = 3,
+  'SIGNATURES_COMPLETED' = 4,
+  'CLOSED' = 5,
+  'CLOSED_LOST' = 6,
+}
