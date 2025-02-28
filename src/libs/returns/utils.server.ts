@@ -22,6 +22,7 @@ import {
   DealWithInvestmentStatsAndProjectWithPics,
   ProjectWithInvestmentStats,
 } from '../types';
+import Logger from '../logger';
 
 const finishedAsync = promisify(finished);
 
@@ -132,6 +133,8 @@ export function getDebtUnitType(
 
 // find last day of first month of next quarter
 export function getPayoutScheduleStartDate(closingDate: Date) {
+  if (!closingDate) throw new Error('Closing date not provided');
+
   const thisQuarter = Math.ceil(closingDate.getUTCMonth() / 3);
   const firstDayOfNextQuarter = new Date(
     closingDate.getUTCFullYear(),
@@ -273,6 +276,7 @@ export function getEquityPayoutScheduleForDeal(
     equityPreferredReturn
   );
 }
+
 // used to simulate returns for equity financing
 export function getEquityPayoutScheduleForProject(
   amount: number,
@@ -296,12 +300,13 @@ export function getEquityPayoutScheduleForProject(
     throw new Error('No last entry found in equity payout');
   }
   const investmentMultiple = lastEntry.equityDistributionCumulative / amount;
-  const irr = (investmentMultiple - 1) / ((schedule.length - 1) / 12);
+  const periods = schedule.length - 1;
+  const irr = periods > 0 ? (investmentMultiple - 1) / (periods / 12) : 0;
   const stats = {
     investmentMultiple,
     interestRateOrIrrPerc: roundTo(irr * 100, 2),
-    totalGrossReturn: lastEntry.equityDistributionCumulative,
-    totalNetReturn: lastEntry.equityDistributionCumulative - amount,
+    totalGrossReturn: roundTo(lastEntry.equityDistributionCumulative, 2),
+    totalNetReturn: roundTo(lastEntry.equityDistributionCumulative - amount, 2),
   } as ProjectReturnsStats;
 
   return { schedule, stats };
@@ -385,25 +390,25 @@ export async function getPortfolioReturns(
   const resolvedSchedules = deals.map(async deal => {
     const { project, investmentStats, closingDate } = deal;
     if (!investmentStats) {
-      console.error(
+      Logger.warn(
         `!!!Investment stats missing for deal ${deal.id}. The deal will not be processed!`
       );
       return [];
     }
     if (!closingDate) {
-      console.error(
+      Logger.warn(
         `!!!Closing date is missing for deal ${deal.id}. The deal will not be processed!`
       );
       return [];
     }
     if (!project?.milestones || !project.equityReturnsFile) {
-      console.error(
+      Logger.warn(
         `!!!Project milestones or equity returns file not found for project of deal ${deal.id}. The deal will not be processed!`
       );
       return [];
     }
     if (!project.investmentStats) {
-      console.error(
+      Logger.warn(
         `!!!Project investment stats not found for project of deal ${deal.id}. The deal will not be processed!`
       );
       return [];
@@ -447,6 +452,11 @@ export async function getPortfolioReturns(
           projectEquityStats.shareOfEquity
         );
 
+        if (!schedule.length) {
+          Logger.warn(`Skipping deal ${deal.id}: No payout schedule generated`);
+          return [];
+        }
+
         schedule.forEach((dateObject, i) => {
           if (i === schedule.length - 1) {
             portfolioStats.projectedEquityDistributions +=
@@ -476,9 +486,11 @@ export async function getPortfolioReturns(
           }
         });
       } catch (e) {
-        console.error(`Failed to get equity stats for deal ${deal.id}:`);
-        console.error(e);
-        return [];
+        Logger.error(`Failed to get equity stats for deal ${deal.id}:`, null, {
+          extra: e,
+        });
+        throw new Error(`Equity stats processing failed for deal ${deal.id}`);
+        // return [];
       }
     } else if (
       investmentStats.financingType === DealFinancingType.promissory_note_now
@@ -487,6 +499,7 @@ export async function getPortfolioReturns(
         investmentStats,
         closingDate
       );
+
       // console.log("debt schedule", schedule)
       schedule.forEach((dateObject, i) => {
         if (i === schedule.length - 1) {
@@ -521,15 +534,15 @@ export async function getPortfolioReturns(
         };
       });
     } else {
-      console.error(
+      Logger.warn(
         `Financing type ${investmentStats.financingType} not supported for dashboard graph - deal ${deal.id}`
       );
       return [];
     }
 
-    console.log(
-      `adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`
-    );
+    Logger.log({
+      message: `adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`,
+    });
     dealStats.push(dealSummary);
     // console.log(`Deal ${deal.id} stats:`, dealSummary);
   });
@@ -546,7 +559,7 @@ export async function getPortfolioReturns(
   sortedKeys.forEach(key => {
     const dateObjects = returnsObjectsByDate[parseInt(key)];
     if (!dateObjects?.length) {
-      console.error('Empty date objects for key:', key);
+      Logger.warn(`Empty date objects for key: ${key}`);
       return;
     } else {
       // combine the date objects for the same date
@@ -602,9 +615,9 @@ export async function validateEquityMilestonesFile(
     equityMilestones.length !==
     project.investmentStats?.equityTermMonths + 1
   ) {
-    console.log(
-      `milestones length: ${equityMilestones.length}, project term: ${project.investmentStats?.equityTermMonths}`
-    );
+    Logger.log({
+      message: `milestones length: ${equityMilestones.length}, project term: ${project.investmentStats?.equityTermMonths}`,
+    });
     return false;
   }
   return true;
