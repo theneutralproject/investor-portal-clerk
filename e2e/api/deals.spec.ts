@@ -10,7 +10,6 @@ test.describe('api/deals test', () => {
     organizationId: 4,
     projectId: 1,
     dealStage: 0,
-    transactionId: 'test-deal-1',
     financingType: DealFinancingType.equity,
     amount: 5555,
   };

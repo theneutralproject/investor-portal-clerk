@@ -18,6 +18,7 @@ import { storageClient } from '@/libs/supabase';
 import { DealWithInvestmentStats } from '@/libs/types';
 import { updateHubspotDealFromDocusignEvent } from '@/libs/hubspot/utils.server';
 import { EnvelopesApi } from 'docusign-esign';
+import { DealStage } from '@/libs/deal/schema';
 
 type DocusignWebhookPayload = {
   event: string;
@@ -251,7 +252,7 @@ async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
         signaturesCompletedDate: toUTCMidnight(
           updatedDealEvent.dateCompleted ?? new Date()
         ),
-        dealStage: 4,
+        dealStage: DealStage.SIGNATURES_COMPLETED,
       };
       await updateDeal(dealData, true);
       await fetchAndStoreCompletedPdfFromDocusign(
