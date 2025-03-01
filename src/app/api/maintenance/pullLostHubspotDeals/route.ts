@@ -5,6 +5,8 @@ import { getListOfHSDeals } from '@/libs/hubspot/utils.server';
 import { isAdminUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils.server';
+import { DealStage } from '@/libs/deal/schema';
+import { DealStatus } from '@prisma/client';
 
 export async function GET(request: NextRequest) {
   const { userId } = getAuth(request);
@@ -19,7 +21,8 @@ export async function GET(request: NextRequest) {
   const updatedDeals = await prisma.deal.updateMany({
     where: { hubspotId: { in: hsIds } },
     data: {
-      dealStage: { set: 6 },
+      dealStage: { set: DealStage.CLOSED_LOST },
+      status: { set: DealStatus.LOST },
       paymentMethod: { set: null },
       dateFundsSent: { set: null },
       signaturesCompletedDate: { set: null },

@@ -8,6 +8,8 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
+import { DealStatus } from '@prisma/client';
+import { DealStage } from '@/libs/deal/schema';
 
 export async function GET(request: NextRequest) {
   // get loggedin user
@@ -23,7 +25,10 @@ export async function GET(request: NextRequest) {
           organization: {
             include: {
               deals: {
-                where: { dealStage: 5 },
+                where: {
+                  dealStage: DealStage.CLOSED,
+                  status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
+                },
                 include: {
                   investmentStats: true,
                   project: {

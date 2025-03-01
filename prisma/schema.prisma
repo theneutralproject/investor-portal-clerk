@@ -43,15 +43,17 @@ model User {
 model Deal {
   id                        Int                        @id @default(autoincrement())
   projectId                 Int
-  dealStage                 Int
+  dealStage                 Int                        @default(0)
   hubspotId                 String                     @unique
   transactionId             String                     @default("")
   /// the project, i.e. Edison LLC
   investmentEntity          String
   organizationId            Int
+  status                    DealStatus?                @default(ACTIVE)
   closingDate               DateTime?
   signaturesCompletedDate   DateTime?
   dateFundsSent             DateTime?
+  dateMatured               DateTime?
   paymentMethod             PaymentMethod?
   paymentReferenceId        String?
   accreditationVerification AccreditationVerification?
@@ -62,6 +64,8 @@ model Deal {
   document                  DealDocument[]
   investmentStats           DealInvestmentStats?
   DocusignEvent             DocusignEvent[]
+  startDealConversion       DealConversion?            @relation("StartDealRelation")
+  endDealConversion         DealConversion?            @relation("EndDealRelation")
 }
 
 /// used to manifest the agreed upon terms of the deal
@@ -84,6 +88,16 @@ model DealInvestmentStats {
   dateCreated           DateTime?         @default(now())
   dateUpdated           DateTime?         @updatedAt
   deal                  Deal              @relation(fields: [dealId], references: [id], onDelete: Cascade)
+}
+
+model DealConversion {
+  id          Int       @id @default(autoincrement())
+  startDealId Int       @unique
+  endDealId   Int       @unique
+  startDeal   Deal?     @relation("StartDealRelation", fields: [startDealId], references: [id])
+  endDeal     Deal?     @relation("EndDealRelation", fields: [endDealId], references: [id])
+  dateCreated DateTime? @default(now())
+  dateUpdated DateTime? @updatedAt
 }
 
 model Organization {
@@ -144,6 +158,7 @@ model DealDocument {
   type         DealDocumentType
   dealId       Int
   dateCreated  DateTime         @default(now())
+  dateUpdated  DateTime?        @updatedAt
   path         String
   uploadedById Int
   taxYear      Int?
@@ -273,6 +288,8 @@ model ProjectDocument {
   link               String
   projectId          Int
   dealStage          Int
+  dateCreated        DateTime?           @default(now())
+  dateUpdated        DateTime?           @updatedAt
   financingTypes     DealFinancingType[] @default([])
   documentType       DocumentType        @default(DOCUMENT)
   docusignTemplateId String?
@@ -334,6 +351,7 @@ enum DealDocumentType {
   K1
   VERIFICATION_ACCREDITATION
   INVESTMENT_DOCUMENT
+  REPORT
 }
 
 enum Role {
@@ -394,6 +412,13 @@ enum DealUnitType {
   AUNIT
   BUNIT
   CUNIT
+}
+
+enum DealStatus {
+  ACTIVE
+  PENDING
+  MATURED
+  LOST
 }
 
 enum VerificationBasis {

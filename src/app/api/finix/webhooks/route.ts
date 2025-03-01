@@ -1,4 +1,4 @@
-import type { DealUpdateSchema } from '@/libs/deal/schema';
+import { DealStage, type DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { PaymentMethod } from '@prisma/client';
@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         try {
           const dealData = {
             hubspotId: dealHubspotId,
-            dealStage: 5,
+            dealStage: DealStage.CLOSED,
             closingDate: new Date(Date.now()),
             dateFundsSent: new Date(Date.now()),
             paymentMethod: PaymentMethod.ACH,

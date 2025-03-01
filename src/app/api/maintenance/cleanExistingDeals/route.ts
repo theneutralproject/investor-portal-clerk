@@ -2,7 +2,7 @@
 import { getAuth } from '@clerk/nextjs/server';
 import { type Deal, PaymentMethod } from '@prisma/client';
 import { NextRequest } from 'next/server';
-import type { DealUpdateSchema } from '@/libs/deal/schema';
+import { DealStage, type DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import { isAdminUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
@@ -67,7 +67,10 @@ export async function POST(request: NextRequest) {
     }
     if (boolResetDealStage) {
       try {
-        updatedDeal = await updateDeal({ hubspotId, dealStage: 5 });
+        updatedDeal = await updateDeal({
+          hubspotId,
+          dealStage: DealStage.CLOSED,
+        });
       } catch (e) {
         console.error(
           '!!!!!!updateDeal2 failed for deal. Need to manually set dealstage to 5 in the DB for Deal ID:',

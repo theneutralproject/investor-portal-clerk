@@ -1,4 +1,5 @@
 'use server';
+import { DealStage } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import { getFinixUserName, getFinixPassword } from '@/libs/finix/utils.server';
 import prisma from '@/libs/prisma.server';
@@ -115,7 +116,7 @@ export async function POST(request: NextRequest) {
         await updateDeal(
           {
             hubspotId: deal.hubspotId,
-            dealStage: 5,
+            dealStage: DealStage.CLOSED,
             closingDate: new Date(Date.now()),
             dateFundsSent: new Date(Date.now()),
             paymentMethod: PaymentMethod.ACH,

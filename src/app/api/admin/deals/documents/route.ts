@@ -51,8 +51,8 @@ export async function POST(request: NextRequest) {
     const files = formData.getAll('files');
     const parsedFiles = zPdfBulkUploadSchema.parse(files);
     let documentType: DealDocumentType = DealDocumentType.INVESTMENT_DOCUMENT;
-    if (queryDocumentType === 'K1') {
-      documentType = DealDocumentType.K1;
+    if (queryDocumentType) documentType = queryDocumentType as DealDocumentType;
+    if (documentType === DealDocumentType.K1) {
       if (!queryTaxYear) {
         return jsonResponse(
           'taxYear query param is required for K1 documentType',
