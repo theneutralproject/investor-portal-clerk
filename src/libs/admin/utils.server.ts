@@ -18,9 +18,7 @@ const PdfParse = require('pdf-parse');
 export async function getAdminFromRequest(request: NextRequest) {
   // get jwt from request headers
   const token = request.headers.get('Authorization');
-  if (token) {
-    console.log('token', token);
-  }
+
   if (!token) {
     throw new Error('No token provided');
   }
