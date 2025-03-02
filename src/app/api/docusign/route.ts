@@ -20,13 +20,17 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import {
-  AccessTokenResponse,
   createNewEnvelopeDefinition,
   getExistingEnvelopeDefinition,
   instantiateApiClientFromAccessToken,
   makeRecipientViewRequest,
   refreshAccessToken,
 } from '@/libs/docusign/utils.server';
+
+interface AccessTokenResponse {
+  consentUrl?: string;
+  accessToken?: string;
+}
 
 // create new envelope or get existing envelope, and display recipient view to user
 export async function POST(req: NextRequest) {

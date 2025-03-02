@@ -19,6 +19,8 @@ const config: Config = {
   moduleDirectories: ['node_modules', 'src'],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.mjs$': 'babel-jest',
+    '^.+\\.(js|jsx)$': 'babel-jest',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   testMatch: [
