@@ -16,12 +16,6 @@ export async function POST(request: NextRequest) {
       return errorResponse('Missing required slug', 400);
     }
     const slug = requestBody.slug;
-    Logger.log(
-      {
-        message: `secrets\t${getFinixUserName(slug)}:${getFinixPassword(slug)}`,
-      },
-      request
-    );
     const response = await fetch(
       `${process.env.FINIX_BASE_URL!}/third_party_tokens`,
       {
