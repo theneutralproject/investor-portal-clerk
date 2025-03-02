@@ -21,6 +21,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { usePostHog } from 'posthog-js/react';
 import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 import { getProjectImage } from './DashboardProjects';
+import { DealStage } from '@/libs/deal/schema';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
 }
@@ -59,7 +60,7 @@ export const getProjectPicture = (deal: DealWithFullOrgAndProject): string => {
 };
 
 const isDealCompleted = (dealStage: number): boolean => {
-  if (dealStage >= 5) {
+  if (dealStage >= DealStage.CLOSED) {
     return true;
   } else {
     return false;

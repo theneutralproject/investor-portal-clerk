@@ -3,6 +3,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 import {
   type DealCreateSchema,
+  DealStage,
   type DealUpdateSchema,
   zDealCreateSchema,
   zDealUpdateSchema,
@@ -13,6 +14,7 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
+import { DealStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -31,22 +33,22 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const { userId } = getAuth(request);
-    if (!userId) {
-      return jsonResponse({ error: 'User not found' }, 404);
+    const { userId: clerkId, sessionClaims } = getAuth(request);
+    if (!clerkId) {
+      console.error('User not authenticated');
+      return errorResponse('userId not found in getAuth()', 404);
     }
-    console.log('clerkUser', userId);
-    const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
-    });
-    if (!dbUser) {
-      console.error('Neutral user not found in api/deals');
-      return jsonResponse(
-        {
-          error: `User record with clerkid ${userId} not found in prisma (GET)`,
-        },
-        404
-      );
+    let dbUserId = sessionClaims?.metadata?.investorPortalId;
+    if (!dbUserId) {
+      console.error('investorPortalId not found in getAuth()');
+      // return errorResponse('investorPortalId not found in getAuth()', 404);
+      const dbUser = await prisma.user.findUnique({
+        where: { clerkId: clerkId },
+      });
+      dbUserId = dbUser?.id;
+      if (!dbUserId) {
+        return errorResponse('investorPortalId not found in getAuth()', 404);
+      }
     }
 
     // Find the project based on the slug
@@ -62,7 +64,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userOrgs = await prisma.organization.findMany({
-      where: { members: { some: { userId: dbUser.id } } },
+      where: { members: { some: { userId: dbUserId } } },
     });
 
     const deals = await prisma.deal.findMany({
@@ -81,9 +83,9 @@ export async function GET(request: NextRequest) {
     return jsonResponse(
       deals.filter(
         deal =>
-          deal.dealStage === 5 ||
+          deal.dealStage === DealStage.CLOSED ||
           userOrgs.some(
-            org => org.id === deal.organizationId && org.ownerId === dbUser.id
+            org => org.id === deal.organizationId && org.ownerId === dbUserId
           )
       )[0] ?? null
     );
@@ -96,20 +98,19 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = getAuth(request);
-    if (!userId) {
-      return jsonResponse({ error: 'User not found' }, 404);
+    const { userId: clerkId } = getAuth(request);
+    if (!clerkId) {
+      return errorResponse('User not found', 404, { request });
     }
 
     const dbUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { clerkId: clerkId },
     });
     if (!dbUser) {
-      return jsonResponse(
-        {
-          error: `User record with clerkid ${userId} not found in prisma (POST)`,
-        },
-        404
+      return errorResponse(
+        `User record with clerkid ${clerkId} not found in prisma (POST)`,
+        404,
+        { request }
       );
     }
 
@@ -119,7 +120,9 @@ export async function POST(request: NextRequest) {
       dealData = zDealCreateSchema.parse(requestBody);
     } catch (parseError) {
       console.error('ERROR: unable to parse POST body:\n', parseError);
-      return jsonResponse({ error: 'Input data malformatted' }, 400);
+      return errorResponse('zDealCreateSchema Input data malformatted', 400, {
+        request,
+      });
     }
 
     // only create a deal if the user is the owner of the organization
@@ -128,11 +131,10 @@ export async function POST(request: NextRequest) {
         where: { id: dealData.organizationId, ownerId: dbUser.id },
       });
       if (!org) {
-        return jsonResponse(
-          {
-            error: `Deal cannot be created. User is not the owner of the organization`,
-          },
-          403
+        return errorResponse(
+          `Deal cannot be created. User is not the owner of the organization`,
+          403,
+          { request }
         );
       }
     }
@@ -158,7 +160,7 @@ export async function POST(request: NextRequest) {
     return jsonResponse(deal, 201);
   } catch (error) {
     console.error(error);
-    return jsonResponse({ error }, 500);
+    return errorResponse(getErrorMessage(error), 500, { request });
   }
 }
 
@@ -197,4 +199,59 @@ export async function PUT(request: NextRequest) {
     console.error('Error updating deal:', error);
     return jsonResponse({ error: 'Error updating deal' }, 500);
   }
+}
+
+/**
+ * Delete in-progress deal by setting it to dealstage 6)
+ * @param request
+ * @returns
+ */
+export async function DELETE(req: NextRequest) {
+  const body = await req.json();
+  const dealId = Number(body.dealId);
+
+  if (!dealId || isNaN(dealId)) {
+    return errorResponse('Invalid deal ID', 400, { request: req });
+  }
+
+  const { userId: clerkId, sessionClaims } = getAuth(req);
+  if (!clerkId) {
+    return errorResponse('User not authenticated', 401, { request: req });
+  }
+
+  const dbUserId = sessionClaims?.metadata?.investorPortalId;
+  if (!dbUserId) {
+    return errorResponse('investorPortalId not found in getAuth()', 404);
+  }
+
+  const deal = await prisma.deal.findUnique({
+    where: { id: dealId, dealStage: { lt: DealStage.CLOSED } },
+    include: { organization: true },
+  });
+
+  if (!deal) {
+    return errorResponse('Deal not found', 404, {
+      request: req,
+      extra: { method: 'prisma.deal.findUnique' },
+    });
+  }
+
+  // Verify user owns the organization
+  const isOwner = await prisma.organization.findFirst({
+    where: { id: deal.organizationId, ownerId: dbUserId },
+  });
+
+  if (!isOwner) {
+    return errorResponse('Unauthorized to cancel this deal', 403, {
+      request: req,
+      extra: { method: 'prisma.organization.findUnique' },
+    });
+  }
+
+  await prisma.deal.update({
+    where: { id: dealId },
+    data: { dealStage: DealStage.CLOSED_LOST, status: DealStatus.LOST },
+  });
+
+  return jsonResponse({ message: 'Deal cancelled' });
 }

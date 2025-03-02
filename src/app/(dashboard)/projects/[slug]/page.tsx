@@ -33,6 +33,7 @@ import { usePostHog } from 'posthog-js/react';
 import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 import { useRouter } from 'next/navigation';
 import { NextClientPage } from '@/types/page';
+import { DealStage } from '@/libs/deal/schema';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -183,7 +184,9 @@ export default function Page({ params }: NextClientPage) {
           {!isMobile && (
             <CompleteInvestment
               deals={deals?.filter(
-                deal => deal.projectId === project.id && deal.dealStage < 5
+                deal =>
+                  deal.projectId === project.id &&
+                  deal.dealStage < DealStage.CLOSED
               )}
             />
           )}
@@ -191,7 +194,9 @@ export default function Page({ params }: NextClientPage) {
           {!isMobile && (
             <CompleteInvestment
               deals={deals?.filter(
-                deal => deal.projectId === project.id && deal.dealStage >= 5
+                deal =>
+                  deal.projectId === project.id &&
+                  deal.dealStage === DealStage.CLOSED
               )}
             />
           )}

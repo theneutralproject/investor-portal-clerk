@@ -33,7 +33,7 @@ import {
 } from '@/libs/organization/schema';
 import DealFlowReview from '@components/DealFlow/ReviewSign/DealFlowReview';
 import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
-import type { DealCreateSchema } from '@/libs/deal/schema';
+import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import DealFlowDetailsExistingEntity from '../Details/DealFlowDetailsExistingEntity';
 // Define the step types
 export type StepType =
@@ -145,7 +145,7 @@ export const steps: Step[] = [
     component: DealFlowFund,
     isMajor: true,
     progress: 100,
-    requiredDealStage: 4,
+    requiredDealStage: DealStage.SIGNATURES_COMPLETED,
   },
 ];
 

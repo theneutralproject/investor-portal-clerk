@@ -70,7 +70,6 @@ export async function createDealForUser(
   try {
     const newDeal = await _createDeal(
       dealData,
-      dealOwner,
       project as ProjectWithInvestmentStats
     );
 
@@ -104,7 +103,6 @@ export async function createDealForAdmin(
   try {
     const newDeal = await _createDeal(
       dealData,
-      dealOwner,
       project as ProjectWithInvestmentStats
     );
     return newDeal;
@@ -116,7 +114,6 @@ export async function createDealForAdmin(
 
 async function _createDeal(
   dealData: DealCreateSchema,
-  user: User,
   project: ProjectWithInvestmentStats
 ): Promise<DealWithInvestmentStats> {
   //   get investment stats from project
@@ -187,6 +184,7 @@ async function _createDeal(
   if (dealData.paymentMethod) data.paymentMethod = dealData.paymentMethod;
   if (dealData.paymentReferenceId)
     data.paymentReferenceId = dealData.paymentReferenceId;
+  if (dealData.status) data.status = dealData.status;
 
   const newDeal = await prisma.deal.create({
     data,
