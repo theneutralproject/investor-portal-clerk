@@ -28,9 +28,9 @@ model User {
   userOrgId                    Int?                   @unique
   referralSource               String?
   dateOfBirth                  DateTime?
-  address                      Address?
   dateCreated                  DateTime?              @default(now())
   dateUpdated                  DateTime?              @updatedAt
+  address                      Address?
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
   DocusignEvent                DocusignEvent[]
@@ -49,23 +49,23 @@ model Deal {
   /// the project, i.e. Edison LLC
   investmentEntity          String
   organizationId            Int
-  status                    DealStatus?                @default(ACTIVE)
   closingDate               DateTime?
   signaturesCompletedDate   DateTime?
   dateFundsSent             DateTime?
-  dateMatured               DateTime?
   paymentMethod             PaymentMethod?
   paymentReferenceId        String?
-  accreditationVerification AccreditationVerification?
   dateCreated               DateTime?                  @default(now())
   dateUpdated               DateTime?                  @updatedAt
+  dateMatured               DateTime?
+  status                    DealStatus?                @default(ACTIVE)
+  accreditationVerification AccreditationVerification?
   organization              Organization               @relation(fields: [organizationId], references: [id])
   project                   Project                    @relation(fields: [projectId], references: [id])
+  endDealConversion         DealConversion?            @relation("EndDealRelation")
+  startDealConversion       DealConversion?            @relation("StartDealRelation")
   document                  DealDocument[]
   investmentStats           DealInvestmentStats?
   DocusignEvent             DocusignEvent[]
-  startDealConversion       DealConversion?            @relation("StartDealRelation")
-  endDealConversion         DealConversion?            @relation("EndDealRelation")
 }
 
 /// used to manifest the agreed upon terms of the deal
@@ -94,10 +94,10 @@ model DealConversion {
   id          Int       @id @default(autoincrement())
   startDealId Int       @unique
   endDealId   Int       @unique
-  startDeal   Deal?     @relation("StartDealRelation", fields: [startDealId], references: [id])
-  endDeal     Deal?     @relation("EndDealRelation", fields: [endDealId], references: [id])
   dateCreated DateTime? @default(now())
   dateUpdated DateTime? @updatedAt
+  endDeal     Deal      @relation("EndDealRelation", fields: [endDealId], references: [id])
+  startDeal   Deal      @relation("StartDealRelation", fields: [startDealId], references: [id])
 }
 
 model Organization {
@@ -158,10 +158,10 @@ model DealDocument {
   type         DealDocumentType
   dealId       Int
   dateCreated  DateTime         @default(now())
-  dateUpdated  DateTime?        @updatedAt
   path         String
   uploadedById Int
   taxYear      Int?
+  dateUpdated  DateTime?        @updatedAt
   deal         Deal             @relation(fields: [dealId], references: [id])
   uploadedBy   User             @relation(fields: [uploadedById], references: [id])
 }
@@ -182,7 +182,6 @@ model OrganizationDocument {
 model Project {
   id                 Int                     @id @default(autoincrement())
   name               String                  @unique
-  displayName        String                  @default("")
   location           String
   tags               String                  @default("")
   status             Status                  @default(ACTIVE)
@@ -191,6 +190,7 @@ model Project {
   youtubeUrl         String                  @default("")
   slug               String                  @unique
   equityReturnsFile  String
+  displayName        String                  @default("")
   deals              Deal[]
   documents          ProjectDocument[]
   investmentStats    ProjectInvestmentStats?
@@ -215,8 +215,6 @@ model ProjectInvestmentStats {
   cUnitThresholdAmount        Float   @default(200000.0)
   debtMinInvestment           Int     @default(5000)
   debtPaymentFreq             String  @default("quarterly")
-  equityIRRMin                Float   @default(0.0)
-  equityIRRMax                Float   @default(0.0)
   equityMinInvestment         Int     @default(5000)
   equityPaymentFreq           String  @default("quarterly")
   equityTermMonths            Int     @default(60)
@@ -238,6 +236,8 @@ model ProjectInvestmentStats {
   boolDebt                    Boolean @default(true)
   /// if the project is offering equity
   boolEquity                  Boolean @default(true)
+  equityIRRMax                Float   @default(0.0)
+  equityIRRMin                Float   @default(0.0)
   project                     Project @relation(fields: [projectId], references: [id])
 }
 
@@ -288,11 +288,11 @@ model ProjectDocument {
   link               String
   projectId          Int
   dealStage          Int
-  dateCreated        DateTime?           @default(now())
-  dateUpdated        DateTime?           @updatedAt
   financingTypes     DealFinancingType[] @default([])
   documentType       DocumentType        @default(DOCUMENT)
   docusignTemplateId String?
+  dateCreated        DateTime?           @default(now())
+  dateUpdated        DateTime?           @updatedAt
   documentEvents     DocumentEvent[]
   project            Project             @relation(fields: [projectId], references: [id])
 }
@@ -344,7 +344,7 @@ model TermsEvents {
   userId       Int
   dateAccepted DateTime
   revision     Int
-  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum DealDocumentType {
@@ -410,8 +410,8 @@ enum DealOwnershipType {
 
 enum DealUnitType {
   AUNIT
-  BUNIT
   CUNIT
+  BUNIT
 }
 
 enum DealStatus {
