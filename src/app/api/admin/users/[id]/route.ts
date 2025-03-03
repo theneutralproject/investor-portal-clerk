@@ -94,11 +94,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  // const adminUser = await getAdminFromRequest(request);
-  // if (isError(adminUser)) {
-  //   console.error(getErrorMessage(adminUser));
-  //   return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
-  // }
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  }
 
   let userId: number;
   try {
