@@ -59,17 +59,6 @@ test.describe('dealflow logic tests', () => {
     await page.goto(`/dealflow/edison/${dealId}/type`);
     console.log('dealId', dealId);
 
-    // await expect
-    //   .poll(() => page.getByText('+15555550100').isVisible())
-    //   .toBe(true);
-    // await expect
-    //   .poll(() => page.getByText('testi+clerk_test@neutral.us').isVisible())
-    //   .toBe(true);
-    // await expect
-    //   .poll(() => page.getByText('Individual').isVisible())
-    //   .toBe(true);
-
-    //   // await expect(page.getByText("Testi Tester")).toBeVisible({ timeout: 10000 });
     const timeout = 30000;
     await page.waitForTimeout(10000);
 
