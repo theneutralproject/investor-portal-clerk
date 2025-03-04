@@ -47,6 +47,7 @@ export default defineConfig({
     },
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
+    headless: true, // Ensure headless mode in CI
   },
   /* Run your local dev server before starting the tests */
   webServer: {
@@ -61,12 +62,13 @@ export default defineConfig({
     {
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
+      fullyParallel: true,
     },
 
-    // {
-    //   name: 'firefox',
-    //   use: { ...devices['Desktop Firefox'] },
-    // },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
 
     // {
     //   name: 'webkit',

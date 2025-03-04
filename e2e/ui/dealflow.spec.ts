@@ -58,14 +58,28 @@ test.describe('dealflow logic tests', () => {
     // Use the stored dealId to navigate directly to the type page
     await page.goto(`/dealflow/edison/${dealId}/type`);
     console.log('dealId', dealId);
-    // await expect(page.getByText("Testi Tester")).toBeVisible({ timeout: 10000 });
+
+    // await expect
+    //   .poll(() => page.getByText('+15555550100').isVisible())
+    //   .toBe(true);
+    // await expect
+    //   .poll(() => page.getByText('testi+clerk_test@neutral.us').isVisible())
+    //   .toBe(true);
+    // await expect
+    //   .poll(() => page.getByText('Individual').isVisible())
+    //   .toBe(true);
+
+    //   // await expect(page.getByText("Testi Tester")).toBeVisible({ timeout: 10000 });
+    const timeout = 30000;
+    await page.waitForTimeout(10000);
+
     await expect(page.getByText('+15555550100')).toBeVisible({
-      timeout: 30000,
+      timeout,
     });
     await expect(page.getByText('testi+clerk_test@neutral.us')).toBeVisible({
-      timeout: 10000,
+      timeout,
     });
-    await expect(page.getByText('Individual')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByText('Individual')).toBeVisible({ timeout });
   });
 
   test.afterAll(async () => {
