@@ -158,7 +158,7 @@ describe('POST /api/finix/webhook', () => {
     );
 
     expect(updateDeal).toHaveBeenCalled();
-    expect(Logger.error).toHaveBeenCalledWith(
+    expect(Logger.warn).toHaveBeenCalledWith(
       'unable to set deal stage to 5 in webhook route',
       expect.any(Object),
       { extra: expect.any(Error) }
