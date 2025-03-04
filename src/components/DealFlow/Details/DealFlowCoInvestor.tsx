@@ -19,6 +19,7 @@ import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { EncryptionCard } from './EncryptionCard';
 import { MODAL_KEYS } from '../Shared/Modal/DealFlowLearnMoreModal';
 import { InfoIcon } from 'lucide-react';
+import { DealStage } from '@/libs/deal/schema';
 
 export const LockedEntityAlert = () => {
   return (
@@ -54,7 +55,7 @@ export const isOrganizationReadOnly = (
   );
 
   const completedDeals = organizationWithDeals?.deals?.filter(
-    deal => deal.dealStage === 5
+    deal => deal.dealStage === DealStage.CLOSED
   );
   if (!completedDeals) return false;
 

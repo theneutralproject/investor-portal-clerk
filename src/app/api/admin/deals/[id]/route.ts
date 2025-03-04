@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { DealStage } from '@/libs/deal/schema';
 import {
   getSigningOrder,
   instantiateApiClientFromUserAndDeal,
@@ -62,7 +63,7 @@ export async function GET(request: NextRequest) {
     // const returns = await getPortfolioReturns([deal]);
     let signingOrders: Awaited<ReturnType<typeof getSigningOrder>>[] = [];
     // if deal is not closed, get signing order
-    if (deal.dealStage < 5) {
+    if (deal.dealStage < DealStage.CLOSED) {
       const dealOwner = deal.organization.members.find(
         member => member.type === 'OWNER'
       )?.user;

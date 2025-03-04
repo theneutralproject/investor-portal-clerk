@@ -9,6 +9,7 @@ import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { createDocusignEnvelope } from '@components/DealFlow/Helpers/DealFlowHelpers';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { DealStage } from '@/libs/deal/schema';
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const [docsLoading, setDocsLoading] = useState({});
@@ -23,7 +24,7 @@ const DealFlowReview: React.FC = () => {
         await updateDeal(
           {
             ...deal,
-            dealStage: 2,
+            dealStage: DealStage.DETAILS_SUBMITTED,
           },
           false
         );
@@ -58,18 +59,18 @@ const DealFlowReview: React.FC = () => {
     await updateDeal(
       {
         ...deal,
-        dealStage: 3,
+        dealStage: DealStage.DOCUMENT_REVIEW,
       },
       false
     );
     await refetchDeal();
   };
 
-  if (deal.dealStage === 3) {
+  if (deal.dealStage === DealStage.DOCUMENT_REVIEW) {
     return <ReviewingInvestment />;
   }
   // Redirect to /fund if dealStage is >= 4
-  if (deal.dealStage >= 4) {
+  if (deal.dealStage >= DealStage.SIGNATURES_COMPLETED) {
     router.push(`/dealflow/${project?.slug}/${deal.id}/fund`);
     return null;
   }

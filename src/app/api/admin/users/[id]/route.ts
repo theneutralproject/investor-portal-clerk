@@ -16,7 +16,6 @@ export async function GET(request: NextRequest) {
   let userId: number;
   try {
     const url = new URL(request.url);
-    console.log(url.pathname.split('/'));
     userId = parseInt(url.pathname.split('/')[4] ?? '');
     if (!userId || !isNumber(userId)) {
       throw new Error('userId is required in url');
@@ -95,11 +94,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  // const adminUser = await getAdminFromRequest(request);
-  // if (isError(adminUser)) {
-  //   console.error(getErrorMessage(adminUser));
-  //   return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
-  // }
+  const adminUser = await getAdminFromRequest(request);
+  if (isError(adminUser)) {
+    console.error(getErrorMessage(adminUser));
+    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  }
 
   let userId: number;
   try {

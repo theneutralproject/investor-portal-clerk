@@ -1,12 +1,13 @@
 import React from 'react';
-import { Paper, Box, Typography, CircularProgress } from '@mui/material';
+import { Paper } from '@mui/material';
 import {
   stepComponents,
   useDealFlow,
 } from '@components/DealFlow/Shared/DealFlowContext';
+import DealFlowContainerLoading from './DealFlowContainerLoading';
 
 const DealFlowContainer: React.FC = () => {
-  const { step, deal, organization } = useDealFlow();
+  const { step, deal, organization, isLoading } = useDealFlow();
 
   const StepComponent = stepComponents[step as keyof typeof stepComponents];
 
@@ -14,19 +15,8 @@ const DealFlowContainer: React.FC = () => {
     return <div>Invalid step</div>;
   }
 
-  if ((!deal || !organization) && step !== 'get-started') {
-    return (
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        height="50vh"
-      >
-        <CircularProgress />
-        <Typography>Loading...</Typography>
-      </Box>
-    );
+  if ((!deal || !organization || isLoading) && step !== 'get-started') {
+    return <DealFlowContainerLoading />;
   }
 
   return (

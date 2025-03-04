@@ -12,7 +12,7 @@ import {
   type DealFinancingType,
   type Prisma,
 } from '@prisma/client';
-import { DealCreateSchema } from '@/libs/deal/schema';
+import { DealCreateSchema, DealStage } from '@/libs/deal/schema';
 import { createDealForUser } from '@/libs/deal/utils.server';
 
 /**
@@ -60,7 +60,10 @@ export async function GET(request: NextRequest) {
   if (documentType.toLowerCase() === 'tax') {
     const allDeals = await prisma.deal.findMany({
       where: {
-        dealStage: { gte: minDealstage, lte: maxDealstage ?? 5 },
+        dealStage: {
+          gte: minDealstage,
+          lte: maxDealstage ?? DealStage.CLOSED,
+        },
       },
       include: {
         document: {
@@ -128,7 +131,10 @@ export async function GET(request: NextRequest) {
     }
 
     const where: Prisma.DealWhereInput = {
-      dealStage: { gte: minDealstage, lte: maxDealstage ?? 5 },
+      dealStage: {
+        gte: minDealstage,
+        lte: maxDealstage ?? DealStage.CLOSED,
+      },
     };
     if (projectId) {
       where.projectId = projectId;

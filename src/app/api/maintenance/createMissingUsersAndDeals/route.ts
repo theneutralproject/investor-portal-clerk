@@ -16,7 +16,7 @@ import prisma from '@/libs/prisma.server';
 import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils.server';
 import type { UserCreateSchema } from '@/libs/user/schema';
 import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
-import type { DealCreateSchema } from '@/libs/deal/schema';
+import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
@@ -169,7 +169,7 @@ export async function POST(request: NextRequest) {
 
   // find all deals in db
   const allDBDeals = await prisma.deal.findMany({
-    where: { projectId, dealStage: 5 },
+    where: { projectId, dealStage: DealStage.CLOSED },
     // select: { hubspotId: true }
   });
   // filter out deals that are already in the db
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
 
     // find all deals in db
     const allDBDeals = await prisma.deal.findMany({
-      where: { projectId: 2, dealStage: 5 },
+      where: { projectId: 2, dealStage: DealStage.CLOSED },
       // select: { hubspotId: true }
     });
     // filter out deals that are already in the db
@@ -328,7 +328,7 @@ export async function POST(request: NextRequest) {
       amount: dealInput.dealAmount,
       projectId: projectId,
       organizationId: altOrgId ?? dealOwner.userOrgId,
-      dealStage: 5,
+      dealStage: DealStage.CLOSED,
       financingType: dealInput.financingType,
       hubspotId: id,
       closingDate: dealInput.dateFunded,

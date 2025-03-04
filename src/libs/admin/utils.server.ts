@@ -18,9 +18,7 @@ const PdfParse = require('pdf-parse');
 export async function getAdminFromRequest(request: NextRequest) {
   // get jwt from request headers
   const token = request.headers.get('Authorization');
-  if (token) {
-    console.log('token', token);
-  }
+
   if (!token) {
     throw new Error('No token provided');
   }
@@ -134,24 +132,10 @@ export async function matchDealWithPdf(
     if (matchScore >= 3) {
       if (!bestMatch || matchScore > bestMatch?.matchedWords.length) {
         console.log(`\t-->best match so far: ${transactionId}`);
+        deal.organizationId = organization.id;
         bestMatch = {
           pdfName: file.name,
-          deal: {
-            id: deal.id,
-            transactionId,
-            organizationId: organization.id,
-            projectId: deal.project.id,
-            dealStage: deal.dealStage,
-            hubspotId: deal.hubspotId,
-            investmentEntity: deal.investmentEntity,
-            closingDate: deal.closingDate,
-            signaturesCompletedDate: deal.signaturesCompletedDate,
-            dateFundsSent: deal.dateFundsSent,
-            paymentMethod: deal.paymentMethod,
-            paymentReferenceId: deal.paymentReferenceId,
-            dateCreated: deal.dateCreated,
-            dateUpdated: deal.dateUpdated,
-          },
+          deal: deal,
           owner: owner.user,
           organization,
           projectName,

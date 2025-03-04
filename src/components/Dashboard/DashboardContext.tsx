@@ -58,7 +58,7 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
   });
 
   const deleteDeal = async (dealId: number) => {
-    await axios.delete(`/api/dashboard/deals`, { data: { dealId } });
+    await axios.delete(`/api/deals`, { data: { dealId } });
     void refetchDeals();
   };
 

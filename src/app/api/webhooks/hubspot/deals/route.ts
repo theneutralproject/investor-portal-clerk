@@ -1,5 +1,5 @@
 'use server';
-import type { DealUpdateSchema } from '@/libs/deal/schema';
+import { DealStage, type DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import {
   HSDealPropNames,
@@ -72,7 +72,7 @@ export async function POST(req: Request) {
     switch (payload.propertyName) {
       case HSDealPropNames.dealstage.toString():
         dealBody.dealStage = getDealStageIntFromHSString(payload.propertyValue);
-        updateProjectFunding = dealBody.dealStage >= 3;
+        updateProjectFunding = dealBody.dealStage >= DealStage.DOCUMENT_REVIEW;
         break;
       case HSDealPropNames.amount.toString():
         dealBody.investmentStats = {

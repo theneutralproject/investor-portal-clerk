@@ -24,6 +24,7 @@ import { InvestmentStatsDisplay } from './DealFlowUI';
 import { useReturnsData } from './useReturnsData';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { DealFinancingType } from '@prisma/client';
+import { DealStage } from '@/libs/deal/schema';
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
 const ACCRUED_RETURN_COLOR = '#d7b15c';
@@ -94,7 +95,7 @@ const DealFlowAmount: React.FC = () => {
 
     await updateDeal({
       ...deal,
-      dealStage: 1, //Input amount
+      dealStage: DealStage.STARTED,
       investmentStats: {
         ...deal.investmentStats,
         amount,

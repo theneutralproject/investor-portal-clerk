@@ -21,6 +21,7 @@ import DashboardDeals from '@/components/Dashboard/DashboardDeals';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
+import { DealStage } from '@/libs/deal/schema';
 const DashboardPage = () => {
   const { loggedIn, user, projects, deals, isLoading } = useDashboard();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -78,7 +79,7 @@ const DashboardPage = () => {
             {!loggedIn && <CreateAccount />}
             {deals && deals.length > 0 && !isMobile && (
               <CompleteInvestment
-                deals={deals?.filter(deal => deal.dealStage < 5)}
+                deals={deals?.filter(deal => deal.dealStage < DealStage.CLOSED)}
               />
             )}
             <InvestingWithNeutral />

@@ -59,7 +59,10 @@ export async function GET(request: NextRequest) {
         };
         if (doc.type === DealDocumentType.K1) {
           taxDocuments.push(documentWithProjectName);
-        } else if (doc.type === DealDocumentType.INVESTMENT_DOCUMENT) {
+        } else if (
+          doc.type === DealDocumentType.INVESTMENT_DOCUMENT ||
+          doc.type === DealDocumentType.REPORT
+        ) {
           investmentDocuments.push(documentWithProjectName);
         }
       }

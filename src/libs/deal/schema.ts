@@ -3,6 +3,9 @@ import {
   DealFinancingType,
   DealUnitType,
   PaymentMethod,
+  DealStatus,
+  DealConversion,
+  Deal,
 } from '@prisma/client';
 import { z } from 'zod';
 
@@ -36,6 +39,7 @@ export const zDealUpdateSchema = z.object({
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
   transactionId: z.string().optional(),
+  status: z.nativeEnum(DealStatus).optional(),
 });
 
 export type DealUpdateSchema = z.infer<typeof zDealUpdateSchema>;
@@ -60,6 +64,31 @@ export const zDealCreateSchema = z.object({
   debtMaxTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals
   debtInterestRatePerc: z.number().nullish(), //used for maintenance scripts to create old deals
   investmentEntity: z.string().optional(), //used for maintenance scripts to create old deals
+  status: z.nativeEnum(DealStatus).optional(), //used to create deals with conversions
 });
 
 export type DealCreateSchema = z.infer<typeof zDealCreateSchema>;
+
+export const zDealConversionCreateSchema = z.object({
+  startDealId: z.number().int(),
+  endDealId: z.number().int(),
+});
+
+export type DealConversionCreateSchema = z.infer<
+  typeof zDealConversionCreateSchema
+>;
+
+export type DealWithConversion = Deal & {
+  startDealConversion?: DealConversion;
+  endDealConversion?: DealConversion;
+};
+
+export enum DealStage {
+  'LEAD' = 0,
+  'STARTED' = 1,
+  'DETAILS_SUBMITTED' = 2,
+  'DOCUMENT_REVIEW' = 3,
+  'SIGNATURES_COMPLETED' = 4,
+  'CLOSED' = 5,
+  'CLOSED_LOST' = 6,
+}
