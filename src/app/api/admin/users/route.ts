@@ -103,7 +103,9 @@ export async function POST(request: NextRequest) {
 
     return jsonResponse(userWithOrgs);
   } catch (error) {
-    console.error('unable to create user:', getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to create user', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

@@ -65,7 +65,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (!user) {
-    return errorResponse('User not found in database', 404);
+    return errorResponse('User not found in database', 404, { request });
   }
   const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
@@ -84,7 +84,9 @@ export async function GET(request: NextRequest) {
     const portfolioReturns = await getPortfolioReturns(deals);
     return jsonResponse(portfolioReturns);
   } catch (error) {
-    console.error(`unable to get portfolio returns: ${error}`);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to get portfolio returns', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

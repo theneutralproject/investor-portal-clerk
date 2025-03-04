@@ -2,7 +2,11 @@ import {
   createDocumentEntry,
   getAdminFromRequest,
 } from '@/libs/admin/utils.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 import { zPdfBulkUploadSchema } from '@/libs/document/schema';
 import { storageClient } from '@/libs/supabase';
@@ -106,12 +110,11 @@ export async function POST(request: NextRequest) {
     queryDocumentType = queryParams.get('documentType') ?? null;
     queryTaxYear = queryParams.get('taxYear') ?? null;
   } catch (error) {
-    console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, { request });
   }
 
   if (!dealId) {
-    return jsonResponse('dealId query param is required', 400);
+    return errorResponse('dealId query param is required', 400, { request });
   }
 
   try {
@@ -122,9 +125,10 @@ export async function POST(request: NextRequest) {
     if (queryDocumentType) documentType = queryDocumentType as DealDocumentType;
     if (documentType === DealDocumentType.K1) {
       if (!queryTaxYear) {
-        return jsonResponse(
+        return errorResponse(
           'taxYear query param is required for K1 documentType',
-          400
+          400,
+          { request }
         );
       }
       taxYear = parseInt(queryTaxYear);
@@ -140,7 +144,10 @@ export async function POST(request: NextRequest) {
         if (error) {
           console.error(`unable to upload file ${name}:`);
           console.error(error);
-          return jsonResponse(getErrorMessage(error), 500);
+          return errorResponse(getErrorMessage(error), 500, {
+            request,
+            extra: { error },
+          });
         }
 
         try {
@@ -159,10 +166,13 @@ export async function POST(request: NextRequest) {
             'unable to createDocumentEntry:',
             getErrorMessage(error)
           );
-          return jsonResponse(getErrorMessage(error), 500);
+          return errorResponse(getErrorMessage(error), 500, {
+            request,
+            extra: { error },
+          });
         }
       } else {
-        console.error('invalid file:', file);
+        Logger.log({ message: 'file is not instance of File' }, request);
         return jsonResponse('invalid file', 400);
       }
     }
@@ -171,7 +181,10 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('unable to read files:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }
 
@@ -195,10 +208,13 @@ export async function DELETE(request: NextRequest) {
     fileId = parseInt(queryParams.get('fileId') ?? '');
   } catch (error) {
     console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
   if (!fileId) {
-    return jsonResponse('fileId is required', 400);
+    return errorResponse('fileId is required', 400, { request });
   }
 
   try {
@@ -211,7 +227,9 @@ export async function DELETE(request: NextRequest) {
 
     return jsonResponse(res);
   } catch (error) {
-    console.error('unable to delete deal document:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to get Deal Documents', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

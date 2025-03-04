@@ -32,8 +32,10 @@ export async function GET(request: NextRequest) {
   try {
     hsDeal = await getHubspotDealById(hubspotId);
   } catch (error) {
-    console.error(getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { method: 'getHubspotDealById' },
+    });
   }
 
   let projectId: number | undefined;
@@ -52,7 +54,7 @@ export async function GET(request: NextRequest) {
           projectName = project.name;
         }
       } catch (error) {
-        console.error(getErrorMessage(error));
+        Logger.warn(getErrorMessage(error), request);
       }
     }
   }

@@ -162,27 +162,35 @@ export async function GET(request: NextRequest) {
           financingTypeStr as DealFinancingType;
       }
     }
-
-    const deals = await prisma.deal.findMany({
-      where: where,
-      include: {
-        organization: { include: { ownedBy: true } },
-        investmentStats: true,
-        document: {
-          include: {
-            uploadedBy: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true,
-                id: true,
+    try {
+      const deals = await prisma.deal.findMany({
+        where: where,
+        include: {
+          organization: { include: { ownedBy: true } },
+          investmentStats: true,
+          document: {
+            include: {
+              uploadedBy: {
+                select: {
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  id: true,
+                },
               },
             },
           },
         },
-      },
-    });
-    return jsonResponse(deals);
+      });
+      return jsonResponse(deals);
+    } catch (error) {
+      return errorResponse(getErrorMessage(error), 500, {
+        request,
+        extra: {
+          method: 'prisma.deal.findMany',
+        },
+      });
+    }
   }
 }
 

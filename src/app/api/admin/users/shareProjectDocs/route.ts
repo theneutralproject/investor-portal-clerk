@@ -22,7 +22,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const postData = (await request.json()) as PostSchema;
-    console.log('postData:', postData);
 
     const hsRes = await shareProjectDocsWithUser(
       postData.hubspotId,
@@ -30,7 +29,9 @@ export async function POST(request: NextRequest) {
     );
     return jsonResponse(hsRes);
   } catch (parseError) {
-    console.error('ERROR: unable to parse POST body:\n', parseError);
-    return errorResponse('Input data malformatted', 400);
+    return errorResponse('Input data malformatted', 400, {
+      request,
+      extra: { error: parseError },
+    });
   }
 }

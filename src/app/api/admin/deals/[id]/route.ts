@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       throw new Error('dealId is required in url');
     }
   } catch (__error) {
-    return jsonResponse({ error: `dealId is required in url` }, 400);
+    return errorResponse(`dealId is required in url`, 400, { request });
   }
 
   const deal = await prisma.deal.findUnique({
@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (!deal) {
-    return errorResponse(`Deal id ${dealId} not found`, 404);
+    return errorResponse(`Deal id ${dealId} not found`, 404, { request });
   }
 
   try {
@@ -72,7 +72,8 @@ export async function GET(request: NextRequest) {
       if (!dealOwner) {
         return errorResponse(
           `Deal with id ${dealId} does not have an owner`,
-          404
+          404,
+          { request }
         );
       }
       const arrSigningOrder = deal.DocusignEvent?.map(async event => {
@@ -100,6 +101,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error(`unable to get portfolio returns: ${error}`);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }
