@@ -102,6 +102,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
       </StyledCard>
     );
   }
+  console.log(data);
   return (
     <StyledCard>
       <ScrollContainer>

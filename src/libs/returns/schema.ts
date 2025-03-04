@@ -49,6 +49,7 @@ export const zReturnsDealStatsSchema = z.object({
   }),
   financingType: z.enum(['equity', 'debt']),
   closingDate: z.date(),
+  isConversion: z.boolean(),
 });
 export type ReturnsDealStats = z.infer<typeof zReturnsDealStatsSchema>;
 

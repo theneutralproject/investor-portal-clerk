@@ -17,6 +17,7 @@ import {
   type DealDocument,
   type ProjectPaymentInfo,
   DocusignEvent,
+  DealConversion,
 } from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
@@ -52,6 +53,8 @@ export type DealWithInvestmentStats = Deal & {
 
 export type DealWithInvestmentStatsAndProjectWithPics = Deal & {
   investmentStats?: DealInvestmentStats | null;
+  startDealConversion?: DealConversion | null;
+  endDealConversion?: DealConversion | null;
   project?:
     | (Project & {
         milestones: ProjectMilestones | null;

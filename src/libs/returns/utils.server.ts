@@ -430,6 +430,7 @@ export async function getPortfolioReturns(
         location: project.location,
         pictures: project.pictures,
       },
+      isConversion: !!deal.startDealConversion || !!deal.endDealConversion,
     };
     const todayNumeric = new Date().getTime();
     portfolioStats.principalInvested += investmentStats.amount;

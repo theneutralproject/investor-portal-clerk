@@ -30,6 +30,8 @@ export async function GET(request: NextRequest) {
                   status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
                 },
                 include: {
+                  startDealConversion: true,
+                  endDealConversion: true,
                   investmentStats: true,
                   project: {
                     include: {
