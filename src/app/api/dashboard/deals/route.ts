@@ -1,7 +1,6 @@
 'use server';
 import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
-import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealStatus } from '@prisma/client';
@@ -15,8 +14,6 @@ export async function GET(request: NextRequest) {
     return errorResponse('User not authenticated', 401);
   }
 
-  Logger.log({ extra: { user: { clerkUserId: userId } } }, request);
-
   // Get the user from the database
   const dbUser = await prisma.user.findUnique({ where: { clerkId: userId } });
 
@@ -26,32 +23,39 @@ export async function GET(request: NextRequest) {
       extra: { method: 'prisma.user.findUnique' },
     });
   }
-  // Get all organizations where user is a member
-  const userOrgs = await prisma.organization.findMany({
-    where: { members: { some: { userId: dbUser.id } } },
-  });
+  try {
+    // Get all organizations where user is a member
+    const userOrgs = await prisma.organization.findMany({
+      where: { members: { some: { userId: dbUser.id } } },
+    });
 
-  // Get all deals for those organizations
-  const deals = await prisma.deal.findMany({
-    where: {
-      organizationId: { in: userOrgs.map(org => org.id) },
-      dealStage: { lt: DealStage.CLOSED_LOST }, //Ignore lost deals
-      status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
-    },
-    include: {
-      organization: true,
-      project: { include: { pictures: true } },
-      investmentStats: true,
-      startDealConversion: true,
-      endDealConversion: true,
-    },
-  });
+    // Get all deals for those organizations
+    const deals = await prisma.deal.findMany({
+      where: {
+        organizationId: { in: userOrgs.map(org => org.id) },
+        dealStage: { lt: DealStage.CLOSED_LOST }, //Ignore lost deals
+        status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
+      },
+      include: {
+        organization: true,
+        project: { include: { pictures: true } },
+        investmentStats: true,
+        startDealConversion: true,
+        endDealConversion: true,
+      },
+    });
 
-  const filteredDeals = deals.filter(deal =>
-    userOrgs.some(
-      org => org.id === deal.organizationId && org.ownerId === dbUser.id
-    )
-  );
+    const filteredDeals = deals.filter(deal =>
+      userOrgs.some(
+        org => org.id === deal.organizationId && org.ownerId === dbUser.id
+      )
+    );
 
-  return jsonResponse(filteredDeals);
+    return jsonResponse(filteredDeals);
+  } catch (error) {
+    return errorResponse('Error fetching dashboard deals', 500, {
+      request,
+      extra: { error },
+    });
+  }
 }
