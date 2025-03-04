@@ -26,7 +26,6 @@ import { format } from 'date-fns';
 import { DealDocumentType } from '@prisma/client';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
-//mapping for titles
 const titleMap = {
   [DealDocumentType.K1]: 'K1',
   [DealDocumentType.VERIFICATION_ACCREDITATION]: 'Verification Accreditation',
@@ -81,7 +80,6 @@ const DocumentList = ({
   isLoading: boolean;
   type: 'tax' | 'investment';
 }) => {
-  console.log(documents);
   const groupDocumentsByProject = (docs: Document[]) => {
     return docs.reduce((acc: Record<string, Document[]>, doc) => {
       const project = doc.projectName || 'Other';
