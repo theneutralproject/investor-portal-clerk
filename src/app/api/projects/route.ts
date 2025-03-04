@@ -1,5 +1,3 @@
-'use server';
-
 import prisma from '@/libs/prisma.server';
 import {
   errorResponse,
