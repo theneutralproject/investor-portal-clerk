@@ -15,6 +15,7 @@ import {
 import { updateHubspotContact } from '@/libs/hubspot/utils.server';
 import { sanitizeUser } from '@/libs/user/utils.server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
+import Logger from '@/libs/logger';
 
 /**
  * @param request
@@ -103,12 +104,14 @@ export async function PUT(request: NextRequest) {
     try {
       await updateHubspotContact(hsUpdateData);
     } catch (hsError) {
-      console.log(hsError);
+      Logger.error('Error updating Hubspot contact', request, {
+        error: hsError,
+      });
     }
     try {
       await (await clerkClient()).users.updateUser(userId, clerkUpdate);
     } catch (clerkError) {
-      console.log(clerkError);
+      Logger.error('Error updating Clerk user', request, { error: clerkError });
     }
   }
 
@@ -119,7 +122,9 @@ export async function PUT(request: NextRequest) {
       // sanitize it (digits only) and encrypt SSN before storing it:
       const presanitizedSSN = userData.ssn.replace(/\D/g, '');
       if (presanitizedSSN.length !== 9) {
-        return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
+        return errorResponse('SSN must be 9 digits', 400, {
+          request,
+        });
       }
       userData.ssn = presanitizedSSN;
     }
@@ -130,7 +135,9 @@ export async function PUT(request: NextRequest) {
       where: { clerkId: userId },
     });
     if (!existingUser) {
-      return jsonResponse({ error: 'User not found' }, 404);
+      return errorResponse('User not found', 404, {
+        request,
+      });
     }
 
     // upsert address
@@ -142,9 +149,10 @@ export async function PUT(request: NextRequest) {
       })
       .catch(dbError => {
         console.error('ERROR: unable to upsert address:\n', dbError);
-        return jsonResponse(
-          { error: `unable to upsert address:\n${getErrorMessage(dbError)}` },
-          400
+        return errorResponse(
+          `unable to upsert address:\n${getErrorMessage(dbError)}`,
+          400,
+          { request, extra: { error: dbError } }
         );
       });
 
