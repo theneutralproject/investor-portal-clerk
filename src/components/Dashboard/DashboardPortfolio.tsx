@@ -95,10 +95,8 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     enabled: loggedIn,
   });
 
-  if (!data) return null;
-
-  const metrics = getMetrics(data);
-  const chartData = getChartData(data);
+  const metrics = getMetrics(data || null);
+  const chartData = getChartData(data || null);
   const todayLinePosition = calculateTodayLinePosition(chartData);
   return (
     <>
