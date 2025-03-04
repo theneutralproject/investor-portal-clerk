@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
             organization: {
               include: { members: true },
             },
+            investmentStats: true,
           },
         },
         endDeal: {
@@ -49,6 +50,7 @@ export async function GET(request: NextRequest) {
             organization: {
               include: { members: true },
             },
+            investmentStats: true,
           },
         },
       },
