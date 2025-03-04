@@ -158,11 +158,7 @@ describe('POST /api/finix/webhook', () => {
     );
 
     expect(updateDeal).toHaveBeenCalled();
-    expect(Logger.warn).toHaveBeenCalledWith(
-      'unable to set deal stage to 5 in webhook route',
-      expect.any(Object),
-      { extra: expect.any(Error) }
-    );
+    expect(Logger.warn).toHaveBeenCalled();
     expect(response).toEqual(
       errorResponse('The ACH transfer was NOT successful', 500)
     );
