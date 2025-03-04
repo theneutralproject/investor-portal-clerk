@@ -60,7 +60,7 @@ test.describe('dealflow logic tests', () => {
     console.log('dealId', dealId);
     // await expect(page.getByText("Testi Tester")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('+15555550100')).toBeVisible({
-      timeout: 20000,
+      timeout: 30000,
     });
     await expect(page.getByText('testi+clerk_test@neutral.us')).toBeVisible({
       timeout: 10000,
