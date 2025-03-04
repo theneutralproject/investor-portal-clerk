@@ -2,7 +2,11 @@
 import { clerkClient, getAuth } from '@clerk/nextjs/server';
 import { type NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import {
   type ClerkUserUpdateSchema,
   type UserUpdateSchema,
@@ -153,7 +157,10 @@ export async function PUT(request: NextRequest) {
       return jsonResponse(sanitizeUser(updatedUser));
     } catch (dbError) {
       console.error('ERROR: unable to update user:\n', dbError);
-      return jsonResponse({ error: 'unable to update user1' }, 400);
+      return errorResponse('unable to update user1', 400, {
+        request,
+        extra: { error: dbError },
+      });
     }
   } else {
     // no address to update, just update user data
@@ -167,7 +174,10 @@ export async function PUT(request: NextRequest) {
       return jsonResponse(sanitizeUser(updatedUser));
     } catch (dbError) {
       console.error('ERROR: unable to update user:\n', dbError);
-      return jsonResponse({ error: 'unable to update user2' }, 400);
+      return errorResponse('unable to update user2', 400, {
+        request,
+        extra: { error: dbError },
+      });
     }
   }
 }
