@@ -5,7 +5,6 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
-import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 import {
   DealDocumentType,
@@ -14,6 +13,7 @@ import {
 } from '@prisma/client';
 import { DealCreateSchema, DealStage } from '@/libs/deal/schema';
 import { createDealForUser } from '@/libs/deal/utils.server';
+import Logger from '@/libs/logger';
 
 /**
  * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
@@ -21,10 +21,11 @@ import { createDealForUser } from '@/libs/deal/utils.server';
  * @returns
  */
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let email: string | undefined;
@@ -190,10 +191,11 @@ export async function GET(request: NextRequest) {
  * @param request
  */
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let postData: DealCreateSchema;

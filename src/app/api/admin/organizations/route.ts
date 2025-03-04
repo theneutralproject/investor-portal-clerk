@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import Logger from '@/libs/logger';
 import {
   OrganizationCreateSchema,
   type OrganizationUpdateSchema,
@@ -12,14 +13,15 @@ import {
 } from '@/libs/utils.server';
 import { MembershipType, Prisma } from '@prisma/client';
 import { User } from '@sentry/nextjs';
-import { isError, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import type { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let postData: OrganizationCreateSchema;
@@ -94,10 +96,11 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let putData: OrganizationUpdateSchema;

@@ -6,14 +6,16 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
-import { isError } from 'lodash';
+import Logger from '@/libs/logger';
 
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
+
   let email: string;
   try {
     const url = new URL(request.url);

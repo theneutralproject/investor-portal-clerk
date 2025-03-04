@@ -1,16 +1,18 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
 import { updateUserInDbAndHubspotAndClerk } from '@/libs/user/utils.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
-import { isError, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let userId: number;
@@ -94,10 +96,11 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let userId: number;

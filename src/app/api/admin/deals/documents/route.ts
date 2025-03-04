@@ -4,15 +4,82 @@ import {
 } from '@/libs/admin/utils.server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
-import { isError } from 'lodash';
 import { zPdfBulkUploadSchema } from '@/libs/document/schema';
 import { storageClient } from '@/libs/supabase';
 import {
   type DealDocument,
   DealDocumentType,
   type Prisma,
+  User,
 } from '@prisma/client';
 import prisma from '@/libs/prisma.server';
+import Logger from '@/libs/logger';
+
+/**
+ * Get dealdocs with download URL by dealId
+ * @param request
+ * @returns
+ */
+export async function GET(request: NextRequest) {
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+
+  let dealId: number | null = null;
+  let includeTaxDocuments: string | null = null;
+  try {
+    const url = new URL(request.url);
+    const queryParams = new URLSearchParams(url.search);
+    dealId = parseInt(queryParams.get('dealId') ?? '');
+    includeTaxDocuments = queryParams.get('includeTaxDocuments') ?? null;
+  } catch (error) {
+    console.error('unable to read query params:', getErrorMessage(error));
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+
+  if (!dealId) {
+    return jsonResponse('dealId is required', 400);
+  }
+  try {
+    const where: Prisma.DealDocumentWhereInput = {
+      dealId: dealId,
+    };
+    if (includeTaxDocuments !== 'true') {
+      where.type = { not: DealDocumentType.K1 };
+    }
+
+    const dealDocs = await prisma.dealDocument.findMany({
+      where,
+    });
+
+    interface docWithUrl extends DealDocument {
+      downloadUrl: string;
+    }
+
+    const fullDocsPromise = dealDocs.map(async doc => {
+      const fullDoc = doc as docWithUrl;
+      const storageRes = await storageClient
+        .from('deal-documents')
+        .createSignedUrl(doc.path, 60 * 60 * 24);
+      fullDoc.downloadUrl = storageRes.data?.signedUrl ?? '';
+      return fullDoc;
+    });
+    return Promise.all(fullDocsPromise)
+      .then(fullDocs => {
+        return jsonResponse(fullDocs);
+      })
+      .catch(error => {
+        console.error('unable to get deal documents:', getErrorMessage(error));
+        return jsonResponse(getErrorMessage(error), 500);
+      });
+  } catch (error) {
+    console.error('unable to get deal documents:', getErrorMessage(error));
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+}
 
 /**
  * Admin can upload up to 10 PDFs at a time
@@ -20,11 +87,12 @@ import prisma from '@/libs/prisma.server';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  // check if they are an admin user by checking the auth token
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  let adminUser: User | null = null;
+  try {
+    adminUser = await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let dealId: number | null = null;
@@ -108,79 +176,16 @@ export async function POST(request: NextRequest) {
 }
 
 /**
- * Get dealdocs with download URL by dealId
- * @param request
- * @returns
- */
-export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
-  }
-  let dealId: number | null = null;
-  let includeTaxDocuments: string | null = null;
-  try {
-    const url = new URL(request.url);
-    const queryParams = new URLSearchParams(url.search);
-    dealId = parseInt(queryParams.get('dealId') ?? '');
-    includeTaxDocuments = queryParams.get('includeTaxDocuments') ?? null;
-  } catch (error) {
-    console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
-  }
-
-  if (!dealId) {
-    return jsonResponse('dealId is required', 400);
-  }
-  try {
-    const where: Prisma.DealDocumentWhereInput = {
-      dealId: dealId,
-    };
-    if (includeTaxDocuments !== 'true') {
-      where.type = { not: DealDocumentType.K1 };
-    }
-
-    const dealDocs = await prisma.dealDocument.findMany({
-      where,
-    });
-
-    interface docWithUrl extends DealDocument {
-      downloadUrl: string;
-    }
-
-    const fullDocsPromise = dealDocs.map(async doc => {
-      const fullDoc = doc as docWithUrl;
-      const storageRes = await storageClient
-        .from('deal-documents')
-        .createSignedUrl(doc.path, 60 * 60 * 24);
-      fullDoc.downloadUrl = storageRes.data?.signedUrl ?? '';
-      return fullDoc;
-    });
-    return Promise.all(fullDocsPromise)
-      .then(fullDocs => {
-        return jsonResponse(fullDocs);
-      })
-      .catch(error => {
-        console.error('unable to get deal documents:', getErrorMessage(error));
-        return jsonResponse(getErrorMessage(error), 500);
-      });
-  } catch (error) {
-    console.error('unable to get deal documents:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
-  }
-}
-
-/**
  * Delete a deal document by fileId
  * @param request
  * @returns
  */
 export async function DELETE(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let fileId: number | null = null;

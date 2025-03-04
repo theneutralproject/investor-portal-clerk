@@ -15,8 +15,9 @@ import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
-import { DealDocumentType } from '@prisma/client';
+import { DealDocumentType, User } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
+import Logger from '@/libs/logger';
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -24,11 +25,11 @@ import { DealStage } from '@/libs/deal/schema';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  // check if they are an admin user by checking the auth token
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let taxYear: number | null = null;
@@ -139,10 +140,12 @@ export async function POST(request: NextRequest) {
  * @returns
  */
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  let adminUser: User | null = null;
+  try {
+    adminUser = await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   const requestBody = (await request.json()) as {

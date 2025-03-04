@@ -1,20 +1,20 @@
 import { getAdminFromRequest, getFileDetails } from '@/libs/admin/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { validateEquityMilestonesFile } from '@/libs/returns/utils.server';
 import { storageClient } from '@/libs/supabase';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
-import { isError } from 'lodash';
 import { NextRequest } from 'next/server';
 
 const projectDocsBucket = 'project-documents';
 
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
-  // check if they are an admin user by checking the auth token
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let projectId: number | null = null;
