@@ -4,8 +4,6 @@ import {
   DealUnitType,
   PaymentMethod,
   DealStatus,
-  DealConversion,
-  Deal,
 } from '@prisma/client';
 import { z } from 'zod';
 
@@ -77,11 +75,6 @@ export const zDealConversionCreateSchema = z.object({
 export type DealConversionCreateSchema = z.infer<
   typeof zDealConversionCreateSchema
 >;
-
-export type DealWithConversion = Deal & {
-  startDealConversion?: DealConversion;
-  endDealConversion?: DealConversion;
-};
 
 export enum DealStage {
   'LEAD' = 0,
