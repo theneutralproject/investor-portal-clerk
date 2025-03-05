@@ -305,7 +305,7 @@ export async function updateDeal(
           `Failed to update deal investment stats for deal id ${existingDeal.id}. `
         );
         console.error(error);
-        throw Error('Failed to update deal with hubspot data');
+        throw error;
       }
     }
   }
@@ -334,9 +334,9 @@ export async function updateDeal(
   } catch (error) {
     console.error(
       `Failed to update deal with hubspot id ${dealData.hubspotId}:`,
-      error
+      getErrorMessage(error)
     );
-    throw Error(`Failed to update deal with hubspot id ${dealData.hubspotId}`);
+    throw error;
   }
 
   if (updateHubspot) {
@@ -356,7 +356,10 @@ export async function updateDeal(
       );
       await updateHubspotDealProperties(hsDeal);
     } catch (error) {
-      console.error('Failed to update deal in Hubspot', error);
+      console.error(
+        'Failed to update deal in Hubspot - but deal was updated in DB:'
+      );
+      console.error(error);
     }
   }
   if (updatedStats) {
