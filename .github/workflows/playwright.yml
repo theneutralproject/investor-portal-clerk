@@ -23,9 +23,8 @@ jobs:
             libgif-dev \
             librsvg2-dev \
             pkg-config \
-            libasound2 \
             alsa-utils \
-            pulseaudio
+            liboss4-salsa-asound2
       - name: Install dependencies
         run: npm install
       - name: Install Playwright Chromium Browser
