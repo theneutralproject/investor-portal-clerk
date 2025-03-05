@@ -88,7 +88,7 @@ jobs:
           CURRENT_TERMS_REVISION: ${{ secrets.CURRENT_TERMS_REVISION }}
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: DEBUG=pw:browser npx playwright test --disable-web-security
+        run: DEBUG=pw:browser npx playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
