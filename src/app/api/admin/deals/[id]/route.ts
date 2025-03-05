@@ -113,12 +113,19 @@ export async function GET(request: NextRequest) {
     return errorResponse(`Deal id ${dealId} not found`, 404, { request });
   }
   try {
+    const {
+      investmentStats,
+      organization,
+      DocusignEvent,
+      project,
+      ...dealData
+    } = deal;
     const retData = await getDetailedDealStats(
-      deal,
-      deal.investmentStats,
-      deal.organization,
-      deal.DocusignEvent,
-      deal.project,
+      dealData,
+      investmentStats,
+      organization,
+      DocusignEvent,
+      project,
       request
     );
     return jsonResponse(retData);
@@ -191,12 +198,19 @@ export async function PUT(request: NextRequest) {
     return errorResponse(`Deal id ${dealId} not found`, 404, { request });
   }
   try {
+    const {
+      investmentStats,
+      organization,
+      DocusignEvent,
+      project,
+      ...dealData
+    } = deal;
     const retData = await getDetailedDealStats(
-      deal,
-      deal.investmentStats,
-      deal.organization,
-      deal.DocusignEvent,
-      deal.project,
+      dealData,
+      investmentStats,
+      organization,
+      DocusignEvent,
+      project,
       request
     );
     return jsonResponse(retData);

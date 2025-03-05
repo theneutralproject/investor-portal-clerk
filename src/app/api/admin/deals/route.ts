@@ -235,14 +235,16 @@ export async function POST(request: NextRequest) {
     return errorResponse('financingType is required', 400, {
       request,
     });
-  if (!postData.closingDate)
+  if (postData.dealStage === DealStage.CLOSED && !postData.closingDate)
     return errorResponse('closingDate is required', 400, {
       request,
     });
-  postData.dealStage = postData.dealStage ?? 5;
-  postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
-  postData.signaturesCompletedDate =
-    postData.signaturesCompletedDate ?? postData.closingDate;
+  postData.dealStage = postData.dealStage ?? DealStage.CLOSED;
+  if (postData.dealStage === DealStage.CLOSED) {
+    postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
+    postData.signaturesCompletedDate =
+      postData.signaturesCompletedDate ?? postData.closingDate;
+  }
 
   const ownerOrg = await prisma.organization.findUnique({
     where: { id: postData.organizationId },

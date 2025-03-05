@@ -320,7 +320,7 @@ export async function updateDeal(
   let updatedDeal: DealWithInvestmentStats;
 
   if (
-    dealData.dealStage === 5 &&
+    dealData.dealStage === DealStage.CLOSED &&
     !existingDeal.closingDate &&
     !dealData.closingDate
   ) {
