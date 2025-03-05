@@ -48,6 +48,9 @@ export default defineConfig({
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
     headless: true, // Ensure headless mode in CI
+    launchOptions: {
+      args: ['--disable-web-security'],
+    },
   },
   /* Run your local dev server before starting the tests */
   webServer: {

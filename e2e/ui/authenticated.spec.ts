@@ -1,19 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('authentication view tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.route(
-      'https://polite-man-6.clerk.accounts.dev/npm/@clerk/clerk-js@5/dist/clerk.browser.js',
-      route => {
-        route.fulfill({
-          status: 200,
-          contentType: 'application/javascript',
-          body: '', // Empty script to prevent CORS issues
-        });
-      }
-    );
-  });
-
   test('Can view dashboard page and load project data', async ({
     request,
     page,
