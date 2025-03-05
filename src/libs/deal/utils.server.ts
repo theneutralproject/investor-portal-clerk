@@ -6,7 +6,11 @@ import {
   type DealInvestmentStats,
 } from '@prisma/client';
 import { isError } from 'lodash';
-import { type DealCreateSchema, type DealUpdateSchema } from './schema';
+import {
+  DealStage,
+  type DealCreateSchema,
+  type DealUpdateSchema,
+} from './schema';
 import {
   getDebtInterestRate,
   getDebtUnitType,
@@ -25,6 +29,7 @@ import type {
 } from '../types';
 import { getInvestmentEntity } from './utils';
 import { getErrorMessage } from '../utils.server';
+import Logger from '../logger';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -216,8 +221,13 @@ export async function updateDeal(
     throw Error('The deal does not exist in the database');
   }
 
-  if (existingDeal.dealStage >= 5 && !allowMaintenanceOfCompletedDeals) {
-    console.error('Completed Deals cannot be updated');
+  if (
+    existingDeal.dealStage >= DealStage.CLOSED &&
+    !allowMaintenanceOfCompletedDeals
+  ) {
+    Logger.error(new Error('Completed Deals cannot be updated'), null, {
+      extra: { existingDeal },
+    });
     throw Error('Completed Deals cannot be updated');
   }
   console.log('investmentStatsToUpdate', investmentStatsToUpdate);

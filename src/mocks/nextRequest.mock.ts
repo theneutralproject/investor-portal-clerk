@@ -4,14 +4,17 @@ import type { NextRequest } from 'next/server';
 export function nextRequestMock(
   body: Record<string, any> = {},
   headers: Record<string, string> = {},
-  method: string = 'POST',
+  method: string = 'GET',
   pathname: string = '/api/test',
   cookies: Record<string, string> = {}
 ): Partial<NextRequest> {
+  const url = `http://localhost:3000${pathname}`;
+
   return {
     json: jest.fn().mockResolvedValue(body),
     headers: new Headers(headers),
     method,
+    url,
     nextUrl: { pathname } as NextURL,
     cookies: {
       get: jest.fn((name: string) => ({ value: cookies[name] })),
