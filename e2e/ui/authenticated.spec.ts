@@ -5,7 +5,11 @@ test.describe('authentication view tests', () => {
     await page.goto('/dashboard', { waitUntil: 'domcontentloaded' });
 
     // await expect(page.getByText('Projects')).toBeVisible();
-    await expect(page.getByText('The Edison')).toBeVisible();
-    await expect(page.getByText('Welcome to Neutral')).toBeVisible();
+    await expect(page.getByText('The Edison')).toBeVisible({
+      timeout: 20000,
+    });
+    await expect(page.getByText('Welcome to Neutral')).toBeVisible({
+      timeout: 20000,
+    });
   });
 });

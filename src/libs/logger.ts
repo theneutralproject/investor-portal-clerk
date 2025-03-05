@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import pino from 'pino';
 import type { NextRequest } from 'next/server';
 import { parseSessionFromCookie } from './session/utils';
+import { getErrorMessage } from './utils.server';
 
 const logger = pino({
   level: 'info',
@@ -89,11 +90,14 @@ class Logger {
    * @param {Record<string, unknown | Sentry.SeverityLevel>} [extra] - Additional metadata (optional).
    */
   static error(
-    error: Error | unknown,
+    error: Error | unknown | string,
     req?: NextRequest | null,
     extra: Record<string, unknown | Sentry.SeverityLevel> = {}
   ): void {
-    const _error = error as Error;
+    const isObjectError = error instanceof Error;
+    const _error = isObjectError
+      ? (error as Error)
+      : { message: error as string, stack: '', name: '' };
     const apiMessage = req
       ? `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
       : `An error has occurred: ${_error.message}`;
@@ -104,7 +108,9 @@ class Logger {
       message: _error.message,
       stack: [traces[0], traces[1]].join(' ').replaceAll('\n', ''),
       request: req ? this.getRequestDetails(req) : null,
-      log: this.getLogError(_error, req, extra.method),
+      log: isObjectError
+        ? this.getLogError(_error, req, extra.method)
+        : getErrorMessage(_error),
       extra,
     };
 
