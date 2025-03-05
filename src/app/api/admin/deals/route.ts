@@ -211,14 +211,11 @@ export async function POST(request: NextRequest) {
     const requestBody = (await request.json()) as DealCreateSchema;
     postData = requestBody;
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse deals POST body:\n',
-      getErrorMessage(parseError)
-    );
-    return errorResponse(getErrorMessage(parseError), 400, {
+    return errorResponse('Input data malformatted', 400, {
       request,
       extra: {
         method: 'parseError',
+        error: parseError,
       },
     });
   }
@@ -268,11 +265,11 @@ export async function POST(request: NextRequest) {
     const newDeal = await createDealForUser(postData, ownerOrg.ownedBy);
     return jsonResponse(newDeal);
   } catch (error) {
-    console.error('unable to create deal:', getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500, {
+    return errorResponse('unable to create deal', 500, {
       request,
       extra: {
         method: 'createDealForUser',
+        error,
       },
     });
   }
