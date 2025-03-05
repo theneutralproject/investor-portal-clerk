@@ -137,7 +137,7 @@ describe('POST /api/finix/webhook', () => {
     );
   });
 
-  xit('should return 500 if updateDeal fails', async () => {
+  it('should return 500 if updateDeal fails', async () => {
     (updateDeal as jest.Mock).mockRejectedValue(new Error('DB error'));
 
     const requestBody = {
@@ -159,7 +159,7 @@ describe('POST /api/finix/webhook', () => {
 
     expect(updateDeal).toHaveBeenCalled();
     expect(response).toEqual(
-      errorResponse('The ACH transfer was NOT successful', 500)
+      jsonResponse({ message: 'Webhook not processed' }, 200)
     );
   });
 

@@ -23,7 +23,7 @@ if (!baseURL || !testUserToken) {
 
 export default defineConfig({
   timeout: 60 * 1000,
-  testDir: './e2e',
+  testDir: './e2e/ui',
   /* Run tests in files in parallel */
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */

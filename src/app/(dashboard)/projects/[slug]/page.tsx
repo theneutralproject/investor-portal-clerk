@@ -34,6 +34,7 @@ import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 import { useRouter } from 'next/navigation';
 import { NextClientPage } from '@/types/page';
 import { DealStage } from '@/libs/deal/schema';
+import { useRedirect } from '@/app/context/RedirectContext';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -41,6 +42,7 @@ export default function Page({ params }: NextClientPage) {
   const posthog = usePostHog();
   const router = useRouter();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { setRedirectUrl } = useRedirect();
 
   const { isLoading: projectLoading, data: projectData } = useQuery<
     ProjectWithAllNestedData[],
@@ -97,7 +99,9 @@ export default function Page({ params }: NextClientPage) {
       project_id: project.id,
       project_name: project.name,
     });
-    router.push(`/dealflow/${project.slug}/new/get-started`);
+    const path = `/dealflow/${project.slug}/new/get-started`;
+    setRedirectUrl(path);
+    router.push(path);
   };
 
   return (

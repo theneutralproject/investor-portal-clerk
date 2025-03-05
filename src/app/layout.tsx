@@ -17,6 +17,7 @@ import CSPostHogProvider from './CSPostHogProvider';
 import UserIdentifier from './UserIdentifier';
 import { TermsProvider } from '@/app/context/TermsContext';
 import { HubspotChatProvider } from '@/components/HubspotChatProvider';
+import { RedirectProvider } from './context/RedirectContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -36,41 +37,43 @@ export default function RootLayout({
   return (
     <CSPostHogProvider>
       <ClerkProvider>
-        <TermsProvider>
-          <html lang="en">
-            <body className={inter.className}>
-              <PageViewTracker />
-              <UserIdentifier />
-              <NeutralQueryProvider>
-                <NeutralThemeProvider>
-                  <HubspotChatProvider>
-                    <SignInTOSModal />
-                    <DashboardProvider>
-                      <Sidebar>{children}</Sidebar>
-                      <ToastContainer
-                        position="top-right"
-                        autoClose={5000}
-                        newestOnTop={false}
-                        closeOnClick
-                        rtl={false}
-                        pauseOnFocusLoss
-                        draggable
-                        theme="light"
-                      />
-                    </DashboardProvider>
-                  </HubspotChatProvider>
-                </NeutralThemeProvider>
-              </NeutralQueryProvider>
-            </body>
+        <RedirectProvider>
+          <TermsProvider>
+            <html lang="en">
+              <body className={inter.className}>
+                <PageViewTracker />
+                <UserIdentifier />
+                <NeutralQueryProvider>
+                  <NeutralThemeProvider>
+                    <HubspotChatProvider>
+                      <SignInTOSModal />
+                      <DashboardProvider>
+                        <Sidebar>{children}</Sidebar>
+                        <ToastContainer
+                          position="top-right"
+                          autoClose={5000}
+                          newestOnTop={false}
+                          closeOnClick
+                          rtl={false}
+                          pauseOnFocusLoss
+                          draggable
+                          theme="light"
+                        />
+                      </DashboardProvider>
+                    </HubspotChatProvider>
+                  </NeutralThemeProvider>
+                </NeutralQueryProvider>
+              </body>
 
-            <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
-            <script
-              type="text/javascript"
-              src="https://forms.finixpymnts.com/finix.js"
-              async
-            ></script>
-          </html>
-        </TermsProvider>
+              <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
+              <script
+                type="text/javascript"
+                src="https://forms.finixpymnts.com/finix.js"
+                async
+              ></script>
+            </html>
+          </TermsProvider>
+        </RedirectProvider>
       </ClerkProvider>
     </CSPostHogProvider>
   );
