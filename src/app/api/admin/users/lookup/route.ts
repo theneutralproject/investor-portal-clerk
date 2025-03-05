@@ -6,14 +6,16 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
-import { isError } from 'lodash';
+import Logger from '@/libs/logger';
 
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
+
   let email: string;
   try {
     const url = new URL(request.url);
@@ -24,7 +26,7 @@ export async function GET(request: NextRequest) {
       throw new Error('dealId is required in url');
     }
   } catch (__error) {
-    return errorResponse(`dealId is required in url`, 400);
+    return errorResponse(`dealId is required in url`, 400, { request });
   }
 
   try {
@@ -45,9 +47,14 @@ export async function GET(request: NextRequest) {
       },
     });
     if (!user)
-      console.log(`User with email ${email} not found in lookup route`);
+      Logger.warn(
+        `User with email ${email} not found in lookup route`,
+        request
+      );
     return jsonResponse(user);
   } catch (__error) {
-    return jsonResponse({ error: `User with email ${email} not found` }, 500);
+    return errorResponse(`User with email ${email} not found`, 500, {
+      request,
+    });
   }
 }

@@ -1,10 +1,11 @@
 'use server';
 import type { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
 import { updateHubspotContact } from '@/libs/hubspot/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { type UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
 import { sanitizeUser } from '@/libs/user/utils.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import { isNumber } from 'lodash';
 import type { NextRequest } from 'next/server';
@@ -23,19 +24,19 @@ export async function PUT(request: NextRequest) {
       throw new Error('userId is required in url');
     }
   } catch (__error: unknown) {
-    return jsonResponse({ error: `userId is required in url` }, 400);
+    return errorResponse('userId is required in url', 400, { request });
   }
 
   const { userId: clerkUserId } = getAuth(request);
   if (!clerkUserId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+    return errorResponse('Clerk user not found', 404, { request });
   }
 
   const requestingUser = await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
   });
   if (!requestingUser) {
-    return jsonResponse({ error: 'Requesting user not found' }, 404);
+    return errorResponse('Requesting user not found', 404, { request });
   }
 
   // get the user to update and make sure they are a ghost user
@@ -49,21 +50,26 @@ export async function PUT(request: NextRequest) {
   });
 
   if (!userToUpdate) {
-    return jsonResponse({ error: 'User to update not found' }, 404);
+    return errorResponse('User to update not found', 404, {
+      request,
+      extra: { userId },
+    });
   }
 
   // get the organization of the requester and make sure the user to update is a member
   if (userToUpdate.clerkId === clerkUserId) {
-    return jsonResponse(
-      { error: 'use /api/users PUT route to update your own user data' },
-      401
+    return errorResponse(
+      'use /api/users PUT route to update your own user data',
+      401,
+      { request }
     );
   }
 
   if (userToUpdate.clerkId) {
-    return jsonResponse(
-      { error: 'You cannot update a user that is not a ghost user' },
-      401
+    return errorResponse(
+      'You cannot update a user that is not a ghost user',
+      401,
+      { request }
     );
   }
 
@@ -73,12 +79,10 @@ export async function PUT(request: NextRequest) {
       .map(member => member.organization)
       .filter(org => org.ownerId === requestingUser.id).length
   ) {
-    return jsonResponse(
-      {
-        error:
-          'You are not authorized to update users outside of your organization',
-      },
-      401
+    return errorResponse(
+      'You are not authorized to update users outside of your organization',
+      401,
+      { request }
     );
   }
 
@@ -88,14 +92,10 @@ export async function PUT(request: NextRequest) {
   try {
     putData = zUserUpdateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse user/id PUT body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse(
-      { error: `Input data malformatted: \n${(parseError as Error).message}` },
-      400
-    );
+    return errorResponse('Input data malformatted', 400, {
+      request,
+      extra: { error: parseError },
+    });
   }
 
   const { address, ...userUpdateData } = putData;
@@ -141,13 +141,16 @@ export async function PUT(request: NextRequest) {
     try {
       await updateHubspotContact(hsUpdateData);
     } catch (hsError) {
-      console.log(hsError);
+      Logger.error('Hubspot User update error', request, {
+        hubspotError: hsError,
+      });
     }
   }
 
   if (userUpdateData.ssn && !userUpdateData.ssn.startsWith('***-**-')) {
     const presanitizedSSN = userUpdateData.ssn.replace(/\D/g, '');
     if (presanitizedSSN.length !== 9) {
+      Logger.warn('SSN must be 9 digits', request);
       return jsonResponse({ error: 'SSN must be 9 digits' }, 400);
     }
     userUpdateData.ssn = presanitizedSSN;
@@ -162,11 +165,10 @@ export async function PUT(request: NextRequest) {
         update: { ...address, userId: userToUpdate.id },
       })
       .catch(dbError => {
-        console.error('ERROR: unable to upsert address:\n', dbError);
-        return jsonResponse(
-          { error: `unable to upsert address:\n${getErrorMessage(dbError)}` },
-          400
-        );
+        return errorResponse(`unable to upsert address`, 400, {
+          request,
+          extra: { error: dbError },
+        });
       });
 
     try {
@@ -177,8 +179,10 @@ export async function PUT(request: NextRequest) {
       });
       return jsonResponse(sanitizeUser(updatedUser));
     } catch (dbError) {
-      console.error('ERROR: unable to update user:\n', dbError);
-      return jsonResponse({ error: 'unable to update user1' }, 400);
+      return errorResponse('Unable to update user', 400, {
+        request,
+        extra: { error: dbError },
+      });
     }
   } else {
     // no address to update, just update user data
@@ -191,8 +195,10 @@ export async function PUT(request: NextRequest) {
 
       return jsonResponse(sanitizeUser(updatedUser));
     } catch (dbError) {
-      console.error('ERROR: unable to update user:\n', dbError);
-      return jsonResponse({ error: 'unable to update user2' }, 400);
+      return errorResponse('Unknown user update error', 500, {
+        request,
+        extra: { error: dbError },
+      });
     }
   }
 }

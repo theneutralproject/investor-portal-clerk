@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
   try {
     const requestBody = (await request.json()) as { slug: string };
     if (!requestBody.slug) {
-      return errorResponse('Missing required slug', 400);
+      return errorResponse('Missing required slug', 400, { request });
     }
     const slug = requestBody.slug;
     const response = await fetch(
@@ -45,12 +45,12 @@ export async function POST(request: NextRequest) {
       request
     );
     if (!data.token) {
-      return errorResponse('Failed to get Plaid Link token', 500);
+      return errorResponse('Failed to get Plaid Link token', 500, { request });
     }
 
     return jsonResponse(data.token);
   } catch (e) {
     console.error(e);
-    return errorResponse('Failed to get Plaid Link token', 500);
+    return errorResponse('Failed to get Plaid Link token', 500, { request });
   }
 }

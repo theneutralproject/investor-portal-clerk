@@ -2,110 +2,22 @@ import {
   createDocumentEntry,
   getAdminFromRequest,
 } from '@/libs/admin/utils.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
-import { isError } from 'lodash';
 import { zPdfBulkUploadSchema } from '@/libs/document/schema';
 import { storageClient } from '@/libs/supabase';
 import {
   type DealDocument,
   DealDocumentType,
   type Prisma,
+  User,
 } from '@prisma/client';
 import prisma from '@/libs/prisma.server';
-
-/**
- * Admin can upload up to 10 PDFs at a time
- * @param request formData with PdfDocumentCreateSchema
- * @returns
- */
-export async function POST(request: NextRequest) {
-  // check if they are an admin user by checking the auth token
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
-  }
-
-  let dealId: number | null = null;
-  let queryTaxYear: string | null = null;
-  let queryDocumentType: string | null = null;
-  let taxYear: number | undefined = undefined;
-  try {
-    const url = new URL(request.url);
-    const queryParams = new URLSearchParams(url.search);
-    dealId = parseInt(queryParams.get('dealId') ?? '');
-    queryDocumentType = queryParams.get('documentType') ?? null;
-    queryTaxYear = queryParams.get('taxYear') ?? null;
-  } catch (error) {
-    console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
-  }
-
-  if (!dealId) {
-    return jsonResponse('dealId query param is required', 400);
-  }
-
-  try {
-    const formData = await request.formData();
-    const files = formData.getAll('files');
-    const parsedFiles = zPdfBulkUploadSchema.parse(files);
-    let documentType: DealDocumentType = DealDocumentType.INVESTMENT_DOCUMENT;
-    if (queryDocumentType) documentType = queryDocumentType as DealDocumentType;
-    if (documentType === DealDocumentType.K1) {
-      if (!queryTaxYear) {
-        return jsonResponse(
-          'taxYear query param is required for K1 documentType',
-          400
-        );
-      }
-      taxYear = parseInt(queryTaxYear);
-    }
-
-    for (const file of parsedFiles) {
-      if (file instanceof File) {
-        const { name, type } = file;
-        const { data, error } = await storageClient
-          .from('deal-documents')
-          .upload(`deal-${dealId}/${name}`, file, { contentType: type });
-
-        if (error) {
-          console.error(`unable to upload file ${name}:`);
-          console.error(error);
-          return jsonResponse(getErrorMessage(error), 500);
-        }
-
-        try {
-          await createDocumentEntry(
-            'deal',
-            dealId,
-            name,
-            data.path,
-            '',
-            adminUser.id,
-            documentType,
-            taxYear
-          );
-        } catch (error) {
-          console.error(
-            'unable to createDocumentEntry:',
-            getErrorMessage(error)
-          );
-          return jsonResponse(getErrorMessage(error), 500);
-        }
-      } else {
-        console.error('invalid file:', file);
-        return jsonResponse('invalid file', 400);
-      }
-    }
-    return jsonResponse({
-      message: `${parsedFiles.length} files uploaded successfully`,
-    });
-  } catch (error) {
-    console.error('unable to read files:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
-  }
-}
+import Logger from '@/libs/logger';
 
 /**
  * Get dealdocs with download URL by dealId
@@ -113,11 +25,13 @@ export async function POST(request: NextRequest) {
  * @returns
  */
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
+
   let dealId: number | null = null;
   let includeTaxDocuments: string | null = null;
   try {
@@ -172,15 +86,119 @@ export async function GET(request: NextRequest) {
 }
 
 /**
+ * Admin can upload up to 10 PDFs at a time
+ * @param request formData with PdfDocumentCreateSchema
+ * @returns
+ */
+export async function POST(request: NextRequest) {
+  let adminUser: User | null = null;
+  try {
+    adminUser = await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+
+  let dealId: number | null = null;
+  let queryTaxYear: string | null = null;
+  let queryDocumentType: string | null = null;
+  let taxYear: number | undefined = undefined;
+  try {
+    const url = new URL(request.url);
+    const queryParams = new URLSearchParams(url.search);
+    dealId = parseInt(queryParams.get('dealId') ?? '');
+    queryDocumentType = queryParams.get('documentType') ?? null;
+    queryTaxYear = queryParams.get('taxYear') ?? null;
+  } catch (error) {
+    return errorResponse(getErrorMessage(error), 500, { request });
+  }
+
+  if (!dealId) {
+    return errorResponse('dealId query param is required', 400, { request });
+  }
+
+  try {
+    const formData = await request.formData();
+    const files = formData.getAll('files');
+    const parsedFiles = zPdfBulkUploadSchema.parse(files);
+    let documentType: DealDocumentType = DealDocumentType.INVESTMENT_DOCUMENT;
+    if (queryDocumentType) documentType = queryDocumentType as DealDocumentType;
+    if (documentType === DealDocumentType.K1) {
+      if (!queryTaxYear) {
+        return errorResponse(
+          'taxYear query param is required for K1 documentType',
+          400,
+          { request }
+        );
+      }
+      taxYear = parseInt(queryTaxYear);
+    }
+
+    for (const file of parsedFiles) {
+      if (file instanceof File) {
+        const { name, type } = file;
+        const { data, error } = await storageClient
+          .from('deal-documents')
+          .upload(`deal-${dealId}/${name}`, file, { contentType: type });
+
+        if (error) {
+          console.error(`unable to upload file ${name}:`);
+          console.error(error);
+          return errorResponse(getErrorMessage(error), 500, {
+            request,
+            extra: { error },
+          });
+        }
+
+        try {
+          await createDocumentEntry(
+            'deal',
+            dealId,
+            name,
+            data.path,
+            '',
+            adminUser.id,
+            documentType,
+            taxYear
+          );
+        } catch (error) {
+          console.error(
+            'unable to createDocumentEntry:',
+            getErrorMessage(error)
+          );
+          return errorResponse(getErrorMessage(error), 500, {
+            request,
+            extra: { error },
+          });
+        }
+      } else {
+        Logger.log({ message: 'file is not instance of File' }, request);
+        return jsonResponse('invalid file', 400);
+      }
+    }
+    return jsonResponse({
+      message: `${parsedFiles.length} files uploaded successfully`,
+    });
+  } catch (error) {
+    console.error('unable to read files:', getErrorMessage(error));
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
+  }
+}
+
+/**
  * Delete a deal document by fileId
  * @param request
  * @returns
  */
 export async function DELETE(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let fileId: number | null = null;
@@ -190,10 +208,13 @@ export async function DELETE(request: NextRequest) {
     fileId = parseInt(queryParams.get('fileId') ?? '');
   } catch (error) {
     console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
   if (!fileId) {
-    return jsonResponse('fileId is required', 400);
+    return errorResponse('fileId is required', 400, { request });
   }
 
   try {
@@ -206,7 +227,9 @@ export async function DELETE(request: NextRequest) {
 
     return jsonResponse(res);
   } catch (error) {
-    console.error('unable to delete deal document:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to get Deal Documents', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

@@ -88,14 +88,16 @@ export async function GET(request: NextRequest) {
     );
 
     if (!queryResult.success) {
-      return errorResponse('Invalid query parameters', 400);
+      return errorResponse('Invalid query parameters', 400, { request });
     }
 
     const { projectSlug, dealId } = queryResult.data;
 
     const project = await fetchProject(projectSlug);
     if (!project) {
-      return errorResponse('Project not found', 404);
+      return errorResponse(`Project ${projectSlug} not found`, 404, {
+        request,
+      });
     }
 
     // Return public project data if dealId is not provided or is "new"
@@ -112,24 +114,33 @@ export async function GET(request: NextRequest) {
       where: { clerkId: clerkUserId },
     });
     if (!dbUser) {
-      return errorResponse('User not found', 404);
+      return errorResponse(
+        `User w clerkId ${clerkUserId} not found in DB`,
+        404,
+        { request }
+      );
     }
 
     const deal = await fetchDeal(parseInt(dealId, 10));
     if (!deal) {
-      return errorResponse('Deal not found', 404);
+      return errorResponse(`Deal with id ${dealId} not found`, 404, {
+        request,
+      });
     }
 
     if (deal.projectId !== project.id) {
       return errorResponse(
         'Deal does not belong to the specified project',
-        403
+        403,
+        { request }
       );
     }
 
     const hasAccess = await checkUserAccess(dbUser.id, deal.organization);
     if (!hasAccess) {
-      return errorResponse('You do not have access to this deal', 403);
+      return errorResponse('You do not have access to this deal', 403, {
+        request,
+      });
     }
 
     const docusignDocs = await fetchProjectDocuments(
@@ -144,7 +155,9 @@ export async function GET(request: NextRequest) {
       deal,
     });
   } catch (error) {
-    console.error('Error in GET /api/deal:', error);
-    return errorResponse('Internal server error', 500);
+    return errorResponse('Error in GET /api/deal', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

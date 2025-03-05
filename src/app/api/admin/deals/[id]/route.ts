@@ -4,6 +4,7 @@ import {
   getSigningOrder,
   instantiateApiClientFromUserAndDeal,
 } from '@/libs/docusign/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 // import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import {
@@ -11,7 +12,7 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
-import { isError, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 /**
@@ -20,10 +21,11 @@ import { NextRequest } from 'next/server';
  * @returns deal loaded returns, documents, signing order, and other information
  */
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let dealId: number;
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
       throw new Error('dealId is required in url');
     }
   } catch (__error) {
-    return jsonResponse({ error: `dealId is required in url` }, 400);
+    return errorResponse(`dealId is required in url`, 400, { request });
   }
 
   const deal = await prisma.deal.findUnique({
@@ -56,7 +58,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (!deal) {
-    return errorResponse(`Deal id ${dealId} not found`, 404);
+    return errorResponse(`Deal id ${dealId} not found`, 404, { request });
   }
 
   try {
@@ -70,7 +72,8 @@ export async function GET(request: NextRequest) {
       if (!dealOwner) {
         return errorResponse(
           `Deal with id ${dealId} does not have an owner`,
-          404
+          404,
+          { request }
         );
       }
       const arrSigningOrder = deal.DocusignEvent?.map(async event => {
@@ -98,6 +101,9 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     console.error(`unable to get portfolio returns: ${error}`);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }

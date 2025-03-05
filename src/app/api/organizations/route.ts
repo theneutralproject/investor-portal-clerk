@@ -8,29 +8,28 @@ import {
 } from '@/libs/organization/schema';
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
+import Logger from '@/libs/logger';
 
 /**
  * @param request GET all organizations that a user is a member of
  */
 export async function GET(request: NextRequest) {
-  const { userId } = getAuth(request);
-  if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
+    return errorResponse('Clerk user not found', 404, { request });
   }
 
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { clerkId },
     include: { address: true, organizationMember: true },
   });
 
   if (!dbUser) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
-    return jsonResponse(
-      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
-      404
+    return errorResponse(
+      `User record with clerkid ${clerkId} not found in prisma (GET)`,
+      404,
+      { request }
     );
   }
 
@@ -48,23 +47,21 @@ export async function GET(request: NextRequest) {
  * @param request POST create a new organization
  */
 export async function POST(request: NextRequest) {
-  const { userId } = getAuth(request);
-  if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
+    return errorResponse('Clerk user not found', 404, { request });
   }
 
   const dbUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { clerkId: clerkId },
     include: { address: true },
   });
 
   if (!dbUser) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
-    return jsonResponse(
-      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
-      404
+    return errorResponse(
+      `User record with clerkid ${clerkId} not found in prisma (GET)`,
+      404,
+      { request }
     );
   }
 
@@ -72,15 +69,11 @@ export async function POST(request: NextRequest) {
   let postData: OrganizationCreateSchema;
   try {
     postData = zOrganizationCreateSchema.parse(requestBody);
-  } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse org PUT body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse(
-      { error: `Input data malformatted: \n${(parseError as Error).message}` },
-      400
-    );
+  } catch (error) {
+    return errorResponse('Unable to parse org POST body', 400, {
+      request,
+      extra: { error },
+    });
   }
 
   const getOrgName = () => {
@@ -109,7 +102,8 @@ export async function POST(request: NextRequest) {
   };
 
   if (postData.tin && postData.tin.replace(/\D/g, '').length !== 9) {
-    return jsonResponse({ error: 'TIN must be 9 digits' }, 400);
+    Logger.warn('TIN must be 9 digits', request);
+    return errorResponse('TIN must be 9 digits', 400);
   }
 
   const orgCreateData = {
@@ -125,7 +119,9 @@ export async function POST(request: NextRequest) {
     const newOrg = await prisma.organization.create({ data: orgCreateData });
     return jsonResponse(sanitizeOrganization(newOrg), 201);
   } catch (dbError) {
-    console.error('ERROR: unable to update org:\n', dbError);
-    return jsonResponse({ error: dbError }, 400);
+    return errorResponse('Unable to create the organization', 500, {
+      request,
+      extra: { error: dbError },
+    });
   }
 }

@@ -30,7 +30,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     clerkUser = await authClient.users.getUser(userId);
   } catch (__error) {
-    return errorResponse('User not found', 401);
+    return errorResponse('User not found', 401, { request });
   }
 
   if (dbUser) {
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest): Promise<Response> {
     });
   } else {
     Logger.log({
-      message: `User Clerk: ${userId}`,
+      message: `Creating new user with Clerk ID: ${userId}`,
       extra: clerkUser,
     });
 
@@ -81,13 +81,12 @@ export async function POST(request: NextRequest): Promise<Response> {
     };
 
     if (!email) {
-      return errorResponse(`No email found for new clerk user: ${userId}`, 500);
+      return errorResponse(
+        `No email found for new clerk user: ${userId}`,
+        500,
+        { request }
+      );
     }
-
-    Logger.log({
-      message: `User DB: ${newUserData.clerkId}`,
-      extra: newUserData,
-    });
 
     // Store the user in the database and HubSpot
     const user = await createUserInDbAndHubspot(newUserData);
@@ -99,10 +98,11 @@ export async function POST(request: NextRequest): Promise<Response> {
           investortPortalId: user.id,
         },
       });
-    } catch (_err) {
+    } catch (error) {
       return errorResponse(
         'There was an error updating the user metadata.',
-        500
+        500,
+        { request, extra: { error } }
       );
     }
 

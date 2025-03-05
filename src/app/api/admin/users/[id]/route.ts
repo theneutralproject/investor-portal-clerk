@@ -1,16 +1,22 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
 import { updateUserInDbAndHubspotAndClerk } from '@/libs/user/utils.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
-import { isError, isNumber } from 'lodash';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
+import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let userId: number;
@@ -21,7 +27,7 @@ export async function GET(request: NextRequest) {
       throw new Error('userId is required in url');
     }
   } catch (__error) {
-    return jsonResponse({ error: `userId is required in url` }, 400);
+    return errorResponse(`userId is required in url`, 500, { request });
   }
   try {
     const detailedUser = await prisma.user.findUnique({
@@ -89,15 +95,19 @@ export async function GET(request: NextRequest) {
     });
     return jsonResponse(detailedUser);
   } catch (error) {
-    return jsonResponse(error, 404);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }
 
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let userId: number;
@@ -109,7 +119,7 @@ export async function PUT(request: NextRequest) {
       throw new Error('userId is required in url');
     }
   } catch (__error) {
-    return jsonResponse({ error: `userId is required in url` }, 400);
+    return errorResponse(`userId is required in url`, 500, { request });
   }
 
   let putData: UserUpdateSchema;
@@ -117,11 +127,10 @@ export async function PUT(request: NextRequest) {
     const requestBody = (await request.json()) as UserUpdateSchema;
     putData = zUserUpdateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse users PUT body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse({ error: getErrorMessage(parseError) }, 400);
+    return errorResponse(getErrorMessage(parseError), 500, {
+      request,
+      extra: { parseError },
+    });
   }
 
   try {
@@ -129,7 +138,9 @@ export async function PUT(request: NextRequest) {
     const updatedUser = await updateUserInDbAndHubspotAndClerk(putData);
     return jsonResponse(updatedUser);
   } catch (error) {
-    console.error('unable to update user:', getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to update user', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

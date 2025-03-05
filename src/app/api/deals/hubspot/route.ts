@@ -3,7 +3,7 @@ import {
   zHsUpdateDealSchema,
 } from '@/libs/hubspot/schema';
 import { updateHubspotDealProperties } from '@/libs/hubspot/utils.server';
-import { jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 /**
  * This function is used to update any of the deal properties in hubspot
@@ -18,14 +18,18 @@ export async function PUT(request: NextRequest) {
     try {
       deal = zHsUpdateDealSchema.parse(requestBody);
     } catch (parseError) {
-      console.error('ERROR: unable to parse PUT body:\n', parseError);
-      return jsonResponse({ error: 'Input data malformatted' }, 400);
+      return errorResponse('Input data malformatted', 400, {
+        request,
+        extra: { error: parseError },
+      });
     }
 
     const res = await updateHubspotDealProperties(deal);
     return jsonResponse(res);
   } catch (error) {
-    console.error('Error updating Hubspot deal:', error);
-    return jsonResponse({ error: 'Error updating Hubspot deal' }, 500);
+    return errorResponse('Error updating Hubspot deal', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

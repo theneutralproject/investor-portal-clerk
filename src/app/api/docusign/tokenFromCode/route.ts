@@ -1,5 +1,6 @@
 import { buildRedirectUrl } from '@/libs/dealflow/utils.server';
 import { refreshAccessTokenFromCode } from '@/libs/docusign/utils.server';
+import Logger from '@/libs/logger';
 import { NextRequest } from 'next/server';
 
 /**
@@ -23,13 +24,18 @@ export async function GET(request: NextRequest) {
     await refreshAccessTokenFromCode(code!);
     if (dealId && slug) {
       const redirectUrl = buildRedirectUrl(slug, dealId);
-      console.log('redirectUrl:', redirectUrl.toString());
+      Logger.log(
+        {
+          message: `docusign redirect success: redirectUrl: ${redirectUrl.toString()}`,
+        },
+        request
+      );
       return Response.redirect(redirectUrl.toString(), 303);
     }
 
     return Response.redirect('/dashboard', 303);
   } catch (error) {
-    console.error('Error in docusign tokenFromCode route:', error);
+    Logger.error(error, request, { method: 'docusign.tokenFromCode' });
     return Response.redirect('/dashboard', 500);
   }
 }

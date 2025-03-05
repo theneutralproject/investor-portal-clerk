@@ -1,6 +1,7 @@
 'use server';
 import type { DocumentEventCreateSchema } from '@/libs/document/schema';
 import prisma from '@/libs/prisma.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import type { NextRequest } from 'next/server';
 
@@ -10,10 +11,7 @@ export async function POST(request: NextRequest) {
     const { userId } = getAuth(request);
 
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Clerk user not found', 404, { request });
     }
 
     const neutralUser = await prisma.user.findUnique({
@@ -21,24 +19,17 @@ export async function POST(request: NextRequest) {
     });
 
     if (!neutralUser) {
-      return new Response(JSON.stringify({ error: 'User record not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return errorResponse('User not found in database', 404, { request });
     }
 
     const requestBody = (await request.json()) as DocumentEventCreateSchema;
     const { documentId, type } = requestBody;
 
     if (!documentId || !type) {
-      return new Response(
-        JSON.stringify({
-          error: 'All parameters (documentId, type) are required',
-        }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        }
+      return errorResponse(
+        'All parameters (documentId, type) are required',
+        400,
+        { request }
       );
     }
 
@@ -51,15 +42,11 @@ export async function POST(request: NextRequest) {
         type,
       },
     });
-
-    return new Response(JSON.stringify(documentEvent), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse(documentEvent, 201);
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: 'Error processing request' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    return errorResponse('Error creating document event', 500, {
+      request,
+      extra: { error },
     });
   }
 }
