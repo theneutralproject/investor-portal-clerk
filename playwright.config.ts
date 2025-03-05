@@ -23,7 +23,7 @@ if (!baseURL || !testUserToken) {
 
 export default defineConfig({
   timeout: 60 * 1000,
-  testDir: './e2e',
+  testDir: './e2e/ui',
   /* Run tests in files in parallel */
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -48,9 +48,6 @@ export default defineConfig({
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
     bypassCSP: true,
-    launchOptions: {
-      args: ['--disable-web-security'],
-    },
   },
   /* Run your local dev server before starting the tests */
   webServer: {
