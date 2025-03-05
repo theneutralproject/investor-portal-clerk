@@ -95,7 +95,7 @@ const DealFlowAmount: React.FC = () => {
 
     await updateDeal({
       ...deal,
-      dealStage: DealStage.STARTED,
+      dealStage: DealStage.DISCOVERY,
       investmentStats: {
         ...deal.investmentStats,
         amount,

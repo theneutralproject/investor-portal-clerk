@@ -6,7 +6,11 @@ import {
   type DealInvestmentStats,
 } from '@prisma/client';
 import { isError } from 'lodash';
-import { type DealCreateSchema, type DealUpdateSchema } from './schema';
+import {
+  DealStage,
+  type DealCreateSchema,
+  type DealUpdateSchema,
+} from './schema';
 import {
   getDebtInterestRate,
   getDebtUnitType,
@@ -310,7 +314,7 @@ export async function updateDeal(
   let updatedDeal: DealWithInvestmentStats;
 
   if (
-    dealData.dealStage === 5 &&
+    dealData.dealStage === DealStage.CLOSED &&
     !existingDeal.closingDate &&
     !dealData.closingDate
   ) {

@@ -112,7 +112,7 @@ const getNextStepDisplay = (deal: DealWithFullOrgAndProject): string => {
 };
 
 const getDealProgress = (deal: DealWithOrgMembersAndProject): number => {
-  const MAX_DEAL_STAGE = 5;
+  const MAX_DEAL_STAGE = DealStage.CLOSED;
   return (deal.dealStage / MAX_DEAL_STAGE) * 100;
 };
 

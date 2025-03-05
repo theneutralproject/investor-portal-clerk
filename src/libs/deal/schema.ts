@@ -78,7 +78,7 @@ export type DealConversionCreateSchema = z.infer<
 
 export enum DealStage {
   'LEAD' = 0,
-  'STARTED' = 1,
+  'DISCOVERY' = 1,
   'DETAILS_SUBMITTED' = 2,
   'DOCUMENT_REVIEW' = 3,
   'SIGNATURES_COMPLETED' = 4,
