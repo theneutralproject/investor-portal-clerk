@@ -93,10 +93,10 @@ jobs:
         run: npx playwright list-files
 
       - name: Run UI E2E Tests
-        run: DEBUG=pw:browser npx playwright test e2e/ui --reporter=dot --trace on
+        run: DEBUG=pw:browser npx playwright test e2e/ui --reporter=list --trace on
 
       - name: Run API E2E Tests
-        run: DEBUG=pw:browser npx playwright test e2e/api --reporter=dot --trace on
+        run: DEBUG=pw:browser npx playwright test e2e/api --reporter=list --trace on
 
       - name: Upload Playwright Artifacts (Reports & Traces)
         if: always()
