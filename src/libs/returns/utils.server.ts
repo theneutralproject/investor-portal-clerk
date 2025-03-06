@@ -2,6 +2,7 @@ import 'server-only';
 import {
   DealFinancingType,
   type DealInvestmentStats,
+  DealStatus,
   DealUnitType,
   type ProjectInvestmentStats,
   type ProjectMilestones,
@@ -416,6 +417,7 @@ export async function getPortfolioReturns(
 
     const dealSummary: ReturnsDealStats = {
       dealId: deal.id,
+      status: deal.status ?? DealStatus.ACTIVE,
       committedAmount: investmentStats.amount,
       distributionsToDate: 0,
       distributionsProjected: 0,

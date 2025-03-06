@@ -18,6 +18,8 @@ import CloseIcon from '@mui/icons-material/Close';
 import { format } from 'date-fns';
 import _ from 'lodash';
 import { DealWithInvestmentStats } from '@/libs/types';
+import { PortfolioReturnsResponse } from '@/libs/returns/schema';
+import { DealStatus } from '@prisma/client';
 
 interface DealConversion {
   id: number;
@@ -33,12 +35,11 @@ interface DealRow {
   id: number;
   status: string;
   type: string;
-  effectiveDate: string | Date | null;
-  endDate: string | null;
+  effectiveDate: string;
+  endDate: string;
   investmentPrincipal: number;
   distributions: number | null;
   accruedInterest: number | null;
-  isActive: boolean;
 }
 
 interface DashboardDealConversionModalProps {
@@ -65,7 +66,7 @@ const StyledTableCell = styled(TableCell)(() => ({
   fontWeight: 'medium',
 }));
 
-const StatusIndicator = styled('span')<{ status: string }>(
+const StatusIndicator = styled('span')<{ status: DealStatus }>(
   ({ theme, status }) => ({
     display: 'inline-block',
     width: 10,
@@ -73,7 +74,7 @@ const StatusIndicator = styled('span')<{ status: string }>(
     borderRadius: '50%',
     marginRight: theme.spacing(1),
     backgroundColor:
-      status === 'ACTIVE'
+      status === DealStatus.ACTIVE
         ? theme.palette.success.main
         : theme.palette.grey[400],
   })
@@ -96,6 +97,8 @@ export const DashboardDealConversionModal: React.FC<
 > = ({ conversionId, open, onClose }) => {
   const [loading, setLoading] = useState<boolean>(false);
   const [conversion, setConversion] = useState<DealConversion | null>(null);
+  const [conversionReturns, setConversionReturns] =
+    useState<PortfolioReturnsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [dealRows, setDealRows] = useState<DealRow[]>([]);
 
@@ -117,31 +120,35 @@ export const DashboardDealConversionModal: React.FC<
         id: conversion.endDeal.id,
         status: conversion.endDeal.status ?? '',
         type: getDisplayType(conversion.endDeal.investmentStats.financingType),
-        effectiveDate: conversion.endDeal.closingDate,
-        endDate: null,
-        investmentPrincipal: conversion.startDeal.investmentStats.amount,
-        distributions: 0,
-        accruedInterest: null,
-        isActive: true,
+        effectiveDate: formatDate(conversion.endDeal.closingDate),
+        endDate: formatDate(conversion.endDeal.dateMatured),
+        investmentPrincipal: conversion.endDeal.investmentStats.amount,
+        distributions:
+          conversionReturns?.dealStats.find(
+            deal => deal.dealId === conversion.endDeal.id
+          )?.distributionsToDate ?? null,
+        accruedInterest: -1,
       });
 
       rows.push({
         id: conversion.startDeal.id,
-        status: 'Converted',
+        status: conversion.startDeal.status ?? '',
         type: getDisplayType(
           conversion.startDeal.investmentStats.financingType
         ),
-        effectiveDate: conversion.startDeal.closingDate,
-        endDate: conversion.dateCreated,
+        effectiveDate: formatDate(conversion.startDeal.closingDate),
+        endDate: formatDate(conversion.startDeal.dateMatured),
         investmentPrincipal: conversion.startDeal.investmentStats.amount,
-        distributions: null,
-        accruedInterest: null,
-        isActive: false,
+        distributions:
+          conversionReturns?.dealStats.find(
+            deal => deal.dealId === conversion.startDeal.id
+          )?.distributionsToDate ?? null,
+        accruedInterest: -1,
       });
 
       setDealRows(rows);
     }
-  }, [conversion]);
+  }, [conversion, conversionReturns]);
 
   const fetchConversion = async (id: number) => {
     setLoading(true);
@@ -151,7 +158,8 @@ export const DashboardDealConversionModal: React.FC<
         throw new Error(`Failed to fetch conversion: ${response.statusText}`);
       }
       const data = await response.json();
-      setConversion(data);
+      setConversion(data.conversion);
+      setConversionReturns(data.conversionReturns);
       setError(null);
     } catch (err) {
       console.error('Error fetching conversion:', err);
@@ -162,16 +170,30 @@ export const DashboardDealConversionModal: React.FC<
     }
   };
 
-  const formatDate = (dateString: string | null) => {
+  const formatDate = (dateString: Date | null) => {
     if (!dateString) return '-';
     try {
       return format(new Date(dateString), 'MM/dd/yy');
     } catch (err) {
       console.error('Error formatting date:', err);
-      return dateString;
+      return '-';
     }
   };
 
+  const formatStatus = (status: DealStatus) => {
+    switch (status) {
+      case DealStatus.ACTIVE:
+        return 'Active';
+      case DealStatus.PENDING:
+        return 'Pending';
+      case DealStatus.MATURED:
+        return 'Matured';
+      case DealStatus.LOST:
+        return 'Lost';
+      default:
+        return 'Unknown';
+    }
+  };
   const formatCurrency = (amount: number | null) => {
     if (amount === null) return '-';
     return `$${amount.toLocaleString()}`;
@@ -236,7 +258,6 @@ export const DashboardDealConversionModal: React.FC<
                     <StyledTableCell>End Date</StyledTableCell>
                     <StyledTableCell>Investment Principal</StyledTableCell>
                     <StyledTableCell>Distributions</StyledTableCell>
-                    <StyledTableCell>Accrued Interest</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -244,34 +265,21 @@ export const DashboardDealConversionModal: React.FC<
                     <TableRow key={row.id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                          <StatusIndicator
-                            status={row.isActive ? 'ACTIVE' : 'CONVERTED'}
-                          />
+                          <StatusIndicator status={row.status as DealStatus} />
                           <Typography>
-                            {row.isActive ? 'Active' : 'Converted'}
+                            {formatStatus(row.status as DealStatus)}
                           </Typography>
                         </Box>
                       </TableCell>
                       <TableCell>{row.type}</TableCell>
-                      <TableCell>
-                        {row.effectiveDate
-                          ? formatDate(row.effectiveDate.toString())
-                          : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {row.endDate ? formatDate(row.endDate) : '-'}
-                      </TableCell>
+                      <TableCell>{row.effectiveDate}</TableCell>
+                      <TableCell>{row.endDate}</TableCell>
                       <TableCell>
                         {formatCurrency(row.investmentPrincipal)}
                       </TableCell>
                       <TableCell>
                         {row.distributions !== null
                           ? formatCurrency(row.distributions)
-                          : '-'}
-                      </TableCell>
-                      <TableCell>
-                        {row.accruedInterest !== null
-                          ? formatCurrency(row.accruedInterest)
                           : '-'}
                       </TableCell>
                     </TableRow>
