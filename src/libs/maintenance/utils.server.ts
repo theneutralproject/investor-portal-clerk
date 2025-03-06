@@ -97,7 +97,7 @@ export interface DealRecord {
   debtMaxTerm?: number;
 }
 
-function getDealOwnershipType(ownershipType: string): DealOwnershipType {
+export function getDealOwnershipType(ownershipType: string): DealOwnershipType {
   switch (ownershipType) {
     case 'COMMON':
       return DealOwnershipType.COMMON;
@@ -113,6 +113,8 @@ function getDealOwnershipType(ownershipType: string): DealOwnershipType {
       return DealOwnershipType.TRUST;
     case 'PARTNERSHIP':
       return DealOwnershipType.PARTNERSHIP;
+    case 'IRA':
+      return DealOwnershipType.IRA;
     case 'OTHER':
       return DealOwnershipType.OTHER;
     default:

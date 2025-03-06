@@ -19,7 +19,10 @@ import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
-import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
+import {
+  findOrCreateClerkUser,
+  getDealOwnershipType,
+} from '@/libs/maintenance/utils.server';
 import { ProjectName } from '@/libs/project/schema';
 import { NextRequest } from 'next/server';
 
@@ -63,29 +66,6 @@ function getDealType(dealType: string): DealFinancingType {
       return DealFinancingType.promissory_note_at_closing;
     default:
       throw new Error(`Invalid deal type: ${dealType}`);
-  }
-}
-
-function getDealOwnershipType(ownershipType: string): DealOwnershipType {
-  switch (ownershipType) {
-    case 'COMMON':
-      return DealOwnershipType.COMMON;
-    case 'CORPORATION':
-      return DealOwnershipType.CORPORATION;
-    case 'INDIVIDUAL':
-      return DealOwnershipType.INDIVIDUAL;
-    case 'JOINT':
-      return DealOwnershipType.JOINT;
-    case 'MARITAL':
-      return DealOwnershipType.MARITAL;
-    case 'TRUST':
-      return DealOwnershipType.TRUST;
-    case 'PARTNERSHIP':
-      return DealOwnershipType.PARTNERSHIP;
-    case 'OTHER':
-      return DealOwnershipType.OTHER;
-    default:
-      throw new Error(`Invalid ownership type: ${ownershipType}`);
   }
 }
 

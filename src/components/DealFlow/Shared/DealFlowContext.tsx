@@ -169,7 +169,7 @@ export const calculateDealProgress = (
   if (currentStepInfo.majorParent === 'details') {
     const entityDetailsRequired =
       ownershipType &&
-      ['CORPORATION', 'COMMON', 'OTHER', 'TRUST'].includes(
+      ['CORPORATION', 'COMMON', 'OTHER', 'TRUST', 'IRA'].includes(
         ownershipType as string
       );
 

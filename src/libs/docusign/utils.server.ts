@@ -709,7 +709,10 @@ export function getOwnershipTypeFromDeal(ownershipType: DealOwnershipType) {
       return docusignOwnershipTypeEnum.Common;
     case DealOwnershipType.MARITAL:
       return docusignOwnershipTypeEnum.Marital;
+    case DealOwnershipType.TRUST:
+      return docusignOwnershipTypeEnum.RevocableGrantor;
     default:
+      // this includes IRA and OTHER
       return docusignOwnershipTypeEnum.Other;
   }
 }

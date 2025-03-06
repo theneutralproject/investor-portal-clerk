@@ -96,6 +96,9 @@ export async function POST(request: NextRequest) {
       case DealOwnershipType.TRUST: {
         return `${dbUser.firstName} ${dbUser.lastName}'s Trust Organization`;
       }
+      case DealOwnershipType.IRA: {
+        return `${dbUser.firstName} ${dbUser.lastName}'s IRA Organization`;
+      }
       default:
         return `${dbUser.firstName} ${dbUser.lastName}'s Organization`;
     }

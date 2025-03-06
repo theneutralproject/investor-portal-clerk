@@ -92,7 +92,7 @@ export const DealFinancingTypeSchema = z.enum(['equity','promissory_note_now','p
 
 export type DealFinancingTypeType = `${z.infer<typeof DealFinancingTypeSchema>}`
 
-export const DealOwnershipTypeSchema = z.enum(['INDIVIDUAL','JOINT','CORPORATION','TRUST','OTHER','MARITAL','COMMON','PARTNERSHIP']);
+export const DealOwnershipTypeSchema = z.enum(['INDIVIDUAL','JOINT','CORPORATION','TRUST','OTHER','MARITAL','COMMON','PARTNERSHIP','IRA']);
 
 export type DealOwnershipTypeType = `${z.infer<typeof DealOwnershipTypeSchema>}`
 
