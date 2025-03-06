@@ -3,7 +3,7 @@ import { isError } from 'lodash';
 import type { HubspotContactCreateUpdateSchema } from '../hubspot/schema';
 import {
   associateContactWithDealInHubspot,
-  createHubspotContact,
+  createOrUpdateHubspotContact,
   formatDateForHubspot,
   updateHubspotContact,
 } from '../hubspot/utils.server';
@@ -29,6 +29,9 @@ interface ClerkAPIError {
   meta: Record<string, any>;
 }
 
+/**
+ * format user data for hubspot
+ */
 const getHsUserData = (
   userData: UserCreateSchema | UserUpdateSchema,
   address: AddressCreateSchema | undefined
@@ -73,11 +76,12 @@ export async function createUserInDbAndHubspot(
       throw new Error(`Deal with id ${dealId} not found`);
     }
   }
-  /* Upsert user in Hubspot**/
+
   const hsUserData = getHsUserData(userData, address);
 
   let hsContactId: string;
   if (userData.hubspotId) {
+    // we know that the user already exists in hubspot. Just update the HS with the new user data
     hsUserData.hubspotId = userData.hubspotId;
     hsContactId = userData.hubspotId;
     hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
@@ -90,7 +94,7 @@ export async function createUserInDbAndHubspot(
   } else {
     // create new user in hubspot
     try {
-      hsContactId = await createHubspotContact(hsUserData);
+      hsContactId = await createOrUpdateHubspotContact(hsUserData);
     } catch (error) {
       console.error('Unable to create user in hubspot:\n', error);
       throw new Error(getErrorMessage(error));
