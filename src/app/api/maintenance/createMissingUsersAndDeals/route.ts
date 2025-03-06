@@ -19,12 +19,10 @@ import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import { createDealForAdmin } from '@/libs/deal/utils.server';
 import type { DealWithInvestmentStats } from '@/libs/types';
-import {
-  findOrCreateClerkUser,
-  getDealOwnershipType,
-} from '@/libs/maintenance/utils.server';
+import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import { ProjectName } from '@/libs/project/schema';
 import { NextRequest } from 'next/server';
+import { getDealOwnershipType } from '@/libs/maintenance/utils';
 
 const finishedAsync = promisify(finished);
 

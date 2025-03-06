@@ -7,6 +7,7 @@ import { promisify } from 'util';
 import { getErrorMessage } from '../utils.server';
 import { clerkClient } from '@clerk/nextjs/server';
 import prisma from '../prisma.server';
+import { getDealOwnershipType } from './utils';
 
 const finishedAsync = promisify(finished);
 
@@ -95,31 +96,6 @@ export interface DealRecord {
   linkToDocumentFolder: string;
   debtMinTerm?: number;
   debtMaxTerm?: number;
-}
-
-export function getDealOwnershipType(ownershipType: string): DealOwnershipType {
-  switch (ownershipType) {
-    case 'COMMON':
-      return DealOwnershipType.COMMON;
-    case 'CORPORATION':
-      return DealOwnershipType.CORPORATION;
-    case 'INDIVIDUAL':
-      return DealOwnershipType.INDIVIDUAL;
-    case 'JOINT':
-      return DealOwnershipType.JOINT;
-    case 'MARITAL':
-      return DealOwnershipType.MARITAL;
-    case 'TRUST':
-      return DealOwnershipType.TRUST;
-    case 'PARTNERSHIP':
-      return DealOwnershipType.PARTNERSHIP;
-    case 'IRA':
-      return DealOwnershipType.IRA;
-    case 'OTHER':
-      return DealOwnershipType.OTHER;
-    default:
-      throw new Error(`Invalid ownership type: ${ownershipType}`);
-  }
 }
 
 function getNumbersFromString(val: string): number | undefined {
