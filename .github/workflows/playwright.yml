@@ -63,10 +63,11 @@ env:
   SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
 
 jobs:
-  test:
-    timeout-minutes: 10
+  setup:
+    name: Setup & Install Dependencies
     runs-on: ubuntu-22.04
-
+    outputs:
+      cache-key: ${{ steps.cache-deps.outputs.cache-hit }}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -77,29 +78,107 @@ jobs:
           node-version: '22.13.1'
           cache: 'npm'
 
+      - name: Cache Dependencies
+        id: cache-deps
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.npm
+            ~/.cache/ms-playwright
+            node_modules
+          key: deps-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
       - name: Install Dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
+      - name: Upload Node Modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules/
+          retention-days: 1
+
+      - name: Upload Playwright Cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-cache
+          path: ~/.cache/ms-playwright
+          retention-days: 1
+
+  ui-tests:
+    name: UI E2E Tests
+    needs: setup
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Node Modules
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules/
+
+      - name: Download Playwright Cache
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-cache
+          path: ~/.cache/ms-playwright
+
       - name: Verify Playwright Installation
-        run: |
-          npx playwright --version
-          which node
-          node --version
+        run: npx playwright --version
 
-      - name: List Playwright Test Files
-        run: npx playwright list-files
+      - name: Run UI E2E Tests
+        run: DEBUG=pw:browser npx playwright test e2e/ui --reporter=dot --trace on
 
-      - name: Run Playwright Tests
-        run: DEBUG=pw:browser npx playwright test --reporter=dot --trace on
-
-      - name: Upload Playwright Artifacts (Reports & Traces)
+      - name: Upload UI Test Artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
+          name: ui-playwright-report
+          path: |
+            playwright-report/
+            test-results/
+            trace.zip
+          retention-days: 10
+
+  api-tests:
+    name: API E2E Tests
+    needs: setup
+    timeout-minutes: 10
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Download Node Modules
+        uses: actions/download-artifact@v4
+        with:
+          name: node-modules
+          path: node_modules/
+
+      - name: Download Playwright Cache
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-cache
+          path: ~/.cache/ms-playwright
+
+      - name: Verify Playwright Installation
+        run: npx playwright --version
+
+      - name: Run API E2E Tests
+        run: DEBUG=pw:browser npx playwright test e2e/api --reporter=dot --trace on
+
+      - name: Upload API Test Artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-playwright-report
           path: |
             playwright-report/
             test-results/
