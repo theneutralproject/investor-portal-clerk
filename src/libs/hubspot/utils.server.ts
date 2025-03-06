@@ -57,7 +57,10 @@ export async function createOrUpdateHubspotContact(
   });
 
   if (hsSearchResult.total > 0) {
-    console.log('hsSearchResult', hsSearchResult);
+    Logger.log({
+      message: hsSearchResult.results[0]?.id,
+      extra: { hsSearchResult },
+    });
     const hsId = hsSearchResult.results[0]?.id.toString();
     Logger.log({
       message: `Contact with email ${hubspotContact.email} already exists. Updating it instead.\nhsID: ${hsId}`,
