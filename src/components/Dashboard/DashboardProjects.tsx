@@ -12,6 +12,7 @@ import {
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { type ProjectWithAllNestedData } from '@/libs/types';
+import { useRouter } from 'next/navigation';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -120,7 +121,7 @@ export const displayDebtInterest = (project: ProjectWithAllNestedData) => {
 const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-
+  const router = useRouter();
   const formatNumber = (num: number) =>
     num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
 
@@ -136,7 +137,21 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
           const headerImage = getProjectImage(project.pictures);
 
           return (
-            <StyledCard key={project.id} elevation={1}>
+            <StyledCard
+              key={project.id}
+              elevation={1}
+              onClick={() => {
+                router.push(`/projects/${project.slug}`);
+              }}
+              sx={{
+                textDecoration: 'none',
+                color: 'inherit',
+                cursor: 'pointer',
+                '&:hover': {
+                  boxShadow: 4,
+                },
+              }}
+            >
               <Grid
                 container
                 spacing={3}

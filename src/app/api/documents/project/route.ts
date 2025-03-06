@@ -1,4 +1,5 @@
 import prisma from '@/libs/prisma.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import { DealFinancingType, Prisma, type DocumentEvent } from '@prisma/client';
 import { type NextRequest } from 'next/server';
@@ -15,15 +16,15 @@ export async function GET(request: NextRequest) {
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Clerk user not found', 404, { request });
     }
 
     const neutralUser = await prisma.user.findUnique({
       where: { clerkId: userId },
     });
+    if (!neutralUser) {
+      return errorResponse('User not found in database', 404, { request });
+    }
 
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
@@ -32,10 +33,7 @@ export async function GET(request: NextRequest) {
     const financingType = queryParams.get('financingType') ?? '';
 
     if (isNaN(projectId)) {
-      return new Response(JSON.stringify({ error: 'Invalid Project ID' }), {
-        status: 400,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Invalid Project ID', 400, { request });
     }
 
     //If no financing type is provided, return all documents
@@ -91,14 +89,11 @@ export async function GET(request: NextRequest) {
       return 0;
     });
 
-    return new Response(JSON.stringify(results), {
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return jsonResponse(results);
   } catch (error) {
-    console.error(error);
-    return new Response(JSON.stringify({ error: 'Error fetching data' }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
+    return errorResponse('Error fetching data', 500, {
+      request,
+      extra: { error },
     });
   }
 }

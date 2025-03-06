@@ -8,7 +8,6 @@ export async function getUserAndOrg(request: NextRequest, idIdxFromRight = 0) {
   const url = new URL(request.url);
   const urlBits = url.pathname.split('/');
   const id = parseInt(urlBits[urlBits.length - 1 - idIdxFromRight] ?? '');
-  console.log(`orgId: ${id}`);
   if (!id || !isNumber(id)) {
     throw new Error(`id: number is required in url. We found ${id}`);
   }
@@ -26,9 +25,6 @@ export async function getUserAndOrg(request: NextRequest, idIdxFromRight = 0) {
   });
 
   if (!user) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
     throw new Error(
       `User record with clerkid ${userId} not found in prisma (GET)`
     );

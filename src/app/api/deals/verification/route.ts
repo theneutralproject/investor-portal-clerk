@@ -4,7 +4,7 @@ import {
   zAccreditationVerificationCreateSchema,
 } from '@/libs/accreditationVerification/schema';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import type { AccreditationVerifier } from '@prisma/client';
 import type { NextRequest } from 'next/server';
@@ -22,11 +22,10 @@ export async function POST(request: NextRequest) {
 
   const user = await prisma.user.findUnique({ where: { clerkId: userId } });
   if (!user) {
-    return jsonResponse(
-      {
-        error: `User record with clerkid ${userId} not found in prisma (POST)`,
-      },
-      404
+    return errorResponse(
+      `User record with clerkid ${userId} not found in prisma (POST)`,
+      404,
+      { request }
     );
   }
 
@@ -37,9 +36,11 @@ export async function POST(request: NextRequest) {
 
     try {
       requestData = zAccreditationVerificationCreateSchema.parse(requestBody);
-    } catch (parseError) {
-      console.error('unable to parse POST body:\n', parseError);
-      return jsonResponse({ error: 'Input data malformatted' }, 400);
+    } catch (error) {
+      return errorResponse('Input data malformatted', 400, {
+        request,
+        extra: { error },
+      });
     }
 
     const { dealId, method, basis, verifier } = requestData;
@@ -50,10 +51,9 @@ export async function POST(request: NextRequest) {
     });
     if (!dealToUpdate) {
       console.error(`You do not have access to deal id ${dealId} (POST)`);
-      return jsonResponse(
-        { error: `You do not have access to deal id ${dealId}` },
-        404
-      );
+      return errorResponse(`You do not have access to deal id ${dealId}`, 404, {
+        request,
+      });
     }
     let newVerifier: AccreditationVerifier | undefined;
     if (verifier) {
@@ -68,13 +68,9 @@ export async function POST(request: NextRequest) {
       });
     return jsonResponse(newAccreditationVerification);
   } catch (error) {
-    console.error(
-      'ERROR: unable to create AccreditationVerification:\n',
-      error
-    );
-    return jsonResponse(
-      { error: 'Unable to create AccreditationVerification' },
-      500
-    );
+    return errorResponse('Error creating AccreditationVerification', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

@@ -1,19 +1,24 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { shareProjectDocsWithUser } from '@/libs/hubspot/utils.server';
+import Logger from '@/libs/logger';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import { UserCreateSchema, zUserCreateSchema } from '@/libs/user/schema';
 import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
-import { isError } from 'lodash';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 
 // get all users with their orgs
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   try {
@@ -34,16 +39,19 @@ export async function GET(request: NextRequest) {
     });
     return jsonResponse(allUsers);
   } catch (error) {
-    console.error('unable to fetch users:', getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to fetch users', 500, {
+      request,
+      extra: { error },
+    });
   }
 }
 
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let postData: UserCreateSchema;
@@ -51,11 +59,10 @@ export async function POST(request: NextRequest) {
     const requestBody = (await request.json()) as UserCreateSchema;
     postData = zUserCreateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse users POST body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse({ error: getErrorMessage(parseError) }, 400);
+    return errorResponse(getErrorMessage(parseError), 400, {
+      request,
+      extra: { error: parseError },
+    });
   }
 
   try {
@@ -96,7 +103,9 @@ export async function POST(request: NextRequest) {
 
     return jsonResponse(userWithOrgs);
   } catch (error) {
-    console.error('unable to create user:', getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to create user', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

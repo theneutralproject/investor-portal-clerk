@@ -1,20 +1,24 @@
 import { getAdminFromRequest, getFileDetails } from '@/libs/admin/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { validateEquityMilestonesFile } from '@/libs/returns/utils.server';
 import { storageClient } from '@/libs/supabase';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
-import { isError } from 'lodash';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
 
 const projectDocsBucket = 'project-documents';
 
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
-  // check if they are an admin user by checking the auth token
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let projectId: number | null = null;
@@ -23,8 +27,10 @@ export async function POST(request: NextRequest) {
     const queryParams = new URLSearchParams(url.search);
     projectId = parseInt(queryParams.get('projectId') ?? '-1');
   } catch (error) {
-    console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to read query params', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   let csvFile: FormDataEntryValue | null = null;
@@ -34,7 +40,10 @@ export async function POST(request: NextRequest) {
     csvFile = file[0] ?? null;
   } catch (error) {
     console.error('unable to read form data');
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to read form data', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   if (!csvFile) {
@@ -48,7 +57,9 @@ export async function POST(request: NextRequest) {
     },
   });
   if (!project?.investmentStats) {
-    return jsonResponse(`project witrh id ${projectId} not found`, 404);
+    return errorResponse(`project with id ${projectId} not found`, 404, {
+      request,
+    });
   }
   try {
     const fileDetails = getFileDetails(csvFile);
@@ -59,12 +70,12 @@ export async function POST(request: NextRequest) {
       .from(projectDocsBucket)
       .upload(`${tempPath}`, csvFile);
     if (error) {
-      console.warn('Failed to upload file to tempstorage:', error);
+      Logger.warn('Failed to upload file to tempstorage:', request, { error });
       if (error.message !== 'The resource already exists') {
-        return jsonResponse(
-          { message: 'Failed to upload file to tempstorage' },
-          500
-        );
+        return errorResponse('Failed to upload file to tempstorage', 500, {
+          request,
+          extra: { error },
+        });
       }
     }
 
@@ -79,6 +90,9 @@ export async function POST(request: NextRequest) {
       ...projectData,
     });
     if (!fileIsValid) {
+      Logger.warn('File is not formatted correctly:', request, {
+        method: 'validateEquityMilestonesFile',
+      });
       return jsonResponse('File is not formatted correctly', 400);
     }
 
@@ -97,8 +111,10 @@ export async function POST(request: NextRequest) {
       .from(projectDocsBucket)
       .move(`temp/${project.slug}/${fileName}`, `${newPath}`);
     if (finalError) {
-      console.error('Failed to move file to storage:', finalError);
-      return jsonResponse({ message: 'Failed to move file to storage' }, 500);
+      return errorResponse('Failed to move file to storage', 500, {
+        request,
+        extra: { error: finalError },
+      });
     }
 
     // update the project with the equity milestones csv path
@@ -118,7 +134,9 @@ export async function POST(request: NextRequest) {
       newPublicUrl,
     });
   } catch (error) {
-    console.error('Error in POST equity milestones:', error);
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('Error uploading equityMilestones file', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

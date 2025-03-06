@@ -33,7 +33,7 @@ export const zUserCreateSchema = z.object({
   email: z.string().email(),
   phoneNumber: z.string().optional(),
   address: zAddressCreateSchema.optional(),
-  dateOfBirth: z.coerce.date().optional(),
+  dateOfBirth: z.coerce.date().nullish(),
   projectSlug: z.string().optional(), // used to invite user to review project documents when invited from the admin portal
 });
 

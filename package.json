@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "engines": {
-    "node": "22.14"
+    "node": "22.13"
   },
   "scripts": {
     "build": "next build",
@@ -16,6 +16,10 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
+    "check-types": "tsc --pretty --noEmit",
+    "check-format": "prettier --check .",
+    "check-lint": "eslint . --ext ts --ext tsx --ext js",
+    "check-unused": "npx knip",
     "prebuild": "tsc --noEmit && eslint && prisma generate && prisma migrate deploy",
     "precommit": "tsc && eslint && prisma generate",
     "start": "next start",
@@ -35,7 +39,7 @@
     "@mui/icons-material": "^6.0.0",
     "@mui/material": "^6.1.7",
     "@mui/styled-engine-sc": "^6.0.0-alpha.18",
-    "@next/third-parties": "15.2.1",
+    "@next/third-parties": "15.1.6",
     "@sentry/nextjs": "^8.51.0",
     "@supabase/storage-js": "^2.7.1",
     "@t3-oss/env-nextjs": "^0.12.0",

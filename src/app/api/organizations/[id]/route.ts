@@ -9,7 +9,11 @@ import {
 } from '@/libs/organization/schema';
 import { sanitizeOrganization } from '@/libs/organization/utils';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 
 async function getUserAndOrg(request: NextRequest) {
   const url = new URL(request.url);
@@ -29,9 +33,6 @@ async function getUserAndOrg(request: NextRequest) {
   });
 
   if (!user) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
     throw new Error(
       `User record with clerkid ${userId} not found in prisma (GET)`
     );
@@ -63,7 +64,10 @@ export async function GET(request: NextRequest) {
       organization ? sanitizeOrganization(organization) : organization
     );
   } catch (error: unknown) {
-    return jsonResponse(getErrorMessage(error), 400);
+    return errorResponse(getErrorMessage(error), 400, {
+      request,
+      extra: { error },
+    });
   }
 }
 
@@ -76,7 +80,7 @@ export async function PUT(request: NextRequest) {
   try {
     const { user, organization: orgToUpdate } = await getUserAndOrg(request);
     if (!orgToUpdate) {
-      throw new Error('You do not have access to this organization');
+      return errorResponse('Organization not found', 404, { request });
     }
 
     const requestBody = (await request.json()) as OrganizationUpdateSchema;
@@ -84,10 +88,10 @@ export async function PUT(request: NextRequest) {
     try {
       putData = zOrganizationUpdateSchema.parse(requestBody);
     } catch (parseError) {
-      console.error('ERROR: unable to parse PUT body:\n', parseError);
-      throw new Error(
-        `Input data malformatted: \n${(parseError as Error).message}`
-      );
+      return errorResponse('Input data malformatted', 400, {
+        request,
+        extra: { error: parseError },
+      });
     }
 
     const { address, ...orgData } = putData;
@@ -101,8 +105,10 @@ export async function PUT(request: NextRequest) {
           update: { ...address, organizationId: orgToUpdate.id },
         })
         .catch(dbError => {
-          console.error('ERROR: unable to upsert address:\n', dbError);
-          throw new Error('unable to update the organization');
+          return errorResponse('Unable to update the organization', 500, {
+            request,
+            extra: { error: dbError },
+          });
         });
     }
 
@@ -111,8 +117,10 @@ export async function PUT(request: NextRequest) {
         orgToUpdate.isPrimary &&
         orgData.ownershipType !== DealOwnershipType.INDIVIDUAL
       ) {
-        throw new Error(
-          'Cannot update primary organization to non-INDIVIDUAL ownership type'
+        return errorResponse(
+          'Cannot update primary organization to non-INDIVIDUAL ownership type',
+          400,
+          { request }
         );
       }
     }
@@ -128,21 +136,25 @@ export async function PUT(request: NextRequest) {
         orgData.tin = presanitizedTIN;
       }
     }
-
-    const updatedOrg = await prisma.organization
-      .update({
+    try {
+      const updatedOrg = await prisma.organization.update({
         where: { ownerId: user.id, id: orgToUpdate.id },
         data: orgData,
         include: { members: true, address: true },
-      })
-      .catch(dbError => {
-        console.error('ERROR: unable to update org:\n', dbError);
-        throw new Error('unable to update the organization');
       });
 
-    return jsonResponse(sanitizeOrganization(updatedOrg));
-  } catch (error: unknown) {
-    return jsonResponse(getErrorMessage(error), 400);
+      return jsonResponse(sanitizeOrganization(updatedOrg));
+    } catch (error) {
+      return errorResponse('Unable to update the organization', 500, {
+        request,
+        extra: { error },
+      });
+    }
+  } catch (error) {
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }
 
@@ -156,7 +168,7 @@ export async function DELETE(request: NextRequest) {
     const { user, organization: orgToDelete } = await getUserAndOrg(request);
 
     if (!orgToDelete) {
-      throw new Error('You do not have access to this organization');
+      return errorResponse('Organization not found', 404, { request });
     }
 
     // check if org has existing deals
@@ -164,31 +176,45 @@ export async function DELETE(request: NextRequest) {
       where: { organizationId: orgToDelete.id },
     });
     if (orgDeals.length > 0) {
-      throw new Error('Organization has existing deals and cannot be deleted');
-    }
-
-    if (orgToDelete.isPrimary) {
-      throw new Error('Cannot delete primary organization');
-    }
-
-    if (orgToDelete.ownerId !== user.id) {
-      throw new Error(
-        'Only the organization owner can delete the organization'
+      return errorResponse(
+        'Organization has existing deals and cannot be deleted',
+        400,
+        { request }
       );
     }
 
-    await prisma.organization
-      .delete({ where: { id: orgToDelete.id, ownerId: user.id } })
-      .catch(dbError => {
-        console.error('ERROR: unable to delete org:\n', dbError);
-        throw new Error('unable to delete the organization');
+    if (orgToDelete.isPrimary) {
+      return errorResponse('Cannot delete primary organization', 400, {
+        request,
+      });
+    }
+
+    if (orgToDelete.ownerId !== user.id) {
+      return errorResponse(
+        'Only the organization owner can delete the organization',
+        400,
+        { request }
+      );
+    }
+    try {
+      await prisma.organization.delete({
+        where: { id: orgToDelete.id, ownerId: user.id },
       });
 
-    return jsonResponse(
-      { success: true, message: 'organization successfully deleted' },
-      200
-    );
-  } catch (error: unknown) {
-    return jsonResponse(getErrorMessage(error), 400);
+      return jsonResponse(
+        { success: true, message: 'organization successfully deleted' },
+        200
+      );
+    } catch (error) {
+      return errorResponse('Unable to delete the organization', 500, {
+        request,
+        extra: { error },
+      });
+    }
+  } catch (error) {
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }

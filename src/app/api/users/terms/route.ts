@@ -1,11 +1,7 @@
 'use server';
 import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/libs/prisma.server';
-import {
-  errorResponse,
-  getErrorMessage,
-  jsonResponse,
-} from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
 
 /**
@@ -41,19 +37,17 @@ const getUser = async (clerkUserId: string) => {
  * @returns {Promise<Response>} A JSON response indicating whether the user has accepted the current revision.
  */
 export async function GET(request: NextRequest) {
-  const { userId } = getAuth(request);
-  if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
+    return errorResponse('Clerk user not found', 404, { request });
   }
-  const user = await getUser(userId);
+  const user = await getUser(clerkId);
 
   if (!user) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
-    return jsonResponse(
-      { error: `User record with clerkid ${userId} not found in prisma (GET)` },
-      404
+    return errorResponse(
+      `User record with clerkid ${clerkId} not found in prisma (GET)`,
+      404,
+      { request }
     );
   }
 
@@ -74,21 +68,17 @@ export async function GET(request: NextRequest) {
  * @returns {Promise<Response>} A JSON response indicating success or failure of the operation.
  */
 export async function POST(request: NextRequest) {
-  const { userId } = getAuth(request);
-  if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
+    return errorResponse('Clerk user not found', 404, { request });
   }
-  const user = await getUser(userId);
+  const user = await getUser(clerkId);
 
   if (!user) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (POST)`
-    );
-    return jsonResponse(
-      {
-        error: `User record with clerkid ${userId} not found in prisma (POST)`,
-      },
-      404
+    return errorResponse(
+      `User record with clerkid ${clerkId} not found in prisma (GET)`,
+      404,
+      { request }
     );
   }
 
@@ -103,6 +93,9 @@ export async function POST(request: NextRequest) {
 
     return jsonResponse({ termEvent: newTermEvent }, 201);
   } catch (error) {
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse('Unknown Terms.create Error', 500, {
+      request,
+      extra: { error },
+    });
   }
 }
