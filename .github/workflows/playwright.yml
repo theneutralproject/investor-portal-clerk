@@ -95,6 +95,9 @@ jobs:
       - name: Run UI E2E Tests
         run: DEBUG=pw:browser npx playwright test e2e/ui --reporter=dot --trace on
 
+      - name: Run API E2E Tests
+        run: DEBUG=pw:browser npx playwright test e2e/api --reporter=dot --trace on
+
       - name: Upload Playwright Artifacts (Reports & Traces)
         if: always()
         uses: actions/upload-artifact@v4
