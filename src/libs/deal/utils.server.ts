@@ -59,6 +59,7 @@ export async function createDealForUser(
     .toUpperCase();
 
   if (!dealData.hubspotId) {
+    // create deal in hubspot
     const hsDealInput = initHubspotDealProps(project, dealOwner, dealData);
     if (!hsDealInput) {
       throw new Error(
@@ -66,12 +67,23 @@ export async function createDealForUser(
       );
     }
 
-    const hsDealId = await createHubspotDeal(
-      hsDealInput,
-      String(dealOwner.hubspotId)
-    );
-    dealData.hubspotId = hsDealId;
+    Logger.log({
+      message: `Creating deal in Hubspot for deal with transaction id ${dealData.transactionId}`,
+      extra: { hsDealInput },
+    });
+
+    try {
+      const hsDealId = await createHubspotDeal(
+        hsDealInput,
+        String(dealOwner.hubspotId)
+      );
+      dealData.hubspotId = hsDealId;
+    } catch (error) {
+      Logger.error(error, null, { dealData });
+      throw error;
+    }
   }
+  // now create the deal in the db
   try {
     const newDeal = await _createDeal(
       dealData,
@@ -79,9 +91,13 @@ export async function createDealForUser(
     );
 
     return newDeal;
-  } catch (e) {
-    console.error('Failed to create deal', e);
-    throw e;
+  } catch (error) {
+    Logger.error(error, null, {
+      dealData,
+      message: getErrorMessage(error),
+      function: 'createDealForUser._createDeal',
+    });
+    throw error;
   }
 }
 
