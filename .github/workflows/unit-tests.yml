@@ -1,5 +1,4 @@
 # GitHub action to build
-
 name: Unit Tests
 
 on:
@@ -16,9 +15,77 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: npm install
-      - run: npm run check-lint
-      - run: npm run check-types
-      - run: npm run check-format
-      - run: npm run test
-      - run: npm run build
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.13.1'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run Static Code Checks
+        run: npm run check-lint && npm run check-types && npm run check-format
+      - name: Run Unit Tests
+        env:
+          CI: true
+          BASE_URL: 'http://localhost:3000'
+          NODE_OPTIONS: '--max-old-space-size=4096'
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DIRECT_URL: ${{ secrets.DIRECT_URL }}
+          CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+          CLERK_WEBHOOK_SECRET: ${{ secrets.CLERK_WEBHOOK_SECRET }}
+          ADMIN_USER_ID: ${{ secrets.ADMIN_USER_ID }}
+          FINIX_USERNAME_519: ${{ secrets.FINIX_USERNAME_519 }}
+          FINIX_USERNAME_BAKERS: ${{ secrets.FINIX_USERNAME_BAKERS }}
+          FINIX_USERNAME_EDISON: ${{ secrets.FINIX_USERNAME_EDISON }}
+          FINIX_PASSWORD_519: ${{ secrets.FINIX_PASSWORD_519 }}
+          FINIX_PASSWORD_BAKERS: ${{ secrets.FINIX_PASSWORD_BAKERS }}
+          FINIX_PASSWORD_EDISON: ${{ secrets.FINIX_PASSWORD_EDISON }}
+          FINIX_BASE_URL: ${{ secrets.FINIX_BASE_URL }}
+          NEXT_PUBLIC_FINIX_MERCHANT_ID_519: ${{ secrets.NEXT_PUBLIC_FINIX_MERCHANT_ID_519 }}
+          NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS: ${{ secrets.NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS }}
+          NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON: ${{ secrets.NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON }}
+          NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: ${{ secrets.NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT }}
+          FINIX_WH_USERNAME: ${{ secrets.FINIX_WH_USERNAME }}
+          FINIX_WH_PASSWORD: ${{ secrets.FINIX_WH_PASSWORD }}
+          HUBSPOT_ACCESS_TOKEN: ${{ secrets.HUBSPOT_ACCESS_TOKEN }}
+          HUBSPOT_API_BASE_URL: ${{ secrets.HUBSPOT_API_BASE_URL }}
+          HUBSPOT_SHARE_PROJECT_DOCS_WEBHOOK_URL: ${{ secrets.HUBSPOT_SHARE_PROJECT_DOCS_WEBHOOK_URL }}
+          HUBSPOT_OWNER_ID: ${{ secrets.HUBSPOT_OWNER_ID }}
+          SUPABASE_STORAGE_URL: ${{ secrets.SUPABASE_STORAGE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          GOOGLE_TAG_ID: ${{ secrets.GOOGLE_TAG_ID }}
+          NEXT_PUBLIC_POSTHOG_KEY: ${{ secrets.NEXT_PUBLIC_POSTHOG_KEY }}
+          NEXT_PUBLIC_POSTHOG_HOST: ${{ secrets.NEXT_PUBLIC_POSTHOG_HOST }}
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+          PRISMA_FIELD_ENCRYPTION_KEY: ${{ secrets.PRISMA_FIELD_ENCRYPTION_KEY }}
+          E2E_CLERK_USER_USERNAME: ${{ secrets.E2E_CLERK_USER_USERNAME }}
+          E2E_CLERK_USER_PASSWORD: ${{ secrets.E2E_CLERK_USER_PASSWORD }}
+          E2E_CLERK_USER_VERIFY_CODE: ${{ secrets.E2E_CLERK_USER_VERIFY_CODE }}
+          E2E_CLERK_USER_PHONE: ${{ secrets.E2E_CLERK_USER_PHONE }}
+          TEST_USER_TOKEN: ${{ secrets.TEST_USER_TOKEN }}
+          IRON_SESSION_PASSWORD: ${{ secrets.IRON_SESSION_PASSWORD }}
+          DOCUSIGN_BASE_PATH: ${{ secrets.DOCUSIGN_BASE_PATH }}
+          DOCUSIGN_USER_ID: ${{ secrets.DOCUSIGN_USER_ID }}
+          DOCUSIGN_INTEGRATION_KEY: ${{ secrets.DOCUSIGN_INTEGRATION_KEY }}
+          DOCUSIGN_API_ACCOUNT_ID: ${{ secrets.DOCUSIGN_API_ACCOUNT_ID }}
+          DOCUSIGN_RSA_PRIVATE_KEY: ${{ secrets.DOCUSIGN_RSA_PRIVATE_KEY }}
+          DOCUSIGN_SECRET_KEY: ${{ secrets.DOCUSIGN_SECRET_KEY }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          GOOGLE_OAUTH_URL: ${{ secrets.GOOGLE_OAUTH_URL }}
+          GOOGLE_ACCESS_TOKEN_URL: ${{ secrets.GOOGLE_ACCESS_TOKEN_URL }}
+          GOOGLE_TOKEN_INFO_URL: ${{ secrets.GOOGLE_TOKEN_INFO_URL }}
+          GOOGLE_CALLBACK_URL_SUBDIRECTORY: ${{ secrets.GOOGLE_CALLBACK_URL_SUBDIRECTORY }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CURRENT_TERMS_REVISION: ${{ secrets.CURRENT_TERMS_REVISION }}
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+        run: npm run test -- --verbose
+      - name: Upload Test Reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: unit-test-results
+          path: unit-test-results/
+          retention-days: 10
+      - name: Run Build
+        run: npm run build
