@@ -47,6 +47,7 @@ export default defineConfig({
     },
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
+    bypassCSP: true,
   },
   /* Run your local dev server before starting the tests */
   webServer: {

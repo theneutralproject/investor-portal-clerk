@@ -22,24 +22,23 @@ import Logger from '@/libs/logger';
  * @returns the full user data for the currently logged in user
  */
 export async function GET(request: NextRequest) {
-  const { userId } = getAuth(request);
-  if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
+    return errorResponse('Clerk user not found', 404, {
+      request,
+      extra: { clerkId },
+    });
   }
   const user = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { clerkId: clerkId },
     include: { address: true },
   });
 
   if (!user) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
-    return jsonResponse(
-      {
-        error: `User record with clerkid ${userId} not found in prisma (GET)`,
-      },
-      404
+    return errorResponse(
+      `User record with clerkid ${clerkId} not found in prisma (GET)`,
+      404,
+      { request }
     );
   }
 
@@ -54,15 +53,19 @@ export async function GET(request: NextRequest) {
  */
 export async function PUT(request: NextRequest) {
   // user can only update their own information
-  const { userId } = getAuth(request);
-  if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
+    return errorResponse('Clerk user not found', 404, {
+      request,
+      extra: { clerkId },
+    });
   }
+
   const requestingUser = await prisma.user.findUnique({
-    where: { clerkId: userId },
+    where: { clerkId: clerkId },
   });
   if (!requestingUser) {
-    return jsonResponse({ error: 'Requesting user not found' }, 404);
+    return errorResponse('Requesting user not found', 404, { request });
   }
 
   const requestBody = (await request.json()) as UserUpdateSchema;
@@ -70,14 +73,10 @@ export async function PUT(request: NextRequest) {
   try {
     putData = zUserUpdateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse users PUT body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse(
-      { error: `Input data malformatted: \n${(parseError as Error).message}` },
-      400
-    );
+    return errorResponse('Input data malformed', 400, {
+      request,
+      extra: { error: parseError },
+    });
   }
 
   //TODO: use new updateUserInDbAndHubspot function instead of this, but might need to unsanitize ssn first
@@ -109,7 +108,7 @@ export async function PUT(request: NextRequest) {
       });
     }
     try {
-      await (await clerkClient()).users.updateUser(userId, clerkUpdate);
+      await (await clerkClient()).users.updateUser(clerkId, clerkUpdate);
     } catch (clerkError) {
       Logger.error('Error updating Clerk user', request, { error: clerkError });
     }
@@ -132,7 +131,7 @@ export async function PUT(request: NextRequest) {
 
   if (address) {
     const existingUser = await prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { clerkId },
     });
     if (!existingUser) {
       return errorResponse('User not found', 404, {
@@ -158,7 +157,7 @@ export async function PUT(request: NextRequest) {
 
     try {
       const updatedUser = await prisma.user.update({
-        where: { clerkId: userId },
+        where: { clerkId },
         data: userData,
         include: { address: true },
       });
@@ -174,7 +173,7 @@ export async function PUT(request: NextRequest) {
     // no address to update, just update user data
     try {
       const updatedUser = await prisma.user.update({
-        where: { clerkId: userId },
+        where: { clerkId },
         data: userData,
         include: { address: true },
       });

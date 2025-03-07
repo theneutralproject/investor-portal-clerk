@@ -1,6 +1,6 @@
 import prisma from '@/libs/prisma.server';
 import { getSupabaseDownloadUrl } from '@/libs/supabase';
-import { jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import { DealDocumentType } from '@prisma/client';
 import { NextRequest } from 'next/server';
@@ -16,10 +16,7 @@ export async function GET(request: NextRequest) {
   try {
     const { userId } = getAuth(request);
     if (!userId) {
-      return new Response(JSON.stringify({ error: 'User not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return errorResponse('Clerk user not found', 404, { request });
     }
 
     const neutralUser = await prisma.user.findUnique({
@@ -28,10 +25,7 @@ export async function GET(request: NextRequest) {
     });
 
     if (!neutralUser) {
-      return new Response(
-        JSON.stringify({ error: 'User not associated with any organization' }),
-        { status: 404, headers: { 'Content-Type': 'application/json' } }
-      );
+      return errorResponse('User not found in database', 404, { request });
     }
 
     const organizationIds = neutralUser.organizationMember.map(
@@ -70,10 +64,9 @@ export async function GET(request: NextRequest) {
 
     return jsonResponse({ taxDocuments, investmentDocuments });
   } catch (error) {
-    console.error('Error getting deal documents: ', error);
-    return new Response(
-      JSON.stringify({ error: 'Error getting deal documents' }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } }
-    );
+    return errorResponse('Error fetching deal documents', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

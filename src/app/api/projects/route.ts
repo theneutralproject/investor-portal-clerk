@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     slug = queryParams.get('slug') ?? undefined;
   } catch (error) {
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, { request });
   }
   const projects = await prisma.project
     .findMany({
@@ -30,20 +30,14 @@ export async function GET(request: NextRequest) {
       },
     })
     .catch(findManyError => {
-      console.error(
-        `Could not fetch projects with slug ${slug}: ${findManyError}`
-      );
-      return new Response(JSON.stringify({ error: 'Projects not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
+      return errorResponse('Projects not found', 404, {
+        request,
+        extra: findManyError,
       });
     });
 
   if (!projects) {
-    return new Response(JSON.stringify({ error: 'Projects not found' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return errorResponse('Projects not found', 404, { request });
   }
   return jsonResponse(projects);
 }

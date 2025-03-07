@@ -15,8 +15,11 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);
   }
-  const projects = await prisma.project
-    .findMany({
+
+  let projects = [];
+
+  try {
+    projects = await prisma.project.findMany({
       where: { slug: slug },
       include: {
         pictures: true,
@@ -24,21 +27,24 @@ export async function GET(request: NextRequest) {
         investmentStats: true,
         propertyStats: true,
       },
-    })
-    .catch(findManyError => {
-      console.error(
-        `Could not fetch projects with slug ${slug}: ${findManyError}`
-      );
-      return new Response(JSON.stringify({ error: 'Projects not found' }), {
-        status: 404,
-        headers: { 'Content-Type': 'application/json' },
-      });
     });
+  } catch (findManyError) {
+    return errorResponse('Projects not found', 404, {
+      request,
+      extra: {
+        slug,
+        findManyError
+      }
+    });
+  }
 
-  if (!projects) {
-    return new Response(JSON.stringify({ error: 'Projects not found' }), {
-      status: 404,
-      headers: { 'Content-Type': 'application/json' },
+  if (!projects.length) {
+    return errorResponse('Projects not found', 404, {
+      request,
+      extra: {
+        slug,
+        projects
+      }
     });
   }
   return jsonResponse(projects);

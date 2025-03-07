@@ -1,4 +1,5 @@
-import { DealCreateSchema, DealWithConversion } from '@/libs/deal/schema';
+import { DealCreateSchema } from '@/libs/deal/schema';
+import { DealWithConversion } from '@/libs/types';
 import { test, expect } from '@playwright/test';
 import {
   Deal,

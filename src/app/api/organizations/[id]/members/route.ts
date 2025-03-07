@@ -8,7 +8,7 @@ import {
   createUserInDbAndHubspot,
   sanitizeUser,
 } from '@/libs/user/utils.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import type { User } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 import { getUserAndOrg } from './helpers';
@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
   try {
     const { user: dbUser, organization } = await getUserAndOrg(request, 1);
     if (!organization) {
-      throw new Error('Organization not found');
+      return errorResponse('Organization not found', 404, { request });
     }
     if (!dbUser) {
-      throw new Error('User not found');
+      return errorResponse('User not found', 404, { request });
     }
 
     const requestBody =
@@ -37,13 +37,10 @@ export async function POST(request: NextRequest) {
     try {
       postData = zOrganizationMemberCreateSchema.parse(requestBody);
     } catch (parseError) {
-      console.error('unable to parse POST body:\n', parseError);
-      return jsonResponse(
-        {
-          error: `Input data malformatted: \n${(parseError as Error).message}`,
-        },
-        400
-      );
+      return errorResponse('Input data malformatted', 400, {
+        request,
+        extra: { error: parseError },
+      });
     }
 
     // extract email from postdata.user
@@ -54,15 +51,10 @@ export async function POST(request: NextRequest) {
 
     // 1. make sure that the requester is the owner of the org in question
     if (organization.ownerId !== dbUser.id) {
-      console.error(
-        `User ${dbUser.id} is not authorized to edit the orgToUpdate with id ${organization.id}:\n`
-      );
-      return jsonResponse(
-        {
-          error:
-            'You are not the owner of the organization you are looking to edit',
-        },
-        401
+      return errorResponse(
+        'Only org owners can edit organization members',
+        401,
+        { request }
       );
     }
 
@@ -71,11 +63,10 @@ export async function POST(request: NextRequest) {
       member => member.user.email === email.toLowerCase()
     );
     if (existingMember) {
-      return jsonResponse(
-        {
-          error: `User ${email.toLowerCase()} already exists as a member of the specified organization`,
-        },
-        403
+      return errorResponse(
+        `User ${email.toLowerCase()} already exists as a member of the specified organization`,
+        403,
+        { request }
       );
     }
 
@@ -105,11 +96,11 @@ export async function POST(request: NextRequest) {
           201
         );
       } catch (error) {
-        console.error(
-          `ERROR: unable to CONNECT existing user to org with id ${organization.id}:\n`,
-          error
+        return errorResponse(
+          `Unable to CONNECT existing user to org with id ${organization.id}`,
+          400,
+          { request, extra: { error } }
         );
-        return jsonResponse(getErrorMessage(error), 400);
       }
     }
 
@@ -121,8 +112,10 @@ export async function POST(request: NextRequest) {
         dealId
       );
     } catch (createUserError) {
-      console.error('ERROR: unable to create user:\n', createUserError);
-      return jsonResponse({ error: 'The user could not be created' }, 400);
+      return errorResponse('The user could not be created', 400, {
+        request,
+        extra: { error: createUserError },
+      });
     }
 
     try {
@@ -142,14 +135,19 @@ export async function POST(request: NextRequest) {
         201
       );
     } catch (error) {
-      console.error(
-        `ERROR: unable to CONNECT new user to org with id ${organization.id}:\n`,
-        error
+      return errorResponse(
+        `Unable to CONNECT new user to org with id ${organization.id}`,
+        400,
+        {
+          request,
+          extra: { error },
+        }
       );
-      return jsonResponse(getErrorMessage(error), 400);
     }
   } catch (error: unknown) {
-    console.error('ERROR: unable to add user to org:\n', error);
-    return jsonResponse(getErrorMessage(error), 400);
+    return errorResponse('The member could not be added', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

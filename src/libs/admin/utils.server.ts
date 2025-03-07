@@ -36,7 +36,8 @@ export async function getAdminFromRequest(request: NextRequest) {
     }
     return adminUser;
   } catch (__error) {
-    return new Error('Invalid or Expired token');
+    // return new Error('Invalid or Expired token');
+    throw __error;
   }
 }
 

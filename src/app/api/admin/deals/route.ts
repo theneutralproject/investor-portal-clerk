@@ -5,7 +5,6 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
-import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 import {
   DealDocumentType,
@@ -14,6 +13,7 @@ import {
 } from '@prisma/client';
 import { DealCreateSchema, DealStage } from '@/libs/deal/schema';
 import { createDealForUser } from '@/libs/deal/utils.server';
+import Logger from '@/libs/logger';
 
 /**
  * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
@@ -21,10 +21,11 @@ import { createDealForUser } from '@/libs/deal/utils.server';
  * @returns
  */
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let email: string | undefined;
@@ -161,27 +162,35 @@ export async function GET(request: NextRequest) {
           financingTypeStr as DealFinancingType;
       }
     }
-
-    const deals = await prisma.deal.findMany({
-      where: where,
-      include: {
-        organization: { include: { ownedBy: true } },
-        investmentStats: true,
-        document: {
-          include: {
-            uploadedBy: {
-              select: {
-                email: true,
-                firstName: true,
-                lastName: true,
-                id: true,
+    try {
+      const deals = await prisma.deal.findMany({
+        where: where,
+        include: {
+          organization: { include: { ownedBy: true } },
+          investmentStats: true,
+          document: {
+            include: {
+              uploadedBy: {
+                select: {
+                  email: true,
+                  firstName: true,
+                  lastName: true,
+                  id: true,
+                },
               },
             },
           },
         },
-      },
-    });
-    return jsonResponse(deals);
+      });
+      return jsonResponse(deals);
+    } catch (error) {
+      return errorResponse(getErrorMessage(error), 500, {
+        request,
+        extra: {
+          method: 'prisma.deal.findMany',
+        },
+      });
+    }
   }
 }
 
@@ -190,10 +199,11 @@ export async function GET(request: NextRequest) {
  * @param request
  */
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let postData: DealCreateSchema;
@@ -201,14 +211,11 @@ export async function POST(request: NextRequest) {
     const requestBody = (await request.json()) as DealCreateSchema;
     postData = requestBody;
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse deals POST body:\n',
-      getErrorMessage(parseError)
-    );
-    return errorResponse(getErrorMessage(parseError), 400, {
+    return errorResponse('Input data malformatted', 400, {
       request,
       extra: {
         method: 'parseError',
+        error: parseError,
       },
     });
   }
@@ -228,14 +235,16 @@ export async function POST(request: NextRequest) {
     return errorResponse('financingType is required', 400, {
       request,
     });
-  if (!postData.closingDate)
+  if (postData.dealStage === DealStage.CLOSED && !postData.closingDate)
     return errorResponse('closingDate is required', 400, {
       request,
     });
-  postData.dealStage = postData.dealStage ?? 5;
-  postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
-  postData.signaturesCompletedDate =
-    postData.signaturesCompletedDate ?? postData.closingDate;
+  postData.dealStage = postData.dealStage ?? DealStage.CLOSED;
+  if (postData.dealStage === DealStage.CLOSED) {
+    postData.dateFundsSent = postData.dateFundsSent ?? postData.closingDate;
+    postData.signaturesCompletedDate =
+      postData.signaturesCompletedDate ?? postData.closingDate;
+  }
 
   const ownerOrg = await prisma.organization.findUnique({
     where: { id: postData.organizationId },
@@ -258,11 +267,11 @@ export async function POST(request: NextRequest) {
     const newDeal = await createDealForUser(postData, ownerOrg.ownedBy);
     return jsonResponse(newDeal);
   } catch (error) {
-    console.error('unable to create deal:', getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500, {
+    return errorResponse('unable to create deal', 500, {
       request,
       extra: {
         method: 'createDealForUser',
+        error,
       },
     });
   }

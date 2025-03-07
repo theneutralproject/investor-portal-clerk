@@ -1,9 +1,11 @@
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import {
   getDealStageIntFromHSString,
   getFinancingType,
   getHubspotDealById,
   getProjectSlugFromDealStage,
 } from '@/libs/hubspot/utils.server';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import {
   errorResponse,
@@ -14,6 +16,13 @@ import { SimplePublicObjectWithAssociations } from '@hubspot/api-client/lib/code
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+
   const url = new URL(request.url);
   const hubspotId = new URLSearchParams(url.search).get('hubspotId');
   if (!hubspotId) {
@@ -23,8 +32,10 @@ export async function GET(request: NextRequest) {
   try {
     hsDeal = await getHubspotDealById(hubspotId);
   } catch (error) {
-    console.error(getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { method: 'getHubspotDealById' },
+    });
   }
 
   let projectId: number | undefined;
@@ -43,7 +54,7 @@ export async function GET(request: NextRequest) {
           projectName = project.name;
         }
       } catch (error) {
-        console.error(getErrorMessage(error));
+        Logger.warn(getErrorMessage(error), request);
       }
     }
   }

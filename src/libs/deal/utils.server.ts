@@ -6,7 +6,11 @@ import {
   type DealInvestmentStats,
 } from '@prisma/client';
 import { isError } from 'lodash';
-import { type DealCreateSchema, type DealUpdateSchema } from './schema';
+import {
+  DealStage,
+  type DealCreateSchema,
+  type DealUpdateSchema,
+} from './schema';
 import {
   getDebtInterestRate,
   getDebtUnitType,
@@ -25,6 +29,7 @@ import type {
 } from '../types';
 import { getInvestmentEntity } from './utils';
 import { getErrorMessage } from '../utils.server';
+import Logger from '../logger';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -216,8 +221,13 @@ export async function updateDeal(
     throw Error('The deal does not exist in the database');
   }
 
-  if (existingDeal.dealStage >= 5 && !allowMaintenanceOfCompletedDeals) {
-    console.error('Completed Deals cannot be updated');
+  if (
+    existingDeal.dealStage >= DealStage.CLOSED &&
+    !allowMaintenanceOfCompletedDeals
+  ) {
+    Logger.error(new Error('Completed Deals cannot be updated'), null, {
+      extra: { existingDeal },
+    });
     throw Error('Completed Deals cannot be updated');
   }
   console.log('investmentStatsToUpdate', investmentStatsToUpdate);
@@ -301,7 +311,7 @@ export async function updateDeal(
           `Failed to update deal investment stats for deal id ${existingDeal.id}. `
         );
         console.error(error);
-        throw Error('Failed to update deal with hubspot data');
+        throw error;
       }
     }
   }
@@ -310,7 +320,7 @@ export async function updateDeal(
   let updatedDeal: DealWithInvestmentStats;
 
   if (
-    dealData.dealStage === 5 &&
+    dealData.dealStage === DealStage.CLOSED &&
     !existingDeal.closingDate &&
     !dealData.closingDate
   ) {
@@ -330,9 +340,9 @@ export async function updateDeal(
   } catch (error) {
     console.error(
       `Failed to update deal with hubspot id ${dealData.hubspotId}:`,
-      error
+      getErrorMessage(error)
     );
-    throw Error(`Failed to update deal with hubspot id ${dealData.hubspotId}`);
+    throw error;
   }
 
   if (updateHubspot) {
@@ -352,7 +362,10 @@ export async function updateDeal(
       );
       await updateHubspotDealProperties(hsDeal);
     } catch (error) {
-      console.error('Failed to update deal in Hubspot', error);
+      console.error(
+        'Failed to update deal in Hubspot - but deal was updated in DB:'
+      );
+      console.error(error);
     }
   }
   if (updatedStats) {

@@ -2,6 +2,7 @@
 
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { DealStage } from '@/libs/deal/schema';
+import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
@@ -11,14 +12,15 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import { DealStatus } from '@prisma/client';
-import { isError, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let userId: number;
@@ -63,7 +65,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (!user) {
-    return errorResponse('User not found in database', 404);
+    return errorResponse('User not found in database', 404, { request });
   }
   const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
@@ -82,7 +84,9 @@ export async function GET(request: NextRequest) {
     const portfolioReturns = await getPortfolioReturns(deals);
     return jsonResponse(portfolioReturns);
   } catch (error) {
-    console.error(`unable to get portfolio returns: ${error}`);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to get portfolio returns', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
     (await request.json()) as RequestBody;
 
   if (!projectId || !amount || !financingType) {
-    return jsonResponse({ message: 'Missing required fields' }, 400);
+    return errorResponse('Missing required fields', 400, { request });
   }
   const projectResponse = await prisma.project.findUnique({
     where: { id: projectId },
@@ -30,20 +30,21 @@ export async function POST(request: NextRequest) {
     },
   });
   if (!projectResponse) {
-    return jsonResponse({ message: 'Project not found' }, 404);
+    return errorResponse('Project not found', 404, { request });
   }
   const { investmentStats, milestones, ...project } = projectResponse;
   if (!investmentStats) {
-    return jsonResponse({ message: 'Project investment stats not found' }, 404);
+    return errorResponse('Project investment stats not found', 404, {
+      request,
+    });
   }
   if (!milestones) {
-    return jsonResponse({ message: 'Project milestones not found' }, 404);
+    return errorResponse('Project milestones not found', 404, { request });
   }
   if (!project.equityReturnsFile) {
-    return jsonResponse(
-      { message: 'Project equity returns file not found' },
-      404
-    );
+    return errorResponse('Project equity returns file not found', 404, {
+      request,
+    });
   }
 
   // for closed deals, use the closing date as the start date. Otherwise, use today's date, if the project already officially closed
@@ -59,17 +60,19 @@ export async function POST(request: NextRequest) {
     financingType !== DealFinancingType.equity &&
     financingType !== DealFinancingType.promissory_note_now
   ) {
-    return jsonResponse({ message: 'Financing type not supported' }, 400);
+    return errorResponse('Financing type not supported', 400, {
+      request,
+      extra: { financingType },
+    });
   }
 
   // debt financing
   if (financingType === DealFinancingType.promissory_note_now) {
     if (amount < investmentStats.debtMinInvestment) {
-      return jsonResponse(
-        {
-          message: `The minimum investment amount for this project is $${investmentStats.debtMinInvestment.toLocaleString()}`,
-        },
-        400
+      return errorResponse(
+        `The minimum investment amount for this project is $${investmentStats.debtMinInvestment.toLocaleString()}`,
+        400,
+        { request, extra: { amount } }
       );
     }
     const payoutScheduleAndStats = getDebtPayoutScheduleAndStatsForProject(
@@ -98,10 +101,12 @@ export async function POST(request: NextRequest) {
         investmentStats.equityPreferredReturn
       );
       return jsonResponse(payoutScheduleAndStats);
-    } catch (e) {
-      console.error(`Failed to get equity stats for project ${project.name}:`);
-      console.error(e);
-      return errorResponse('Failed to get equity stats', 500);
+    } catch (error) {
+      return errorResponse(
+        `Failed to get equity stats for project ${project.name}`,
+        500,
+        { request, extra: { error } }
+      );
     }
   }
 }

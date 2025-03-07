@@ -23,14 +23,17 @@ export async function POST(request: NextRequest) {
     },
     request
   );
-  const { userId } = getAuth(request);
-  if (!userId) {
+  const { userId: clerkId } = getAuth(request);
+  if (!clerkId) {
     return errorResponse('User not authenticated', 401);
   }
 
-  const user = await prisma.user.findUnique({ where: { clerkId: userId } });
+  const user = await prisma.user.findUnique({ where: { clerkId } });
   if (!user) {
-    return errorResponse('User not found', 404);
+    return errorResponse('User not found', 404, {
+      request,
+      extra: { clerkId },
+    });
   }
 
   const body = (await request.json()) as {
@@ -51,7 +54,8 @@ export async function POST(request: NextRequest) {
   ) {
     return errorResponse(
       'plaid_public_token, plaid_account_id, dealId and sessionKey are required',
-      400
+      400,
+      { request }
     );
   }
   try {
@@ -72,10 +76,16 @@ export async function POST(request: NextRequest) {
       deal.investmentStats.amount <= 0 ||
       deal.investmentStats.amount > maxFinixAmount
     ) {
-      return errorResponse('The investment amount is invalid', 400);
+      return errorResponse('The investment amount is invalid', 400, {
+        request,
+        extra: { deal },
+      });
     }
     if (!deal.organization.members.find(member => member.userId === user.id)) {
-      return errorResponse('You are not a member of this organization', 401);
+      return errorResponse('You are not a member of this organization', 401, {
+        request,
+        extra: { deal },
+      });
     }
 
     const {
@@ -102,9 +112,6 @@ export async function POST(request: NextRequest) {
       body.sessionKey
     );
     if (isError(achTransferResponseData)) {
-      Logger.error('Error transferring money 1:', request, {
-        extra: { achTransferResponseData },
-      });
       return errorResponse('Error transferring money 1', 500, {
         request,
         extra: { response: achTransferResponseData },
