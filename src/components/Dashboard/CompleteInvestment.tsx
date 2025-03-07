@@ -13,13 +13,13 @@ import { styled } from '@mui/material/styles';
 import {
   type DealWithOrgMembersAndProject,
   type DealWithFullOrgAndProject,
+  POSTHOG_EVENTS,
 } from '@/libs/types';
 import { useRouter } from 'next/navigation';
 import { DealFinancingType } from '@prisma/client';
 import DeleteDealButton from './DeleteDealButton';
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { usePostHog } from 'posthog-js/react';
-import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 import { getProjectImage } from './DashboardProjects';
 import { DealStage } from '@/libs/deal/schema';
 interface CompleteInvestmentProps {

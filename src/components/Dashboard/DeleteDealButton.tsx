@@ -10,7 +10,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useDashboard } from './DashboardContext';
 import { usePostHog } from 'posthog-js/react';
-import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
+import { POSTHOG_EVENTS } from '@/libs/types';
 
 interface DeleteDealButtonProps {
   dealId: number;

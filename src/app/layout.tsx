@@ -13,11 +13,11 @@ import { ToastContainer } from 'react-toastify';
 import SignInTOSModal from '@/components/Dashboard/SignInTOSModal';
 import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 import PageViewTracker from './PageViewTracker';
-import CSPostHogProvider from './CSPostHogProvider';
 import UserIdentifier from './UserIdentifier';
 import { TermsProvider } from '@/app/context/TermsContext';
 import { HubspotChatProvider } from '@/components/HubspotChatProvider';
 import { RedirectProvider } from './context/RedirectContext';
+import { PostHogProvider } from './context/PostHogContext';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -35,7 +35,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <CSPostHogProvider>
+    <PostHogProvider>
       <ClerkProvider>
         <RedirectProvider>
           <TermsProvider>
@@ -75,6 +75,6 @@ export default function RootLayout({
           </TermsProvider>
         </RedirectProvider>
       </ClerkProvider>
-    </CSPostHogProvider>
+    </PostHogProvider>
   );
 }

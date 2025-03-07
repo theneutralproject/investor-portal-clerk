@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Card, CardContent, Divider, Typography } from '@mui/material';
-import type { ProjectWithStats } from '@/libs/types';
+import { POSTHOG_EVENTS, type ProjectWithStats } from '@/libs/types';
 import useDocuments from '@/app/hooks/useDocuments';
 import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
 import DocumentCard from '../ProjectDocs/DocumentCard';
 import DocumentViewerModal from '../ProjectDocs/DocumentViewerModal';
 import { usePostHog } from 'posthog-js/react';
-import { POSTHOG_EVENTS } from '@/app/CSPostHogProvider';
 
 // Define a proper error type
 type ApiError = {
