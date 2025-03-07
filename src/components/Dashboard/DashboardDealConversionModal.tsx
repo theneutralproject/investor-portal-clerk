@@ -115,7 +115,6 @@ export const DashboardDealConversionModal: React.FC<
     if (conversion) {
       const rows: DealRow[] = [];
 
-      // Process end deal (active  deal)
       rows.push({
         id: conversion.endDeal.id,
         status: conversion.endDeal.status ?? '',
@@ -146,6 +145,16 @@ export const DashboardDealConversionModal: React.FC<
         accruedInterest: -1,
       });
 
+      // Sort rows by effective date
+      rows.sort((a, b) => {
+        if (b.effectiveDate === '-') {
+          return -1;
+        }
+        if (a.effectiveDate === '-') {
+          return 1;
+        }
+        return a.effectiveDate <= b.effectiveDate ? -1 : 1;
+      });
       setDealRows(rows);
     }
   }, [conversion, conversionReturns]);
