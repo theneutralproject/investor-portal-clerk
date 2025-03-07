@@ -1,6 +1,6 @@
 'use server';
 import prisma from '@/libs/prisma.server';
-import { createHubspotContact } from '@/libs/hubspot/utils.server';
+import { createOrUpdateHubspotContact } from '@/libs/hubspot/utils.server';
 import { jsonResponse } from '@/libs/utils.server';
 import {
   findOrCreateClerkUser,
@@ -45,7 +45,7 @@ export async function GET(request: NextRequest) {
       );
       try {
         // update user in hubspot
-        const hsId = await createHubspotContact({
+        const hsId = await createOrUpdateHubspotContact({
           email,
           properties: {
             userid: clerkUser.id,

@@ -118,8 +118,11 @@ export async function PUT(request: NextRequest) {
     if (!userId || !isNumber(userId)) {
       throw new Error('userId is required in url');
     }
-  } catch (__error) {
-    return errorResponse(`userId is required in url`, 500, { request });
+  } catch (error) {
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 
   let putData: UserUpdateSchema;
@@ -129,7 +132,7 @@ export async function PUT(request: NextRequest) {
   } catch (parseError) {
     return errorResponse(getErrorMessage(parseError), 500, {
       request,
-      extra: { parseError },
+      extra: { error: parseError },
     });
   }
 
