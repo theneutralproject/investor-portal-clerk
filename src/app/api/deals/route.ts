@@ -231,7 +231,9 @@ export async function DELETE(request: NextRequest) {
 
   const dbUserId = sessionClaims?.metadata?.investorPortalId;
   if (!dbUserId) {
-    return errorResponse('investorPortalId not found in getAuth()', 404);
+    return errorResponse('investorPortalId not found in getAuth()', 404, {
+      request,
+    });
   }
 
   const deal = await prisma.deal.findUnique({
@@ -240,7 +242,7 @@ export async function DELETE(request: NextRequest) {
   });
 
   if (!deal) {
-    return errorResponse('Deal not found', 404, {
+    return errorResponse(`Deal with id ${dealId} not found in DB`, 404, {
       request: request,
       extra: { method: 'prisma.deal.findUnique' },
     });
@@ -252,16 +254,22 @@ export async function DELETE(request: NextRequest) {
   });
 
   if (!isOwner) {
-    return errorResponse('Unauthorized to cancel this deal', 403, {
+    return errorResponse('You are unauthorized to cancel this deal', 403, {
       request: request,
       extra: { method: 'prisma.organization.findUnique' },
     });
   }
+  try {
+    await prisma.deal.update({
+      where: { id: dealId },
+      data: { dealStage: DealStage.CLOSED_LOST, status: DealStatus.LOST },
+    });
 
-  await prisma.deal.update({
-    where: { id: dealId },
-    data: { dealStage: DealStage.CLOSED_LOST, status: DealStatus.LOST },
-  });
-
-  return jsonResponse({ message: 'Deal cancelled' });
+    return jsonResponse({ message: 'Deal cancelled' });
+  } catch (error) {
+    return errorResponse('Error cancelling deal', 500, {
+      request: request,
+      extra: { error },
+    });
+  }
 }
