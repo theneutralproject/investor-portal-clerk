@@ -38,7 +38,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       await authClient.users.updateUser(userId, {
         publicMetadata: {
           onboardingComplete: true,
-          investortPortalId: dbUser.id,
+          investorPortalId: dbUser.id,
         },
       });
     }
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest): Promise<Response> {
       await authClient.users.updateUser(userId, {
         publicMetadata: {
           onboardingComplete: true,
-          investortPortalId: user.id,
+          investorPortalId: user.id,
         },
       });
     } catch (error) {
