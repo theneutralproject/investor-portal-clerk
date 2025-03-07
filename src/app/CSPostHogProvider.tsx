@@ -1,11 +1,4 @@
 'use client';
-import posthog from 'posthog-js';
-import { PostHogProvider } from 'posthog-js/react';
-import React from 'react';
-
-function CSPostHogProvider({ children }: { children: React.ReactNode }) {
-  return <PostHogProvider client={posthog}>{children}</PostHogProvider>;
-}
 
 export const POSTHOG_EVENTS = {
   PROJECT_INVEST_CLICKED: '$project_invest_clicked',
@@ -17,5 +10,3 @@ export const POSTHOG_EVENTS = {
   DOCUMENT_DOWNLOADED: '$document_downloaded',
   CHAT_OPENED: '$chat_opened',
 };
-
-export default CSPostHogProvider;
