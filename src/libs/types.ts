@@ -58,6 +58,8 @@ export type DealWithConversion = Deal & {
 
 export type DealWithInvestmentStatsAndProjectWithPics = Deal & {
   investmentStats?: DealInvestmentStats | null;
+  startDealConversion?: DealConversion | null;
+  endDealConversion?: DealConversion | null;
   project?:
     | (Project & {
         milestones: ProjectMilestones | null;
