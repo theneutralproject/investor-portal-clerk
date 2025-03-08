@@ -495,8 +495,10 @@ export function makeEnvelopeDefinition(
     .map(m => m.user as UserWithAddress);
   const accreditationVerifier = deal.accreditationVerification?.verifier;
 
-  const { amount, numberAUnits, numberCUnits } = deal.investmentStats;
+  const { amount, numberAUnits, numberCUnits, debtInterestRatePerc } =
+    deal.investmentStats;
   const amountSpelledOut = toWords(amount);
+  const interestSpelledOut = `${toWords(debtInterestRatePerc ?? 0)} Percent`;
   const investingEntityName = getInvestingEntityName(org, deal, signer);
 
   const env: EnvelopeDefinition =
@@ -527,12 +529,12 @@ export function makeEnvelopeDefinition(
 
   const interestTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'interest',
-    value: amount >= 250000 ? '12' : '10',
+    value: debtInterestRatePerc?.toString() ?? '',
   }) as DSText;
 
   const interestSpelledOutTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'interestSpelledOut',
-    value: amount >= 250000 ? `Twelve Percent` : `Ten Percent`,
+    value: interestSpelledOut,
   }) as DSText;
 
   const investingEntityNameTab: DSText = docusign.Text.constructFromObject({
