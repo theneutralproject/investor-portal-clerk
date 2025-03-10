@@ -10,6 +10,7 @@ import {
   PlaidLinkOnSuccessMetadata,
 } from 'react-plaid-link';
 import { toast } from 'react-toastify';
+import Logger from '@/libs/logger';
 
 const PLAID_ERROR_MESSAGE =
   'We are unable to complete the bank connection. Please refresh your browser window and try again. Contact a member of the team if the problem persists.';
@@ -38,6 +39,9 @@ class PlaidLinkClass extends React.Component<Props, State> {
         }),
       });
       if (!response.ok) {
+        Logger.error('Failed to create plaidLinkToken', null, {
+          response: await response.json(),
+        });
         throw new Error('Failed to create link token');
       }
       const link_token = await response.json();
@@ -58,6 +62,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
     const fullMetadata = metadata as PlaidLinkOnSuccessMetadata & {
       account_id: string;
     };
+    Logger.log({ message: 'PlaidLinkOnSuccess', extra: fullMetadata });
 
     try {
       console.log('merchantId:', this.props.merchantId);
@@ -99,6 +104,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
       this.setState({ isLoading: true });
     }
     if (eventName === 'ERROR') {
+      Logger.error('PlaidLinkOnEvent Error:', null, { metadata, eventName });
       toast.error(PLAID_ERROR_MESSAGE);
       this.setState({ isLoading: false });
     }
@@ -111,6 +117,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
 
     if (error) {
       toast.error(PLAID_ERROR_MESSAGE);
+      Logger.error('PlaidLinkOnExit Error:', null, { metadata });
     }
 
     if (
@@ -120,6 +127,10 @@ class PlaidLinkClass extends React.Component<Props, State> {
       toast.info(
         'Bank connection was not completed. Please try again when ready.'
       );
+      Logger.error('PlaidLinkOnExit requires_credentials:', null, {
+        metadata,
+        disableSentry: true,
+      });
     }
   };
 

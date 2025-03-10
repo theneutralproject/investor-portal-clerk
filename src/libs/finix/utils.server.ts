@@ -39,7 +39,9 @@ export async function initializeFinixTransfer(
   slug: string,
   fraudSessionKey: string
 ): Promise<FinixTransferResponse> {
-  Logger.log({ message: `merchantId: ${merchantId}` });
+  Logger.log({
+    message: `initializeFinixTransfer for merchantId: ${merchantId}`,
+  });
   const amountInCents = deal.investmentStats.amount * 100;
   const achTransferResponse = await fetch(
     `${process.env.FINIX_BASE_URL!}/transfers`,
@@ -70,6 +72,12 @@ export async function initializeFinixTransfer(
       }),
     }
   );
+
+  if (!achTransferResponse.ok) {
+    Logger.error('Failed to initializeFinixTransfer', null, {
+      response: await achTransferResponse.json(),
+    });
+  }
 
   return await achTransferResponse.json();
 }
