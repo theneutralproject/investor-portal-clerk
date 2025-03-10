@@ -107,10 +107,16 @@ export async function POST(request: NextRequest) {
       });
       const { dealHubspotId } = transfer.tags;
       if (!dealHubspotId) {
+        Logger.error(
+          'The ACH transfer was NOT successful because the tags were missing',
+          request,
+          {
+            extra: transfer.tags,
+          }
+        );
         return errorResponse(
           'The ACH transfer was NOT successful because the tags were missing',
-          500,
-          { request, extra: transfer.tags }
+          500
         );
       }
 
