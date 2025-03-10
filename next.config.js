@@ -24,6 +24,9 @@ const nextConfig = {
     config.externals.push({
       'node:crypto': 'commonjs crypto',
     });
+    config.cache = {
+      type: 'memory', // Store cache in memory instead of file system
+    };
     return config;
   },
   async headers() {
