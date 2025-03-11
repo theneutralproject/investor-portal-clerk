@@ -31,6 +31,7 @@ interface DocumentUploadProps {
   documents: Document[];
   type: DocumentType;
   dealDocumentType?: DealDocumentType;
+  allowUploadWhenReadOnly?: boolean;
 }
 
 interface FileUploadState {
@@ -46,6 +47,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   documents,
   type,
   dealDocumentType,
+  allowUploadWhenReadOnly = false,
 }) => {
   const {
     organization,
@@ -275,7 +277,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           </Box>
         )}
 
-        {!organizationReadOnly && (
+        {(allowUploadWhenReadOnly || !organizationReadOnly) && (
           <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
             <Button
               variant="blackPill"
@@ -305,6 +307,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
       handleRemoveFile,
       renderUploadStatus,
       organizationReadOnly,
+      allowUploadWhenReadOnly,
     ]
   );
 

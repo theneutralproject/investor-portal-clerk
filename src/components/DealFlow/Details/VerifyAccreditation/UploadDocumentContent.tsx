@@ -61,6 +61,7 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
           },
         ]}
         dealDocumentType={dealDocumentType}
+        allowUploadWhenReadOnly={false} // We allow upload because VerifyAccreditation is saved to the deal, not the organization
       />
     </Box>
   );
