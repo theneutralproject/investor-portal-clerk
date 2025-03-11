@@ -5,3 +5,4 @@ export const SIDEBAR_TEST_ID = 'sidebar';
 export const USER_AVATAR_TEST_ID = 'user-avatar';
 export const COMPLETE_INVESTMENT = 'complete-investment';
 export const INVESTMENT_SUMMARY_TEST_ID = 'investment-summary';
+export const CUSTOM_TOOLTIP_TEST_ID = 'custom-tooltip';

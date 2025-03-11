@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, BrowserContext, Page } from '@playwright/test';
 import {
   COMPLETE_INVESTMENT,
   DASHBOARD_POSTFOLIO_TEST_ID,
@@ -7,14 +7,19 @@ import {
 } from 'e2e/testIds';
 
 test.describe('Unauthenticated User Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    // Ensure the user is logged out before each test
+  let context: BrowserContext;
+  let page: Page;
+
+  test.beforeAll(async ({ browser }) => {
+    context = await browser.newContext();
+    page = await context.newPage();
+
     await page.goto('/signout');
     await page.waitForLoadState('networkidle');
   });
 
-  test.describe('Dashboard Page', () => {
-    test('Should see "Sign in" button in dashboard section when logged out', async ({
+  test.describe('Dashboard Page', async () => {
+    test('Should see "Sign in" button in dashboard page when logged out', async ({
       page,
     }) => {
       await page.goto('/dashboard', { waitUntil: 'networkidle' });
@@ -26,7 +31,19 @@ test.describe('Unauthenticated User Tests', () => {
       await expect(loginButton).toHaveText('SIGN IN');
     });
 
-    test('Should see "Sign up" button in dashboard section when logged out', async ({
+    test('Should see "Sign up" button in dashboard page when logged out', async ({
+      page,
+    }) => {
+      await page.goto('/dashboard', { waitUntil: 'networkidle' });
+
+      const signUpButton = page.locator(
+        `[data-testid="${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up-btn"]`
+      );
+      await expect(signUpButton).toBeVisible();
+      await expect(signUpButton).toHaveText('CREATE ACCOUNT');
+    });
+
+    test('Should see "Invest in Tomorrow, Today" section in dashboard page when logged out', async ({
       page,
     }) => {
       await page.goto('/dashboard', { waitUntil: 'networkidle' });
@@ -66,7 +83,6 @@ test.describe('Unauthenticated User Tests', () => {
       await page.goto('/projects/edison', { waitUntil: 'networkidle' });
 
       await expect(page.getByText('Investment Summary')).toBeVisible();
-
       await expect(
         page.locator(`[data-testid="${INVESTMENT_SUMMARY_TEST_ID}"]`)
       ).toBeVisible();

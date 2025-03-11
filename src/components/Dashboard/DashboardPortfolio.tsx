@@ -28,9 +28,7 @@ import {
   formatCurrency,
   calculateTodayLinePosition,
 } from './Portfolio/portfolioHelpers';
-
-export const DASHBOARD_POSTFOLIO_TEST_ID = 'dashboard-portfolio';
-export const CUSTOM_TOOLTIP_TEST_ID = 'custom-tooltip';
+import { DASHBOARD_POSTFOLIO_TEST_ID } from 'e2e/testIds';
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
   active,
@@ -250,6 +248,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             backdropFilter: 'blur(4px)',
             borderRadius: '8px',
           }}
+          data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-create-account`}
         >
           <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
             <Typography variant="body1" align="center" fontWeight="500">
