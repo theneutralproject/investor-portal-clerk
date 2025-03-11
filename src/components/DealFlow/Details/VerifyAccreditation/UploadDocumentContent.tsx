@@ -53,7 +53,7 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
       )}
 
       <DealFlowDocumentUpload
-        type="deal"
+        type="organization" // Can change here
         documents={[
           {
             display: 'Verification Accreditation',

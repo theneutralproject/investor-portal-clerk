@@ -61,6 +61,9 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
     organization
   );
 
+  console.log(organization);
+  console.log(deal);
+
   const [uploadState, setUploadState] = useState<UploadState>(() => {
     const initial: UploadState = {};
     documents.forEach(doc => {
