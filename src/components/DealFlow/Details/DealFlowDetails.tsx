@@ -1,14 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Typography,
-  TextField,
-  CircularProgress,
-  Autocomplete,
-  Tooltip,
-} from '@mui/material';
+import React, { useEffect } from 'react';
+import { Box, Typography, CircularProgress, Tooltip } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { zUserUpdateSchema, type UserUpdateSchema } from '@/libs/user/schema';
 import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { usStates } from '@components/DealFlow/Helpers/DealFlowHelpers';
@@ -17,98 +9,54 @@ import { type Address } from '@prisma/client';
 import InfoIcon from '@mui/icons-material/Info';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { EncryptionCard } from './EncryptionCard';
+import {
+  useDealFlowDetailsForm,
+  DealFlowDetailsFormValues,
+} from '../../../hooks/useValidatedForm';
+import { FormTextField, FormAutocomplete } from '../Shared/FormComponents';
 
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
-  const [formData, setFormData] = useState<UserUpdateSchema | null>(null);
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { isValid },
+    trigger,
+  } = useDealFlowDetailsForm();
 
   useEffect(() => {
     if (user) {
-      setFormData({
-        id: user.id,
-        firstName: user.firstName ?? '',
-        lastName: user.lastName ?? '',
-        ssn: user.ssn ?? '',
-        phoneNumber: user.phoneNumber ?? '',
-        // @ts-expect-error dateOfBirth is a string
-        dateOfBirth: formatDate(user.dateOfBirth),
-        address: user.address ?? {
-          street: '',
-          city: '',
-          zipcode: '',
-          state: '',
-          country: 'United States',
-        },
-      });
+      // Set form values from user data
+      setValue('id', user.id);
+      setValue('firstName', user.firstName ?? '');
+      setValue('lastName', user.lastName ?? '');
+      setValue('phoneNumber', user.phoneNumber ?? '');
+      setValue('ssn', user.ssn ?? '');
+      setValue('dateOfBirth', formatDate(user.dateOfBirth) ?? '');
+
+      // Set address values
+      setValue('address.street', user.address?.street ?? '');
+      setValue('address.city', user.address?.city ?? '');
+      setValue('address.state', user.address?.state ?? '');
+      setValue('address.zipcode', user.address?.zipcode ?? '');
+      setValue('address.country', 'United States');
+      trigger();
     }
-  }, [user]);
+  }, [user, setValue, trigger]);
 
-  const handleInputChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    setFormData(prevData => (prevData ? { ...prevData, [name]: value } : null));
-  };
+  const onSubmit = (data: DealFlowDetailsFormValues) => {
+    try {
+      const dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
+      const address = data.address ? ({ ...data.address } as Address) : null;
 
-  const handleSSNChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const rawValue = e.target.value.replace(/\D/g, '');
-    if (rawValue.length <= 9) {
-      let formatted = rawValue;
-      if (rawValue.length > 3) {
-        formatted = `${rawValue.slice(0, 3)}-${rawValue.slice(3)}`;
-      }
-      if (rawValue.length > 5) {
-        formatted = `${rawValue.slice(0, 3)}-${rawValue.slice(3, 5)}-${rawValue.slice(5)}`;
-      }
-      handleInputChange({
-        ...e,
-        target: { ...e.target, value: formatted, name: 'ssn' },
-      });
+      void updateUser({ ...data, dateOfBirth, address });
+    } catch (error) {
+      console.error('Submission error:', error);
     }
   };
 
-  const handleAddressChange = (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = event.target;
-    setFormData(prevData =>
-      prevData
-        ? {
-            ...prevData,
-            address: prevData.address
-              ? { ...prevData.address, [name]: value }
-              : {
-                  street: '',
-                  city: '',
-                  zipcode: '',
-                  state: '',
-                  country: 'United States',
-                  [name]: value,
-                },
-          }
-        : null
-    );
-  };
-
-  const handleSubmit = () => {
-    if (formData) {
-      try {
-        const validatedData = zUserUpdateSchema.parse({ ...formData });
-
-        const dateOfBirth = formData.dateOfBirth
-          ? new Date(formData.dateOfBirth)
-          : null;
-        const address = formData.address
-          ? ({ ...formData.address } as Address)
-          : null;
-        void updateUser({ ...validatedData, dateOfBirth, address });
-      } catch (error) {
-        console.error('Validation error:', error);
-      }
-    }
-  };
-
-  if (isLoading || !formData) {
+  if (isLoading) {
     return (
       <Box
         display="flex"
@@ -121,106 +69,75 @@ const DealFlowDetails: React.FC = () => {
     );
   }
 
-  const isContinueDisabled =
-    !formData.firstName ||
-    !formData.lastName ||
-    !formData.ssn ||
-    !formData.dateOfBirth ||
-    !formData.address?.street;
-
   return (
     <Box>
       <DealFlowTitle title="Personal Details" />
       <Grid container spacing={2}>
         {/* Personal Information Section */}
         <Grid size={6}>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="First Name"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
             name="firstName"
-            value={formData.firstName}
-            onChange={handleInputChange}
+            label="First Name"
+            required
           />
         </Grid>
         <Grid size={6}>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Last Name"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
             name="lastName"
-            value={formData.lastName}
-            onChange={handleInputChange}
+            label="Last Name"
+            required
           />
         </Grid>
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Phone Number"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
             name="phoneNumber"
-            value={formData.phoneNumber}
-            onChange={handleInputChange}
+            label="Phone Number"
+            format="phone"
           />
         </Grid>
 
         {/* Address Section */}
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
+            name="address.street"
             label="Address"
-            name="street"
-            value={formData.address?.street}
-            onChange={handleAddressChange}
+            required
           />
         </Grid>
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
+            name="address.street2"
             label="Address Line 2 (Optional)"
-            name="street2"
-            onChange={handleAddressChange}
           />
         </Grid>
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
+            name="address.city"
             label="City"
-            name="city"
-            value={formData.address?.city}
-            onChange={handleAddressChange}
+            required
           />
         </Grid>
         <Grid size={6}>
-          <Autocomplete
+          <FormAutocomplete<DealFlowDetailsFormValues>
+            control={control}
+            name="address.state"
+            label="State"
             options={usStates}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="State"
-                fullWidth
-                variant="standard"
-              />
-            )}
-            value={formData.address?.state}
-            onChange={(_, newValue) =>
-              handleAddressChange({
-                target: { name: 'state', value: newValue ?? '' },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
+            required
           />
         </Grid>
         <Grid size={6}>
-          <TextField
-            fullWidth
-            variant="standard"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
+            name="address.zipcode"
             label="Zip"
-            name="zipcode"
-            value={formData.address?.zipcode}
-            onChange={handleAddressChange}
+            required
           />
         </Grid>
         <Grid size={12}>
@@ -251,12 +168,10 @@ const DealFlowDetails: React.FC = () => {
             placement="right"
           >
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <TextField
-                fullWidth
-                variant="standard"
+              <FormTextField<DealFlowDetailsFormValues>
+                control={control}
+                name="address.country"
                 label="Country"
-                name="country"
-                value="United States"
                 disabled
               />
               <InfoIcon color="disabled" fontSize="small" />
@@ -266,27 +181,24 @@ const DealFlowDetails: React.FC = () => {
 
         {/* Additional Information Section */}
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Social Security Number"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
             name="ssn"
-            value={formData.ssn}
-            onChange={handleSSNChange}
+            label="Social Security Number"
+            required
             placeholder="___-__-____"
+            format="ssn"
           />
         </Grid>
         <Grid size={12}>
-          <TextField
-            fullWidth
-            variant="standard"
-            label="Date of Birth"
+          <FormTextField<DealFlowDetailsFormValues>
+            control={control}
             name="dateOfBirth"
+            label="Date of Birth"
             type="date"
-            value={formData.dateOfBirth}
-            onChange={handleInputChange}
-            InputLabelProps={{ shrink: true }}
+            required
             placeholder="MM/DD/YYYY"
+            InputLabelProps={{ shrink: true }}
             sx={{
               '& input::-webkit-datetime-edit': { color: 'rgba(0, 0, 0, 0.6)' },
               '& input:not([value=""])::-webkit-datetime-edit': {
@@ -302,8 +214,8 @@ const DealFlowDetails: React.FC = () => {
       </Grid>
 
       <DealFlowFooter
-        onContinue={handleSubmit}
-        isContinueDisabled={isContinueDisabled}
+        onContinue={handleSubmit(onSubmit)}
+        isContinueDisabled={!isValid}
       />
     </Box>
   );

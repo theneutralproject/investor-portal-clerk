@@ -14,7 +14,7 @@ import {
   type Organization,
   type AccreditationVerification,
 } from '@prisma/client';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from 'react-toastify';
@@ -432,9 +432,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       }
       toast.success('Deal updated successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to update deal. Please try again.');
+      }
       console.error('Error updating deal:', error);
       setError('Failed to update deal. Please try again.');
-      toast.error('Failed to update deal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -460,9 +464,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       }
       toast.success('Deal created successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to create deal. Please try again.');
+      }
       console.error('Error creating deal:', error);
       setError('Failed to create deal. Please try again.');
-      toast.error('Failed to create deal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -490,9 +498,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       }
       toast.success('User updated successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to update user. Please try again.');
+      }
       console.error('Error updating user:', error);
       setError('Failed to update user. Please try again.');
-      toast.error('Failed to update user. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -527,7 +539,11 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     } catch (error) {
       console.error('Error creating organization:', error);
       setError('Failed to create organization. Please try again.');
-      toast.error('Failed to create organization. Please try again.');
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to create organization. Please try again.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -593,24 +609,14 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       console.error('Error updating organization:', error);
 
       // Type checking for better error handling
-      let errorMessage = 'Failed to update organization. Please try again.';
+      const errorMessage = 'Failed to update organization. Please try again.';
 
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response &&
-        typeof error.response === 'object' &&
-        'data' in error.response &&
-        error.response.data &&
-        typeof error.response.data === 'object' &&
-        'error' in error.response.data
-      ) {
-        errorMessage = `Error updating organization: ${error.response.data.error}`;
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error(errorMessage);
       }
-
       setError(errorMessage);
-      toast.error(errorMessage);
       setIsLoading(false);
       return { success: false, error: errorMessage };
     }
@@ -635,9 +641,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       });
       toast.success('Co-investor created successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to create organization member. Please try again.');
+      }
       console.error('Error creating organization member:', error);
       setError('Failed to create organization member. Please try again.');
-      toast.error('Failed to create organization member. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -685,9 +695,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       setOrganization(organization);
       toast.success('Co-investor updated successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to update organization member. Please try again.');
+      }
       console.error('Error updating organization member:', error);
       setError('Failed to update organization member. Please try again.');
-      toast.error('Failed to update organization member. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -708,9 +722,15 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
       toast.success('Accreditation verifier created successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error(
+          'Failed to create accreditation verifier. Please try again.'
+        );
+      }
       console.error('Error creating accreditation verifier:', error);
       setError('Failed to create accreditation verifier. Please try again.');
-      toast.error('Failed to create accreditation verifier. Please try again.');
     } finally {
       setIsLoading(false);
     }
