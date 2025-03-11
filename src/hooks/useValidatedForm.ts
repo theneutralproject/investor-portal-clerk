@@ -48,9 +48,19 @@ export const dealFlowDetailsSchema = z.object({
   address: addressSchema,
 });
 
+// Entity Details schema
+export const entityDetailsSchema = z.object({
+  id: z.number().optional(),
+  name: z.string().min(1, 'Entity name is required'),
+  tin: z.string().min(1, 'TIN is required'),
+  dateOfCreation: z.string().min(1, 'Date of creation is required'),
+  juristication: z.string().min(1, 'Jurisdiction is required'),
+});
+
 // Type exports for schemas
 export type AddressFormValues = z.infer<typeof addressSchema>;
 export type DealFlowDetailsFormValues = z.infer<typeof dealFlowDetailsSchema>;
+export type EntityDetailsFormValues = z.infer<typeof entityDetailsSchema>;
 
 // Form-specific hooks
 export const useDealFlowDetailsForm = (
@@ -76,10 +86,17 @@ export const useDealFlowDetailsForm = (
   });
 };
 
-// You can add more form-specific hooks following the same pattern
-// Example:
-// export const useOtherFormType = () => {
-//   return useValidatedForm(otherFormSchema, {
-//     defaultValues: { ... }
-//   });
-// };
+// Entity details form hook
+export const useEntityDetailsForm = (
+  options?: Omit<UseFormProps<EntityDetailsFormValues>, 'resolver'>
+) => {
+  return useValidatedForm(entityDetailsSchema, {
+    defaultValues: {
+      name: '',
+      tin: '',
+      dateOfCreation: '',
+      juristication: '',
+    },
+    ...options,
+  });
+};

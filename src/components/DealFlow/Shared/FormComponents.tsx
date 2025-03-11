@@ -98,6 +98,7 @@ export interface FormAutocompleteProps<T extends FieldValues> {
   label: string;
   options: string[];
   required?: boolean;
+  disabled?: boolean;
 }
 
 // Generic autocomplete component
@@ -107,6 +108,8 @@ export function FormAutocomplete<T extends FieldValues>({
   label,
   options,
   required,
+  disabled,
+  ...rest
 }: FormAutocompleteProps<T>) {
   return (
     <Controller
@@ -121,9 +124,11 @@ export function FormAutocomplete<T extends FieldValues>({
           value={value || null}
           onChange={(_, newValue) => onChange(newValue)}
           onBlur={onBlur}
+          disabled={disabled}
           renderInput={params => (
             <TextField
               {...params}
+              {...rest}
               inputRef={ref}
               label={required ? `${label} *` : label}
               fullWidth
