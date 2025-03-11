@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import Logger from '@/libs/logger';
 import {
   OrganizationCreateSchema,
   type OrganizationUpdateSchema,
@@ -12,14 +13,15 @@ import {
 } from '@/libs/utils.server';
 import { MembershipType, Prisma } from '@prisma/client';
 import { User } from '@sentry/nextjs';
-import { isError, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import type { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let postData: OrganizationCreateSchema;
@@ -27,34 +29,32 @@ export async function POST(request: NextRequest) {
     const requestBody = (await request.json()) as OrganizationCreateSchema;
     postData = requestBody;
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse users POST body:\n',
-      getErrorMessage(parseError)
-    );
-    return jsonResponse({ error: getErrorMessage(parseError) }, 400);
+    return errorResponse(getErrorMessage(parseError), 400, {
+      request,
+      extra: { parseError },
+    });
   }
 
-  if (!postData.ownerId) return errorResponse('ownerId is required', 400);
+  if (!postData.ownerId)
+    return errorResponse('ownerId is required', 400, { request });
 
   let owner: User | null = null;
   try {
     owner = await prisma.user.findUnique({
       where: { id: postData.ownerId },
     });
-  } catch (error) {
-    console.error(
-      `unable to find user with id ${postData.ownerId}`,
-      getErrorMessage(error)
-    );
+  } catch (__error) {
     return errorResponse(
       `unable to find user with id ${postData.ownerId}`,
-      404
+      404,
+      { request }
     );
   }
   if (!owner)
     return errorResponse(
       `unable to find user with id ${postData.ownerId}`,
-      404
+      404,
+      { request }
     );
 
   if (!postData.ownershipType) postData.ownershipType = 'INDIVIDUAL';
@@ -77,6 +77,7 @@ export async function POST(request: NextRequest) {
   if (postData.tin) {
     const presanitizedTIN = postData.tin.replace(/\D/g, '');
     if (presanitizedTIN.length !== 9) {
+      Logger.log({ message: `TIN ${postData.tin} must be 9 digits` }, request);
       return errorResponse(`TIN ${postData.tin} must be 9 digits`, 400);
     }
     data.tin = presanitizedTIN;
@@ -88,16 +89,19 @@ export async function POST(request: NextRequest) {
     });
     return jsonResponse(newOrg);
   } catch (error) {
-    console.error('unable to create organization:', getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to create organization', 500, {
+      request,
+      extra: { error },
+    });
   }
 }
 
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let putData: OrganizationUpdateSchema;
@@ -105,11 +109,8 @@ export async function PUT(request: NextRequest) {
     const requestBody = (await request.json()) as OrganizationUpdateSchema;
     putData = zOrganizationUpdateSchema.parse(requestBody);
   } catch (parseError) {
-    console.error(
-      'ERROR: unable to parse users PUT body:\n',
-      getErrorMessage(parseError)
-    );
-    return errorResponse(getErrorMessage(parseError), 400);
+    Logger.log({ message: getErrorMessage(parseError) }, request);
+    throw parseError;
   }
 
   try {
@@ -122,7 +123,7 @@ export async function PUT(request: NextRequest) {
           update: { ...address, organizationId: orgData.id },
         })
         .catch(dbError => {
-          console.error('ERROR: unable to upsert address:\n', dbError);
+          Logger.log({ message: getErrorMessage(dbError) }, request);
           throw new Error('unable to update the organization');
         });
     }
@@ -136,6 +137,10 @@ export async function PUT(request: NextRequest) {
       else {
         const presanitizedTIN = orgData.tin.replace(/\D/g, '');
         if (presanitizedTIN.length !== 9) {
+          Logger.log(
+            { message: `TIN ${orgData.tin} must be 9 digits` },
+            request
+          );
           return errorResponse(`TIN ${orgData.tin} must be 9 digits`, 400);
         }
         orgData.tin = presanitizedTIN;
@@ -151,7 +156,9 @@ export async function PUT(request: NextRequest) {
     });
     return jsonResponse(updatedOrg);
   } catch (error) {
-    console.error('unable to update organization:', getErrorMessage(error));
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 500, {
+      request,
+      extra: { error },
+    });
   }
 }

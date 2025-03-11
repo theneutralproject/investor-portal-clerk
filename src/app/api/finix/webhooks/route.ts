@@ -131,13 +131,9 @@ export async function POST(request: NextRequest) {
         } as DealUpdateSchema;
         await updateDeal(dealData, true);
       } catch (error) {
-        Logger.error(
-          'unable to set deal stage to 5 in webhook route',
-          request,
-          {
-            extra: error,
-          }
-        );
+        Logger.warn('unable to set deal stage to 5 in webhook route', request, {
+          extra: error,
+        });
         return errorResponse('The ACH transfer was NOT successful', 500);
       }
       return jsonResponse({ message: 'The ACH transfer was successful' });

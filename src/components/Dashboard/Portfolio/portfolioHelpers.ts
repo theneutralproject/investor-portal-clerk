@@ -152,7 +152,9 @@ export const dataAccessors = {
     data.isProjected ? data.portfolioValue : data.portfolioValue,
 };
 
-export const getMetrics = (data: PortfolioReturnsResponse): MetricData[] => {
+export const getMetrics = (
+  data: PortfolioReturnsResponse | null
+): MetricData[] => {
   if (!data) {
     return [
       {
@@ -220,7 +222,7 @@ export const getMetrics = (data: PortfolioReturnsResponse): MetricData[] => {
   ];
 };
 
-export const getChartData = (data: PortfolioReturnsResponse) => {
+export const getChartData = (data: PortfolioReturnsResponse | null) => {
   if (!data) return [];
   return groupByQuarter(data.consolidatedSchedule);
 };

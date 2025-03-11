@@ -3,13 +3,10 @@ import { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
 import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
-import {
-  errorResponse,
-  getErrorMessage,
-  jsonResponse,
-} from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealStatus } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
+import Logger from '@/libs/logger';
 
 export async function GET(request: NextRequest) {
   // get loggedin user
@@ -30,6 +27,8 @@ export async function GET(request: NextRequest) {
                   status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
                 },
                 include: {
+                  startDealConversion: true,
+                  endDealConversion: true,
                   investmentStats: true,
                   project: {
                     include: {
@@ -47,7 +46,7 @@ export async function GET(request: NextRequest) {
     },
   });
   if (!user) {
-    return errorResponse('User not found in database', 404);
+    return errorResponse('User not found in database', 404, { request });
   }
   const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
@@ -55,7 +54,9 @@ export async function GET(request: NextRequest) {
     const org = member.organization;
     for (const deal of org.deals) {
       if (!deal.investmentStats) {
-        console.error(`Deal ${deal.id} has no investment stats`);
+        Logger.error(
+          `Deal ${deal.id} has no investment stats and cannot be shown in user dashboard!`
+        );
       }
       if (deal.investmentStats && deal.project) {
         deals.push(deal);
@@ -66,7 +67,9 @@ export async function GET(request: NextRequest) {
     const portfolioReturns = await getPortfolioReturns(deals);
     return jsonResponse(portfolioReturns);
   } catch (error) {
-    console.error(`unable to get portfolio returns: ${error}`);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to get portfolio returns', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

@@ -2,6 +2,7 @@ import * as Sentry from '@sentry/nextjs';
 import pino from 'pino';
 import type { NextRequest } from 'next/server';
 import { parseSessionFromCookie } from './session/utils';
+import { getErrorMessage } from './utils.server';
 
 const logger = pino({
   level: 'info',
@@ -28,10 +29,14 @@ class Logger {
    * @param {NextRequest} [req] - The Next.js request object (optional).
    */
   static log(metadata: MetaData = { extra: {} }, req?: NextRequest): void {
+    metadata = metadata || { extra: {} };
+
     const apiMessage =
-      metadata.message ||
-      (req &&
-        `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`);
+      metadata?.message ||
+      (req
+        ? `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
+        : 'No message provided');
+
     const logData = {
       apiMessage,
       level: 'log',
@@ -82,21 +87,43 @@ class Logger {
   }
 
   /**
-   * Logs errors and sends them to Sentry with optional request details.
+   * Logs an error message, captures details, and optionally reports it to Sentry.
    *
-   * @param {Error} error - The error object to log.
-   * @param {NextRequest} [req] - The Next.js request object (optional).
-   * @param {Record<string, unknown | Sentry.SeverityLevel>} [extra] - Additional metadata (optional).
+   * @param {Error | string | unknown} error - The error object or message to log.
+   * @param {NextRequest} [req] - The optional Next.js request object for contextual logging.
+   * @param {Record<string, unknown | Sentry.SeverityLevel> & { disableSentry?: boolean }} [extra] -
+   *        Additional metadata for logging, including a flag to disable Sentry reporting.
+   *
+   * @property {boolean} [extra.disableSentry] - If `true`, prevents the error from being reported to Sentry.
    */
   static error(
-    error: Error | unknown,
+    error: Error | unknown | string,
     req?: NextRequest | null,
-    extra: Record<string, unknown | Sentry.SeverityLevel> = {}
+    extra: Record<string, unknown | Sentry.SeverityLevel> & {
+      disableSentry?: boolean;
+    } = {}
   ): void {
-    const _error = error as Error;
+    const isObjectError = error instanceof Error;
+
+    // Ensure error message is always a string, correctly handling `null` and `undefined`
+    const _errorMessage = String(
+      error === null
+        ? 'null'
+        : error === undefined
+          ? 'undefined'
+          : isObjectError
+            ? (error as Error).message
+            : error
+    );
+
+    const _error = isObjectError
+      ? (error as Error)
+      : { message: _errorMessage, stack: '', name: '' };
+
     const apiMessage = req
       ? `Log from ${req.method.toUpperCase()} -> ${req.nextUrl.pathname}`
       : `An error has occurred: ${_error.message}`;
+
     const traces = _error.stack?.split('\n    ') || [];
     const logData = {
       apiMessage,
@@ -104,7 +131,9 @@ class Logger {
       message: _error.message,
       stack: [traces[0], traces[1]].join(' ').replaceAll('\n', ''),
       request: req ? this.getRequestDetails(req) : null,
-      log: this.getLogError(_error, req, extra.method),
+      log: isObjectError
+        ? this.getLogError(_error, req, extra.method)
+        : getErrorMessage(_error),
       extra,
     };
 
@@ -112,7 +141,10 @@ class Logger {
       logData,
       `Error '${logData.message}' occurred at ${logData.apiMessage}`
     );
-    Sentry.captureException(error, { level: 'error', extra: logData });
+
+    if (!extra.disableSentry) {
+      Sentry.captureException(error, { level: 'error', extra: logData });
+    }
   }
 
   /**

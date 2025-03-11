@@ -1,6 +1,7 @@
 import type { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
 import { buildRedirectUrl } from '@/libs/dealflow/utils.server';
+import Logger from '@/libs/logger';
 
 interface DocuSignParams {
   documentTemplateId: string;
@@ -62,9 +63,12 @@ async function getProjectDocument(documentTemplateId: string) {
 }
 
 // Create document event based on the event type
-async function createDocumentEvent(params: DocuSignParams) {
+async function createDocumentEvent(
+  params: DocuSignParams,
+  request: NextRequest
+) {
   if (params.event === 'signing_complete') {
-    console.log('Creating document event for signing_complete');
+    Logger.log({ message: 'Creating document event for signing_complete' });
     const existingDocusignEvent = await prisma.docusignEvent.findFirst({
       where: {
         dealId: parseInt(params.dealId),
@@ -80,13 +84,11 @@ async function createDocumentEvent(params: DocuSignParams) {
           investorSignatureCompleted: true,
         },
       });
-      console.log(
-        `Docusign Event updated for dealId ${params.dealId} and userId ${params.userId}`
-      );
       return;
     } else {
-      console.error(
-        `Docusign Event not found for dealId ${params.dealId} and userId ${params.userId}`
+      Logger.error(
+        `Docusign Event not found for dealId ${params.dealId} and userId ${params.userId}`,
+        request
       );
       return;
     }
@@ -94,12 +96,11 @@ async function createDocumentEvent(params: DocuSignParams) {
 }
 
 // Create error response
-function createErrorResponse(error: unknown) {
+function createErrorResponse(error: unknown, request: NextRequest) {
   const status = error instanceof ValidationError ? 400 : 500;
   const message = error instanceof Error ? error.message : 'Unknown error';
 
-  console.error('DocuSign return handler error:', error);
-
+  Logger.error('DocuSign return handler error', request, { error });
   return new Response(
     JSON.stringify({
       error: status === 400 ? message : 'Internal server error',
@@ -121,7 +122,7 @@ export async function GET(request: NextRequest) {
     const projectDocument = await getProjectDocument(params.documentTemplateId);
 
     // Create document event if signature has been completed
-    await createDocumentEvent(params);
+    await createDocumentEvent(params, request);
 
     // Build and return redirect URL
     const redirectUrl = buildRedirectUrl(
@@ -131,6 +132,6 @@ export async function GET(request: NextRequest) {
 
     return Response.redirect(redirectUrl.toString(), 303);
   } catch (error) {
-    return createErrorResponse(error);
+    return createErrorResponse(error, request);
   }
 }

@@ -15,8 +15,9 @@ import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
-import { DealDocumentType } from '@prisma/client';
+import { DealDocumentType, User } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
+import Logger from '@/libs/logger';
 
 /**
  * Admin can upload up to 20 PDFs at a time
@@ -24,11 +25,11 @@ import { DealStage } from '@/libs/deal/schema';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  // check if they are an admin user by checking the auth token
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse(getErrorMessage(adminUser), 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   let taxYear: number | null = null;
@@ -37,14 +38,17 @@ export async function POST(request: NextRequest) {
     const queryParams = new URLSearchParams(url.search);
     taxYear = parseInt(queryParams.get('taxYear') ?? '-1');
   } catch (error) {
-    console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to read query params', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   if (!taxYear || taxYear < 2018) {
-    return jsonResponse(
+    return errorResponse(
       'taxYear query param is required and must be 2018 or later',
-      400
+      400,
+      { request }
     );
   }
 
@@ -57,7 +61,7 @@ export async function POST(request: NextRequest) {
       .from(`deal-documents`)
       .list('tempPdfStorage');
     if (isError(error)) {
-      console.error(getErrorMessage(error));
+      Logger.warn(getErrorMessage(error), request);
     }
     if (data?.length) {
       console.log('Deleting all files in tempPdfStorage folder');
@@ -65,17 +69,17 @@ export async function POST(request: NextRequest) {
         .from(`deal-documents`)
         .remove(data.map(file => `tempPdfStorage/${file.name}`));
       if (deleteResult.error) {
-        console.error('COULD NOT DELETE:');
-        console.error(getErrorMessage(deleteResult.error));
-        return jsonResponse(
-          { error: getErrorMessage(deleteResult.error) },
-          500
-        );
+        return errorResponse('Could not delete temp files from storage', 500, {
+          request,
+          extra: { error: deleteResult.error },
+        });
       }
     }
   } catch (error) {
-    console.error('unable to read form data');
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to read form data', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   let deals: DealWithFullOrgAndSlimProject[] = [];
@@ -97,8 +101,10 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('unable to get deals from database');
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('Unable to fetch deals', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   try {
@@ -111,25 +117,29 @@ export async function POST(request: NextRequest) {
           .from(`deal-documents`)
           .upload(`tempPdfStorage/${name}`, file, { contentType: type });
         if (error) {
-          console.error(`unable to upload file ${name} to temp storage:`);
-          console.error(error.message);
-          console.error(error);
-          return jsonResponse({ error: getErrorMessage(error) }, 500);
+          return errorResponse('unable to upload file to temp storage', 500, {
+            request,
+            extra: { error },
+          });
         }
 
         // match the files to the correct deal
         const match = await matchDealWithPdf(deals, file);
         retArr.push(match);
       } else {
-        console.error('file is not instance of File');
-        return jsonResponse({ error: 'file is not instance of File' }, 400);
+        return errorResponse('file is not instance of File', 400, {
+          request,
+          extra: { file },
+        });
       }
     });
     await Promise.all(matchPromises);
     return jsonResponse(retArr);
   } catch (err) {
-    console.error(err);
-    return jsonResponse({ error: getErrorMessage(err) }, 500);
+    return errorResponse(getErrorMessage(err), 500, {
+      request,
+      extra: { error: err },
+    });
   }
 }
 
@@ -139,10 +149,12 @@ export async function POST(request: NextRequest) {
  * @returns
  */
 export async function PUT(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  let adminUser: User | null = null;
+  try {
+    adminUser = await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   const requestBody = (await request.json()) as {
@@ -152,16 +164,17 @@ export async function PUT(request: NextRequest) {
   };
   const { dealId, pdfName, taxYear } = requestBody;
   if (!dealId) {
-    return errorResponse('Missing required dealId', 400);
+    return errorResponse('Missing required dealId', 400, { request });
   }
   const newPath = `deal-${dealId}/${pdfName}`;
   const { error } = await storageClient
     .from(`deal-documents`)
     .move(`tempPdfStorage/${pdfName}`, newPath);
   if (error) {
-    console.error('unable to move file from temp storage to deal:');
-    console.error(getErrorMessage(error));
-    return jsonResponse({ error: getErrorMessage(error) }, 500);
+    return errorResponse('unable to move file from temp storage to deal', 500, {
+      request,
+      extra: { error },
+    });
   }
   try {
     const newDocEntry = await createDocumentEntry(
@@ -180,7 +193,9 @@ export async function PUT(request: NextRequest) {
       document: newDocEntry,
     });
   } catch (error) {
-    console.error('Error processing upload:', error);
-    return errorResponse(getErrorMessage(error), 500);
+    return errorResponse('Error processing upload', 500, {
+      request,
+      extra: { error },
+    });
   }
 }

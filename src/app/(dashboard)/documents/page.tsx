@@ -23,6 +23,15 @@ import { useQuery } from '@tanstack/react-query';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { format } from 'date-fns';
+import { DealDocumentType } from '@prisma/client';
+import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
+import DescriptionIcon from '@mui/icons-material/Description';
+const titleMap = {
+  [DealDocumentType.K1]: 'K1',
+  [DealDocumentType.VERIFICATION_ACCREDITATION]: 'Verification Accreditation',
+  [DealDocumentType.INVESTMENT_DOCUMENT]: 'Investment Document',
+  [DealDocumentType.REPORT]: 'Quarterly Report',
+};
 
 interface Document {
   id: number;
@@ -65,9 +74,11 @@ const handleDownload = async (downloadUrl: string, fileName: string) => {
 const DocumentList = ({
   documents,
   isLoading,
+  type,
 }: {
   documents: Document[];
   isLoading: boolean;
+  type: 'tax' | 'investment';
 }) => {
   const groupDocumentsByProject = (docs: Document[]) => {
     return docs.reduce((acc: Record<string, Document[]>, doc) => {
@@ -143,10 +154,11 @@ const DocumentList = ({
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             sx={{
-              bgcolor: 'background.default',
+              bgcolor: 'white',
               '& .MuiAccordionSummary-content': {
                 display: 'flex',
                 alignItems: 'center',
+                color: 'text.secondary',
               },
             }}
           >
@@ -164,18 +176,33 @@ const DocumentList = ({
               <TableHead>
                 <TableRow>
                   <TableCell>Document Name</TableCell>
-                  <TableCell>Tax Year</TableCell>
+                  {type === 'tax' && <TableCell>Tax Year</TableCell>}
+                  {type === 'investment' && <TableCell>Type</TableCell>}
                   <TableCell>Date Created</TableCell>
-                  <TableCell align="right">Action</TableCell>
+                  <TableCell align="right"></TableCell> {/*Action */}
                 </TableRow>
               </TableHead>
               <TableBody>
                 {groupedDocs[project]?.map(doc => (
                   <TableRow key={doc.id}>
-                    <TableCell>{doc.name}</TableCell>
-                    <TableCell>
-                      {doc.taxYear || new Date(doc.dateCreated).getFullYear()}
+                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                      {doc.path.endsWith('.pdf') ? (
+                        <PictureAsPdfIcon />
+                      ) : (
+                        <DescriptionIcon />
+                      )}
+                      <Box sx={{ ml: 1 }}>{doc.name}</Box>
                     </TableCell>
+                    {type === 'tax' && (
+                      <TableCell>
+                        {doc.taxYear || new Date(doc.dateCreated).getFullYear()}
+                      </TableCell>
+                    )}
+                    {type === 'investment' && (
+                      <TableCell>
+                        {titleMap[doc.type as DealDocumentType]}
+                      </TableCell>
+                    )}
                     <TableCell>
                       {format(new Date(doc.dateCreated), 'MMM d, yyyy')}
                     </TableCell>
@@ -238,8 +265,9 @@ const DocumentsPage = () => {
             },
           }}
         >
-          <Tab label="TAX DOCS" />
           <Tab label="INVESTMENT DOCS" />
+
+          <Tab label="TAX DOCS" />
         </Tabs>
       </Box>
 
@@ -251,14 +279,16 @@ const DocumentsPage = () => {
         <>
           {tabValue === 0 && (
             <DocumentList
-              documents={data?.taxDocuments ?? []}
+              documents={data?.investmentDocuments ?? []}
               isLoading={isLoading}
+              type="investment"
             />
           )}
           {tabValue === 1 && (
             <DocumentList
-              documents={data?.investmentDocuments ?? []}
+              documents={data?.taxDocuments ?? []}
               isLoading={isLoading}
+              type="tax"
             />
           )}
         </>

@@ -2,7 +2,7 @@
 import { getAuth } from '@clerk/nextjs/server';
 import { type NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 
 /**
  * @param request
@@ -11,21 +11,17 @@ import { jsonResponse } from '@/libs/utils.server';
 export async function GET(request: NextRequest) {
   const { userId } = getAuth(request);
   if (!userId) {
-    return jsonResponse({ error: 'Clerk user not found' }, 404);
+    return errorResponse('Clerk user not found', 404, { request });
   }
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
   });
 
   if (!user) {
-    console.error(
-      `User record with clerkid ${userId} not found in prisma (GET)`
-    );
-    return jsonResponse(
-      {
-        error: `User record with clerkid ${userId} not found in prisma (GET)`,
-      },
-      404
+    return errorResponse(
+      `User record with clerkid ${userId} not found in prisma (GET)`,
+      404,
+      { request }
     );
   }
 

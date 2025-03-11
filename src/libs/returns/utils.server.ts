@@ -2,6 +2,7 @@ import 'server-only';
 import {
   DealFinancingType,
   type DealInvestmentStats,
+  DealStatus,
   DealUnitType,
   type ProjectInvestmentStats,
   type ProjectMilestones,
@@ -386,6 +387,17 @@ export async function getPortfolioReturns(
     principalInvested: 0,
   };
 
+  deals.forEach(deal => {
+    console.log(
+      'deal',
+      deal.id,
+      deal.status,
+      deal.dealStage,
+      deal.investmentStats?.amount,
+      deal.investmentStats?.financingType
+    );
+  });
+
   // for each deal, get the payout schedule based on the financing type
   const resolvedSchedules = deals.map(async deal => {
     const { project, investmentStats, closingDate } = deal;
@@ -416,6 +428,7 @@ export async function getPortfolioReturns(
 
     const dealSummary: ReturnsDealStats = {
       dealId: deal.id,
+      status: deal.status ?? DealStatus.ACTIVE,
       committedAmount: investmentStats.amount,
       distributionsToDate: 0,
       distributionsProjected: 0,
@@ -430,6 +443,8 @@ export async function getPortfolioReturns(
         location: project.location,
         pictures: project.pictures,
       },
+      conversionId:
+        deal.startDealConversion?.id || deal.endDealConversion?.id || null,
     };
     const todayNumeric = new Date().getTime();
     portfolioStats.principalInvested += investmentStats.amount;
@@ -540,11 +555,21 @@ export async function getPortfolioReturns(
       return [];
     }
 
+    // round all numerical values for to 2 decimal places
+    dealSummary.distributionsToDate = roundTo(
+      dealSummary.distributionsToDate,
+      2
+    );
+    dealSummary.distributionsProjected = roundTo(
+      dealSummary.distributionsProjected,
+      2
+    );
+    dealSummary.committedAmount = roundTo(dealSummary.committedAmount, 2);
+
     Logger.log({
       message: `adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`,
     });
     dealStats.push(dealSummary);
-    // console.log(`Deal ${deal.id} stats:`, dealSummary);
   });
 
   await Promise.all(resolvedSchedules);

@@ -1,4 +1,5 @@
 import prisma from '@/libs/prisma.server';
+import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import {
   errorResponse,
   getErrorMessage,
@@ -42,6 +43,14 @@ export async function GET(request: NextRequest) {
             organization: {
               include: { members: true },
             },
+            project: {
+              include: {
+                milestones: true,
+                pictures: true,
+                investmentStats: true,
+              },
+            },
+            investmentStats: true,
           },
         },
         endDeal: {
@@ -49,6 +58,14 @@ export async function GET(request: NextRequest) {
             organization: {
               include: { members: true },
             },
+            project: {
+              include: {
+                milestones: true,
+                pictures: true,
+                investmentStats: true,
+              },
+            },
+            investmentStats: true,
           },
         },
       },
@@ -59,16 +76,22 @@ export async function GET(request: NextRequest) {
       return errorResponse('Conversion not found', 404);
     }
     const startOrgMembers = conversion.startDeal?.organization?.members ?? [];
-    const endOrg = conversion.endDeal?.organization?.members ?? [];
+    const endOrgMembers = conversion.endDeal?.organization?.members ?? [];
+
+    const deals = [conversion.startDeal, conversion.endDeal];
+    const conversionReturns = await getPortfolioReturns(deals);
 
     if (
       !startOrgMembers.some(member => member.userId === dbUserId) &&
-      !endOrg.some(member => member.userId === dbUserId)
+      !endOrgMembers.some(member => member.userId === dbUserId)
     ) {
       return errorResponse('User not authorized to view this conversion', 403);
     }
 
-    return jsonResponse(conversion);
+    return jsonResponse({
+      conversion,
+      conversionReturns,
+    });
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500);
   }

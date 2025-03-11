@@ -22,6 +22,7 @@ import {
   instantiateApiClientFromUserAndDeal,
 } from '../docusign/utils.server';
 import { Signer } from 'docusign-esign';
+import Logger from '../logger';
 
 const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
@@ -31,14 +32,14 @@ export function formatDateForHubspot(date: Date) {
   return new Date(date.setUTCHours(0, 0, 0, 0)).getTime().toString();
 }
 
-export async function createHubspotContact(
+export async function createOrUpdateHubspotContact(
   hubspotContact: HubspotContactCreateUpdateSchema
 ) {
   if (!hubspotContact.email) {
     throw new Error('email is required to create a contact in hubspot');
   }
 
-  // check if contact already exists. if yes, update it
+  // check if contact already exists. Note that Eq filters are case sensitive, so it might not find it if the case is different
   const hsSearchResult = await hubspotClient.crm.contacts.searchApi.doSearch({
     limit: 1,
     properties: ['hs_object_id'],
@@ -56,35 +57,47 @@ export async function createHubspotContact(
   });
 
   if (hsSearchResult.total > 0) {
-    console.log('Contact already exists. Updating it instead');
+    Logger.log({
+      message: hsSearchResult.results[0]?.id,
+      extra: { hsSearchResult },
+    });
     const hsId = hsSearchResult.results[0]?.id.toString();
-    console.log('hsId', hsId);
+    Logger.log({
+      message: `Contact with email ${hubspotContact.email} already exists. Updating it instead.\nhsID: ${hsId}`,
+    });
     if (!hsId) {
-      console.error('ERROR: unable to get Hubspot contact id');
-      throw new Error('unable to get hubspot contact id');
+      throw new Error(
+        `unable to get hubspot contact id for ${hubspotContact.email}`
+      );
     }
     hubspotContact.hubspotId = hsId;
     try {
       await updateHubspotContact(hubspotContact);
       return hsId;
     } catch (error) {
-      console.error('Unable to update user in hubspot2:\n', error);
-      throw new Error(getErrorMessage(error));
+      Logger.error(error, null, {
+        message: `Unable to update user with email ${hubspotContact.email} in hubspot`,
+      });
+      throw error;
     }
-  }
+  } else {
+    Logger.log({
+      message: `Contact with email ${hubspotContact.email} does not exist. Creating a new contact.`,
+    });
+    const signupDate = formatDateForHubspot(new Date());
 
-  console.log('Creating new contact in hubspot');
-  const signupDate = formatDateForHubspot(new Date());
-
-  hubspotContact.properties.date_signed_up = signupDate;
-  hubspotContact.properties.email = hubspotContact.email;
-  try {
-    const hubspotCreateResponse =
-      await hubspotClient.crm.contacts.basicApi.create(hubspotContact);
-    return hubspotCreateResponse.id;
-  } catch (error) {
-    console.error('Unable to create user in hubspot:\n', error);
-    throw new Error(getErrorMessage(error));
+    hubspotContact.properties.date_signed_up = signupDate;
+    hubspotContact.properties.email = hubspotContact.email;
+    try {
+      const hubspotCreateResponse =
+        await hubspotClient.crm.contacts.basicApi.create(hubspotContact);
+      return hubspotCreateResponse.id;
+    } catch (error) {
+      Logger.error(error, null, {
+        message: `Unable to create user with email ${hubspotContact.email} in hubspot`,
+      });
+      throw error;
+    }
   }
 }
 
@@ -102,8 +115,10 @@ export async function updateHubspotContact(
     );
     return hsUpdateRes.id;
   } catch (error) {
-    console.error('Unable to update user in hubspot3:\n', error);
-    throw new Error(getErrorMessage(error));
+    Logger.error(error, null, {
+      message: `Unable to update user with email ${hubspotContact.email} in hubspot`,
+    });
+    throw error;
   }
 }
 

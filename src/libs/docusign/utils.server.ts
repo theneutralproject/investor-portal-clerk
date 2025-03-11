@@ -36,6 +36,8 @@ import { type SessionData, sessionOptions } from '../session/utils';
 import { toWords } from 'number-to-words';
 import { isNull } from 'lodash';
 import { getErrorMessage } from '../utils.server';
+import { getFileContent, storageClient } from '../supabase';
+import Logger from '../logger';
 
 /* eslint-disable-next-line*/
 const docusign = require('docusign-esign'); //https://github.com/docusign/docusign-esign-node-client/issues/332
@@ -85,40 +87,41 @@ export async function refreshAccessToken(
     };
   };
   try {
+    await storageClient.getBucket('env');
+    const docusignRSAKey = await getFileContent('env', 'docusign.pem');
+    if (!docusignRSAKey) {
+      throw new Error('Docusign RSA Key not found');
+    }
     docusignJwtRes = await dsApiClient
       .requestJWTUserToken(
         process.env.DOCUSIGN_INTEGRATION_KEY!,
         process.env.DOCUSIGN_USER_ID!,
         ['signature', 'impersonation'],
-        Buffer.from(process.env.DOCUSIGN_RSA_PRIVATE_KEY!, 'utf8'),
+        Buffer.from(docusignRSAKey, 'utf8'),
         3600
       )
       .catch((err: { response: { data: { error: string } } }) => {
         // The user is not logged in
         const errMessage = err.response.data.error;
-        console.log(err.response.data);
+        Logger.log({ extra: err.response.data, message: errMessage });
         // expected DocuSign API problem - every user will see this once.
         if (errMessage === 'consent_required') {
-          console.log(
-            'caught error: consent required - redirecting to consent page'
-          );
+          Logger.log({
+            message:
+              'caught error: consent required - redirecting to consent page',
+          });
           ///https://www.docusign.com/blog/developers/oauth-jwt-granting-consent
           // https://www.youtube.com/watch?v=sBziZ2TfFVs
           // TODO: redirect to /tokenFromCode
           const consentUrl = `https://account.docusign.com/oauth/auth?response_type=code&scope=signature%20impersonation&client_id=${process.env.DOCUSIGN_INTEGRATION_KEY}&redirect_uri=${process.env.BASE_URL}/api/docusign/tokenFromCode&login_hint=${userEmail}&state=dealId${dealId}projectSlug${projectSlug}`;
           return { body: { consentUrl } };
         } else {
-          //
-          console.error(
-            'caught unknown docusign error - donno why',
-            errMessage
-          );
-          console.error(err.response.data);
+          Logger.error(err.response.data.error);
           throw new Error(errMessage);
         }
       });
   } catch (err) {
-    console.error(`Error getting Docusign JWT token: ${err}`);
+    Logger.error(`Error getting Docusign JWT token: ${err}`);
     throw new Error(`Error getting Docusign JWT token: ${err}`);
   }
 
@@ -495,8 +498,10 @@ export function makeEnvelopeDefinition(
     .map(m => m.user as UserWithAddress);
   const accreditationVerifier = deal.accreditationVerification?.verifier;
 
-  const { amount, numberAUnits, numberCUnits } = deal.investmentStats;
+  const { amount, numberAUnits, numberCUnits, debtInterestRatePerc } =
+    deal.investmentStats;
   const amountSpelledOut = toWords(amount);
+  const interestSpelledOut = `${toWords(debtInterestRatePerc ?? 0)} Percent`;
   const investingEntityName = getInvestingEntityName(org, deal, signer);
 
   const env: EnvelopeDefinition =
@@ -527,12 +532,12 @@ export function makeEnvelopeDefinition(
 
   const interestTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'interest',
-    value: amount >= 250000 ? '12' : '10',
+    value: debtInterestRatePerc?.toString() ?? '',
   }) as DSText;
 
   const interestSpelledOutTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'interestSpelledOut',
-    value: amount >= 250000 ? `Twelve Percent` : `Ten Percent`,
+    value: interestSpelledOut,
   }) as DSText;
 
   const investingEntityNameTab: DSText = docusign.Text.constructFromObject({

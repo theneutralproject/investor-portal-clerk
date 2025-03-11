@@ -1,11 +1,11 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { shareProjectDocsWithUser } from '@/libs/hubspot/utils.server';
+import Logger from '@/libs/logger';
 import {
   errorResponse,
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
-import { isError } from 'lodash';
 import { NextRequest } from 'next/server';
 
 type PostSchema = {
@@ -13,15 +13,15 @@ type PostSchema = {
   slug: string;
 };
 export async function POST(request: NextRequest) {
-  const adminUser = await getAdminFromRequest(request);
-  if (isError(adminUser)) {
-    console.error(getErrorMessage(adminUser));
-    return jsonResponse({ error: getErrorMessage(adminUser) }, 401);
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
   }
 
   try {
     const postData = (await request.json()) as PostSchema;
-    console.log('postData:', postData);
 
     const hsRes = await shareProjectDocsWithUser(
       postData.hubspotId,
@@ -29,7 +29,9 @@ export async function POST(request: NextRequest) {
     );
     return jsonResponse(hsRes);
   } catch (parseError) {
-    console.error('ERROR: unable to parse POST body:\n', parseError);
-    return errorResponse('Input data malformatted', 400);
+    return errorResponse('Input data malformatted', 400, {
+      request,
+      extra: { error: parseError },
+    });
   }
 }

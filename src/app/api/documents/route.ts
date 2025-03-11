@@ -15,6 +15,7 @@ import {
   errorResponse,
   getErrorMessage,
 } from '@/libs/utils.server';
+import Logger from '@/libs/logger';
 
 async function validateUser(request: NextRequest) {
   const { userId } = getAuth(request);
@@ -87,7 +88,9 @@ export async function POST(request: NextRequest) {
     const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
 
     if (!validationResult.success) {
-      console.error('Validation errors:', validationResult.error);
+      Logger.error('Validation errors:', request, {
+        validationError: validationResult.error,
+      });
       return jsonResponse(
         {
           error: 'Validation failed',
@@ -102,11 +105,10 @@ export async function POST(request: NextRequest) {
 
     const id = type === 'deal' ? dealId : organizationId;
     if (!id) {
-      return jsonResponse(
-        {
-          error: `${type === 'deal' ? 'Deal' : 'Organization'} ID is required`,
-        },
-        400
+      return errorResponse(
+        `${type === 'deal' ? 'Deal' : 'Organization'} ID is required`,
+        400,
+        { request }
       );
     }
 
@@ -126,7 +128,7 @@ export async function POST(request: NextRequest) {
 
     return jsonResponse({ success: true, document: newDocEntry });
   } catch (error) {
-    console.error('Error processing upload:', error);
+    Logger.error('Error uploading document:', request, { error });
 
     if (error instanceof z.ZodError) {
       return jsonResponse(

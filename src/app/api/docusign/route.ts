@@ -14,11 +14,7 @@ import {
   type DocusignEnvelopeCreateSchema,
   zDocusignEvelopeCreate,
 } from '@/libs/docusign/schema';
-import {
-  errorResponse,
-  getErrorMessage,
-  jsonResponse,
-} from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import {
   createNewEnvelopeDefinition,
   getExistingEnvelopeDefinition,
@@ -26,6 +22,7 @@ import {
   makeRecipientViewRequest,
   refreshAccessToken,
 } from '@/libs/docusign/utils.server';
+import Logger from '@/libs/logger';
 
 interface AccessTokenResponse {
   consentUrl?: string;
@@ -33,8 +30,8 @@ interface AccessTokenResponse {
 }
 
 // create new envelope or get existing envelope, and display recipient view to user
-export async function POST(req: NextRequest) {
-  const { userId: clerkUserId } = getAuth(req);
+export async function POST(request: NextRequest) {
+  const { userId: clerkUserId } = getAuth(request);
   if (!clerkUserId) {
     return jsonResponse({ error: 'User not found' }, 404);
   }
@@ -44,25 +41,21 @@ export async function POST(req: NextRequest) {
     include: { address: true, organizationMember: { include: { user: true } } },
   });
   if (!userWOrgsAndAddress) {
-    console.error('Neutral user not found in api/docusign');
-    return jsonResponse(
-      {
-        error: `User record with clerkid ${clerkUserId} not found in prisma (GET)`,
-      },
-      404
-    );
+    return errorResponse(`User record not found`, 404, {
+      request,
+      extra: { clerkUserId },
+    });
   }
 
   let payload: DocusignEnvelopeCreateSchema;
   // console.log('Docusign POST payload:', await req.json());
   try {
-    payload = zDocusignEvelopeCreate.parse(await req.json());
-  } catch (err) {
-    console.error('Error parsing Docusign POST payload: ', err);
-    return new Response(
-      JSON.stringify({ error: 'Unable to parse Docusign POST payload:', err }),
-      { status: 404, headers: { 'Content-Type': 'application/json' } }
-    );
+    payload = zDocusignEvelopeCreate.parse(await request.json());
+  } catch (error) {
+    return errorResponse('Unable to parse Docusign POST payload', 404, {
+      request,
+      extra: { error },
+    });
   }
 
   // check if user has access to deal
@@ -89,14 +82,12 @@ export async function POST(req: NextRequest) {
     },
   });
   if (!deal) {
-    console.error(
-      `Deal with id ${payload.dealId} not found in user's organization`
-    );
-    return jsonResponse(
+    return errorResponse(
+      `Deal with id ${payload.dealId} not found in user's organization`,
+      404,
       {
-        error: `Deal with id ${payload.dealId} not found in user's organization1`,
-      },
-      404
+        request,
+      }
     );
   }
 
@@ -109,15 +100,12 @@ export async function POST(req: NextRequest) {
   } = deal;
 
   if (!project || !organization || !investmentStats) {
-    console.error(
-      `Deal with id ${payload.dealId} not found in user's organization2`
-    );
-    console.log(!!project, !!organization, !!investmentStats);
-    return jsonResponse(
+    return errorResponse(
+      `Details for deal with id ${payload.dealId} not found`,
+      404,
       {
-        error: `Deal with id ${payload.dealId} not found in user's organization`,
-      },
-      404
+        request,
+      }
     );
   }
   let accessTokenResponse: AccessTokenResponse;
@@ -130,9 +118,12 @@ export async function POST(req: NextRequest) {
     );
     if (accessTokenResponse.consentUrl) {
       // we need to get consent from the user to share their data with docusign.
-      console.log(
-        'need to get consent from user to use docusign',
-        accessTokenResponse
+      Logger.log(
+        {
+          message: 'We are requesting consent from user to use docusign',
+          extra: accessTokenResponse,
+        },
+        request
       );
       return new Response(
         JSON.stringify({ consentUrl: accessTokenResponse.consentUrl }),
@@ -141,17 +132,23 @@ export async function POST(req: NextRequest) {
     }
     if (!accessTokenResponse.accessToken) {
       // this is unexpected
-      console.error('No access token found after consent flow');
-      return errorResponse('No access token found after consent flow', 500);
+      return errorResponse('No access token found after consent flow', 500, {
+        request,
+        extra: { accessTokenResponse },
+      });
     }
-  } catch (err) {
-    console.error('Error refreshing access token', getErrorMessage(err));
-    return errorResponse('Error refreshing access token', 500);
+  } catch (error) {
+    return errorResponse('Error refreshing access token', 500, {
+      request,
+      extra: { error },
+    });
   }
   // we do not need consent anymore, so we can instantiate the api client
-  console.log(
-    'instantiating api client with access token',
-    accessTokenResponse.accessToken
+  Logger.log(
+    {
+      message: `instantiating api client with access token ${accessTokenResponse.accessToken}`,
+    },
+    request
   );
 
   let envelopesApi: EnvelopesApi | null = null;
@@ -159,9 +156,11 @@ export async function POST(req: NextRequest) {
     envelopesApi = await instantiateApiClientFromAccessToken(
       accessTokenResponse.accessToken
     );
-  } catch (err) {
-    console.error('Error instantiating envelopesApi', getErrorMessage(err));
-    return errorResponse('Error instantiating envelopesApi', 500);
+  } catch (error) {
+    return errorResponse('Error instantiating envelopesApi', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   let envelopeResponse: EnvelopeSummary | Envelope;
@@ -177,31 +176,39 @@ export async function POST(req: NextRequest) {
         templateId: payload.templateId,
       },
     });
-  } catch (err) {
-    console.error(
-      'Error finding existing docusign event',
-      getErrorMessage(err)
-    );
-    return errorResponse('Error finding existing docusign event', 500);
+  } catch (error) {
+    return errorResponse('Error finding existing docusign event', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   if (existingDocusignEvent) {
-    console.log('Reusing existing envelope:', existingDocusignEvent);
+    Logger.log(
+      {
+        message: 'Reusing existing envelope',
+        extra: existingDocusignEvent,
+      },
+      request
+    );
     try {
       envelopeResponse = await getExistingEnvelopeDefinition(
         envelopesApi,
         existingDocusignEvent.envelopeId
       );
-    } catch (err) {
-      console.error('Unable to get existing envelope from Docusign', err);
+    } catch (error) {
       return errorResponse(
         'Unable to get existing envelope from Docusign',
-        500
+        500,
+        { request, extra: { error } }
       );
     }
   } else {
     // if no, create a new envelope
-    console.log('Creating new envelope for deal', deal.id);
+    Logger.log(
+      { message: 'Creating new envelope for deal', extra: { dealId: deal.id } },
+      request
+    );
     try {
       envelopeResponse = await createNewEnvelopeDefinition(
         envelopesApi,
@@ -210,15 +217,19 @@ export async function POST(req: NextRequest) {
         userWOrgsAndAddress,
         organization
       );
-    } catch (__err) {
-      console.error('Unable to create new envelope in Docusign');
-      return errorResponse('Unable to create new envelope in Docusign', 500);
+    } catch (error) {
+      return errorResponse('Unable to create new envelope in Docusign', 500, {
+        request,
+        extra: { error },
+      });
     }
   }
 
   if (!envelopeResponse.envelopeId) {
-    console.error('docusign envelope response is falsy:', envelopeResponse);
-    return errorResponse('Docusign envelope response is falsy', 500);
+    return errorResponse('Docusign envelope response is falsy', 500, {
+      request,
+      extra: { envelopeResponse },
+    });
   }
 
   const documentTemplateId = payload.templateId;
@@ -226,7 +237,10 @@ export async function POST(req: NextRequest) {
 
   const returnUrl = `${process.env.BASE_URL}/api/docusign/return?documentTemplateId=${documentTemplateId}&userId=${userId}&dealId=${deal.id}`;
   // Create the recipient view for the Signing Ceremony
-  console.log('Creating recipient view with returnUrl', returnUrl);
+  Logger.log(
+    { message: 'Creating recipient view for user', extra: { returnUrl } },
+    request
+  );
   const viewRequest = makeRecipientViewRequest(userWOrgsAndAddress, returnUrl);
   let viewRequestResponse: ViewUrl | Error;
   try {
@@ -235,14 +249,18 @@ export async function POST(req: NextRequest) {
       envelopeResponse.envelopeId,
       { recipientViewRequest: viewRequest }
     );
-  } catch (err) {
-    console.error('CANNOT CREATE RECIPIENT VIEW:', err);
-    return errorResponse('CANNOT CREATE RECIPIENT VIEW', 500);
+  } catch (error) {
+    return errorResponse('Cannot create recipient view', 500, {
+      request,
+      extra: { error },
+    });
   }
 
   if (isError(viewRequestResponse)) {
-    console.error('returning error for bad makeRecipientViewRequest');
-    return errorResponse(`${viewRequestResponse}`, 500);
+    return errorResponse(`Bad viewRequestResponse`, 500, {
+      request,
+      extra: { viewRequestResponse },
+    });
   }
   // store docusignEvent:
   if (!existingDocusignEvent) {
@@ -258,9 +276,11 @@ export async function POST(req: NextRequest) {
       });
 
       return jsonResponse(viewRequestResponse, 200);
-    } catch (err) {
-      console.error('Error creating new docusignEvent:', err);
-      return errorResponse('Error creating new docusignEvent', 500);
+    } catch (error) {
+      return errorResponse('Error creating new docusignEvent', 500, {
+        request,
+        extra: { error },
+      });
     }
   } else {
     try {
@@ -269,9 +289,11 @@ export async function POST(req: NextRequest) {
         data: { envelopeId: envelopeResponse.envelopeId, dateSent: new Date() },
       });
       return jsonResponse(viewRequestResponse, 200);
-    } catch (err) {
-      console.error('Error updating existing docusignEvent:', err);
-      return errorResponse('Error updating existing docusignEvent', 500);
+    } catch (error) {
+      return errorResponse('Error updating existing docusignEvent', 500, {
+        request,
+        extra: { error },
+      });
     }
   }
 }

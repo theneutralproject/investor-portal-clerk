@@ -3,7 +3,7 @@ import {
   instantiateApiClientFromUserAndDeal,
 } from '@/libs/docusign/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { currentUser } from '@clerk/nextjs/server';
 import { EnvelopesApi } from 'docusign-esign';
 import { NextRequest } from 'next/server';
@@ -16,8 +16,10 @@ export async function GET(request: NextRequest) {
     const queryParams = new URLSearchParams(url.search);
     envelopeId = queryParams.get('envelopeId') ?? null;
   } catch (error) {
-    console.error('unable to read query params:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('unable to read query params', 400, {
+      request,
+      extra: { error },
+    });
   }
 
   if (!envelopeId) {
@@ -28,10 +30,10 @@ export async function GET(request: NextRequest) {
     where: { clerkId: clerkUser?.id ?? '' },
   });
   if (!user) {
-    return jsonResponse(
-      `user with clerkId ${clerkUser?.id} not found in DB`,
-      404
-    );
+    return errorResponse(`User not found in DB`, 404, {
+      request,
+      extra: { clerkUser },
+    });
   }
 
   const docusignEvent = await prisma.docusignEvent.findUnique({
@@ -51,9 +53,10 @@ export async function GET(request: NextRequest) {
   });
 
   if (!docusignEvent || !docusignEvent.deal) {
-    return jsonResponse(
-      `docusign event not found for envelopeId ${envelopeId}`,
-      404
+    return errorResponse(
+      `Docusign event not found for envelopeId ${envelopeId}`,
+      404,
+      { request }
     );
   }
 
@@ -68,17 +71,21 @@ export async function GET(request: NextRequest) {
       envelopeId
     );
   } catch (error) {
-    console.error('Error getting envelopesApi:', getErrorMessage(error));
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('error getting envelopesApi', 500, {
+      request,
+      extra: { error, method: 'instantiateApiClientFromUserAndDeal' },
+    });
   }
   try {
     const signingOrder = await getSigningOrder(envelopesApi, envelopeId);
     return jsonResponse(signingOrder);
   } catch (error) {
-    console.error(
-      'Error getting envelopesApi or signing order:',
-      getErrorMessage(error)
-    );
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse('error getting envelopesApi or signingOrder', 500, {
+      request,
+      extra: {
+        error,
+        method: 'instantiateApiClientFromUserAndDeal or getSigningOrder',
+      },
+    });
   }
 }
