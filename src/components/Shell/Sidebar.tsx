@@ -28,27 +28,32 @@ import * as React from 'react';
 import { theme } from './NeutralThemeProvider';
 import UserAvatar from './UserAvatar';
 import MobileSidebar from './MobileSidebar';
+import { SIDEBAR_TEST_ID } from 'e2e/testIds';
 
 export const ROUTES = [
   {
     name: 'Dashboard',
     path: '/dashboard',
     icon: HomeIcon,
+    dataTestId: `${SIDEBAR_TEST_ID}-dashboard`,
   },
   {
     name: 'Documents',
     path: '/documents',
     icon: DescriptionIcon,
+    dataTestId: `${SIDEBAR_TEST_ID}-documents`,
   },
   {
     name: 'Learn',
     path: '/learn',
     icon: InfoIcon,
+    dataTestId: `${SIDEBAR_TEST_ID}-learn`,
   },
   {
     name: 'Contact',
     path: '/contact',
     icon: MessageIcon,
+    dataTestId: `${SIDEBAR_TEST_ID}-contact`,
   },
 ];
 
@@ -56,24 +61,37 @@ export const buttonItems = [
   {
     key: 'terms',
     label: 'Terms of Service',
+    dataTestId: `${SIDEBAR_TEST_ID}-terms`,
     icon: <DescriptionIcon />,
     path: '/terms',
   },
   {
     key: 'privacy',
     label: 'Privacy Policy',
+    dataTestId: `${SIDEBAR_TEST_ID}-privacy`,
     icon: <PolicyIcon />,
     path: '/privacy',
   },
   {
     key: 'copyright',
     label: '2025 Neutral',
+    dataTestId: `${SIDEBAR_TEST_ID}-copyright`,
     icon: <CopyrightIcon />,
   },
 ];
 
-export const ListItem = ({ item }: { item: any }) => (
-  <ListItemButton key={item.key} onClick={item.onClick}>
+export const ListItem = ({
+  item,
+  dataTestId,
+}: {
+  item: any;
+  dataTestId?: string;
+}) => (
+  <ListItemButton
+    key={item.key}
+    onClick={item.onClick}
+    data-testid={dataTestId}
+  >
     <ListItemIcon sx={{ color: '#e2e4e4', minWidth: '40px' }}>
       {item.icon}
     </ListItemIcon>
@@ -122,7 +140,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex' }} data-testid={SIDEBAR_TEST_ID}>
       <AppBar position="absolute">
         <Toolbar
           sx={{
@@ -150,6 +168,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
                 <Button
                   key={route.name}
                   onClick={() => router.push(route.path)}
+                  data-testid={route.dataTestId}
                   sx={{
                     borderRadius: '15px',
                     padding: '5px 10px',
