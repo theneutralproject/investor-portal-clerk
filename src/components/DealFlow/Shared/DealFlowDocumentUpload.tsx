@@ -17,7 +17,6 @@ import {
   type DealDocument,
   type DealDocumentType,
 } from '@prisma/client';
-import { isOrganizationReadOnly } from '../Details/DealFlowCoInvestor';
 
 type UploadStatus = 'uploading' | 'success' | 'error';
 type DocumentType = 'organization' | 'deal';
@@ -47,17 +46,8 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   type,
   dealDocumentType,
 }) => {
-  const {
-    organization,
-    deal,
-    refetchOrganization,
-    refetchDeal,
-    organizationsOwned,
-  } = useDealFlow();
-  const organizationReadOnly = isOrganizationReadOnly(
-    organizationsOwned,
-    organization
-  );
+  const { organization, deal, refetchOrganization, refetchDeal } =
+    useDealFlow();
 
   const [uploadState, setUploadState] = useState<UploadState>(() => {
     const initial: UploadState = {};
@@ -275,37 +265,30 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           </Box>
         )}
 
-        {!organizationReadOnly && (
-          <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
-            <Button
-              variant="blackPill"
-              component="label"
-              startIcon={<Upload size={18} />}
-              size="small"
-            >
-              Upload New File
-              <input
-                type="file"
-                hidden
-                accept=".pdf,.png,.jpg,.jpeg"
-                onChange={e => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    void handleFileSelect(doc.key, file);
-                  }
-                }}
-              />
-            </Button>
-          </Box>
-        )}
+        <Box sx={{ p: 2, bgcolor: 'grey.50' }}>
+          <Button
+            variant="blackPill"
+            component="label"
+            startIcon={<Upload size={18} />}
+            size="small"
+          >
+            Upload New File
+            <input
+              type="file"
+              hidden
+              accept=".pdf,.png,.jpg,.jpeg"
+              onChange={e => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  void handleFileSelect(doc.key, file);
+                }
+              }}
+            />
+          </Button>
+        </Box>
       </Paper>
     ),
-    [
-      handleFileSelect,
-      handleRemoveFile,
-      renderUploadStatus,
-      organizationReadOnly,
-    ]
+    [handleFileSelect, handleRemoveFile, renderUploadStatus]
   );
 
   return (
