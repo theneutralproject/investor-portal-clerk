@@ -142,7 +142,17 @@ class Logger {
       `Error '${logData.message}' occurred at ${logData.apiMessage}`
     );
 
-    if (!extra.disableSentry) {
+    if (extra.disableSentry) {
+      Sentry.addBreadcrumb({
+        category: 'log',
+        message: apiMessage,
+        level: 'warning',
+        data: {
+          logData,
+          error,
+        },
+      });
+    } else {
       Sentry.captureException(error, { level: 'error', extra: logData });
     }
   }
