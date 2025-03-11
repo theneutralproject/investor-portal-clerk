@@ -7,6 +7,8 @@ import {
 } from 'e2e/testIds';
 
 test.describe('Unauthenticated User Tests', () => {
+  test.describe.configure({ mode: 'parallel' });
+
   let context: BrowserContext;
   let page: Page;
 
@@ -16,6 +18,10 @@ test.describe('Unauthenticated User Tests', () => {
 
     await page.goto('/signout');
     await page.waitForLoadState('networkidle');
+  });
+
+  test.afterAll(async () => {
+    await context.close();
   });
 
   test.describe('Dashboard Page', async () => {
