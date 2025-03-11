@@ -53,7 +53,7 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
       )}
 
       <DealFlowDocumentUpload
-        type="organization" // Can change here
+        type="deal"
         documents={[
           {
             display: 'Verification Accreditation',
@@ -61,7 +61,6 @@ const UploadDocumentContent: React.FC<UploadDocumentContentProps> = ({
           },
         ]}
         dealDocumentType={dealDocumentType}
-        allowUploadWhenReadOnly={false} // We allow upload because VerifyAccreditation is saved to the deal, not the organization
       />
     </Box>
   );
