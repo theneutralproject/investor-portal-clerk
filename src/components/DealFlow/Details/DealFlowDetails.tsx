@@ -14,6 +14,7 @@ import {
   DealFlowDetailsFormValues,
 } from '../../../hooks/useValidatedForm';
 import { FormTextField, FormAutocomplete } from '../Shared/FormComponents';
+import Logger from '@/libs/logger';
 
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
@@ -52,7 +53,9 @@ const DealFlowDetails: React.FC = () => {
 
       void updateUser({ ...data, dateOfBirth, address });
     } catch (error) {
-      console.error('Submission error:', error);
+      Logger.error(error, null, {
+        message: 'Submission error:',
+      });
     }
   };
 
