@@ -4,7 +4,7 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { DealFinancingType, ProjectDocument } from '@prisma/client';
-
+import Logger from '@/libs/logger';
 export type DocumentWithCompletion = ProjectDocument & { completed: boolean };
 
 const useDocuments = (
@@ -75,6 +75,7 @@ const useDocuments = (
     onError: (error, { documentId, type }, context) => {
       // Reverting to previous data if mutation fails
       toast.error(`Failed to update the document: ${error.message}`);
+      Logger.error(error.message);
       if (context?.previousDocuments) {
         queryClient.setQueryData(documentsQueryKey, context.previousDocuments);
       }

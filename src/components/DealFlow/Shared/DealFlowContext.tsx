@@ -35,6 +35,7 @@ import DealFlowReview from '@components/DealFlow/ReviewSign/DealFlowReview';
 import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import DealFlowDetailsExistingEntity from '../Details/DealFlowDetailsExistingEntity';
+import Logger from '@/libs/logger';
 // Define the step types
 export type StepType =
   | 'get-started'
@@ -340,10 +341,18 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
               `/dealflow/${projectSlug}/${dealId}/${lastValidStep.value}`
             );
             toast.error('Please complete previous steps first');
+            Logger.error('Please complete previous steps first', null, {
+              currentRouteStep,
+              lastValidStep,
+            });
           }
         } else {
           router.push(`/dealflow/${projectSlug}/${dealId}`);
           toast.error('Invalid deal stage for this step');
+          Logger.error('Invalid deal stage for this step', null, {
+            currentRouteStep,
+            lastValidStep,
+          });
         }
       }
     }
@@ -438,6 +447,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
         toast.error('Failed to update deal. Please try again.');
       }
       console.error('Error updating deal:', error);
+      Logger.error('Error updating deal:', null, {
+        error,
+        message: 'DealFlowContext updateDeal error:',
+        updatedDealData,
+        step,
+      });
       setError('Failed to update deal. Please try again.');
     } finally {
       setIsLoading(false);
@@ -469,6 +484,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       } else {
         toast.error('Failed to create deal. Please try again.');
       }
+      Logger.error('Error creating deal:', null, {
+        error,
+        message: 'DealFlowContext createDeal error:',
+        dealCreateData,
+        step,
+      });
       console.error('Error creating deal:', error);
       setError('Failed to create deal. Please try again.');
     } finally {
@@ -503,6 +524,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       } else {
         toast.error('Failed to update user. Please try again.');
       }
+      Logger.error('Error updating user:', null, {
+        error,
+        message: 'DealFlowContext updateUser error:',
+        updatedUserData,
+        step,
+      });
       console.error('Error updating user:', error);
       setError('Failed to update user. Please try again.');
     } finally {
@@ -544,6 +571,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       } else {
         toast.error('Failed to create organization. Please try again.');
       }
+      Logger.error('Error creating organization:', null, {
+        error,
+        message: 'DealFlowContext createOrganization error:',
+        organizationData,
+        step,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -616,6 +649,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       } else {
         toast.error(errorMessage);
       }
+      Logger.error('Error updating organization:', null, {
+        error,
+        message: 'DealFlowContext updateOrganization error:',
+        organizationId,
+        updatedOrganizationData,
+        step,
+      });
       setError(errorMessage);
       setIsLoading(false);
       return { success: false, error: errorMessage };
@@ -646,6 +686,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       } else {
         toast.error('Failed to create organization member. Please try again.');
       }
+      Logger.error('Error creating organization member:', null, {
+        error,
+        message: 'DealFlowContext createOrganizationMember error:',
+        createData,
+        step,
+      });
       console.error('Error creating organization member:', error);
       setError('Failed to create organization member. Please try again.');
     } finally {
@@ -700,6 +746,13 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       } else {
         toast.error('Failed to update organization member. Please try again.');
       }
+      Logger.error('Error updating organization member:', null, {
+        error,
+        message: 'DealFlowContext updateOrganizationMember error:',
+        memberId,
+        updateData,
+        step,
+      });
       console.error('Error updating organization member:', error);
       setError('Failed to update organization member. Please try again.');
     } finally {
@@ -729,6 +782,12 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
           'Failed to create accreditation verifier. Please try again.'
         );
       }
+      Logger.error('Error creating accreditation verifier:', null, {
+        error,
+        message: 'DealFlowContext createVerification error:',
+        verificationData,
+        step,
+      });
       console.error('Error creating accreditation verifier:', error);
       setError('Failed to create accreditation verifier. Please try again.');
     } finally {

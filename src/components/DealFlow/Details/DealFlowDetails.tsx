@@ -99,6 +99,7 @@ const DealFlowDetails: React.FC = () => {
             name="phoneNumber"
             label="Phone Number"
             format="phone"
+            required
           />
         </Grid>
 

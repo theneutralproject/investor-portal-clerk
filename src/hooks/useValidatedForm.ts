@@ -29,7 +29,7 @@ export const dealFlowDetailsSchema = z.object({
   id: z.number().optional(),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  phoneNumber: z.string().optional(),
+  phoneNumber: z.string().min(1, 'Phone number is required'),
   ssn: z.string().refine(
     val => {
       // Check for formatted SSN: ***-**-6789

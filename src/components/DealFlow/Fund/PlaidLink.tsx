@@ -47,7 +47,7 @@ class PlaidLinkClass extends React.Component<Props, State> {
       const link_token = await response.json();
       return link_token;
     } catch (error) {
-      toast.error(PLAID_ERROR_MESSAGE);
+      toast.error(PLAID_ERROR_MESSAGE); //Logger.error caught above
       return null;
     }
   }
@@ -93,7 +93,9 @@ class PlaidLinkClass extends React.Component<Props, State> {
         }
       );
     } catch (error) {
-      console.error('Auth error:', error);
+      Logger.error('PlaidLink error:', null, {
+        error,
+      });
       toast.error(PLAID_ERROR_MESSAGE);
       this.setState({ isLoading: false });
     }
