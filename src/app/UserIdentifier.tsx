@@ -26,7 +26,8 @@ export default function UserIdentifier() {
   const [loadTermsStatus, setLoadTermStatus] = useState<boolean>(false);
   const { setTermsStatus } = useTermsContext();
   const { data, isLoading } = useTermsStatus(
-    !!user && loadTermsStatus && !isOnboarding
+    !!user && loadTermsStatus && !isOnboarding,
+    user?.id
   );
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 

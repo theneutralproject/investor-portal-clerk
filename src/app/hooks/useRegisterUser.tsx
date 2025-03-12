@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import { localStorageHandler, TERMS_CACHE_KEY } from '@/libs/localStorage';
 export const useRegisterUser = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -14,6 +14,11 @@ export const useRegisterUser = () => {
       try {
         const response = await axios.post('/api/clerk');
         setData(response.data);
+
+        localStorageHandler.set(
+          TERMS_CACHE_KEY,
+          JSON.stringify({ userId: response.data.id })
+        );
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to register user');
       } finally {
