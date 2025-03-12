@@ -27,6 +27,19 @@ test.describe('authentication view tests', () => {
       await dashboardPage.close();
     });
 
+    test('Can view dashboard banner with username', async () => {
+      await expect(
+        dashboardPage.locator(
+          `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}"]`
+        )
+      ).toBeVisible();
+      await expect(
+        dashboardPage.locator(
+          `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}-title"]`
+        )
+      ).toHaveText('Welcome to Neutral, Testi');
+    });
+
     test('Can view dashboard page and load project data', async () => {
       const projectCards = dashboardPage.locator(
         `[data-testid="${DASHBOARD_PROJECTS_TEST_ID}-project-card"]`
@@ -41,29 +54,13 @@ test.describe('authentication view tests', () => {
         )
       ).toHaveText('Current Opportunities');
 
-      // ✅ Ensure there are exactly 3 project cards
+      // Ensure there are exactly 3 project cards
       await expect(projectCards).toHaveCount(3);
 
-      // ✅ Check that at least one of them contains "The Edison"
+      // Check that at least one of them contains "The Edison"
       await expect(projectCards.filter({ hasText: 'The Edison' })).toHaveCount(
         1
-      ); // Ensures at least one matches
-
-      await expect(
-        dashboardPage.locator(
-          `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}"]`
-        )
-      ).toBeVisible();
-      await expect(
-        dashboardPage.locator(
-          `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}-title"]`
-        )
-      ).toBeVisible();
-      await expect(
-        dashboardPage.locator(
-          `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}-title"]`
-        )
-      ).toHaveText('Welcome to Neutral, Testi');
+      );
     });
 
     test('Should see "User Navbar" in dashboard page when signed in', async () => {

@@ -49,7 +49,6 @@ export default defineConfig({
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
     bypassCSP: true,
-    headless: true,
     storageState: './playwright/.clerk/user.json',
   },
   /* Run your local dev server before starting the tests */
