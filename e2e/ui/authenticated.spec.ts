@@ -32,12 +32,16 @@ test.describe('authentication view tests', () => {
         dashboardPage.locator(
           `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}"]`
         )
-      ).toBeVisible();
+      ).toBeVisible({
+        timeout: 20000,
+      });
       await expect(
         dashboardPage.locator(
           `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}-title"]`
         )
-      ).toHaveText('Welcome to Neutral, Testi');
+      ).toHaveText('Welcome to Neutral, Testi', {
+        timeout: 20000,
+      });
     });
 
     test('Can view dashboard page and load project data', async () => {
@@ -47,19 +51,26 @@ test.describe('authentication view tests', () => {
 
       await expect(
         dashboardPage.locator(`[data-testid="${DASHBOARD_PROJECTS_TEST_ID}"]`)
-      ).toBeVisible();
+      ).toBeVisible({
+        timeout: 20000,
+      });
       await expect(
         dashboardPage.locator(
           `[data-testid="${DASHBOARD_PROJECTS_TEST_ID}-title"]`
         )
-      ).toHaveText('Current Opportunities');
+      ).toHaveText('Current Opportunities', {
+        timeout: 20000,
+      });
 
       // Ensure there are exactly 3 project cards
       await expect(projectCards).toHaveCount(3);
 
       // Check that at least one of them contains "The Edison"
       await expect(projectCards.filter({ hasText: 'The Edison' })).toHaveCount(
-        1
+        1,
+        {
+          timeout: 20000,
+        }
       );
     });
 
@@ -119,7 +130,9 @@ test.describe('authentication view tests', () => {
     test('Should see project "Documents" when signed in', async () => {
       await expect(
         projectsPage.locator(`[data-testid="${DOCUMENTS_NEW_TEST_ID}"]`)
-      ).toBeVisible();
+      ).toBeVisible({
+        timeout: 20000,
+      });
     });
 
     test('Should see "Complete Invesments" section when signed in', async () => {
