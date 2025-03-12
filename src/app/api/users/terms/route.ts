@@ -10,7 +10,7 @@ import { NextRequest } from 'next/server';
  * @constant {number}
  */
 const CURRENT_REVISION = parseInt(
-  process.env.CURRENT_TERMS_REVISION || '1',
+  process.env.NEXT_PUBLIC_CURRENT_TERMS_REVISION || '1',
   10
 );
 
