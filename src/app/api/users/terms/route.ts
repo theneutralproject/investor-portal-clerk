@@ -56,6 +56,8 @@ export async function GET(request: NextRequest) {
   );
 
   return jsonResponse({
+    userId: user.id,
+    clerkUserId: clerkId,
     hasAcceptedCurrentRevision: !!currentRevisionTermEvent,
   });
 }
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return jsonResponse({ termEvent: newTermEvent }, 201);
+    return jsonResponse({ termEvent: newTermEvent, clerkUserId: clerkId }, 201);
   } catch (error) {
     return errorResponse('Unknown Terms.create Error', 500, {
       request,

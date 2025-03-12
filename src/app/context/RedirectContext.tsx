@@ -2,30 +2,10 @@
 
 import React, { createContext, useContext, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { localStorageHandler, REDIRECT_URL_KEY } from '@/libs/localStorage';
 
 // Define localStorage key
-const REDIRECT_URL_KEY = 'redirect_url';
 
-const localStorageHandler = {
-  get: (): string | null => {
-    try {
-      return localStorage.getItem(REDIRECT_URL_KEY);
-    } catch {
-      return null;
-    }
-  },
-  set: (url: string | null) => {
-    try {
-      if (url) {
-        localStorage.setItem(REDIRECT_URL_KEY, url);
-      } else {
-        localStorage.removeItem(REDIRECT_URL_KEY);
-      }
-    } catch {
-      console.warn('localStorage is not available');
-    }
-  },
-};
 interface DoRedirectType {
   path?: string;
   remove?: boolean;
@@ -48,8 +28,10 @@ export const RedirectProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const router = useRouter();
 
-  const getRedirectUrl = (): string | null => localStorageHandler.get();
-  const setRedirectUrl = (url: string | null) => localStorageHandler.set(url);
+  const getRedirectUrl = (): string | null =>
+    localStorageHandler.get(REDIRECT_URL_KEY);
+  const setRedirectUrl = (url: string | null) =>
+    localStorageHandler.set(REDIRECT_URL_KEY, url);
 
   const doRedirect = ({ path, remove = true }: DoRedirectType) => {
     const finalPath = path || getRedirectUrl() || '/dashboard';
