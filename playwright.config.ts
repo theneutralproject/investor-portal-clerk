@@ -24,6 +24,7 @@ if (!baseURL || !testUserToken) {
 export default defineConfig({
   timeout: 60 * 1000,
   testDir: './e2e',
+  globalSetup: './e2e/global.setup.ts',
   /* Run tests in files in parallel */
   fullyParallel: false,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
@@ -37,7 +38,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: baseURL,
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
     extraHTTPHeaders: {
@@ -48,6 +49,8 @@ export default defineConfig({
     navigationTimeout: 60 * 1000,
     actionTimeout: 60 * 1000,
     bypassCSP: true,
+    headless: true,
+    storageState: './playwright/.clerk/user.json',
   },
   /* Run your local dev server before starting the tests */
   webServer: {

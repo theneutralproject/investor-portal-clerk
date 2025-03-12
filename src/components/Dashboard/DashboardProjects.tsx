@@ -13,6 +13,7 @@ import {
 import Grid from '@mui/material/Grid2';
 import { type ProjectWithAllNestedData } from '@/libs/types';
 import { useRouter } from 'next/navigation';
+import { DASHBOARD_PROJECTS_TEST_ID } from 'e2e/testIds';
 
 const StyledCard = styled(Card)(({ theme }) => ({
   marginBottom: theme.spacing(2),
@@ -126,9 +127,16 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
     num % 1 === 0 ? num.toFixed(0) : num.toFixed(1);
 
   return (
-    <Card sx={{ borderRadius: '8px', mt: 2 }}>
+    <Card
+      sx={{ borderRadius: '8px', mt: 2 }}
+      data-testid={DASHBOARD_PROJECTS_TEST_ID}
+    >
       <CardContent>
-        <Typography variant="h6" sx={{ fontSize: '20px', mb: 2 }}>
+        <Typography
+          variant="h6"
+          sx={{ fontSize: '20px', mb: 2 }}
+          data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-title`}
+        >
           Current Opportunities
         </Typography>
         <Divider sx={{ mb: 2 }} />
@@ -151,6 +159,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                   boxShadow: 4,
                 },
               }}
+              data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-project-card`}
             >
               <Grid
                 container
@@ -159,7 +168,9 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                 alignItems="center"
               >
                 <Grid size={{ xs: 12, sm: 2 }}>
-                  <ProjectImage>
+                  <ProjectImage
+                    data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-projet-card-image`}
+                  >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={headerImage ?? `/project-images/${project.id}.jpg`}
@@ -178,10 +189,18 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                     }}
                   >
                     <Box sx={{ width: '100%' }}>
-                      <Typography variant="h6" sx={{ mb: 0.5 }}>
+                      <Typography
+                        variant="h6"
+                        sx={{ mb: 0.5 }}
+                        data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-projet-card-name`}
+                      >
                         {project.displayName}
                       </Typography>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-projet-card-location`}
+                      >
                         {project.location}
                       </Typography>
                     </Box>
@@ -195,6 +214,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                           whiteSpace: 'nowrap',
                           padding: '8px 32px',
                         }}
+                        data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-projet-card-details-btn`}
                       >
                         VIEW DETAILS
                       </Button>

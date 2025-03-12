@@ -1,48 +1,49 @@
-// The setup function runs before each test
-
 import { clerk, clerkSetup } from '@clerk/testing/playwright';
-import { test as setup } from '@playwright/test';
 import path from 'path';
+import { fileURLToPath } from 'url';
+import { chromium } from '@playwright/test';
 
-setup('global setup', async ({}) => {
-  console.log('In Global setup');
-  await clerkSetup();
-
-  if (
-    !process.env.E2E_CLERK_USER_USERNAME ||
-    !process.env.E2E_CLERK_USER_PASSWORD
-  ) {
-    throw new Error(
-      'Please provide E2E_CLERK_USER_USERNAME and E2E_CLERK_USER_PASSWORD environment variables.'
-    );
-  }
-});
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const authFile = path.join(__dirname, '../playwright/.clerk/user.json');
+const BASE_URL = process.env.BASE_URL || 'http://localhost:3000';
 
-setup('authenticate', async ({ page }) => {
-  console.log('in setup/ authenticate');
-  await page.goto('/');
+export default async function globalSetup() {
+  console.log('Running Global Setup...');
+  await clerkSetup();
+
+  if (!process.env.E2E_CLERK_USER_PHONE) {
+    throw new Error(
+      'Missing Clerk environment variables: E2E_CLERK_USER_PHONE'
+    );
+  }
+
+  const browser = await chromium.launch();
+  const page = await browser.newPage();
+
+  console.log('Signing in user with Clerk...');
+  await page.goto(BASE_URL);
+
   await clerk.signIn({
     page,
     signInParams: {
-      strategy: 'password',
-      identifier: process.env.E2E_CLERK_USER_USERNAME!,
-      password: process.env.E2E_CLERK_USER_PASSWORD!,
+      strategy: 'phone_code',
+      identifier: process.env.E2E_CLERK_USER_PHONE!,
     },
   });
-  await page.goto('/dashboard');
-  await page.getByText('Projects');
 
-  const pageContext = await page.context();
+  await page.goto(`${BASE_URL}/dashboard`);
 
+  const pageContext = page.context();
   let cookies = await pageContext.cookies();
 
-  // clerk polls the session cookie, so we have to set a wait
   while (!cookies.some(c => c.name === '__session')) {
     cookies = await pageContext.cookies();
   }
 
-  // store the cookies in the state.json
   await pageContext.storageState({ path: authFile });
-});
+
+  console.log('Clerk authentication completed. Session stored.');
+  await browser.close();
+}

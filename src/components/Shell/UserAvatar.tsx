@@ -73,7 +73,10 @@ const UserAvatar = () => {
 
   return (
     <>
-      <IconButton onClick={handleClick}>
+      <IconButton
+        onClick={handleClick}
+        data-testid={`${USER_AVATAR_TEST_ID}-user-avatar`}
+      >
         <Avatar sx={{ bgcolor: '#bdbdbd' }}>{getInitials()}</Avatar>
       </IconButton>
       <Menu

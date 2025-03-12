@@ -1,4 +1,4 @@
-import { test, expect, BrowserContext, Page } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import {
   COMPLETE_INVESTMENT,
   DASHBOARD_POSTFOLIO_TEST_ID,
@@ -9,52 +9,39 @@ import {
 test.describe('Unauthenticated User Tests', () => {
   test.describe.configure({ mode: 'parallel' });
 
-  let context: BrowserContext;
-  let page: Page;
-
-  test.beforeAll(async ({ browser }) => {
-    context = await browser.newContext();
-    page = await context.newPage();
-
-    await page.goto('/signout');
-    await page.waitForLoadState('networkidle');
-  });
-
-  test.afterAll(async () => {
-    await context.close();
-  });
-
   test.describe('Dashboard Page', async () => {
-    test('Should see "Sign in" button in dashboard page when logged out', async ({
-      page,
-    }) => {
-      await page.goto('/dashboard', { waitUntil: 'networkidle' });
+    let dashboardPage: Page;
 
-      const loginButton = page.locator(
+    test.beforeAll(async ({ browser }) => {
+      dashboardPage = await browser.newPage();
+
+      await dashboardPage.goto('/signout');
+      await dashboardPage.waitForLoadState('networkidle');
+      await dashboardPage.goto('/dashboard', { waitUntil: 'networkidle' });
+    });
+
+    test.afterAll(async () => {
+      await dashboardPage.close();
+    });
+
+    test('Should see "Sign in" button in dashboard page when logged out', async () => {
+      const loginButton = dashboardPage.locator(
         `[data-testid="${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in-btn"]`
       );
       await expect(loginButton).toBeVisible();
       await expect(loginButton).toHaveText('SIGN IN');
     });
 
-    test('Should see "Sign up" button in dashboard page when logged out', async ({
-      page,
-    }) => {
-      await page.goto('/dashboard', { waitUntil: 'networkidle' });
-
-      const signUpButton = page.locator(
+    test('Should see "Sign up" button in dashboard page when logged out', async () => {
+      const signUpButton = dashboardPage.locator(
         `[data-testid="${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up-btn"]`
       );
       await expect(signUpButton).toBeVisible();
       await expect(signUpButton).toHaveText('CREATE ACCOUNT');
     });
 
-    test('Should see "Invest in Tomorrow, Today" section in dashboard page when logged out', async ({
-      page,
-    }) => {
-      await page.goto('/dashboard', { waitUntil: 'networkidle' });
-
-      const signUpButton = page.locator(
+    test('Should see "Invest in Tomorrow, Today" section in dashboard page when logged out', async () => {
+      const signUpButton = dashboardPage.locator(
         `[data-testid="${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up-btn"]`
       );
       await expect(signUpButton).toBeVisible();
@@ -63,38 +50,40 @@ test.describe('Unauthenticated User Tests', () => {
   });
 
   test.describe('Project Page', () => {
-    test('Should not see project "Documents" when logged out', async ({
-      page,
-    }) => {
-      await page.goto('/projects/edison', { waitUntil: 'networkidle' });
+    let projectsPage: Page;
 
+    test.beforeAll(async ({ browser }) => {
+      projectsPage = await browser.newPage();
+
+      await projectsPage.goto('/signout');
+      await projectsPage.waitForLoadState('networkidle');
+      await projectsPage.goto('/projects/edison', { waitUntil: 'networkidle' });
+    });
+
+    test.afterAll(async () => {
+      await projectsPage.close();
+    });
+
+    test('Should not see project "Documents" when logged out', async () => {
       await expect(
-        page.locator(`[data-testid="${DOCUMENTS_NEW_TEST_ID}"]`)
+        projectsPage.locator(`[data-testid="${DOCUMENTS_NEW_TEST_ID}"]`)
       ).not.toBeVisible();
     });
 
-    test('Should not see "Complete Invesments" section when logged out', async ({
-      page,
-    }) => {
-      await page.goto('/projects/edison', { waitUntil: 'networkidle' });
-
+    test('Should not see "Complete Invesments" section when logged out', async () => {
       await expect(
-        page.locator(`[data-testid="${COMPLETE_INVESTMENT}"]`)
+        projectsPage.locator(`[data-testid="${COMPLETE_INVESTMENT}"]`)
       ).not.toBeVisible();
     });
 
-    test('Should see "Investment Summary" section blurred and with "Create an account" section when logged out', async ({
-      page,
-    }) => {
-      await page.goto('/projects/edison', { waitUntil: 'networkidle' });
-
-      await expect(page.getByText('Investment Summary')).toBeVisible();
+    test('Should see "Investment Summary" section blurred and with "Create an account" section when logged out', async () => {
+      await expect(projectsPage.getByText('Investment Summary')).toBeVisible();
       await expect(
-        page.locator(`[data-testid="${INVESTMENT_SUMMARY_TEST_ID}"]`)
+        projectsPage.locator(`[data-testid="${INVESTMENT_SUMMARY_TEST_ID}"]`)
       ).toBeVisible();
 
       await expect(
-        page.locator(
+        projectsPage.locator(
           `[data-testid="${INVESTMENT_SUMMARY_TEST_ID}-create-account"]`
         )
       ).toBeVisible();
