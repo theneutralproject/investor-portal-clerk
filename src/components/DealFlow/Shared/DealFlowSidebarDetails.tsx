@@ -128,7 +128,7 @@ const DealFlowSidebarDetails: React.FC = () => {
               >
                 <IconText
                   icon={<PersonIcon />}
-                  text={`${investor.user.firstName} ${investor.user.lastName}`}
+                  text={`${investor?.user?.firstName} ${investor?.user?.lastName}`}
                   caption="Co-Investor"
                 />
               </Card>

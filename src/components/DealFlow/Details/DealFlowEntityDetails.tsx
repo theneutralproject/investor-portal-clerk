@@ -1,5 +1,5 @@
-import React, { useState, type ChangeEvent } from 'react';
-import { Box, TextField, Autocomplete } from '@mui/material';
+import React, { useEffect } from 'react';
+import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useDealFlow } from '@/components/DealFlow/Shared/DealFlowContext';
 import { useRouter } from 'next/navigation';
@@ -13,6 +13,11 @@ import {
   isOrganizationReadOnly,
   LockedEntityAlert,
 } from './DealFlowCoInvestor';
+import {
+  useEntityDetailsForm,
+  EntityDetailsFormValues,
+} from '../../../hooks/useValidatedForm';
+import { FormTextField, FormAutocomplete } from '../Shared/FormComponents';
 
 const REQUIRED_DOCUMENTS = [
   {
@@ -24,12 +29,6 @@ const REQUIRED_DOCUMENTS = [
     key: 'organization-operating-agreement',
   },
 ];
-interface FormData {
-  name: string;
-  tin: string;
-  dateOfCreation: string;
-  juristication: string;
-}
 
 export const formatDate = (date: Date | null | undefined | string): string => {
   if (!date) return '';
@@ -53,33 +52,38 @@ const DealFlowEntityDetails: React.FC = () => {
     organization
   );
 
-  const [formData, setFormData] = useState<FormData>({
-    name: organization?.name ?? '',
-    tin: organization?.tin ?? '',
-    dateOfCreation: formatDate(organization?.dateOfCreation),
-    juristication: organization?.juristication ?? '',
-  });
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    formState: { isValid },
+    trigger,
+  } = useEntityDetailsForm();
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+  useEffect(() => {
+    if (organization) {
+      // Set form values from organization data
+      setValue('id', organization.id);
+      setValue('name', organization.name ?? '');
+      setValue('tin', organization.tin ?? '');
+      setValue('dateOfCreation', formatDate(organization.dateOfCreation));
+      setValue('juristication', organization.juristication ?? '');
+      trigger();
+    }
+  }, [organization, setValue, trigger]);
 
-  const handleContinue = async () => {
+  const handleContinue = async (data: EntityDetailsFormValues) => {
     try {
       if (organization?.id) {
-        const updatedFormData = {
-          ...formData,
-          dateOfCreation: formData.dateOfCreation
-            ? new Date(formData.dateOfCreation)
+        const updatedData = {
+          ...data,
+          dateOfCreation: data.dateOfCreation
+            ? new Date(data.dateOfCreation)
             : undefined,
         };
-        const response = await updateOrganization(
-          organization.id,
-          updatedFormData
-        );
+
+        const response = await updateOrganization(organization.id, updatedData);
+
         if (response.success) {
           router.push(
             `/dealflow/${project?.slug}/${deal?.id}/entity-details-co-investor`
@@ -95,13 +99,12 @@ const DealFlowEntityDetails: React.FC = () => {
     const orgDocuments = organization?.document ?? [];
     const requiredKeys = REQUIRED_DOCUMENTS.map(doc => doc.key);
 
-    const hasAllRequired = requiredKeys.every(requiredKey => {
+    return requiredKeys.every(requiredKey => {
       const matchingDocs = orgDocuments.filter(doc => doc.key === requiredKey);
       return matchingDocs.length > 0;
     });
-
-    return hasAllRequired;
   };
+
   return (
     <Box>
       <DealFlowTitle title="Ownership Information" />
@@ -110,70 +113,49 @@ const DealFlowEntityDetails: React.FC = () => {
 
       <Grid container spacing={2}>
         <Grid size={6}>
-          <TextField
-            variant="standard"
-            fullWidth
-            margin="normal"
-            label="Name of Entity"
+          <FormTextField<EntityDetailsFormValues>
+            control={control}
             name="name"
-            value={formData.name}
-            onChange={handleInputChange}
+            label="Name of Entity"
             required
             disabled={organizationReadOnly}
           />
         </Grid>
 
         <Grid size={6}>
-          <TextField
-            variant="standard"
-            fullWidth
-            margin="normal"
-            label="Tax Identification Number (TIN)"
+          <FormTextField<EntityDetailsFormValues>
+            control={control}
             name="tin"
-            value={formData.tin}
-            onChange={handleInputChange}
+            label="Tax Identification Number (TIN)"
             disabled={organizationReadOnly}
           />
         </Grid>
 
         <Grid size={6}>
-          <TextField
-            variant="standard"
-            fullWidth
-            margin="normal"
-            label="Date of Creation"
+          <FormTextField<EntityDetailsFormValues>
+            control={control}
             name="dateOfCreation"
+            label="Date of Creation"
             type="date"
-            value={formData.dateOfCreation}
-            onChange={handleInputChange}
-            InputLabelProps={{ shrink: true }}
+            required
             disabled={organizationReadOnly}
+            InputLabelProps={{ shrink: true }}
+            sx={{
+              '& input::-webkit-datetime-edit': { color: 'rgba(0, 0, 0, 0.6)' },
+              '& input:not([value=""])::-webkit-datetime-edit': {
+                color: 'inherit',
+              },
+            }}
           />
         </Grid>
 
         <Grid size={6}>
-          <Autocomplete
+          <FormAutocomplete<EntityDetailsFormValues>
+            control={control}
+            name="juristication"
+            label="Jurisdiction of Registration"
             options={usStates}
-            renderInput={params => (
-              <TextField
-                {...params}
-                label="Jurisdiction of Registration"
-                fullWidth
-                variant="standard"
-                margin="normal" // Add this to match other fields
-                slotProps={{
-                  inputLabel: {
-                    shrink: true,
-                  },
-                }}
-              />
-            )}
-            value={formData.juristication}
-            onChange={(_, newValue) =>
-              handleInputChange({
-                target: { name: 'juristication', value: newValue ?? '' },
-              } as React.ChangeEvent<HTMLInputElement>)
-            }
+            required
             disabled={organizationReadOnly}
           />
         </Grid>
@@ -186,9 +168,10 @@ const DealFlowEntityDetails: React.FC = () => {
       />
       <EncryptionCard />
       <DealFlowFooter
-        onContinue={handleContinue}
+        onContinue={handleSubmit(handleContinue)}
         isContinueDisabled={
-          !allRequiredDocumentsAreUploaded() && !organizationReadOnly
+          (!isValid || !allRequiredDocumentsAreUploaded()) &&
+          !organizationReadOnly
         }
         onBack={() => router.back()}
       />
