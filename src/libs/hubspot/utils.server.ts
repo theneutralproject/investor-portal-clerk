@@ -1,5 +1,11 @@
 import 'server-only';
-import { type User, Deal, DealFinancingType, Project } from '@prisma/client';
+import {
+  type User,
+  Deal,
+  DealFinancingType,
+  DealStatus,
+  Project,
+} from '@prisma/client';
 import {
   type HubspotContactCreateUpdateSchema,
   type HubspotDealPropertiesCollection,
@@ -7,6 +13,7 @@ import {
   type HubspotDealUpdate,
   zHsDealSearchResultsSchema,
   type HsDealCreateResponse,
+  DealContact,
 } from './schema';
 import type { DealUpdateSchema, DealCreateSchema } from '../deal/schema';
 import { getErrorMessage } from '../utils.server';
@@ -286,12 +293,6 @@ export async function getDealsWithContactsFromHubspot(hsIds: string[]) {
     console.error('Error', e);
   }
 
-  // associate contacts with deals by dealname
-  interface DealContact {
-    deal: SimplePublicObject | undefined;
-    contact: SimplePublicObject;
-  }
-
   const dealContacts = contacts.map(c => {
     const first = c.properties.firstname?.toLowerCase() ?? 'ljdfioqwehoeiufnil';
     const last = c.properties.lastname?.toLowerCase() ?? 'ljdfioqwehoeiufnil';
@@ -549,6 +550,7 @@ export function initHubspotDealProps(
     { name: 'amount', value: `${dealData.amount ?? 0}` },
     { name: 'transaction_id', value: dealData.transactionId! },
     { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
+    { name: 'deal_status', value: dealData.status ?? DealStatus.ACTIVE },
   ];
   const hsDealStageString = getHsDealStageStrFromInt(
     dealData.dealStage ?? 1,

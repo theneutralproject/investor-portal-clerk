@@ -1,4 +1,7 @@
-import type { SimplePublicObjectInputForCreate } from '@hubspot/api-client/lib/codegen/crm/contacts';
+import type {
+  SimplePublicObject,
+  SimplePublicObjectInputForCreate,
+} from '@hubspot/api-client/lib/codegen/crm/contacts';
 import { DealFinancingType, DealUnitType } from '@prisma/client';
 import { z } from 'zod';
 
@@ -26,6 +29,12 @@ export const zHsContactUpdateSchema = z.object({
 export type HubspotUserCreateResponse = {
   vid: number;
   isNew: boolean;
+};
+
+// associate contacts with deals by dealname
+export type DealContact = {
+  deal: SimplePublicObject | undefined;
+  contact: SimplePublicObject;
 };
 
 /**
