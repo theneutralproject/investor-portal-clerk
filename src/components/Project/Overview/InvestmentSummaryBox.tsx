@@ -8,6 +8,7 @@ import {
   displayDebtInterest,
   displayEquityIRR,
 } from '@/components/Dashboard/DashboardProjects';
+import { INVESTMENT_SUMMARY_TEST_ID } from 'e2e/testIds';
 const formatter = new Intl.NumberFormat('en', {
   notation: 'compact',
   maximumFractionDigits: 1,
@@ -130,10 +131,11 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
 
   if (!data.investmentStats.boolEquity) {
     return (
-      <Grid item xs={12} sm={5.5}>
+      <Grid item xs={12} sm={5.5} data-testid={INVESTMENT_SUMMARY_TEST_ID}>
         <DebtSection
           investmentStats={data.investmentStats}
           project={data as ProjectWithAllNestedData}
+          data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-debt-section`}
         />
       </Grid>
     );
@@ -145,11 +147,13 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
         container
         spacing={2}
         sx={{ alignItems: 'stretch', height: '100%' }}
+        data-testid={INVESTMENT_SUMMARY_TEST_ID}
       >
         <Grid item xs={12} sm={5.5}>
           <EquitySection
             investmentStats={data.investmentStats}
             project={data as ProjectWithAllNestedData}
+            data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-equity-section`}
           />
         </Grid>
 
@@ -167,10 +171,14 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
             investmentStats={data.investmentStats}
             project={data as ProjectWithAllNestedData}
             showAsterisk
+            data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-debt-section`}
           />
         </Grid>
 
-        <Footnotes investmentStats={data.investmentStats} />
+        <Footnotes
+          investmentStats={data.investmentStats}
+          data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-footnotes`}
+        />
       </Grid>
 
       {!loggedIn && (
@@ -188,6 +196,7 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
             backdropFilter: 'blur(4px)',
             borderRadius: '8px',
           }}
+          data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-create-account`}
         >
           <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
             <Typography variant="body1" align="center" fontWeight="500">
@@ -201,12 +210,26 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
               Create an account or sign in to view exclusive investment details.
             </Typography>
             <Stack direction="row" spacing={2}>
-              <Link href="/login" passHref>
-                <Button variant="neutralYellow">CREATE ACCOUNT</Button>
+              <Link
+                href="/login"
+                passHref
+                data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up`}
+              >
+                <Button
+                  variant="neutralYellow"
+                  data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up-btn`}
+                >
+                  CREATE ACCOUNT
+                </Button>
               </Link>
-              <Link href="/login" passHref>
+              <Link
+                href="/login"
+                passHref
+                data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-in`}
+              >
                 <Button
                   variant="text"
+                  data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-in-btn`}
                   sx={{
                     borderColor: 'text.primary',
                     color: 'text.primary',

@@ -28,6 +28,7 @@ import {
   formatCurrency,
   calculateTodayLinePosition,
 } from './Portfolio/portfolioHelpers';
+import { DASHBOARD_POSTFOLIO_TEST_ID } from 'e2e/testIds';
 
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
   active,
@@ -99,7 +100,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const chartData = getChartData(data || null);
   const todayLinePosition = calculateTodayLinePosition(chartData);
   return (
-    <>
+    <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}`}>
       <Grid container spacing={4} sx={{ mb: 4 }}>
         {metrics.map((metric, index) => (
           <Grid item xs={6} sm={6} md={3} key={index}>
@@ -247,6 +248,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
             backdropFilter: 'blur(4px)',
             borderRadius: '8px',
           }}
+          data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-create-account`}
         >
           <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
             <Typography variant="body1" align="center" fontWeight="500">
@@ -263,10 +265,23 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               solutions. Sign in or create your account to get started.
             </Typography>
             <Stack direction="row" spacing={2}>
-              <Link href="/login" passHref>
-                <Button variant="neutralYellow">CREATE ACCOUNT</Button>
+              <Link
+                href="/login"
+                passHref
+                data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up`}
+              >
+                <Button
+                  variant="neutralYellow"
+                  data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up-btn`}
+                >
+                  CREATE ACCOUNT
+                </Button>
               </Link>
-              <Link href="/login" passHref>
+              <Link
+                href="/login"
+                passHref
+                data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in`}
+              >
                 <Button
                   variant="text"
                   sx={{
@@ -277,6 +292,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
                       bgcolor: 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
+                  data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in-btn`}
                 >
                   SIGN IN
                 </Button>
@@ -285,7 +301,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
           </Stack>
         </Box>
       )}
-    </>
+    </div>
   );
 };
 

@@ -53,3 +53,5 @@ node_modules/
 /seedData/
 # Sentry Config File
 .env.sentry-build-plugin
+
+/playwright/.clerk/

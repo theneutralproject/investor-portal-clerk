@@ -121,7 +121,7 @@ describe('Logger', () => {
       );
     });
 
-    it('should log an error message and NOT send it to Sentry when disableSentry is true', () => {
+    it('should log an error message and send Sentry a warn breadcrumb when disableSentry is true', () => {
       const error = new Error('Test error');
 
       Logger.error(error, undefined, { disableSentry: true });
@@ -134,6 +134,7 @@ describe('Logger', () => {
       );
 
       expect(Sentry.captureException).not.toHaveBeenCalled();
+      expect(Sentry.addBreadcrumb).toHaveBeenCalled();
     });
 
     it('should handle non-object error messages correctly', () => {

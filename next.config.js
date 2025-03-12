@@ -39,7 +39,7 @@ const nextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: process.env.BASE_URL || 'http://localhost:3000',
-          }, // replace this your actual origin
+          },
           {
             key: 'Access-Control-Allow-Methods',
             value: 'GET,DELETE,PATCH,POST,PUT',

@@ -57,7 +57,6 @@ test.describe('dealflow logic tests', () => {
     }
     // Use the stored dealId to navigate directly to the type page
     await page.goto(`/dealflow/edison/${dealId}/type`);
-    console.log('dealId', dealId);
     // await expect(page.getByText("Testi Tester")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText('+15555550100')).toBeVisible({
       timeout: 20000,

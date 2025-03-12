@@ -1,0 +1,10 @@
+export const DOCUMENTS_NEW_TEST_ID = 'documents-new';
+export const DASHBOARD_POSTFOLIO_TEST_ID = 'dashboard-portfolio';
+export const MOBILE_SIDEBAR_TEST_ID = 'mobile-sidebar';
+export const SIDEBAR_TEST_ID = 'sidebar';
+export const USER_AVATAR_TEST_ID = 'user-avatar';
+export const COMPLETE_INVESTMENT = 'complete-investment';
+export const INVESTMENT_SUMMARY_TEST_ID = 'investment-summary';
+export const CUSTOM_TOOLTIP_TEST_ID = 'custom-tooltip';
+export const DASHBOARD_PROJECTS_TEST_ID = 'dashboard-projects';
+export const DASHBOARD_PAGE_BANNER_TEST_ID = 'dashboard-page-banner';
