@@ -49,6 +49,7 @@ export const zDealCreateSchema = z.object({
   hubspotId: z.string().nullish(),
   dealStage: z.number().min(0).max(6).nullish(),
   financingType: z.nativeEnum(DealFinancingType).nullish(),
+  ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
   transactionId: z.string().optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
@@ -56,6 +57,7 @@ export const zDealCreateSchema = z.object({
     .date()
     .or(z.string().transform(str => new Date(str)))
     .nullish(),
+  dateMatured: z.date().nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
   debtMinTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals

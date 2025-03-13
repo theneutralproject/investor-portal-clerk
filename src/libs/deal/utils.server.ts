@@ -121,12 +121,39 @@ export async function createDealForAdmin(
       `Project with id ${dealData.projectId} does not have investment stats.`
     );
   }
+
+  if (!dealData.hubspotId) {
+    // create deal in hubspot
+    const hsDealInput = initHubspotDealProps(project, dealOwner, dealData);
+    if (!hsDealInput) {
+      throw new Error(
+        'Deal cannot be created. Project not yet supported in Hubspot'
+      );
+    }
+
+    Logger.log({
+      message: `Creating deal in Hubspot for deal with transaction id ${dealData.transactionId}`,
+      extra: { hsDealInput },
+    });
+
+    try {
+      const hsDealId = await createHubspotDeal(
+        hsDealInput,
+        String(dealOwner.hubspotId)
+      );
+      dealData.hubspotId = hsDealId;
+    } catch (error) {
+      Logger.error(error, null, { dealData });
+      throw error;
+    }
+  }
+
   try {
-    const newDeal = await _createDeal(
+    const newAdminDeal = await _createDeal(
       dealData,
       project as ProjectWithInvestmentStats
     );
-    return newDeal;
+    return newAdminDeal;
   } catch (e) {
     console.error('Failed to create deal', getErrorMessage(e));
     throw e;
@@ -173,6 +200,16 @@ async function _createDeal(
       newInvestmentStats.debtTermMonthsMin = dealData.debtMinTerm;
     if (dealData.debtInterestRatePerc)
       newInvestmentStats.debtInterestRatePerc = dealData.debtInterestRatePerc;
+    if (dealData.ownershipType) {
+      console.log('ownershipType', dealData.ownershipType, dealData.status);
+      newInvestmentStats.ownershipType = dealData.ownershipType;
+    } else {
+      console.log(
+        'ownershipType not set',
+        dealData.ownershipType,
+        dealData.status
+      );
+    }
   }
 
   // ensure that organizationId and hubspotId are set

@@ -15,7 +15,7 @@ import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
-import { DealDocumentType, User } from '@prisma/client';
+import { DealDocumentType, DealStatus, User } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 
@@ -89,6 +89,7 @@ export async function POST(request: NextRequest) {
       where: {
         dealStage: DealStage.CLOSED,
         closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
+        status: DealStatus.ACTIVE,
       },
       include: {
         organization: {
