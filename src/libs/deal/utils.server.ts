@@ -200,16 +200,6 @@ async function _createDeal(
       newInvestmentStats.debtTermMonthsMin = dealData.debtMinTerm;
     if (dealData.debtInterestRatePerc)
       newInvestmentStats.debtInterestRatePerc = dealData.debtInterestRatePerc;
-    if (dealData.ownershipType) {
-      console.log('ownershipType', dealData.ownershipType, dealData.status);
-      newInvestmentStats.ownershipType = dealData.ownershipType;
-    } else {
-      console.log(
-        'ownershipType not set',
-        dealData.ownershipType,
-        dealData.status
-      );
-    }
   }
 
   // ensure that organizationId and hubspotId are set

@@ -73,6 +73,9 @@ export async function POST(request: NextRequest) {
       investmentStats: true,
       accreditationVerification: { include: { verifier: true } },
       organization: {
+        select: {
+          ownershipType: true,
+        },
         include: {
           members: { include: { user: { include: { address: true } } } },
           address: true,
