@@ -133,6 +133,12 @@ export async function POST(request: NextRequest) {
       }
       taxYear = parseInt(queryTaxYear);
     }
+    if (!taxYear)
+      return errorResponse(
+        'taxYear query param is required for K1 documentType',
+        400,
+        { request }
+      );
 
     for (const file of parsedFiles) {
       if (file instanceof File) {
