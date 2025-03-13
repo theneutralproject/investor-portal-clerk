@@ -284,13 +284,9 @@ export async function updateDeal(
     );
   } else {
     if (investmentStatsToUpdate) {
-      // the only investment stats fields that can be updated  from outside this function are amount, financingType, and ownershipType
-      const {
-        amount,
-        financingType,
-        ownershipType,
-        ...ignoredInvestmentStats
-      } = investmentStatsToUpdate;
+      // the only investment stats fields that can be updated  from outside this function are amount and financingType.
+      const { amount, financingType, ...ignoredInvestmentStats } =
+        investmentStatsToUpdate;
 
       for (const key in ignoredInvestmentStats) {
         console.warn(
@@ -312,13 +308,10 @@ export async function updateDeal(
       const dealFinancingType =
         financingType ?? existingDeal.investmentStats?.financingType;
       const dealAmount = amount ?? existingDeal.investmentStats?.amount;
-      const dealOwnershipType =
-        ownershipType ?? existingDeal.investmentStats?.ownershipType;
 
       let newInvestmentStats = {
         amount: dealAmount,
         financingType: dealFinancingType,
-        ownershipType: dealOwnershipType,
         dealId: existingDeal.id,
       } as DealInvestmentStats;
 
