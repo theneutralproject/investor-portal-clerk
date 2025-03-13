@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         if (error) {
           console.error(`unable to upload file ${name}:`);
           console.error(error);
-          return errorResponse(getErrorMessage(error), 500, {
+          return errorResponse(`unable to upload file: ${error.message}`, 500, {
             request,
             extra: { error },
           });
