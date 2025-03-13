@@ -167,15 +167,30 @@ export async function PUT(request: NextRequest) {
   if (!dealId) {
     return errorResponse('Missing required dealId', 400, { request });
   }
+  if (!pdfName) {
+    return errorResponse('Missing required pdfName', 400, { request });
+  }
+  if (!taxYear) {
+    return errorResponse('Missing required taxYear', 400, { request });
+  }
   const newPath = `deal-${dealId}/${pdfName}`;
   const { error } = await storageClient
     .from(`deal-documents`)
     .move(`tempPdfStorage/${pdfName}`, newPath);
   if (error) {
-    return errorResponse('unable to move file from temp storage to deal', 500, {
-      request,
-      extra: { error },
-    });
+    return errorResponse(
+      `unable to move file from temp storage to deal: ${error.name} - ${error.message}`,
+      500,
+      {
+        request,
+        extra: {
+          name: error.name,
+          message: error.message,
+          cause: error.cause,
+          stack: error.stack,
+        },
+      }
+    );
   }
   try {
     const newDocEntry = await createDocumentEntry(
@@ -194,9 +209,13 @@ export async function PUT(request: NextRequest) {
       document: newDocEntry,
     });
   } catch (error) {
-    return errorResponse('Error processing upload', 500, {
-      request,
-      extra: { error },
-    });
+    return errorResponse(
+      `Error processing upload: ${getErrorMessage(error)}`,
+      500,
+      {
+        request,
+        extra: { error: getErrorMessage(error) },
+      }
+    );
   }
 }
