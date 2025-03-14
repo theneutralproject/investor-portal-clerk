@@ -15,7 +15,7 @@ import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
-import { DealDocumentType, DealStatus, User } from '@prisma/client';
+import { DealDocumentType, DealStatus, Prisma, User } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 
@@ -33,10 +33,12 @@ export async function POST(request: NextRequest) {
   }
 
   let taxYear: number | null = null;
+  let projectName: string | null = null;
   try {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
     taxYear = parseInt(queryParams.get('taxYear') ?? '-1');
+    projectName = queryParams.get('projectName') ?? null;
   } catch (error) {
     return errorResponse('unable to read query params', 500, {
       request,
@@ -50,6 +52,16 @@ export async function POST(request: NextRequest) {
       400,
       { request }
     );
+  }
+
+  if (projectName && projectName.length) {
+    if (!(projectName in ['The Edison', 'Bakers Place', 'Vanilla 301'])) {
+      return errorResponse(
+        `${projectName} is an invalid projectName - it must be either of ${['The Edison', 'Bakers Place', 'Vanilla 301'].toString()}`,
+        400,
+        { request }
+      );
+    }
   }
 
   let pdfFiles: FormDataEntryValue[] = [];
@@ -83,14 +95,24 @@ export async function POST(request: NextRequest) {
   }
 
   let deals: DealWithFullOrgAndSlimProject[] = [];
+
+  let whereQuery: Prisma.DealWhereInput = {
+    dealStage: DealStage.CLOSED,
+    closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
+    status: DealStatus.ACTIVE,
+  };
+
+  if (projectName) {
+    whereQuery = {
+      ...whereQuery,
+      project: { name: projectName },
+    };
+  }
+
   try {
     // get all closed deals
     deals = await prisma.deal.findMany({
-      where: {
-        dealStage: DealStage.CLOSED,
-        closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
-        status: DealStatus.ACTIVE,
-      },
+      where: whereQuery,
       include: {
         organization: {
           include: {
@@ -179,7 +201,7 @@ export async function PUT(request: NextRequest) {
     .move(`tempPdfStorage/${pdfName}`, newPath);
   if (error) {
     return errorResponse(
-      `unable to move file from temp storage to deal: ${error.name} - ${error.message}`,
+      `unable to move file from temp storage to deal ${dealId}: ${error.name} - ${error.message}`,
       500,
       {
         request,
@@ -188,6 +210,8 @@ export async function PUT(request: NextRequest) {
           message: error.message,
           cause: error.cause,
           stack: error.stack,
+          from: `tempPdfStorage/${pdfName}`,
+          to: newPath,
         },
       }
     );
