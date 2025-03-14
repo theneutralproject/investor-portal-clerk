@@ -25,12 +25,12 @@ import Logger from '@/libs/logger';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  // try {
-  //   await getAdminFromRequest(request);
-  // } catch (error) {
-  //   Logger.log({ message: getErrorMessage(error) }, request);
-  //   return jsonResponse(getErrorMessage(error), 500);
-  // }
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
+  }
 
   let taxYear: number | null = null;
   let projectSlug: string | null = null;
