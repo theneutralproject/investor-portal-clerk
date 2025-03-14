@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
   }
 
   if (projectName && projectName.length) {
-    if (!(projectName in ['The Edison', 'Bakers Place', 'Vanilla 301'])) {
+    if (!['The Edison', 'Bakers Place', 'Vanilla 301'].includes(projectName)) {
       return errorResponse(
         `${projectName} is an invalid projectName - it must be either of ${['The Edison', 'Bakers Place', 'Vanilla 301'].toString()}`,
         400,
