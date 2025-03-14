@@ -25,20 +25,20 @@ import Logger from '@/libs/logger';
  * @returns
  */
 export async function POST(request: NextRequest) {
-  try {
-    await getAdminFromRequest(request);
-  } catch (error) {
-    Logger.log({ message: getErrorMessage(error) }, request);
-    return jsonResponse(getErrorMessage(error), 500);
-  }
+  // try {
+  //   await getAdminFromRequest(request);
+  // } catch (error) {
+  //   Logger.log({ message: getErrorMessage(error) }, request);
+  //   return jsonResponse(getErrorMessage(error), 500);
+  // }
 
   let taxYear: number | null = null;
-  let projectName: string | null = null;
+  let projectSlug: string | null = null;
   try {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
     taxYear = parseInt(queryParams.get('taxYear') ?? '-1');
-    projectName = queryParams.get('projectName') ?? null;
+    projectSlug = queryParams.get('projectSlug') ?? null;
   } catch (error) {
     return errorResponse('unable to read query params', 500, {
       request,
@@ -52,16 +52,6 @@ export async function POST(request: NextRequest) {
       400,
       { request }
     );
-  }
-
-  if (projectName && projectName.length) {
-    if (!['The Edison', 'Bakers Place', 'Vanilla 301'].includes(projectName)) {
-      return errorResponse(
-        `${projectName} is an invalid projectName - it must be either of ${['The Edison', 'Bakers Place', 'Vanilla 301'].toString()}`,
-        400,
-        { request }
-      );
-    }
   }
 
   let pdfFiles: FormDataEntryValue[] = [];
@@ -102,10 +92,15 @@ export async function POST(request: NextRequest) {
     status: DealStatus.ACTIVE,
   };
 
-  if (projectName) {
+  if (projectSlug) {
+    if (!['519', 'bakers', 'edison'].includes(projectSlug)) {
+      return errorResponse(`Invalid projectSlug: ${projectSlug}`, 400, {
+        request,
+      });
+    }
     whereQuery = {
       ...whereQuery,
-      project: { name: projectName },
+      project: { slug: projectSlug },
     };
   }
 
