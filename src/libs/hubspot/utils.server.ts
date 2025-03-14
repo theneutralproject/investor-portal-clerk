@@ -583,6 +583,7 @@ export function getHsDealPropsFromDeal(
     investmentStats,
     signaturesCompletedDate,
     transactionId,
+    paymentMethod,
   } = deal;
   const hsReturnObject = {
     hubspotDealId: parseInt(hubspotId, 10),
@@ -646,6 +647,13 @@ export function getHsDealPropsFromDeal(
       name: 'date_signatures_completed',
       value: formatDateForHubspot(signaturesCompletedDate),
     });
+
+  if (paymentMethod)
+    hsReturnObject.properties.push({
+      name: 'payment_method',
+      value: paymentMethod,
+    });
+
   return hsReturnObject;
 }
 
