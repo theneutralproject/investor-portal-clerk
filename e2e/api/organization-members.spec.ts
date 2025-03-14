@@ -80,12 +80,12 @@ test.describe('api/organizations/members test', () => {
         data: {
           type: MembershipType.COINVESTOR,
           title: 'Test Title',
-          user: { email: 'updatedEmail@test-email.org' },
+          user: { email: 'updatedEmail@test-email2.org' },
         },
       }
     );
     const putResponseBody = await JSON.parse(await updateResponse.text());
-    expect(putResponseBody.user.email).toBe('updatedEmail@test-email.org');
+    expect(putResponseBody.user.email).toBe('updatedEmail@test-email2.org');
     expect(putResponseBody.user.firstName).toBe(memberData.user.firstName);
     expect(updateResponse.status()).toBe(200);
   });
