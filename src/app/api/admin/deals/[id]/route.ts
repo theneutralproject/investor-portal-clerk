@@ -73,6 +73,7 @@ async function getDetailedDealStats(
  * @returns deal loaded returns, documents, signing order, and other information
  */
 export async function GET(request: NextRequest) {
+  console.log('GET /api/admin/deals/:dealId');
   try {
     await getAdminFromRequest(request);
   } catch (error) {
