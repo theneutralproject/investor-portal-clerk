@@ -16,7 +16,6 @@ import type { AddressCreateSchema } from '../address/schema';
 import { clerkClient } from '@clerk/nextjs/server';
 import { ReferralSource } from '../hubspot/utils.client';
 import Logger from '../logger';
-import { sendGTMEvent } from '@next/third-parties/google';
 
 interface ClerkAPIErrorResponse {
   clerkError: boolean;
@@ -123,16 +122,6 @@ export async function createUserInDbAndHubspot(
     Logger.log({ message: 'begin creating user in db', extra: userCreateData });
     const dbUser = await prisma.user.create({
       data: userCreateData,
-    });
-
-    // Send to Google Tag Manager
-    sendGTMEvent({
-      event: 'signup',
-      user_id: dbUser?.id,
-      logged_in: true,
-      eventCategory: 'Account',
-      eventAction: 'Step 1: Creation',
-      eventLabel: 'Account Created',
     });
 
     // create a personal org:
