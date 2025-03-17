@@ -16,6 +16,7 @@ import {
 import { createDealForUser, updateDeal } from '@/libs/deal/utils.server';
 import { DealStatus } from '@prisma/client';
 import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
@@ -161,6 +162,16 @@ export async function POST(request: NextRequest) {
 
     const deal = await createDealForUser(dealData, dbUser);
 
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'deal creation',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Deal Stage Updated to ${deal.dealStage}`,
+      eventLabel: 'Deal Created',
+    });
+
     return jsonResponse(deal, 201);
   } catch (error) {
     console.error(error);
@@ -198,6 +209,15 @@ export async function PUT(request: NextRequest) {
 
     // also update the deal in hubspot:
     const updatedDeal = await updateDeal(deal, true);
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'deal update',
+      dealId: updatedDeal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Deal Stage Updated to ${updatedDeal.dealStage}`,
+      eventLabel: 'Deal Updated',
+    });
 
     return jsonResponse(updatedDeal);
   } catch (error) {
@@ -264,6 +284,16 @@ export async function DELETE(request: NextRequest) {
     await prisma.deal.update({
       where: { id: dealId },
       data: { dealStage: DealStage.CLOSED_LOST, status: DealStatus.LOST },
+    });
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'deal cancelled',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Deal Stage Updated to ${DealStage.CLOSED_LOST}`,
+      eventLabel: 'Deal Cancelled',
     });
 
     return jsonResponse({ message: 'Deal cancelled' });
