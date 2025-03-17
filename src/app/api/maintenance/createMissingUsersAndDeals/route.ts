@@ -350,7 +350,6 @@ export async function POST(request: NextRequest) {
       paymentMethod: PaymentMethod.CHECK,
       paymentReferenceId: 'N/A',
       investmentEntity: dealInput.investmentEntity,
-      ownershipType: dealInput.ownershipType,
     };
     if (dealInput.debtMinTerm)
       dealCreateData.debtMinTerm = dealInput.debtMinTerm;

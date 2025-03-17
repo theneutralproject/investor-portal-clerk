@@ -200,16 +200,6 @@ async function _createDeal(
       newInvestmentStats.debtTermMonthsMin = dealData.debtMinTerm;
     if (dealData.debtInterestRatePerc)
       newInvestmentStats.debtInterestRatePerc = dealData.debtInterestRatePerc;
-    if (dealData.ownershipType) {
-      console.log('ownershipType', dealData.ownershipType, dealData.status);
-      newInvestmentStats.ownershipType = dealData.ownershipType;
-    } else {
-      console.log(
-        'ownershipType not set',
-        dealData.ownershipType,
-        dealData.status
-      );
-    }
   }
 
   // ensure that organizationId and hubspotId are set
@@ -294,13 +284,9 @@ export async function updateDeal(
     );
   } else {
     if (investmentStatsToUpdate) {
-      // the only investment stats fields that can be updated  from outside this function are amount, financingType, and ownershipType
-      const {
-        amount,
-        financingType,
-        ownershipType,
-        ...ignoredInvestmentStats
-      } = investmentStatsToUpdate;
+      // the only investment stats fields that can be updated  from outside this function are amount and financingType.
+      const { amount, financingType, ...ignoredInvestmentStats } =
+        investmentStatsToUpdate;
 
       for (const key in ignoredInvestmentStats) {
         console.warn(
@@ -322,13 +308,10 @@ export async function updateDeal(
       const dealFinancingType =
         financingType ?? existingDeal.investmentStats?.financingType;
       const dealAmount = amount ?? existingDeal.investmentStats?.amount;
-      const dealOwnershipType =
-        ownershipType ?? existingDeal.investmentStats?.ownershipType;
 
       let newInvestmentStats = {
         amount: dealAmount,
         financingType: dealFinancingType,
-        ownershipType: dealOwnershipType,
         dealId: existingDeal.id,
       } as DealInvestmentStats;
 

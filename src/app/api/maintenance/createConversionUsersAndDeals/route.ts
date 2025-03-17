@@ -355,7 +355,6 @@ export async function POST(request: NextRequest) {
       organizationId: altOrgId ?? dealOwner.userOrgId,
       dealStage: DealStage.CLOSED,
       financingType: DealFinancingType.promissory_note_now,
-      ownershipType: dealInput.ownershipType,
       hubspotId,
       closingDate: dealInput.dateStartFunded,
       signaturesCompletedDate: dealInput.dateSigned,
@@ -393,7 +392,6 @@ export async function POST(request: NextRequest) {
         dealInput.financingType === DealFinancingType.promissory_to_equity
           ? DealFinancingType.equity
           : DealFinancingType.promissory_note_now,
-      ownershipType: dealInput.ownershipType,
       closingDate: dealInput.dateEndFunded,
       signaturesCompletedDate: dealInput.dateSigned,
       investmentEntity: InvestmentEntity[projectName],

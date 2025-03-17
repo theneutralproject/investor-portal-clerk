@@ -333,10 +333,9 @@ const addressToOneLine = (a: Address | null) => {
 
 const getAddress = (
   org: OrganizationWithFullMembersAndAddress,
-  deal: DealWithInvestmentStatsAndVerification,
   user: UserWithAddress
 ) => {
-  switch (deal.investmentStats.ownershipType) {
+  switch (org.ownershipType) {
     case DealOwnershipType.INDIVIDUAL:
     case DealOwnershipType.MARITAL:
     case DealOwnershipType.JOINT:
@@ -348,10 +347,9 @@ const getAddress = (
 
 const getSsnOrTin = (
   org: OrganizationWithFullMembersAndAddress,
-  deal: DealWithInvestmentStatsAndVerification,
   user: UserWithAddress
 ) => {
-  switch (deal.investmentStats.ownershipType) {
+  switch (org.ownershipType) {
     case DealOwnershipType.INDIVIDUAL:
     case DealOwnershipType.MARITAL:
     case DealOwnershipType.JOINT:
@@ -363,10 +361,9 @@ const getSsnOrTin = (
 
 const getInvestingEntityName = (
   org: OrganizationWithFullMembersAndAddress,
-  deal: DealWithInvestmentStatsAndVerification,
   user: UserWithAddress
 ) => {
-  switch (deal.investmentStats.ownershipType) {
+  switch (org.ownershipType) {
     case DealOwnershipType.INDIVIDUAL:
     case DealOwnershipType.MARITAL:
     case DealOwnershipType.JOINT:
@@ -446,28 +443,35 @@ const getSignerCompanyDetailsTabs = (
 ) => {
   const stateNotOrgTab = docusign.Text.constructFromObject({
     tabLabel: 'stateNotOrg',
-    value: getAddress(org, deal, user)?.state ?? '',
+    value: getAddress(org, user)?.state ?? '',
     required: 'true',
   }) as DSText;
-  console.log(deal.investmentStats.ownershipType);
-  switch (deal.investmentStats.ownershipType) {
+  Logger.log({
+    message: `Organization Type: ${org.ownershipType} at getSignerCompanyDetailsTabs`,
+  });
+  switch (org.ownershipType) {
     case DealOwnershipType.INDIVIDUAL:
     case DealOwnershipType.MARITAL:
     case DealOwnershipType.OTHER:
-      console.log('getting individual details tabs');
+      Logger.log({
+        message: `getting individual details tabs at getSignerCompanyDetailsTabs`,
+      });
       return [stateNotOrgTab];
     default:
-      console.log('getting company details tabs', org.address);
+      Logger.log({
+        message: `getting company details tabs`,
+        extra: { address: org.address },
+      });
 
       const corporationStateTab: DSText = docusign.Text.constructFromObject({
         tabLabel: 'corporationState',
-        value: getAddress(org, deal, user)?.state ?? '',
+        value: getAddress(org, user)?.state ?? '',
         required: 'true',
       }) as DSText;
 
       const corporationCityTab: DSText = docusign.Text.constructFromObject({
         tabLabel: 'corporationCity',
-        value: getAddress(org, deal, user)?.city ?? '',
+        value: getAddress(org, user)?.city ?? '',
         required: 'true',
       }) as DSText;
 
@@ -502,7 +506,7 @@ export function makeEnvelopeDefinition(
     deal.investmentStats;
   const amountSpelledOut = toWords(amount);
   const interestSpelledOut = `${toWords(debtInterestRatePerc ?? 0)} Percent`;
-  const investingEntityName = getInvestingEntityName(org, deal, signer);
+  const investingEntityName = getInvestingEntityName(org, signer);
 
   const env: EnvelopeDefinition =
     new docusign.EnvelopeDefinition() as EnvelopeDefinition;
@@ -557,28 +561,28 @@ export function makeEnvelopeDefinition(
 
   const signer1SsnTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'ssn',
-    value: getSsnOrTin(org, deal, signer),
+    value: getSsnOrTin(org, signer),
   }) as DSText;
 
   const signer1AddressStreetTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'addressStreet',
-    value: getAddress(org, deal, signer)?.street ?? '',
+    value: getAddress(org, signer)?.street ?? '',
   }) as DSText;
 
   const signer1AddressCityStateZipTab: DSText =
     docusign.Text.constructFromObject({
       tabLabel: 'addressCityStateZip',
-      value: addressToCityStateZip(getAddress(org, deal, signer)),
+      value: addressToCityStateZip(getAddress(org, signer)),
     }) as DSText;
 
   const signer1AddressOneLineTab: DSText = docusign.Text.constructFromObject({
     tabLabel: 'addressOneLine',
-    value: addressToOneLine(getAddress(org, deal, signer)),
+    value: addressToOneLine(getAddress(org, signer)),
   }) as DSText;
 
   const signer1State: DSText = docusign.Text.constructFromObject({
     tabLabel: 'state',
-    value: getAddress(org, deal, signer)?.state,
+    value: getAddress(org, signer)?.state,
   }) as DSText;
 
   const signer1PhoneNumberTab: DSText = docusign.Text.constructFromObject({
@@ -587,9 +591,7 @@ export function makeEnvelopeDefinition(
   }) as DSText;
 
   // Ownership type
-  const ownershipType = getOwnershipTypeFromDeal(
-    deal.investmentStats.ownershipType
-  );
+  const ownershipType = getOwnershipTypeFromOrganization(org.ownershipType);
 
   const signer1OwnershipTypeTab: RadioGroup =
     docusign.RadioGroup.constructFromObject({
@@ -700,7 +702,9 @@ export function makeRecipientViewRequest(signer: User, returnUrl: string) {
   return viewRequest;
 }
 
-export function getOwnershipTypeFromDeal(ownershipType: DealOwnershipType) {
+export function getOwnershipTypeFromOrganization(
+  ownershipType: DealOwnershipType
+) {
   switch (ownershipType) {
     case DealOwnershipType.INDIVIDUAL:
       return docusignOwnershipTypeEnum.Individual;
