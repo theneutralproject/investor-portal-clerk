@@ -8,6 +8,7 @@ import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
 import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 /**
  * UserIdentifier component is responsible for:
@@ -57,6 +58,28 @@ export default function UserIdentifier() {
         lastname: lastName,
         id: id,
       });
+
+      if (isOnboarding) {
+        // Send to Google Tag Manager
+        sendGTMEvent({
+          event: 'signup',
+          user_id: id,
+          logged_in: true,
+          eventCategory: 'Account',
+          eventAction: 'Step 1: Signup',
+          eventLabel: 'Account Signup',
+        });
+      } else {
+        // Send to Google Tag Manager
+        sendGTMEvent({
+          event: 'login',
+          user_id: id,
+          logged_in: true,
+          eventCategory: 'Account',
+          eventAction: 'Step 1: Login',
+          eventLabel: 'Account Login',
+        });
+      }
 
       /**
        * Fetch user data from the API or create a new user if not found.

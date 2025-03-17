@@ -13,6 +13,7 @@ import {
   type Project,
   type Organization,
   type AccreditationVerification,
+  Deal,
 } from '@prisma/client';
 import axios, { AxiosError } from 'axios';
 import { useRouter, usePathname } from 'next/navigation';
@@ -36,6 +37,7 @@ import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import DealFlowDetailsExistingEntity from '../Details/DealFlowDetailsExistingEntity';
 import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 // Define the step types
 export type StepType =
   | 'get-started'
@@ -424,6 +426,17 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     incrementStep = true
   ) => {
     if (!deal) return;
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'deal update',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Deal Stage Updated to ${deal.dealStage}`,
+      eventLabel: 'Deal Updated',
+    });
+
     setIsLoading(true);
     // Remove signaturesCompletedDate from updatedDealData because it was formatted as a string
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -461,6 +474,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
   const createDeal = async () => {
     if (!project) return;
+
     setIsLoading(true);
 
     const dealCreateData: DealCreateSchema = {
@@ -469,10 +483,17 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     };
 
     try {
-      const { data } = await axios.post<{ id: string }>(
-        '/api/deals',
-        dealCreateData
-      );
+      const { data } = await axios.post<Deal>('/api/deals', dealCreateData);
+
+      // Send to Google Tag Manager
+      sendGTMEvent({
+        event: 'deal creation',
+        dealId: data.id,
+        dealStage: data.dealStage,
+        eventCategory: 'Deal Flow',
+        eventAction: `Deal Stage Updated to ${data.dealStage}`,
+        eventLabel: 'Deal Created',
+      });
       const nextStep = getNextStep(step);
       if (nextStep) {
         router.push(`/dealflow/${project.slug}/${data.id}/${nextStep}`);
