@@ -1,8 +1,7 @@
 import '@/styles/globals.css';
 
 import { Inter } from 'next/font/google';
-import { GoogleAnalytics } from '@next/third-parties/google';
-
+import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 import NeutralThemeProvider from '@/components/Shell/NeutralThemeProvider';
 import Sidebar from '@/components/Shell/Sidebar';
 import NeutralQueryProvider from '@/components/QueryClientProvider';
@@ -66,6 +65,7 @@ export default function RootLayout({
               </body>
 
               <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
+              <GoogleTagManager gtmId={process.env.GOOGLE_ADS_TAG_ID ?? ''} />
               <script
                 type="text/javascript"
                 src="https://forms.finixpymnts.com/finix.js"
