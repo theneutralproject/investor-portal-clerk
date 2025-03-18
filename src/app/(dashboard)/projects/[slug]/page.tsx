@@ -34,6 +34,7 @@ import { useRouter } from 'next/navigation';
 import { NextClientPage } from '@/types/page';
 import { DealStage } from '@/libs/deal/schema';
 import { useRedirect } from '@/app/context/RedirectContext';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -55,6 +56,16 @@ export default function Page({ params }: NextClientPage) {
   });
 
   useEffect(() => {
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      userId: user?.id,
+      loggedIn: loggedIn,
+      currentUrl: window.location.href,
+      eventCategory: 'Page View',
+      event: `Project Page Visited`,
+      eventLabel: `Viewed ${window.location.href}`,
+    });
+
     posthog.capture(POSTHOG_EVENTS.PROJECT_PAGE_VIEWED, {
       current_url: window.location.href,
       user_id: user?.id,

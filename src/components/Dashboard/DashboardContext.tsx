@@ -9,6 +9,8 @@ import type {
   DealWithOrgMembersAndProject,
   ProjectWithAllNestedData,
 } from '@/libs/types';
+import { sendGTMEvent } from '@next/third-parties/google';
+import { DealStage } from '@/libs/deal/schema';
 
 interface DashboardContextType {
   projects: ProjectWithAllNestedData[];
@@ -59,6 +61,16 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const deleteDeal = async (dealId: number) => {
     await axios.delete(`/api/deals`, { data: { dealId } });
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      dealId: dealId,
+      dealStage: DealStage.CLOSED_LOST,
+      eventCategory: 'Deal Flow',
+      event: `Deal Deleted`,
+      eventLabel: 'Deal Cancelled by user',
+    });
+
     void refetchDeals();
   };
 
