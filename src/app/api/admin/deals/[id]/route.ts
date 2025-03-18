@@ -1,3 +1,7 @@
+import {
+  createInvestmentCompletedActivityItem,
+  DealWithNestedItems,
+} from '@/libs/activityFeedItem/utils.server';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { DealStage, DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
@@ -198,6 +202,11 @@ export async function PUT(request: NextRequest) {
   if (!deal) {
     return errorResponse(`Deal id ${dealId} not found`, 404, { request });
   }
+
+  if (putData.dealStage === DealStage.CLOSED) {
+    await createInvestmentCompletedActivityItem(deal as DealWithNestedItems);
+  }
+
   try {
     const {
       investmentStats,

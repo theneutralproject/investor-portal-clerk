@@ -30,6 +30,10 @@ import type {
 import { getInvestmentEntity } from './utils';
 import { getErrorMessage } from '../utils.server';
 import Logger from '../logger';
+import {
+  createInvestmentCompletedActivityItem,
+  DealWithNestedItems,
+} from '../activityFeedItem/utils.server';
 
 /**
  * creates a deal in the db, and in hubspot
@@ -258,6 +262,7 @@ export async function updateDeal(
     include: {
       investmentStats: true,
       project: { select: { id: true, name: true, slug: true } },
+      organization: { select: { ownerId: true } },
     },
   });
   if (!existingDeal) {
@@ -407,6 +412,14 @@ export async function updateDeal(
   if (updatedStats) {
     updatedDeal.investmentStats = updatedStats;
   }
+
+  // Add activity feed item if the deal has closed
+  if (updateDealData.dealStage === DealStage.CLOSED) {
+    await createInvestmentCompletedActivityItem(
+      updatedDeal as DealWithNestedItems
+    );
+  }
+
   return updatedDeal;
 }
 

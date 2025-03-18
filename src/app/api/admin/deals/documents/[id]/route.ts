@@ -19,6 +19,10 @@ import {
 import prisma from '@/libs/prisma.server';
 import Logger from '@/libs/logger';
 import { isNumber } from 'lodash';
+import {
+  createInvestmentAvailableActivityItem,
+  createTaxDocAvailableActivityItem,
+} from '@/libs/activityFeedItem/utils.server';
 
 /**
  * Get dealdocs with download URL by dealId
@@ -172,7 +176,7 @@ export async function POST(request: NextRequest) {
         }
 
         try {
-          await createDocumentEntry(
+          const doc = await createDocumentEntry(
             'deal',
             dealId,
             name,
@@ -182,6 +186,30 @@ export async function POST(request: NextRequest) {
             documentType,
             taxYear
           );
+
+          if (documentType === DealDocumentType.K1) {
+            // Create Tax Doc Available Activity Feed Item for K1 Deals
+            await createTaxDocAvailableActivityItem({
+              userId: adminUser.id,
+              itemId: doc.id,
+            });
+          } else {
+            const dealProject = await prisma.deal.findFirst({
+              where: {
+                id: dealId,
+              },
+              include: {
+                project: { select: { name: true } },
+              },
+            });
+
+            // Create Investment Doc Available Activity Feed Item for this document
+            await createInvestmentAvailableActivityItem({
+              userId: adminUser.id,
+              itemId: doc.id,
+              projectName: dealProject?.project.name,
+            });
+          }
         } catch (error) {
           console.error(
             'unable to createDocumentEntry:',
