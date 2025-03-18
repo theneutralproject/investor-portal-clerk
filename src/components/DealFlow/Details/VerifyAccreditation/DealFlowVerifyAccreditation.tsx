@@ -119,11 +119,10 @@ const DealFlowVerifyAccreditation: React.FC = () => {
 
       await createVerification(data);
       sendGTMEvent({
-        event: 'customEvent',
         dealId: deal.id,
         dealStage: deal.dealStage,
         eventCategory: 'Deal Flow',
-        eventAction: `Step 5: Accreditation Verification`,
+        event: `Step 5: Accreditation Verification`,
         eventLabel: `Accreditation Basis: ${data.basis}| Method: ${data.method}`,
       });
     } catch (err) {

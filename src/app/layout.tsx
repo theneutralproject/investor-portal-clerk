@@ -38,6 +38,8 @@ export default function RootLayout({
       <ClerkProvider>
         <RedirectProvider>
           <TermsProvider>
+            <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
+            <GoogleTagManager gtmId={process.env.GOOGLE_ADS_TAG_ID ?? ''} />
             <html lang="en">
               <body className={inter.className}>
                 <PageViewTracker />
@@ -63,9 +65,6 @@ export default function RootLayout({
                   </NeutralThemeProvider>
                 </NeutralQueryProvider>
               </body>
-
-              <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
-              <GoogleTagManager gtmId={process.env.GOOGLE_ADS_TAG_ID ?? ''} />
               <script
                 type="text/javascript"
                 src="https://forms.finixpymnts.com/finix.js"

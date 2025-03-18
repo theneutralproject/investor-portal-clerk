@@ -429,11 +429,10 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'customEvent',
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
-      eventAction: `Deal Stage Updated to ${deal.dealStage}`,
+      event: `Deal Stage Updated to ${deal.dealStage}`,
       eventLabel: 'Deal Updated',
     });
 
@@ -487,11 +486,10 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
       // Send to Google Tag Manager
       sendGTMEvent({
-        event: 'customEvent',
         dealId: data.id,
         dealStage: data.dealStage,
         eventCategory: 'Deal Flow',
-        eventAction: `Deal Stage Updated to ${data.dealStage}`,
+        event: `Deal Stage Updated to ${data.dealStage}`,
         eventLabel: 'Deal Created',
       });
       const nextStep = getNextStep(step);

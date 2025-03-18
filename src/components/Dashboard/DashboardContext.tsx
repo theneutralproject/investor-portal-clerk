@@ -64,11 +64,10 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'customEvent',
       dealId: dealId,
       dealStage: DealStage.CLOSED_LOST,
       eventCategory: 'Deal Flow',
-      eventAction: `Deal Deleted`,
+      event: `Deal Deleted`,
       eventLabel: 'Deal Cancelled by user',
     });
 

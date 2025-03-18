@@ -32,11 +32,10 @@ const DealFlowFund: React.FC = () => {
   const handleContinue = () => {
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'customEvent',
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
-      eventAction: `Step 7: Funds Committed`,
+      event: `Step 7: Funds Committed`,
       eventLabel: `Selected Funding Method: ${selectedOption}`,
     });
 
