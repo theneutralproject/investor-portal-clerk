@@ -25,6 +25,7 @@ import { useReturnsData } from './useReturnsData';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { DealFinancingType } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
 const ACCRUED_RETURN_COLOR = '#d7b15c';
@@ -98,6 +99,16 @@ const DealFlowAmount: React.FC = () => {
         ...deal.investmentStats,
         amount: Math.min(Math.max(amount, MIN_INVESTMENT), MAX_INVESTMENT),
       },
+    });
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'customEvent',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Step 2: Amount Input`,
+      eventLabel: `Amount selected: ${deal.investmentStats.amount}`,
     });
   };
 

@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const [docsLoading, setDocsLoading] = useState({});
@@ -70,6 +71,14 @@ const DealFlowReview: React.FC = () => {
       false
     );
     await refetchDeal();
+    sendGTMEvent({
+      event: 'customEvent',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Step 6: Investor Signature`,
+      eventLabel: `Subscription Agreement Signed by Investor`,
+    });
   };
 
   if (deal.dealStage === DealStage.DOCUMENT_REVIEW) {

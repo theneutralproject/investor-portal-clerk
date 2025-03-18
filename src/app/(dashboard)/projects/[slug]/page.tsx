@@ -58,10 +58,10 @@ export default function Page({ params }: NextClientPage) {
   useEffect(() => {
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'page_view',
-      user_id: user?.id,
-      logged_in: loggedIn,
-      current_url: window.location.href,
+      event: 'customEvent',
+      userId: user?.id,
+      loggedIn: loggedIn,
+      currentUrl: window.location.href,
       eventCategory: 'Page View',
       eventAction: `Visited ${window.location.href}`,
       eventLabel: 'Page Viewed',

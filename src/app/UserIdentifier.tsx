@@ -62,22 +62,20 @@ export default function UserIdentifier() {
       if (isOnboarding) {
         // Send to Google Tag Manager
         sendGTMEvent({
-          event: 'signup',
-          user_id: id,
-          logged_in: true,
+          event: 'customEvent',
+          userId: id,
           eventCategory: 'Account',
-          eventAction: 'Step 1: Signup',
-          eventLabel: 'Account Signup',
+          eventAction: 'Account Signup',
+          eventLabel: `Account Signup by ${primaryEmailAddress?.toString()}`,
         });
       } else {
         // Send to Google Tag Manager
         sendGTMEvent({
-          event: 'login',
-          user_id: id,
-          logged_in: true,
+          event: 'customEvent',
+          userId: id,
           eventCategory: 'Account',
-          eventAction: 'Step 1: Login',
-          eventLabel: 'Account Login',
+          eventAction: 'Account Login',
+          eventLabel: `Account Login by ${primaryEmailAddress?.toString()}`,
         });
       }
 

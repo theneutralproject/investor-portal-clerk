@@ -64,12 +64,12 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'deal cancelled',
+      event: 'customEvent',
       dealId: dealId,
       dealStage: DealStage.CLOSED_LOST,
       eventCategory: 'Deal Flow',
-      eventAction: `Deal Stage Updated to ${DealStage.CLOSED_LOST}`,
-      eventLabel: 'Deal Cancelled',
+      eventAction: `Deal Deleted`,
+      eventLabel: 'Deal Cancelled by user',
     });
 
     void refetchDeals();

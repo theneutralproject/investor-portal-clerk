@@ -5,6 +5,7 @@ import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { MODAL_KEYS } from '../Shared/Modal/DealFlowLearnMoreModal';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const DealFlowType: React.FC = () => {
   const { deal, updateDeal, project } = useDealFlow();
@@ -25,6 +26,16 @@ const DealFlowType: React.FC = () => {
         ...deal.investmentStats,
         financingType: financingType,
       },
+    });
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'customEvent',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Step 1: Choose Investment Type`,
+      eventLabel: `Financing Type: ${financingType} | Project ID: ${project?.slug}`,
     });
   };
 
