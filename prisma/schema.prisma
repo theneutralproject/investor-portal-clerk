@@ -356,6 +356,7 @@ model ActivityFeedItem {
   dateCreated DateTime     @default(now())
   link        String?
   type        ActivityType
+  itemId      Int?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

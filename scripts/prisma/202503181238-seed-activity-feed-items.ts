@@ -36,6 +36,7 @@ async function main() {
     body: string
     dateCreated: Date
     link: string | null
+    itemId: number
     type: ActivityType
   }[] = [
     ...closedDeals.map(deal => ({
@@ -45,6 +46,7 @@ async function main() {
       type: ActivityType.NEW_INVESTMENT,
       dateCreated: deal.dateCreated!,
       link: `/projects/${deal.project.slug}`,
+      itemId: deal.id
     })),
 
     ...investorDocuments.map(doc => ({
@@ -54,6 +56,7 @@ async function main() {
       type: ActivityType.INVESTOR_DOCUMENT,
       dateCreated: doc.dateCreated,
       link: `/documents/investor`,
+      itemId: doc.id
     })),
 
     ...taxDocuments.map(doc => ({
@@ -63,6 +66,7 @@ async function main() {
       type: ActivityType.TAX_DOCUMENT,
       dateCreated: doc.dateCreated,
       link: `/documents/tax`,
+      itemId: doc.id
     })),
   ];
 
