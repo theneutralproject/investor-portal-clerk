@@ -77,7 +77,10 @@ const DealFlowVerifyAccreditation: React.FC = () => {
     []
   );
 
-  const handleSubmitVerifier = async () => {
+  const handleSubmitVerifier = async (
+    method: VerificationMethod,
+    basis: VerificationBasis
+  ) => {
     setIsSubmitting(true);
     setError(null);
 
@@ -86,22 +89,6 @@ const DealFlowVerifyAccreditation: React.FC = () => {
         throw new Error('Deal not found');
       }
 
-      const method =
-        answers.verification === 'Upload Document'
-          ? VerificationMethod.SELF
-          : VerificationMethod.THIRD_PARTY;
-
-      const basis = answers.accreditation
-        ?.toLowerCase()
-        .includes('income of at least')
-        ? VerificationBasis.INCOME
-        : answers.accreditation?.toLowerCase().includes('verifiable net worth')
-          ? VerificationBasis.ASSETS
-          : answers.accreditation
-                ?.toLowerCase()
-                .includes('professional license')
-            ? VerificationBasis.LICENSE
-            : VerificationBasis.OTHER;
       const data = {
         dealId: deal.id,
         method,
@@ -118,13 +105,6 @@ const DealFlowVerifyAccreditation: React.FC = () => {
       }
 
       await createVerification(data);
-      sendGTMEvent({
-        dealId: deal.id,
-        dealStage: deal.dealStage,
-        eventCategory: 'Deal Flow',
-        event: `Step 5: Accreditation Verification`,
-        eventLabel: `Accreditation Basis: ${data.basis}| Method: ${data.method}`,
-      });
     } catch (err) {
       setError('Failed to submit verifier information. Please try again.');
       console.error('Error submitting verifier:', err);
@@ -134,11 +114,33 @@ const DealFlowVerifyAccreditation: React.FC = () => {
   };
 
   const handleContinue = () => {
+    const method =
+      answers.verification === 'Upload Document'
+        ? VerificationMethod.SELF
+        : VerificationMethod.THIRD_PARTY;
+
+    const basis = answers.accreditation
+      ?.toLowerCase()
+      .includes('income of at least')
+      ? VerificationBasis.INCOME
+      : answers.accreditation?.toLowerCase().includes('verifiable net worth')
+        ? VerificationBasis.ASSETS
+        : answers.accreditation?.toLowerCase().includes('professional license')
+          ? VerificationBasis.LICENSE
+          : VerificationBasis.OTHER;
+
     if (Object.keys(answers).length === 2) {
       if (answers.verification === 'Contact Third Party Verifier') {
-        void handleSubmitVerifier();
+        void handleSubmitVerifier(method, basis);
       }
 
+      sendGTMEvent({
+        dealId: deal.id,
+        dealStage: deal.dealStage,
+        eventCategory: 'Deal Flow',
+        event: `Step 5: Accreditation Verification`,
+        eventLabel: `Accreditation Basis: ${basis}| Method: ${method}`,
+      });
       router.push(`/dealflow/${project?.slug}/${deal?.id}/review`);
     }
   };
