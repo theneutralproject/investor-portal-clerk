@@ -62,20 +62,10 @@ export default function UserIdentifier() {
       if (isOnboarding) {
         // Send to Google Tag Manager
         sendGTMEvent({
-          event: 'customEvent',
           userId: id,
           eventCategory: 'Account',
-          eventAction: 'Account Signup',
+          event: 'Account Signup',
           eventLabel: `Account Signup by ${primaryEmailAddress?.toString()}`,
-        });
-      } else {
-        // Send to Google Tag Manager
-        sendGTMEvent({
-          event: 'customEvent',
-          userId: id,
-          eventCategory: 'Account',
-          eventAction: 'Account Login',
-          eventLabel: `Account Login by ${primaryEmailAddress?.toString()}`,
         });
       }
 

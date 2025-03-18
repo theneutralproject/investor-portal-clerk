@@ -29,11 +29,10 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
 
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'customEvent',
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
-      eventAction: `Step 3: Ownership Type`,
+      event: `Step 3: Ownership Type`,
       eventLabel: `Ownership Type selected: ${ownershipType}`,
     });
 

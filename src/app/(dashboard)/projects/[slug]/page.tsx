@@ -58,13 +58,12 @@ export default function Page({ params }: NextClientPage) {
   useEffect(() => {
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'customEvent',
       userId: user?.id,
       loggedIn: loggedIn,
       currentUrl: window.location.href,
       eventCategory: 'Page View',
-      eventAction: `Visited ${window.location.href}`,
-      eventLabel: 'Page Viewed',
+      event: `Project Page Visited`,
+      eventLabel: `Viewed ${window.location.href}`,
     });
 
     posthog.capture(POSTHOG_EVENTS.PROJECT_PAGE_VIEWED, {

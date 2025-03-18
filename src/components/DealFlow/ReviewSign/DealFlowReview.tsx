@@ -72,11 +72,10 @@ const DealFlowReview: React.FC = () => {
     );
     await refetchDeal();
     sendGTMEvent({
-      event: 'customEvent',
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
-      eventAction: `Step 6: Investor Signature`,
+      event: `Step 6: Investor Signature`,
       eventLabel: `Subscription Agreement Signed by Investor`,
     });
   };

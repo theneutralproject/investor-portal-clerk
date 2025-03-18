@@ -30,11 +30,10 @@ const DealFlowType: React.FC = () => {
 
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'customEvent',
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
-      eventAction: `Step 1: Choose Investment Type`,
+      event: `Step 1: Choose Investment Type`,
       eventLabel: `Financing Type: ${financingType} | Project ID: ${project?.slug}`,
     });
   };
