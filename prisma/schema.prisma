@@ -38,6 +38,7 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
+  ActivityFeedItem             ActivityFeedItem[]
 }
 
 model Deal {
@@ -345,6 +346,27 @@ model TermsEvents {
   dateAccepted DateTime
   revision     Int
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityFeedItem {
+  id          String       @id @default(uuid())
+  userId      Int
+  header      String
+  body        String
+  dateCreated DateTime     @default(now())
+  link        String?
+  type        ActivityType
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum ActivityType {
+  EVENT
+  PAYOUT
+  TAX_DOCUMENT
+  INVESTOR_DOCUMENT
+  INVESTOR_REPORT
+  NEW_INVESTMENT
 }
 
 enum DealDocumentType {
