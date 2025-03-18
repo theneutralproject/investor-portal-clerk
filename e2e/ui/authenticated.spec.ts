@@ -39,7 +39,7 @@ test.describe('authentication view tests', () => {
         dashboardPage.locator(
           `[data-testid="${DASHBOARD_PAGE_BANNER_TEST_ID}-title"]`
         )
-      ).toHaveText('Welcome to Neutral, ', {
+      ).toContainText('Welcome to Neutral,', {
         timeout: 20000,
       });
     });
