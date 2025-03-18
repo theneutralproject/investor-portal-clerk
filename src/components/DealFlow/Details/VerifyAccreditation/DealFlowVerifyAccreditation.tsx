@@ -16,6 +16,7 @@ import {
 import type { AccreditationVerificationCreateSchema } from '@/libs/accreditationVerification/schema';
 import DealFlowTitle from '../../Shared/DealFlowTitle';
 import { MODAL_KEYS } from '../../Shared/Modal/DealFlowLearnMoreModal';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const DealFlowVerifyAccreditation: React.FC = () => {
   const router = useRouter();
@@ -117,6 +118,14 @@ const DealFlowVerifyAccreditation: React.FC = () => {
       }
 
       await createVerification(data);
+      sendGTMEvent({
+        event: 'customEvent',
+        dealId: deal.id,
+        dealStage: deal.dealStage,
+        eventCategory: 'Deal Flow',
+        eventAction: `Step 5: Accreditation Verification`,
+        eventLabel: `Accreditation Basis: ${data.basis}| Method: ${data.method}`,
+      });
     } catch (err) {
       setError('Failed to submit verifier information. Please try again.');
       console.error('Error submitting verifier:', err);

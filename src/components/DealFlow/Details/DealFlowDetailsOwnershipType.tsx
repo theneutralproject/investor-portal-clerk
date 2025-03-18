@@ -11,6 +11,7 @@ import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import { useRouter } from 'next/navigation';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
+import { sendGTMEvent } from '@next/third-parties/google';
 const DealFlowDetailsOwnershipType: React.FC = () => {
   const { deal, updateDeal, createOrganization, project } = useDealFlow();
   const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
@@ -25,6 +26,16 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
 
   const handleUpdateDeal = async () => {
     if (!deal) return;
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      event: 'customEvent',
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      eventAction: `Step 3: Ownership Type`,
+      eventLabel: `Ownership Type selected: ${ownershipType}`,
+    });
 
     if (ownershipType === DealOwnershipType.INDIVIDUAL) {
       await updateDeal({

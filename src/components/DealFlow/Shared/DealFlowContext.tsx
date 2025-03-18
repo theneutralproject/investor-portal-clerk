@@ -429,7 +429,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     // Send to Google Tag Manager
     sendGTMEvent({
-      event: 'deal update',
+      event: 'customEvent',
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
@@ -487,7 +487,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
       // Send to Google Tag Manager
       sendGTMEvent({
-        event: 'deal creation',
+        event: 'customEvent',
         dealId: data.id,
         dealStage: data.dealStage,
         eventCategory: 'Deal Flow',
