@@ -37,7 +37,6 @@ import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import DealFlowDetailsExistingEntity from '../Details/DealFlowDetailsExistingEntity';
 import Logger from '@/libs/logger';
-import { sendGTMEvent } from '@next/third-parties/google';
 // Define the step types
 export type StepType =
   | 'get-started'
@@ -427,15 +426,6 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   ) => {
     if (!deal) return;
 
-    // Send to Google Tag Manager
-    sendGTMEvent({
-      dealId: deal.id,
-      dealStage: deal.dealStage,
-      eventCategory: 'Deal Flow',
-      event: `Deal Stage Updated to ${deal.dealStage}`,
-      eventLabel: 'Deal Updated',
-    });
-
     setIsLoading(true);
     // Remove signaturesCompletedDate from updatedDealData because it was formatted as a string
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -483,15 +473,6 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
     try {
       const { data } = await axios.post<Deal>('/api/deals', dealCreateData);
-
-      // Send to Google Tag Manager
-      sendGTMEvent({
-        dealId: data.id,
-        dealStage: data.dealStage,
-        eventCategory: 'Deal Flow',
-        event: `Deal Stage Updated to ${data.dealStage}`,
-        eventLabel: 'Deal Created',
-      });
       const nextStep = getNextStep(step);
       if (nextStep) {
         router.push(`/dealflow/${project.slug}/${data.id}/${nextStep}`);

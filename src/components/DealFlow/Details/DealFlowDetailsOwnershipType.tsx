@@ -32,7 +32,7 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
       dealId: deal.id,
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
-      event: `Step 3: Ownership Type`,
+      event: `Step 4: Ownership Type`,
       eventLabel: `Ownership Type selected: ${ownershipType}`,
     });
 

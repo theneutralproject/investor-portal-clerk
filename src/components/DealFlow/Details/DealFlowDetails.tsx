@@ -15,6 +15,7 @@ import {
 } from '../../../hooks/useValidatedForm';
 import { FormTextField, FormAutocomplete } from '../Shared/FormComponents';
 import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const DealFlowDetails: React.FC = () => {
   const { user, updateUser, isLoading } = useDealFlow();
@@ -52,6 +53,15 @@ const DealFlowDetails: React.FC = () => {
       const address = data.address ? ({ ...data.address } as Address) : null;
 
       void updateUser({ ...data, dateOfBirth, address });
+
+      // Send to Google Tag Manager
+      sendGTMEvent({
+        dealId: 'n/a',
+        dealStage: 1,
+        eventCategory: 'Deal Flow',
+        event: `Step 3: Investor Details Submission`,
+        eventLabel: `Investor Details submitted`,
+      });
     } catch (error) {
       Logger.error(error, null, {
         message: 'Submission error:',
