@@ -131,6 +131,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (achTransferResponseData.state?.toUpperCase() === 'SUCCEEDED') {
+      return jsonResponse({ message: 'The ACH transfer was successful' });
+    }
+
     if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
       return errorResponse(
         'The ACH transfer failed. Please contact your Neutral Representative',
