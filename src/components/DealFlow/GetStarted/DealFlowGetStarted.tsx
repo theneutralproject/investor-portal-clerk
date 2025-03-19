@@ -1,13 +1,22 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, Typography } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const DealFlowGetStarted: React.FC = () => {
-  const { createDeal } = useDealFlow();
+  const { createDeal, user, project } = useDealFlow();
+
+  useEffect(() => {
+    sendGTMEvent({
+      eventCategory: 'Deal Flow',
+      event: `Step 0: Getting Started`,
+      eventLabel: `${user.email} started the deal flow process for ${project.slug}`,
+    });
+  }, []);
 
   return (
     <Box>
