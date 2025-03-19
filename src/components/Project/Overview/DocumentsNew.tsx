@@ -77,7 +77,7 @@ const DocumentsNew = ({
 
   return (
     <Card
-      sx={{ mt: 2, minHeight: '400px', position: 'relative' }}
+      sx={{ mt: 2, position: 'relative' }}
       data-testid={DOCUMENTS_NEW_TEST_ID}
     >
       <CardContent>
@@ -217,7 +217,8 @@ const LoginOverlay = () => {
           Create an account
         </Typography>
         <Typography variant="subtitle2" align="center" color="text.secondary">
-          Create an account or sign in to view documents.
+          Create an account or sign in to view documents such as Market Study,
+          Tax Analysis, and Investment Deck.
         </Typography>
         <Stack direction="row" spacing={2}>
           <Link
