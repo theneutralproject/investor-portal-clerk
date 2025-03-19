@@ -5,6 +5,19 @@ import { withSentryConfig } from '@sentry/nextjs';
  */
 await import('./src/env.js');
 
+import { setMaxListeners } from 'events';
+
+// Set global max listeners limit ONCE
+setMaxListeners(50);
+
+// Remove duplicate listeners in development mode
+if (process.env.NODE_ENV !== 'production') {
+  process.removeAllListeners('exit');
+  console.log('Remove duplicate listeners in development mode...');
+}
+
+console.log(`Platform started on process ID: ${process.pid}`);
+
 /** @type {import("next").NextConfig} */
 const nextConfig = {
   async redirects() {
@@ -27,6 +40,14 @@ const nextConfig = {
     config.cache = {
       type: 'memory', // Store cache in memory instead of file system
     };
+    // Ensure exit listeners are only set once
+    if (!process.listenerCount('exit')) {
+      process.on('exit', () => console.log('Process is exiting...'));
+    }
+
+    // Show exiting listeners count
+    console.log(`Exit listeners count:`, process.listenerCount('exit'));
+
     return config;
   },
   async headers() {
@@ -39,7 +60,7 @@ const nextConfig = {
           {
             key: 'Access-Control-Allow-Origin',
             value: process.env.BASE_URL || 'http://localhost:3000',
-          }, // replace this your actual origin
+          },
           {
             key: 'Access-Control-Allow-Methods',
             value: 'GET,DELETE,PATCH,POST,PUT',

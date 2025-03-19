@@ -74,6 +74,7 @@ export async function GET(request: NextRequest) {
       where: {
         organizationId: { in: userOrgs.map(org => org.id) },
         projectId: project.id,
+        status: DealStatus.ACTIVE,
       },
       include: { investmentStats: true },
     });

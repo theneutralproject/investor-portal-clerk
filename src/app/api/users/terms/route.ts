@@ -10,7 +10,7 @@ import { NextRequest } from 'next/server';
  * @constant {number}
  */
 const CURRENT_REVISION = parseInt(
-  process.env.CURRENT_TERMS_REVISION || '1',
+  process.env.NEXT_PUBLIC_CURRENT_TERMS_REVISION || '1',
   10
 );
 
@@ -56,6 +56,8 @@ export async function GET(request: NextRequest) {
   );
 
   return jsonResponse({
+    userId: user.id,
+    clerkUserId: clerkId,
     hasAcceptedCurrentRevision: !!currentRevisionTermEvent,
   });
 }
@@ -91,7 +93,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return jsonResponse({ termEvent: newTermEvent }, 201);
+    return jsonResponse({ termEvent: newTermEvent, clerkUserId: clerkId }, 201);
   } catch (error) {
     return errorResponse('Unknown Terms.create Error', 500, {
       request,

@@ -77,10 +77,10 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const DealConversion = await prisma.dealConversion.create({
+    const dealConversion = await prisma.dealConversion.create({
       data: conversionData,
     });
-    return jsonResponse(DealConversion);
+    return jsonResponse(dealConversion);
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500, { request });
   }

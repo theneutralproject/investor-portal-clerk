@@ -25,6 +25,7 @@ import { useReturnsData } from './useReturnsData';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { DealFinancingType } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const QUICK_SELECT_AMOUNTS = [25000, 50000, 100000, 250000];
 const ACCRUED_RETURN_COLOR = '#d7b15c';
@@ -54,13 +55,15 @@ const DealFlowAmount: React.FC = () => {
     financingType: deal?.investmentStats?.financingType,
   });
 
-  const validationError = useMemo(
-    () =>
-      amount < MIN_INVESTMENT
-        ? `Minimum investment amount is $${MIN_INVESTMENT.toLocaleString()}`
-        : '',
-    [amount, MIN_INVESTMENT]
-  );
+  const validationError = useMemo(() => {
+    if (amount < MIN_INVESTMENT) {
+      return `Minimum investment amount is $${MIN_INVESTMENT.toLocaleString()}`;
+    }
+    if (amount > MAX_INVESTMENT) {
+      return `Maximum investment amount is $${MAX_INVESTMENT.toLocaleString()}`;
+    }
+    return '';
+  }, [amount, MIN_INVESTMENT, MAX_INVESTMENT]);
 
   const chartData = useMemo(() => {
     return returnsData.map(dataPoint => {
@@ -81,25 +84,30 @@ const DealFlowAmount: React.FC = () => {
   const handleAmountChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const newAmount = Number(event.target.value);
-      if (newAmount > MAX_INVESTMENT) {
-        setAmount(MAX_INVESTMENT);
-      } else {
-        setAmount(newAmount);
-      }
+      setAmount(newAmount);
     },
     []
   );
 
   const handleUpdateDeal = async () => {
-    if (!deal) return;
+    if (!deal || validationError) return;
 
     await updateDeal({
       ...deal,
       dealStage: DealStage.DISCOVERY,
       investmentStats: {
         ...deal.investmentStats,
-        amount,
+        amount: Math.min(Math.max(amount, MIN_INVESTMENT), MAX_INVESTMENT),
       },
+    });
+
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      event: `Step 2: Amount Input`,
+      eventLabel: `Amount selected: ${deal.investmentStats.amount}`,
     });
   };
 
@@ -175,7 +183,8 @@ const DealFlowAmount: React.FC = () => {
         />
 
         <Typography variant="caption" color="text.secondary">
-          Minimum: ${MIN_INVESTMENT.toLocaleString()}
+          Minimum: ${MIN_INVESTMENT.toLocaleString()} | Maximum: $
+          {MAX_INVESTMENT.toLocaleString()}
         </Typography>
 
         {isLoading ? (
@@ -253,7 +262,10 @@ const DealFlowAmount: React.FC = () => {
         )}
       </Box>
 
-      <DealFlowFooter onContinue={handleUpdateDeal} />
+      <DealFlowFooter
+        onContinue={handleUpdateDeal}
+        isContinueDisabled={!!validationError}
+      />
     </Box>
   );
 };

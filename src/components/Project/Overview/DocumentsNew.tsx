@@ -6,6 +6,7 @@ import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
 import DocumentCard from '../ProjectDocs/DocumentCard';
 import DocumentViewerModal from '../ProjectDocs/DocumentViewerModal';
 import { usePostHog } from 'posthog-js/react';
+import { DOCUMENTS_NEW_TEST_ID } from 'e2e/testIds';
 
 // Define a proper error type
 type ApiError = {
@@ -62,9 +63,13 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
   };
 
   return (
-    <Card sx={{ mt: 2 }}>
+    <Card sx={{ mt: 2 }} data-testid={DOCUMENTS_NEW_TEST_ID}>
       <CardContent>
-        <Typography variant="h6" gutterBottom>
+        <Typography
+          variant="h6"
+          gutterBottom
+          data-testid={`${DOCUMENTS_NEW_TEST_ID}-title`}
+        >
           Documents
         </Typography>
         <Divider sx={{ mt: 2, mb: 2 }} />
@@ -75,6 +80,7 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
             dealStage={55}
             handleViewDocument={handleViewDocument}
             handleDownloadDocument={handleDownloadDocument}
+            data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-card`}
           />
         ))}
         {currentDocument?.link && (
@@ -82,6 +88,7 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
             open={openModal}
             onClose={handleCloseModal}
             fileUrl={currentDocument.link}
+            data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-viewer-modal`}
           />
         )}
       </CardContent>

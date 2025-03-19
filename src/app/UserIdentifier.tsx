@@ -8,6 +8,7 @@ import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
 import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 /**
  * UserIdentifier component is responsible for:
@@ -26,7 +27,8 @@ export default function UserIdentifier() {
   const [loadTermsStatus, setLoadTermStatus] = useState<boolean>(false);
   const { setTermsStatus } = useTermsContext();
   const { data, isLoading } = useTermsStatus(
-    !!user && loadTermsStatus && !isOnboarding
+    !!user && loadTermsStatus && !isOnboarding,
+    user?.id
   );
   const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
 
@@ -56,6 +58,16 @@ export default function UserIdentifier() {
         lastname: lastName,
         id: id,
       });
+
+      if (isOnboarding) {
+        // Send to Google Tag Manager
+        sendGTMEvent({
+          userId: id,
+          eventCategory: 'Account',
+          event: 'Account Signup',
+          eventLabel: `Account Signup by ${primaryEmailAddress?.toString()}`,
+        });
+      }
 
       /**
        * Fetch user data from the API or create a new user if not found.

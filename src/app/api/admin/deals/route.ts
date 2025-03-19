@@ -8,6 +8,7 @@ import {
 import type { NextRequest } from 'next/server';
 import {
   DealDocumentType,
+  DealStatus,
   type DealFinancingType,
   type Prisma,
 } from '@prisma/client';
@@ -65,6 +66,7 @@ export async function GET(request: NextRequest) {
           gte: minDealstage,
           lte: maxDealstage ?? DealStage.CLOSED,
         },
+        status: DealStatus.ACTIVE,
       },
       include: {
         document: {
@@ -136,6 +138,7 @@ export async function GET(request: NextRequest) {
         gte: minDealstage,
         lte: maxDealstage ?? DealStage.CLOSED,
       },
+      status: DealStatus.ACTIVE,
     };
     if (projectId) {
       where.projectId = projectId;
@@ -168,18 +171,9 @@ export async function GET(request: NextRequest) {
         include: {
           organization: { include: { ownedBy: true } },
           investmentStats: true,
-          document: {
-            include: {
-              uploadedBy: {
-                select: {
-                  email: true,
-                  firstName: true,
-                  lastName: true,
-                  id: true,
-                },
-              },
-            },
-          },
+          document: true,
+          startDealConversion: true,
+          endDealConversion: true,
         },
       });
       return jsonResponse(deals);

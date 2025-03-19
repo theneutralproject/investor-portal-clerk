@@ -15,7 +15,7 @@ import type { MatchResponseObject } from '@/libs/admin/schema';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
 import type { DealWithFullOrgAndSlimProject } from '@/libs/types';
-import { DealDocumentType, User } from '@prisma/client';
+import { DealDocumentType, DealStatus, Prisma, User } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 
@@ -33,10 +33,12 @@ export async function POST(request: NextRequest) {
   }
 
   let taxYear: number | null = null;
+  let projectSlug: string | null = null;
   try {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
     taxYear = parseInt(queryParams.get('taxYear') ?? '-1');
+    projectSlug = queryParams.get('projectSlug') ?? null;
   } catch (error) {
     return errorResponse('unable to read query params', 500, {
       request,
@@ -83,13 +85,29 @@ export async function POST(request: NextRequest) {
   }
 
   let deals: DealWithFullOrgAndSlimProject[] = [];
+
+  let whereQuery: Prisma.DealWhereInput = {
+    dealStage: DealStage.CLOSED,
+    closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
+    status: DealStatus.ACTIVE,
+  };
+
+  if (projectSlug) {
+    if (!['519', 'bakers', 'edison'].includes(projectSlug)) {
+      return errorResponse(`Invalid projectSlug: ${projectSlug}`, 400, {
+        request,
+      });
+    }
+    whereQuery = {
+      ...whereQuery,
+      project: { slug: projectSlug },
+    };
+  }
+
   try {
     // get all closed deals
     deals = await prisma.deal.findMany({
-      where: {
-        dealStage: DealStage.CLOSED,
-        closingDate: { lt: new Date(`${taxYear + 1}-01-01`) },
-      },
+      where: whereQuery,
       include: {
         organization: {
           include: {
@@ -166,15 +184,32 @@ export async function PUT(request: NextRequest) {
   if (!dealId) {
     return errorResponse('Missing required dealId', 400, { request });
   }
+  if (!pdfName) {
+    return errorResponse('Missing required pdfName', 400, { request });
+  }
+  if (!taxYear) {
+    return errorResponse('Missing required taxYear', 400, { request });
+  }
   const newPath = `deal-${dealId}/${pdfName}`;
   const { error } = await storageClient
     .from(`deal-documents`)
     .move(`tempPdfStorage/${pdfName}`, newPath);
   if (error) {
-    return errorResponse('unable to move file from temp storage to deal', 500, {
-      request,
-      extra: { error },
-    });
+    return errorResponse(
+      `unable to move file from temp storage to deal ${dealId}: ${error.name} - ${error.message}`,
+      500,
+      {
+        request,
+        extra: {
+          name: error.name,
+          message: error.message,
+          cause: error.cause,
+          stack: error.stack,
+          from: `tempPdfStorage/${pdfName}`,
+          to: newPath,
+        },
+      }
+    );
   }
   try {
     const newDocEntry = await createDocumentEntry(
@@ -193,9 +228,13 @@ export async function PUT(request: NextRequest) {
       document: newDocEntry,
     });
   } catch (error) {
-    return errorResponse('Error processing upload', 500, {
-      request,
-      extra: { error },
-    });
+    return errorResponse(
+      `Error processing upload: ${getErrorMessage(error)}`,
+      500,
+      {
+        request,
+        extra: { error: getErrorMessage(error) },
+      }
+    );
   }
 }

@@ -1,4 +1,5 @@
 import { Box, Typography } from '@mui/material';
+import { DASHBOARD_PAGE_BANNER_TEST_ID } from 'e2e/testIds';
 
 const DashboardPageBanner = ({
   headline,
@@ -17,6 +18,7 @@ const DashboardPageBanner = ({
         borderRadius: '8px',
         background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.60) 100%), url("${background}") lightgray 0px -122.163px / 100% 391.783% no-repeat`,
       }}
+      data-testid={DASHBOARD_PAGE_BANNER_TEST_ID}
     >
       <Box
         sx={{
@@ -30,6 +32,7 @@ const DashboardPageBanner = ({
           sx={{
             color: 'white',
           }}
+          data-testid={`${DASHBOARD_PAGE_BANNER_TEST_ID}-title`}
         >
           {headline}
         </Typography>

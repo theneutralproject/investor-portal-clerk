@@ -36,6 +36,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_ROLE_KEY: z.string(),
     BASE_URL: z.string(),
     GOOGLE_TAG_ID: z.string(),
+    GOOGLE_ADS_TAG_ID: z.string(),
     PRISMA_FIELD_ENCRYPTION_KEY: z.string(),
     TEST_USER_TOKEN: z.string(),
     GOOGLE_CLIENT_ID: z.string(),
@@ -51,7 +52,6 @@ export const env = createEnv({
     DOCUSIGN_API_ACCOUNT_ID: z.string(),
     DOCUSIGN_INTEGRATION_KEY: z.string(),
     DOCUSIGN_SECRET_KEY: z.string(),
-    CURRENT_TERMS_REVISION: z.string(),
     SENTRY_AUTH_TOKEN: z.string().optional(),
     SENTRY_DSN: z.string().optional(),
   },
@@ -69,6 +69,7 @@ export const env = createEnv({
     NEXT_PUBLIC_FINIX_MERCHANT_ID_EDISON: z.string(),
     NEXT_PUBLIC_FINIX_MERCHANT_ID_BAKERS: z.string(),
     NEXT_PUBLIC_FINIX_MAX_TRANSACTION_AMOUNT: z.string(),
+    NEXT_PUBLIC_CURRENT_TERMS_REVISION: z.string(),
   },
 
   /**
@@ -114,6 +115,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
     BASE_URL: process.env.BASE_URL,
     GOOGLE_TAG_ID: process.env.GOOGLE_TAG_ID,
+    GOOGLE_ADS_TAG_ID: process.env.GOOGLE_ADS_TAG_ID,
     NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
     NEXT_PUBLIC_POSTHOG_HOST: process.env.NEXT_PUBLIC_POSTHOG_HOST,
     PRISMA_FIELD_ENCRYPTION_KEY: process.env.PRISMA_FIELD_ENCRYPTION_KEY,
@@ -132,9 +134,10 @@ export const env = createEnv({
     DOCUSIGN_API_ACCOUNT_ID: process.env.DOCUSIGN_API_ACCOUNT_ID,
     DOCUSIGN_INTEGRATION_KEY: process.env.DOCUSIGN_INTEGRATION_KEY,
     DOCUSIGN_SECRET_KEY: process.env.DOCUSIGN_SECRET_KEY,
-    CURRENT_TERMS_REVISION: process.env.CURRENT_TERMS_REVISION,
     SENTRY_AUTH_TOKEN: process.env.SENTRY_AUTH_TOKEN,
     SENTRY_DSN: process.env.SENTRY_DSN,
+    NEXT_PUBLIC_CURRENT_TERMS_REVISION:
+      process.env.NEXT_PUBLIC_CURRENT_TERMS_REVISION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

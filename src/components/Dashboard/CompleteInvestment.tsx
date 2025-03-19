@@ -22,6 +22,7 @@ import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { usePostHog } from 'posthog-js/react';
 import { getProjectImage } from './DashboardProjects';
 import { DealStage } from '@/libs/deal/schema';
+import { COMPLETE_INVESTMENT } from 'e2e/testIds';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
 }
@@ -256,6 +257,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
         color: 'white',
         mb: 2,
       }}
+      data-testid={COMPLETE_INVESTMENT}
     >
       <CardContent>
         <Typography
@@ -264,6 +266,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
             fontSize: '20px',
             mb: 2,
           }}
+          data-testid={`${COMPLETE_INVESTMENT}-title`}
         >
           {header}
         </Typography>
@@ -274,12 +277,17 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
           .sort((a, b) => a.id - b.id)
           .map(deal =>
             isDealCompleted(deal.dealStage) ? (
-              <CompletedDeal key={deal.id} deal={deal} />
+              <CompletedDeal
+                key={deal.id}
+                deal={deal}
+                data-testid={`${COMPLETE_INVESTMENT}-completed-deal`}
+              />
             ) : (
               <InProgressDeal
                 key={deal.id}
                 deal={deal}
                 handleContinue={handleContinue}
+                data-testid={`${COMPLETE_INVESTMENT}-in-progress-deal`}
               />
             )
           )}

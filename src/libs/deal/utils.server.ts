@@ -121,12 +121,39 @@ export async function createDealForAdmin(
       `Project with id ${dealData.projectId} does not have investment stats.`
     );
   }
+
+  if (!dealData.hubspotId) {
+    // create deal in hubspot
+    const hsDealInput = initHubspotDealProps(project, dealOwner, dealData);
+    if (!hsDealInput) {
+      throw new Error(
+        'Deal cannot be created. Project not yet supported in Hubspot'
+      );
+    }
+
+    Logger.log({
+      message: `Creating deal in Hubspot for deal with transaction id ${dealData.transactionId}`,
+      extra: { hsDealInput },
+    });
+
+    try {
+      const hsDealId = await createHubspotDeal(
+        hsDealInput,
+        String(dealOwner.hubspotId)
+      );
+      dealData.hubspotId = hsDealId;
+    } catch (error) {
+      Logger.error(error, null, { dealData });
+      throw error;
+    }
+  }
+
   try {
-    const newDeal = await _createDeal(
+    const newAdminDeal = await _createDeal(
       dealData,
       project as ProjectWithInvestmentStats
     );
-    return newDeal;
+    return newAdminDeal;
   } catch (e) {
     console.error('Failed to create deal', getErrorMessage(e));
     throw e;
@@ -257,13 +284,9 @@ export async function updateDeal(
     );
   } else {
     if (investmentStatsToUpdate) {
-      // the only investment stats fields that can be updated  from outside this function are amount, financingType, and ownershipType
-      const {
-        amount,
-        financingType,
-        ownershipType,
-        ...ignoredInvestmentStats
-      } = investmentStatsToUpdate;
+      // the only investment stats fields that can be updated  from outside this function are amount and financingType.
+      const { amount, financingType, ...ignoredInvestmentStats } =
+        investmentStatsToUpdate;
 
       for (const key in ignoredInvestmentStats) {
         console.warn(
@@ -285,13 +308,10 @@ export async function updateDeal(
       const dealFinancingType =
         financingType ?? existingDeal.investmentStats?.financingType;
       const dealAmount = amount ?? existingDeal.investmentStats?.amount;
-      const dealOwnershipType =
-        ownershipType ?? existingDeal.investmentStats?.ownershipType;
 
       let newInvestmentStats = {
         amount: dealAmount,
         financingType: dealFinancingType,
-        ownershipType: dealOwnershipType,
         dealId: existingDeal.id,
       } as DealInvestmentStats;
 

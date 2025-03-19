@@ -10,6 +10,8 @@ import { createDocusignEnvelope } from '@components/DealFlow/Helpers/DealFlowHel
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import { DealStage } from '@/libs/deal/schema';
+import Logger from '@/libs/logger';
+import { sendGTMEvent } from '@next/third-parties/google';
 const DealFlowReview: React.FC = () => {
   const { project, deal, updateDeal, refetchDeal } = useDealFlow();
   const [docsLoading, setDocsLoading] = useState({});
@@ -47,6 +49,11 @@ const DealFlowReview: React.FC = () => {
       if (res.url && res.url.length > 0) {
         window.location.assign(res.url);
       } else {
+        Logger.error(res.message, null, {
+          message: 'DealFlowReview error:',
+          templateId,
+          dealId: deal.id,
+        });
         toast.error(res.message);
       }
       setDocsLoading(prev => ({ ...prev, [templateId]: false }));
@@ -64,6 +71,13 @@ const DealFlowReview: React.FC = () => {
       false
     );
     await refetchDeal();
+    sendGTMEvent({
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      event: `Step 6: Investor Signature`,
+      eventLabel: `Subscription Agreement Signed by Investor`,
+    });
   };
 
   if (deal.dealStage === DealStage.DOCUMENT_REVIEW) {

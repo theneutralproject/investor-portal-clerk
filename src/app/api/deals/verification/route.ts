@@ -3,6 +3,8 @@ import {
   type AccreditationVerificationCreateSchema,
   zAccreditationVerificationCreateSchema,
 } from '@/libs/accreditationVerification/schema';
+import { HubspotDealUpdate } from '@/libs/hubspot/schema';
+import { updateHubspotDealProperties } from '@/libs/hubspot/utils.server';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
@@ -66,6 +68,15 @@ export async function POST(request: NextRequest) {
       await prisma.accreditationVerification.create({
         data: { dealId, method, basis, verifierId: newVerifier?.id ?? null },
       });
+
+    const hsStartDealUpdate: HubspotDealUpdate = {
+      hubspotDealId: dealId,
+      properties: [
+        { name: 'verification_basis', value: basis },
+        { name: 'verification_method', value: method },
+      ],
+    };
+    await updateHubspotDealProperties(hsStartDealUpdate);
     return jsonResponse(newAccreditationVerification);
   } catch (error) {
     return errorResponse('Error creating AccreditationVerification', 500, {

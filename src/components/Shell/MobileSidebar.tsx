@@ -22,6 +22,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { useClerk } from '@clerk/nextjs';
 import posthog from 'posthog-js';
+import { MOBILE_SIDEBAR_TEST_ID } from 'e2e/testIds';
 
 const MobileSidebar = props => {
   const { signOut, user } = useClerk();
@@ -62,6 +63,7 @@ const MobileSidebar = props => {
           label: 'Sign Out',
           icon: <LogoutIcon />,
           path: '/signout',
+          dataTestId: `${MOBILE_SIDEBAR_TEST_ID}-sign-out`,
           onClick: () => handleSignOut(),
         },
       ]
@@ -71,6 +73,7 @@ const MobileSidebar = props => {
           label: 'Log In',
           icon: <LoginIcon />,
           path: '/login',
+          dataTestId: `${MOBILE_SIDEBAR_TEST_ID}-sign-in`,
           onClick: () => handleClick('/login'),
         },
         {
@@ -78,6 +81,7 @@ const MobileSidebar = props => {
           label: 'Create Account',
           icon: <PersonAddIcon />,
           path: '/login',
+          dataTestId: `${MOBILE_SIDEBAR_TEST_ID}-sign-up`,
           onClick: () => handleClick('/login'),
         },
       ];
@@ -91,6 +95,7 @@ const MobileSidebar = props => {
       <AppBar
         position="fixed"
         sx={{ backgroundColor: theme.palette.neutralDarkGray.main }}
+        data-testid={MOBILE_SIDEBAR_TEST_ID}
       >
         <Toolbar
           sx={{
@@ -168,7 +173,7 @@ const MobileSidebar = props => {
           ))}
 
           {authItems.map(item => (
-            <ListItem key={item.key} item={item} />
+            <ListItem key={item.key} item={item} data-tesid={item.dataTestId} />
           ))}
         </List>
       </Drawer>

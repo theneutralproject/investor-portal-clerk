@@ -13,8 +13,9 @@ import {
   type Project,
   type Organization,
   type AccreditationVerification,
+  Deal,
 } from '@prisma/client';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import { useRouter, usePathname } from 'next/navigation';
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from 'react-toastify';
@@ -35,6 +36,7 @@ import DealFlowReview from '@components/DealFlow/ReviewSign/DealFlowReview';
 import DealFlowFund from '@components/DealFlow/Fund/DealFlowFund';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
 import DealFlowDetailsExistingEntity from '../Details/DealFlowDetailsExistingEntity';
+import Logger from '@/libs/logger';
 // Define the step types
 export type StepType =
   | 'get-started'
@@ -340,10 +342,18 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
               `/dealflow/${projectSlug}/${dealId}/${lastValidStep.value}`
             );
             toast.error('Please complete previous steps first');
+            Logger.error('Please complete previous steps first', null, {
+              currentRouteStep,
+              lastValidStep,
+            });
           }
         } else {
           router.push(`/dealflow/${projectSlug}/${dealId}`);
           toast.error('Invalid deal stage for this step');
+          Logger.error('Invalid deal stage for this step', null, {
+            currentRouteStep,
+            lastValidStep,
+          });
         }
       }
     }
@@ -415,6 +425,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     incrementStep = true
   ) => {
     if (!deal) return;
+
     setIsLoading(true);
     // Remove signaturesCompletedDate from updatedDealData because it was formatted as a string
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -432,9 +443,19 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       }
       toast.success('Deal updated successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to update deal. Please try again.');
+      }
       console.error('Error updating deal:', error);
+      Logger.error('Error updating deal:', null, {
+        error,
+        message: 'DealFlowContext updateDeal error:',
+        updatedDealData,
+        step,
+      });
       setError('Failed to update deal. Please try again.');
-      toast.error('Failed to update deal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -442,6 +463,7 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
   const createDeal = async () => {
     if (!project) return;
+
     setIsLoading(true);
 
     const dealCreateData: DealCreateSchema = {
@@ -450,19 +472,26 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     };
 
     try {
-      const { data } = await axios.post<{ id: string }>(
-        '/api/deals',
-        dealCreateData
-      );
+      const { data } = await axios.post<Deal>('/api/deals', dealCreateData);
       const nextStep = getNextStep(step);
       if (nextStep) {
         router.push(`/dealflow/${project.slug}/${data.id}/${nextStep}`);
       }
       toast.success('Deal created successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to create deal. Please try again.');
+      }
+      Logger.error('Error creating deal:', null, {
+        error,
+        message: 'DealFlowContext createDeal error:',
+        dealCreateData,
+        step,
+      });
       console.error('Error creating deal:', error);
       setError('Failed to create deal. Please try again.');
-      toast.error('Failed to create deal. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -490,9 +519,19 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       }
       toast.success('User updated successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to update user. Please try again.');
+      }
+      Logger.error('Error updating user:', null, {
+        error,
+        message: 'DealFlowContext updateUser error:',
+        updatedUserData,
+        step,
+      });
       console.error('Error updating user:', error);
       setError('Failed to update user. Please try again.');
-      toast.error('Failed to update user. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -527,7 +566,17 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
     } catch (error) {
       console.error('Error creating organization:', error);
       setError('Failed to create organization. Please try again.');
-      toast.error('Failed to create organization. Please try again.');
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to create organization. Please try again.');
+      }
+      Logger.error('Error creating organization:', null, {
+        error,
+        message: 'DealFlowContext createOrganization error:',
+        organizationData,
+        step,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -593,24 +642,21 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       console.error('Error updating organization:', error);
 
       // Type checking for better error handling
-      let errorMessage = 'Failed to update organization. Please try again.';
+      const errorMessage = 'Failed to update organization. Please try again.';
 
-      if (
-        error &&
-        typeof error === 'object' &&
-        'response' in error &&
-        error.response &&
-        typeof error.response === 'object' &&
-        'data' in error.response &&
-        error.response.data &&
-        typeof error.response.data === 'object' &&
-        'error' in error.response.data
-      ) {
-        errorMessage = `Error updating organization: ${error.response.data.error}`;
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error(errorMessage);
       }
-
+      Logger.error('Error updating organization:', null, {
+        error,
+        message: 'DealFlowContext updateOrganization error:',
+        organizationId,
+        updatedOrganizationData,
+        step,
+      });
       setError(errorMessage);
-      toast.error(errorMessage);
       setIsLoading(false);
       return { success: false, error: errorMessage };
     }
@@ -635,9 +681,19 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       });
       toast.success('Co-investor created successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to create organization member. Please try again.');
+      }
+      Logger.error('Error creating organization member:', null, {
+        error,
+        message: 'DealFlowContext createOrganizationMember error:',
+        createData,
+        step,
+      });
       console.error('Error creating organization member:', error);
       setError('Failed to create organization member. Please try again.');
-      toast.error('Failed to create organization member. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -685,9 +741,20 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       setOrganization(organization);
       toast.success('Co-investor updated successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error('Failed to update organization member. Please try again.');
+      }
+      Logger.error('Error updating organization member:', null, {
+        error,
+        message: 'DealFlowContext updateOrganizationMember error:',
+        memberId,
+        updateData,
+        step,
+      });
       console.error('Error updating organization member:', error);
       setError('Failed to update organization member. Please try again.');
-      toast.error('Failed to update organization member. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -708,9 +775,21 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
 
       toast.success('Accreditation verifier created successfully');
     } catch (error) {
+      if (error instanceof AxiosError && error.response?.data.error) {
+        toast.error('Failed: ' + error.response?.data.error);
+      } else {
+        toast.error(
+          'Failed to create accreditation verifier. Please try again.'
+        );
+      }
+      Logger.error('Error creating accreditation verifier:', null, {
+        error,
+        message: 'DealFlowContext createVerification error:',
+        verificationData,
+        step,
+      });
       console.error('Error creating accreditation verifier:', error);
       setError('Failed to create accreditation verifier. Please try again.');
-      toast.error('Failed to create accreditation verifier. Please try again.');
     } finally {
       setIsLoading(false);
     }

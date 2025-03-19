@@ -2,8 +2,8 @@
 import {
   DealFinancingType,
   DealOwnershipType,
+  DealStatus,
   MembershipType,
-  PaymentMethod,
 } from '@prisma/client';
 import { parse } from 'csv-parse';
 import path from 'path';
@@ -13,7 +13,10 @@ import { promisify } from 'util';
 import { getAuth } from '@clerk/nextjs/server';
 import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getDealsWithContactsFromHubspot } from '@/libs/hubspot/utils.server';
+import {
+  getDealsWithContactsFromHubspot,
+  updateHubspotDealProperties,
+} from '@/libs/hubspot/utils.server';
 import type { UserCreateSchema } from '@/libs/user/schema';
 import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
 import { DealStage, type DealCreateSchema } from '@/libs/deal/schema';
@@ -23,14 +26,12 @@ import {
   findOrCreateClerkUser,
   isAdminUser,
 } from '@/libs/maintenance/utils.server';
-import { ProjectName } from '@/libs/project/schema';
+import { InvestmentEntity, ProjectName } from '@/libs/project/schema';
 import { NextRequest } from 'next/server';
-import { SimplePublicObject } from '@hubspot/api-client/lib/codegen/crm/contacts';
-import { DealContact } from '@/libs/hubspot/schema';
+import { HubspotDealUpdate } from '@/libs/hubspot/schema';
 
 const finishedAsync = promisify(finished);
 
-// const projectName: ProjectName = ProjectName['519 W Main'];
 const projectName: ProjectName = ProjectName['The Edison'];
 const projectId = 2;
 const filePath = path.join(
@@ -47,14 +48,16 @@ interface DealRecord {
   financingType: DealFinancingType;
   ownershipType: DealOwnershipType;
   investmentEntity?: string;
-  dealAmount?: number;
+  entityTin?: string; //TODO: add to schema
   dateSigned: Date;
-  dateFunded: Date;
-  equityUnitType?: string;
-  debtInterestRatePerc?: number;
-  debtMinTerm?: number;
-  debtMaxTerm?: number;
-  debtTerm?: number;
+  startDealAmount?: number;
+  dateStartFunded: Date;
+  endDealAmount?: number; //TODO: add to schema
+  dateEndFunded?: Date; //TODO: add to schema
+  debtEndInterestRatePerc?: number;
+  endEquityUnitType?: string;
+  endDebtMinTerm?: number;
+  endDebtMaxTerm?: number;
 }
 
 function getDealType(dealType: string): DealFinancingType {
@@ -114,40 +117,37 @@ async function getDealsFromCsv() {
   parser.on('readable', () => {
     let record;
     while ((record = parser.read())) {
-      if (record.V2 === 'TRUE' && record.addedInV2 === 'FALSE') {
-        let dealRecord: DealRecord | null = null;
-        try {
+      let dealRecord: DealRecord | null = null;
+      try {
+        if (record.V2 === 'TRUE' && record.addedInV2 !== 'TRUE') {
           dealRecord = {
             investorName: record['Investor Name'],
             orgName: record['Investing Entity'],
+            entityTin: record['Entity TIN'],
             dealHubspotId: record['Hubspot ID'],
             financingType: getDealType(record['Type']),
             ownershipType: getDealOwnershipType(record['OwnershipType']),
-            dealAmount: getNumbersFromString(record['Amount ($)']),
+            startDealAmount: getNumbersFromString(record['Amount ($)']),
+            endDealAmount: getNumbersFromString(record['Conversion Amount']),
             dateSigned: new Date(record['Date Investor Signed']),
-            dateFunded: new Date(record['Effective/Funded Date']),
-            equityUnitType: getEquityUnitType(record['Equity Unit']),
+            dateStartFunded: new Date(record['Effective/Funded Date']),
+            endEquityUnitType: getEquityUnitType(record['Equity Unit']),
+            dateEndFunded: new Date(record['Conversion Date']),
             investmentEntity: record['Entity Name'],
-            debtInterestRatePerc: getNumbersFromString(record['PN Unit']),
+            debtEndInterestRatePerc: getNumbersFromString(record['PN Unit']),
             V2: record.V2,
-            addedInV2: record.addedInV2,
-            debtMinTerm:
-              getNumbersFromString(record['PN Min Term Months']) ??
-              48 /**not listed in Edison data */,
-            debtMaxTerm:
-              getNumbersFromString(record['PN Max Term Months']) ??
-              48 /**not listed in Edison data */,
-            debtTerm:
-              getNumbersFromString(record['PN Term']) ??
-              48 /**not reliably listed in Edison data */,
+            addedInV2: record['addedInV2'],
+            endDebtMinTerm: getNumbersFromString(record['PN Term']) ?? 48,
+            endDebtMaxTerm: getNumbersFromString(record['PN Term']) ?? 48,
           };
+
           dealRecords.push(dealRecord);
-        } catch (e) {
-          console.error(
-            'unable to parse deal record - skipping to next one:\n',
-            getErrorMessage(e)
-          );
         }
+      } catch (e) {
+        console.error(
+          `unable to create deal record for HSID ${record['Hubspot ID']} - skipping to next one:\n`,
+          e
+        );
       }
     }
   });
@@ -171,37 +171,31 @@ export async function POST(request: NextRequest) {
     return jsonResponse({ error: 'User is not an admin' }, 403);
   }
 
-  const dealInputs = (await getDealsFromCsv()).filter(
-    deal =>
-      deal.financingType === 'promissory_note_now' ||
-      deal.financingType === 'equity'
-  );
+  const dealInputs = (await getDealsFromCsv()).filter(d => {
+    return (
+      d.financingType === DealFinancingType.promissory_to_equity ||
+      d.financingType === DealFinancingType.promissory_note_at_closing
+    );
+  });
   const dealHubspotIds = dealInputs.map(deal => deal.dealHubspotId);
-  console.log(dealHubspotIds);
 
   // get deal and user info from hubspot
-  let hsSearchResults: {
-    deals: SimplePublicObject[];
-    contacts: SimplePublicObject[];
-    dealContacts: DealContact[];
-  };
-  try {
-    hsSearchResults = await getDealsWithContactsFromHubspot(dealHubspotIds);
-  } catch (e) {
-    console.error('Error fetching deals from hubspot:', e);
-    return jsonResponse({ error: 'Error fetching deals from hubspot' }, 500);
-  }
-  console.log('hsSearchResults:', hsSearchResults.deals?.length);
+  const hsSearchResults = await getDealsWithContactsFromHubspot(dealHubspotIds);
+
   if (dealHubspotIds.length !== hsSearchResults.deals?.length) {
-    console.error('Some deals not found in hubspot');
+    console.error('Some deals not found in hubspot:');
+    console.error(
+      dealHubspotIds.filter(
+        id => !hsSearchResults.deals?.find(deal => deal.id === id)
+      )
+    );
   } else {
     console.log('All deals found in hubspot');
   }
 
-  // find all deals in db
+  // find all deals in db for this project
   const allDBDeals = await prisma.deal.findMany({
     where: { projectId, dealStage: DealStage.CLOSED },
-    // select: { hubspotId: true }
   });
   // filter out deals that are already in the db
   const missingHubspotDeals = hsSearchResults.deals?.filter(
@@ -218,14 +212,19 @@ export async function POST(request: NextRequest) {
   console.log(extraDBDeals.map(deal => deal.hubspotId));
   // return jsonResponse({ missingHubspotDeals, allDBDeals }, 200);
 
-  const newDealsArr: DealWithInvestmentStats[] = [];
+  // for conversion deals:
+  // 1. create the old deal, and set status to converted. Also set status to converted in hubspot
+  // 2. create the new deal, and create the new deal in hubspot
+
+  const newStartDealsArr: DealWithInvestmentStats[] = [];
+  const newEndDealsArr: DealWithInvestmentStats[] = [];
   // loop through deals and create missing users and deals
   let i = -1;
   for await (const dealcontact of hsSearchResults.dealContacts) {
     // create user if not found
     i++;
     console.log('i:', i);
-    if (i > 3) break;
+    if (i > 2) break;
     const { email, firstname, lastname, hs_object_id, phone } =
       dealcontact.contact.properties;
     if (!email || !firstname || !lastname || !hs_object_id) {
@@ -254,8 +253,9 @@ export async function POST(request: NextRequest) {
         dbUserData.hubspotId = dbUserData.hubspotId ?? '';
 
         dealOwner = await createUserInDbAndHubspot(dbUserData);
-      } catch (__e) {
+      } catch (userCreateError) {
         console.error(`Error creating Clerk user with email ${email}`);
+        console.error(getErrorMessage(userCreateError));
       }
     }
 
@@ -264,44 +264,39 @@ export async function POST(request: NextRequest) {
       continue;
     }
 
-    // we now have a user with org. create deal
+    // we now have a user with org. create FIRST deal
     const hsDeal = dealcontact.deal;
     if (!hsDeal) {
-      console.error('Deal not found for contact:', dealcontact.contact);
+      console.error('hubspot Deal not found for contact:', dealcontact.contact);
       continue;
     }
     const { id: hubspotId } = hsDeal;
 
     // find deal in csvdata
     const dealInput = dealInputs.find(deal => deal.dealHubspotId === hubspotId);
-    if (!dealInput?.dealAmount) {
+    if (!dealInput?.startDealAmount) {
       console.error('Deal not found in csv data');
       continue;
     }
 
-    // get project id:
-    let projectId: number;
-    switch (projectName) {
-      case ProjectName['Bakers Place']:
-        projectId = 2;
-        break;
-      case ProjectName['519 W Main']:
-        projectId = 3;
-        break;
-      case ProjectName['The Edison']:
-        projectId = 1;
-        break;
-      default:
-        console.error('Project not found');
-        continue;
+    if (
+      dealInput.financingType === 'promissory_note_now' ||
+      dealInput.financingType === 'equity'
+    ) {
+      console.warn(
+        'Deal financing type not supported by this function:',
+        dealInput.financingType
+      );
+      continue;
     }
-
     // potentially create a second org for joint ownership
     let altOrgId: number | undefined;
-    if (
-      dealInput.ownershipType !== DealOwnershipType.INDIVIDUAL &&
-      dealInput.orgName
-    ) {
+    if (dealInput.ownershipType !== DealOwnershipType.INDIVIDUAL) {
+      if (!dealInput.orgName) {
+        console.error('Org name missing in spreadsheet', dealInput);
+        continue;
+      }
+
       // check if org already exists
       const altOrg = (
         await prisma.organization.findMany({ where: { ownerId: dealOwner.id } })
@@ -329,43 +324,127 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // get project id:
+    let projectId: number;
+    switch (projectName) {
+      case ProjectName['Bakers Place']:
+        projectId = 2;
+        break;
+      case ProjectName['519 W Main']:
+        projectId = 3;
+        break;
+      case ProjectName['The Edison']:
+        projectId = 1;
+        break;
+      default:
+        console.error('Project not found');
+        continue;
+    }
+
     console.log(
-      'Creating deal for user:',
+      'Creating START deal for user:',
       dealOwner.firstName,
       dealOwner.lastName,
       'deal amount:',
-      dealInput.dealAmount
+      dealInput.startDealAmount
     );
 
-    const dealCreateData: DealCreateSchema = {
-      amount: dealInput.dealAmount,
+    const startDealCreateData: DealCreateSchema = {
+      amount: dealInput.startDealAmount,
       projectId: projectId,
       organizationId: altOrgId ?? dealOwner.userOrgId,
       dealStage: DealStage.CLOSED,
-      financingType: dealInput.financingType,
+      financingType: DealFinancingType.promissory_note_now,
       hubspotId,
-      closingDate: dealInput.dateFunded,
+      closingDate: dealInput.dateStartFunded,
       signaturesCompletedDate: dealInput.dateSigned,
-      dateFundsSent: dealInput.dateFunded,
-      paymentMethod: PaymentMethod.CHECK,
-      paymentReferenceId: 'N/A',
+      dateFundsSent: dealInput.dateStartFunded,
       investmentEntity: dealInput.investmentEntity,
+      dateMatured: dealInput.dateEndFunded,
+      status: DealStatus.MATURED,
     };
-    if (dealInput.debtMinTerm)
-      dealCreateData.debtMinTerm = dealInput.debtMinTerm;
-    if (dealInput.debtMaxTerm)
-      dealCreateData.debtMaxTerm = dealInput.debtMaxTerm;
-    if (dealInput.debtInterestRatePerc)
-      dealCreateData.debtInterestRatePerc = dealInput.debtInterestRatePerc;
-    console.log('dealCreateData:', dealCreateData);
+    if (dealInput.endDebtMinTerm)
+      startDealCreateData.debtMinTerm = dealInput.endDebtMinTerm;
+    if (dealInput.endDebtMaxTerm)
+      startDealCreateData.debtMaxTerm = dealInput.endDebtMaxTerm;
+    if (dealInput.debtEndInterestRatePerc)
+      startDealCreateData.debtInterestRatePerc =
+        dealInput.debtEndInterestRatePerc;
+    console.log('dealCreateData:', startDealCreateData);
+    let newStartDeal: DealWithInvestmentStats;
+    let newEndDeal: DealWithInvestmentStats;
     try {
-      const newDeal = await createDealForAdmin(dealCreateData, dealOwner);
-      newDealsArr.push(newDeal);
-    } catch (__e) {
-      console.error('Error creating deal above', dealOwner);
+      newStartDeal = await createDealForAdmin(startDealCreateData, dealOwner);
+      newStartDealsArr.push(newStartDeal);
+    } catch (startDealCreateError) {
+      console.error('Error creating start deal', dealInput);
+      console.error(getErrorMessage(startDealCreateError));
       continue;
+    }
+
+    // create END deal
+    const endDealCreateData: DealCreateSchema = {
+      amount: dealInput.endDealAmount,
+      projectId: projectId,
+      organizationId: altOrgId ?? dealOwner.userOrgId,
+      dealStage: DealStage.CLOSED,
+      financingType:
+        dealInput.financingType === DealFinancingType.promissory_to_equity
+          ? DealFinancingType.equity
+          : DealFinancingType.promissory_note_now,
+      closingDate: dealInput.dateEndFunded,
+      signaturesCompletedDate: dealInput.dateSigned,
+      investmentEntity: InvestmentEntity[projectName],
+      status: DealStatus.ACTIVE,
+    };
+    if (
+      endDealCreateData.financingType === DealFinancingType.promissory_note_now
+    ) {
+      endDealCreateData.debtMinTerm = dealInput.endDebtMinTerm;
+      endDealCreateData.debtMaxTerm = dealInput.endDebtMaxTerm;
+      endDealCreateData.debtInterestRatePerc =
+        dealInput.debtEndInterestRatePerc;
+    }
+    try {
+      newEndDeal = await createDealForAdmin(endDealCreateData, dealOwner);
+      newEndDealsArr.push(newEndDeal);
+    } catch (endDealCreateError) {
+      console.error('Error creating end deal', dealInput);
+      console.error(getErrorMessage(endDealCreateError));
+      continue;
+    }
+
+    // create conversion entry
+    const conversionData = {
+      startDealId: newStartDeal.id,
+      endDealId: newEndDeal.id,
+    };
+    await prisma.dealConversion.create({ data: conversionData });
+
+    try {
+      // update hubspot deals with new start and end deal ids
+      const hsStartDealUpdate: HubspotDealUpdate = {
+        hubspotDealId: parseInt(newStartDeal.hubspotId),
+        properties: [
+          { name: 'deal_status', value: DealStatus.MATURED },
+          { name: 'hubspot_start_deal_id', value: newStartDeal.hubspotId },
+          { name: 'hubspot_end_deal_id', value: newEndDeal.hubspotId },
+        ],
+      };
+      await updateHubspotDealProperties(hsStartDealUpdate);
+
+      const hsEndDealUpdate: HubspotDealUpdate = {
+        hubspotDealId: parseInt(newEndDeal.hubspotId),
+        properties: [
+          { name: 'hubspot_start_deal_id', value: newStartDeal.hubspotId },
+          { name: 'hubspot_end_deal_id', value: newEndDeal.hubspotId },
+        ],
+      };
+      await updateHubspotDealProperties(hsEndDealUpdate);
+    } catch (e) {
+      console.error('Error creating Hubspot conversion:', e);
     }
   }
 
-  return jsonResponse(newDealsArr, 201);
+  return jsonResponse({ newStartDealsArr, newEndDealsArr }, 201);
 }
