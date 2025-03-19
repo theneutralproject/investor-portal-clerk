@@ -464,6 +464,15 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
   const createDeal = async () => {
     if (!project) return;
 
+    //Already created a deal, assume on get-started step
+    if (deal) {
+      const nextStep = getNextStep(step);
+      if (nextStep) {
+        router.push(`/dealflow/${project.slug}/${deal.id}/${nextStep}`);
+      }
+      return;
+    }
+
     setIsLoading(true);
 
     const dealCreateData: DealCreateSchema = {

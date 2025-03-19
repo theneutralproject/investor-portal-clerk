@@ -31,7 +31,11 @@ export const getSupabaseDownloadUrl = async (
 
     return response.data.signedUrl;
   } catch (error) {
-    console.error(error);
+    Logger.error(error, null, {
+      message: 'Error fetching signed URL',
+      filePath,
+      bucketName,
+    });
     return '';
   }
 };
@@ -60,7 +64,11 @@ export const getFileContent = async (
 
     return await data.text();
   } catch (err) {
-    Logger.error(err);
+    Logger.error(err, null, {
+      message: 'Error fetching file content',
+      filePath,
+      bucketName,
+    });
     return null;
   }
 };
