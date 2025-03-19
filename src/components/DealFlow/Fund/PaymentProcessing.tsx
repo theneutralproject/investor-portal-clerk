@@ -8,12 +8,21 @@ import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { PaymentMethod } from '@prisma/client';
 import PaymentDetailsCard from './PaymentDetailsCard';
 import { getPaymentInfo } from './FundShared';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const PaymentProcessing: React.FC = () => {
   const router = useRouter();
   const { deal, project } = useDealFlow();
 
   const goToDashboard = () => {
+    // Send to Google Tag Manager
+    sendGTMEvent({
+      dealId: deal.id,
+      dealStage: deal.dealStage,
+      eventCategory: 'Deal Flow',
+      event: `Step 7: Funds Committed`,
+      eventLabel: `Selected Funding Method: ${deal.paymentMethod}`,
+    });
     router.push('/dashboard');
   };
 

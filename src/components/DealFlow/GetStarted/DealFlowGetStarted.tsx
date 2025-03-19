@@ -15,7 +15,7 @@ const DealFlowGetStarted: React.FC = () => {
       sendGTMEvent({
         eventCategory: 'Deal Flow',
         event: `Step 0: Getting Started`,
-        eventLabel: `${user?.email} started the deal flow process for ${project.slug}`,
+        eventLabel: `${user?.email} started the deal flow process for ${project?.slug}`,
       });
     }
   }, [user, project]);
