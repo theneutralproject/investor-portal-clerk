@@ -3441,11 +3441,21 @@ export const ActivityFeedItemOrderByWithRelationInputSchema: z.ZodType<Prisma.Ac
   user: z.lazy(() => UserOrderByWithRelationInputSchema).optional()
 }).strict();
 
-export const ActivityFeedItemWhereUniqueInputSchema: z.ZodType<Prisma.ActivityFeedItemWhereUniqueInput> = z.object({
-  id: z.string().uuid()
-})
+export const ActivityFeedItemWhereUniqueInputSchema: z.ZodType<Prisma.ActivityFeedItemWhereUniqueInput> = z.union([
+  z.object({
+    id: z.string().uuid(),
+    activity_user_item_type: z.lazy(() => ActivityFeedItemActivity_user_item_typeCompoundUniqueInputSchema)
+  }),
+  z.object({
+    id: z.string().uuid(),
+  }),
+  z.object({
+    activity_user_item_type: z.lazy(() => ActivityFeedItemActivity_user_item_typeCompoundUniqueInputSchema),
+  }),
+])
 .and(z.object({
   id: z.string().uuid().optional(),
+  activity_user_item_type: z.lazy(() => ActivityFeedItemActivity_user_item_typeCompoundUniqueInputSchema).optional(),
   AND: z.union([ z.lazy(() => ActivityFeedItemWhereInputSchema),z.lazy(() => ActivityFeedItemWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ActivityFeedItemWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ActivityFeedItemWhereInputSchema),z.lazy(() => ActivityFeedItemWhereInputSchema).array() ]).optional(),
@@ -7162,6 +7172,12 @@ export const EnumActivityTypeFilterSchema: z.ZodType<Prisma.EnumActivityTypeFilt
   in: z.lazy(() => ActivityTypeSchema).array().optional(),
   notIn: z.lazy(() => ActivityTypeSchema).array().optional(),
   not: z.union([ z.lazy(() => ActivityTypeSchema),z.lazy(() => NestedEnumActivityTypeFilterSchema) ]).optional(),
+}).strict();
+
+export const ActivityFeedItemActivity_user_item_typeCompoundUniqueInputSchema: z.ZodType<Prisma.ActivityFeedItemActivity_user_item_typeCompoundUniqueInput> = z.object({
+  userId: z.number(),
+  itemId: z.number(),
+  type: z.lazy(() => ActivityTypeSchema)
 }).strict();
 
 export const ActivityFeedItemCountOrderByAggregateInputSchema: z.ZodType<Prisma.ActivityFeedItemCountOrderByAggregateInput> = z.object({

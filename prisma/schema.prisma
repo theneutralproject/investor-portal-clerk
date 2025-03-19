@@ -357,8 +357,9 @@ model ActivityFeedItem {
   link        String?
   type        ActivityType
   itemId      Int?
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@unique([userId, itemId, type], name: "activity_user_item_type")
 }
 
 enum ActivityType {

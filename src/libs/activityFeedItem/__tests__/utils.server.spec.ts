@@ -8,7 +8,7 @@ import prisma from '@/libs/prisma.server';
 
 jest.mock('@/libs/prisma.server', () => ({
   activityFeedItem: {
-    create: jest.fn(),
+    upsert: jest.fn(),
   },
 }));
 
@@ -18,20 +18,29 @@ describe('Activity Feed Item Creation', () => {
   });
 
   describe('createInvestmentCompletedActivityItem', () => {
-    it('should create an investment completed activity item', async () => {
+    it('should upsert an investment completed activity item', async () => {
       const deal = {
-        id: 1,
-        organization: { ownerId: 100 },
-        investmentStats: { financingType: 'equity' },
-        project: { name: 'Project A', slug: 'project-a' },
+        userId: 100,
+        itemId: 1,
+        projectName: 'Project A',
+        projectSlug: 'project-a',
+        financingType: 'equity',
         closingDate: new Date('2025-01-01T08:39:11.723Z'),
         dateCreated: new Date('2025-01-01'),
-      } as any;
+      };
 
       await createInvestmentCompletedActivityItem(deal);
 
-      expect(prisma.activityFeedItem.create).toHaveBeenCalledWith({
-        data: {
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledWith({
+        where: {
+          activity_user_item_type: {
+            userId: 100,
+            type: ActivityType.NEW_INVESTMENT,
+            itemId: 1,
+          },
+        },
+        update: {},
+        create: {
           userId: 100,
           header: 'Investment Completed',
           body: `You successfully initiated an Equity investment into Project A on Wed Jan 01 2025.`,
@@ -42,10 +51,32 @@ describe('Activity Feed Item Creation', () => {
         },
       });
     });
+
+    it('should handle duplicate investment completed activity item gracefully', async () => {
+      const deal = {
+        userId: 100,
+        itemId: 1,
+        projectName: 'Project A',
+        projectSlug: 'project-a',
+        financingType: 'equity',
+        closingDate: new Date('2025-01-01T08:39:11.723Z'),
+        dateCreated: new Date('2025-01-01'),
+      };
+
+      jest
+        .spyOn(prisma.activityFeedItem, 'upsert')
+        .mockRejectedValueOnce(new Error('Unique constraint failed'));
+
+      await expect(createInvestmentCompletedActivityItem(deal)).rejects.toThrow(
+        'Unique constraint failed'
+      );
+
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('createInvestmentAvailableActivityItem', () => {
-    it('should create an investment document available activity item', async () => {
+    it('should upsert an investment document available activity item', async () => {
       const dealDocActivityPayload = {
         userId: 200,
         projectName: 'Project B',
@@ -54,8 +85,16 @@ describe('Activity Feed Item Creation', () => {
 
       await createInvestmentAvailableActivityItem(dealDocActivityPayload);
 
-      expect(prisma.activityFeedItem.create).toHaveBeenCalledWith({
-        data: {
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledWith({
+        where: {
+          activity_user_item_type: {
+            userId: 200,
+            type: ActivityType.INVESTOR_DOCUMENT,
+            itemId: 2,
+          },
+        },
+        update: {},
+        create: {
           userId: 200,
           header: 'Investment Doc Available',
           body: `A new investment document is available for your investment into Project B.`,
@@ -76,8 +115,16 @@ describe('Activity Feed Item Creation', () => {
 
       await createInvestmentAvailableActivityItem(dealDocActivityPayload);
 
-      expect(prisma.activityFeedItem.create).toHaveBeenCalledWith({
-        data: {
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledWith({
+        where: {
+          activity_user_item_type: {
+            userId: 200,
+            type: ActivityType.INVESTOR_DOCUMENT,
+            itemId: 3,
+          },
+        },
+        update: {},
+        create: {
           userId: 200,
           header: 'Investment Doc Available',
           body: `A new investment document is available for your investment into .`,
@@ -88,10 +135,28 @@ describe('Activity Feed Item Creation', () => {
         },
       });
     });
+
+    it('should handle duplicate investment document activity item gracefully', async () => {
+      const dealDocActivityPayload = {
+        userId: 200,
+        projectName: 'Project B',
+        itemId: 2,
+      };
+
+      jest
+        .spyOn(prisma.activityFeedItem, 'upsert')
+        .mockRejectedValueOnce(new Error('Unique constraint failed'));
+
+      await expect(
+        createInvestmentAvailableActivityItem(dealDocActivityPayload)
+      ).rejects.toThrow('Unique constraint failed');
+
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('createTaxDocAvailableActivityItem', () => {
-    it('should create a tax document available activity item', async () => {
+    it('should upsert a tax document available activity item', async () => {
       const dealDocActivityPayload = {
         userId: 300,
         itemId: 4,
@@ -99,8 +164,16 @@ describe('Activity Feed Item Creation', () => {
 
       await createTaxDocAvailableActivityItem(dealDocActivityPayload);
 
-      expect(prisma.activityFeedItem.create).toHaveBeenCalledWith({
-        data: {
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledWith({
+        where: {
+          activity_user_item_type: {
+            userId: 300,
+            type: ActivityType.TAX_DOCUMENT,
+            itemId: 4,
+          },
+        },
+        update: {},
+        create: {
           userId: 300,
           header: 'K-1 Tax Doc Available',
           body: `A new tax document has been added to your document portal.`,
@@ -110,6 +183,23 @@ describe('Activity Feed Item Creation', () => {
           itemId: 4,
         },
       });
+    });
+
+    it('should handle duplicate tax document activity item gracefully', async () => {
+      const dealDocActivityPayload = {
+        userId: 300,
+        itemId: 4,
+      };
+
+      jest
+        .spyOn(prisma.activityFeedItem, 'upsert')
+        .mockRejectedValueOnce(new Error('Unique constraint failed'));
+
+      await expect(
+        createTaxDocAvailableActivityItem(dealDocActivityPayload)
+      ).rejects.toThrow('Unique constraint failed');
+
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledTimes(1);
     });
   });
 });

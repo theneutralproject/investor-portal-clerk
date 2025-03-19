@@ -1,7 +1,4 @@
-import {
-  createInvestmentCompletedActivityItem,
-  DealWithNestedItems,
-} from '@/libs/activityFeedItem/utils.server';
+import { createInvestmentCompletedActivityItem } from '@/libs/activityFeedItem/utils.server';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { DealStage, DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
@@ -204,7 +201,15 @@ export async function PUT(request: NextRequest) {
   }
 
   if (putData.dealStage === DealStage.CLOSED) {
-    await createInvestmentCompletedActivityItem(deal as DealWithNestedItems);
+    await createInvestmentCompletedActivityItem({
+      itemId: deal.id,
+      userId: deal.organization.ownerId,
+      closingDate: deal.closingDate!,
+      dateCreated: deal.dateCreated,
+      financingType: deal.investmentStats?.financingType,
+      projectName: deal.project.name,
+      projectSlug: deal.project.slug,
+    });
   }
 
   try {

@@ -1,22 +1,16 @@
 import _ from 'lodash';
-import {
-  ActivityType,
-  Deal,
-  DealDocument,
-  DealInvestmentStats,
-  Project,
-} from '@prisma/client';
+import { ActivityType } from '@prisma/client';
 import prisma from '../prisma.server';
 
-export type DealWithNestedItems = Deal & {
-  investmentStats: DealInvestmentStats;
-  project: Project;
-  organization: { ownerId: number };
-};
-
-export type DealDocumentWithDealItems = DealDocument & {
-  deal: DealWithNestedItems;
-};
+export interface DealActivityItemCreate {
+  userId: number;
+  itemId: number;
+  projectName: string;
+  projectSlug: string;
+  financingType?: string;
+  dateCreated?: Date | null;
+  closingDate: Date;
+}
 
 export interface DealDocumentActivityItemCreate {
   userId: number;
@@ -25,17 +19,25 @@ export interface DealDocumentActivityItemCreate {
 }
 
 export const createInvestmentCompletedActivityItem = async (
-  deal: DealWithNestedItems
+  deal: DealActivityItemCreate
 ) => {
-  return await prisma.activityFeedItem.create({
-    data: {
-      userId: deal.organization.ownerId,
+  return await prisma.activityFeedItem.upsert({
+    where: {
+      activity_user_item_type: {
+        userId: deal.userId,
+        type: ActivityType.NEW_INVESTMENT,
+        itemId: deal.itemId,
+      },
+    },
+    update: {},
+    create: {
+      userId: deal.userId,
       header: 'Investment Completed',
-      body: `You successfully initiated an ${_.startCase(deal.investmentStats?.financingType)} investment into ${deal.project.name} on ${deal?.closingDate?.toDateString()}.`,
+      body: `You successfully initiated an ${_.startCase(deal.financingType || '')} investment into ${deal.projectName} on ${deal.closingDate?.toDateString()}.`,
       type: ActivityType.NEW_INVESTMENT,
       dateCreated: deal.dateCreated!,
-      link: `/projects/${deal.project.slug}`,
-      itemId: deal.id,
+      link: `/projects/${deal.projectSlug}`,
+      itemId: deal.itemId,
     },
   });
 };
@@ -43,8 +45,16 @@ export const createInvestmentCompletedActivityItem = async (
 export const createInvestmentAvailableActivityItem = async (
   dealDocActivityPayload: DealDocumentActivityItemCreate
 ) => {
-  return await prisma.activityFeedItem.create({
-    data: {
+  return await prisma.activityFeedItem.upsert({
+    where: {
+      activity_user_item_type: {
+        userId: dealDocActivityPayload.userId,
+        type: ActivityType.INVESTOR_DOCUMENT,
+        itemId: dealDocActivityPayload.itemId,
+      },
+    },
+    update: {},
+    create: {
       userId: dealDocActivityPayload.userId,
       header: 'Investment Doc Available',
       body: `A new investment document is available for your investment into ${dealDocActivityPayload.projectName || ''}.`,
@@ -59,8 +69,16 @@ export const createInvestmentAvailableActivityItem = async (
 export const createTaxDocAvailableActivityItem = async (
   dealDocActivityPayload: DealDocumentActivityItemCreate
 ) => {
-  return await prisma.activityFeedItem.create({
-    data: {
+  return await prisma.activityFeedItem.upsert({
+    where: {
+      activity_user_item_type: {
+        userId: dealDocActivityPayload.userId,
+        type: ActivityType.TAX_DOCUMENT,
+        itemId: dealDocActivityPayload.itemId,
+      },
+    },
+    update: {},
+    create: {
       userId: dealDocActivityPayload.userId,
       header: 'K-1 Tax Doc Available',
       body: `A new tax document has been added to your document portal.`,
