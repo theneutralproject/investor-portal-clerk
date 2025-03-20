@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { Card, CardContent, Divider, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Stack,
+  Typography,
+  Skeleton,
+} from '@mui/material';
+import Link from 'next/link';
 import { POSTHOG_EVENTS, type ProjectWithStats } from '@/libs/types';
 import useDocuments from '@/app/hooks/useDocuments';
 import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
@@ -8,12 +18,17 @@ import DocumentViewerModal from '../ProjectDocs/DocumentViewerModal';
 import { usePostHog } from 'posthog-js/react';
 import { DOCUMENTS_NEW_TEST_ID } from 'e2e/testIds';
 
-// Define a proper error type
 type ApiError = {
   message: string;
 };
 
-const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
+const DocumentsNew = ({
+  project,
+  loggedIn,
+}: {
+  project: ProjectWithStats;
+  loggedIn: boolean;
+}) => {
   const [openModal, setOpenModal] = useState(false);
   const [currentDocument, setCurrentDocument] = useState<
     DocumentWithCompletion | undefined
@@ -24,7 +39,7 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
   const {
     isLoading,
     isError,
-    data = [], // Provide default value
+    data = [],
     error,
   } = useDocuments(project.id, 1) as {
     isLoading: boolean;
@@ -58,12 +73,13 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
     window.open(document.link, '_blank');
   };
 
-  const handleCloseModal = () => {
-    setOpenModal(false);
-  };
+  const handleCloseModal = () => setOpenModal(false);
 
   return (
-    <Card sx={{ mt: 2 }} data-testid={DOCUMENTS_NEW_TEST_ID}>
+    <Card
+      sx={{ mt: 2, position: 'relative' }}
+      data-testid={DOCUMENTS_NEW_TEST_ID}
+    >
       <CardContent>
         <Typography
           variant="h6"
@@ -73,26 +89,173 @@ const DocumentsNew = ({ project }: { project: ProjectWithStats }) => {
           Documents
         </Typography>
         <Divider sx={{ mt: 2, mb: 2 }} />
-        {data.map((document, index) => (
-          <DocumentCard
-            key={index}
-            document={document}
-            dealStage={55}
+
+        {loggedIn ? (
+          <DocumentsList
+            documents={data}
             handleViewDocument={handleViewDocument}
             handleDownloadDocument={handleDownloadDocument}
-            data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-card`}
+            currentDocument={currentDocument}
+            openModal={openModal}
+            handleCloseModal={handleCloseModal}
           />
-        ))}
-        {currentDocument?.link && (
-          <DocumentViewerModal
-            open={openModal}
-            onClose={handleCloseModal}
-            fileUrl={currentDocument.link}
-            data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-viewer-modal`}
-          />
+        ) : (
+          <NonLoggedInView />
         )}
       </CardContent>
     </Card>
+  );
+};
+
+const DocumentsList = ({
+  documents,
+  handleViewDocument,
+  handleDownloadDocument,
+  currentDocument,
+  openModal,
+  handleCloseModal,
+}: {
+  documents: DocumentWithCompletion[];
+  handleViewDocument: (document: DocumentWithCompletion) => void;
+  handleDownloadDocument: (document: DocumentWithCompletion) => void;
+  currentDocument: DocumentWithCompletion | undefined;
+  openModal: boolean;
+  handleCloseModal: () => void;
+}) => {
+  return (
+    <>
+      {documents.map((document: DocumentWithCompletion, index: number) => (
+        <DocumentCard
+          key={index}
+          document={document}
+          dealStage={55}
+          handleViewDocument={handleViewDocument}
+          handleDownloadDocument={handleDownloadDocument}
+          data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-card`}
+        />
+      ))}
+      {currentDocument?.link && (
+        <DocumentViewerModal
+          open={openModal}
+          onClose={handleCloseModal}
+          fileUrl={currentDocument.link}
+          data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-viewer-modal`}
+        />
+      )}
+    </>
+  );
+};
+
+const NonLoggedInView = () => {
+  return (
+    <>
+      <SkeletonDocuments />
+      <LoginOverlay />
+    </>
+  );
+};
+
+const SkeletonDocuments = () => {
+  return (
+    <>
+      {[1, 2, 3, 4].map((_, index) => (
+        <Box
+          key={index}
+          sx={{
+            mb: 2,
+            opacity: 0.6,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 1,
+          }}
+        >
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Skeleton
+              variant="rectangular"
+              width={40}
+              height={40}
+              sx={{ borderRadius: 1 }}
+            />
+            <Box sx={{ flex: 1 }}>
+              <Skeleton variant="text" width="60%" height={24} />
+              <Skeleton variant="text" width="40%" height={20} />
+            </Box>
+            <Skeleton
+              variant="rectangular"
+              width={100}
+              height={36}
+              sx={{ borderRadius: 1 }}
+            />
+          </Box>
+          <Skeleton variant="rectangular" height={2} />
+        </Box>
+      ))}
+    </>
+  );
+};
+
+const LoginOverlay = () => {
+  return (
+    <Box
+      sx={{
+        position: 'absolute',
+        top: 80,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: 'rgba(255, 255, 255, 0.1)',
+        backdropFilter: 'blur(4px)',
+        borderRadius: '8px',
+      }}
+      data-testid={`${DOCUMENTS_NEW_TEST_ID}-create-account`}
+    >
+      <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
+        <Typography variant="body1" align="center" fontWeight="500">
+          Create an account
+        </Typography>
+        <Typography variant="subtitle2" align="center" color="text.secondary">
+          Create an account or sign in to view documents such as Market Study,
+          Tax Analysis, and Investment Deck.
+        </Typography>
+        <Stack direction="row" spacing={2}>
+          <Link
+            href="/login"
+            passHref
+            data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up`}
+          >
+            <Button
+              variant="neutralYellow"
+              data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up-btn`}
+            >
+              CREATE ACCOUNT
+            </Button>
+          </Link>
+          <Link
+            href="/login"
+            passHref
+            data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in`}
+          >
+            <Button
+              variant="text"
+              data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in-btn`}
+              sx={{
+                borderColor: 'text.primary',
+                color: 'text.primary',
+                '&:hover': {
+                  borderColor: 'text.primary',
+                  bgcolor: 'rgba(0, 0, 0, 0.04)',
+                },
+              }}
+            >
+              SIGN IN
+            </Button>
+          </Link>
+        </Stack>
+      </Stack>
+    </Box>
   );
 };
 

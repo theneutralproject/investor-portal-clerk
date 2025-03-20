@@ -26,6 +26,9 @@ import { format } from 'date-fns';
 import { DealDocumentType } from '@prisma/client';
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
+import Logger from '@/libs/logger';
+import { toast } from 'react-toastify';
+
 const titleMap = {
   [DealDocumentType.K1]: 'K1',
   [DealDocumentType.VERIFICATION_ACCREDITATION]: 'Verification Accreditation',
@@ -66,8 +69,19 @@ const handleDownload = async (downloadUrl: string, fileName: string) => {
     link.parentNode?.removeChild(link);
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Download error:', error);
-    alert('Failed to download the file. Please try again.');
+    const errorMessage =
+      error instanceof Error ? error.message : 'An unknown error occurred';
+    Logger.error(error, null, {
+      message: 'Error downloading document',
+      fileName,
+      downloadUrl,
+      error: errorMessage,
+    });
+    toast.error(
+      errorMessage === 'Download failed'
+        ? 'Unable to download the file. Please try again later.'
+        : 'An error occurred while downloading. Please try again.'
+    );
   }
 };
 

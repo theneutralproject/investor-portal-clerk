@@ -50,3 +50,21 @@ export const zOrganizationMemberUpdateSchema = z.object({
 export type OrganizationMemberUpdateSchema = z.infer<
   typeof zOrganizationMemberUpdateSchema
 >;
+
+export const zAdminOrganizationMemberCreateSchema = z.object({
+  organizationId: z.number().int(),
+  userId: z.number().int(),
+  type: z.nativeEnum(MembershipType),
+  title: z.string().max(120, '120 characters max').optional(),
+});
+export type AdminOrganizationMemberCreateSchema = z.infer<
+  typeof zAdminOrganizationMemberCreateSchema
+>;
+
+export const zAdminOrganizationMemberDeleteSchema = z.object({
+  id: z.number().int(),
+});
+
+export type AdminOrganizationMemberDeleteSchema = z.infer<
+  typeof zAdminOrganizationMemberDeleteSchema
+>;

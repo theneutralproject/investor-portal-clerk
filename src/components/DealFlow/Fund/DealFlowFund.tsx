@@ -6,14 +6,13 @@ import PaymentProcessing from '@components/DealFlow/Fund/PaymentProcessing';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import FundPlaid from '@components/DealFlow/Fund/FundPlaid';
 import FundCheck from '@components/DealFlow/Fund/FundCheck';
-import FundACH from '@/components/DealFlow/Fund/FundWire';
+import FundWire from '@/components/DealFlow/Fund/FundWire';
 import {
   getPaymentInfo,
   getMerchantId,
   FundingOptions,
 } from '@components/DealFlow/Fund/FundShared';
 import PaymentComplete from '@components/DealFlow/Fund/PaymentComplete';
-import { sendGTMEvent } from '@next/third-parties/google';
 
 const DealFlowFund: React.FC = () => {
   const { project, deal } = useDealFlow();
@@ -30,15 +29,6 @@ const DealFlowFund: React.FC = () => {
   };
 
   const handleContinue = () => {
-    // Send to Google Tag Manager
-    sendGTMEvent({
-      dealId: deal.id,
-      dealStage: deal.dealStage,
-      eventCategory: 'Deal Flow',
-      event: `Step 7: Funds Committed`,
-      eventLabel: `Selected Funding Method: ${selectedOption}`,
-    });
-
     if (selectedOption) {
       setShowComponent(true);
     }
@@ -66,7 +56,7 @@ const DealFlowFund: React.FC = () => {
         );
       case 'wire':
         return (
-          <FundACH
+          <FundWire
             paymentInfo={paymentInfo}
             investmentAmount={investmentAmount}
             onBack={handleBack}

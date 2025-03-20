@@ -5,7 +5,6 @@ import {
   CardMedia,
   Typography,
   Stack,
-  IconButton,
   Box,
 } from '@mui/material';
 import {
@@ -101,21 +100,15 @@ const ShareOnSocial = () => {
                 title={title}
                 hashtags={hashtags}
               >
-                <IconButton size="small" aria-label="share on twitter">
-                  <XIcon size={25} round />
-                </IconButton>
+                <XIcon size={25} round />
               </TwitterShareButton>
 
               <LinkedinShareButton url={shareUrl} title={title}>
-                <IconButton size="small" aria-label="share on linkedin">
-                  <LinkedinIcon size={25} round />
-                </IconButton>
+                <LinkedinIcon size={25} round />
               </LinkedinShareButton>
 
               <FacebookShareButton url={shareUrl} hashtag={`#${hashtags[0]}`}>
-                <IconButton size="small" aria-label="share on facebook">
-                  <FacebookIcon size={25} round />
-                </IconButton>
+                <FacebookIcon size={25} round />
               </FacebookShareButton>
             </Stack>
           </CardContent>

@@ -11,12 +11,14 @@ const DealFlowGetStarted: React.FC = () => {
   const { createDeal, user, project } = useDealFlow();
 
   useEffect(() => {
-    sendGTMEvent({
-      eventCategory: 'Deal Flow',
-      event: `Step 0: Getting Started`,
-      eventLabel: `${user.email} started the deal flow process for ${project.slug}`,
-    });
-  }, []);
+    if (user && project) {
+      sendGTMEvent({
+        eventCategory: 'Deal Flow',
+        event: `Step 0: Getting Started`,
+        eventLabel: `${user?.email} started the deal flow process for ${project?.slug}`,
+      });
+    }
+  }, [user, project]);
 
   return (
     <Box>

@@ -30,6 +30,8 @@ class PlaidLinkClass extends React.Component<Props, State> {
     super(props);
     this.state = { token: null, isLoading: false };
   }
+
+  // If fails, set isLoading to false, toast and log error ✅
   async createLinkToken() {
     try {
       const response = await fetch('/api/finix/plaidLinkToken', {
@@ -45,9 +47,11 @@ class PlaidLinkClass extends React.Component<Props, State> {
         throw new Error('Failed to create link token');
       }
       const link_token = await response.json();
+      this.setState({ isLoading: false });
       return link_token;
     } catch (error) {
       toast.error(PLAID_ERROR_MESSAGE); //Logger.error caught above
+      this.setState({ isLoading: false });
       return null;
     }
   }
@@ -73,29 +77,44 @@ class PlaidLinkClass extends React.Component<Props, State> {
           console.log('sessionKey', sk);
 
           // https://plaid.com/docs/api/tokens/#token-exchange-flow
-          const res = await axios.post('/api/finix/transaction', {
-            plaid_public_token: publicToken,
-            plaid_account_id: fullMetadata.account_id,
-            dealId: this.props.dealId,
-            sessionKey: sk,
-            merchantId: this.props.merchantId,
-            slug: this.props.projectSlug,
-          });
 
-          if (res.status === 200) {
+          // If fails, set isLoading to false, toast and log error ✅
+          try {
+            const res = await axios.post('/api/finix/transaction', {
+              plaid_public_token: publicToken,
+              plaid_account_id: fullMetadata.account_id,
+              dealId: this.props.dealId,
+              sessionKey: sk,
+              merchantId: this.props.merchantId,
+              slug: this.props.projectSlug,
+            });
+
             const { message } = res.data;
             console.log(message);
             toast.success(message);
+            this.setState({ isLoading: false });
             await this.props.refetchDeal();
-          } else {
-            throw new Error('Failed to process transaction');
+          } catch (error) {
+            this.setState({ isLoading: false });
+
+            if (axios.isAxiosError(error)) {
+              const errorMessage =
+                error.response?.data?.error || 'Transaction failed';
+              toast.error(errorMessage);
+              Logger.error('PlaidLink transaction error:', null, {
+                error: error.response?.data,
+                status: error.response?.status,
+              });
+            } else {
+              toast.error(PLAID_ERROR_MESSAGE);
+              Logger.error('PlaidLink unexpected error:', null, { error });
+            }
           }
         }
       );
     } catch (error) {
-      Logger.error('PlaidLink error:', null, {
-        error,
-      });
+      Logger.error('PlaidLink auth error:', null, { error });
+
       toast.error(PLAID_ERROR_MESSAGE);
       this.setState({ isLoading: false });
     }
