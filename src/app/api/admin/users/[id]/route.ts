@@ -50,6 +50,16 @@ export async function GET(request: NextRequest) {
         organizationMember: {
           select: {
             type: true,
+            id: true,
+            title: true,
+            user: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
             organization: {
               select: {
                 id: true,
