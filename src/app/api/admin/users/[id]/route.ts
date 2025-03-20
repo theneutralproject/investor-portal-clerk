@@ -60,6 +60,7 @@ export async function GET(request: NextRequest) {
                   select: {
                     id: true,
                     transactionId: true,
+                    status: true,
                     dealStage: true,
                     document: true,
                     hubspotId: true,
