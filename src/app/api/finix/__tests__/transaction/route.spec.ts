@@ -42,8 +42,13 @@ jest.mock('@/libs/prisma.server', () => ({
   },
 }));
 
+jest.mock('@/libs/deal/utils.server', () => ({
+  updateDeal: jest.fn(),
+}));
+
 import prisma from '@/libs/prisma.server';
 import { initializeFinixTransfer } from '@/libs/finix/utils.server';
+import { updateDeal } from '@/libs/deal/utils.server';
 
 const mockUser: any = {
   id: 1,
@@ -206,7 +211,7 @@ describe('POST /api/finix/transaction', () => {
   it('should return a successful ACH transfer response', async () => {
     (getAuth as jest.Mock).mockReturnValue({ userId: 1 });
     jest.spyOn(prisma.user, 'findUnique').mockResolvedValueOnce(mockUser);
-    jest.spyOn(prisma.deal, 'findUnique').mockResolvedValueOnce(dealFixture);
+    jest.spyOn(prisma.deal, 'findUnique').mockResolvedValue(dealFixture);
 
     (initializeFinixTransfer as jest.Mock).mockResolvedValueOnce({
       state: 'SUCCEEDED',
@@ -230,11 +235,18 @@ describe('POST /api/finix/transaction', () => {
 
   it('should return a pending ACH transfer response', async () => {
     (getAuth as jest.Mock).mockReturnValue({ userId: 1 });
+    (updateDeal as jest.Mock).mockReturnValue({ success: true });
     jest.spyOn(prisma.user, 'findUnique').mockResolvedValueOnce(mockUser);
-    jest.spyOn(prisma.deal, 'findUnique').mockResolvedValueOnce(dealFixture);
+    jest
+      .spyOn(prisma.deal, 'findUnique')
+      .mockResolvedValue({ ...dealFixture, hubspotId: 123 });
+    jest
+      .spyOn(prisma.deal, 'findUnique')
+      .mockResolvedValue({ ...dealFixture, hubspotId: 123 });
+
     (initializeFinixTransfer as jest.Mock).mockResolvedValueOnce({
       state: 'PENDING',
-      id: 'transfer-xyz',
+      id: 'transfer-1234',
     });
 
     const response = await POST(
