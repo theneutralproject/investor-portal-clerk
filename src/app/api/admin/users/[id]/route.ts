@@ -44,19 +44,10 @@ export async function GET(request: NextRequest) {
         ssn: true,
         dateOfBirth: true,
         dateCreated: true,
-        organizationsOwned: {
-          select: {
-            id: true,
-            name: true,
-            address: true,
-            tin: true,
-            isPrimary: true,
-            ownershipType: true,
-          },
-        },
         address: true,
         organizationMember: {
           select: {
+            type: true,
             organization: {
               select: {
                 id: true,
