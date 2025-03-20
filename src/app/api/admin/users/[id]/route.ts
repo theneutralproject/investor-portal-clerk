@@ -40,7 +40,31 @@ export async function GET(request: NextRequest) {
 
     const organizations = await prisma.organization.findMany({
       where: { members: { some: { userId } } },
-      include: { address: true, members: { include: { user: true } } },
+      select: {
+        id: true,
+        name: true,
+        tin: true,
+        ownershipType: true,
+        isPrimary: true,
+        deals: {
+          select: {
+            id: true,
+          },
+        },
+        address: true,
+        members: {
+          select: {
+            user: {
+              select: {
+                firstName: true,
+                lastName: true,
+                email: true,
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     const deals = await prisma.deal.findMany({
@@ -57,6 +81,7 @@ export async function GET(request: NextRequest) {
         closingDate: true,
         dateUpdated: true,
         dateCreated: true,
+        organizationId: true,
         project: {
           select: {
             id: true,
