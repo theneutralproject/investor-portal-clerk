@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
@@ -46,6 +47,7 @@ export async function GET(request: NextRequest) {
       where: {
         organizationId: { in: organizations.map(org => org.id) },
         status: DealStatus.ACTIVE,
+        dealStage: { not: DealStage.CLOSED_LOST },
       },
       select: {
         investmentStats: true,
