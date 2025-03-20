@@ -189,7 +189,7 @@ export default function Page({ params }: NextClientPage) {
               id="documents"
               sx={{ position: 'absolute', top: -80, left: 0 }}
             />
-            {loggedIn && <DocumentsNew project={project} />}
+            <DocumentsNew project={project} loggedIn={loggedIn} />
           </Box>
           <GalleryNew data={project} />
           <HaveQuestionsNew />
