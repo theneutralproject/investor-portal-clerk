@@ -32,76 +32,44 @@ export async function GET(request: NextRequest) {
     return errorResponse(`userId is required in url`, 500, { request });
   }
   try {
-    const detailedUser = await prisma.user.findUnique({
+    // get the user
+    const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: { address: true },
+    });
+
+    const organizations = await prisma.organization.findMany({
+      where: { members: { some: { userId } } },
+      include: { address: true, members: { include: { user: true } } },
+    });
+
+    const deals = await prisma.deal.findMany({
+      where: {
+        organizationId: { in: organizations.map(org => org.id) },
+        status: DealStatus.ACTIVE,
+        dealStage: { not: DealStage.CLOSED_LOST },
+      },
       select: {
+        investmentStats: true,
         id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        role: true,
-        hubspotId: true,
-        referralSource: true,
-        ssn: true,
-        dateOfBirth: true,
+        transactionId: true,
+        dealStage: true,
+        closingDate: true,
+        dateUpdated: true,
         dateCreated: true,
-        address: true,
-        organizationMember: {
+        project: {
           select: {
-            type: true,
             id: true,
-            title: true,
-            user: {
-              select: {
-                id: true,
-                firstName: true,
-                lastName: true,
-                email: true,
-              },
-            },
-            organization: {
-              select: {
-                id: true,
-                name: true,
-                address: true,
-                tin: true,
-                isPrimary: true,
-                ownershipType: true,
-                deals: {
-                  where: {
-                    dealStage: { lte: DealStage.CLOSED },
-                    status: DealStatus.ACTIVE,
-                  },
-                  select: {
-                    id: true,
-                    transactionId: true,
-                    status: true,
-                    dealStage: true,
-                    document: true,
-                    hubspotId: true,
-                    investmentEntity: true,
-                    closingDate: true,
-                    signaturesCompletedDate: true,
-                    project: {
-                      select: {
-                        id: true,
-                        name: true,
-                        pictures: {
-                          where: { type: 'CARD' },
-                        },
-                      },
-                    },
-                    investmentStats: true,
-                  },
-                },
-              },
+            name: true,
+            pictures: {
+              where: { type: 'CARD' },
             },
           },
         },
       },
     });
-    return jsonResponse(detailedUser);
+
+    return jsonResponse({ user, deals, organizations });
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500, {
       request,
