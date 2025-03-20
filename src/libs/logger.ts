@@ -10,6 +10,13 @@ const logger = pino({
     level(label) {
       return { level: label.toUpperCase() };
     },
+    bindings: bindings => {
+      return {
+        pid: bindings.pid,
+        host: bindings.hostname,
+        node_version: process.version,
+      };
+    },
   },
   timestamp: pino.stdTimeFunctions.isoTime, // Uses ISO timestamp format
 });

@@ -1,4 +1,5 @@
 'use server';
+import { updateDeal } from '@/libs/deal/utils.server';
 import {
   initializeFinixTransfer,
   getPlaidToken,
@@ -9,6 +10,7 @@ import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
+import { PaymentMethod } from '@prisma/client';
 import { isError } from 'lodash';
 import type { NextRequest } from 'next/server';
 
@@ -142,6 +144,17 @@ export async function POST(request: NextRequest) {
         { request, extra: { response: achTransferResponseData } }
       );
     }
+
+    await updateDeal(
+      {
+        hubspotId: deal.hubspotId,
+        closingDate: new Date(Date.now()),
+        dateFundsSent: new Date(Date.now()),
+        paymentMethod: PaymentMethod.ACH,
+        paymentReferenceId: achTransferResponseData.id,
+      },
+      true
+    );
 
     return jsonResponse({ message: 'The ACH transfer is pending' });
   } catch (error) {

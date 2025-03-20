@@ -12,6 +12,7 @@ jest.mock('@/libs/deal/utils.server', () => ({
 jest.mock('@/libs/logger', () => ({
   log: jest.fn(),
   error: jest.fn(),
+  warn: jest.fn(),
 }));
 
 describe('POST /api/finix/webhook', () => {
@@ -62,15 +63,14 @@ describe('POST /api/finix/webhook', () => {
         transfers: [{ subtype: 'OTHER' }],
       },
     };
+    const message = 'Webhook not processed because the subtype is not "API"';
 
     const response = await POST(
       nextRequestMock(requestBody, { Authorization: validAuthHeader }) as any
     );
 
-    expect(Logger.log).toHaveBeenLastCalledWith({
-      message: 'ignoring the Webhook because the subtype is not "API"',
-    });
-    expect(response).toEqual(jsonResponse({ message: 'ignoring the Webhook' }));
+    expect(Logger.warn).toHaveBeenLastCalledWith(message);
+    expect(response).toEqual(jsonResponse({ message }));
   });
 
   it('should return 500 if dealHubspotId is missing in tags', async () => {
@@ -81,6 +81,7 @@ describe('POST /api/finix/webhook', () => {
             subtype: 'API',
             state: 'SUCCEEDED',
             tags: {}, // Missing dealHubspotId
+            ready_to_settle_at: new Date(),
           },
         ],
       },
@@ -112,6 +113,7 @@ describe('POST /api/finix/webhook', () => {
             subtype: 'API',
             state: 'SUCCEEDED',
             tags: { dealHubspotId: 'hubspot-123' },
+            ready_to_settle_at: new Date(),
           },
         ],
       },
@@ -148,6 +150,7 @@ describe('POST /api/finix/webhook', () => {
             subtype: 'API',
             state: 'SUCCEEDED',
             tags: { dealHubspotId: 'hubspot-123' },
+            ready_to_settle_at: new Date(),
           },
         ],
       },
@@ -158,8 +161,13 @@ describe('POST /api/finix/webhook', () => {
     );
 
     expect(updateDeal).toHaveBeenCalled();
+    expect(Logger.warn).toHaveBeenCalledWith(
+      'unable to set deal stage to 5 in webhook route',
+      expect.any(Object),
+      { extra: expect.any(Error) }
+    );
     expect(response).toEqual(
-      jsonResponse({ message: 'Webhook not processed' }, 200)
+      errorResponse('The ACH transfer was NOT successful', 500)
     );
   });
 
@@ -199,5 +207,30 @@ describe('POST /api/finix/webhook', () => {
     expect(response).toEqual(
       jsonResponse({ message: 'Webhook not processed' })
     );
+  });
+
+  it('should return 200 if webhook is ignored when transaction not done', async () => {
+    const message = 'Webhook not processed because transaction is not done yet';
+    const requestBody = {
+      _embedded: {
+        transfers: [
+          {
+            id: 'transfer-123',
+            subtype: 'API',
+            state: 'SUCCEEDED',
+            tags: { dealHubspotId: 'hubspot-123' },
+            ready_to_settle_at: null,
+          },
+        ],
+      },
+    };
+    const response = await POST(
+      nextRequestMock(requestBody, {
+        Authorization: validAuthHeader,
+      }) as any
+    );
+
+    expect(Logger.warn).toHaveBeenCalledWith(message);
+    expect(response).toEqual(jsonResponse({ message }));
   });
 });
