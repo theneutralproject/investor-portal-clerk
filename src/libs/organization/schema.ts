@@ -4,7 +4,6 @@ import { zUserCreateSchema, zUserUpdateSchema } from '../user/schema';
 import { zAddressCreateSchema } from '../address/schema';
 
 export const zOrganizationUpdateSchema = z.object({
-  id: z.number().int().optional(), // if provided, an admin can update any organization
   name: z.string().max(120, '120 characters max').optional(),
   tin: z.string().max(200).optional(),
   dateOfCreation: z.coerce.date().optional(),
