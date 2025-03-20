@@ -59,7 +59,9 @@ export default function UserIdentifier() {
           event: 'Account Login',
           eventLabel: `New Account Login by ${user.primaryEmailAddress?.toString()}`,
         };
-        console.log('Clerk JWT login detected, sending event:', event);
+        Logger.log({
+          message: `New Account Login by ${user.primaryEmailAddress?.toString()}`,
+        });
         sendGTMEvent(event);
       }
     }
