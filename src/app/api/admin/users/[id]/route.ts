@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
@@ -8,6 +9,7 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
+import { DealStatus } from '@prisma/client';
 import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
@@ -57,6 +59,10 @@ export async function GET(request: NextRequest) {
                 isPrimary: true,
                 ownershipType: true,
                 deals: {
+                  where: {
+                    dealStage: { lte: DealStage.CLOSED },
+                    status: DealStatus.ACTIVE,
+                  },
                   select: {
                     id: true,
                     transactionId: true,
