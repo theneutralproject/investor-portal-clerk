@@ -51,7 +51,6 @@ export type OrganizationMemberUpdateSchema = z.infer<
 >;
 
 export const zAdminOrganizationMemberCreateSchema = z.object({
-  organizationId: z.number().int(),
   userId: z.number().int(),
   type: z.nativeEnum(MembershipType),
   title: z.string().max(120, '120 characters max').optional(),

@@ -27,10 +27,10 @@ export async function PUT(request: NextRequest) {
     console.log(url.pathname.split('/'));
     orgId = parseInt(url.pathname.split('/')[4] ?? '');
     if (!orgId || !isNumber(orgId)) {
-      throw new Error('dealId is required in url');
+      throw new Error('orgId is required in url');
     }
   } catch (__error) {
-    return errorResponse(`dealId is required in url`, 400, { request });
+    return errorResponse(`orgId is required in url`, 400, { request });
   }
 
   let putData: OrganizationUpdateSchema;

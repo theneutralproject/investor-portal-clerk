@@ -10,6 +10,7 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
+import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 // POST request to add a member to an organization
@@ -21,6 +22,17 @@ export async function POST(request: NextRequest) {
     return jsonResponse(getErrorMessage(error), 500);
   }
 
+  let organizationId: number;
+  try {
+    const url = new URL(request.url);
+    console.log(url.pathname.split('/'));
+    organizationId = parseInt(url.pathname.split('/')[4] ?? '');
+    if (!organizationId || !isNumber(organizationId)) {
+      throw new Error('orgId is required in url');
+    }
+  } catch (__error) {
+    return errorResponse(`orgId is required in url`, 400, { request });
+  }
   let postData: AdminOrganizationMemberCreateSchema;
   try {
     const requestBody =
@@ -33,7 +45,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  const { userId, organizationId, type, title } = postData;
+  const { userId, type, title } = postData;
 
   try {
     const organization = await prisma.organization.findUnique({
