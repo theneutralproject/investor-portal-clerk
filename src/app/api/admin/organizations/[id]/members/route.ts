@@ -113,7 +113,7 @@ export async function DELETE(request: NextRequest) {
       include: {
         organization: {
           include: {
-            deals: { where: { dealStage: { not: DealStage.CLOSED } } },
+            deals: { where: { dealStage: { not: DealStage.CLOSED_LOST } } },
           },
         },
       },
