@@ -8,7 +8,6 @@ import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
 import Logger from '@/libs/logger';
-import { sendGTMEvent } from '@next/third-parties/google';
 
 /**
  * UserIdentifier component is responsible for:
@@ -40,32 +39,6 @@ export default function UserIdentifier() {
     const urlParams = new URLSearchParams(window.location.search);
     setRedirectUrl(urlParams.get('redirectUrl'));
   }, []);
-
-  /**
-   * Handles the detection of clerk_db_jwt in the URL hash
-   * and triggers a login event when detected
-   */
-  useEffect(() => {
-    if (user && window.location.hash) {
-      const hashValue = window.location.hash;
-      if (hashValue.includes('__clerk_db_jwt')) {
-        // Remove the JWT from the URL without page reload
-        const cleanUrl = window.location.href.split('#')[0];
-        window.history.replaceState({}, document.title, cleanUrl);
-
-        const event = {
-          userId: user.id,
-          eventCategory: 'Account',
-          event: 'Account Login',
-          eventLabel: `New Account Login by ${user.primaryEmailAddress?.toString()}`,
-        };
-        Logger.log({
-          message: `New Account Login by ${user.primaryEmailAddress?.toString()}`,
-        });
-        sendGTMEvent(event);
-      }
-    }
-  }, [user]);
 
   /**
    * Effect that runs when a user logs in.

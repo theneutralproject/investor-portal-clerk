@@ -6,7 +6,6 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import useRegisterUser from '@/app/hooks/useRegisterUser';
 import { useUser } from '@clerk/nextjs';
 import { useRedirect } from '@/app/context/RedirectContext';
-import { sendGTMEvent } from '@next/third-parties/google';
 
 const OnboardingPage = () => {
   const router = useRouter();
@@ -23,13 +22,6 @@ const OnboardingPage = () => {
   useEffect(() => {
     async function onboardedProcess() {
       await user?.reload();
-      sendGTMEvent({
-        userId: user?.id,
-        eventCategory: 'Account',
-        event: 'Account Signup',
-        eventLabel: `New Account Signup by ${user?.primaryEmailAddress?.emailAddress?.toString()}`,
-      });
-
       if (redirectUrl) {
         router.push(redirectUrl || '/dashboard');
       } else {
