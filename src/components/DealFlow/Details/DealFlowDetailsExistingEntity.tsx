@@ -121,7 +121,6 @@ const DealFlowDetailsExistingEntity = () => {
   const router = useRouter();
 
   const handleContinue = async () => {
-    console.log('Selected organization:', selectedOrganizationId);
     const org = organizationsOwned.find(
       org => org.id === selectedOrganizationId
     );

@@ -99,6 +99,12 @@ export async function DELETE(request: NextRequest) {
     });
     await storageClient.from('deal-documents').remove([`${res.path}`]);
 
+    await prisma.activityFeedItem.deleteMany({
+      where: {
+        itemId: fileId,
+      },
+    });
+
     return jsonResponse(res);
   } catch (error) {
     return errorResponse('unable to get Deal Documents', 500, {

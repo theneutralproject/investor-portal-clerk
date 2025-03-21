@@ -1,5 +1,4 @@
 'use server';
-import { DealStage } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import {
   initializeFinixTransfer,
@@ -135,44 +134,29 @@ export async function POST(request: NextRequest) {
     }
 
     if (achTransferResponseData.state?.toUpperCase() === 'SUCCEEDED') {
-      try {
-        await updateDeal(
-          {
-            hubspotId: deal.hubspotId,
-            dealStage: DealStage.CLOSED,
-            closingDate: new Date(Date.now()),
-            dateFundsSent: new Date(Date.now()),
-            paymentMethod: PaymentMethod.ACH,
-            paymentReferenceId: achTransferResponseData.id,
-          },
-          true
-        );
-      } catch (error) {
-        Logger.error('unable to set deal stage to 5', request, { error });
-      }
       return jsonResponse({ message: 'The ACH transfer was successful' });
-    } else if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
+    }
+
+    if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
       return errorResponse(
         'The ACH transfer failed. Please contact your Neutral Representative',
         400,
         { request, extra: { response: achTransferResponseData } }
       );
-    } else {
-      try {
-        await updateDeal(
-          {
-            hubspotId: deal.hubspotId,
-            dateFundsSent: new Date(Date.now()),
-            paymentMethod: PaymentMethod.ACH,
-            paymentReferenceId: achTransferResponseData.id,
-          },
-          false
-        ); // update the deal without updating hubspot
-      } catch (error) {
-        Logger.error('unable to save ach payment', request, { error });
-      }
-      return jsonResponse({ message: 'The ACH transfer is pending' });
     }
+
+    await updateDeal(
+      {
+        hubspotId: deal.hubspotId,
+        closingDate: new Date(Date.now()),
+        dateFundsSent: new Date(Date.now()),
+        paymentMethod: PaymentMethod.ACH,
+        paymentReferenceId: achTransferResponseData.id,
+      },
+      true
+    );
+
+    return jsonResponse({ message: 'The ACH transfer is pending' });
   } catch (error) {
     Logger.error('Finix transaction error 2', request, { error });
     return errorResponse('Error transferring money 2', 500, {

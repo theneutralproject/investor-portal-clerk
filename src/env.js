@@ -36,7 +36,7 @@ export const env = createEnv({
     SUPABASE_SERVICE_ROLE_KEY: z.string(),
     BASE_URL: z.string(),
     GOOGLE_TAG_ID: z.string(),
-    GOOGLE_ADS_TAG_ID: z.string(),
+    GOOGLE_ADS_TAG_ID: z.string().optional(),
     PRISMA_FIELD_ENCRYPTION_KEY: z.string(),
     TEST_USER_TOKEN: z.string(),
     GOOGLE_CLIENT_ID: z.string(),

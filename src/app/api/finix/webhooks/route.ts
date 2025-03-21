@@ -73,6 +73,7 @@ export async function POST(request: NextRequest) {
               dealHubspotId: string | null;
               project: string | null;
             };
+            ready_to_settle_at?: string;
           },
         ];
       };
@@ -95,11 +96,19 @@ export async function POST(request: NextRequest) {
 
     const transfer = body._embedded.transfers[0];
     if (transfer.subtype !== 'API') {
-      Logger.log({
-        message: 'ignoring the Webhook because the subtype is not "API"',
+      Logger.warn('Webhook not processed because the subtype is not "API"');
+      return jsonResponse({
+        message: 'Webhook not processed because the subtype is not "API"',
       });
-      return jsonResponse({ message: 'ignoring the Webhook' });
     }
+
+    if (!transfer.ready_to_settle_at) {
+      Logger.warn('Webhook not processed because transaction is not done yet');
+      return jsonResponse({
+        message: 'Webhook not processed because transaction is not done yet',
+      });
+    }
+
     if (transfer.state?.toUpperCase() === 'SUCCEEDED') {
       Logger.log({
         message: 'Processing Transfer Succeeded Webhook: ',

@@ -38,6 +38,7 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
+  ActivityFeedItem             ActivityFeedItem[]
 }
 
 model Deal {
@@ -347,6 +348,29 @@ model TermsEvents {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
+model ActivityFeedItem {
+  id          String       @id @default(uuid())
+  userId      Int
+  header      String
+  body        String
+  dateCreated DateTime     @default(now())
+  link        String?
+  type        ActivityType
+  itemId      Int?
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, itemId, type], name: "activity_user_item_type")
+}
+
+enum ActivityType {
+  EVENT
+  PAYOUT
+  TAX_DOCUMENT
+  INVESTOR_DOCUMENT
+  INVESTOR_REPORT
+  NEW_INVESTMENT
+}
+
 enum DealDocumentType {
   K1
   VERIFICATION_ACCREDITATION
@@ -406,6 +430,7 @@ enum DealOwnershipType {
   MARITAL
   COMMON
   PARTNERSHIP
+  IRA
 }
 
 enum DealUnitType {
