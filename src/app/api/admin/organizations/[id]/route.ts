@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 import {
   OrganizationUpdateSchema,
@@ -114,7 +115,10 @@ export async function DELETE(request: NextRequest) {
   try {
     // check if the organization has any deals
     const deals = await prisma.deal.findMany({
-      where: { organizationId: orgId },
+      where: {
+        organizationId: orgId,
+        dealStage: { not: { equals: DealStage.CLOSED_LOST } },
+      },
     });
     if (deals.length > 0) {
       return errorResponse(
