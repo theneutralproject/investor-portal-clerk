@@ -47,6 +47,7 @@ export async function GET(request: NextRequest) {
         ownershipType: true,
         isPrimary: true,
         deals: {
+          where: { dealStage: { not: DealStage.CLOSED_LOST } },
           select: {
             id: true,
           },
