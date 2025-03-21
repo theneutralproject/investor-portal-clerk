@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 import {
   AdminOrganizationMemberCreateSchema,
@@ -110,7 +111,11 @@ export async function DELETE(request: NextRequest) {
     const memberWithOrgAndDeals = await prisma.member.findUnique({
       where: { id: memberId },
       include: {
-        organization: { include: { deals: true } },
+        organization: {
+          include: {
+            deals: { where: { dealStage: { not: DealStage.CLOSED } } },
+          },
+        },
       },
     });
     // check if the organization has deals
