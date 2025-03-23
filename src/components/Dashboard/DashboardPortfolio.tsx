@@ -274,14 +274,6 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in`}>
                 <SignInButton
                   variant="text"
-                  sx={{
-                    borderColor: 'text.primary',
-                    color: 'text.primary',
-                    '&:hover': {
-                      borderColor: 'text.primary',
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                    },
-                  }}
                   data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in-btn`}
                 />
               </div>

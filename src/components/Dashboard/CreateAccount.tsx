@@ -24,14 +24,14 @@ const StyledCreateButton = styled(Button)(() => ({
 }));
 
 const StyledSignInLink = styled(Link)(({}) => ({
-  color: 'rgba(255, 255, 255, 0.66)',
+  color: 'black',
   textDecoration: 'none',
   cursor: 'pointer',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   '&:hover': {
-    color: 'rgba(255, 255, 255, 1)',
+    color: 'gray',
   },
 }));
 
@@ -106,7 +106,14 @@ const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
 
           <Stack direction="row" spacing={2} mt={2} alignItems="center">
             <CreateAccountButton />
-            <SignInButton />
+            <SignInButton
+              sx={{
+                color: 'white',
+                '&:hover': {
+                  color: 'gray',
+                },
+              }}
+            />
           </Stack>
         </Box>
       </CardContent>

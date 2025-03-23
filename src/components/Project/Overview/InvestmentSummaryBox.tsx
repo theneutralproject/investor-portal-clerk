@@ -223,14 +223,6 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
                 <SignInButton
                   variant="text"
                   data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-in-btn`}
-                  sx={{
-                    borderColor: 'text.primary',
-                    color: 'text.primary',
-                    '&:hover': {
-                      borderColor: 'text.primary',
-                      bgcolor: 'rgba(0, 0, 0, 0.04)',
-                    },
-                  }}
                 />
               </div>
             </Stack>

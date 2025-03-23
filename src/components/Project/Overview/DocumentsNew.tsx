@@ -233,14 +233,6 @@ const LoginOverlay = () => {
             <SignInButton
               variant="text"
               data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in-btn`}
-              sx={{
-                borderColor: 'text.primary',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'text.primary',
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
             />
           </div>
         </Stack>
