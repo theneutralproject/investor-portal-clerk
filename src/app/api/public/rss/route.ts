@@ -5,14 +5,12 @@ import pino from 'pino';
 
 const logger = pino({ name: 'rss-api' });
 
-// RSS feed URLs
 const PODCAST_RSS_URL = 'https://www.neutral.us/podcast/rss.xml';
 const BLOG_RSS_URL = 'https://www.neutral.us/learn/rss.xml';
 
 // Cache duration (1 hour in seconds)
 const CACHE_DURATION = 60 * 60;
 
-// RSS parser instance
 const parser = new Parser<{
   item: {
     'media:content'?: Array<{$: {url: string}}>;
@@ -123,7 +121,6 @@ async function fetchAllRSSFeeds(): Promise<NewsItem[]> {
       return rssCache.data;
     }
 
-    // Fetch both feeds in parallel
     const [blogItems, podcastItems] = await Promise.all([
       parseRSSFeed(BLOG_RSS_URL, 'blog'),
       parseRSSFeed(PODCAST_RSS_URL, 'podcast'),
