@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Button, Grid, Stack, Typography } from '@mui/material';
-import Link from 'next/link';
+import { Box, Grid, Stack, Typography } from '@mui/material';
+import { CreateAccountButton, SignInButton } from './CreateAccount';
 
 import {
   ComposedChart,
@@ -264,25 +264,15 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               to discover innovative, sustainable, and regenerative development
               solutions. Sign in or create your account to get started.
             </Typography>
-            <Stack direction="row" spacing={2}>
-              <Link
-                href="/login"
-                passHref
-                data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up`}
-              >
-                <Button
+            <Stack direction="row" spacing={2} alignItems="center">
+              <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up`}>
+                <CreateAccountButton
                   variant="neutralYellow"
                   data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up-btn`}
-                >
-                  CREATE ACCOUNT
-                </Button>
-              </Link>
-              <Link
-                href="/login"
-                passHref
-                data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in`}
-              >
-                <Button
+                />
+              </div>
+              <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in`}>
+                <SignInButton
                   variant="text"
                   sx={{
                     borderColor: 'text.primary',
@@ -293,10 +283,8 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
                     },
                   }}
                   data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-in-btn`}
-                >
-                  SIGN IN
-                </Button>
-              </Link>
+                />
+              </div>
             </Stack>
           </Stack>
         </Box>

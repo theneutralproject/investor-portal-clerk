@@ -1,8 +1,11 @@
 import React from 'react';
-import { Box, Grid, Typography, Divider, Button, Stack } from '@mui/material';
+import { Box, Grid, Typography, Divider, Stack } from '@mui/material';
 import type { ProjectWithAllNestedData, ProjectWithStats } from '@/libs/types';
 import type { ProjectInvestmentStats } from '@prisma/client';
-import Link from 'next/link';
+import {
+  CreateAccountButton,
+  SignInButton,
+} from '@/components/Dashboard/CreateAccount';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import {
   displayDebtInterest,
@@ -209,25 +212,15 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
             >
               Create an account or sign in to view exclusive investment details.
             </Typography>
-            <Stack direction="row" spacing={2}>
-              <Link
-                href="/login"
-                passHref
-                data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up`}
-              >
-                <Button
+            <Stack direction="row" spacing={2} alignItems="center">
+              <div data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up`}>
+                <CreateAccountButton
                   variant="neutralYellow"
                   data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up-btn`}
-                >
-                  CREATE ACCOUNT
-                </Button>
-              </Link>
-              <Link
-                href="/login"
-                passHref
-                data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-in`}
-              >
-                <Button
+                />
+              </div>
+              <div data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-in`}>
+                <SignInButton
                   variant="text"
                   data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-in-btn`}
                   sx={{
@@ -238,10 +231,8 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
                       bgcolor: 'rgba(0, 0, 0, 0.04)',
                     },
                   }}
-                >
-                  SIGN IN
-                </Button>
-              </Link>
+                />
+              </div>
             </Stack>
           </Stack>
         </Box>
