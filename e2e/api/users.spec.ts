@@ -60,6 +60,10 @@ test.describe('api/users test', () => {
     expect(body.email).toBe(process.env.E2E_CLERK_USER_USERNAME);
     expect(body.firstName).toBe('Johnny');
     expect(body.ssn).toBe('***-**-6789');
+
+    await request.put('/api/users', {
+      data: { firstName: 'Testi' },
+    });
   });
 
   // put user with address should return updated user with a new address

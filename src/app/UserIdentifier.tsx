@@ -15,6 +15,7 @@ import Logger from '@/libs/logger';
  * - Fetching user data from the backend
  * - Redirecting users to `/referral` if they have no referral source
  * - Managing terms acceptance state in the application
+ * - Sending a GTM event when a user logs in via clerk_db_jwt
  *
  * @component
  */

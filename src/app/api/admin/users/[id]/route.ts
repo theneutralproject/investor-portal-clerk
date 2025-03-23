@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { UserUpdateSchema, zUserUpdateSchema } from '@/libs/user/schema';
@@ -8,6 +9,7 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
+import { DealStatus } from '@prisma/client';
 import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
@@ -30,61 +32,73 @@ export async function GET(request: NextRequest) {
     return errorResponse(`userId is required in url`, 500, { request });
   }
   try {
-    const detailedUser = await prisma.user.findUnique({
+    // get the user
+    const user = await prisma.user.findUnique({
       where: { id: userId },
+      include: { address: true },
+    });
+
+    const organizations = await prisma.organization.findMany({
+      where: { members: { some: { userId } } },
       select: {
         id: true,
-        firstName: true,
-        lastName: true,
-        email: true,
-        phoneNumber: true,
-        role: true,
-        hubspotId: true,
-        referralSource: true,
-        ssn: true,
-        dateOfBirth: true,
-        dateCreated: true,
-        address: true,
-        organizationMember: {
+        name: true,
+        tin: true,
+        ownershipType: true,
+        isPrimary: true,
+        deals: {
+          where: { dealStage: { not: DealStage.CLOSED_LOST } },
           select: {
-            type: true,
-            organization: {
+            id: true,
+          },
+        },
+        address: true,
+        members: {
+          select: {
+            user: {
               select: {
+                firstName: true,
+                lastName: true,
+                email: true,
                 id: true,
-                name: true,
-                address: true,
-                tin: true,
-                isPrimary: true,
-                ownershipType: true,
-                deals: {
-                  select: {
-                    id: true,
-                    transactionId: true,
-                    dealStage: true,
-                    document: true,
-                    hubspotId: true,
-                    investmentEntity: true,
-                    closingDate: true,
-                    signaturesCompletedDate: true,
-                    project: {
-                      select: {
-                        id: true,
-                        name: true,
-                        pictures: {
-                          where: { type: 'CARD' },
-                        },
-                      },
-                    },
-                    investmentStats: true,
-                  },
-                },
               },
+            },
+            type: true,
+            title: true,
+            id: true,
+          },
+        },
+      },
+    });
+
+    const deals = await prisma.deal.findMany({
+      where: {
+        organizationId: { in: organizations.map(org => org.id) },
+        status: DealStatus.ACTIVE,
+        dealStage: { not: DealStage.CLOSED_LOST },
+      },
+      select: {
+        investmentStats: true,
+        id: true,
+        transactionId: true,
+        dealStage: true,
+        closingDate: true,
+        dateUpdated: true,
+        dateCreated: true,
+        organizationId: true,
+        project: {
+          select: {
+            id: true,
+            name: true,
+            pictures: {
+              where: { type: 'CARD' },
             },
           },
         },
       },
     });
-    return jsonResponse(detailedUser);
+
+    return jsonResponse({ user, deals, organizations });
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500, {
       request,

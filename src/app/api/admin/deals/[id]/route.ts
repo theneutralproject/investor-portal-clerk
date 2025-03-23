@@ -1,3 +1,4 @@
+import { createInvestmentCompletedActivityItem } from '@/libs/activityFeedItem/utils.server';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { DealStage, DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
@@ -198,6 +199,19 @@ export async function PUT(request: NextRequest) {
   if (!deal) {
     return errorResponse(`Deal id ${dealId} not found`, 404, { request });
   }
+
+  if (putData.dealStage === DealStage.CLOSED) {
+    await createInvestmentCompletedActivityItem({
+      itemId: deal.id,
+      userId: deal.organization.ownerId,
+      closingDate: deal.closingDate!,
+      dateCreated: deal.dateCreated,
+      financingType: deal.investmentStats?.financingType,
+      projectName: deal.project.name,
+      projectSlug: deal.project.slug,
+    });
+  }
+
   try {
     const {
       investmentStats,

@@ -1,6 +1,10 @@
 'use server';
 import prisma from '@/libs/prisma.server';
-import { errorResponse, jsonResponse } from '@/libs/utils.server';
+import {
+  errorResponse,
+  getErrorMessage,
+  jsonResponse,
+} from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 import { getUserAndOrg } from '../helpers';
 import { isNumber } from 'lodash';
@@ -199,16 +203,24 @@ export async function PUT(request: NextRequest) {
         });
       }
       return jsonResponse(updatedMember);
-    } catch (updateError) {
-      return errorResponse('The member could not be updated', 400, {
-        request,
-        extra: { error: updateError },
-      });
+    } catch (error) {
+      return errorResponse(
+        `The member could not be updated: ${getErrorMessage(error)}`,
+        400,
+        {
+          request,
+          extra: { error: getErrorMessage(error) },
+        }
+      );
     }
-  } catch (error: unknown) {
-    return errorResponse('The member could not be updated', 500, {
-      request,
-      extra: { error },
-    });
+  } catch (error) {
+    return errorResponse(
+      `The member could not be updated2: ${getErrorMessage(error)}`,
+      500,
+      {
+        request,
+        extra: { error: getErrorMessage(error) },
+      }
+    );
   }
 }

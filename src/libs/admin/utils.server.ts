@@ -6,6 +6,7 @@ import { DealDocumentType, MembershipType, Role } from '@prisma/client';
 import { type MatchResponseObject, MatchConfidence } from './schema';
 import { storageClient } from '../supabase';
 import type { DealWithFullOrgAndSlimProject } from '../types';
+import Logger from '../logger';
 
 // eslint-disable-next-line
 const PdfParse = require('pdf-parse');
@@ -260,15 +261,18 @@ export async function createDocumentEntry(
   dealDocumentType?: DealDocumentType,
   taxYear?: number
 ) {
-  console.log('Creating document entry:', {
-    documentType,
-    id,
-    name,
-    path,
-    key,
-    userId,
-    dealDocumentType,
-    taxYear,
+  Logger.log({
+    message: 'Creating document entry:',
+    extra: {
+      documentType,
+      id,
+      name,
+      path,
+      key,
+      userId,
+      dealDocumentType,
+      taxYear,
+    },
   });
   try {
     if (documentType === 'deal') {
@@ -300,7 +304,9 @@ export async function createDocumentEntry(
       });
     }
   } catch (error) {
-    console.error('Error creating document entry:', error);
+    Logger.error(error, null, {
+      message: `Error creating document entry: ${(error as Error).message}`,
+    });
     throw error;
   }
 }

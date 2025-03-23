@@ -16,6 +16,7 @@ import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
 import { ReferralSource } from '@/libs/hubspot/utils.client';
 import { useRedirect } from '@/app/context/RedirectContext';
+import { sendGTMEvent } from '@next/third-parties/google';
 
 const normalizeLabel = (label: string) => {
   return label
@@ -35,6 +36,13 @@ function ReferralForm() {
   const { doRedirect } = useRedirect();
 
   const updateUserAndHubspot = async (source: ReferralSource) => {
+    sendGTMEvent({
+      userId: user?.id,
+      eventCategory: 'Account',
+      event: 'Account Signup',
+      eventLabel: `New Account Signup by ${user?.primaryEmailAddress?.emailAddress?.toString()}`,
+    });
+
     try {
       const email =
         user?.primaryEmailAddress?.emailAddress ??

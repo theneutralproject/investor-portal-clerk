@@ -266,7 +266,6 @@ export const DashboardDealConversionModal: React.FC<
                     <StyledTableCell>Effective Date</StyledTableCell>
                     <StyledTableCell>End Date</StyledTableCell>
                     <StyledTableCell>Investment Principal</StyledTableCell>
-                    <StyledTableCell>Distributions</StyledTableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -285,11 +284,6 @@ export const DashboardDealConversionModal: React.FC<
                       <TableCell>{row.endDate}</TableCell>
                       <TableCell>
                         {formatCurrency(row.investmentPrincipal)}
-                      </TableCell>
-                      <TableCell>
-                        {row.distributions !== null
-                          ? formatCurrency(row.distributions)
-                          : '-'}
                       </TableCell>
                     </TableRow>
                   ))}
