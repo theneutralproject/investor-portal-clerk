@@ -7,4 +7,5 @@ export const COMPLETE_INVESTMENT = 'complete-investment';
 export const INVESTMENT_SUMMARY_TEST_ID = 'investment-summary';
 export const CUSTOM_TOOLTIP_TEST_ID = 'custom-tooltip';
 export const DASHBOARD_PROJECTS_TEST_ID = 'dashboard-projects';
+export const DASHBOARD_NEWS_TEST_ID = 'dashboard-news';
 export const DASHBOARD_PAGE_BANNER_TEST_ID = 'dashboard-page-banner';
