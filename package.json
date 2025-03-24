@@ -75,6 +75,7 @@
     "react-share": "^5.1.0",
     "react-toastify": "^11.0.5",
     "recharts": "^2.13.0",
+    "rss-parser": "^3.13.0",
     "server-only": "^0.0.1",
     "styled-components": "^6.1.8",
     "svix": "^1.21.0",

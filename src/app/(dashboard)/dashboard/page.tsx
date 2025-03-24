@@ -18,6 +18,7 @@ import CreateAccount from '@/components/Dashboard/CreateAccount';
 import DashboardProjects from '@/components/Dashboard/DashboardProjects';
 import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 import DashboardDeals from '@/components/Dashboard/DashboardDeals';
+import DashboardNews from '@/components/Dashboard/DashboardNews';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
@@ -71,6 +72,7 @@ const DashboardPage = () => {
               </CardContent>
             </Card>
             <DashboardProjects projects={projects ?? []} />
+            <DashboardNews />
           </Box>
         </Grid>
 
