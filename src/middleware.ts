@@ -8,6 +8,7 @@ const publicRoutes = [
   '/contact',
   '/dashboard',
   '/projects/(.*)',
+  '/api/public/rss',
 ];
 
 const ignoredRoutes = [
@@ -18,6 +19,7 @@ const ignoredRoutes = [
   '/api/finix/webhooks',
   '/api/clerk',
   '/api/public/projects',
+  '/api/hubspot/token',
 ];
 
 const isIgnoredRoute = createRouteMatcher(ignoredRoutes);

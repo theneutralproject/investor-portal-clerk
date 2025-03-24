@@ -1,4 +1,5 @@
 'use client';
+import { useHubspot } from '@/app/hooks/useHubspot';
 import { createContext, useContext, useEffect, useState } from 'react';
 
 interface HubspotChatContextType {
@@ -19,6 +20,7 @@ export function HubspotChatProvider({
   children: React.ReactNode;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const { isLoading: isLoadingToken, hubspotData } = useHubspot(isLoaded);
 
   useEffect(() => {
     const checkWidget = () => {
@@ -34,6 +36,9 @@ export function HubspotChatProvider({
         if (checkWidget()) return;
         return;
       }
+
+      // Set HubSpot visitor identification before widget loads
+      window.hsConversationsSettings = hubspotData;
 
       const script = document.createElement('script');
       script.src = '//js.hs-scripts.com/24164917.js';
@@ -54,8 +59,10 @@ export function HubspotChatProvider({
       document.body.appendChild(script);
     };
 
-    loadHubSpot();
-  }, []);
+    if (!isLoadingToken) {
+      loadHubSpot();
+    }
+  }, [hubspotData, isLoadingToken]);
 
   const openChat = () => {
     if (!window.HubSpotConversations?.widget) return;
