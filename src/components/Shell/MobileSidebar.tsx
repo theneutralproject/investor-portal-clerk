@@ -53,8 +53,7 @@ const MobileSidebar = props => {
 
   const handleSignOut = () => {
     posthog.reset();
-    window.HubSpotConversations?.widget?.remove();
-    window.HubSpotConversations?.clear();
+    window.hsConversationsSettings = {};
     void signOut();
   };
 

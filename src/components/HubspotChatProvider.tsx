@@ -1,4 +1,5 @@
 'use client';
+
 import { useHubspot } from '@/app/hooks/useHubspot';
 import { createContext, useContext, useEffect, useState } from 'react';
 
@@ -20,49 +21,50 @@ export function HubspotChatProvider({
   children: React.ReactNode;
 }) {
   const [isLoaded, setIsLoaded] = useState(false);
-  const { isLoading: isLoadingToken, hubspotData } = useHubspot(isLoaded);
+  const { isLoading: isLoadingToken, hubspotData } = useHubspot();
 
   useEffect(() => {
-    const checkWidget = () => {
-      if (window.HubSpotConversations?.widget) {
-        setIsLoaded(true);
-        return true;
-      }
-      return false;
+    if (!hubspotData || isLoadingToken) return;
+
+    // Prevent duplicate script load
+    if (document.getElementById('hs-script-loader')) return;
+
+    window.hsConversationsSettings = {
+      loadImmediately: false,
     };
 
-    const loadHubSpot = () => {
-      if (document.getElementById('hs-script-loader')) {
-        if (checkWidget()) return;
-        return;
-      }
+    const script = document.createElement('script');
+    script.src = '//js.hs-scripts.com/24164917.js';
+    script.async = true;
+    script.defer = true;
+    script.id = 'hs-script-loader';
 
-      // Set HubSpot visitor identification before widget loads
-      window.hsConversationsSettings = hubspotData;
-
-      const script = document.createElement('script');
-      script.src = '//js.hs-scripts.com/24164917.js';
-      script.async = true;
-      script.defer = true;
-      script.id = 'hs-script-loader';
-
-      script.addEventListener('load', () => {
-        const checkInterval = setInterval(() => {
-          if (checkWidget()) {
-            clearInterval(checkInterval);
-          }
-        }, 100);
-
-        setTimeout(() => clearInterval(checkInterval), 10000);
-      });
-
-      document.body.appendChild(script);
+    // Monitor script and widget readiness
+    script.onload = () => {
+      const checkInterval = setInterval(() => {
+        if (window.HubSpotConversations?.widget) {
+          setIsLoaded(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+      setTimeout(() => clearInterval(checkInterval), 10000);
     };
 
-    if (!isLoadingToken) {
-      loadHubSpot();
+    if (!window.HubSpotConversations) {
+      window.hsConversationsOnReady = [
+        () => {
+          window.hsConversationsSettings = {
+            loadImmediately: true,
+            identificationEmail: hubspotData?.identificationEmail,
+            identificationToken: hubspotData?.identificationToken,
+          };
+          window.HubSpotConversations.widget.load();
+        },
+      ];
     }
-  }, [hubspotData, isLoadingToken]);
+
+    document.body.appendChild(script);
+  }, [isLoadingToken, hubspotData]);
 
   const openChat = () => {
     if (!window.HubSpotConversations?.widget) return;

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
   }
 
   const res = await fetch(
-    'https://api.hubapi.com/conversations/v3/visitor-identification/tokens/create',
+    'https://api.hubspot.com/conversations/v3/visitor-identification/tokens/create',
     {
       method: 'POST',
       headers: {

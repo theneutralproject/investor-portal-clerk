@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-export const useHubspot = (enabled: boolean) => {
+export const useHubspot = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hubspotData, setHubspotData] = useState<{
     loadImmediately?: boolean;
@@ -30,10 +30,6 @@ export const useHubspot = (enabled: boolean) => {
         return;
       }
 
-      window.hsConversationsSettings = {
-        loadImmediately: false,
-      };
-
       setHubspotData({
         identificationEmail: data.email,
         identificationToken: data.token,
@@ -41,10 +37,8 @@ export const useHubspot = (enabled: boolean) => {
       });
     };
 
-    if (enabled) {
-      loadHubspot();
-    }
-  }, [enabled]);
+    loadHubspot();
+  }, []);
 
   return {
     isLoading,

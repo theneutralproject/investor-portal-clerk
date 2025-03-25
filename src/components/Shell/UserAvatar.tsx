@@ -27,6 +27,7 @@ const UserAvatar = () => {
 
   const handleSignOut = () => {
     posthog.reset();
+    window.hsConversationsSettings = {};
     void signOut();
   };
 
