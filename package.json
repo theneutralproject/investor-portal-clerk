@@ -121,7 +121,7 @@
     "lint-staged": "^15.4.3",
     "next-test-api-route-handler": "^4.0.7",
     "prettier": "^3.5.3",
-    "prisma": "^6.1.0",
+    "prisma": "^6.5.0",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.1",
     "typescript": "^5.4.2",
