@@ -36,7 +36,7 @@ const DocumentTabToValue: { [x: number]: DocumentType } = {
 
 const routes = {
   investment: '/documents/investor',
-  tax: '/documents/tax-doc',
+  tax: '/documents/tax',
 };
 
 const DocumentsContent = ({ type }: { type: DocumentType }) => {
