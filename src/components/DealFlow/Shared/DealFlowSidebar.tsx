@@ -48,7 +48,7 @@ const DealFlowSidebar = () => {
             />
             <Box>
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                {project?.name}
+                {project?.displayName}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {project?.location}
