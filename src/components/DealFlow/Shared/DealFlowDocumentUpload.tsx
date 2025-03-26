@@ -68,7 +68,12 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   const handleFileUpload = useCallback(
     async (key: string, file: File, formData: FormData): Promise<void> => {
       try {
-        const response = await fetch('/api/documents', {
+        if (file.size > 26 * 1024 * 1024) {
+          throw new Error('File exceeds 26MB limit');
+        }
+
+        // Step 1: Request a pre-signed upload URL from backend
+        const response = await fetch('/api/documents/signed-url', {
           method: 'POST',
           body: formData,
         });
@@ -77,6 +82,33 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
 
         if (!response.ok) {
           throw new Error(responseData?.error || 'Upload failed');
+        }
+
+        const { uploadUrl } = responseData;
+        if (!uploadUrl) throw new Error('Failed to get upload URL');
+
+        // Step 2: Upload file directly to Supabase Storage
+        const uploadRes = await fetch(uploadUrl, {
+          method: 'PUT',
+          body: file,
+          headers: { 'Content-Type': file.type },
+        });
+
+        if (!uploadRes.ok) {
+          throw new Error('Operation failed while trying to upload document');
+        }
+
+        // Step 3: Store file metadata in the database
+        const storeMetaDataResponse = await fetch(
+          '/api/documents/store-metadata',
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        if (!storeMetaDataResponse.ok) {
+          throw new Error('Upload failed while trying to store document');
         }
 
         setUploadState(prev => ({

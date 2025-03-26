@@ -7,6 +7,7 @@ import prisma from '@/libs/prisma.server';
 import { zPdfDocumentCreateSchema } from '@/libs/document/schema';
 import { validateAccess } from '@/libs/document/utils.server';
 import { UserWithOrganizations } from '@/libs/types';
+import { getFileDetails } from '@/libs/admin/utils.server';
 
 export async function POST(request: NextRequest) {
   const { userId } = getAuth(request);
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { type, organizationId, dealId, key } = validationResult.data;
+  const { type, organizationId, dealId, file } = validationResult.data;
 
   const id = type === 'deal' ? dealId : organizationId;
   if (!id) {
@@ -60,9 +61,10 @@ export async function POST(request: NextRequest) {
 
   await validateAccess(dbUser, type, id);
 
-  const folder = `${type}/${id}`;
-  const bucketName = 'documents';
-  const fileName = key;
+  const folder = `${type}-${id}`;
+  const bucketName = `${type}-documents`;
+  const fileDetails = getFileDetails(file);
+  const fileName = fileDetails.name;
 
   const { data, error } = await storageClient
     .from(bucketName)
