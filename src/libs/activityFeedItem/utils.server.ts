@@ -21,6 +21,7 @@ export interface DealDocumentActivityItemCreate {
 export const createInvestmentCompletedActivityItem = async (
   deal: DealActivityItemCreate
 ) => {
+  const closingDate = deal.closingDate || new Date();
   return await prisma.activityFeedItem.upsert({
     where: {
       activity_user_item_type: {
@@ -33,7 +34,7 @@ export const createInvestmentCompletedActivityItem = async (
     create: {
       userId: deal.userId,
       header: 'Investment Completed',
-      body: `You successfully initiated an ${_.startCase(deal.financingType || '')} investment into ${deal.projectName} on ${deal.closingDate?.toDateString()}.`,
+      body: `You successfully initiated an ${_.startCase(deal.financingType || '')} investment into ${deal.projectName} on ${closingDate?.toDateString()}.`,
       type: ActivityType.NEW_INVESTMENT,
       dateCreated: deal.dateCreated!,
       link: `/projects/${deal.projectSlug}`,

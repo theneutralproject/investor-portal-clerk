@@ -53,6 +53,7 @@ const MobileSidebar = props => {
 
   const handleSignOut = () => {
     posthog.reset();
+    window.hsConversationsSettings = {};
     void signOut();
   };
 

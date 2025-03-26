@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Box,
-  Button,
   Card,
   CardContent,
   Divider,
@@ -9,7 +8,10 @@ import {
   Typography,
   Skeleton,
 } from '@mui/material';
-import Link from 'next/link';
+import {
+  CreateAccountButton,
+  SignInButton,
+} from '@/components/Dashboard/CreateAccount';
 import { POSTHOG_EVENTS, type ProjectWithStats } from '@/libs/types';
 import useDocuments from '@/app/hooks/useDocuments';
 import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
@@ -220,39 +222,19 @@ const LoginOverlay = () => {
           Create an account or sign in to view documents such as Market Study,
           Tax Analysis, and Investment Deck.
         </Typography>
-        <Stack direction="row" spacing={2}>
-          <Link
-            href="/login"
-            passHref
-            data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up`}
-          >
-            <Button
+        <Stack direction="row" spacing={2} alignItems="center">
+          <div data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up`}>
+            <CreateAccountButton
               variant="neutralYellow"
               data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up-btn`}
-            >
-              CREATE ACCOUNT
-            </Button>
-          </Link>
-          <Link
-            href="/login"
-            passHref
-            data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in`}
-          >
-            <Button
+            />
+          </div>
+          <div data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in`}>
+            <SignInButton
               variant="text"
               data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in-btn`}
-              sx={{
-                borderColor: 'text.primary',
-                color: 'text.primary',
-                '&:hover': {
-                  borderColor: 'text.primary',
-                  bgcolor: 'rgba(0, 0, 0, 0.04)',
-                },
-              }}
-            >
-              SIGN IN
-            </Button>
-          </Link>
+            />
+          </div>
         </Stack>
       </Stack>
     </Box>

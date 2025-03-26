@@ -39,7 +39,7 @@ export const ROUTES = [
   },
   {
     name: 'Documents',
-    path: '/documents',
+    path: '/documents/investor',
     icon: DescriptionIcon,
     dataTestId: `${SIDEBAR_TEST_ID}-documents`,
   },
@@ -132,7 +132,11 @@ export default function Sidebar(props: { children: React.ReactNode }) {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const isActiveRoute = (routePath: string) => {
-    return pathName.includes(routePath);
+    const rootPath = routePath.split('/')[1];
+    return (
+      pathName.includes(routePath) ||
+      (rootPath && pathName.startsWith(`/${rootPath}`))
+    );
   };
 
   if (isMobile) {

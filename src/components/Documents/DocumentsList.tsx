@@ -1,10 +1,7 @@
-'use client';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   Box,
   Typography,
-  Tabs,
-  Tab,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -15,11 +12,9 @@ import {
   TableHead,
   TableRow,
   CircularProgress,
-  Alert,
   Card,
   CardContent,
 } from '@mui/material';
-import { useQuery } from '@tanstack/react-query';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import FileDownloadIcon from '@mui/icons-material/FileDownload';
 import { format } from 'date-fns';
@@ -47,11 +42,6 @@ interface Document {
   taxYear: number | null;
   projectName: string;
   downloadUrl: string;
-}
-
-interface DocumentsResponse {
-  taxDocuments: Document[];
-  investmentDocuments: Document[];
 }
 
 const handleDownload = async (downloadUrl: string, fileName: string) => {
@@ -243,72 +233,4 @@ const DocumentList = ({
   );
 };
 
-const DocumentsPage = () => {
-  const [tabValue, setTabValue] = useState(0);
-
-  const { data, error, isLoading } = useQuery<DocumentsResponse>({
-    queryKey: ['documents'],
-    queryFn: () => fetch('/api/documents/deal').then(res => res.json()),
-  });
-
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Documents
-      </Typography>
-
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          TabIndicatorProps={{
-            style: {
-              backgroundColor: '#1c5e20',
-            },
-          }}
-          sx={{
-            '& .MuiTab-root': {
-              color: 'text.secondary',
-              '&.Mui-selected': {
-                color: '#1c5e20',
-              },
-            },
-          }}
-        >
-          <Tab label="INVESTMENT DOCS" />
-
-          <Tab label="TAX DOCS" />
-        </Tabs>
-      </Box>
-
-      {error ? (
-        <Alert severity="error">
-          Error loading documents. Please try again later.
-        </Alert>
-      ) : (
-        <>
-          {tabValue === 0 && (
-            <DocumentList
-              documents={data?.investmentDocuments ?? []}
-              isLoading={isLoading}
-              type="investment"
-            />
-          )}
-          {tabValue === 1 && (
-            <DocumentList
-              documents={data?.taxDocuments ?? []}
-              isLoading={isLoading}
-              type="tax"
-            />
-          )}
-        </>
-      )}
-    </Box>
-  );
-};
-
-export default DocumentsPage;
+export default DocumentList;

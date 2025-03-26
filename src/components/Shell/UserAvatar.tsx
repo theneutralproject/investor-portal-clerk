@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useClerk, useUser } from '@clerk/nextjs';
-import { Avatar, Menu, MenuItem, IconButton, Button, Box } from '@mui/material';
+import { Avatar, Menu, MenuItem, IconButton, Box } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PolicyIcon from '@mui/icons-material/Policy';
 import posthog from 'posthog-js';
 import Link from 'next/link';
+import {
+  CreateAccountButton,
+  SignInButton,
+} from '@/components/Dashboard/CreateAccount';
 import { USER_AVATAR_TEST_ID } from 'e2e/testIds';
 
 const UserAvatar = () => {
@@ -23,6 +27,7 @@ const UserAvatar = () => {
 
   const handleSignOut = () => {
     posthog.reset();
+    window.hsConversationsSettings = {};
     void signOut();
   };
 
@@ -34,25 +39,20 @@ const UserAvatar = () => {
 
   if (!user) {
     return (
-      <Box sx={{ display: 'flex', gap: 2 }} data-testid={USER_AVATAR_TEST_ID}>
-        <Link
-          href="/login"
-          passHref
-          data-testid={`${USER_AVATAR_TEST_ID}-sign-up`}
-        >
-          <Button
+      <Box
+        sx={{ display: 'flex', gap: 2, alignItems: 'center' }}
+        data-testid={USER_AVATAR_TEST_ID}
+      >
+        <div data-testid={`${USER_AVATAR_TEST_ID}-sign-up`}>
+          <CreateAccountButton
             variant="neutralYellow"
             data-testid={`${USER_AVATAR_TEST_ID}-sign-up-btn`}
           >
             Create account
-          </Button>
-        </Link>
-        <Link
-          href="/login"
-          passHref
-          data-testid={`${USER_AVATAR_TEST_ID}-sign-in`}
-        >
-          <Button
+          </CreateAccountButton>
+        </div>
+        <div data-testid={`${USER_AVATAR_TEST_ID}-sign-in`}>
+          <SignInButton
             variant="text"
             sx={{
               borderColor: 'white',
@@ -65,8 +65,8 @@ const UserAvatar = () => {
             data-testid={`${USER_AVATAR_TEST_ID}-sign-in-btn`}
           >
             Sign in
-          </Button>
-        </Link>
+          </SignInButton>
+        </div>
       </Box>
     );
   }
