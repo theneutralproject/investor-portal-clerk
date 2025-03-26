@@ -38,9 +38,8 @@ const RecentActivity: React.FC = () => {
         }
 
         const data: ActivityItem[] = await response.json();
-        console.log('data', data);
 
-        setActivities([data[0], data[0], data[0], data[0], data[0]]);
+        setActivities(data);
         setError(null);
       } catch (err) {
         setError('Failed to load activities');
@@ -53,7 +52,6 @@ const RecentActivity: React.FC = () => {
     fetchActivities();
   }, []);
 
-  // Format date to match the design
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const month = date.toLocaleString('default', { month: 'short' });
