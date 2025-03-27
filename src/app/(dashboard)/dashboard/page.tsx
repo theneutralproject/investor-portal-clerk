@@ -23,6 +23,7 @@ import { theme } from '@/components/Shell/NeutralThemeProvider';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { DealStage } from '@/libs/deal/schema';
+import RecentActivity from '@/components/Dashboard/RecentActivity';
 const DashboardPage = () => {
   const { loggedIn, user, projects, deals, isLoading } = useDashboard();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -85,6 +86,7 @@ const DashboardPage = () => {
               />
             )}
             <InvestingWithNeutral />
+            <RecentActivity />
             <Questions />
           </Box>
         </Grid>

@@ -44,7 +44,7 @@ const DealFlowHeader = () => {
     >
       <Toolbar>
         <Typography variant="body1" sx={{ flexGrow: 1, color: '#00000099' }}>
-          {project?.name || 'Neutral'}
+          {project?.displayName || 'Neutral'}
           <span style={{ color: '#000000DE' }}> / Invest</span>
         </Typography>
       </Toolbar>
