@@ -9,6 +9,9 @@ import { validateAccess } from '@/libs/document/utils.server';
 import { UserWithOrganizations } from '@/libs/types';
 import { getFileDetails } from '@/libs/admin/utils.server';
 
+const STORAGE_URL = process.env.SUPABASE_STORAGE_URL;
+const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
 export async function POST(request: NextRequest) {
   const { userId } = getAuth(request);
   if (!userId) {
@@ -75,6 +78,10 @@ export async function POST(request: NextRequest) {
   }
 
   return jsonResponse({
+    t: SERVICE_KEY,
+    u: STORAGE_URL,
+    bucketName,
+    fileName,
     uploadUrl: data.signedUrl,
     filePath: `${folder}/${fileName}`,
   });

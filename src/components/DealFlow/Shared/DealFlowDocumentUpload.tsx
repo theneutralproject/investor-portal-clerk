@@ -17,6 +17,7 @@ import {
   type DealDocument,
   type DealDocumentType,
 } from '@prisma/client';
+import { uploadResumableFile } from '@/libs/document/utils.client';
 
 type UploadStatus = 'uploading' | 'success' | 'error';
 type DocumentType = 'organization' | 'deal';
@@ -84,19 +85,17 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           throw new Error(responseData?.error || 'Upload failed');
         }
 
-        const { uploadUrl } = responseData;
+        const { uploadUrl, t, bucketName, u, fileName } = responseData;
         if (!uploadUrl) throw new Error('Failed to get upload URL');
 
         // Step 2: Upload file directly to Supabase Storage
-        const uploadRes = await fetch(uploadUrl, {
-          method: 'PUT',
-          body: file,
-          headers: { 'Content-Type': file.type },
+        await uploadResumableFile({
+          bucketName,
+          token: t,
+          url: u,
+          fileName,
+          file,
         });
-
-        if (!uploadRes.ok) {
-          throw new Error('Operation failed while trying to upload document');
-        }
 
         // Step 3: Store file metadata in the database
         const storeMetaDataResponse = await fetch(
