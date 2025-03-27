@@ -4,7 +4,7 @@ import Logger from '../logger';
 
 interface IUploadResumableFile {
   bucketName: string;
-  fileName: string;
+  filePath: string;
   url: string;
   token: string;
   file: File;
@@ -12,7 +12,7 @@ interface IUploadResumableFile {
 
 export async function uploadResumableFile({
   bucketName,
-  fileName,
+  filePath,
   url,
   token,
   file,
@@ -37,8 +37,9 @@ export async function uploadResumableFile({
       removeFingerprintOnSuccess: false,
       metadata: {
         bucketName: bucketName,
-        objectName: fileName,
+        objectName: filePath,
         contentType: file.type,
+        cacheControl: '3600',
       },
       chunkSize: 5 * 1024 * 1024,
       onError: function (error) {

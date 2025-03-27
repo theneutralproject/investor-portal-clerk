@@ -104,7 +104,7 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           bucketName,
           token: t,
           url: u,
-          fileName,
+          filePath,
           file,
         });
 
