@@ -4,10 +4,9 @@ import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
 import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/libs/prisma.server';
-import { zPdfDocumentCreateSchema } from '@/libs/document/schema';
+import { zPdfDocumentNoFileCreateSchema } from '@/libs/document/schema';
 import { validateAccess } from '@/libs/document/utils.server';
 import { UserWithOrganizations } from '@/libs/types';
-import { getFileDetails } from '@/libs/admin/utils.server';
 
 const STORAGE_URL = process.env.SUPABASE_STORAGE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -26,17 +25,8 @@ export async function POST(request: NextRequest) {
     return errorResponse(`User record not found`, 404, { request });
   }
 
-  const formData = await request.formData();
-  const dataToValidate = {
-    type: formData.get('type'),
-    organizationId: formData.get('organizationId'),
-    dealId: formData.get('dealId'),
-    key: formData.get('key'),
-    file: formData.get('file'),
-    dealDocumentType: formData.get('dealDocumentType'),
-  };
-
-  const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
+  const payload = await request.json();
+  const validationResult = zPdfDocumentNoFileCreateSchema.safeParse(payload);
 
   if (!validationResult.success) {
     Logger.error('Validation errors:', request, {
@@ -51,7 +41,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { type, organizationId, dealId, file } = validationResult.data;
+  const { type, organizationId, dealId, fileName } = validationResult.data;
 
   const id = type === 'deal' ? dealId : organizationId;
   if (!id) {
@@ -66,8 +56,6 @@ export async function POST(request: NextRequest) {
 
   const folder = `${type}-${id}`;
   const bucketName = `${type}-documents`;
-  const fileDetails = getFileDetails(file);
-  const fileName = fileDetails.name;
 
   const { data, error } = await storageClient
     .from(bucketName)

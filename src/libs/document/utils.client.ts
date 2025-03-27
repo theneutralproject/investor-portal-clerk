@@ -1,4 +1,6 @@
 import * as tus from 'tus-js-client';
+import { createFileSchema } from './schema';
+import Logger from '../logger';
 
 interface IUploadResumableFile {
   bucketName: string;
@@ -15,6 +17,15 @@ export async function uploadResumableFile({
   token,
   file,
 }: IUploadResumableFile) {
+  const validationResult = createFileSchema().safeParse(file);
+
+  if (!validationResult.success) {
+    Logger.error('Validation errors:', null, {
+      validationError: validationResult.error,
+    });
+    return new Error(`Validation failed: ${validationResult.error.format()}`);
+  }
+
   return new Promise(async (resolve, reject) => {
     const upload = new tus.Upload(file, {
       endpoint: `${url}/upload/resumable`,

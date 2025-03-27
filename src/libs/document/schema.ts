@@ -9,7 +9,7 @@ const ACCEPTED_FILE_TYPES = [
   'image/jpeg',
 ] as const;
 
-const MAX_FILE_SIZE = 10; // In MegaBytes
+const MAX_FILE_SIZE = 12; // In MegaBytes
 
 const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
   const result = sizeInBytes / (1024 * 1024);
@@ -32,7 +32,7 @@ const hasFileProperties = (
 };
 
 // Generic file validation schema that works in both client and server contexts
-const createFileSchema = () =>
+export const createFileSchema = () =>
   z.custom<File | FormDataEntryValue>(file => {
     if (!file) {
       throw new Error('File is required');
@@ -88,6 +88,33 @@ export const zPdfDocumentCreateSchema = z.object({
   }),
   file: createFileSchema(),
   key: z.string(),
+  dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
+});
+
+// Schema for creating a single without file document
+export const zPdfDocumentNoFileCreateSchema = z.object({
+  dealId: z
+    .union([z.string(), z.number()])
+    .transform(val => {
+      if (!val) return null;
+      const num = Number(val);
+      return isNaN(num) ? null : num;
+    })
+    .nullable(),
+  organizationId: z
+    .union([z.string(), z.number()])
+    .transform(val => {
+      if (!val) return null;
+      const num = Number(val);
+      return isNaN(num) ? null : num;
+    })
+    .nullable(),
+  type: z.string().refine(val => ['organization', 'deal'].includes(val), {
+    message: "Type must be either 'organization' or 'deal'",
+  }),
+  key: z.string(),
+  fileName: z.string(),
+  filePath: z.string().optional(),
   dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
 });
 

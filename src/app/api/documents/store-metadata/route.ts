@@ -1,9 +1,5 @@
-import {
-  createDocumentEntry,
-  getFileDetails,
-  uploadFile,
-} from '@/libs/admin/utils.server';
-import { zPdfDocumentCreateSchema } from '@/libs/document/schema';
+import { createDocumentEntry } from '@/libs/admin/utils.server';
+import { zPdfDocumentNoFileCreateSchema } from '@/libs/document/schema';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { UserWithOrganizations } from '@/libs/types';
@@ -25,17 +21,8 @@ export async function POST(request: NextRequest) {
     return errorResponse(`User record not found`, 404, { request });
   }
 
-  const formData = await request.formData();
-  const dataToValidate = {
-    type: formData.get('type'),
-    organizationId: formData.get('organizationId'),
-    dealId: formData.get('dealId'),
-    key: formData.get('key'),
-    file: formData.get('file'),
-    dealDocumentType: formData.get('dealDocumentType'),
-  };
-
-  const validationResult = zPdfDocumentCreateSchema.safeParse(dataToValidate);
+  const payload = await request.json();
+  const validationResult = zPdfDocumentNoFileCreateSchema.safeParse(payload);
 
   if (!validationResult.success) {
     Logger.error('Validation errors:', request, {
@@ -50,8 +37,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { type, organizationId, dealId, file, key, dealDocumentType } =
-    validationResult.data;
+  const {
+    type,
+    organizationId,
+    dealId,
+    key,
+    dealDocumentType,
+    fileName,
+    filePath,
+  } = validationResult.data;
 
   const id = type === 'deal' ? dealId : organizationId;
   if (!id) {
@@ -62,14 +56,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const path = await uploadFile(file, type, id);
-
-  const fileDetails = getFileDetails(file);
   const newDocEntry = await createDocumentEntry(
     type,
     id,
-    fileDetails.name,
-    path,
+    fileName,
+    filePath || '',
     key,
     dbUser.id,
     dealDocumentType

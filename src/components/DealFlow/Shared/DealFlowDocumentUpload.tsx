@@ -76,7 +76,17 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
         // Step 1: Request a pre-signed upload URL from backend
         const response = await fetch('/api/documents/signed-url', {
           method: 'POST',
-          body: formData,
+          body: JSON.stringify({
+            type: formData.get('type'),
+            organizationId: formData.get('organizationId'),
+            dealId: formData.get('dealId'),
+            fileName: file.name,
+            key,
+            dealDocumentType: formData.get('dealDocumentType'),
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
         const responseData = await response.json();
@@ -85,7 +95,8 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           throw new Error(responseData?.error || 'Upload failed');
         }
 
-        const { uploadUrl, t, bucketName, u, fileName } = responseData;
+        const { uploadUrl, t, bucketName, u, fileName, filePath } =
+          responseData;
         if (!uploadUrl) throw new Error('Failed to get upload URL');
 
         // Step 2: Upload file directly to Supabase Storage
@@ -102,7 +113,18 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
           '/api/documents/store-metadata',
           {
             method: 'POST',
-            body: formData,
+            body: JSON.stringify({
+              type: formData.get('type'),
+              organizationId: formData.get('organizationId'),
+              dealId: formData.get('dealId'),
+              fileName,
+              path: filePath,
+              key,
+              dealDocumentType: formData.get('dealDocumentType'),
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
           }
         );
 
