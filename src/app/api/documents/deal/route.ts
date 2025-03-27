@@ -37,8 +37,34 @@ export async function GET(request: NextRequest) {
       include: { document: true, project: true },
     });
 
+    if (!dealsWithDocuments) {
+      return jsonResponse({ taxDocuments: [], investmentDocuments: [] });
+    }
+
+    const uniqueProjectIds = [
+      ...new Set(dealsWithDocuments.map(deal => deal.projectId)),
+    ];
+
+    const projectReports = await prisma.projectReport.findMany({
+      where: { projectId: { in: uniqueProjectIds } },
+      include: { project: true },
+    });
+
     const taxDocuments = [];
     const investmentDocuments = [];
+    for (const report of projectReports) {
+      const downloadUrl = await getSupabaseDownloadUrl(
+        report.path,
+        'project-reports'
+      );
+      const reportWithProjectName = {
+        ...report,
+        projectName: report.project?.name,
+        downloadUrl,
+        type: DealDocumentType.REPORT,
+      };
+      investmentDocuments.push(reportWithProjectName);
+    }
 
     for (const deal of dealsWithDocuments) {
       for (const doc of deal.document) {
