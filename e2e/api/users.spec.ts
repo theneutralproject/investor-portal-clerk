@@ -88,7 +88,18 @@ test.describe('api/users test', () => {
     expect(address!.street).toBe(addressData.street);
   });
 
-  test.afterEach(async ({ request }) => {
+  test.beforeEach(async ({ request }) => {
+    const response = await request.put('/api/users', {
+      data: { firstName: 'Testi', lastName: 'Tester' },
+    });
+    const body = await JSON.parse(await response.text());
+    expect(body.firstName).toBe('Testi');
+    if (body.address) {
+      await prisma.address.delete({ where: { id: body.address.id } });
+    }
+  });
+
+  test.afterAll(async ({ request }) => {
     const response = await request.put('/api/users', {
       data: { firstName: 'Testi', lastName: 'Tester' },
     });
