@@ -25,6 +25,7 @@ import { DealStage } from '@/libs/deal/schema';
 import { COMPLETE_INVESTMENT } from 'e2e/testIds';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
+  testId?: string;
 }
 
 const ProjectCard = styled(Box)(({ theme }) => ({
@@ -227,7 +228,10 @@ const CompletedDeal = ({ deal }: { deal: DealWithOrgMembersAndProject }) => {
     </Box>
   );
 };
-const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
+const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({
+  deals,
+  testId = COMPLETE_INVESTMENT,
+}) => {
   const router = useRouter();
   const posthog = usePostHog();
 
@@ -257,7 +261,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({ deals }) => {
         color: 'white',
         mb: 2,
       }}
-      data-testid={COMPLETE_INVESTMENT}
+      data-testid={testId}
     >
       <CardContent>
         <Typography
