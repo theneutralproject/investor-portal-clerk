@@ -301,6 +301,7 @@ model ProjectDocument {
 
 model ProjectReport {
   id          Int       @id @default(autoincrement())
+  name        String
   projectId   Int
   dateCreated DateTime  @default(now())
   dateUpdated DateTime? @updatedAt

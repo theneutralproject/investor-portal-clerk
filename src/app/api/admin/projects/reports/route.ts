@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
           quarter,
           year,
           path,
+          name,
         },
       });
       const activityCreateResult = await createActivityFeedItems(

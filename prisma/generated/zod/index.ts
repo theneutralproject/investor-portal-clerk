@@ -46,7 +46,7 @@ export const ProjectPictureScalarFieldEnumSchema = z.enum(['id','projectId','url
 
 export const ProjectDocumentScalarFieldEnumSchema = z.enum(['id','name','fileName','description','link','projectId','dealStage','financingTypes','documentType','docusignTemplateId','dateCreated','dateUpdated']);
 
-export const ProjectReportScalarFieldEnumSchema = z.enum(['id','projectId','dateCreated','dateUpdated','quarter','year','path']);
+export const ProjectReportScalarFieldEnumSchema = z.enum(['id','name','projectId','dateCreated','dateUpdated','quarter','year','path']);
 
 export const DocumentEventScalarFieldEnumSchema = z.enum(['id','userId','documentId','date','type','dateCreated','dateUpdated']);
 
@@ -510,6 +510,7 @@ export type ProjectDocument = z.infer<typeof ProjectDocumentSchema>
 
 export const ProjectReportSchema = z.object({
   id: z.number().int(),
+  name: z.string(),
   projectId: z.number().int(),
   dateCreated: z.coerce.date(),
   dateUpdated: z.coerce.date().nullable(),
@@ -1193,6 +1194,7 @@ export const ProjectReportArgsSchema: z.ZodType<Prisma.ProjectReportDefaultArgs>
 
 export const ProjectReportSelectSchema: z.ZodType<Prisma.ProjectReportSelect> = z.object({
   id: z.boolean().optional(),
+  name: z.boolean().optional(),
   projectId: z.boolean().optional(),
   dateCreated: z.boolean().optional(),
   dateUpdated: z.boolean().optional(),
@@ -3133,6 +3135,7 @@ export const ProjectReportWhereInputSchema: z.ZodType<Prisma.ProjectReportWhereI
   OR: z.lazy(() => ProjectReportWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectReportWhereInputSchema),z.lazy(() => ProjectReportWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -3144,6 +3147,7 @@ export const ProjectReportWhereInputSchema: z.ZodType<Prisma.ProjectReportWhereI
 
 export const ProjectReportOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectReportOrderByWithRelationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   dateUpdated: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -3161,6 +3165,7 @@ export const ProjectReportWhereUniqueInputSchema: z.ZodType<Prisma.ProjectReport
   AND: z.union([ z.lazy(() => ProjectReportWhereInputSchema),z.lazy(() => ProjectReportWhereInputSchema).array() ]).optional(),
   OR: z.lazy(() => ProjectReportWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectReportWhereInputSchema),z.lazy(() => ProjectReportWhereInputSchema).array() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -3172,6 +3177,7 @@ export const ProjectReportWhereUniqueInputSchema: z.ZodType<Prisma.ProjectReport
 
 export const ProjectReportOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectReportOrderByWithAggregationInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   dateUpdated: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
@@ -3190,6 +3196,7 @@ export const ProjectReportScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma
   OR: z.lazy(() => ProjectReportScalarWhereWithAggregatesInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectReportScalarWhereWithAggregatesInputSchema),z.lazy(() => ProjectReportScalarWhereWithAggregatesInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
   projectId: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -5202,6 +5209,7 @@ export const ProjectDocumentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Pro
 }).strict();
 
 export const ProjectReportCreateInputSchema: z.ZodType<Prisma.ProjectReportCreateInput> = z.object({
+  name: z.string(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional().nullable(),
   quarter: z.number().int(),
@@ -5212,6 +5220,7 @@ export const ProjectReportCreateInputSchema: z.ZodType<Prisma.ProjectReportCreat
 
 export const ProjectReportUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectReportUncheckedCreateInput> = z.object({
   id: z.number().int().optional(),
+  name: z.string(),
   projectId: z.number().int(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional().nullable(),
@@ -5221,6 +5230,7 @@ export const ProjectReportUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectRe
 }).strict();
 
 export const ProjectReportUpdateInputSchema: z.ZodType<Prisma.ProjectReportUpdateInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   quarter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5231,6 +5241,7 @@ export const ProjectReportUpdateInputSchema: z.ZodType<Prisma.ProjectReportUpdat
 
 export const ProjectReportUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectReportUncheckedUpdateInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   projectId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -5241,6 +5252,7 @@ export const ProjectReportUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectRe
 
 export const ProjectReportCreateManyInputSchema: z.ZodType<Prisma.ProjectReportCreateManyInput> = z.object({
   id: z.number().int().optional(),
+  name: z.string(),
   projectId: z.number().int(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional().nullable(),
@@ -5250,6 +5262,7 @@ export const ProjectReportCreateManyInputSchema: z.ZodType<Prisma.ProjectReportC
 }).strict();
 
 export const ProjectReportUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectReportUpdateManyMutationInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   quarter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -5259,6 +5272,7 @@ export const ProjectReportUpdateManyMutationInputSchema: z.ZodType<Prisma.Projec
 
 export const ProjectReportUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectReportUncheckedUpdateManyInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   projectId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
@@ -7160,6 +7174,7 @@ export const EnumDocumentTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumDo
 
 export const ProjectReportCountOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectReportCountOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   dateUpdated: z.lazy(() => SortOrderSchema).optional(),
@@ -7177,6 +7192,7 @@ export const ProjectReportAvgOrderByAggregateInputSchema: z.ZodType<Prisma.Proje
 
 export const ProjectReportMaxOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectReportMaxOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   dateUpdated: z.lazy(() => SortOrderSchema).optional(),
@@ -7187,6 +7203,7 @@ export const ProjectReportMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Proje
 
 export const ProjectReportMinOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectReportMinOrderByAggregateInput> = z.object({
   id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
   projectId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
   dateUpdated: z.lazy(() => SortOrderSchema).optional(),
@@ -12315,6 +12332,7 @@ export const ProjectPropertyStatsCreateOrConnectWithoutProjectInputSchema: z.Zod
 }).strict();
 
 export const ProjectReportCreateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectReportCreateWithoutProjectInput> = z.object({
+  name: z.string(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional().nullable(),
   quarter: z.number().int(),
@@ -12324,6 +12342,7 @@ export const ProjectReportCreateWithoutProjectInputSchema: z.ZodType<Prisma.Proj
 
 export const ProjectReportUncheckedCreateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectReportUncheckedCreateWithoutProjectInput> = z.object({
   id: z.number().int().optional(),
+  name: z.string(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional().nullable(),
   quarter: z.number().int(),
@@ -12597,6 +12616,7 @@ export const ProjectReportScalarWhereInputSchema: z.ZodType<Prisma.ProjectReport
   OR: z.lazy(() => ProjectReportScalarWhereInputSchema).array().optional(),
   NOT: z.union([ z.lazy(() => ProjectReportScalarWhereInputSchema),z.lazy(() => ProjectReportScalarWhereInputSchema).array() ]).optional(),
   id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
   projectId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
   dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
@@ -14745,6 +14765,7 @@ export const ProjectPictureCreateManyProjectInputSchema: z.ZodType<Prisma.Projec
 
 export const ProjectReportCreateManyProjectInputSchema: z.ZodType<Prisma.ProjectReportCreateManyProjectInput> = z.object({
   id: z.number().int().optional(),
+  name: z.string(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional().nullable(),
   quarter: z.number().int(),
@@ -14898,6 +14919,7 @@ export const ProjectPictureUncheckedUpdateManyWithoutProjectInputSchema: z.ZodTy
 }).strict();
 
 export const ProjectReportUpdateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectReportUpdateWithoutProjectInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   quarter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -14907,6 +14929,7 @@ export const ProjectReportUpdateWithoutProjectInputSchema: z.ZodType<Prisma.Proj
 
 export const ProjectReportUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectReportUncheckedUpdateWithoutProjectInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   quarter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
@@ -14916,6 +14939,7 @@ export const ProjectReportUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Pr
 
 export const ProjectReportUncheckedUpdateManyWithoutProjectInputSchema: z.ZodType<Prisma.ProjectReportUncheckedUpdateManyWithoutProjectInput> = z.object({
   id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   quarter: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
