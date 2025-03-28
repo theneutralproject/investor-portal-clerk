@@ -35,6 +35,7 @@ import { NextClientPage } from '@/types/page';
 import { DealStage } from '@/libs/deal/schema';
 import { useRedirect } from '@/app/context/RedirectContext';
 import { sendGTMEvent } from '@next/third-parties/google';
+import { INVESTMENTS } from 'e2e/testIds';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -207,6 +208,7 @@ export default function Page({ params }: NextClientPage) {
           <RightSidebarCTA project={project} onInvest={handleInvest} />
           {!isMobile && (
             <CompleteInvestment
+              testId={INVESTMENTS}
               deals={deals?.filter(
                 deal =>
                   deal.projectId === project.id &&
