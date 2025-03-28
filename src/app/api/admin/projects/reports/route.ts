@@ -14,6 +14,23 @@ import { NextRequest } from 'next/server';
 
 const PROJECT_REPORTS_BUCKET = 'project-reports';
 
+export async function GET(request: NextRequest) {
+  console.log('GET /api/admin/projects/:projectId/reports');
+  try {
+    await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 500);
+  }
+  try {
+    // return all existing reports for all projects
+    const reports = await prisma.projectReport.findMany();
+    return jsonResponse(reports, 200);
+  } catch (error) {
+    return errorResponse(getErrorMessage(error), 500, { request });
+  }
+}
+
 function countDigits(number: number): number {
   return Math.abs(number).toString().length;
 }
