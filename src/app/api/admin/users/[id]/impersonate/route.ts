@@ -1,6 +1,5 @@
 'use server';
 
-import { env } from '@/env';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
@@ -30,7 +29,7 @@ export async function POST(
 ) {
   const userParamId = (await params).id;
 
-  if (!userParamId || Number.isNaN(userParamId)) {
+  if (!userParamId || Number.isNaN(parseInt(userParamId, 10))) {
     return errorResponse('User id not valid', 404, { request });
   }
 
@@ -73,7 +72,7 @@ export async function POST(
     },
     {
       headers: {
-        Authorization: `Bearer ${env.CLERK_SECRET_KEY}`,
+        Authorization: `Bearer ${process.env.CLERK_SECRET_KEY}`,
         'Content-Type': 'application/json',
       },
     }
