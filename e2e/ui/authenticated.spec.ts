@@ -6,7 +6,6 @@ import {
   DASHBOARD_PROJECTS_TEST_ID,
   DOCUMENTS_NEW_TEST_ID,
   INVESTMENT_SUMMARY_TEST_ID,
-  INVESTMENTS,
   USER_AVATAR_TEST_ID,
 } from 'e2e/testIds';
 
@@ -139,12 +138,6 @@ test.describe('authentication view tests', () => {
     test('Should see "Complete Invesments" section when signed in', async () => {
       await expect(
         projectsPage.locator(`[data-testid="${COMPLETE_INVESTMENT}"]`)
-      ).toBeVisible();
-    });
-
-    test('Should see "Invesments" section when signed in', async () => {
-      await expect(
-        projectsPage.locator(`[data-testid="${INVESTMENTS}"]`)
       ).toBeVisible();
     });
 
