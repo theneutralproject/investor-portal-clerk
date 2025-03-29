@@ -162,6 +162,35 @@ export async function getHubspotContactsWithoutSignupDate() {
   }
 }
 
+export async function shareProjectReportWithUsers(
+  projectName: string
+  // reportUrl: string
+) {
+  const body = JSON.stringify({
+    projectName,
+    //reportUrl,
+  });
+  const url =
+    process.env.HUBSPOT_PROJECT_REPORT_NOTIFICATION_EMAIL_WEBHOOK_URL!;
+  try {
+    const hsRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    });
+    return await hsRes.json();
+  } catch (error) {
+    console.error(
+      'Unable to notify user of project report in hubspot:\n',
+      error
+    );
+    throw new Error(getErrorMessage(error));
+  }
+}
+
 export async function shareProjectDocsWithUser(
   userHubspotId: number,
   slug: string
@@ -171,7 +200,6 @@ export async function shareProjectDocsWithUser(
     slug,
   });
   const url = process.env.HUBSPOT_SHARE_PROJECT_DOCS_WEBHOOK_URL!;
-  console.log('url', url);
   try {
     const hsRes = await fetch(url, {
       method: 'POST',
@@ -187,6 +215,27 @@ export async function shareProjectDocsWithUser(
       'Unable to share project docs with user in hubspot:\n',
       error
     );
+    throw new Error(getErrorMessage(error));
+  }
+}
+
+export async function shareTaxFormForDeal(hsDealId: string) {
+  const body = JSON.stringify({
+    hsDealId,
+  });
+  const url = process.env.HUBSPOT_TAXFORM_WEBHOOK_URL!;
+  try {
+    const hsRes = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.HUBSPOT_ACCESS_TOKEN}`,
+      },
+      body,
+    });
+    return await hsRes.json();
+  } catch (error) {
+    console.error('Unable to share tax form with user in hubspot:\n', error);
     throw new Error(getErrorMessage(error));
   }
 }

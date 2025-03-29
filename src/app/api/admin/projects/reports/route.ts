@@ -1,5 +1,6 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { zPdfAdminBulkUploadSchema } from '@/libs/document/schema';
+import { shareProjectReportWithUsers } from '@/libs/hubspot/utils.server';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
@@ -8,7 +9,7 @@ import {
   jsonResponse,
   errorResponse,
 } from '@/libs/utils.server';
-import { ActivityType, ProjectReport } from '@prisma/client';
+import { ActivityType, ProjectReport, User } from '@prisma/client';
 import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
@@ -35,36 +36,40 @@ function countDigits(number: number): number {
   return Math.abs(number).toString().length;
 }
 
-async function createActivityFeedItems(
-  project: { id: number; name: string },
-  report: ProjectReport
-) {
-  // for each investor in the project, create an activity feed item
+async function getListOfInvestors(project: { id: number; name: string }) {
+  // get all deals for the project
   const projectDeals = await prisma.deal.findMany({
     where: { projectId: project.id },
     include: {
       organization: {
         include: {
-          members: true,
+          members: { include: { user: true } },
         },
       },
     },
   });
-
-  // for each unique user, create an activity feed item
-  const uniqueUserIds = [
+  // for each deal, get the investors
+  const uniqueInvestors = [
     ...new Set(
       projectDeals.flatMap(deal =>
-        deal.organization.members.map(member => member.userId)
+        deal.organization.members.map(member => member.user)
       )
     ),
   ];
+  return uniqueInvestors;
+}
+
+async function createActivityFeedItems(
+  users: User[],
+  projectName: string,
+  report: ProjectReport
+) {
   try {
     const createMany = await prisma.activityFeedItem.createMany({
-      data: uniqueUserIds.map(userId => ({
-        userId,
+      data: users.map(user => ({
+        userId: user.id,
         header: 'New Quarterly Investor Report Available',
-        body: `The Q${report.quarter}-${report.year} Quarterly Report is available for your ${project.name} investment`,
+        body: `The Q${report.quarter}-${report.year} Quarterly Report is available for your ${projectName} investment`,
         type: ActivityType.INVESTOR_REPORT,
         dateCreated: report.dateCreated,
         link: '/documents/investor',
@@ -153,8 +158,19 @@ export async function POST(request: NextRequest) {
           name,
         },
       });
+
+      await shareProjectReportWithUsers(project.name);
+
+      const investors = await getListOfInvestors(project);
+      if (!investors || investors.length === 0) {
+        return errorResponse('No investors found for this project', 404, {
+          request,
+        });
+      }
+
       const activityCreateResult = await createActivityFeedItems(
-        project,
+        investors,
+        project.name,
         newReport
       );
       return jsonResponse(
