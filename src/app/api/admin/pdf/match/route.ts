@@ -3,7 +3,7 @@ import {
   getAdminFromRequest,
   matchDealWithPdf,
 } from '@/libs/admin/utils.server';
-import { zPdfBulkUploadSchema } from '@/libs/document/schema';
+import { zPdfAdminBulkUploadSchema } from '@/libs/document/schema';
 import {
   errorResponse,
   getErrorMessage,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const files = formData.getAll('files');
-    pdfFiles = zPdfBulkUploadSchema.parse(files);
+    pdfFiles = zPdfAdminBulkUploadSchema.parse(files);
     const { data, error } = await storageClient
       .from(`deal-documents`)
       .list('tempPdfStorage');

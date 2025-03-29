@@ -5,12 +5,13 @@ import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 
 export async function POST(request: NextRequest) {
-  const { userId } = await auth();
+  const userId = (await auth()).userId;
   if (!userId) {
     Logger.warn('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
 
+  // If this happens is because the user is not yet fully signed-up (in onboarding page)
   const user = await prisma.user.findUnique({
     where: { clerkId: userId },
   });
@@ -18,7 +19,12 @@ export async function POST(request: NextRequest) {
     return errorResponse(
       `User record with clerkid ${userId} not found in prisma (POST)`,
       404,
-      { request }
+      {
+        request,
+        extra: {
+          disableSentry: true,
+        },
+      }
     );
   }
 
@@ -57,7 +63,7 @@ export async function POST(request: NextRequest) {
     });
   }
 
-  return errorResponse(`Hubspot token generation failed`, 404, {
+  return errorResponse(`Hubspot token generation failed`, 500, {
     request,
     extra: {
       data,
