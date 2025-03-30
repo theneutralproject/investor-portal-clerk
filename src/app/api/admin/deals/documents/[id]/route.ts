@@ -8,7 +8,7 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
-import { zPdfBulkUploadSchema } from '@/libs/document/schema';
+import { zPdfAdminBulkUploadSchema } from '@/libs/document/schema';
 import { storageClient } from '@/libs/supabase';
 import {
   type DealDocument,
@@ -145,7 +145,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData();
     const files = formData.getAll('files');
-    const parsedFiles = zPdfBulkUploadSchema.parse(files);
+    const parsedFiles = zPdfAdminBulkUploadSchema.parse(files);
     let documentType: DealDocumentType = DealDocumentType.INVESTMENT_DOCUMENT;
     if (queryDocumentType) documentType = queryDocumentType as DealDocumentType;
     if (documentType === DealDocumentType.K1) {
