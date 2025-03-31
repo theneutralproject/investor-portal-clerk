@@ -188,8 +188,21 @@ const DocumentList = ({
               </TableHead>
               <TableBody>
                 {groupedDocs[project]?.map(doc => (
-                  <TableRow key={doc.id}>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                  <TableRow
+                    key={doc.id}
+                    sx={{
+                      borderBottom: '1px solid #e0e0e0 !important',
+                      height: '65px',
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        border: 'none',
+                        height: '65px',
+                      }}
+                    >
                       {doc.path.endsWith('.pdf') ? (
                         <PictureAsPdfIcon />
                       ) : (
@@ -198,19 +211,36 @@ const DocumentList = ({
                       <Box sx={{ ml: 1 }}>{doc.name}</Box>
                     </TableCell>
                     {type === 'tax' && (
-                      <TableCell>
+                      <TableCell
+                        sx={{
+                          border: 'none',
+                        }}
+                      >
                         {doc.taxYear || new Date(doc.dateCreated).getFullYear()}
                       </TableCell>
                     )}
                     {type === 'investment' && (
-                      <TableCell>
+                      <TableCell
+                        sx={{
+                          border: 'none',
+                        }}
+                      >
                         {titleMap[doc.type as DealDocumentType]}
                       </TableCell>
                     )}
-                    <TableCell>
+                    <TableCell
+                      sx={{
+                        border: 'none',
+                      }}
+                    >
                       {format(new Date(doc.dateCreated), 'MMM d, yyyy')}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell
+                      align="right"
+                      sx={{
+                        border: 'none',
+                      }}
+                    >
                       <Button
                         variant="grayPill"
                         size="small"
