@@ -271,7 +271,10 @@ export async function updateDeal(
     !allowMaintenanceOfCompletedDeals
   ) {
     Logger.error(new Error('Completed Deals cannot be updated'), null, {
-      extra: { existingDeal },
+      extra: {
+        existingDeal: JSON.stringify(existingDeal),
+        disableSentry: true,
+      },
     });
     throw Error('Completed Deals cannot be updated');
   }
