@@ -205,6 +205,19 @@ export async function POST(request: NextRequest) {
               },
               select: {
                 hubspotId: true,
+                organization: {
+                  select: {
+                    ownedBy: {
+                      select: {
+                        id: true,
+                        email: true,
+                        hubspotId: true,
+                        firstName: true,
+                        lastName: true,
+                      },
+                    },
+                  },
+                },
               },
             });
             if (!deal?.hubspotId) {
@@ -213,7 +226,10 @@ export async function POST(request: NextRequest) {
               });
             }
             // trigger email notification in Hubspot
-            await shareTaxFormForDeal(deal.hubspotId);
+            await shareTaxFormForDeal(
+              deal.hubspotId,
+              deal.organization.ownedBy.hubspotId
+            );
           } else {
             const dealProject = await prisma.deal.findFirst({
               where: {

@@ -219,9 +219,10 @@ export async function shareProjectDocsWithUser(
   }
 }
 
-export async function shareTaxFormForDeal(hsDealId: string) {
+export async function shareTaxFormForDeal(hsDealId: string, hsUserId: string) {
   const body = JSON.stringify({
     hsDealId,
+    hsUserId,
   });
   const url = process.env.HUBSPOT_TAXFORM_WEBHOOK_URL!;
   try {
