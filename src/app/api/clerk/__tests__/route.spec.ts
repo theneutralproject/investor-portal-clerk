@@ -55,7 +55,7 @@ const mockUser: any = {
   clerkId: mockClerkUser.id,
   hubspotId: null,
   ssn: '123-45-6789',
-  referralSource: ReferralSource.GOOGLE_AD,
+  referralSource: ReferralSource.OTHER,
   email: 'johndoe@example.com',
   phoneNumber: '+1234567890',
   address: null,
