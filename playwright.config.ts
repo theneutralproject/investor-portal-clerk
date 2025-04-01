@@ -56,7 +56,7 @@ export default defineConfig({
     // command: process.env.CI ? 'DEBUG=pw:webserver npm run build && npm run start' : 'npm run dev',
     command: 'npm run dev',
     url: baseURL,
-    timeout: 12 * 60 * 1000 /**12 mins per test */,
+    timeout: 15 * 60 * 1000 /** 15 mins as timeout */,
     reuseExistingServer: !process.env.CI,
   },
   /* Configure projects for major browsers */
