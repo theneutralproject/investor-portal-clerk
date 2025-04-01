@@ -17,6 +17,7 @@ import {
   type DealDocument,
   type DealDocumentType,
 } from '@prisma/client';
+import { uploadResumableFile } from '@/libs/document/utils.client';
 
 type UploadStatus = 'uploading' | 'success' | 'error';
 type DocumentType = 'organization' | 'deal';
@@ -68,15 +69,67 @@ const DealFlowDocumentUpload: React.FC<DocumentUploadProps> = ({
   const handleFileUpload = useCallback(
     async (key: string, file: File, formData: FormData): Promise<void> => {
       try {
-        const response = await fetch('/api/documents', {
+        if (file.size > 26 * 1024 * 1024) {
+          throw new Error('File exceeds 26MB limit');
+        }
+
+        // Step 1: Request a pre-signed upload URL from backend
+        const response = await fetch('/api/documents/signed-url', {
           method: 'POST',
-          body: formData,
+          body: JSON.stringify({
+            type: formData.get('type'),
+            organizationId: formData.get('organizationId'),
+            dealId: formData.get('dealId'),
+            fileName: file.name,
+            key,
+            dealDocumentType: formData.get('dealDocumentType'),
+          }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
         });
 
         const responseData = await response.json();
 
         if (!response.ok) {
           throw new Error(responseData?.error || 'Upload failed');
+        }
+
+        const { uploadUrl, t, bucketName, u, fileName, filePath } =
+          responseData;
+        if (!uploadUrl) throw new Error('Failed to get upload URL');
+
+        // Step 2: Upload file directly to Supabase Storage
+        await uploadResumableFile({
+          bucketName,
+          token: t,
+          url: u,
+          filePath,
+          file,
+        });
+
+        // Step 3: Store file metadata in the database
+        const storeMetaDataResponse = await fetch(
+          '/api/documents/store-metadata',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              type: formData.get('type'),
+              organizationId: formData.get('organizationId'),
+              dealId: formData.get('dealId'),
+              fileName,
+              path: filePath,
+              key,
+              dealDocumentType: formData.get('dealDocumentType'),
+            }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!storeMetaDataResponse.ok) {
+          throw new Error('Upload failed while trying to store document');
         }
 
         setUploadState(prev => ({
