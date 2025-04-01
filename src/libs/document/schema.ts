@@ -8,7 +8,7 @@ const ACCEPTED_FILE_TYPES = [
   'image/jpeg',
 ] as const;
 
-const MAX_FILE_SIZE = 12; // In MegaBytes
+const MAX_FILE_SIZE = 25; // In MegaBytes
 
 const sizeInMB = (sizeInBytes: number, decimalsNum = 2) => {
   const result = sizeInBytes / (1024 * 1024);
