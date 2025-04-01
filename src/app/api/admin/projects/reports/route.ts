@@ -159,7 +159,7 @@ export async function POST(request: NextRequest) {
         },
       });
 
-      await shareProjectReportWithUsers(project.name);
+      await shareProjectReportWithUsers(project.slug);
 
       const investors = await getListOfInvestors(project);
       if (!investors || investors.length === 0) {

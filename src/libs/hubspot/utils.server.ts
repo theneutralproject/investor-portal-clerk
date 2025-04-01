@@ -163,15 +163,22 @@ export async function getHubspotContactsWithoutSignupDate() {
 }
 
 export async function shareProjectReportWithUsers(
-  projectName: string
+  projectSlug: string
   // reportUrl: string
 ) {
   const body = JSON.stringify({
-    projectName,
+    projectSlug,
     //reportUrl,
   });
   const url =
-    process.env.HUBSPOT_PROJECT_REPORT_NOTIFICATION_EMAIL_WEBHOOK_URL!;
+    process.env[
+      `HUBSPOT_${projectSlug.toUpperCase()}_REPORT_NOTIFICATION_EMAIL_WEBHOOK_URL`
+    ];
+  if (!url) {
+    throw new Error(
+      `HUBSPOT_${projectSlug.toUpperCase()}_REPORT_NOTIFICATION_EMAIL_WEBHOOK_URL is not set`
+    );
+  }
   try {
     const hsRes = await fetch(url, {
       method: 'POST',
