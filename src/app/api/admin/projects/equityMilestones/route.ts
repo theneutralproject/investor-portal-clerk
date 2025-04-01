@@ -14,8 +14,10 @@ const projectDocsBucket = 'project-documents';
 
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
+  let admin;
+  console.log(admin);
   try {
-    await getAdminFromRequest(request);
+    admin = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -61,11 +63,28 @@ export async function POST(request: NextRequest) {
       request,
     });
   }
+
   try {
     const fileDetails = getFileDetails(csvFile);
-    const fileName = fileDetails.name;
-    const tempPath = `temp/${project.slug}/${fileName}`;
-    // move to temp storage
+    const originalFileName = fileDetails.name;
+    const fileNameWithoutExt = originalFileName.replace(/\.[^/.]+$/, '');
+    const fileExt = originalFileName.match(/\.[^/.]+$/)?.[0] || '';
+
+    // Find the latest version number for this file
+    const latestVersion = await prisma.equityMilestoneFile.findFirst({
+      where: {
+        projectId: projectId,
+      },
+      orderBy: {
+        versionNum: 'desc',
+      },
+    });
+
+    const nextVersionNum = latestVersion ? latestVersion.versionNum + 1 : 1;
+    const versionedFileName = `${fileNameWithoutExt}_v${nextVersionNum}${fileExt}`;
+    const tempPath = `temp/${project.slug}/${versionedFileName}`;
+
+    // Upload to temp storage first
     const { error } = await storageClient
       .from(projectDocsBucket)
       .upload(`${tempPath}`, csvFile);
@@ -79,7 +98,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // get file Url
+    // Get file Url for validation
     const {
       data: { publicUrl },
     } = storageClient.from(projectDocsBucket).getPublicUrl(tempPath);
@@ -96,20 +115,13 @@ export async function POST(request: NextRequest) {
       return jsonResponse('File is not formatted correctly', 400);
     }
 
-    // check if a file of the same name already exists in storage, and delete it
-    try {
-      await storageClient
-        .from(projectDocsBucket)
-        .remove([`${project.slug}/${fileName}`]);
-    } catch (__error) {
-      // if the file does not exist, we can ignore the error
-    }
+    // Final path with versioned filename
+    const newPath = `${project.slug}/${versionedFileName}`;
 
-    // if we made it this far, the file is formatted correctly. Lets move it to permanent storage
-    const newPath = `${project.slug}/${fileName}`;
+    // Move file to permanent storage with versioned filename
     const { error: finalError } = await storageClient
       .from(projectDocsBucket)
-      .move(`temp/${project.slug}/${fileName}`, `${newPath}`);
+      .move(`temp/${project.slug}/${versionedFileName}`, `${newPath}`);
     if (finalError) {
       return errorResponse('Failed to move file to storage', 500, {
         request,
@@ -117,10 +129,22 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // update the project with the equity milestones csv path
+    // Get public URL for the versioned file
     const {
       data: { publicUrl: newPublicUrl },
     } = storageClient.from(projectDocsBucket).getPublicUrl(newPath);
+
+    // Create a new file version record in the database
+    const fileVersion = await prisma.equityMilestoneFile.create({
+      data: {
+        projectId: projectId,
+        fileName: originalFileName, // Store original filename for reference
+        filePath: newPath,
+        publicUrl: newPublicUrl,
+        versionNum: nextVersionNum,
+        uploadedBy: admin.email,
+      },
+    });
 
     await prisma.project.update({
       where: { id: projectId },
@@ -131,6 +155,7 @@ export async function POST(request: NextRequest) {
 
     return jsonResponse({
       message: 'File upload successful',
+      fileVersion: fileVersion,
       newPublicUrl,
     });
   } catch (error) {
