@@ -199,6 +199,7 @@ model Project {
   projectPaymentInfo ProjectPaymentInfo[]
   pictures           ProjectPicture[]
   propertyStats      ProjectPropertyStats?
+  ProjectReport      ProjectReport[]
 }
 
 model ProjectPropertyStats {
@@ -296,6 +297,18 @@ model ProjectDocument {
   dateUpdated        DateTime?           @updatedAt
   documentEvents     DocumentEvent[]
   project            Project             @relation(fields: [projectId], references: [id])
+}
+
+model ProjectReport {
+  id          Int       @id @default(autoincrement())
+  name        String
+  projectId   Int
+  dateCreated DateTime  @default(now())
+  dateUpdated DateTime? @updatedAt
+  quarter     Int
+  year        Int
+  path        String
+  project     Project   @relation(fields: [projectId], references: [id])
 }
 
 /// used to track who accessed which document when

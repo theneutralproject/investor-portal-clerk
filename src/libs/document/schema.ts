@@ -1,6 +1,5 @@
 import { DealDocumentType, DocumentEventType } from '@prisma/client';
 import { z } from 'zod';
-import * as zfd from 'zod-form-data';
 
 const ACCEPTED_FILE_TYPES = [
   'application/pdf',
@@ -131,7 +130,7 @@ export type DocumentEventCreateSchema = z.infer<
   typeof zDocumentEventCreateSchema
 >;
 
-export const zPdfBulkUploadSchema = z
+export const zPdfAdminBulkUploadSchema = z
   .array(createFileSchema())
   .nonempty()
   .max(20)
@@ -152,32 +151,9 @@ export const zPdfBulkUploadSchema = z
     }
   );
 
-// Schema for bulk file uploads
-export const zPdfBulkUploadSchemaOld = zfd.formData({
-  files: z
-    .array(createFileSchema())
-    .nonempty()
-    .max(20)
-    .refine(
-      files => {
-        return files.every(file => {
-          if (!hasFileProperties(file)) return false;
-          return (
-            (sizeInMB(file.size) <= MAX_FILE_SIZE &&
-              file.type === 'application/pdf') ||
-            file.type.startsWith('image/')
-          );
-        });
-      },
-      {
-        message:
-          'Only PDF and image files are allowed and each file must be less than 4.5MB',
-      }
-    ),
-  dealId: z.string().optional(),
-});
-
-export type PdfBulkUploadSchema = z.infer<typeof zPdfBulkUploadSchema>;
+export type PdfAdminBulkUploadSchema = z.infer<
+  typeof zPdfAdminBulkUploadSchema
+>;
 
 // Export constants and utilities for reuse
 export const FILE_VALIDATION = {
