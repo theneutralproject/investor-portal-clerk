@@ -7,6 +7,7 @@ import { type MatchResponseObject, MatchConfidence } from './schema';
 import { storageClient } from '../supabase';
 import type { DealWithFullOrgAndSlimProject } from '../types';
 import Logger from '../logger';
+import { isFileLike } from '../document/utils.client';
 
 // eslint-disable-next-line
 const PdfParse = require('pdf-parse');
@@ -157,24 +158,6 @@ interface FileDetails {
   name: string;
   type: string;
   size?: number;
-}
-
-interface FileWrapper {
-  name: string;
-  type: string;
-  size?: number;
-  arrayBuffer(): Promise<ArrayBuffer>;
-}
-
-// Helper function to determine if value is File-like
-function isFileLike(value: unknown): value is FileWrapper {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    'name' in value &&
-    'type' in value &&
-    typeof (value as FileWrapper).arrayBuffer === 'function'
-  );
 }
 
 // Helper function to safely get file details
