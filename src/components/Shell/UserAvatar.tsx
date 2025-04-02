@@ -4,6 +4,7 @@ import { Avatar, Menu, MenuItem, IconButton, Box } from '@mui/material';
 import LogoutIcon from '@mui/icons-material/Logout';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PolicyIcon from '@mui/icons-material/Policy';
+import PersonIcon from '@mui/icons-material/Person';
 import posthog from 'posthog-js';
 import Link from 'next/link';
 import {
@@ -85,6 +86,15 @@ const UserAvatar = () => {
         onClose={handleClose}
         data-testid={`${USER_AVATAR_TEST_ID}-menu`}
       >
+        <Link href="/account" passHref>
+          <MenuItem
+            onClick={handleClose}
+            sx={{ width: '200px' }}
+            data-testid={`${USER_AVATAR_TEST_ID}-menu-account`}
+          >
+            <PersonIcon sx={{ marginRight: 1 }} /> My Account
+          </MenuItem>
+        </Link>
         <Link href="/terms" passHref>
           <MenuItem
             onClick={handleClose}
