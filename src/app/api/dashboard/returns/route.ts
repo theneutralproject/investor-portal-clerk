@@ -1,12 +1,12 @@
 import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
-import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import type { DealWithInvestmentStatsAndProjectWithPics } from '@/libs/types';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealStatus } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
+import { getPortfolioReturns } from '@/libs/returns/helpers';
 
 export async function GET(request: NextRequest) {
   // get loggedin user

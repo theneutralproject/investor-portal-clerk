@@ -27,7 +27,9 @@ import Logger from '../logger';
 
 const finishedAsync = promisify(finished);
 
-export async function readEquityMilestoneData(csvUrl: string) {
+export async function readEquityMilestoneData(
+  csvUrl: string
+): Promise<ProjectMilestoneType[]> {
   Logger.log({ message: csvUrl, extra: { csvUrl } });
   if (!csvUrl) {
     console.error('CSV url not provided');
@@ -74,15 +76,17 @@ export async function readEquityMilestoneData(csvUrl: string) {
 export async function getEquityStatsFromProject(
   amount: number,
   equityReturnsFileUrl: string,
-  cUnitThresholdAmount: number
+  cUnitThresholdAmount: number,
+  equityMilestonesData?: ProjectMilestoneType[]
 ) {
   let unitType: DealUnitType = DealUnitType.AUNIT;
   let numberCUnits = 0;
   let numberAUnits = 0;
   let shareOfEquity = 0;
 
-  let equityMilestones: ProjectMilestoneType[] | undefined = undefined;
-  equityMilestones = await readEquityMilestoneData(equityReturnsFileUrl);
+  const equityMilestones: ProjectMilestoneType[] | undefined =
+    equityMilestonesData ||
+    (await readEquityMilestoneData(equityReturnsFileUrl));
 
   try {
     const firstMilestone = equityMilestones?.[0];
@@ -146,7 +150,7 @@ export function getPayoutScheduleStartDate(closingDate: Date) {
 }
 
 function _getDebtPayoutSchedule(
-  amount: number,
+  principalAmount: number,
   interestRate: number,
   termMonths: number,
   paymentFreqMonths: number,
@@ -180,22 +184,26 @@ function _getDebtPayoutSchedule(
       if (paymentFreq === termMonths) {
         // onetime payment at the end of the term:
         distributionAmount =
-          (((amount * interestRate) / 100) * termMonths) / 12;
+          (((principalAmount * interestRate) / 100) * termMonths) / 12;
       } else {
         distributionAmount =
-          (amount * interestRate) / 100 / distributionDivisor;
+          (principalAmount * interestRate) / 100 / distributionDivisor;
       }
+    }
+
+    if (i === 1) {
+      portfolioValueToDate += principalAmount;
     }
 
     // Handle final payment (principal + interest)
     if (i === termMonths) {
-      distributionAmount += amount;
-      // portfolioValueToDate -= amount;
+      distributionAmount += principalAmount;
+      portfolioValueToDate -= principalAmount;
 
       stats.totalGrossReturn = distributionsCumulative + distributionAmount;
-      stats.totalNetReturn = distributionsCumulative - amount;
+      stats.totalNetReturn = distributionsCumulative - principalAmount;
       stats.investmentMultiple =
-        (distributionsCumulative + distributionAmount) / amount;
+        (distributionsCumulative + distributionAmount) / principalAmount;
     }
 
     // Calculate running totals
@@ -211,8 +219,8 @@ function _getDebtPayoutSchedule(
       equityDistributionCumulative: 0,
       equityAccruedPreferredReturn: 0,
       portfolioValueToDate: portfolioValueToDate,
-      principalInvestedToDate: amount,
-      principalInvestedCurrent: i === 1 ? amount : 0,
+      principalInvestedToDate: principalAmount,
+      principalInvestedCurrent: i === 1 ? principalAmount : 0,
     };
 
     payoutSchedule.push(entry);
@@ -348,12 +356,18 @@ function _getEquityPayoutSchedule(
       (previousEntry?.equityDistributionCumulative ?? 0) + distributionAmount;
     const preferredReturnCurrent = (amount * preferredReturn) / 12;
     const equityAccruedPreferredReturn = preferredReturnCurrent * index;
-    const portfolioValueToDate = previousEntry
+    let portfolioValueToDate = previousEntry
       ? previousEntry.portfolioValueToDate + distributionAmount
       : 0;
-    // if(index === schedule.length - 1) {
-    //     portfolioValueToDate -=amount
-    // }
+
+    if (index === 1) {
+      portfolioValueToDate += amount;
+    }
+
+    if (index === schedule.length - 1) {
+      portfolioValueToDate -= amount;
+    }
+
     schedule.push({
       date,
       debtDistributionsCurrent: 0,
@@ -449,6 +463,7 @@ export async function getPortfolioReturns(
     const todayNumeric = new Date().getTime();
     portfolioStats.principalInvested += investmentStats.amount;
     portfolioStats.portfolioValueToDate += investmentStats.amount;
+
     if (investmentStats.financingType === DealFinancingType.equity) {
       try {
         const equityMilestones = await readEquityMilestoneData(
@@ -458,7 +473,8 @@ export async function getPortfolioReturns(
         const projectEquityStats = await getEquityStatsFromProject(
           investmentStats.amount,
           project.equityReturnsFile,
-          project.investmentStats.cUnitThresholdAmount
+          project.investmentStats.cUnitThresholdAmount,
+          equityMilestones
         );
         const schedule = getEquityPayoutScheduleForDeal(
           investmentStats,
@@ -593,9 +609,9 @@ export async function getPortfolioReturns(
         acc.debtDistributionsCumulative += curr.debtDistributionsCumulative;
         acc.equityDistributionsCurrent += curr.equityDistributionsCurrent;
         acc.equityDistributionCumulative += curr.equityDistributionCumulative;
-        acc.portfolioValueToDate += curr.portfolioValueToDate;
         acc.principalInvestedCurrent += curr.principalInvestedCurrent;
         acc.principalInvestedToDate += curr.principalInvestedToDate;
+        acc.portfolioValueToDate += curr.portfolioValueToDate;
         return acc;
       });
 
@@ -606,18 +622,19 @@ export async function getPortfolioReturns(
         combinedDateObject.debtDistributionsCumulative =
           previousDateObject.debtDistributionsCumulative +
           combinedDateObject.debtDistributionsCurrent;
+        combinedDateObject.principalInvestedToDate =
+          previousDateObject.principalInvestedToDate +
+          combinedDateObject.principalInvestedCurrent;
         combinedDateObject.portfolioValueToDate =
           previousDateObject.portfolioValueToDate +
           combinedDateObject.debtDistributionsCurrent +
           combinedDateObject.equityDistributionsCurrent;
-        combinedDateObject.principalInvestedToDate =
-          previousDateObject.principalInvestedToDate +
-          combinedDateObject.principalInvestedCurrent;
       }
       previousDateObject = combinedDateObject;
       consolidatedSchedule.push(combinedDateObject);
     }
   });
+
   return {
     consolidatedSchedule,
     portfolioStats,

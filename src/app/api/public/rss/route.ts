@@ -150,9 +150,9 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const query = querySchema.parse(Object.fromEntries(searchParams));
-    
+
     const newsItems = await fetchAllRSSFeeds();
-    
+
     const limitedItems = query.limit ? newsItems.slice(0, query.limit) : newsItems;
 
     return NextResponse.json(

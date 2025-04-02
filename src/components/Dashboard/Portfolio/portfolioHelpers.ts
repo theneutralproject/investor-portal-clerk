@@ -79,7 +79,11 @@ export const groupByQuarter = (
         0,
         curr.equityDistributionCumulative
       );
-      acc[quarterKey].portfolioValue = curr.portfolioValueToDate;
+      acc[quarterKey].portfolioValue =
+        acc[quarterKey].principal +
+        acc[quarterKey].equityDistributions +
+        curr.portfolioValueToDate -
+        acc[quarterKey].debtDistributions;
 
       return acc;
     },
