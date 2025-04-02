@@ -42,7 +42,7 @@ const ProjectImage = styled('img')({
 
 const TableHeader = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: '300px 1fr 1fr 1fr 1fr',
+  gridTemplateColumns: '300px 100px 120px 120px 120px 120px',
   padding: theme.spacing(1.5),
   borderBottom: `1px solid ${theme.palette.divider}`,
   minWidth: 900,
@@ -50,7 +50,7 @@ const TableHeader = styled(Box)(({ theme }) => ({
 
 const TableRow = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: '300px 1fr 1fr 1fr 1fr',
+  gridTemplateColumns: '300px 100px 120px 120px 120px 120px',
   padding: theme.spacing(1.5),
   alignItems: 'center',
   minWidth: 900,
@@ -136,6 +136,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
             <Box /> {/* Empty space for image and name column */}
             <StyledHeader>Type</StyledHeader>
             <StyledHeader>Committed</StyledHeader>
+            <StyledHeader>Closing Date</StyledHeader>
             <StyledHeader>Distributions to Date</StyledHeader>
             <StyledHeader>Projected Return</StyledHeader>
           </TableHeader>
@@ -174,6 +175,11 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   </Box>
                   <Typography variant="body2">
                     {formatCurrency(deal.committedAmount)}
+                  </Typography>
+                  <Typography variant="body2">
+                    {deal.closingDate
+                      ? new Date(deal.closingDate).toLocaleDateString()
+                      : '-'}
                   </Typography>
                   <Typography variant="body2">
                     {formatCurrency(deal.distributionsToDate)}
