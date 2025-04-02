@@ -15,7 +15,7 @@ const projectDocsBucket = 'project-documents';
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
   let admin;
-  console.log(admin);
+
   try {
     admin = await getAdminFromRequest(request);
   } catch (error) {
