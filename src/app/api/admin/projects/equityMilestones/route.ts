@@ -10,7 +10,7 @@ import {
 } from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
 
-const projectDocsBucket = 'project-documents';
+const projectDocsBucket = 'project-milestones';
 
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
     const fileVersion = await prisma.equityMilestoneFile.create({
       data: {
         projectId: projectId,
-        fileName: originalFileName, // Store original filename for reference
+        fileName: originalFileName,
         filePath: newPath,
         publicUrl: newPublicUrl,
         versionNum: nextVersionNum,
