@@ -128,7 +128,6 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
     );
   }
 
-  console.log(data);
   return (
     <>
       <StyledCard>
@@ -188,6 +187,18 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
           </CardContent>
         </ScrollContainer>
       </StyledCard>
+      <Typography
+        variant="subtitle2"
+        sx={{ mt: 2, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
+      >
+        The financial projections on the Neutral Investor Portal are estimates
+        based on current assumptions and are updated monthly for transparency.
+        However, they are not guarantees and may change due to market
+        conditions. Real estate investments are illiquid, and past performance
+        does not ensure future results. Returns depend on factors like property
+        performance, investment timing, and economic conditions. All figures are
+        illustrative, and Neutral is not a cryptocurrency platform.
+      </Typography>
 
       <DashboardDealConversionModal
         conversionId={selectedConversionId}

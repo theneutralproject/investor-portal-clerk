@@ -10,7 +10,7 @@ import {
 } from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
 
-const projectDocsBucket = 'project-milestones';
+const projectDocsBucket = 'project-documents';
 
 // admin uploads a csv file for a project via form data
 export async function POST(request: NextRequest) {
