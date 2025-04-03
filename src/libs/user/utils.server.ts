@@ -45,6 +45,9 @@ const getHsUserData = (
   if ('clerkId' in userData && userData.clerkId)
     hsUserData.properties.userid = userData.clerkId;
   if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
+  hsUserData.properties.notify_user_on_create = (
+    userData.notifyUserOnCreate ?? true
+  ).toString();
 
   if (address) {
     hsUserData.properties.address = address.street;
