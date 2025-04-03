@@ -181,25 +181,26 @@ model OrganizationDocument {
 }
 
 model Project {
-  id                 Int                     @id @default(autoincrement())
-  name               String                  @unique
-  location           String
-  tags               String                  @default("")
-  status             Status                  @default(ACTIVE)
-  description        String
-  marketHighlights   String                  @default("")
-  youtubeUrl         String                  @default("")
-  slug               String                  @unique
-  equityReturnsFile  String
-  displayName        String                  @default("")
-  deals              Deal[]
-  documents          ProjectDocument[]
-  investmentStats    ProjectInvestmentStats?
-  milestones         ProjectMilestones?
-  projectPaymentInfo ProjectPaymentInfo[]
-  pictures           ProjectPicture[]
-  propertyStats      ProjectPropertyStats?
-  ProjectReport      ProjectReport[]
+  id                   Int                     @id @default(autoincrement())
+  name                 String                  @unique
+  location             String
+  tags                 String                  @default("")
+  status               Status                  @default(ACTIVE)
+  description          String
+  marketHighlights     String                  @default("")
+  youtubeUrl           String                  @default("")
+  slug                 String                  @unique
+  equityReturnsFile    String
+  displayName          String                  @default("")
+  deals                Deal[]
+  documents            ProjectDocument[]
+  investmentStats      ProjectInvestmentStats?
+  milestones           ProjectMilestones?
+  projectPaymentInfo   ProjectPaymentInfo[]
+  pictures             ProjectPicture[]
+  propertyStats        ProjectPropertyStats?
+  ProjectReport        ProjectReport[]
+  equityMilestoneFiles EquityMilestoneFile[]
 }
 
 model ProjectPropertyStats {
@@ -373,6 +374,20 @@ model ActivityFeedItem {
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, itemId, type], name: "activity_user_item_type")
+}
+
+model EquityMilestoneFile {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  project    Project  @relation(fields: [projectId], references: [id])
+  fileName   String // Original filename without version number
+  filePath   String // Path with versioned filename
+  publicUrl  String // Public URL to access the file
+  versionNum Int
+  uploadedBy String // Admin user email
+  createdAt  DateTime @default(now())
+
+  @@unique([projectId, fileName, versionNum])
 }
 
 enum ActivityType {

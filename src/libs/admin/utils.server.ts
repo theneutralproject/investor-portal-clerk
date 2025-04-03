@@ -18,7 +18,17 @@ const PdfParse = require('pdf-parse');
  * @returns an admin user if the jwt is valid
  */
 export async function getAdminFromRequest(request: NextRequest) {
-  // get jwt from request headers
+  // If running locally, use hardcoded admin user
+  if (process.env.NODE_ENV === 'development') {
+    const adminUser = await prisma.user.findUnique({
+      where: { email: 'brent@neutral.us', role: Role.ADMIN },
+    });
+    if (!adminUser) {
+      throw new Error('Admin user not found');
+    }
+    return adminUser;
+  }
+
   const token = request.headers.get('Authorization');
 
   if (!token) {

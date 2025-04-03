@@ -29,7 +29,7 @@ import {
   calculateTodayLinePosition,
 } from './Portfolio/portfolioHelpers';
 import { DASHBOARD_POSTFOLIO_TEST_ID } from 'e2e/testIds';
-
+import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 const CustomTooltip: React.FC<CustomTooltipProps> = ({
   active,
   payload,
@@ -96,6 +96,9 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     enabled: loggedIn,
   });
 
+  const equityFileLastUpdatedString = data?.equityFileLastUpdated
+    ? new Date(data.equityFileLastUpdated).toLocaleDateString()
+    : null;
   const metrics = getMetrics(data || null);
   const chartData = getChartData(data || null);
   const todayLinePosition = calculateTodayLinePosition(chartData);
@@ -114,6 +117,22 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
         ))}
       </Grid>
 
+      {chartData.length > 0 && equityFileLastUpdatedString && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'flex-end',
+          }}
+        >
+          <CheckCircleOutlineIcon
+            sx={{ fontSize: 14, mr: 1, color: 'rgba(0, 0, 0, 0.5)' }}
+          />
+          <Typography variant="caption" sx={{ color: 'rgba(0, 0, 0, 0.5)' }}>
+            Projections last updated {equityFileLastUpdatedString}
+          </Typography>
+        </Box>
+      )}
       {chartData.length > 0 && (
         <Box sx={{ height: 300, mt: 4, display: { xs: 'none', sm: 'block' } }}>
           <ResponsiveContainer width="100%" height="100%">

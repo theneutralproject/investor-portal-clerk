@@ -42,7 +42,7 @@ const ProjectImage = styled('img')({
 
 const TableHeader = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: '300px 1fr 1fr 1fr 1fr',
+  gridTemplateColumns: '300px 100px 120px 120px 120px 120px',
   padding: theme.spacing(1.5),
   borderBottom: `1px solid ${theme.palette.divider}`,
   minWidth: 900,
@@ -50,7 +50,7 @@ const TableHeader = styled(Box)(({ theme }) => ({
 
 const TableRow = styled(Box)(({ theme }) => ({
   display: 'grid',
-  gridTemplateColumns: '300px 1fr 1fr 1fr 1fr',
+  gridTemplateColumns: '300px 100px 120px 120px 120px 120px',
   padding: theme.spacing(1.5),
   alignItems: 'center',
   minWidth: 900,
@@ -128,7 +128,6 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
     );
   }
 
-  console.log(data);
   return (
     <>
       <StyledCard>
@@ -137,6 +136,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
             <Box /> {/* Empty space for image and name column */}
             <StyledHeader>Type</StyledHeader>
             <StyledHeader>Committed</StyledHeader>
+            <StyledHeader>Closing Date</StyledHeader>
             <StyledHeader>Distributions to Date</StyledHeader>
             <StyledHeader>Projected Return</StyledHeader>
           </TableHeader>
@@ -177,6 +177,11 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                     {formatCurrency(deal.committedAmount)}
                   </Typography>
                   <Typography variant="body2">
+                    {deal.closingDate
+                      ? new Date(deal.closingDate).toLocaleDateString()
+                      : '-'}
+                  </Typography>
+                  <Typography variant="body2">
                     {formatCurrency(deal.distributionsToDate)}
                   </Typography>
                   <Typography variant="body2">
@@ -188,6 +193,18 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
           </CardContent>
         </ScrollContainer>
       </StyledCard>
+      <Typography
+        variant="subtitle2"
+        sx={{ mt: 2, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
+      >
+        The financial projections on the Neutral Investor Portal are estimates
+        based on current assumptions and are updated monthly for transparency.
+        However, they are not guarantees and may change due to market
+        conditions. Real estate investments are illiquid, and past performance
+        does not ensure future results. Returns depend on factors like property
+        performance, investment timing, and economic conditions. All figures are
+        illustrative, and Neutral is not a cryptocurrency platform.
+      </Typography>
 
       <DashboardDealConversionModal
         conversionId={selectedConversionId}
