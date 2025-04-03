@@ -59,6 +59,7 @@ export const zPortfolioReturnsSchema = z.object({
   portfolioStats: zReturnsPortfolioStatsSchema,
   dealStats: z.array(zReturnsDealStatsSchema),
   consolidatedSchedule: z.array(zReturnsDateObjectSchema),
+  equityFileLastUpdated: z.date().nullable(),
 });
 export type PortfolioReturnsResponse = z.infer<typeof zPortfolioReturnsSchema>;
 
