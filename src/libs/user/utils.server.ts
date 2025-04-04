@@ -52,7 +52,9 @@ const getHsUserData = (
     userData.notifyUserOnCreate === undefined
       ? true
       : userData.notifyUserOnCreate
-  ).toString();
+  )
+    .toString()
+    .toUpperCase();
 
   if (address) {
     hsUserData.properties.address = address.street;
