@@ -249,6 +249,7 @@ export async function POST(request: NextRequest) {
           firstName: firstname.trim(),
           lastName: lastname.trim(),
           hubspotId: hs_object_id,
+          notifyUserOnCreate: false,
         } as UserCreateSchema;
         if (cleanPhone) dbUserData.phoneNumber = cleanPhone;
         dbUserData.hubspotId = dbUserData.hubspotId ?? '';
