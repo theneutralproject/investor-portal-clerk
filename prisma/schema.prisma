@@ -30,6 +30,7 @@ model User {
   dateOfBirth                  DateTime?
   dateCreated                  DateTime?              @default(now())
   dateUpdated                  DateTime?              @updatedAt
+  ActivityFeedItem             ActivityFeedItem[]
   address                      Address?
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
@@ -38,7 +39,6 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
-  ActivityFeedItem             ActivityFeedItem[]
 }
 
 model Deal {
@@ -193,6 +193,7 @@ model Project {
   equityReturnsFile    String
   displayName          String                  @default("")
   deals                Deal[]
+  equityMilestoneFiles EquityMilestoneFile[]
   documents            ProjectDocument[]
   investmentStats      ProjectInvestmentStats?
   milestones           ProjectMilestones?
@@ -200,7 +201,6 @@ model Project {
   pictures             ProjectPicture[]
   propertyStats        ProjectPropertyStats?
   ProjectReport        ProjectReport[]
-  equityMilestoneFiles EquityMilestoneFile[]
 }
 
 model ProjectPropertyStats {
@@ -302,13 +302,13 @@ model ProjectDocument {
 
 model ProjectReport {
   id          Int       @id @default(autoincrement())
-  name        String
   projectId   Int
   dateCreated DateTime  @default(now())
   dateUpdated DateTime? @updatedAt
   quarter     Int
   year        Int
   path        String
+  name        String
   project     Project   @relation(fields: [projectId], references: [id])
 }
 
@@ -379,13 +379,13 @@ model ActivityFeedItem {
 model EquityMilestoneFile {
   id         Int      @id @default(autoincrement())
   projectId  Int
-  project    Project  @relation(fields: [projectId], references: [id])
-  fileName   String // Original filename without version number
-  filePath   String // Path with versioned filename
-  publicUrl  String // Public URL to access the file
+  fileName   String
+  filePath   String
+  publicUrl  String
   versionNum Int
-  uploadedBy String // Admin user email
+  uploadedBy String
   createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id])
 
   @@unique([projectId, fileName, versionNum])
 }
