@@ -36,7 +36,7 @@ export const zUserCreateSchema = z.object({
   address: zAddressCreateSchema.optional(),
   dateOfBirth: z.coerce.date().nullish(),
   projectSlug: z.string().optional(), // used to invite user to review project documents when invited from the admin portal
-  notifyUserOnCreate: z.boolean().default(true), // used to determine if the user should be notified when created from the admin portal
+  notifyUserOnCreate: z.boolean().optional(), // used to determine if the user should be notified when created from the admin portal
 });
 
 export type UserCreateSchema = z.infer<typeof zUserCreateSchema>;

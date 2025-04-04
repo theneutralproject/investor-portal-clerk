@@ -45,8 +45,13 @@ const getHsUserData = (
   if ('clerkId' in userData && userData.clerkId)
     hsUserData.properties.userid = userData.clerkId;
   if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
+
+  // default notifyUserOnCreate to true if not provided, so that they will enroll in email flow
   hsUserData.properties.notify_user_on_create = (
-    userData.notifyUserOnCreate ?? true
+    userData.notifyUserOnCreate === null ||
+    userData.notifyUserOnCreate === undefined
+      ? true
+      : userData.notifyUserOnCreate
   ).toString();
 
   if (address) {

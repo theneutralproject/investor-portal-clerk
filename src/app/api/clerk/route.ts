@@ -78,7 +78,6 @@ export async function POST(request: NextRequest): Promise<Response> {
       lastName: clerkUser?.lastName || '',
       phoneNumber,
       address: undefined,
-      notifyUserOnCreate: true,
     };
 
     if (!email) {
