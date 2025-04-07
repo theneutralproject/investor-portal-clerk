@@ -130,6 +130,7 @@ export async function createUserInDbAndHubspot(
       };
     }
     Logger.log({ message: 'begin creating user in db', extra: userCreateData });
+    delete userCreateData.notifyUserOnCreate;
     const dbUser = await prisma.user.create({
       data: userCreateData,
     });
