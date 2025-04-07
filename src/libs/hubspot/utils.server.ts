@@ -613,6 +613,14 @@ export function initHubspotDealProps(
     dealData.dealStage ?? 1,
     project.slug
   );
+
+  if (dealData.closingDate) {
+    properties.push({
+      name: 'closedate',
+      value: formatDateForHubspot(dealData.closingDate),
+    });
+  }
+
   return {
     properties: [
       ...properties,

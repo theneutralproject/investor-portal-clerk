@@ -23,6 +23,9 @@ import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf';
 import DescriptionIcon from '@mui/icons-material/Description';
 import Logger from '@/libs/logger';
 import { toast } from 'react-toastify';
+import { captureDocumentDownloadEvent } from '@/libs/posthog/events';
+import { usePostHog } from 'posthog-js/react';
+import { PostHog } from 'posthog-js';
 
 const titleMap = {
   [DealDocumentType.K1]: 'K1',
@@ -44,16 +47,23 @@ interface Document {
   downloadUrl: string;
 }
 
-const handleDownload = async (downloadUrl: string, fileName: string) => {
+const handleDownload = async (doc: Document, posthog: PostHog) => {
   try {
-    const response = await fetch(downloadUrl);
+    const response = await fetch(doc.downloadUrl);
     if (!response.ok) throw new Error('Download failed');
+
+    captureDocumentDownloadEvent(posthog, {
+      documentId: doc.id,
+      documentName: doc.name,
+      projectName: doc.projectName,
+      dateCreated: doc.dateCreated,
+    });
 
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.setAttribute('download', fileName);
+    link.setAttribute('download', doc.name);
     document.body.appendChild(link);
     link.click();
     link.parentNode?.removeChild(link);
@@ -63,8 +73,8 @@ const handleDownload = async (downloadUrl: string, fileName: string) => {
       error instanceof Error ? error.message : 'An unknown error occurred';
     Logger.error(error, null, {
       message: 'Error downloading document',
-      fileName,
-      downloadUrl,
+      fileName: doc.name,
+      downloadUrl: doc.downloadUrl,
       error: errorMessage,
     });
     toast.error(
@@ -84,6 +94,7 @@ const DocumentList = ({
   isLoading: boolean;
   type: 'tax' | 'investment';
 }) => {
+  const posthog = usePostHog();
   const groupDocumentsByProject = (docs: Document[]) => {
     return docs.reduce((acc: Record<string, Document[]>, doc) => {
       const project = doc.projectName || 'Other';
@@ -188,8 +199,21 @@ const DocumentList = ({
               </TableHead>
               <TableBody>
                 {groupedDocs[project]?.map(doc => (
-                  <TableRow key={doc.id}>
-                    <TableCell sx={{ display: 'flex', alignItems: 'center' }}>
+                  <TableRow
+                    key={doc.id}
+                    sx={{
+                      borderBottom: '1px solid #e0e0e0 !important',
+                      height: '65px',
+                    }}
+                  >
+                    <TableCell
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        border: 'none',
+                        height: '65px',
+                      }}
+                    >
                       {doc.path.endsWith('.pdf') ? (
                         <PictureAsPdfIcon />
                       ) : (
@@ -198,26 +222,41 @@ const DocumentList = ({
                       <Box sx={{ ml: 1 }}>{doc.name}</Box>
                     </TableCell>
                     {type === 'tax' && (
-                      <TableCell>
+                      <TableCell
+                        sx={{
+                          border: 'none',
+                        }}
+                      >
                         {doc.taxYear || new Date(doc.dateCreated).getFullYear()}
                       </TableCell>
                     )}
                     {type === 'investment' && (
-                      <TableCell>
+                      <TableCell
+                        sx={{
+                          border: 'none',
+                        }}
+                      >
                         {titleMap[doc.type as DealDocumentType]}
                       </TableCell>
                     )}
-                    <TableCell>
+                    <TableCell
+                      sx={{
+                        border: 'none',
+                      }}
+                    >
                       {format(new Date(doc.dateCreated), 'MMM d, yyyy')}
                     </TableCell>
-                    <TableCell align="right">
+                    <TableCell
+                      align="right"
+                      sx={{
+                        border: 'none',
+                      }}
+                    >
                       <Button
                         variant="grayPill"
                         size="small"
                         startIcon={<FileDownloadIcon />}
-                        onClick={() =>
-                          handleDownload(doc.downloadUrl, doc.name)
-                        }
+                        onClick={() => handleDownload(doc, posthog)}
                       >
                         Download
                       </Button>

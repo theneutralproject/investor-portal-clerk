@@ -7,6 +7,7 @@ import { type MatchResponseObject, MatchConfidence } from './schema';
 import { storageClient } from '../supabase';
 import type { DealWithFullOrgAndSlimProject } from '../types';
 import Logger from '../logger';
+import { isFileLike } from '../document/utils.client';
 
 // eslint-disable-next-line
 const PdfParse = require('pdf-parse');
@@ -17,7 +18,17 @@ const PdfParse = require('pdf-parse');
  * @returns an admin user if the jwt is valid
  */
 export async function getAdminFromRequest(request: NextRequest) {
-  // get jwt from request headers
+  // If running locally, use hardcoded admin user
+  if (process.env.NODE_ENV === 'development') {
+    const adminUser = await prisma.user.findUnique({
+      where: { email: 'brent@neutral.us', role: Role.ADMIN },
+    });
+    if (!adminUser) {
+      throw new Error('Admin user not found');
+    }
+    return adminUser;
+  }
+
   const token = request.headers.get('Authorization');
 
   if (!token) {
@@ -157,24 +168,6 @@ interface FileDetails {
   name: string;
   type: string;
   size?: number;
-}
-
-interface FileWrapper {
-  name: string;
-  type: string;
-  size?: number;
-  arrayBuffer(): Promise<ArrayBuffer>;
-}
-
-// Helper function to determine if value is File-like
-function isFileLike(value: unknown): value is FileWrapper {
-  return (
-    value !== null &&
-    typeof value === 'object' &&
-    'name' in value &&
-    'type' in value &&
-    typeof (value as FileWrapper).arrayBuffer === 'function'
-  );
 }
 
 // Helper function to safely get file details
