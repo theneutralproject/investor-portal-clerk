@@ -23,6 +23,7 @@ import {
   createInvestmentAvailableActivityItem,
   createTaxDocAvailableActivityItem,
 } from '@/libs/activityFeedItem/utils.server';
+import { shareTaxFormForDeal } from '@/libs/hubspot/utils.server';
 
 /**
  * Get dealdocs with download URL by dealId
@@ -114,6 +115,10 @@ export async function POST(request: NextRequest) {
     return jsonResponse(getErrorMessage(error), 500);
   }
 
+  if (!adminUser) {
+    return errorResponse('admin user not found', 500, { request });
+  }
+  console.log('POST /api/admin/deals/documents/:dealId');
   let dealId: number;
   try {
     const url = new URL(request.url);
@@ -193,6 +198,38 @@ export async function POST(request: NextRequest) {
               userId: adminUser.id,
               itemId: doc.id,
             });
+
+            const deal = await prisma.deal.findFirst({
+              where: {
+                id: dealId,
+              },
+              select: {
+                hubspotId: true,
+                organization: {
+                  select: {
+                    ownedBy: {
+                      select: {
+                        id: true,
+                        email: true,
+                        hubspotId: true,
+                        firstName: true,
+                        lastName: true,
+                      },
+                    },
+                  },
+                },
+              },
+            });
+            if (!deal?.hubspotId) {
+              return errorResponse('deal does not have hubspotId', 500, {
+                request,
+              });
+            }
+            // trigger email notification in Hubspot
+            await shareTaxFormForDeal(
+              deal.hubspotId,
+              deal.organization.ownedBy.hubspotId
+            );
           } else {
             const dealProject = await prisma.deal.findFirst({
               where: {
