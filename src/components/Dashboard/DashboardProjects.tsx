@@ -243,7 +243,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                               {displayDebtInterest(project)}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              Debt Return
+                              Annualized Debt Return
                             </Typography>
                           </>
                         )}
@@ -259,7 +259,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                               {displayEquityIRR(project)}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              Equity Return
+                              Annualized Equity Return
                             </Typography>
                           </>
                         )}
