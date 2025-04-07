@@ -14,6 +14,7 @@ import {
   startOfMonth,
   differenceInCalendarDays,
   formatISO,
+  isLeapYear,
 } from 'date-fns';
 import type {
   PortfolioReturnsResponse,
@@ -212,8 +213,10 @@ function _getDebtPayoutSchedule(
         daysInPeriod = differenceInCalendarDays(date, lastPaymentDate);
       }
 
+      const daysInYear = isLeapYear(date) ? 366 : 365;
+
       const interestAccrued =
-        (daysInPeriod / 365) * amount * (interestRate / 100);
+        (daysInPeriod / daysInYear) * amount * (interestRate / 100);
 
       distributionAmount = interestAccrued;
 
