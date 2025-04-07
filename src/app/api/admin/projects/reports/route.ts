@@ -95,12 +95,14 @@ export async function POST(request: NextRequest) {
   let projectSlug: string | null = null;
   let quarter: number;
   let year: number;
+  let notifyInvestors = 'true';
   try {
     const url = new URL(request.url);
     const queryParams = new URLSearchParams(url.search);
     projectSlug = queryParams.get('projectSlug') ?? null;
     quarter = parseInt(queryParams.get('quarter') ?? '');
     year = parseInt(queryParams.get('year') ?? '');
+    notifyInvestors = queryParams.get('notifyInvestors') ?? 'true';
     if (!projectSlug) {
       throw new Error('projectSlug is required in query');
     }
@@ -158,23 +160,28 @@ export async function POST(request: NextRequest) {
           name,
         },
       });
+      let activityCreateResult = null;
+      if (notifyInvestors === 'true') {
+        await shareProjectReportWithUsers(project.slug);
 
-      await shareProjectReportWithUsers(project.slug);
+        const investors = await getListOfInvestors(project);
+        if (!investors || investors.length === 0) {
+          return errorResponse('No investors found for this project', 404, {
+            request,
+          });
+        }
 
-      const investors = await getListOfInvestors(project);
-      if (!investors || investors.length === 0) {
-        return errorResponse('No investors found for this project', 404, {
-          request,
-        });
+        activityCreateResult = await createActivityFeedItems(
+          investors,
+          project.name,
+          newReport
+        );
       }
-
-      const activityCreateResult = await createActivityFeedItems(
-        investors,
-        project.name,
-        newReport
-      );
       return jsonResponse(
-        { newReport, numActivityFeedItems: activityCreateResult.count },
+        {
+          newReport,
+          numActivityFeedItems: activityCreateResult?.count ?? 0,
+        },
         201
       );
     } catch (reportError) {
