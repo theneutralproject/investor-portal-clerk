@@ -94,10 +94,10 @@ test.describe('api/dashboard/returns test', () => {
     const lastScheduleEntry =
       stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
     expect(lastScheduleEntry?.debtDistributionsCumulative).toBeCloseTo(
-      141232.88,
+      141260.27,
       2
     );
-    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(141232.88, 2);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(141260.27, 2);
   });
 
   test('[GET] get dashboard returns for multiple DEBT deals starting on the same day', async ({
@@ -145,10 +145,10 @@ test.describe('api/dashboard/returns test', () => {
     const lastScheduleEntry =
       stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
     expect(lastScheduleEntry?.debtDistributionsCumulative).toBeCloseTo(
-      282465.75,
+      282520.55,
       2
     );
-    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(282465.75, 2);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(282520.55, 2);
   });
 
   test('[GET] get dashboard returns for multiple DEBT deals starting on offset days', async ({
@@ -197,13 +197,13 @@ test.describe('api/dashboard/returns test', () => {
       stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
 
     expect(lastScheduleEntry?.debtDistributionsCumulative).toBeCloseTo(
-      281232.88,
+      281287.67,
       2
     );
-    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(281232.88, 2);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(281287.67, 2);
     expect(stats.portfolioStats?.principalInvested).toBe(200000);
     expect(stats.portfolioStats?.projectedDebtDistributions).toBeCloseTo(
-      281232.88,
+      281287.67,
       2
     );
   });
@@ -340,7 +340,7 @@ test.describe('api/dashboard/returns test', () => {
     const cumulativeDistribution =
       (lastScheduleEntry?.debtDistributionsCumulative ?? 0) +
       (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-    expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251);
+    expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21278);
   });
 
   test('[GET] get dashboard returns for two EQUITY deals', async ({

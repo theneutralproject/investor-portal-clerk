@@ -54,6 +54,7 @@ export const env = createEnv({
     DOCUSIGN_SECRET_KEY: z.string(),
     SENTRY_AUTH_TOKEN: z.string().optional(),
     SENTRY_DSN: z.string().optional(),
+    DEBT_INTEREST_PERIOD_OVERRIDES: z.string().optional(),
   },
 
   /**
@@ -138,6 +139,7 @@ export const env = createEnv({
     SENTRY_DSN: process.env.SENTRY_DSN,
     NEXT_PUBLIC_CURRENT_TERMS_REVISION:
       process.env.NEXT_PUBLIC_CURRENT_TERMS_REVISION,
+    DEBT_INTEREST_PERIOD_OVERRIDES: process.env.DEBT_INTEREST_PERIOD_OVERRIDES,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

@@ -13,6 +13,7 @@ import {
   endOfMonth,
   startOfMonth,
   differenceInCalendarDays,
+  formatISO,
 } from 'date-fns';
 import type {
   PortfolioReturnsResponse,
@@ -150,6 +151,25 @@ export function getPayoutScheduleStartDate(closingDate: Date) {
   return new Date(endOfMonth(firstDayOfNextQuarter).setHours(0, 0, 0, 0));
 }
 
+function parseDebtInterestOverrides(): Map<string, number> {
+  const envVar = process.env.DEBT_INTEREST_PERIOD_OVERRIDES;
+  const map = new Map<string, number>();
+
+  if (!envVar) return map;
+
+  for (const pair of envVar.split(';')) {
+    const [dateStr, valueStr] = pair.split(',');
+    if (dateStr && valueStr) {
+      const parsed = parseInt(valueStr.trim(), 10);
+      if (!isNaN(parsed)) {
+        map.set(dateStr.trim(), parsed);
+      }
+    }
+  }
+
+  return map;
+}
+
 function _getDebtPayoutSchedule(
   amount: number,
   interestRate: number,
@@ -171,6 +191,7 @@ function _getDebtPayoutSchedule(
   // Default payment frequency
   const paymentFreq = paymentFreqMonths === 0 ? termMonths : paymentFreqMonths;
 
+  const dayOverrides = parseDebtInterestOverrides();
   let date = getPayoutScheduleStartDate(closingDate);
   let lastPaymentDate = closingDate;
 
@@ -181,12 +202,14 @@ function _getDebtPayoutSchedule(
     let distributionAmount = 0;
 
     const isPaymentPeriod = i % paymentFreq === 0;
+    const dateKey = formatISO(date, { representation: 'date' }); // e.g., 2025-04-01
 
     if (isPaymentPeriod || i === termMonths) {
-      let daysInPeriod = differenceInCalendarDays(date, lastPaymentDate);
-
-      if (date.toDateString() === 'Tue Apr 01 2025') {
-        daysInPeriod = 89;
+      let daysInPeriod: number;
+      if (dayOverrides.has(dateKey)) {
+        daysInPeriod = dayOverrides.get(dateKey)!;
+      } else {
+        daysInPeriod = differenceInCalendarDays(date, lastPaymentDate);
       }
 
       const interestAccrued =
