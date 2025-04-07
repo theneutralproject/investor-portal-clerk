@@ -225,7 +225,7 @@ export async function POST(request: NextRequest) {
     // create user if not found
     i++;
     console.log('i:', i);
-    if (i > 3) break;
+    if (i > 2) break;
     const { email, firstname, lastname, hs_object_id, phone } =
       dealcontact.contact.properties;
     if (!email || !firstname || !lastname || !hs_object_id) {
