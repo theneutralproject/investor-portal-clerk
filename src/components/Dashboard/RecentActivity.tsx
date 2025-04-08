@@ -34,6 +34,18 @@ const RecentActivity: React.FC = () => {
         const response = await fetch('/api/activity');
 
         if (!response.ok) {
+          if (response.status === 401) {
+            setError('Sign in to see recent activity');
+            setLoading(false);
+            return;
+          }
+
+          if (response.status === 404) {
+            setActivities([]);
+            setLoading(false);
+            return;
+          }
+
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
