@@ -127,7 +127,7 @@ const RecentActivity: React.FC = () => {
         <Box sx={{ maxHeight: '400px', overflowY: 'auto', px: 2 }}>
           {activities.length === 0 ? (
             <Typography variant="body2" sx={{ py: 4, textAlign: 'center' }}>
-              No activity found
+              No activity yet
             </Typography>
           ) : (
             activities.map((activity, index) => (
