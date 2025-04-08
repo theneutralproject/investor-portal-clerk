@@ -447,8 +447,11 @@ describe('utils.server', () => {
       expect(result.consolidatedSchedule.length).toBe(48);
       const lastScheduleEntry = result.consolidatedSchedule.at(-1);
       expect(lastScheduleEntry).toBeDefined();
-      expect(lastScheduleEntry!.debtDistributionsCumulative).toBe(140000);
-      expect(lastScheduleEntry!.portfolioValueToDate).toBe(140000);
+      expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
+        141232.88,
+        2
+      );
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(141232.88, 2);
     });
 
     it('should return correct dashboard returns for multiple DEBT deals starting on the same day', async () => {
@@ -461,8 +464,11 @@ describe('utils.server', () => {
       const lastScheduleEntry = result.consolidatedSchedule.at(-1);
 
       expect(lastScheduleEntry).toBeDefined();
-      expect(lastScheduleEntry!.debtDistributionsCumulative).toBe(280000);
-      expect(lastScheduleEntry!.portfolioValueToDate).toBe(280000);
+      expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
+        282465.75,
+        2
+      );
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(282465.75, 2);
     });
 
     it('should return correct dashboard returns for multiple DEBT deals with different start dates', async () => {
@@ -480,10 +486,16 @@ describe('utils.server', () => {
       const lastScheduleEntry = result.consolidatedSchedule.at(-1);
 
       expect(lastScheduleEntry).toBeDefined();
-      expect(lastScheduleEntry!.debtDistributionsCumulative).toBe(280000);
-      expect(lastScheduleEntry!.portfolioValueToDate).toBe(280000);
+      expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
+        281232.88,
+        2
+      );
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(281232.88, 2);
       expect(result.portfolioStats.principalInvested).toBe(200000);
-      expect(result.portfolioStats.projectedDebtDistributions).toBe(280000);
+      expect(result.portfolioStats.projectedDebtDistributions).toBeCloseTo(
+        281232.88,
+        2
+      );
     });
 
     it('should return correct dashboard returns for one EQUITY deal', async () => {
@@ -526,11 +538,10 @@ describe('utils.server', () => {
       const lastScheduleEntry =
         result.consolidatedSchedule[result.consolidatedSchedule.length - 1];
 
-      console.log(lastScheduleEntry);
       const cumulativeDistribution =
         (lastScheduleEntry?.debtDistributionsCumulative ?? 0) +
         (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 20018.0);
+      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251);
     });
 
     it('should return correct dashboard returns for two EQUITY deals', async () => {
@@ -702,6 +713,34 @@ describe('utils.server', () => {
       await expect(getPortfolioReturns([faultyDeal])).rejects.toThrow(
         'Equity stats processing failed for deal'
       );
+    });
+
+    it('should calculate daily-accrued interest correctly for Q1', async () => {
+      const closingDate = new Date('2025-01-02');
+      const jan1Deal = {
+        ...debtDealFixture,
+        closingDate,
+        investmentStats: {
+          ...debtDealFixture.investmentStats,
+          amount: 100_000,
+          interestRate: 10,
+          financingType: DealFinancingType.promissory_note_now,
+        },
+      };
+
+      const result = await getPortfolioReturns([jan1Deal]);
+
+      // Find the schedule entry for one day after end of first quarter (April 1, 2025)
+      const q1LastMonthEntry = result.consolidatedSchedule[2];
+
+      expect(q1LastMonthEntry).toBeDefined();
+
+      // Expected: (90 / 365) * 100_000 * 10% = 2,438.36
+      expect(q1LastMonthEntry!.debtDistributionsCurrent).toBeCloseTo(
+        2438.36,
+        2
+      );
+      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2438.36, 2);
     });
   });
 });

@@ -8,7 +8,14 @@ import {
   type ProjectMilestones,
 } from '@prisma/client';
 import { parse } from 'csv-parse';
-import { add, endOfMonth, startOfMonth } from 'date-fns';
+import {
+  add,
+  endOfMonth,
+  startOfMonth,
+  differenceInCalendarDays,
+  formatISO,
+  isLeapYear,
+} from 'date-fns';
 import type {
   PortfolioReturnsResponse,
   ProjectMilestoneType,
@@ -145,6 +152,25 @@ export function getPayoutScheduleStartDate(closingDate: Date) {
   return new Date(endOfMonth(firstDayOfNextQuarter).setHours(0, 0, 0, 0));
 }
 
+function parseDebtInterestOverrides(): Map<string, number> {
+  const envVar = process.env.DEBT_INTEREST_PERIOD_OVERRIDES;
+  const map = new Map<string, number>();
+
+  if (!envVar) return map;
+
+  for (const pair of envVar.split(';')) {
+    const [dateStr, valueStr] = pair.split(',');
+    if (dateStr && valueStr) {
+      const parsed = parseInt(valueStr.trim(), 10);
+      if (!isNaN(parsed)) {
+        map.set(dateStr.trim(), parsed);
+      }
+    }
+  }
+
+  return map;
+}
+
 function _getDebtPayoutSchedule(
   amount: number,
   interestRate: number,
@@ -155,13 +181,7 @@ function _getDebtPayoutSchedule(
   const payoutSchedule: ReturnsDateObject[] = [];
   let distributionsCumulative = 0;
   let portfolioValueToDate = 0;
-  let distributionDivisor = 4;
-  let paymentFreq = paymentFreqMonths; //default to every 3 months
-  if (paymentFreq === 0) {
-    // one time payment at the end of the term
-    paymentFreq = termMonths;
-    distributionDivisor = 1;
-  }
+
   const stats = {
     interestRateOrIrrPerc: interestRate,
     totalGrossReturn: 0,
@@ -169,40 +189,53 @@ function _getDebtPayoutSchedule(
     investmentMultiple: 0,
   };
 
+  // Default payment frequency
+  const paymentFreq = paymentFreqMonths === 0 ? termMonths : paymentFreqMonths;
+
+  const dayOverrides = parseDebtInterestOverrides();
   let date = getPayoutScheduleStartDate(closingDate);
+  let lastPaymentDate = closingDate;
+
   for (let i = 1; i <= termMonths; i++) {
     // Move to next month
     date = startOfMonth(add(date, { months: 1 }));
 
-    // Calculate distribution amount based on payment frequency
     let distributionAmount = 0;
-    if (i % paymentFreq === 0 && i !== 0) {
-      if (paymentFreq === termMonths) {
-        // onetime payment at the end of the term:
-        distributionAmount =
-          (((amount * interestRate) / 100) * termMonths) / 12;
+
+    const isPaymentPeriod = i % paymentFreq === 0;
+    const dateKey = formatISO(date, { representation: 'date' }); // e.g., 2025-04-01
+
+    if (isPaymentPeriod || i === termMonths) {
+      let daysInPeriod: number;
+      if (dayOverrides.has(dateKey)) {
+        daysInPeriod = dayOverrides.get(dateKey)!;
       } else {
-        distributionAmount =
-          (amount * interestRate) / 100 / distributionDivisor;
+        daysInPeriod = differenceInCalendarDays(date, lastPaymentDate);
       }
+
+      const daysInYear = isLeapYear(date) ? 366 : 365;
+
+      const interestAccrued =
+        (daysInPeriod / daysInYear) * amount * (interestRate / 100);
+
+      distributionAmount = interestAccrued;
+
+      // Include principal only in final payment
+      if (i === termMonths) {
+        distributionAmount += amount;
+
+        stats.totalGrossReturn = distributionsCumulative + distributionAmount;
+        stats.totalNetReturn = distributionsCumulative - amount;
+        stats.investmentMultiple =
+          (distributionsCumulative + distributionAmount) / amount;
+      }
+
+      lastPaymentDate = date;
     }
 
-    // Handle final payment (principal + interest)
-    if (i === termMonths) {
-      distributionAmount += amount;
-      // portfolioValueToDate -= amount;
-
-      stats.totalGrossReturn = distributionsCumulative + distributionAmount;
-      stats.totalNetReturn = distributionsCumulative - amount;
-      stats.investmentMultiple =
-        (distributionsCumulative + distributionAmount) / amount;
-    }
-
-    // Calculate running totals
     distributionsCumulative += distributionAmount;
     portfolioValueToDate += distributionAmount;
 
-    // Round all numerical values for consistency
     const entry: ReturnsDateObject = {
       date,
       debtDistributionsCurrent: distributionAmount,
@@ -210,13 +243,14 @@ function _getDebtPayoutSchedule(
       equityDistributionsCurrent: 0,
       equityDistributionCumulative: 0,
       equityAccruedPreferredReturn: 0,
-      portfolioValueToDate: portfolioValueToDate,
+      portfolioValueToDate,
       principalInvestedToDate: amount,
       principalInvestedCurrent: i === 1 ? amount : 0,
     };
 
     payoutSchedule.push(entry);
   }
+
   return { schedule: payoutSchedule, stats };
 }
 
