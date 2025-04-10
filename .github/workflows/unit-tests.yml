@@ -68,6 +68,7 @@ env:
   JWT_SECRET: ${{ secrets.JWT_SECRET }}
   SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
   SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
+  DEBT_INTEREST_PERIOD_OVERRIDES: ${{ secrets.DEBT_INTEREST_PERIOD_OVERRIDES }}
 
 jobs:
   test:
