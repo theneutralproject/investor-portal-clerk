@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useAuth, useUser } from '@clerk/nextjs';
 import posthog from 'posthog-js';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTermsContext } from '@/app/context/TermsContext';
 import useTermsStatus from '@/app/hooks/useTermsStatus';
 import axios from 'axios';
 import Logger from '@/libs/logger';
+import { identifyUser } from '@/libs/posthog/events';
 
 /**
  * UserIdentifier component is responsible for:
@@ -21,6 +22,7 @@ import Logger from '@/libs/logger';
  */
 export default function UserIdentifier() {
   const { user } = useUser();
+  const auth = useAuth();
   const router = useRouter();
   const pathname = usePathname();
   const isOnboarding = pathname === '/onboarding';
@@ -51,11 +53,17 @@ export default function UserIdentifier() {
     if (user) {
       const { id, primaryEmailAddress, firstName, lastName } = user;
 
+      if (auth?.actor?.sub) {
+        posthog.opt_out_capturing();
+      } else {
+        posthog.opt_in_capturing();
+      }
+
       // Identify user in PostHog analytics
-      posthog.identify(primaryEmailAddress?.toString(), {
+      identifyUser(posthog, {
         email: primaryEmailAddress?.toString(),
-        firstname: firstName,
-        lastname: lastName,
+        firstName,
+        lastName,
         id: id,
       });
 
@@ -91,7 +99,7 @@ export default function UserIdentifier() {
         void fetchUser();
       }
     }
-  }, [user, router, pathname, isOnboarding, redirectUrl]);
+  }, [user, router, pathname, isOnboarding, redirectUrl, auth?.actor?.sub]);
 
   /**
    * Effect that updates the terms acceptance status when data is available.

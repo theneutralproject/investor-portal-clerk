@@ -36,6 +36,7 @@ import { DealStage } from '@/libs/deal/schema';
 import { useRedirect } from '@/app/context/RedirectContext';
 import { sendGTMEvent } from '@next/third-parties/google';
 import { INVESTMENTS } from 'e2e/testIds';
+import { capturePageView } from '@/libs/posthog/events';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -67,10 +68,10 @@ export default function Page({ params }: NextClientPage) {
       eventLabel: `Viewed ${window.location.href}`,
     });
 
-    posthog.capture(POSTHOG_EVENTS.PROJECT_PAGE_VIEWED, {
-      current_url: window.location.href,
-      user_id: user?.id,
-      logged_in: loggedIn,
+    capturePageView(posthog, {
+      url: window.location.href,
+      userId: user?.id,
+      loggedIn,
     });
   }, [user, loggedIn, posthog]);
 
