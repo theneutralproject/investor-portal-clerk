@@ -1,16 +1,8 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import {
-  Box,
-  Typography,
-  CircularProgress,
-  Tooltip,
-  Button,
-} from '@mui/material';
+import React, { useEffect } from 'react';
+import { Box, Typography, Tooltip, Button } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import axios from 'axios';
-import { toast } from 'react-toastify';
 import InfoIcon from '@mui/icons-material/Info';
 import SaveIcon from '@mui/icons-material/Save';
 import { usStates } from '@components/DealFlow/Helpers/DealFlowHelpers';
@@ -34,7 +26,6 @@ const profileSchema = z.object({
   id: z.number().optional(),
   firstName: z.string().min(1, 'First name is required'),
   lastName: z.string().min(1, 'Last name is required'),
-  phoneNumber: z.string().min(1, 'Phone number is required'),
   ssn: z.string().refine(
     val => {
       // Check for formatted SSN: ***-**-6789
@@ -55,10 +46,15 @@ const profileSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
-const AccountProfileDetails: React.FC = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [user, setUser] = useState<UserWithAddress | null>(null);
+interface AccountProfileDetailsProps {
+  user: UserWithAddress | null;
+  onUpdate: (updatedUser: UserWithAddress) => Promise<void>;
+}
 
+const AccountProfileDetails: React.FC<AccountProfileDetailsProps> = ({
+  user,
+  onUpdate,
+}) => {
   const {
     control,
     handleSubmit,
@@ -69,12 +65,11 @@ const AccountProfileDetails: React.FC = () => {
     defaultValues: {
       firstName: '',
       lastName: '',
-      phoneNumber: '',
       ssn: '',
       dateOfBirth: '',
       address: {
         street: '',
-        street2: '', //TODO
+        street2: '',
         city: '',
         state: '',
         zipcode: '',
@@ -84,77 +79,36 @@ const AccountProfileDetails: React.FC = () => {
   });
 
   useEffect(() => {
-    const fetchUser = async () => {
-      setIsLoading(true);
-      try {
-        const { data } = await axios.get<UserWithAddress>('/api/users');
-        setUser(data);
+    if (user) {
+      setValue('id', user.id);
+      setValue('firstName', user.firstName ?? '');
+      setValue('lastName', user.lastName ?? '');
+      setValue('ssn', user.ssn ?? '');
+      setValue('dateOfBirth', formatDate(user.dateOfBirth) ?? '');
 
-        setValue('id', data.id);
-        setValue('firstName', data.firstName ?? '');
-        setValue('lastName', data.lastName ?? '');
-        setValue('phoneNumber', data.phoneNumber ?? '');
-        setValue('ssn', data.ssn ?? '');
-        setValue('dateOfBirth', formatDate(data.dateOfBirth) ?? '');
+      setValue('address.street', user.address?.street ?? '');
+      // setValue('address.street2', user.address?.street2 ?? '');
+      setValue('address.city', user.address?.city ?? '');
+      setValue('address.state', user.address?.state ?? '');
+      setValue('address.zipcode', user.address?.zipcode ?? '');
+      setValue('address.country', 'United States');
 
-        setValue('address.street', data.address?.street ?? '');
-        // setValue('address.street2', data.address?.street2 ?? ''); //TODO
-        setValue('address.city', data.address?.city ?? '');
-        setValue('address.state', data.address?.state ?? '');
-        setValue('address.zipcode', data.address?.zipcode ?? '');
-        setValue('address.country', 'United States');
-
-        trigger();
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-        toast.error('Failed to load profile data');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    void fetchUser();
-  }, [setValue, trigger]);
+      trigger();
+    }
+  }, [user, setValue, trigger]);
 
   const onSubmit = async (data: ProfileFormValues) => {
-    setIsLoading(true);
-    try {
-      const dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
-      const address = data.address ? { ...data.address } : null;
+    const dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;
+    const address = data.address ? { ...data.address } : null;
 
-      const updatedUser = {
-        ...data,
-        dateOfBirth,
-        address,
-      };
+    const updatedUser = {
+      ...data,
+      dateOfBirth,
+      address,
+    };
 
-      const { data: response } = await axios.put<UserWithAddress>(
-        '/api/users',
-        updatedUser
-      );
-
-      setUser(response);
-      toast.success('Profile updated successfully');
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast.error('Failed to update profile');
-    } finally {
-      setIsLoading(false);
-    }
+    await onUpdate(updatedUser as UserWithAddress);
   };
-
-  if (isLoading && !user) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        height="200px"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <Box component="form" onSubmit={handleSubmit(onSubmit)}>
@@ -173,15 +127,6 @@ const AccountProfileDetails: React.FC = () => {
             control={control}
             name="lastName"
             label="Last Name"
-            required
-          />
-        </Grid>
-        <Grid size={12}>
-          <FormTextField<ProfileFormValues>
-            control={control}
-            name="phoneNumber"
-            label="Phone Number"
-            format="phone"
             required
           />
         </Grid>
@@ -298,14 +243,14 @@ const AccountProfileDetails: React.FC = () => {
         <Grid size={12} sx={{ mt: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
-              variant="contained"
+              variant="neutralYellow"
               color="primary"
               type="submit"
-              disabled={!isValid || !isDirty || isLoading}
+              disabled={!isValid || !isDirty}
               startIcon={<SaveIcon />}
               sx={{ mt: 2 }}
             >
-              {isLoading ? 'Saving...' : 'Save Changes'}
+              Save Changes
             </Button>
           </Box>
         </Grid>
