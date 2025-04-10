@@ -1,10 +1,9 @@
 import React from 'react';
 import { Box, Typography, Card, CardContent } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
-
-export const EncryptionCard = () => {
+export const EncryptionCard = ({ mt = 2 }) => {
   return (
-    <Card sx={{ mt: 2 }}>
+    <Card sx={{ mt }}>
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <LockIcon sx={{ fontSize: 20, color: 'text.secondary' }} />
