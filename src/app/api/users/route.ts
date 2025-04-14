@@ -68,16 +68,17 @@ export async function PUT(request: NextRequest) {
     return errorResponse('Requesting user not found', 404, { request });
   }
 
-  const requestBody = (await request.json()) as UserUpdateSchema;
-  let putData: UserUpdateSchema;
-  try {
-    putData = zUserUpdateSchema.parse(requestBody);
-  } catch (parseError) {
+  const requestBody = await request.json();
+  const result = zUserUpdateSchema.partial().strip().safeParse(requestBody);
+
+  if (!result.success) {
     return errorResponse('Input data malformed', 400, {
       request,
-      extra: { error: parseError },
+      extra: { error: result.error },
     });
   }
+
+  const putData = result.data as UserUpdateSchema;
 
   //TODO: use new updateUserInDbAndHubspot function instead of this, but might need to unsanitize ssn first
   const { address, ...userData } = putData;

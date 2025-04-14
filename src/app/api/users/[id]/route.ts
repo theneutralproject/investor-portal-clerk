@@ -87,16 +87,17 @@ export async function PUT(request: NextRequest) {
   }
 
   // update the user
-  const requestBody = (await request.json()) as UserUpdateSchema;
-  let putData: UserUpdateSchema;
-  try {
-    putData = zUserUpdateSchema.parse(requestBody);
-  } catch (parseError) {
-    return errorResponse('Input data malformatted', 400, {
+  const requestBody = await request.json();
+  const result = zUserUpdateSchema.partial().strip().safeParse(requestBody);
+
+  if (!result.success) {
+    return errorResponse('Input data malformed', 400, {
       request,
-      extra: { error: parseError },
+      extra: { error: result.error },
     });
   }
+
+  const putData = result.data as UserUpdateSchema;
 
   const { address, ...userUpdateData } = putData;
   //  Check if hubspot needs to be updated
