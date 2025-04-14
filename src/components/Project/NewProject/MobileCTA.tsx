@@ -10,10 +10,13 @@ interface MobileCTAProps {
 }
 
 const MobileCTA = ({ project, onInvest }: MobileCTAProps) => {
-  const fundingPercentage = Math.round(
-    (project.investmentStats.investmentRaised /
-      project.investmentStats.investmentGoal) *
-      100
+  const fundingPercentage = Math.min(
+    100,
+    Math.round(
+      (project.investmentStats.investmentRaised /
+        project.investmentStats.investmentGoal) *
+        100
+    )
   );
 
   return (
