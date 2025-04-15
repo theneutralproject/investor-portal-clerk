@@ -1,8 +1,6 @@
 import 'server-only';
 import {
-  DealFinancingType,
   type DealInvestmentStats,
-  DealStatus,
   DealUnitType,
   type ProjectInvestmentStats,
   type ProjectMilestones,
@@ -31,10 +29,17 @@ import {
   ProjectWithInvestmentStats,
 } from '../types';
 import Logger from '../logger';
+import {
+  generateConsolidatedSchedules,
+  generateResolvedSchedules,
+  getInitialPortfolioStats,
+} from './portfolio-returns';
 
 const finishedAsync = promisify(finished);
 
-export async function readEquityMilestoneData(csvUrl: string) {
+export async function readEquityMilestoneData(
+  csvUrl: string
+): Promise<ProjectMilestoneType[]> {
   Logger.log({ message: csvUrl, extra: { csvUrl } });
   if (!csvUrl) {
     console.error('CSV url not provided');
@@ -81,15 +86,17 @@ export async function readEquityMilestoneData(csvUrl: string) {
 export async function getEquityStatsFromProject(
   amount: number,
   equityReturnsFileUrl: string,
-  cUnitThresholdAmount: number
+  cUnitThresholdAmount: number,
+  equityMilestonesData?: ProjectMilestoneType[]
 ) {
   let unitType: DealUnitType = DealUnitType.AUNIT;
   let numberCUnits = 0;
   let numberAUnits = 0;
   let shareOfEquity = 0;
 
-  let equityMilestones: ProjectMilestoneType[] | undefined = undefined;
-  equityMilestones = await readEquityMilestoneData(equityReturnsFileUrl);
+  const equityMilestones: ProjectMilestoneType[] | undefined =
+    equityMilestonesData ||
+    (await readEquityMilestoneData(equityReturnsFileUrl));
 
   try {
     const firstMilestone = equityMilestones?.[0];
@@ -405,260 +412,6 @@ function _getEquityPayoutSchedule(
   }, []);
 }
 
-export async function getPortfolioReturns(
-  deals: DealWithInvestmentStatsAndProjectWithPics[]
-): Promise<PortfolioReturnsResponse> {
-  const returnsObjectsByDate: Record<number, ReturnsDateObject[]> = {};
-  const dealStats = [] as ReturnsDealStats[];
-  const portfolioStats: ReturnsPortfolioStats = {
-    portfolioValueToDate: 0,
-    distributionsToDate: 0,
-    debtDistributionsToDate: 0,
-    equityDistributionsToDate: 0,
-    projectedEquityDistributions: 0,
-    projectedDebtDistributions: 0,
-    projectedPortfolioValue: 0,
-    principalInvested: 0,
-  };
-
-  deals.forEach(deal => {
-    console.log(
-      'deal',
-      deal.id,
-      deal.status,
-      deal.dealStage,
-      deal.investmentStats?.amount,
-      deal.investmentStats?.financingType
-    );
-  });
-
-  // for each deal, get the payout schedule based on the financing type
-  const resolvedSchedules = deals.map(async deal => {
-    const { project, investmentStats, closingDate } = deal;
-    if (!investmentStats) {
-      Logger.warn(
-        `!!!Investment stats missing for deal ${deal.id}. The deal will not be processed!`
-      );
-      return [];
-    }
-    if (!closingDate) {
-      Logger.warn(
-        `!!!Closing date is missing for deal ${deal.id}. The deal will not be processed!`
-      );
-      return [];
-    }
-    if (!project?.milestones || !project.equityReturnsFile) {
-      Logger.warn(
-        `!!!Project milestones or equity returns file not found for project of deal ${deal.id}. The deal will not be processed!`
-      );
-      return [];
-    }
-    if (!project.investmentStats) {
-      Logger.warn(
-        `!!!Project investment stats not found for project of deal ${deal.id}. The deal will not be processed!`
-      );
-      return [];
-    }
-
-    const dealSummary: ReturnsDealStats = {
-      dealId: deal.id,
-      status: deal.status ?? DealStatus.ACTIVE,
-      committedAmount: investmentStats.amount,
-      distributionsToDate: 0,
-      distributionsProjected: 0,
-      financingType:
-        investmentStats.financingType === DealFinancingType.equity
-          ? 'equity'
-          : 'debt',
-      closingDate: closingDate,
-      project: {
-        id: project.id,
-        name: project.displayName,
-        location: project.location,
-        pictures: project.pictures,
-      },
-      conversionId:
-        deal.startDealConversion?.id || deal.endDealConversion?.id || null,
-    };
-    const todayNumeric = new Date().getTime();
-    portfolioStats.principalInvested += investmentStats.amount;
-    portfolioStats.portfolioValueToDate += investmentStats.amount;
-    if (investmentStats.financingType === DealFinancingType.equity) {
-      try {
-        const equityMilestones = await readEquityMilestoneData(
-          project.equityReturnsFile
-        );
-
-        const projectEquityStats = await getEquityStatsFromProject(
-          investmentStats.amount,
-          project.equityReturnsFile,
-          project.investmentStats.cUnitThresholdAmount
-        );
-        const schedule = getEquityPayoutScheduleForDeal(
-          investmentStats,
-          project.milestones,
-          equityMilestones,
-          projectEquityStats.shareOfEquity
-        );
-
-        if (!schedule.length) {
-          Logger.warn(`Skipping deal ${deal.id}: No payout schedule generated`);
-          return [];
-        }
-
-        schedule.forEach((dateObject, i) => {
-          if (i === schedule.length - 1) {
-            portfolioStats.projectedEquityDistributions +=
-              dateObject.equityDistributionCumulative;
-            portfolioStats.projectedPortfolioValue +=
-              dateObject.equityDistributionCumulative;
-          }
-          const dateNo = dateObject.date.getTime();
-          if (dateNo < todayNumeric) {
-            portfolioStats.distributionsToDate +=
-              dateObject.equityDistributionsCurrent;
-            portfolioStats.portfolioValueToDate +=
-              dateObject.equityDistributionsCurrent;
-            portfolioStats.equityDistributionsToDate +=
-              dateObject.equityDistributionsCurrent;
-
-            dealSummary.distributionsToDate +=
-              dateObject.equityDistributionsCurrent;
-          } else {
-            dealSummary.distributionsProjected +=
-              dateObject.equityDistributionsCurrent;
-          }
-          if (!returnsObjectsByDate[dateNo]) {
-            returnsObjectsByDate[dateNo] = [dateObject];
-          } else {
-            returnsObjectsByDate[dateNo].push(dateObject);
-          }
-        });
-      } catch (e) {
-        Logger.error(`Failed to get equity stats for deal ${deal.id}:`, null, {
-          extra: e,
-        });
-        throw new Error(`Equity stats processing failed for deal ${deal.id}`);
-        // return [];
-      }
-    } else if (
-      investmentStats.financingType === DealFinancingType.promissory_note_now
-    ) {
-      const schedule = getDebtPayoutScheduleForDeal(
-        investmentStats,
-        closingDate
-      );
-
-      // console.log("debt schedule", schedule)
-      schedule.forEach((dateObject, i) => {
-        if (i === schedule.length - 1) {
-          portfolioStats.projectedDebtDistributions +=
-            dateObject.debtDistributionsCumulative;
-          portfolioStats.projectedPortfolioValue +=
-            dateObject.debtDistributionsCumulative;
-        }
-        const dateNo = dateObject.date.getTime();
-        if (dateNo < todayNumeric) {
-          portfolioStats.distributionsToDate +=
-            dateObject.debtDistributionsCurrent;
-          portfolioStats.portfolioValueToDate +=
-            dateObject.debtDistributionsCurrent;
-          portfolioStats.debtDistributionsToDate +=
-            dateObject.debtDistributionsCurrent;
-
-          dealSummary.distributionsToDate +=
-            dateObject.debtDistributionsCurrent;
-        } else {
-          dealSummary.distributionsProjected +=
-            dateObject.debtDistributionsCurrent;
-        }
-        if (!returnsObjectsByDate[dateNo]) {
-          returnsObjectsByDate[dateNo] = [dateObject];
-        } else {
-          returnsObjectsByDate[dateNo].push(dateObject);
-        }
-        return {
-          ...dateObject,
-          // dealId: deal.id,
-        };
-      });
-    } else {
-      Logger.warn(
-        `Financing type ${investmentStats.financingType} not supported for dashboard graph - deal ${deal.id}`
-      );
-      return [];
-    }
-
-    // round all numerical values for to 2 decimal places
-    dealSummary.distributionsToDate = roundTo(
-      dealSummary.distributionsToDate,
-      2
-    );
-    dealSummary.distributionsProjected = roundTo(
-      dealSummary.distributionsProjected,
-      2
-    );
-    dealSummary.committedAmount = roundTo(dealSummary.committedAmount, 2);
-
-    Logger.log({
-      message: `adding to deal stats: ${dealSummary.dealId} - ${dealSummary.financingType.toUpperCase()}, \tamt:${dealSummary.committedAmount}\ttodate: ${dealSummary.distributionsToDate}\tproj: ${dealSummary.distributionsProjected}`,
-    });
-    dealStats.push(dealSummary);
-  });
-
-  await Promise.all(resolvedSchedules);
-
-  const consolidatedSchedule = [] as ReturnsDateObject[];
-  let previousDateObject: ReturnsDateObject | undefined;
-
-  const sortedKeys = Object.keys(returnsObjectsByDate).sort((a, b) =>
-    a <= b ? -1 : 1
-  );
-  // console.log("Sorted keys:", sortedKeys.map(key => new Date(parseInt(key)).toDateString()));
-  sortedKeys.forEach(key => {
-    const dateObjects = returnsObjectsByDate[parseInt(key)];
-    if (!dateObjects?.length) {
-      Logger.warn(`Empty date objects for key: ${key}`);
-      return;
-    } else {
-      // combine the date objects for the same date
-      const combinedDateObject = dateObjects.reduce((acc, curr) => {
-        acc.debtDistributionsCurrent += curr.debtDistributionsCurrent;
-        acc.debtDistributionsCumulative += curr.debtDistributionsCumulative;
-        acc.equityDistributionsCurrent += curr.equityDistributionsCurrent;
-        acc.equityDistributionCumulative += curr.equityDistributionCumulative;
-        acc.portfolioValueToDate += curr.portfolioValueToDate;
-        acc.principalInvestedCurrent += curr.principalInvestedCurrent;
-        acc.principalInvestedToDate += curr.principalInvestedToDate;
-        return acc;
-      });
-
-      if (previousDateObject) {
-        combinedDateObject.equityDistributionCumulative =
-          previousDateObject.equityDistributionCumulative +
-          combinedDateObject.equityDistributionsCurrent;
-        combinedDateObject.debtDistributionsCumulative =
-          previousDateObject.debtDistributionsCumulative +
-          combinedDateObject.debtDistributionsCurrent;
-        combinedDateObject.portfolioValueToDate =
-          previousDateObject.portfolioValueToDate +
-          combinedDateObject.debtDistributionsCurrent +
-          combinedDateObject.equityDistributionsCurrent;
-        combinedDateObject.principalInvestedToDate =
-          previousDateObject.principalInvestedToDate +
-          combinedDateObject.principalInvestedCurrent;
-      }
-      previousDateObject = combinedDateObject;
-      consolidatedSchedule.push(combinedDateObject);
-    }
-  });
-  return {
-    consolidatedSchedule,
-    portfolioStats,
-    dealStats,
-  } as PortfolioReturnsResponse;
-}
-
 export async function validateEquityMilestonesFile(
   storageUrl: string,
   project: ProjectWithInvestmentStats
@@ -680,4 +433,43 @@ export async function validateEquityMilestonesFile(
     return false;
   }
   return true;
+}
+
+/**
+ * Calculates the portfolio-wide return statistics, schedules, and individual deal summaries.
+ *
+ * @param {DealWithInvestmentStatsAndProjectWithPics[]} deals - The list of deals to process.
+ * @returns {Promise<PortfolioReturnsResponse>} Portfolio-wide returns response including schedules and stats.
+ *
+ * @example
+ * const result = await getPortfolioReturns(deals);
+ * // {
+ * //   consolidatedSchedule: [...],
+ * //   portfolioStats: { ... },
+ * //   dealStats: [...]
+ * // }
+ */
+export async function getPortfolioReturns(
+  deals: DealWithInvestmentStatsAndProjectWithPics[]
+): Promise<PortfolioReturnsResponse> {
+  const returnsObjectsByDate: Record<number, ReturnsDateObject[]> = {};
+  const dealStats = [] as ReturnsDealStats[];
+  const portfolioStats: ReturnsPortfolioStats = getInitialPortfolioStats();
+
+  // for each deal, get the payout schedule based on the financing type
+  await generateResolvedSchedules(
+    deals,
+    portfolioStats,
+    returnsObjectsByDate,
+    dealStats
+  );
+
+  const consolidatedSchedule =
+    generateConsolidatedSchedules(returnsObjectsByDate);
+
+  return {
+    consolidatedSchedule,
+    portfolioStats,
+    dealStats,
+  } as PortfolioReturnsResponse;
 }
