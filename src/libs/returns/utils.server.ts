@@ -24,7 +24,10 @@ import type {
 } from './schema';
 import { finished } from 'stream';
 import { promisify } from 'util';
-import { DealWithInvestmentStatsAndProjectWithPics } from '../types';
+import {
+  DealWithInvestmentStatsAndProjectWithPics,
+  ProjectWithInvestmentStats,
+} from '../types';
 import Logger from '../logger';
 import {
   generateConsolidatedSchedules,
@@ -407,6 +410,29 @@ function _getEquityPayoutSchedule(
     previousEntry = schedule[schedule.length - 1];
     return schedule;
   }, []);
+}
+
+export async function validateEquityMilestonesFile(
+  storageUrl: string,
+  project: ProjectWithInvestmentStats
+) {
+  // parse the csv file with some test data
+  const projectEquityStats = await getEquityStatsFromProject(
+    100000,
+    storageUrl,
+    200000
+  );
+  const { equityMilestones } = projectEquityStats;
+  if (
+    equityMilestones.length !==
+    project.investmentStats?.equityTermMonths + 1
+  ) {
+    Logger.log({
+      message: `milestones length: ${equityMilestones.length}, project term: ${project.investmentStats?.equityTermMonths}`,
+    });
+    return false;
+  }
+  return true;
 }
 
 /**
