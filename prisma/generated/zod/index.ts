@@ -82,7 +82,7 @@ export const DealDocumentTypeSchema = z.enum(['K1','VERIFICATION_ACCREDITATION',
 
 export type DealDocumentTypeType = `${z.infer<typeof DealDocumentTypeSchema>}`
 
-export const RoleSchema = z.enum(['ADMIN','USER']);
+export const RoleSchema = z.enum(['ADMIN','USER','ADVISOR']);
 
 export type RoleType = `${z.infer<typeof RoleSchema>}`
 

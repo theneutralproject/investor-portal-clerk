@@ -441,6 +441,7 @@ enum DealDocumentType {
 enum Role {
   ADMIN
   USER
+  ADVISOR
 }
 
 enum Status {
