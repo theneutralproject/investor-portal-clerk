@@ -32,6 +32,8 @@ model User {
   dateUpdated                  DateTime?              @updatedAt
   ActivityFeedItem             ActivityFeedItem[]
   address                      Address?
+  AdvisorFirm                  AdvisorFirm?
+  AdvisorFirmEmployee          AdvisorFirmEmployee[]
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
   DocusignEvent                DocusignEvent[]
@@ -39,8 +41,6 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
-  AdvisorFirm                  AdvisorFirm?
-  AdvisorFirmEmployee          AdvisorFirmEmployee[]
 }
 
 model Deal {
@@ -115,14 +115,13 @@ model Organization {
   ownershipType  DealOwnershipType      @default(INDIVIDUAL)
   /// used to determine which organization is the primary individual one for the user
   isPrimary      Boolean                @default(false)
+  advisorFirmId  Int?
   address        Address?
   deals          Deal[]
   members        Member[]
+  advisorFirm    AdvisorFirm?           @relation("advisorClientOrganizations", fields: [advisorFirmId], references: [id])
   ownedBy        User                   @relation("userOrg", fields: [ownerId], references: [id], onDelete: Cascade)
   document       OrganizationDocument[]
-
-  advisorFirmId Int?
-  advisorFirm   AdvisorFirm? @relation("advisorClientOrganizations", fields: [advisorFirmId], references: [id])
 }
 
 model Member {
@@ -400,11 +399,11 @@ model AdvisorFirm {
   name                String
   logoUrl             String?
   primaryContactId    Int                   @unique
+  dateCreated         DateTime              @default(now())
+  dateUpdated         DateTime              @updatedAt
   primaryContact      User                  @relation(fields: [primaryContactId], references: [id])
   employees           AdvisorFirmEmployee[]
   clientOrganizations Organization[]        @relation("advisorClientOrganizations")
-  dateCreated         DateTime              @default(now())
-  dateUpdated         DateTime              @updatedAt
 }
 
 model AdvisorFirmEmployee {
@@ -412,9 +411,8 @@ model AdvisorFirmEmployee {
   advisorFirmId Int
   userId        Int
   role          AdvisorEmployeeRole
-
-  advisorFirm AdvisorFirm @relation(fields: [advisorFirmId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  advisorFirm   AdvisorFirm         @relation(fields: [advisorFirmId], references: [id], onDelete: Cascade)
+  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([advisorFirmId, userId])
 }
