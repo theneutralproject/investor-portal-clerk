@@ -32,7 +32,6 @@ model User {
   dateUpdated                  DateTime?              @updatedAt
   ActivityFeedItem             ActivityFeedItem[]
   address                      Address?
-  AdvisorFirm                  AdvisorFirm?
   AdvisorFirmEmployee          AdvisorFirmEmployee[]
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
@@ -398,12 +397,12 @@ model AdvisorFirm {
   id                  Int                   @id @default(autoincrement())
   name                String
   logoUrl             String?
-  primaryContactId    Int                   @unique
-  dateCreated         DateTime              @default(now())
-  dateUpdated         DateTime              @updatedAt
-  primaryContact      User                  @relation(fields: [primaryContactId], references: [id])
+  primaryContactId    Int?                  @unique
+  primaryContact      AdvisorFirmEmployee?  @relation("PrimaryContact", fields: [primaryContactId], references: [id])
   employees           AdvisorFirmEmployee[]
   clientOrganizations Organization[]        @relation("advisorClientOrganizations")
+  dateCreated         DateTime              @default(now())
+  dateUpdated         DateTime              @updatedAt
 }
 
 model AdvisorFirmEmployee {
@@ -411,8 +410,12 @@ model AdvisorFirmEmployee {
   advisorFirmId Int
   userId        Int
   role          AdvisorEmployeeRole
-  advisorFirm   AdvisorFirm         @relation(fields: [advisorFirmId], references: [id], onDelete: Cascade)
-  user          User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  isPrimary     Boolean             @default(false)
+
+  advisorFirm AdvisorFirm @relation(fields: [advisorFirmId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  AdvisorFirmAsPrimaryContact AdvisorFirm[] @relation("PrimaryContact")
 
   @@unique([advisorFirmId, userId])
 }
