@@ -515,6 +515,8 @@ export const DealFlowProvider: React.FC<DealFlowProviderProps> = ({
       ...updatedUserData,
     };
 
+    updatedUser.referralSource = undefined as unknown as null;
+
     try {
       const { data } = await axios.put<UserWithAddress>(
         `/api/users`,

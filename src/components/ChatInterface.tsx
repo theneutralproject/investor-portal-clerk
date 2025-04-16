@@ -4,7 +4,7 @@ import { Fab, Button, useTheme } from '@mui/material';
 import ChatIcon from '@mui/icons-material/Chat';
 import { usePostHog } from 'posthog-js/react';
 import { useHubspotChat } from '@/components/HubspotChatProvider';
-import { POSTHOG_EVENTS } from '@/libs/types';
+import { captureChatOpened } from '@/libs/posthog/events';
 
 const ChatInterface = ({ type }: { type: string }) => {
   const theme = useTheme();
@@ -13,9 +13,7 @@ const ChatInterface = ({ type }: { type: string }) => {
 
   const handleOpen = () => {
     openChat();
-    posthog.capture(POSTHOG_EVENTS.CHAT_OPENED, {
-      type,
-    });
+    captureChatOpened(posthog, type);
   };
 
   const renderChatTrigger = () => {

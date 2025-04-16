@@ -34,6 +34,7 @@ export async function GET(request: NextRequest) {
                     include: {
                       milestones: true,
                       pictures: true,
+                      equityMilestoneFiles: true,
                       investmentStats: true,
                     },
                   },
@@ -50,9 +51,19 @@ export async function GET(request: NextRequest) {
   }
   const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
   // iterate through user organizations and get deals
+  let equityFileLastUpdated: Date | null = null;
   for (const member of user.organizationMember) {
     const org = member.organization;
     for (const deal of org.deals) {
+      if (
+        deal.project?.equityMilestoneFiles &&
+        deal.project.equityMilestoneFiles.length > 0
+      ) {
+        const latestFile = deal.project.equityMilestoneFiles[0];
+        if (latestFile) {
+          equityFileLastUpdated = latestFile.createdAt;
+        }
+      }
       if (!deal.investmentStats) {
         Logger.error(
           `Deal ${deal.id} has no investment stats and cannot be shown in user dashboard!`
@@ -65,7 +76,10 @@ export async function GET(request: NextRequest) {
   }
   try {
     const portfolioReturns = await getPortfolioReturns(deals);
-    return jsonResponse(portfolioReturns);
+    return jsonResponse({
+      ...portfolioReturns,
+      equityFileLastUpdated,
+    });
   } catch (error) {
     return errorResponse('unable to get portfolio returns', 500, {
       request,

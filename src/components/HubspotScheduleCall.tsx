@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button, Modal, Box } from '@mui/material';
 import { usePostHog } from 'posthog-js/react';
-import { POSTHOG_EVENTS } from '@/libs/types';
+import { captureScheduleCallClick } from '@/libs/posthog/events';
 
 function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
   const [open, setOpen] = useState(false);
@@ -9,7 +9,7 @@ function HubspotScheduleCall({ onExit }: { onExit?: () => void }) {
 
   const handleOpen = () => {
     setOpen(true);
-    posthog.capture(POSTHOG_EVENTS.SCHEDULE_CALL_CLICKED);
+    captureScheduleCallClick(posthog);
   };
 
   const handleClose = () => {

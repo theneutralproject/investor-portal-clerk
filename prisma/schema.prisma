@@ -30,6 +30,7 @@ model User {
   dateOfBirth                  DateTime?
   dateCreated                  DateTime?              @default(now())
   dateUpdated                  DateTime?              @updatedAt
+  ActivityFeedItem             ActivityFeedItem[]
   address                      Address?
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
@@ -38,7 +39,8 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
-  ActivityFeedItem             ActivityFeedItem[]
+  AdvisorFirm                  AdvisorFirm?
+  AdvisorFirmEmployee          AdvisorFirmEmployee[]
 }
 
 model Deal {
@@ -118,6 +120,9 @@ model Organization {
   members        Member[]
   ownedBy        User                   @relation("userOrg", fields: [ownerId], references: [id], onDelete: Cascade)
   document       OrganizationDocument[]
+
+  advisorFirmId Int?
+  advisorFirm   AdvisorFirm? @relation("advisorClientOrganizations", fields: [advisorFirmId], references: [id])
 }
 
 model Member {
@@ -181,25 +186,26 @@ model OrganizationDocument {
 }
 
 model Project {
-  id                 Int                     @id @default(autoincrement())
-  name               String                  @unique
-  location           String
-  tags               String                  @default("")
-  status             Status                  @default(ACTIVE)
-  description        String
-  marketHighlights   String                  @default("")
-  youtubeUrl         String                  @default("")
-  slug               String                  @unique
-  equityReturnsFile  String
-  displayName        String                  @default("")
-  deals              Deal[]
-  documents          ProjectDocument[]
-  investmentStats    ProjectInvestmentStats?
-  milestones         ProjectMilestones?
-  projectPaymentInfo ProjectPaymentInfo[]
-  pictures           ProjectPicture[]
-  propertyStats      ProjectPropertyStats?
-  ProjectReport      ProjectReport[]
+  id                   Int                     @id @default(autoincrement())
+  name                 String                  @unique
+  location             String
+  tags                 String                  @default("")
+  status               Status                  @default(ACTIVE)
+  description          String
+  marketHighlights     String                  @default("")
+  youtubeUrl           String                  @default("")
+  slug                 String                  @unique
+  equityReturnsFile    String
+  displayName          String                  @default("")
+  deals                Deal[]
+  equityMilestoneFiles EquityMilestoneFile[]
+  documents            ProjectDocument[]
+  investmentStats      ProjectInvestmentStats?
+  milestones           ProjectMilestones?
+  projectPaymentInfo   ProjectPaymentInfo[]
+  pictures             ProjectPicture[]
+  propertyStats        ProjectPropertyStats?
+  ProjectReport        ProjectReport[]
 }
 
 model ProjectPropertyStats {
@@ -301,13 +307,13 @@ model ProjectDocument {
 
 model ProjectReport {
   id          Int       @id @default(autoincrement())
-  name        String
   projectId   Int
   dateCreated DateTime  @default(now())
   dateUpdated DateTime? @updatedAt
   quarter     Int
   year        Int
   path        String
+  name        String
   project     Project   @relation(fields: [projectId], references: [id])
 }
 
@@ -373,6 +379,49 @@ model ActivityFeedItem {
   user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, itemId, type], name: "activity_user_item_type")
+}
+
+model EquityMilestoneFile {
+  id         Int      @id @default(autoincrement())
+  projectId  Int
+  fileName   String
+  filePath   String
+  publicUrl  String
+  versionNum Int
+  uploadedBy String
+  createdAt  DateTime @default(now())
+  project    Project  @relation(fields: [projectId], references: [id])
+
+  @@unique([projectId, fileName, versionNum])
+}
+
+model AdvisorFirm {
+  id                  Int                   @id @default(autoincrement())
+  name                String
+  logoUrl             String?
+  primaryContactId    Int                   @unique
+  primaryContact      User                  @relation(fields: [primaryContactId], references: [id])
+  employees           AdvisorFirmEmployee[]
+  clientOrganizations Organization[]        @relation("advisorClientOrganizations")
+  dateCreated         DateTime              @default(now())
+  dateUpdated         DateTime              @updatedAt
+}
+
+model AdvisorFirmEmployee {
+  id            Int                 @id @default(autoincrement())
+  advisorFirmId Int
+  userId        Int
+  role          AdvisorEmployeeRole
+
+  advisorFirm AdvisorFirm @relation(fields: [advisorFirmId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([advisorFirmId, userId])
+}
+
+enum AdvisorEmployeeRole {
+  ADMIN
+  STAFF
 }
 
 enum ActivityType {

@@ -10,7 +10,7 @@ import {
 import CloseIcon from '@mui/icons-material/Close';
 import { useDashboard } from './DashboardContext';
 import { usePostHog } from 'posthog-js/react';
-import { POSTHOG_EVENTS } from '@/libs/types';
+import { captureDeleteDealClick } from '@/libs/posthog/events';
 
 interface DeleteDealButtonProps {
   dealId: number;
@@ -22,9 +22,7 @@ const DeleteDealButton: React.FC<DeleteDealButtonProps> = ({ dealId }) => {
   const { deleteDeal } = useDashboard();
 
   const handleClickOpen = () => {
-    posthog.capture(POSTHOG_EVENTS.DELETE_DEAL_CLICKED, {
-      deal_id: dealId,
-    });
+    captureDeleteDealClick(posthog, dealId);
     setOpen(true);
   };
 

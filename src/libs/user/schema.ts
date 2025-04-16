@@ -14,6 +14,7 @@ export const zUserUpdateSchema = z.object({
   referralSource: z.nativeEnum(ReferralSource).optional().nullish(),
   address: zAddressCreateSchema.optional(),
   dateOfBirth: z.coerce.date().nullish(),
+  notifyUserOnCreate: z.boolean().nullish(), // used to determine if the user should be notified when created from the admin portal
 });
 
 export type UserUpdateSchema = z.infer<typeof zUserUpdateSchema>;
@@ -35,6 +36,7 @@ export const zUserCreateSchema = z.object({
   address: zAddressCreateSchema.optional(),
   dateOfBirth: z.coerce.date().nullish(),
   projectSlug: z.string().optional(), // used to invite user to review project documents when invited from the admin portal
+  notifyUserOnCreate: z.boolean().optional(), // used to determine if the user should be notified when created from the admin portal
 });
 
 export type UserCreateSchema = z.infer<typeof zUserCreateSchema>;

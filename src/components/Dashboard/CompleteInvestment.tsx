@@ -13,7 +13,6 @@ import { styled } from '@mui/material/styles';
 import {
   type DealWithOrgMembersAndProject,
   type DealWithFullOrgAndProject,
-  POSTHOG_EVENTS,
 } from '@/libs/types';
 import { useRouter } from 'next/navigation';
 import { DealFinancingType } from '@prisma/client';
@@ -23,6 +22,7 @@ import { usePostHog } from 'posthog-js/react';
 import { getProjectImage } from './DashboardProjects';
 import { DealStage } from '@/libs/deal/schema';
 import { COMPLETE_INVESTMENT } from 'e2e/testIds';
+import { captureDealFlowContinueClick } from '@/libs/posthog/events';
 interface CompleteInvestmentProps {
   deals: DealWithOrgMembersAndProject[];
   testId?: string;
@@ -236,12 +236,7 @@ const CompleteInvestment: React.FC<CompleteInvestmentProps> = ({
   const posthog = usePostHog();
 
   const handleContinue = (deal: DealWithOrgMembersAndProject) => {
-    posthog.capture(POSTHOG_EVENTS.DEALFLOW_CONTINUE_CLICKED, {
-      deal_id: deal.id,
-      deal_stage: deal.dealStage,
-      project_id: deal.project.id,
-      project_name: deal.project.name,
-    });
+    captureDealFlowContinueClick(posthog, deal);
 
     const nextStep = getNextStep(deal as DealWithFullOrgAndProject);
     router.push(`/dealflow/${deal.project.slug}/${deal.id}/${nextStep}`);

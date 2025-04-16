@@ -46,6 +46,16 @@ const getHsUserData = (
     hsUserData.properties.userid = userData.clerkId;
   if (userData.phoneNumber) hsUserData.properties.phone = userData.phoneNumber;
 
+  // default notifyUserOnCreate to true if not provided, so that they will enroll in email flow
+  hsUserData.properties.notify_user_on_create = (
+    userData.notifyUserOnCreate === null ||
+    userData.notifyUserOnCreate === undefined
+      ? true
+      : userData.notifyUserOnCreate
+  )
+    .toString()
+    .toUpperCase();
+
   if (address) {
     hsUserData.properties.address = address.street;
     hsUserData.properties.state = address.state;
@@ -120,6 +130,7 @@ export async function createUserInDbAndHubspot(
       };
     }
     Logger.log({ message: 'begin creating user in db', extra: userCreateData });
+    delete userCreateData.notifyUserOnCreate;
     const dbUser = await prisma.user.create({
       data: userCreateData,
     });

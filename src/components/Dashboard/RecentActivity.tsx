@@ -34,6 +34,18 @@ const RecentActivity: React.FC = () => {
         const response = await fetch('/api/activity');
 
         if (!response.ok) {
+          if (response.status === 401) {
+            setError('Sign in to see recent activity');
+            setLoading(false);
+            return;
+          }
+
+          if (response.status === 404) {
+            setActivities([]);
+            setLoading(false);
+            return;
+          }
+
           throw new Error(`HTTP error! Status: ${response.status}`);
         }
 
@@ -115,7 +127,7 @@ const RecentActivity: React.FC = () => {
         <Box sx={{ maxHeight: '400px', overflowY: 'auto', px: 2 }}>
           {activities.length === 0 ? (
             <Typography variant="body2" sx={{ py: 4, textAlign: 'center' }}>
-              No activity found
+              No activity yet
             </Typography>
           ) : (
             activities.map((activity, index) => (
