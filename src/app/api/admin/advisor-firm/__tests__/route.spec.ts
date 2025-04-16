@@ -2,11 +2,12 @@ import { POST } from '../route';
 import { nextRequestMock } from '@/mocks/nextRequest.mock';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getAuth } from '@clerk/nextjs/server';
 import Logger from '@/libs/logger';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { APIError } from '@/libs/types';
 
-jest.mock('@clerk/nextjs/server', () => ({
-  getAuth: jest.fn(),
+jest.mock('@/libs/admin/utils.server', () => ({
+  getAdminFromRequest: jest.fn(),
 }));
 
 jest.mock('@/libs/prisma.server', () => ({
@@ -38,20 +39,67 @@ describe('POST /api/advisor-firm', () => {
     email: 'admin@firm.com',
     role: 'ADMIN',
   };
-  const clerkUserSession: any = {
-    userId: 'clerk123',
-    sessionClaims: { metadata: { investorPortalId: adminUser.id } },
-  };
   const loggerLogSpy = jest.spyOn(Logger, 'log').mockImplementation(() => {});
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return advisor firm object on success', async () => {
-    jest.mocked(getAuth).mockReturnValue(clerkUserSession);
+  it('returns 400 error when token is not provided', async () => {
+    const error = new APIError('No token provided', 400);
+    jest.mocked(getAdminFromRequest).mockRejectedValue(error);
 
-    jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(adminUser);
+    const response = await POST(mockRequest as any);
+    expect(response).toEqual(
+      errorResponse(error.message, error.status, {
+        request: expect.any(Object),
+      })
+    );
+  });
+
+  it('returns 400 error when invalid token is provided', async () => {
+    const error = new APIError('Invalid or expired token', 400);
+    jest.mocked(getAdminFromRequest).mockRejectedValue(error);
+
+    const response = await POST(mockRequest as any);
+    expect(response).toEqual(
+      errorResponse(error.message, error.status, {
+        request: expect.any(Object),
+      })
+    );
+  });
+  it('returns 400 error when token has no email', async () => {
+    const error = new APIError('No email found in token', 400);
+    jest.mocked(getAdminFromRequest).mockRejectedValue(error);
+
+    const response = await POST(mockRequest as any);
+    expect(response).toEqual(
+      errorResponse(error.message, error.status, {
+        request: expect.any(Object),
+      })
+    );
+  });
+
+  it('should return 403 if user is not admin', async () => {
+    const error = new APIError('Admin user not found', 403);
+    jest.mocked(getAdminFromRequest).mockRejectedValue(error);
+    const user: any = {
+      ...adminUser,
+      role: 'USER',
+    };
+
+    jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(user);
+
+    const response = await POST(mockRequest as any);
+    expect(response).toEqual(
+      errorResponse(error.message, error.status, {
+        request: expect.any(Object),
+      })
+    );
+  });
+
+  it('should return advisor firm object on success', async () => {
+    jest.mocked(getAdminFromRequest).mockResolvedValue(adminUser);
 
     const createFirmPayload = {
       name: validBody.name,
@@ -85,54 +133,9 @@ describe('POST /api/advisor-firm', () => {
     expect(response).toEqual(jsonResponse(createdFirm));
   });
 
-  it('should return 401 if user is not authenticated', async () => {
-    jest.mocked(getAuth).mockReturnValue({ userId: null } as any);
-
-    const response = await POST(mockRequest as any);
-    expect(response).toEqual(
-      errorResponse('User not authenticated', 401, {
-        request: expect.any(Object),
-      })
-    );
-    expect(loggerLogSpy).not.toHaveBeenCalled();
-  });
-
-  it('should return 404 if user is not found', async () => {
-    jest.mocked(getAuth).mockReturnValue(clerkUserSession);
-
-    jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(null);
-
-    const response = await POST(mockRequest as any);
-    expect(response).toEqual(
-      errorResponse('User not found', 404, {
-        request: expect.any(Object),
-      })
-    );
-    expect(loggerLogSpy).not.toHaveBeenCalled();
-  });
-
-  it('should return 403 if user is not admin', async () => {
-    const user: any = {
-      ...adminUser,
-      role: 'USER',
-    };
-    jest.mocked(getAuth).mockReturnValue(clerkUserSession);
-
-    jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(user);
-
-    const response = await POST(mockRequest as any);
-    expect(response).toEqual(
-      errorResponse('Unauthorized: Only admins can create advisor firms', 403, {
-        request: expect.any(Object),
-      })
-    );
-    expect(loggerLogSpy).not.toHaveBeenCalled();
-  });
-
   it('should return 400 if request body is invalid', async () => {
-    jest.mocked(getAuth).mockReturnValue(clerkUserSession);
+    jest.mocked(getAdminFromRequest).mockResolvedValue(adminUser);
 
-    jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(adminUser);
     const createFirmPayload = { invalidField: true };
 
     const badRequest = {
@@ -157,9 +160,7 @@ describe('POST /api/advisor-firm', () => {
   });
 
   it('should return 500 if create throws', async () => {
-    jest.mocked(getAuth).mockReturnValue(clerkUserSession);
-
-    jest.spyOn(prisma.user, 'findFirst').mockResolvedValue(adminUser);
+    jest.mocked(getAdminFromRequest).mockResolvedValue(adminUser);
     jest
       .spyOn(prisma.advisorFirm, 'create')
       .mockRejectedValue(new Error('Database error'));

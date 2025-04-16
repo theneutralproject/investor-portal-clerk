@@ -157,3 +157,12 @@ export const POSTHOG_EVENTS = {
   DOCUMENT_DOWNLOADED: '$document_downloaded',
   CHAT_OPENED: '$chat_opened',
 };
+
+export class APIError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.status = status;
+  }
+}
