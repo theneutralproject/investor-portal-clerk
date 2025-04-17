@@ -5,7 +5,7 @@ import prisma from '../prisma.server';
 import { DealDocumentType, MembershipType, Role } from '@prisma/client';
 import { type MatchResponseObject, MatchConfidence } from './schema';
 import { storageClient } from '../supabase';
-import type { DealWithFullOrgAndSlimProject } from '../types';
+import { APIError, type DealWithFullOrgAndSlimProject } from '../types';
 import Logger from '../logger';
 import { isFileLike } from '../document/utils.client';
 
@@ -20,37 +20,48 @@ const PdfParse = require('pdf-parse');
 export async function getAdminFromRequest(request: NextRequest) {
   // If running locally, use hardcoded admin user
   if (process.env.NODE_ENV === 'development') {
-    const adminUser = await prisma.user.findUnique({
-      where: { email: 'brent@neutral.us', role: Role.ADMIN },
+    const localAdminUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: 'brent@neutral.us', role: Role.ADMIN },
+          { email: 'brian@neutral.us', role: Role.ADMIN },
+        ],
+      },
     });
-    if (!adminUser) {
-      throw new Error('Admin user not found');
+    if (!localAdminUser) {
+      throw new APIError('Admin user not found', 403);
     }
-    return adminUser;
+    return localAdminUser;
   }
 
   const token = request.headers.get('Authorization');
 
   if (!token) {
-    throw new Error('No token provided');
+    throw new APIError('No token provided', 400);
   }
+
+  let decoded;
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!);
-    const { email } = decoded as { id: number; email: string };
-    if (!email) {
-      throw new Error('No email found in token');
-    }
-    const adminUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase(), role: Role.ADMIN },
-    });
-    if (!adminUser) {
-      throw new Error('Admin user not found');
-    }
-    return adminUser;
-  } catch (__error) {
-    // return new Error('Invalid or Expired token');
-    throw __error;
+    decoded = jwt.verify(token, process.env.JWT_SECRET!);
+  } catch (_error) {
+    throw new APIError('Invalid or expired token', 400);
   }
+
+  const { email } = decoded as { id: number; email: string };
+
+  if (!email) {
+    throw new APIError('No email found in token', 400);
+  }
+
+  const adminUser = await prisma.user.findUnique({
+    where: { email: email.toLowerCase(), role: Role.ADMIN },
+  });
+
+  if (!adminUser) {
+    throw new APIError('Admin user not found', 403);
+  }
+
+  return adminUser;
 }
 
 function calcConfidenceScore(matchCount: number): MatchConfidence {

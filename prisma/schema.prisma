@@ -32,6 +32,7 @@ model User {
   dateUpdated                  DateTime?              @updatedAt
   ActivityFeedItem             ActivityFeedItem[]
   address                      Address?
+  AdvisorFirmEmployee          AdvisorFirmEmployee[]
   DealDocumentUploaded         DealDocument[]
   documentEvents               DocumentEvent[]
   DocusignEvent                DocusignEvent[]
@@ -39,8 +40,6 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
-  AdvisorFirm                  AdvisorFirm?
-  AdvisorFirmEmployee          AdvisorFirmEmployee[]
 }
 
 model Deal {
@@ -115,14 +114,13 @@ model Organization {
   ownershipType  DealOwnershipType      @default(INDIVIDUAL)
   /// used to determine which organization is the primary individual one for the user
   isPrimary      Boolean                @default(false)
+  advisorFirmId  Int?
   address        Address?
   deals          Deal[]
   members        Member[]
+  advisorFirm    AdvisorFirm?           @relation("advisorClientOrganizations", fields: [advisorFirmId], references: [id])
   ownedBy        User                   @relation("userOrg", fields: [ownerId], references: [id], onDelete: Cascade)
   document       OrganizationDocument[]
-
-  advisorFirmId Int?
-  advisorFirm   AdvisorFirm? @relation("advisorClientOrganizations", fields: [advisorFirmId], references: [id])
 }
 
 model Member {
@@ -399,8 +397,8 @@ model AdvisorFirm {
   id                  Int                   @id @default(autoincrement())
   name                String
   logoUrl             String?
-  primaryContactId    Int                   @unique
-  primaryContact      User                  @relation(fields: [primaryContactId], references: [id])
+  primaryContactId    Int?                  @unique
+  primaryContact      AdvisorFirmEmployee?  @relation("PrimaryContact", fields: [primaryContactId], references: [id])
   employees           AdvisorFirmEmployee[]
   clientOrganizations Organization[]        @relation("advisorClientOrganizations")
   dateCreated         DateTime              @default(now())
@@ -412,9 +410,12 @@ model AdvisorFirmEmployee {
   advisorFirmId Int
   userId        Int
   role          AdvisorEmployeeRole
+  isPrimary     Boolean             @default(false)
 
   advisorFirm AdvisorFirm @relation(fields: [advisorFirmId], references: [id], onDelete: Cascade)
   user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  AdvisorFirmAsPrimaryContact AdvisorFirm[] @relation("PrimaryContact")
 
   @@unique([advisorFirmId, userId])
 }
@@ -443,6 +444,7 @@ enum DealDocumentType {
 enum Role {
   ADMIN
   USER
+  ADVISOR
 }
 
 enum Status {
