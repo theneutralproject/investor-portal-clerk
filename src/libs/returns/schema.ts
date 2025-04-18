@@ -14,6 +14,20 @@ export const zReturnsDateObjectSchema = z.object({
   principalInvestedCurrent: z.number(), // indicate principal invested for current month
 });
 export type ReturnsDateObject = z.infer<typeof zReturnsDateObjectSchema>;
+export const zInvestmentStatsSchema = z.object({
+  principalInvested: z.number(),
+  accruedToDate: z.number(),
+  earnedToDate: z.number(),
+  earningsProjected: z.number(),
+  projectedReturn: z.number(),
+});
+
+export const zReturnsTableStatsSchema = z.object({
+  equity: zInvestmentStatsSchema,
+  debt: zInvestmentStatsSchema,
+});
+
+export type ReturnsTableStats = z.infer<typeof zReturnsTableStatsSchema>;
 
 export const zReturnsPortfolioStatsSchema = z.object({
   portfolioValueToDate: z.number(), // sum of accruedInterestToDate and distributionsToDate and principalInvested
@@ -37,6 +51,7 @@ export const zReturnsDealStatsSchema = z.object({
   committedAmount: z.number(),
   distributionsToDate: z.number(),
   distributionsProjected: z.number(),
+  equityAccruedPreferredReturn: z.number(),
   project: z.object({
     id: z.number(),
     name: z.string(),
@@ -60,6 +75,7 @@ export type ReturnsDealStats = z.infer<typeof zReturnsDealStatsSchema>;
 export const zPortfolioReturnsSchema = z.object({
   portfolioStats: zReturnsPortfolioStatsSchema,
   dealStats: z.array(zReturnsDealStatsSchema),
+  tableStats: zReturnsTableStatsSchema,
   consolidatedSchedule: z.array(zReturnsDateObjectSchema),
   equityFileLastUpdated: z.date().nullable(),
 });

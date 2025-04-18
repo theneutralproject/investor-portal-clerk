@@ -158,66 +158,66 @@ export const getMetrics = (
   if (!data) {
     return [
       {
-        label: 'Portfolio Value',
-        toDateValue: '$0',
-        projectedTotalValue: '$0',
-        color: '#FFB800',
+        label: 'Principal Invested',
+        toDateValue: '-',
+        projectedTotalValue: '-',
+        color: '#656565',
       },
       {
-        label: 'Debt Distributions',
-        toDateValue: '$0',
-        projectedTotalValue: '$0',
+        label: 'Equity Return Accrued to Date',
+        toDateValue: '-',
+        projectedTotalValue: '-',
         color: '#5AAC6A',
       },
       {
-        label: 'Equity Distributions',
-        toDateValue: '$0',
-        projectedTotalValue: '$0',
+        label: 'Debt Earned to Date',
+        toDateValue: '-',
+        projectedTotalValue: '-',
         color: '#2196F3',
       },
       {
-        label: 'Principal',
-        toDateValue: '$0',
-        projectedTotalValue: '$0',
-        color: '#656565',
+        label: 'Current Portfolio Value',
+        toDateValue: '-',
+        projectedTotalValue: '-',
+        color: '#FFB800',
       },
     ];
   }
 
   return [
     {
-      label: 'Proj. Portfolio Value',
-      toDateValue: formatCurrency(data.portfolioStats.portfolioValueToDate),
-      projectedTotalValue: formatCurrency(
-        data.portfolioStats.projectedPortfolioValue
-      ),
-      color: '#FFB800',
-    },
-    {
-      label: 'Proj. Debt Distributions',
-      toDateValue: formatCurrency(data.portfolioStats.debtDistributionsToDate),
-      projectedTotalValue: formatCurrency(
-        data.portfolioStats.projectedDebtDistributions
-      ),
-      color: '#5AAC6A',
-    },
-    {
-      label: 'Proj. Equity Distributions',
-      toDateValue: formatCurrency(
-        data.portfolioStats.equityDistributionsToDate
-      ),
-      projectedTotalValue: formatCurrency(
-        data.portfolioStats.projectedEquityDistributions
-      ),
-      color: '#2196F3',
-    },
-    {
-      label: 'Principal',
+      label: 'Principal Invested',
       toDateValue: formatCurrency(data.portfolioStats.principalInvested),
       projectedTotalValue: formatCurrency(
         data.portfolioStats.principalInvested
       ),
       color: '#656565',
+    },
+    {
+      label: 'Equity Return Accrued to Date',
+      toDateValue: formatCurrency(
+        data.portfolioStats.equityAccruedPreferredReturn
+      ),
+      projectedTotalValue: formatCurrency(
+        data.portfolioStats.equityAccruedPreferredReturn
+      ),
+      color: '#5AAC6A',
+    },
+    {
+      label: 'Debt Earned to Date',
+      toDateValue: formatCurrency(data.portfolioStats.debtDistributionsToDate),
+      projectedTotalValue: formatCurrency(
+        data.portfolioStats.projectedDebtDistributions
+      ),
+      color: '#2196F3',
+    },
+    {
+      label: 'Current Portfolio Value',
+      toDateValue: formatCurrency(data.portfolioStats.newPortfolioValueToDate),
+      projectedTotalValue: formatCurrency(
+        data.portfolioStats.newPortfolioValueToDate
+      ),
+      color: '#FFB800',
     },
   ];
 };

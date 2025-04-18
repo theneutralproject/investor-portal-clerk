@@ -22,6 +22,7 @@ import type {
   ReturnsDateObject,
   ReturnsDealStats,
   ReturnsPortfolioStats,
+  ReturnsTableStats,
 } from './schema';
 import { finished } from 'stream';
 import { promisify } from 'util';
@@ -456,6 +457,7 @@ export async function getPortfolioReturns(
   const returnsObjectsByDate: Record<number, ReturnsDateObject[]> = {};
   const dealStats = [] as ReturnsDealStats[];
   const portfolioStats: ReturnsPortfolioStats = getInitialPortfolioStats();
+  const tableStats = { equity: {}, debt: {} } as ReturnsTableStats;
 
   // for each deal, get the payout schedule based on the financing type
   await generateResolvedSchedules(
@@ -465,23 +467,17 @@ export async function getPortfolioReturns(
     dealStats
   );
 
-  //Fix calculation for portfolioStats.equityAccruedPreferredReturn
-  const { totalEquityPreferredReturn } = getEquityReturnAccuredToDate(deals);
-  portfolioStats.equityAccruedPreferredReturn = totalEquityPreferredReturn;
-
-  //Fix calculation for portfolioStats.portfolioValueToDate
-  portfolioStats.newPortfolioValueToDate =
-    portfolioStats.principalInvested +
-    portfolioStats.equityAccruedPreferredReturn +
-    portfolioStats.debtDistributionsToDate;
-
   const consolidatedSchedule =
     generateConsolidatedSchedules(returnsObjectsByDate);
+
+  //Changing from chart to table, clean up and fix values
+  fixNewValues(deals, dealStats, portfolioStats, tableStats);
 
   return {
     consolidatedSchedule,
     portfolioStats,
     dealStats,
+    tableStats,
   } as PortfolioReturnsResponse;
 }
 
@@ -498,7 +494,8 @@ export async function getPortfolioReturns(
  * //   rawMetrics: [...],
  */
 export const getEquityReturnAccuredToDate = (
-  deals: DealWithInvestmentStatsAndProjectWithPics[]
+  deals: DealWithInvestmentStatsAndProjectWithPics[],
+  dealStats: ReturnsDealStats[]
 ) => {
   let totalEquityPreferredReturn = 0;
   const rawMetrics = [];
@@ -536,10 +533,70 @@ export const getEquityReturnAccuredToDate = (
     });
 
     totalEquityPreferredReturn += perDealAccrued;
+
+    // Update the corresponding dealStat entry
+    const dealStat = dealStats.find(ds => ds.dealId === deal.id);
+    if (dealStat) {
+      dealStat.equityAccruedPreferredReturn = perDealAccrued;
+    }
   }
 
   return {
     rawMetrics,
     totalEquityPreferredReturn,
   };
+};
+
+export const fixNewValues = (
+  deals: DealWithInvestmentStatsAndProjectWithPics[],
+  dealStats: ReturnsDealStats[],
+  portfolioStats: ReturnsPortfolioStats,
+  tableStats: ReturnsTableStats
+) => {
+  //Fix calculation for portfolioStats.equityAccruedPreferredReturn
+  const { totalEquityPreferredReturn } = getEquityReturnAccuredToDate(
+    deals,
+    dealStats
+  );
+  portfolioStats.equityAccruedPreferredReturn = totalEquityPreferredReturn;
+
+  //Fix calculation for portfolioStats.portfolioValueToDate
+  portfolioStats.newPortfolioValueToDate =
+    portfolioStats.principalInvested +
+    portfolioStats.equityAccruedPreferredReturn +
+    portfolioStats.debtDistributionsToDate;
+
+  tableStats.equity.principalInvested = dealStats.reduce(
+    (acc, deal: ReturnsDealStats) => {
+      if (deal.financingType === DealFinancingType.equity) {
+        return acc + deal.committedAmount;
+      }
+      return acc;
+    },
+    0
+  );
+
+  tableStats.equity.accruedToDate = portfolioStats.equityAccruedPreferredReturn;
+  tableStats.equity.earnedToDate = portfolioStats.equityDistributionsToDate;
+  tableStats.equity.earningsProjected =
+    portfolioStats.projectedEquityDistributions -
+    tableStats.equity.principalInvested;
+  tableStats.equity.projectedReturn =
+    portfolioStats.projectedEquityDistributions;
+
+  tableStats.debt.principalInvested = dealStats.reduce(
+    (acc, deal: ReturnsDealStats) => {
+      if (deal.financingType !== DealFinancingType.equity) {
+        return acc + deal.committedAmount;
+      }
+      return acc;
+    },
+    0
+  );
+  tableStats.debt.accruedToDate = 0;
+  tableStats.debt.earnedToDate = portfolioStats.debtDistributionsToDate;
+  tableStats.debt.earningsProjected =
+    portfolioStats.projectedDebtDistributions -
+    tableStats.debt.principalInvested;
+  tableStats.debt.projectedReturn = portfolioStats.projectedDebtDistributions;
 };

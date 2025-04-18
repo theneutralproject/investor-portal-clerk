@@ -2,87 +2,12 @@ import React from 'react';
 import { Box, Grid, Stack, Typography } from '@mui/material';
 import { CreateAccountButton, SignInButton } from './CreateAccount';
 
-import {
-  ComposedChart,
-  Line,
-  Area,
-  XAxis,
-  YAxis,
-  ResponsiveContainer,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ReferenceLine,
-} from 'recharts';
 import PortfolioMetric from './PortfolioMetric';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
-import { CustomLegend } from '../Project/Overview/InvestmentCalculatorNew';
-import {
-  getChartData,
-  getMetrics,
-  dataAccessors,
-  CustomTooltipProps,
-  TooltipPayloadItem,
-  formatCurrency,
-  calculateTodayLinePosition,
-} from './Portfolio/portfolioHelpers';
+import { getMetrics } from './Portfolio/portfolioHelpers';
 import { DASHBOARD_POSTFOLIO_TEST_ID } from 'e2e/testIds';
-import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
-const CustomTooltip: React.FC<CustomTooltipProps> = ({
-  active,
-  payload,
-  label,
-}) => {
-  if (!active || !payload) return null;
-
-  const isProjected = payload[0]?.payload?.isProjected;
-
-  return (
-    <Box
-      sx={{
-        bgcolor: 'background.paper',
-        p: 2,
-        border: 1,
-        borderColor: 'grey.200',
-        borderRadius: 1,
-        boxShadow: 1,
-      }}
-    >
-      <Typography variant="subtitle2" sx={{ mb: 1 }}>
-        Quarter: {label}
-      </Typography>
-      {payload.map((entry: TooltipPayloadItem) => {
-        if (!isProjected && entry.name.includes('Projected')) return null;
-        if (isProjected && !entry.name.includes('Projected')) return null;
-
-        if (entry.value !== undefined) {
-          return (
-            <Typography
-              key={entry.name}
-              variant="body2"
-              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-            >
-              <Box
-                component="span"
-                sx={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: '50%',
-                  bgcolor: entry.color,
-                  display: 'inline-block',
-                }}
-              />
-              {entry.name}: {formatCurrency(entry.value)}
-            </Typography>
-          );
-        }
-        return null;
-      })}
-    </Box>
-  );
-};
 
 const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
@@ -96,12 +21,7 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
     enabled: loggedIn,
   });
 
-  const equityFileLastUpdatedString = data?.equityFileLastUpdated
-    ? new Date(data.equityFileLastUpdated).toLocaleDateString()
-    : null;
   const metrics = getMetrics(data || null);
-  const chartData = getChartData(data || null);
-  const todayLinePosition = calculateTodayLinePosition(chartData);
   return (
     <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}`}>
       <Grid container spacing={4} sx={{ mb: 4 }}>
@@ -112,145 +32,11 @@ const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
               projectedTotalValue={metric.projectedTotalValue}
               label={metric.label}
               color={metric.color}
+              tooltipDisabled={true}
             />
           </Grid>
         ))}
       </Grid>
-
-      {chartData.length > 0 && equityFileLastUpdatedString && (
-        <Box
-          sx={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'flex-end',
-          }}
-        >
-          <CheckCircleOutlineIcon
-            sx={{ fontSize: 14, mr: 1, color: 'rgba(0, 0, 0, 0.5)' }}
-          />
-          <Typography variant="caption" sx={{ color: 'rgba(0, 0, 0, 0.5)' }}>
-            Projections last updated {equityFileLastUpdatedString}
-          </Typography>
-        </Box>
-      )}
-      {chartData.length > 0 && (
-        <Box sx={{ height: 300, mt: 4, display: { xs: 'none', sm: 'block' } }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={chartData}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid stroke="#f5f5f5" />
-              <XAxis dataKey="quarter" />
-              <YAxis />
-              <Tooltip
-                content={<CustomTooltip />}
-                labelFormatter={(label: string) => `Quarter: ${label}`}
-              />
-              <Legend content={<CustomLegend payload={[]} />} />
-              <XAxis
-                xAxisId="percentageAxis"
-                type="number"
-                domain={[0, 100]}
-                hide
-              />
-
-              {todayLinePosition !== null && (
-                <ReferenceLine
-                  xAxisId="percentageAxis"
-                  x={todayLinePosition}
-                  stroke="#656565"
-                  label={{
-                    value: 'Today',
-                    position: 'insideTopLeft',
-                    fill: '#656565',
-                  }}
-                />
-              )}
-
-              {/* Areas for historical data */}
-              <Area
-                type="monotone"
-                dataKey={dataAccessors.principal}
-                stroke="#656565"
-                fill="#656565"
-                fillOpacity={0.1}
-                name="Principal"
-                strokeWidth={3}
-              />
-              <Area
-                type="monotone"
-                dataKey={dataAccessors.equityDistributions}
-                stroke="#2196F3"
-                fill="#2196F3"
-                fillOpacity={0.1}
-                name="Equity Distributions"
-                strokeWidth={3}
-              />
-              <Area
-                type="monotone"
-                dataKey={dataAccessors.debtDistributions}
-                stroke="#5AAC6A"
-                fill="#5AAC6A"
-                fillOpacity={0.1}
-                name="Debt Distributions"
-                strokeWidth={3}
-              />
-              <Area
-                type="monotone"
-                dataKey={dataAccessors.portfolioValue}
-                stroke="#FFB800"
-                fill="#FFB800"
-                fillOpacity={0.1}
-                name="Portfolio Value"
-                strokeWidth={3}
-              />
-
-              {/* Lines for projected data */}
-              <Line
-                type="monotone"
-                dataKey={dataAccessors.principalProjected}
-                stroke="#656565"
-                name="Principal (Projected)"
-                strokeWidth={2}
-                dot={false}
-                strokeDasharray="5"
-                legendType="none"
-              />
-              <Line
-                type="monotone"
-                dataKey={dataAccessors.equityDistributionsProjected}
-                stroke="#2196F3"
-                name="Equity Distributions (Projected)"
-                strokeWidth={2}
-                dot={false}
-                strokeDasharray="5"
-                legendType="none"
-              />
-              <Line
-                type="monotone"
-                dataKey={dataAccessors.debtDistributionsProjected}
-                stroke="#5AAC6A"
-                name="Debt Distributions (Projected)"
-                strokeWidth={2}
-                dot={false}
-                strokeDasharray="5"
-                legendType="none"
-              />
-              <Line
-                type="monotone"
-                dataKey={dataAccessors.portfolioValueProjected}
-                stroke="#FFB800"
-                name="Portfolio Value (Projected)"
-                strokeWidth={2}
-                dot={false}
-                strokeDasharray="5"
-                legendType="none"
-              />
-            </ComposedChart>
-          </ResponsiveContainer>
-        </Box>
-      )}
 
       {!loggedIn && (
         <Box
