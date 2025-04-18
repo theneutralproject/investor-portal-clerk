@@ -17,6 +17,7 @@ export type ReturnsDateObject = z.infer<typeof zReturnsDateObjectSchema>;
 
 export const zReturnsPortfolioStatsSchema = z.object({
   portfolioValueToDate: z.number(), // sum of accruedInterestToDate and distributionsToDate and principalInvested
+  newPortfolioValueToDate: z.number(), // Sum of Debt Earned to Date and Equity Return Accrued to Date and Principal Invested
   distributionsToDate: z.number(), // payments made to the investor to date
   debtDistributionsToDate: z.number(), // only used for debt deals
   equityDistributionsToDate: z.number(), // only used for equity deals

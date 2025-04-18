@@ -470,7 +470,7 @@ export async function getPortfolioReturns(
   portfolioStats.equityAccruedPreferredReturn = totalEquityPreferredReturn;
 
   //Fix calculation for portfolioStats.portfolioValueToDate
-  portfolioStats.portfolioValueToDate =
+  portfolioStats.newPortfolioValueToDate =
     portfolioStats.principalInvested +
     portfolioStats.equityAccruedPreferredReturn +
     portfolioStats.debtDistributionsToDate;
