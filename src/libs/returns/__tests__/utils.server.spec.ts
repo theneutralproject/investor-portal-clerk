@@ -743,10 +743,10 @@ describe('utils.server', () => {
 
       // Expected: (90 / 365) * 100_000 * 10% = 2,438.36
       expect(q1LastMonthEntry!.debtDistributionsCurrent).toBeCloseTo(
-        2438.36,
+        2465.753,
         2
       );
-      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2438.36, 2);
+      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2465.753, 2);
     });
   });
 });
