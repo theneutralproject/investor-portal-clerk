@@ -20,6 +20,7 @@ export const zReturnsPortfolioStatsSchema = z.object({
   distributionsToDate: z.number(), // payments made to the investor to date
   debtDistributionsToDate: z.number(), // only used for debt deals
   equityDistributionsToDate: z.number(), // only used for equity deals
+  equityAccruedPreferredReturn: z.number(), // only used for equity deals
   projectedEquityDistributions: z.number(), // only used for equity deals
   projectedDebtDistributions: z.number(), // sum of existing and future distributions
   projectedPortfolioValue: z.number(), // sum of portfolioValueToDate and projectedDistributions

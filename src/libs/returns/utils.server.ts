@@ -2,6 +2,7 @@ import 'server-only';
 import {
   type DealInvestmentStats,
   DealUnitType,
+  DealFinancingType,
   type ProjectInvestmentStats,
   type ProjectMilestones,
 } from '@prisma/client';
@@ -464,6 +465,16 @@ export async function getPortfolioReturns(
     dealStats
   );
 
+  //Fix calculation for portfolioStats.equityAccruedPreferredReturn
+  const { totalEquityPreferredReturn } = getEquityReturnAccuredToDate(deals);
+  portfolioStats.equityAccruedPreferredReturn = totalEquityPreferredReturn;
+
+  //Fix calculation for portfolioStats.portfolioValueToDate
+  portfolioStats.portfolioValueToDate =
+    portfolioStats.principalInvested +
+    portfolioStats.equityAccruedPreferredReturn +
+    portfolioStats.debtDistributionsToDate;
+
   const consolidatedSchedule =
     generateConsolidatedSchedules(returnsObjectsByDate);
 
@@ -473,3 +484,62 @@ export async function getPortfolioReturns(
     dealStats,
   } as PortfolioReturnsResponse;
 }
+
+/**
+ * Calculates the total equity preferred return accrued to date for all equity deals.
+ *
+ * @param {DealWithInvestmentStatsAndProjectWithPics[]} deals - The list of deals to process.
+ * @returns {Object} An object containing the total equity preferred return and raw metrics.
+ *
+ * @example
+ * const result = getEquityReturnAccuredToDate(deals);
+ * // {
+ * //   totalEquityPreferredReturn: 10000,
+ * //   rawMetrics: [...],
+ */
+export const getEquityReturnAccuredToDate = (
+  deals: DealWithInvestmentStatsAndProjectWithPics[]
+) => {
+  let totalEquityPreferredReturn = 0;
+  const rawMetrics = [];
+
+  for (const deal of deals) {
+    // Require equity deal
+    // Require equity preferred return
+    // Require closing date
+    // Require amount
+    if (
+      deal.investmentStats?.financingType !== DealFinancingType.equity ||
+      !deal.project?.investmentStats?.equityPreferredReturn ||
+      !deal.closingDate ||
+      !deal.investmentStats?.amount
+    ) {
+      continue;
+    }
+
+    const equityPreferredReturn =
+      deal.project.investmentStats.equityPreferredReturn;
+    const closingDate = deal.closingDate;
+    const amount = deal.investmentStats.amount;
+
+    const daysSinceClose = differenceInCalendarDays(new Date(), closingDate);
+    const perDealAccrued =
+      amount * (equityPreferredReturn / 365) * daysSinceClose;
+
+    rawMetrics.push({
+      dealId: deal.id,
+      amount,
+      equityPreferredReturn,
+      closingDate,
+      daysSinceClose,
+      perDealAccrued,
+    });
+
+    totalEquityPreferredReturn += perDealAccrued;
+  }
+
+  return {
+    rawMetrics,
+    totalEquityPreferredReturn,
+  };
+};
