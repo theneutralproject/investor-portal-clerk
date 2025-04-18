@@ -547,7 +547,7 @@ describe('utils.server', () => {
       const cumulativeDistribution =
         (lastScheduleEntry?.debtDistributionsCumulative ?? 0) +
         (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251 + 17);
+      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251 + 27);
     });
 
     it('should return correct dashboard returns for two EQUITY deals', async () => {

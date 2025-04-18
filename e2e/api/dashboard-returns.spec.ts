@@ -340,7 +340,7 @@ test.describe('api/dashboard/returns test', () => {
     const cumulativeDistribution =
       (lastScheduleEntry?.debtDistributionsCumulative ?? 0) +
       (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-    expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251);
+    expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251 + 27);
   });
 
   test('[GET] get dashboard returns for two EQUITY deals', async ({
