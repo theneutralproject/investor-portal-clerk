@@ -207,7 +207,7 @@ export const getMetrics = (
       label: 'Debt Earned to Date',
       toDateValue: formatCurrency(data.portfolioStats.debtDistributionsToDate),
       projectedTotalValue: formatCurrency(
-        data.portfolioStats.projectedDebtDistributions
+        data.portfolioStats.debtDistributionsToDate
       ),
       color: '#2196F3',
     },

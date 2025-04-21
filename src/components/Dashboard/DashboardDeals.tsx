@@ -1,67 +1,21 @@
 import React from 'react';
-import { Box, Card, CardContent, Typography, styled } from '@mui/material';
+import { Box, CardContent, Typography } from '@mui/material';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import DashboardCurrentInvestments from './DashboardCurrentInvestments';
+import {
+  ColorDot,
+  StyledCard,
+  SummaryTable,
+  SummaryTableRow,
+  SummaryTableCell,
+  formatCurrency,
+} from './DashboardComponents';
 
 interface DashboardDealsProps {
   loggedIn: boolean;
 }
-
-const StyledCard = styled(Card)({
-  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
-  borderRadius: 8,
-});
-
-const SummaryTable = styled(Box)(({}) => ({
-  width: '100%',
-  borderCollapse: 'separate',
-  borderSpacing: 0,
-}));
-
-const SummaryTableRow = styled(Box)(({}) => ({
-  display: 'flex',
-  width: '100%',
-  borderBottom: '1px solid rgba(224, 224, 224, 1)',
-  '&:last-child': {
-    borderBottom: 'none',
-  },
-  '&.header': {
-    borderBottom: '1px solid rgba(224, 224, 224, 1)',
-  },
-  '&.total': {
-    backgroundColor: 'rgba(250, 250, 250, 1)',
-  },
-}));
-
-const SummaryTableCell = styled(Box)(({ theme }) => ({
-  flex: 1,
-  padding: theme.spacing(2),
-  textAlign: 'right',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  '&.header': {
-    fontWeight: 500,
-    color: 'rgba(0, 0, 0, 0.87)',
-    padding: theme.spacing(1.5, 2),
-  },
-  '&.left': {
-    justifyContent: 'flex-start',
-    paddingLeft: theme.spacing(3),
-  },
-  '&.investment-type': {
-    minWidth: '100px',
-  },
-}));
-
-const ColorDot = styled(Box)({
-  width: 12,
-  height: 12,
-  borderRadius: '50%',
-  display: 'inline-block',
-  marginRight: 12,
-});
 
 const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
@@ -74,15 +28,6 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
     },
     enabled: loggedIn,
   });
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
   // Early return if no data
   if (!data?.dealStats || data.dealStats.length === 0) {
@@ -151,7 +96,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
               >
                 {/* Empty cell for the first column */}
               </SummaryTableCell>
-              <SummaryTableCell className="header">
+              <SummaryTableCell className="header table-header">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -164,7 +109,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   Invested
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell className="header">
+              <SummaryTableCell className="header table-header">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -177,7 +122,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   Date
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell className="header">
+              <SummaryTableCell className="header table-header">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -190,7 +135,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   Date
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell className="header">
+              <SummaryTableCell className="header table-header">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -203,7 +148,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   Earnings
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell className="header">
+              <SummaryTableCell className="header table-header">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -219,7 +164,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
             </SummaryTableRow>
 
             {/* Equity Row */}
-            <SummaryTableRow>
+            <SummaryTableRow className="bordered">
               <SummaryTableCell
                 className="left investment-type"
                 sx={{ flex: 1.5 }}
@@ -237,31 +182,31 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   </Typography>
                 </Box>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(tableStats.equity.principalInvested)}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(Math.round(tableStats.equity.accruedToDate))}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {tableStats.equity.earnedToDate > 0
                     ? formatCurrency(tableStats.equity.earnedToDate)
                     : '-'}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(
                     Math.round(tableStats.equity.earningsProjected)
                   )}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(
                     Math.round(tableStats.equity.projectedReturn)
@@ -271,7 +216,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
             </SummaryTableRow>
 
             {/* Debt Row */}
-            <SummaryTableRow>
+            <SummaryTableRow className="bordered">
               <SummaryTableCell
                 className="left investment-type"
                 sx={{ flex: 1.5 }}
@@ -289,33 +234,33 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   </Typography>
                 </Box>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(tableStats.debt.principalInvested)}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {tableStats.debt.accruedToDate > 0
                     ? formatCurrency(Math.round(tableStats.debt.accruedToDate))
                     : '-'}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {tableStats.debt.earnedToDate > 0
                     ? formatCurrency(Math.round(tableStats.debt.earnedToDate))
                     : '$0'}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(
                     Math.round(tableStats.debt.earningsProjected)
                   )}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography variant="body2">
                   {formatCurrency(Math.round(tableStats.debt.projectedReturn))}
                 </Typography>
@@ -338,7 +283,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   Total
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -349,7 +294,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   {formatCurrency(totalPrincipal)}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -360,7 +305,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   {formatCurrency(Math.round(totalAccrued))}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -373,7 +318,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                     : '$0'}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -384,7 +329,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
                   {formatCurrency(Math.round(totalProjectedEarnings))}
                 </Typography>
               </SummaryTableCell>
-              <SummaryTableCell>
+              <SummaryTableCell className="table-cell">
                 <Typography
                   sx={{
                     color: 'rgba(0, 0, 0, 0.87)',
@@ -399,6 +344,8 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
           </SummaryTable>
         </CardContent>
       </StyledCard>
+
+      <DashboardCurrentInvestments data={data} />
 
       <Typography
         variant="subtitle2"

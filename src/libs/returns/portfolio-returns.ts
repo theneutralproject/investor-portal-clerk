@@ -41,10 +41,12 @@ export const getInitialPortfolioStats = (): ReturnsPortfolioStats => {
     distributionsToDate: 0,
     debtDistributionsToDate: 0,
     equityDistributionsToDate: 0,
+    equityAccruedPreferredReturn: 0,
     projectedEquityDistributions: 0,
     projectedDebtDistributions: 0,
     projectedPortfolioValue: 0,
     principalInvested: 0,
+    newPortfolioValueToDate: 0,
   };
 };
 
@@ -139,12 +141,17 @@ export const initializeDealSummary = (
       investmentStats?.financingType === DealFinancingType.equity
         ? 'equity'
         : 'debt',
+    equityAccruedPreferredReturn: 0,
+    equityAccruedPreferredReturnPercentage:
+      (deal.project?.investmentStats?.equityPreferredReturn ?? 0) * 100,
+    debtInterestRatePercentage: investmentStats?.debtInterestRatePerc ?? 0,
     closingDate: closingDate!,
     project: {
       id: project!.id,
       name: project!.displayName,
       location: project!.location,
       pictures: project!.pictures,
+      targetEquityMultiple: project?.investmentStats?.targetEquityMultiple ?? 0,
     },
     conversionId: startDealConversion?.id || endDealConversion?.id || null,
   };

@@ -52,6 +52,8 @@ export const zReturnsDealStatsSchema = z.object({
   distributionsToDate: z.number(),
   distributionsProjected: z.number(),
   equityAccruedPreferredReturn: z.number(),
+  equityAccruedPreferredReturnPercentage: z.number(),
+  debtInterestRatePercentage: z.number(),
   project: z.object({
     id: z.number(),
     name: z.string(),
@@ -65,6 +67,7 @@ export const zReturnsDealStatsSchema = z.object({
         })
       )
       .nullable(),
+    targetEquityMultiple: z.number(),
   }),
   financingType: z.enum(['equity', 'debt']),
   closingDate: z.date(),
