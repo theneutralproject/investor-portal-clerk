@@ -10,7 +10,13 @@ import {
 import prisma from '../prisma.server';
 import type { UserCreateSchema, UserUpdateSchema } from './schema';
 import { getErrorMessage } from '../utils.server';
-import { type Deal, MembershipType, type User } from '@prisma/client';
+import {
+  type Deal,
+  MembershipType,
+  Prisma,
+  PrismaClient,
+  type User,
+} from '@prisma/client';
 import type { UserWithAddress } from '../types';
 import type { AddressCreateSchema } from '../address/schema';
 import { clerkClient } from '@clerk/nextjs/server';
@@ -73,15 +79,18 @@ const getHsUserData = (
  */
 export async function createUserInDbAndHubspot(
   data: UserCreateSchema,
-  dealId?: number
-) {
+  dealId?: number,
+  tx?: PrismaClient | Prisma.TransactionClient
+): Promise<User> {
+  const db = tx ?? prisma;
   const { address, ...userData } = data;
   userData.email = userData.email.toLowerCase();
+  console.log(data);
 
   let deal: Deal | null = null;
   if (dealId) {
     // attach user to hubspot deal
-    deal = await prisma.deal.findUnique({ where: { id: dealId } });
+    deal = await db.deal.findUnique({ where: { id: dealId } });
     if (!deal) {
       throw new Error(`Deal with id ${dealId} not found`);
     }
@@ -121,22 +130,22 @@ export async function createUserInDbAndHubspot(
     };
 
     if (address) {
-      const userAddress = await prisma.address.create({ data: address });
+      const userAddress = await db.address.create({ data: address });
       console.log(`created address for new user`);
       const addressId = userAddress.id;
       userCreateData = {
         ...userCreateData,
-        ...{ address: { connect: userAddress.id }, addressId: addressId },
+        ...{ address: { connect: { id: addressId } } },
       };
     }
     Logger.log({ message: 'begin creating user in db', extra: userCreateData });
     delete userCreateData.notifyUserOnCreate;
-    const dbUser = await prisma.user.create({
+    const dbUser = await db.user.create({
       data: userCreateData,
     });
 
     // create a personal org:
-    const userOrg = await prisma.organization.create({
+    const userOrg = await db.organization.create({
       data: {
         name: `${userData.firstName} ${userData.lastName}'s Organization`,
         ownedBy: { connect: { id: dbUser.id } },
@@ -147,7 +156,7 @@ export async function createUserInDbAndHubspot(
     userOrgId = userOrg.id;
 
     // add orgId to user
-    updatedUser = await prisma.user.update({
+    updatedUser = await db.user.update({
       where: { id: dbUser.id },
       data: {
         userOrgId,
@@ -157,7 +166,7 @@ export async function createUserInDbAndHubspot(
     // this should only happen if a duplicate webhook is received from clerk
     console.warn('Unable to create user in DB:\n', getErrorMessage(error));
     // check if user already exists in DB:
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await db.user.findUnique({
       where: { email: userData.email },
     });
     if (!existingUser) {
