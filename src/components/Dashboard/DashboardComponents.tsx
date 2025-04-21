@@ -21,25 +21,27 @@ export const FinanceTypeChip = styled(Chip)(
     color: 'white',
     fontWeight: 'bold',
     borderRadius: '4px',
-    height: '20px',
+    height: '18px',
     padding: '0 2px',
-    fontSize: '12px',
+    fontSize: '10px',
   })
 );
 
 export const SummaryTable = styled(Box)(({}) => ({
   width: '100%',
   borderCollapse: 'separate',
+  paddingBottom: '0 !important',
   borderSpacing: 0,
 }));
 
 export const SummaryTableRow = styled(Box)(({}) => ({
   display: 'flex',
   justifyContent: 'space-between',
-  marginBottom: '8px',
   width: '100%',
+  padding: '0 8px',
   '&.bordered': {
     borderBottom: '1px solid rgba(224, 224, 224, 1)',
+
     '&:last-child': {
       borderBottom: 'none',
     },
@@ -49,6 +51,10 @@ export const SummaryTableRow = styled(Box)(({}) => ({
   },
   '&.total': {
     backgroundColor: 'rgba(250, 250, 250, 1)',
+    marginBottom: '0 !important',
+  },
+  '&.deal-card': {
+    padding: '0 !important',
   },
 }));
 

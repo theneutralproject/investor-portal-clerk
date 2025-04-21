@@ -51,7 +51,7 @@ const DashboardCurrentInvestments: React.FC<
               : null);
 
           return (
-            <Grid item xs={6} sm={6} md={4} key={deal.dealId}>
+            <Grid item xs={12} sm={4} key={deal.dealId}>
               <InvestmentCard>
                 <Box sx={{ p: 2, pb: 0 }}>
                   <FinanceTypeChip
@@ -80,7 +80,7 @@ const DashboardCurrentInvestments: React.FC<
 
                 <CardContent>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <SummaryTableRow>
+                    <SummaryTableRow className="deal-card">
                       <SummaryTableCell className="left">
                         Principal Invested:
                       </SummaryTableCell>
@@ -90,7 +90,7 @@ const DashboardCurrentInvestments: React.FC<
                     </SummaryTableRow>
 
                     {deal.financingType === 'debt' ? (
-                      <SummaryTableRow>
+                      <SummaryTableRow className="deal-card">
                         <SummaryTableCell className="left">
                           Interest Rate:
                         </SummaryTableCell>
@@ -100,7 +100,7 @@ const DashboardCurrentInvestments: React.FC<
                       </SummaryTableRow>
                     ) : (
                       <>
-                        <SummaryTableRow>
+                        <SummaryTableRow className="deal-card">
                           <SummaryTableCell className="left">
                             Equity Multiple:
                           </SummaryTableCell>
@@ -108,7 +108,7 @@ const DashboardCurrentInvestments: React.FC<
                             {deal.project.targetEquityMultiple.toFixed(1)}x
                           </SummaryTableCell>
                         </SummaryTableRow>
-                        <SummaryTableRow>
+                        <SummaryTableRow className="deal-card">
                           <SummaryTableCell className="left">
                             Accrued Preferred Return:
                           </SummaryTableCell>
@@ -118,7 +118,7 @@ const DashboardCurrentInvestments: React.FC<
                             )}
                           </SummaryTableCell>
                         </SummaryTableRow>
-                        <SummaryTableRow>
+                        <SummaryTableRow className="deal-card">
                           <SummaryTableCell className="left">
                             Accrued to Date:
                           </SummaryTableCell>
@@ -129,7 +129,7 @@ const DashboardCurrentInvestments: React.FC<
                       </>
                     )}
 
-                    <SummaryTableRow>
+                    <SummaryTableRow className="deal-card">
                       <SummaryTableCell className="left">
                         Earned to Date:
                       </SummaryTableCell>
@@ -138,7 +138,7 @@ const DashboardCurrentInvestments: React.FC<
                       </SummaryTableCell>
                     </SummaryTableRow>
 
-                    <SummaryTableRow>
+                    <SummaryTableRow className="deal-card">
                       <SummaryTableCell className="left">
                         Projected Earnings:
                       </SummaryTableCell>
@@ -149,7 +149,7 @@ const DashboardCurrentInvestments: React.FC<
                       </SummaryTableCell>
                     </SummaryTableRow>
 
-                    <SummaryTableRow>
+                    <SummaryTableRow className="deal-card">
                       <SummaryTableCell className="left">
                         Projected Return:
                       </SummaryTableCell>
