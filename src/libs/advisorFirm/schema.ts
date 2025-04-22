@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { zUserCreateSchema } from '../user/schema';
-import { AdvisorEmployeeRole } from '@prisma/client';
+import { AdvisorEmployeeRole, DealFinancingType } from '@prisma/client';
 
 export const zAdvisorFirmCreateSchema = z.object({
   name: z.string().min(1),
@@ -17,3 +17,54 @@ export const zAdvisorEmployeeCreateSchema = z.object({
 export type AdvisorEmployeeCreateSchema = z.infer<
   typeof zAdvisorEmployeeCreateSchema
 >;
+
+/**
+ * Represents a summary of a client's financial relationship with an advisor.
+ */
+export interface AdvisorClientSummary {
+  /** Client user information */
+  client: {
+    /** Unique ID of the client user */
+    id: number;
+    /** Full name of the client (first + last) */
+    name: string;
+    /** Email address of the client */
+    email: string;
+  };
+  /** The organization the client owns */
+  organization: {
+    /** Unique ID of the organization */
+    id: number;
+    /** Legal or display name of the organization */
+    name: string;
+  };
+  /** Total amount invested across all deals */
+  totalInvested: number;
+  /** Number of deals the client has invested in */
+  numberOfInvestments: number;
+  /** Array of deal financing types the client has invested in */
+  dealTypes: DealFinancingType[]; // can be (DealFinancingType)[]
+  /** Accumulated earnings to date (not projected) */
+  earningsToDate: number;
+  /** Projected earnings excluding principal */
+  projectedEarnings: number;
+  /** Total projected return including principal + earnings */
+  totalProjectedReturn: number;
+}
+
+/**
+ * Response payload for the advisor clients endpoint.
+ */
+export interface AdvisorClientsResponse {
+  /** List of advisor clients and their financial summaries */
+  clients: AdvisorClientSummary[];
+  /** Pagination metadata */
+  pagination: {
+    /** Current page number */
+    page: number;
+    /** Number of records per page */
+    limit: number;
+    /** Whether there are more clients beyond this page */
+    hasMore: boolean;
+  };
+}
