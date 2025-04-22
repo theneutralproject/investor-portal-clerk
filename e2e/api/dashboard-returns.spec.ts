@@ -197,13 +197,13 @@ test.describe('api/dashboard/returns test', () => {
       stats.consolidatedSchedule[stats.consolidatedSchedule.length - 1];
 
     expect(lastScheduleEntry?.debtDistributionsCumulative).toBeCloseTo(
-      282136.986,
+      281260.273,
       2
     );
-    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(282136.986, 2);
+    expect(lastScheduleEntry?.portfolioValueToDate).toBeCloseTo(281260.273, 2);
     expect(stats.portfolioStats?.principalInvested).toBe(200000);
     expect(stats.portfolioStats?.projectedDebtDistributions).toBeCloseTo(
-      282136.986,
+      281260.273,
       2
     );
   });

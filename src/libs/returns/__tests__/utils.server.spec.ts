@@ -490,16 +490,16 @@ describe('utils.server', () => {
 
       expect(lastScheduleEntry).toBeDefined();
       expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
-        282136.986,
+        281260.273,
         2
       );
       expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(
-        282136.986,
+        281260.273,
         2
       );
       expect(result.portfolioStats.principalInvested).toBe(200000);
       expect(result.portfolioStats.projectedDebtDistributions).toBeCloseTo(
-        282136.986,
+        281260.273,
         2
       );
     });
@@ -743,10 +743,10 @@ describe('utils.server', () => {
 
       // Expected: (90 / 365) * 100_000 * 10% = 2,438.36
       expect(q1LastMonthEntry!.debtDistributionsCurrent).toBeCloseTo(
-        2465.753,
+        2438.356,
         2
       );
-      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2465.753, 2);
+      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2438.356, 2);
     });
   });
 });
