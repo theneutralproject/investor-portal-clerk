@@ -46,7 +46,7 @@ export async function POST(
     const raw = await request.json();
     body = zAssignClientToAdvisorFirmSchema.parse(raw);
   } catch (error) {
-    return errorResponse('Invalid request body', 400, {
+    return errorResponse('Invalid organizationId', 400, {
       request,
       extra: { error },
     });
