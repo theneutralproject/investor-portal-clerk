@@ -18,6 +18,14 @@ export type AdvisorEmployeeCreateSchema = z.infer<
   typeof zAdvisorEmployeeCreateSchema
 >;
 
+export const zAssignClientToAdvisorFirmSchema = z.object({
+  organizationId: z.number().int().positive(),
+});
+
+export type AssignClientToAdvisorFirmSchema = z.infer<
+  typeof zAssignClientToAdvisorFirmSchema
+>;
+
 /**
  * Represents a summary of a client's financial relationship with an advisor.
  */
