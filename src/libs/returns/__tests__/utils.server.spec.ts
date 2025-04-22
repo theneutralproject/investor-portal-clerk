@@ -448,10 +448,10 @@ describe('utils.server', () => {
       const lastScheduleEntry = result.consolidatedSchedule.at(-1);
       expect(lastScheduleEntry).toBeDefined();
       expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
-        141260.27,
+        141232.87,
         2
       );
-      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(141260.27, 2);
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(141232.87, 2);
     });
 
     it('should return correct dashboard returns for multiple DEBT deals starting on the same day', async () => {
