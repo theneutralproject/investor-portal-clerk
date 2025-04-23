@@ -1,3 +1,9 @@
+enum Role {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+  ADVISOR = 'ADVISOR',
+}
+
 export {};
 
 declare global {
@@ -5,6 +11,7 @@ declare global {
     metadata: {
       onboardingComplete?: boolean;
       investorPortalId?: number;
+      role?: Role;
     };
   }
 }
