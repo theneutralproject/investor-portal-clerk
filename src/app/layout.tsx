@@ -3,14 +3,12 @@ import '@/styles/globals.css';
 import { Inter } from 'next/font/google';
 import { GoogleAnalytics, GoogleTagManager } from '@next/third-parties/google';
 import NeutralThemeProvider from '@/components/Shell/NeutralThemeProvider';
-import Sidebar from '@/components/Shell/Sidebar';
 import NeutralQueryProvider from '@/components/QueryClientProvider';
 import { ClerkProvider } from '@clerk/nextjs';
 
 import { ToastContainer } from 'react-toastify';
 
 import SignInTOSModal from '@/components/Dashboard/SignInTOSModal';
-import { DashboardProvider } from '@/components/Dashboard/DashboardContext';
 import PageViewTracker from './PageViewTracker';
 import UserIdentifier from './UserIdentifier';
 import { TermsProvider } from '@/app/context/TermsContext';
@@ -34,13 +32,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <PostHogProvider>
-      <ClerkProvider>
-        <RedirectProvider>
-          <TermsProvider>
-            <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
-            <GoogleTagManager gtmId={process.env.GOOGLE_ADS_TAG_ID ?? ''} />
-            <html lang="en">
+    <html lang="en">
+      <PostHogProvider>
+        <ClerkProvider>
+          <RedirectProvider>
+            <TermsProvider>
+              <GoogleAnalytics gaId={process.env.GOOGLE_TAG_ID ?? ''} />
+              <GoogleTagManager gtmId={process.env.GOOGLE_ADS_TAG_ID ?? ''} />
               <body className={inter.className}>
                 <PageViewTracker />
                 <UserIdentifier />
@@ -48,19 +46,17 @@ export default function RootLayout({
                   <NeutralThemeProvider>
                     <HubspotChatProvider>
                       <SignInTOSModal />
-                      <DashboardProvider>
-                        <Sidebar>{children}</Sidebar>
-                        <ToastContainer
-                          position="top-right"
-                          autoClose={5000}
-                          newestOnTop={false}
-                          closeOnClick
-                          rtl={false}
-                          pauseOnFocusLoss
-                          draggable
-                          theme="light"
-                        />
-                      </DashboardProvider>
+                      {children}
+                      <ToastContainer
+                        position="top-right"
+                        autoClose={5000}
+                        newestOnTop={false}
+                        closeOnClick
+                        rtl={false}
+                        pauseOnFocusLoss
+                        draggable
+                        theme="light"
+                      />
                     </HubspotChatProvider>
                   </NeutralThemeProvider>
                 </NeutralQueryProvider>
@@ -70,10 +66,10 @@ export default function RootLayout({
                 src="https://forms.finixpymnts.com/finix.js"
                 async
               ></script>
-            </html>
-          </TermsProvider>
-        </RedirectProvider>
-      </ClerkProvider>
-    </PostHogProvider>
+            </TermsProvider>
+          </RedirectProvider>
+        </ClerkProvider>
+      </PostHogProvider>
+    </html>
   );
 }

@@ -3,9 +3,6 @@
 //@ts-nocheck
 
 import CopyrightIcon from '@mui/icons-material/Copyright';
-import HomeIcon from '@mui/icons-material/Home';
-import MessageIcon from '@mui/icons-material/Message';
-import InfoIcon from '@mui/icons-material/Info';
 import DescriptionIcon from '@mui/icons-material/Description';
 import PolicyIcon from '@mui/icons-material/Policy';
 import {
@@ -13,6 +10,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  SvgIconTypeMap,
   useMediaQuery,
 } from '@mui/material';
 import type { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
@@ -29,33 +27,7 @@ import { theme } from './NeutralThemeProvider';
 import UserAvatar from './UserAvatar';
 import MobileSidebar from './MobileSidebar';
 import { SIDEBAR_TEST_ID } from 'e2e/testIds';
-
-export const ROUTES = [
-  {
-    name: 'Dashboard',
-    path: '/dashboard',
-    icon: HomeIcon,
-    dataTestId: `${SIDEBAR_TEST_ID}-dashboard`,
-  },
-  {
-    name: 'Documents',
-    path: '/documents/investor',
-    icon: DescriptionIcon,
-    dataTestId: `${SIDEBAR_TEST_ID}-documents`,
-  },
-  {
-    name: 'Learn',
-    path: '/learn',
-    icon: InfoIcon,
-    dataTestId: `${SIDEBAR_TEST_ID}-learn`,
-  },
-  {
-    name: 'Contact',
-    path: '/contact',
-    icon: MessageIcon,
-    dataTestId: `${SIDEBAR_TEST_ID}-contact`,
-  },
-];
+import { OverridableComponent } from '@mui/material/OverridableComponent';
 
 export const buttonItems = [
   {
@@ -125,22 +97,40 @@ const AppBar = styled(MuiAppBar, {
 
 export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
 
-export default function Sidebar(props: { children: React.ReactNode }) {
+interface ISidebarProps {
+  children: React.ReactNode;
+  isAdvisor?: boolean;
+  routes: {
+    name: string;
+    path: string;
+    icon: OverridableComponent<SvgIconTypeMap<object, 'svg'>> & {
+      muiName: string;
+    };
+    dataTestId?: string;
+  }[];
+}
+
+export default function Sidebar(props: ISidebarProps) {
   const router = useRouter();
   const pathName = usePathname();
   const isDealflowRoute = pathName.startsWith('/dealflow');
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const isActiveRoute = (routePath: string) => {
-    const rootPath = routePath.split('/')[1];
+    const routeRoot = routePath.split('/')[1];
+    const currentRoot = pathName.split('/')[1];
+
     return (
-      pathName.includes(routePath) ||
-      (rootPath && pathName.startsWith(`/${rootPath}`))
+      pathName === routePath ||
+      pathName.startsWith(`${routePath}/`) ||
+      (routeRoot && currentRoot === routeRoot && pathName.startsWith(routePath))
     );
   };
 
   if (isMobile) {
-    return <MobileSidebar>{props.children}</MobileSidebar>;
+    return (
+      <MobileSidebar routes={props.routes}>{props.children}</MobileSidebar>
+    );
   }
 
   return (
@@ -148,12 +138,14 @@ export default function Sidebar(props: { children: React.ReactNode }) {
       <AppBar position="absolute">
         <Toolbar
           sx={{
-            boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
+            boxShadow: props.isAdvisor
+              ? `0px 2px 4px -1px #00000033;`
+              : `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
             border: 'none !important',
             [theme.breakpoints.down('md')]: {
               display: 'none',
             },
-            backgroundColor: 'black',
+            backgroundColor: props.isAdvisor ? '#FFFFFF' : 'black',
           }}
         >
           <Image
@@ -162,11 +154,16 @@ export default function Sidebar(props: { children: React.ReactNode }) {
             src="/Neutral_White_Medium.png"
             alt="Neutral Logo"
             onClick={() => router.push('/dashboard')}
-            style={{ cursor: 'pointer' }}
+            style={{
+              cursor: 'pointer',
+              background: props.isAdvisor
+                ? 'rgba(105, 156, 219, 1)'
+                : 'transparent',
+            }}
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center', ml: '50px' }}>
-            {ROUTES.map(route => {
+            {props.routes.map(route => {
               //Logic to display based on logged in state (TODO when dashboard finalized)
               return (
                 <Button
@@ -177,16 +174,26 @@ export default function Sidebar(props: { children: React.ReactNode }) {
                     borderRadius: '15px',
                     padding: '5px 10px',
 
-                    color: isActiveRoute(route.path)
-                      ? 'white'
-                      : 'rgba(255, 255, 255, 0.66)',
-                    backgroundColor: isActiveRoute(route.path)
-                      ? 'rgba(255,255,255,0.2)'
-                      : 'transparent',
+                    color: props.isAdvisor
+                      ? isActiveRoute(route.path)
+                        ? 'rgba(0, 0, 0, 0.87)'
+                        : 'rgba(0, 0, 0, 0.6)'
+                      : isActiveRoute(route.path)
+                        ? 'white'
+                        : 'rgba(255, 255, 255, 0.66)',
+                    backgroundColor: props.isAdvisor
+                      ? isActiveRoute(route.path)
+                        ? 'rgba(0, 0, 0, 0.08)'
+                        : 'transparent'
+                      : isActiveRoute(route.path)
+                        ? 'rgba(255, 255, 255, 0.2)'
+                        : 'transparent',
                     '&:hover': {
-                      backgroundColor: isActiveRoute(route.path)
-                        ? 'rgba(255,255,255,0.3)'
-                        : 'rgba(255,255,255,0.1)',
+                      backgroundColor: props.isAdvisor
+                        ? 'rgba(0, 0, 0, 0.08)'
+                        : isActiveRoute(route.path)
+                          ? 'rgba(255, 255, 255, 0.3)'
+                          : 'rgba(255, 255, 255, 0.1)',
                     },
                     fontSize: '14px',
                     mr: '10px',
@@ -207,7 +214,7 @@ export default function Sidebar(props: { children: React.ReactNode }) {
               alignItems: 'center',
             }}
           >
-            <UserAvatar />
+            <UserAvatar isAdvisor={props.isAdvisor} />
           </Box>
         </Toolbar>
       </AppBar>

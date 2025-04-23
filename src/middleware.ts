@@ -25,6 +25,12 @@ const ignoredRoutes = [
 const isIgnoredRoute = createRouteMatcher(ignoredRoutes);
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isPublicRoute = createRouteMatcher(publicRoutes);
+const isAdvisorRoute = createRouteMatcher(['/advisor', '/advisor/(.*)']);
+const isUsersRoute = createRouteMatcher([
+  '/api/users',
+  '/api/users/(.*)',
+  '/account',
+]);
 
 export default clerkMiddleware(async (auth, request: NextRequest) => {
   if (isIgnoredRoute(request)) {
@@ -50,6 +56,23 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
       sessionClaims?.metadata
     );
     return NextResponse.redirect(new URL('/onboarding', request.url));
+  }
+
+  const role = sessionClaims?.metadata?.role;
+
+  // Only allow advisors into /advisor routes
+  if (isAdvisorRoute(request) && role !== 'ADVISOR') {
+    return NextResponse.redirect(new URL('/dashboard', request.url));
+  }
+
+  // If user is an advisor and accessing non-advisor routes, redirect them
+  if (
+    role === 'ADVISOR' &&
+    !isAdvisorRoute(request) &&
+    !isPublicRoute(request) &&
+    !isUsersRoute(request)
+  ) {
+    return NextResponse.redirect(new URL('/advisor/dashboard', request.url));
   }
 
   // If the user is logged in and the route is protected, let them view.

@@ -13,10 +13,15 @@ import {
 } from '@/components/Dashboard/CreateAccount';
 import { USER_AVATAR_TEST_ID } from 'e2e/testIds';
 
-const UserAvatar = () => {
+interface IUserAvatarProps {
+  isAdvisor?: boolean;
+}
+
+const UserAvatar = ({ isAdvisor }: IUserAvatarProps) => {
   const { user } = useUser();
   const { signOut } = useClerk();
   const [anchorEl, setAnchorEl] = useState<EventTarget | null>(null);
+  const basePath = isAdvisor ? '/advisor' : '';
 
   const handleClick = (event: React.MouseEvent<EventTarget>) => {
     setAnchorEl(event.currentTarget);
@@ -86,7 +91,7 @@ const UserAvatar = () => {
         onClose={handleClose}
         data-testid={`${USER_AVATAR_TEST_ID}-menu`}
       >
-        <Link href="/account" passHref>
+        <Link href={`${basePath}/account`} passHref>
           <MenuItem
             onClick={handleClose}
             sx={{ width: '200px' }}
@@ -95,7 +100,7 @@ const UserAvatar = () => {
             <PersonIcon sx={{ marginRight: 1 }} /> My Account
           </MenuItem>
         </Link>
-        <Link href="/terms" passHref>
+        <Link href={`${basePath}/terms`} passHref>
           <MenuItem
             onClick={handleClose}
             sx={{ width: '200px' }}
@@ -104,7 +109,7 @@ const UserAvatar = () => {
             <DescriptionIcon sx={{ marginRight: 1 }} /> Terms of Service
           </MenuItem>
         </Link>
-        <Link href="/privacy" passHref>
+        <Link href={`${basePath}/privacy`} passHref>
           <MenuItem
             onClick={handleClose}
             sx={{ width: '200px' }}
