@@ -15,6 +15,11 @@ jest.mock('@/libs/prisma.server', () => ({
     },
     advisorFirm: {
       findUnique: jest.fn(),
+      count: jest.fn(),
+    },
+    organization: {
+      findMany: jest.fn(),
+      count: jest.fn(),
     },
   },
 }));
@@ -108,7 +113,6 @@ describe('GET /api/advisors/clients', () => {
       })
     );
   });
-
   it('should return client summaries with pagination', async () => {
     jest.mocked(getAuth).mockReturnValue({
       userId: clerkId,
@@ -120,36 +124,36 @@ describe('GET /api/advisors/clients', () => {
       advisorFirmId: 42,
     } as any);
 
-    jest.mocked(prisma.advisorFirm.findUnique).mockResolvedValue({
-      clientOrganizations: [
-        {
-          id: 1,
-          name: 'Doe Investments',
-          ownedBy: {
-            id: 1000,
-            firstName: 'Jane',
-            lastName: 'Doe',
-            email: 'jane@doe.com',
-          },
-          deals: [
-            {
-              investmentStats: {
-                amount: 10000,
-                equityPreferredReturn: 0.1,
-                financingType: 'equity',
-              },
-            },
-            {
-              investmentStats: {
-                amount: 20000,
-                equityPreferredReturn: 0.15,
-                financingType: 'promissory_note_now',
-              },
-            },
-          ],
+    jest.mocked(prisma.organization.findMany).mockResolvedValue([
+      {
+        id: 1,
+        name: 'Doe Investments',
+        ownedBy: {
+          id: 1000,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          email: 'jane@doe.com',
         },
-      ],
-    } as any);
+        deals: [
+          {
+            investmentStats: {
+              amount: 10000,
+              equityPreferredReturn: 0.1,
+              financingType: 'equity',
+            },
+          },
+          {
+            investmentStats: {
+              amount: 20000,
+              equityPreferredReturn: 0.15,
+              financingType: 'promissory_note_now',
+            },
+          },
+        ],
+      },
+    ] as any);
+
+    jest.mocked(prisma.organization.count).mockResolvedValue(1);
 
     const request = nextRequestMock(
       {},
@@ -157,6 +161,7 @@ describe('GET /api/advisors/clients', () => {
       'GET',
       '/api/advisors/clients?page=1&limit=2'
     );
+
     const res = await GET(request as any);
     expect(res).toEqual(
       jsonResponse({
@@ -182,6 +187,7 @@ describe('GET /api/advisors/clients', () => {
         pagination: {
           page: 1,
           limit: 2,
+          total: 1,
           hasMore: false,
         },
       })
