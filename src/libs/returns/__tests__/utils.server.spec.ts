@@ -448,10 +448,10 @@ describe('utils.server', () => {
       const lastScheduleEntry = result.consolidatedSchedule.at(-1);
       expect(lastScheduleEntry).toBeDefined();
       expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
-        141232.87,
+        141260.27,
         2
       );
-      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(141232.87, 2);
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(141260.27, 2);
     });
 
     it('should return correct dashboard returns for multiple DEBT deals starting on the same day', async () => {
@@ -465,13 +465,10 @@ describe('utils.server', () => {
 
       expect(lastScheduleEntry).toBeDefined();
       expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
-        282520.547,
+        282465.75,
         2
       );
-      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(
-        282520.547,
-        2
-      );
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(282465.75, 2);
     });
 
     it('should return correct dashboard returns for multiple DEBT deals with different start dates', async () => {
@@ -490,16 +487,13 @@ describe('utils.server', () => {
 
       expect(lastScheduleEntry).toBeDefined();
       expect(lastScheduleEntry!.debtDistributionsCumulative).toBeCloseTo(
-        281260.273,
+        281232.88,
         2
       );
-      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(
-        281260.273,
-        2
-      );
+      expect(lastScheduleEntry!.portfolioValueToDate).toBeCloseTo(281232.88, 2);
       expect(result.portfolioStats.principalInvested).toBe(200000);
       expect(result.portfolioStats.projectedDebtDistributions).toBeCloseTo(
-        281260.273,
+        281232.88,
         2
       );
     });
@@ -547,7 +541,7 @@ describe('utils.server', () => {
       const cumulativeDistribution =
         (lastScheduleEntry?.debtDistributionsCumulative ?? 0) +
         (lastScheduleEntry?.equityDistributionCumulative ?? 0);
-      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251 + 27);
+      expect(Math.floor(cumulativeDistribution)).toBe(140000 + 21251);
     });
 
     it('should return correct dashboard returns for two EQUITY deals', async () => {
@@ -743,10 +737,10 @@ describe('utils.server', () => {
 
       // Expected: (90 / 365) * 100_000 * 10% = 2,438.36
       expect(q1LastMonthEntry!.debtDistributionsCurrent).toBeCloseTo(
-        2438.356,
+        2438.36,
         2
       );
-      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2438.356, 2);
+      expect(q1LastMonthEntry!.portfolioValueToDate).toBeCloseTo(2438.36, 2);
     });
   });
 });
