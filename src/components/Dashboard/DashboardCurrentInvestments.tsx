@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   CardContent,
@@ -6,6 +6,7 @@ import {
   Typography,
   Grid,
   Divider,
+  Button,
 } from '@mui/material';
 import type {
   PortfolioReturnsResponse,
@@ -19,6 +20,7 @@ import {
   formatCurrency,
   formatPercentage,
 } from './DashboardComponents';
+import { format } from 'date-fns';
 
 interface DashboardCurrentInvestmentsProps {
   data: PortfolioReturnsResponse;
@@ -27,6 +29,14 @@ interface DashboardCurrentInvestmentsProps {
 const DashboardCurrentInvestments: React.FC<
   DashboardCurrentInvestmentsProps
 > = ({ data }) => {
+  const [showAllDeals, setShowAllDeals] = useState(false);
+
+  const cardsPerRow = 3;
+  const displayedDeals = showAllDeals
+    ? data.dealStats
+    : data.dealStats.slice(0, cardsPerRow);
+  const hasMoreDeals = data.dealStats.length > cardsPerRow;
+
   return (
     <Box sx={{ mt: 3 }}>
       <Typography
@@ -36,12 +46,12 @@ const DashboardCurrentInvestments: React.FC<
           mb: 2,
         }}
       >
-        Current Investments
+        Current Investments ({data.dealStats.length})
       </Typography>
       <Divider sx={{ mb: 3 }} />
 
       <Grid container spacing={3}>
-        {data.dealStats.map((deal: ReturnsDealStats) => {
+        {displayedDeals.map((deal: ReturnsDealStats) => {
           // Find card image
           const cardImage =
             deal.project.pictures?.find(pic => pic.type === 'CARD') ||
@@ -59,13 +69,15 @@ const DashboardCurrentInvestments: React.FC<
                     financetype={deal.financingType}
                     size="small"
                   />
-                  <Typography
-                    variant="h6"
-                    component="h2"
-                    fontWeight="bold"
-                    gutterBottom
-                  >
+                  <Typography variant="h6" component="h2" fontWeight="bold">
                     {deal.project.name}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ mb: 1 }}
+                  >
+                    Closed: {format(new Date(deal.closingDate), 'MMM d, yyyy')}
                   </Typography>
                 </Box>
 
@@ -167,6 +179,17 @@ const DashboardCurrentInvestments: React.FC<
           );
         })}
       </Grid>
+
+      {hasMoreDeals && (
+        <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant="neutralYellow"
+            onClick={() => setShowAllDeals(!showAllDeals)}
+          >
+            {showAllDeals ? 'Show Less' : 'View All Investments'}
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };
