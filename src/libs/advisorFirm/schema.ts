@@ -1,6 +1,13 @@
 import { z } from 'zod';
 import { zUserCreateSchema } from '../user/schema';
-import { AdvisorEmployeeRole, DealFinancingType } from '@prisma/client';
+import {
+  AdvisorEmployeeRole,
+  AdvisorFirm,
+  AdvisorFirmEmployee,
+  DealFinancingType,
+  Organization,
+} from '@prisma/client';
+import { PaginatedResponse } from '../types';
 
 export const zAdvisorFirmCreateSchema = z.object({
   name: z.string().min(1),
@@ -63,16 +70,14 @@ export interface AdvisorClientSummary {
 /**
  * Response payload for the advisor clients endpoint.
  */
-export interface AdvisorClientsResponse {
-  /** List of advisor clients and their financial summaries */
-  clients: AdvisorClientSummary[];
-  /** Pagination metadata */
-  pagination: {
-    /** Current page number */
-    page: number;
-    /** Number of records per page */
-    limit: number;
-    /** Whether there are more clients beyond this page */
-    hasMore: boolean;
-  };
-}
+export type AdvisorClientsResponse = PaginatedResponse<AdvisorClientSummary>;
+
+/**
+ * Response payload for the advisor clients endpoint.
+ */
+export type AdvisorFirmsResponse = PaginatedResponse<
+  AdvisorFirm & {
+    employees: AdvisorFirmEmployee[];
+    clientOrganizations: Organization[];
+  }
+>;
