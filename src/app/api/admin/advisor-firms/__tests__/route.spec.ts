@@ -20,6 +20,7 @@ jest.mock('@/libs/prisma.server', () => ({
     advisorFirm: {
       create: jest.fn(),
       findMany: jest.fn(),
+      count: jest.fn(),
     },
   },
 }));
@@ -32,10 +33,6 @@ jest.mock('@/libs/logger', () => ({
 
 describe('/api/advisor-firm', () => {
   const mockRequest = nextRequestMock();
-  const validBody = {
-    name: 'Summit Capital',
-    logoUrl: 'https://example.com/logo.png',
-  };
   const adminUser: any = {
     id: 1,
     email: 'admin@firm.com',
@@ -44,6 +41,11 @@ describe('/api/advisor-firm', () => {
   const loggerLogSpy = jest.spyOn(Logger, 'log').mockImplementation(() => {});
 
   describe('POST /api/advisor-firm', () => {
+    const validBody = {
+      name: 'Summit Capital',
+      logoUrl: 'https://example.com/logo.png',
+    };
+
     beforeEach(() => {
       jest.clearAllMocks();
     });
@@ -220,15 +222,71 @@ describe('/api/advisor-firm', () => {
       ];
 
       jest.mocked(prisma.advisorFirm.findMany).mockResolvedValue(firms);
+      jest.mocked(prisma.advisorFirm.count).mockResolvedValue(firms.length);
+      const pagination = {
+        page: 1,
+        limit: 20,
+        total: firms.length,
+        hasMore: false,
+      };
 
       const response = await GET(mockRequest as any);
-      expect(response).toEqual(jsonResponse(firms));
+      expect(response).toEqual(
+        jsonResponse({
+          advisorFirms: firms,
+          pagination,
+        })
+      );
       expect(Logger.log).toHaveBeenCalledWith(
         {
-          message: `Admin ${adminUser.email} fetched ${firms.length} advisor firms`,
-          extra: { userId: adminUser.id },
+          message: `Admin ${adminUser.email} fetched advisor firms (page 1)`,
+          extra: {
+            userId: adminUser.id,
+            page: pagination.page,
+            limit: pagination.limit,
+          },
         },
         mockRequest
+      );
+    });
+
+    it('should return paginated advisor firms list (page 2)', async () => {
+      jest.mocked(getAdminFromRequest).mockResolvedValue(adminUser);
+      const total = 50;
+      const pagination = {
+        page: 2,
+        limit: 10,
+        total,
+        hasMore: true,
+      };
+
+      const firms = Array.from({ length: 10 }).map((_, i) => ({
+        id: i + 1,
+        name: `Firm ${i + 1}`,
+        logoUrl: `https://example.com/logo${i + 1}.png`,
+        employees: [],
+        clientOrganizations: [],
+        primaryContactId: null,
+        dateCreated: new Date(),
+        dateUpdated: new Date(),
+      }));
+
+      jest.mocked(prisma.advisorFirm.findMany).mockResolvedValue(firms);
+      jest.mocked(prisma.advisorFirm.count).mockResolvedValue(total);
+
+      const request = nextRequestMock(
+        {},
+        {},
+        'GET',
+        `/api/admin/advisor-firms?page=${pagination.page}&limit=${pagination.limit}`
+      );
+
+      const response = await GET(request as any);
+      expect(response).toEqual(
+        jsonResponse({
+          advisorFirms: firms,
+          pagination,
+        })
       );
     });
 
