@@ -21,7 +21,8 @@ export async function findOrCreateClerkUser(
   email: string,
   firstname: string,
   lastname: string,
-  phone?: string
+  phone?: string,
+  metadata?: { [x: string]: any }
 ) {
   const clerkData = {
     emailAddress: [email],
@@ -53,7 +54,10 @@ export async function findOrCreateClerkUser(
       );
       return null;
     }
-    const newClerkUser = await authClient.users.createUser(clerkData);
+    const newClerkUser = await authClient.users.createUser({
+      ...clerkData,
+      publicMetadata: metadata,
+    });
     if (!newClerkUser) {
       throw new Error('Error creating Clerk user');
     }

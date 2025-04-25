@@ -10,6 +10,7 @@ import {
   getErrorMessage,
   jsonResponse,
 } from '@/libs/utils.server';
+import { Role } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 
 // get all users with their orgs
@@ -71,7 +72,10 @@ export async function POST(request: NextRequest) {
       postData.email.toLocaleLowerCase(),
       postData.firstName,
       postData.lastName,
-      cleanPhone
+      cleanPhone,
+      {
+        role: Role.USER,
+      }
     );
     postData.clerkId = clerkUser?.id;
     postData.phoneNumber = cleanPhone;

@@ -121,7 +121,10 @@ export async function POST(
         user.email.toLowerCase(),
         user.firstName,
         user.lastName,
-        cleanPhone
+        cleanPhone,
+        {
+          role: Role.ADVISOR,
+        }
       );
 
       const dbPayload: UserCreateSchema & { role: Role } = {
