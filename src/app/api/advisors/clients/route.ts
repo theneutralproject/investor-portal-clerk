@@ -79,40 +79,43 @@ export async function GET(request: NextRequest) {
   const skip = (page - 1) * limit;
 
   // Get client orgs from advisor firm
-  const firmWithClients = await prisma.advisorFirm.findUnique({
-    where: { id: advisorFirm.advisorFirmId },
-    select: {
-      clientOrganizations: {
-        skip,
-        take: limit,
-        select: {
-          id: true,
-          name: true,
-          ownedBy: {
-            select: {
-              id: true,
-              firstName: true,
-              lastName: true,
-              email: true,
-            },
+  const [orgs, total] = await Promise.all([
+    prisma.organization.findMany({
+      where: {
+        advisorFirmId: advisorFirm.advisorFirmId,
+      },
+      skip,
+      take: limit,
+      select: {
+        id: true,
+        name: true,
+        ownedBy: {
+          select: {
+            id: true,
+            firstName: true,
+            lastName: true,
+            email: true,
           },
-          deals: {
-            select: {
-              investmentStats: {
-                select: {
-                  amount: true,
-                  equityPreferredReturn: true,
-                  financingType: true,
-                },
+        },
+        deals: {
+          select: {
+            investmentStats: {
+              select: {
+                amount: true,
+                equityPreferredReturn: true,
+                financingType: true,
               },
             },
           },
         },
       },
-    },
-  });
-
-  const orgs = firmWithClients?.clientOrganizations ?? [];
+    }),
+    prisma.organization.count({
+      where: {
+        advisorFirmId: advisorFirm.advisorFirmId,
+      },
+    }),
+  ]);
 
   const clients: AdvisorClientSummary[] = orgs.map(org => {
     const deals = org.deals.map(d => d.investmentStats).filter(Boolean);
@@ -163,7 +166,8 @@ export async function GET(request: NextRequest) {
     pagination: {
       page,
       limit,
-      hasMore: clients.length === limit,
+      total,
+      hasMore: skip + clients.length < total,
     },
   };
 
