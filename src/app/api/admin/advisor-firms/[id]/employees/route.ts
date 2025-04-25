@@ -17,6 +17,7 @@ import {
   AdvisorEmployeeCreateSchema,
   zAdvisorEmployeeCreateSchema,
 } from '@/libs/advisorFirm/schema';
+import { ReferralSource } from '@/libs/hubspot/utils.client';
 
 /**
  * POST /api/admin/advisor-firms/:id/employees
@@ -128,6 +129,7 @@ export async function POST(
         phoneNumber: cleanPhone,
         clerkId: clerkUser?.id,
         role: Role.ADVISOR,
+        referralSource: ReferralSource.ADVISOR_UPDATE,
       };
 
       const createdUser = await createUserInDbAndHubspot(

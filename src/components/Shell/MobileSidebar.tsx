@@ -24,7 +24,19 @@ import { useClerk } from '@clerk/nextjs';
 import posthog from 'posthog-js';
 import { MOBILE_SIDEBAR_TEST_ID } from 'e2e/testIds';
 
-const MobileSidebar = props => {
+interface IMobileSidebarProps {
+  children: React.ReactNode;
+  routes: {
+    name: string;
+    path: string;
+    icon: OverridableComponent<SvgIconTypeMap<object, 'svg'>> & {
+      muiName: string;
+    };
+    dataTestId?: string;
+  }[];
+}
+
+const MobileSidebar = (props: IMobileSidebarProps) => {
   const { signOut, user } = useClerk();
   const loggedIn = !!user;
   const [isOpen, setIsOpen] = useState(false);
@@ -141,7 +153,7 @@ const MobileSidebar = props => {
         }}
       >
         <List component="nav">
-          {ROUTES.map(route => (
+          {props.routes.map(route => (
             <ListItemButton
               key={route.name}
               onClick={() => {

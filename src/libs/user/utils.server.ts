@@ -85,7 +85,6 @@ export async function createUserInDbAndHubspot(
   const db = tx ?? prisma;
   const { address, ...userData } = data;
   userData.email = userData.email.toLowerCase();
-  console.log(data);
 
   let deal: Deal | null = null;
   if (dealId) {
