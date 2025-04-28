@@ -25,7 +25,12 @@ const ignoredRoutes = [
 const isIgnoredRoute = createRouteMatcher(ignoredRoutes);
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isPublicRoute = createRouteMatcher(publicRoutes);
-const isAdvisorRoute = createRouteMatcher(['/advisor', '/advisor/(.*)']);
+const isAdvisorRoute = createRouteMatcher([
+  '/advisor',
+  '/advisor/(.*)',
+  '/api/advisors',
+  '/api/advisors/(.*)',
+]);
 const isUsersRoute = createRouteMatcher([
   '/api/users',
   '/api/users/(.*)',

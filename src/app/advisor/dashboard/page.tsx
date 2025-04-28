@@ -1,15 +1,19 @@
 'use client';
 
 import { Box, Card, CardContent, Divider, Typography } from '@mui/material';
-import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
 import Grid from '@mui/material/Grid2';
-import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { useUser } from '@clerk/nextjs';
+import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
+import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
+import AdvisorClientsTable from '@/components/Tables/AdvisorClientsTable';
+import { Role } from '@prisma/client';
 
 const AdvisorDashboardPage = () => {
   const { user, isSignedIn, isLoaded } = useUser();
 
-  if (!isLoaded) return <DashboardSkeleton />;
+  if (!isLoaded || user?.publicMetadata.role !== Role.ADVISOR) {
+    return <DashboardSkeleton />;
+  }
 
   const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
   return (
@@ -45,6 +49,9 @@ const AdvisorDashboardPage = () => {
                   Clients
                 </Typography>
 
+                <Divider sx={{ mb: 3 }} />
+
+                <AdvisorClientsTable loadRequest={isSignedIn} />
                 <Divider sx={{ mb: 3 }} />
               </CardContent>
             </Card>
