@@ -74,16 +74,58 @@ export async function GET(request: NextRequest) {
 
   // Pagination parameters
   const url = new URL(request.url);
+  const search = url.searchParams.get('search')?.toLowerCase() || '';
   const page = Number(url.searchParams.get('page') || '1');
   const limit = Number(url.searchParams.get('limit') || '20');
   const skip = (page - 1) * limit;
+  const normalizedSearch = search?.toLowerCase();
+  const financingTypeFilter = Object.values(DealFinancingType).find(
+    type => type.toLowerCase() === normalizedSearch
+  );
+
+  const whereClause = {
+    advisorFirmId: advisorFirm.advisorFirmId,
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' as const } },
+        {
+          ownedBy: {
+            firstName: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        {
+          ownedBy: {
+            lastName: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        {
+          ownedBy: {
+            email: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        ...(financingTypeFilter
+          ? [
+              {
+                deals: {
+                  some: {
+                    investmentStats: {
+                      is: {
+                        financingType: financingTypeFilter,
+                      },
+                    },
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    }),
+  };
 
   // Get client orgs from advisor firm
   const [orgs, total] = await Promise.all([
     prisma.organization.findMany({
-      where: {
-        advisorFirmId: advisorFirm.advisorFirmId,
-      },
+      where: whereClause,
       skip,
       take: limit,
       select: {

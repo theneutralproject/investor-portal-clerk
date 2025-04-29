@@ -193,4 +193,87 @@ describe('GET /api/advisors/clients', () => {
       })
     );
   });
+
+  it('should filter clients by financing type using search query', async () => {
+    jest.mocked(getAuth).mockReturnValue({
+      userId: clerkId,
+      sessionClaims: { metadata: { investorPortalId } },
+    } as any);
+
+    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
+    jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue({
+      advisorFirmId: 42,
+    } as any);
+
+    // Org with both debt and equity
+    jest.mocked(prisma.organization.findMany).mockResolvedValue([
+      {
+        id: 1,
+        name: 'Filtered Org',
+        ownedBy: {
+          id: 1000,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          email: 'jane@doe.com',
+        },
+        deals: [
+          {
+            investmentStats: {
+              amount: 5000,
+              equityPreferredReturn: 0.1,
+              financingType: 'debt',
+            },
+          },
+          {
+            investmentStats: {
+              amount: 10000,
+              equityPreferredReturn: 0.1,
+              financingType: 'equity',
+            },
+          },
+        ],
+      },
+    ] as any);
+
+    jest.mocked(prisma.organization.count).mockResolvedValue(1);
+
+    const request = nextRequestMock(
+      {},
+      {},
+      'GET',
+      '/api/advisors/clients?search=debt&page=1&limit=10'
+    );
+
+    const res = await GET(request as any);
+
+    expect(res).toEqual(
+      jsonResponse({
+        clients: [
+          {
+            client: {
+              id: 1000,
+              name: 'Jane Doe',
+              email: 'jane@doe.com',
+            },
+            organization: {
+              id: 1,
+              name: 'Filtered Org',
+            },
+            totalInvested: 15000,
+            numberOfInvestments: 2,
+            dealTypes: ['debt', 'equity'],
+            earningsToDate: 1500,
+            projectedEarnings: 1500,
+            totalProjectedReturn: 16500,
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+          hasMore: false,
+        },
+      })
+    );
+  });
 });
