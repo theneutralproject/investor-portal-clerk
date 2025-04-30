@@ -17,7 +17,37 @@ import {
   AdvisorEmployeeCreateSchema,
   zAdvisorEmployeeCreateSchema,
 } from '@/libs/advisorFirm/schema';
+import { ReferralSource } from '@/libs/hubspot/utils.client';
 
+/**
+ * POST /api/admin/advisor-firms/:id/employees
+ *
+ * Creates a new advisor employee and associates them with an Advisor Firm.
+ * Only accessible by users with ADMIN role.
+ *
+ * Steps:
+ * - Validates route param `id` as advisorFirmId
+ * - Authenticates user via getAdminFromRequest
+ * - Validates the request body using zod schema
+ * - Creates Clerk user if not exists
+ * - Creates the user in our DB and HubSpot
+ * - Links user to advisor firm in `advisorFirmEmployee` table
+ *
+ * Input (request body):
+ * {
+ *   "role": "ADMIN" | "STAFF",
+ *   "user": {
+ *     "email": "jane.doe@example.com",
+ *     "firstName": "Jane",
+ *     "lastName": "Doe",
+ *     "phoneNumber": "(123) 456-7890"
+ *   }
+ * }
+ *
+ * @param request - Next.js API Request
+ * @param params - Route params with advisorFirmId
+ * @returns JSON response with the advisorFirmEmployee object or error
+ */
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -91,7 +121,10 @@ export async function POST(
         user.email.toLowerCase(),
         user.firstName,
         user.lastName,
-        cleanPhone
+        cleanPhone,
+        {
+          role: Role.ADVISOR,
+        }
       );
 
       const dbPayload: UserCreateSchema & { role: Role } = {
@@ -99,6 +132,7 @@ export async function POST(
         phoneNumber: cleanPhone,
         clerkId: clerkUser?.id,
         role: Role.ADVISOR,
+        referralSource: ReferralSource.ADVISOR_UPDATE,
       };
 
       const createdUser = await createUserInDbAndHubspot(

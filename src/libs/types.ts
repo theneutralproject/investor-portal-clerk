@@ -166,3 +166,18 @@ export class APIError extends Error {
     this.status = status;
   }
 }
+
+interface Pagination {
+  /** Current page number */
+  page: number;
+  /** Number of records per page */
+  limit: number;
+  /** Total number of records */
+  total: number;
+  /** Whether there are more records beyond this page */
+  hasMore: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  [x: string]: Array<T> | Pagination;
+}

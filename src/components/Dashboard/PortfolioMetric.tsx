@@ -6,12 +6,14 @@ interface PortfolioMetricProps {
   projectedTotalValue: string;
   label: string;
   color: string;
+  tooltipDisabled?: boolean;
 }
 const PortfolioMetric: React.FC<PortfolioMetricProps> = ({
   toDateValue,
   projectedTotalValue,
   label,
   color,
+  tooltipDisabled = false,
 }) => {
   const TooltipContent = () => (
     <Paper
@@ -91,6 +93,7 @@ const PortfolioMetric: React.FC<PortfolioMetricProps> = ({
       title={<TooltipContent />}
       arrow
       placement="top"
+      disableHoverListener={tooltipDisabled}
       componentsProps={{
         tooltip: {
           sx: {
@@ -112,6 +115,9 @@ const PortfolioMetric: React.FC<PortfolioMetricProps> = ({
           }}
         />
         <Box>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+            {label}
+          </Typography>
           <Typography
             variant="h6"
             sx={{
@@ -119,9 +125,6 @@ const PortfolioMetric: React.FC<PortfolioMetricProps> = ({
             }}
           >
             {projectedTotalValue}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-            {label}
           </Typography>
         </Box>
       </Stack>

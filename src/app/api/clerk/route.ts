@@ -39,6 +39,7 @@ export async function POST(request: NextRequest): Promise<Response> {
         publicMetadata: {
           onboardingComplete: true,
           investorPortalId: dbUser.id,
+          role: dbUser.role,
         },
       });
     }

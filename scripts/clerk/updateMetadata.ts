@@ -12,7 +12,7 @@ async function updateUsersFromDatabase() {
   try {
     // Fetch all users from your database
     const dbUsers = await prisma.user.findMany({
-      select: { id: true, clerkId: true }, // Get only relevant fields
+      select: { id: true, clerkId: true, role: true }, // Get only relevant fields
     });
 
     console.log(`Found ${dbUsers.length} users in the database.`);
@@ -28,11 +28,12 @@ async function updateUsersFromDatabase() {
           publicMetadata: {
             onboardingComplete: true,
             investorPortalId: dbUser.id,
+            role: dbUser.role,
           },
         });
 
         console.log(
-          `Updated Clerk's metadata for user '${dbUser.clerkId}' with investorPortalId: ${dbUser.id} and onboardingComplete as true`
+          `Updated Clerk's metadata for user '${dbUser.clerkId}' with investorPortalId: ${dbUser.id}, onboardingComplete as true and role as ${dbUser.role}`
         );
       } catch (updateError) {
         console.error(
