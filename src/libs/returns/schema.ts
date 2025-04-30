@@ -14,12 +14,28 @@ export const zReturnsDateObjectSchema = z.object({
   principalInvestedCurrent: z.number(), // indicate principal invested for current month
 });
 export type ReturnsDateObject = z.infer<typeof zReturnsDateObjectSchema>;
+export const zInvestmentStatsSchema = z.object({
+  principalInvested: z.number(),
+  accruedToDate: z.number(),
+  earnedToDate: z.number(),
+  earningsProjected: z.number(),
+  projectedReturn: z.number(),
+});
+
+export const zReturnsTableStatsSchema = z.object({
+  equity: zInvestmentStatsSchema,
+  debt: zInvestmentStatsSchema,
+});
+
+export type ReturnsTableStats = z.infer<typeof zReturnsTableStatsSchema>;
 
 export const zReturnsPortfolioStatsSchema = z.object({
   portfolioValueToDate: z.number(), // sum of accruedInterestToDate and distributionsToDate and principalInvested
+  newPortfolioValueToDate: z.number(), // Sum of Debt Earned to Date and Equity Return Accrued to Date and Principal Invested
   distributionsToDate: z.number(), // payments made to the investor to date
   debtDistributionsToDate: z.number(), // only used for debt deals
   equityDistributionsToDate: z.number(), // only used for equity deals
+  equityAccruedPreferredReturn: z.number(), // only used for equity deals
   projectedEquityDistributions: z.number(), // only used for equity deals
   projectedDebtDistributions: z.number(), // sum of existing and future distributions
   projectedPortfolioValue: z.number(), // sum of portfolioValueToDate and projectedDistributions
@@ -35,6 +51,9 @@ export const zReturnsDealStatsSchema = z.object({
   committedAmount: z.number(),
   distributionsToDate: z.number(),
   distributionsProjected: z.number(),
+  equityAccruedPreferredReturn: z.number(),
+  equityAccruedPreferredReturnPercentage: z.number(),
+  debtInterestRatePercentage: z.number(),
   project: z.object({
     id: z.number(),
     name: z.string(),
@@ -48,6 +67,7 @@ export const zReturnsDealStatsSchema = z.object({
         })
       )
       .nullable(),
+    targetEquityMultiple: z.number(),
   }),
   financingType: z.enum(['equity', 'debt']),
   closingDate: z.date(),
@@ -58,6 +78,7 @@ export type ReturnsDealStats = z.infer<typeof zReturnsDealStatsSchema>;
 export const zPortfolioReturnsSchema = z.object({
   portfolioStats: zReturnsPortfolioStatsSchema,
   dealStats: z.array(zReturnsDealStatsSchema),
+  tableStats: zReturnsTableStatsSchema,
   consolidatedSchedule: z.array(zReturnsDateObjectSchema),
   equityFileLastUpdated: z.date().nullable(),
 });

@@ -1,91 +1,23 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  styled,
-  Tooltip,
-  IconButton,
-} from '@mui/material';
-import { getProjectPicture } from './CompleteInvestment';
+import React from 'react';
+import { Box, CardContent, Typography } from '@mui/material';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
-import LoopIcon from '@mui/icons-material/Loop';
-import { DashboardDealConversionModal } from './DashboardDealConversionModal';
+import DashboardCurrentInvestments from './DashboardCurrentInvestments';
+import {
+  ColorDot,
+  StyledCard,
+  SummaryTable,
+  SummaryTableRow,
+  SummaryTableCell,
+  formatCurrency,
+} from './DashboardComponents';
 
 interface DashboardDealsProps {
   loggedIn: boolean;
 }
 
-interface Project {
-  name: string;
-  location: string;
-}
-
-const StyledCard = styled(Card)({
-  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
-  borderRadius: 8,
-  marginTop: '20px',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-});
-
-const ProjectImage = styled('img')({
-  width: 48,
-  height: 48,
-  objectFit: 'cover',
-  borderRadius: 4,
-});
-
-const TableHeader = styled(Box)(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: '300px 100px 120px 120px 120px 120px',
-  padding: theme.spacing(1.5),
-  borderBottom: `1px solid ${theme.palette.divider}`,
-  minWidth: 900,
-}));
-
-const TableRow = styled(Box)(({ theme }) => ({
-  display: 'grid',
-  gridTemplateColumns: '300px 100px 120px 120px 120px 120px',
-  padding: theme.spacing(1.5),
-  alignItems: 'center',
-  minWidth: 900,
-  '&:not(:last-child)': {
-    borderBottom: `1px solid ${theme.palette.divider}`,
-  },
-}));
-
-const StyledHeader = styled(Typography)(({}) => ({
-  color: 'rgba(0, 0, 0, 0.87)',
-  fontSize: 14,
-  fontWeight: 500,
-}));
-
-const ScrollContainer = styled(Box)({
-  overflowX: 'auto',
-  width: '100%',
-});
-
 const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedConversionId, setSelectedConversionId] = useState<
-    number | null
-  >(null);
-
-  const handleOpenModal = (conversionId: number) => {
-    setSelectedConversionId(conversionId);
-    setModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedConversionId(null);
-  };
-
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
     queryKey: ['dashboard', 'portfolio'],
     queryFn: async () => {
@@ -96,15 +28,8 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
     },
     enabled: loggedIn,
   });
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
-    }).format(amount);
-  };
 
+  // Early return if no data
   if (!data?.dealStats || data.dealStats.length === 0) {
     return (
       <StyledCard sx={{ height: '300px' }}>
@@ -128,71 +53,329 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
     );
   }
 
+  // Calculate totals for the summary table
+  const tableStats = data.tableStats || {
+    equity: {
+      principalInvested: 0,
+      accruedToDate: 0,
+      earnedToDate: 0,
+      earningsProjected: 0,
+      projectedReturn: 0,
+    },
+    debt: {
+      principalInvested: 0,
+      accruedToDate: 0,
+      earnedToDate: 0,
+      earningsProjected: 0,
+      projectedReturn: 0,
+    },
+  };
+
+  const totalPrincipal =
+    tableStats.equity.principalInvested + tableStats.debt.principalInvested;
+  const totalAccrued =
+    tableStats.equity.accruedToDate + tableStats.debt.accruedToDate;
+  const totalEarned =
+    tableStats.equity.earnedToDate + tableStats.debt.earnedToDate;
+  const totalProjectedEarnings =
+    tableStats.equity.earningsProjected + tableStats.debt.earningsProjected;
+  const totalProjectedReturn =
+    tableStats.equity.projectedReturn + tableStats.debt.projectedReturn;
+
   return (
     <>
+      {/* Summary Table */}
       <StyledCard>
-        <ScrollContainer>
-          <TableHeader>
-            <Box /> {/* Empty space for image and name column */}
-            <StyledHeader>Type</StyledHeader>
-            <StyledHeader>Committed</StyledHeader>
-            <StyledHeader>Closing Date</StyledHeader>
-            <StyledHeader>Distributions to Date</StyledHeader>
-            <StyledHeader>Projected Return</StyledHeader>
-          </TableHeader>
-          <CardContent sx={{ p: 0 }}>
-            {data.dealStats.map(deal => {
-              if (!deal.project) return null;
-              // @ts-expect-error this mapping is okay
-              const picture = getProjectPicture(deal);
-              return (
-                <TableRow key={deal.dealId}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <ProjectImage src={picture} />
-                    <Box>
-                      <Typography variant="body1" fontWeight={500}>
-                        {(deal.project as Project)?.name || 'Project'}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {(deal.project as Project)?.location || 'Location'}
+        <CardContent sx={{ p: '0 !important' }}>
+          <Box
+            sx={{
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              '&::-webkit-scrollbar': {
+                height: '6px',
+              },
+              '&::-webkit-scrollbar-thumb': {
+                backgroundColor: 'rgba(0,0,0,0.2)',
+                borderRadius: '3px',
+              },
+            }}
+          >
+            <Box
+              sx={{
+                minWidth: { xs: '650px', sm: '100%' },
+                width: '100%',
+              }}
+            >
+              <SummaryTable>
+                {/* Header Row */}
+                <SummaryTableRow className="header">
+                  <SummaryTableCell
+                    className="header left investment-type"
+                    sx={{ flex: 1.5 }}
+                  >
+                    {/* Empty cell for the first column */}
+                  </SummaryTableCell>
+                  <SummaryTableCell className="header table-header">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Principal
+                      <br />
+                      Invested
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="header table-header">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Accrued to
+                      <br />
+                      Date
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="header table-header">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Earned to
+                      <br />
+                      Date
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="header table-header">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Projected
+                      <br />
+                      Earnings
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="header table-header">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Projected
+                      <br />
+                      Return
+                    </Typography>
+                  </SummaryTableCell>
+                </SummaryTableRow>
+
+                {/* Equity Row */}
+                <SummaryTableRow className="bordered">
+                  <SummaryTableCell
+                    className="left investment-type"
+                    sx={{ flex: 1.5 }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ColorDot sx={{ bgcolor: '#4CAF50' }} />
+                      <Typography
+                        sx={{
+                          color: 'rgba(0, 0, 0, 0.87)',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                        }}
+                      >
+                        Equity
                       </Typography>
                     </Box>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
                     <Typography variant="body2">
-                      {deal.financingType === 'equity' ? 'Equity' : 'Debt'}
+                      {formatCurrency(tableStats.equity.principalInvested)}
                     </Typography>
-                    {deal.conversionId && (
-                      <Tooltip title="Show Conversion">
-                        <IconButton
-                          size="small"
-                          onClick={() => handleOpenModal(deal.conversionId!)}
-                        >
-                          <LoopIcon sx={{ color: 'gray' }} />
-                        </IconButton>
-                      </Tooltip>
-                    )}
-                  </Box>
-                  <Typography variant="body2">
-                    {formatCurrency(deal.committedAmount)}
-                  </Typography>
-                  <Typography variant="body2">
-                    {deal.closingDate
-                      ? new Date(deal.closingDate).toLocaleDateString()
-                      : '-'}
-                  </Typography>
-                  <Typography variant="body2">
-                    {formatCurrency(deal.distributionsToDate)}
-                  </Typography>
-                  <Typography variant="body2">
-                    {formatCurrency(deal.distributionsProjected)}
-                  </Typography>
-                </TableRow>
-              );
-            })}
-          </CardContent>
-        </ScrollContainer>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {formatCurrency(
+                        Math.round(tableStats.equity.accruedToDate)
+                      )}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {tableStats.equity.earnedToDate > 0
+                        ? formatCurrency(tableStats.equity.earnedToDate)
+                        : '-'}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {formatCurrency(
+                        Math.round(tableStats.equity.earningsProjected)
+                      )}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {formatCurrency(
+                        Math.round(tableStats.equity.projectedReturn)
+                      )}
+                    </Typography>
+                  </SummaryTableCell>
+                </SummaryTableRow>
+
+                {/* Debt Row */}
+                <SummaryTableRow className="bordered">
+                  <SummaryTableCell
+                    className="left investment-type"
+                    sx={{ flex: 1.5 }}
+                  >
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <ColorDot sx={{ bgcolor: '#2196F3' }} />
+                      <Typography
+                        sx={{
+                          color: 'rgba(0, 0, 0, 0.87)',
+                          fontSize: '12px',
+                          fontWeight: 500,
+                        }}
+                      >
+                        Debt
+                      </Typography>
+                    </Box>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {formatCurrency(tableStats.debt.principalInvested)}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {tableStats.debt.accruedToDate > 0
+                        ? formatCurrency(
+                            Math.round(tableStats.debt.accruedToDate)
+                          )
+                        : '-'}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {tableStats.debt.earnedToDate > 0
+                        ? formatCurrency(
+                            Math.round(tableStats.debt.earnedToDate)
+                          )
+                        : '$0'}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {formatCurrency(
+                        Math.round(tableStats.debt.earningsProjected)
+                      )}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography variant="body2">
+                      {formatCurrency(
+                        Math.round(tableStats.debt.projectedReturn)
+                      )}
+                    </Typography>
+                  </SummaryTableCell>
+                </SummaryTableRow>
+
+                {/* Total Row */}
+                <SummaryTableRow className="total">
+                  <SummaryTableCell
+                    className="left investment-type"
+                    sx={{ flex: 1.5 }}
+                  >
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Total
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {formatCurrency(totalPrincipal)}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {formatCurrency(Math.round(totalAccrued))}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {totalEarned > 0
+                        ? formatCurrency(Math.round(totalEarned))
+                        : '$0'}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {formatCurrency(Math.round(totalProjectedEarnings))}
+                    </Typography>
+                  </SummaryTableCell>
+                  <SummaryTableCell className="table-cell">
+                    <Typography
+                      sx={{
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        fontSize: '12px',
+                        fontWeight: 500,
+                      }}
+                    >
+                      {formatCurrency(Math.round(totalProjectedReturn))}
+                    </Typography>
+                  </SummaryTableCell>
+                </SummaryTableRow>
+              </SummaryTable>
+            </Box>
+          </Box>
+        </CardContent>
       </StyledCard>
+
+      <DashboardCurrentInvestments data={data} />
+
       <Typography
         variant="subtitle2"
         sx={{ mt: 2, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
@@ -205,12 +388,6 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
         performance, investment timing, and economic conditions. All figures are
         illustrative, and Neutral is not a cryptocurrency platform.
       </Typography>
-
-      <DashboardDealConversionModal
-        conversionId={selectedConversionId}
-        open={modalOpen}
-        onClose={handleCloseModal}
-      />
     </>
   );
 };

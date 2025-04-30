@@ -2,6 +2,7 @@ import 'server-only';
 import {
   type DealInvestmentStats,
   DealUnitType,
+  DealFinancingType,
   type ProjectInvestmentStats,
   type ProjectMilestones,
 } from '@prisma/client';
@@ -21,6 +22,7 @@ import type {
   ReturnsDateObject,
   ReturnsDealStats,
   ReturnsPortfolioStats,
+  ReturnsTableStats,
 } from './schema';
 import { finished } from 'stream';
 import { promisify } from 'util';
@@ -455,6 +457,7 @@ export async function getPortfolioReturns(
   const returnsObjectsByDate: Record<number, ReturnsDateObject[]> = {};
   const dealStats = [] as ReturnsDealStats[];
   const portfolioStats: ReturnsPortfolioStats = getInitialPortfolioStats();
+  const tableStats = { equity: {}, debt: {} } as ReturnsTableStats;
 
   // for each deal, get the payout schedule based on the financing type
   await generateResolvedSchedules(
@@ -467,9 +470,133 @@ export async function getPortfolioReturns(
   const consolidatedSchedule =
     generateConsolidatedSchedules(returnsObjectsByDate);
 
+  //Changing from chart to table, clean up and fix values
+  fixNewValues(deals, dealStats, portfolioStats, tableStats);
+
   return {
     consolidatedSchedule,
     portfolioStats,
     dealStats,
+    tableStats,
   } as PortfolioReturnsResponse;
 }
+
+/**
+ * Calculates the total equity preferred return accrued to date for all equity deals.
+ *
+ * @param {DealWithInvestmentStatsAndProjectWithPics[]} deals - The list of deals to process.
+ * @returns {Object} An object containing the total equity preferred return and raw metrics.
+ *
+ * @example
+ * const result = getEquityReturnAccuredToDate(deals);
+ * // {
+ * //   totalEquityPreferredReturn: 10000,
+ * //   rawMetrics: [...],
+ */
+export const getEquityReturnAccuredToDate = (
+  deals: DealWithInvestmentStatsAndProjectWithPics[],
+  dealStats: ReturnsDealStats[]
+) => {
+  let totalEquityPreferredReturn = 0;
+  const rawMetrics = [];
+
+  for (const deal of deals) {
+    // Require equity deal
+    // Require equity preferred return
+    // Require closing date
+    // Require amount
+    if (
+      deal.investmentStats?.financingType !== DealFinancingType.equity ||
+      !deal.project?.investmentStats?.equityPreferredReturn ||
+      !deal.closingDate ||
+      !deal.investmentStats?.amount
+    ) {
+      continue;
+    }
+
+    const equityPreferredReturn =
+      deal.project.investmentStats.equityPreferredReturn;
+    const closingDate = deal.closingDate;
+    const amount = deal.investmentStats.amount;
+
+    const daysSinceClose = differenceInCalendarDays(new Date(), closingDate);
+    const perDealAccrued =
+      amount * (equityPreferredReturn / 365) * daysSinceClose;
+
+    rawMetrics.push({
+      dealId: deal.id,
+      amount,
+      equityPreferredReturn,
+      closingDate,
+      daysSinceClose,
+      perDealAccrued,
+    });
+
+    totalEquityPreferredReturn += perDealAccrued;
+
+    // Update the corresponding dealStat entry
+    const dealStat = dealStats.find(ds => ds.dealId === deal.id);
+    if (dealStat) {
+      dealStat.equityAccruedPreferredReturn = perDealAccrued;
+    }
+  }
+
+  return {
+    rawMetrics,
+    totalEquityPreferredReturn,
+  };
+};
+
+export const fixNewValues = (
+  deals: DealWithInvestmentStatsAndProjectWithPics[],
+  dealStats: ReturnsDealStats[],
+  portfolioStats: ReturnsPortfolioStats,
+  tableStats: ReturnsTableStats
+) => {
+  //Fix calculation for portfolioStats.equityAccruedPreferredReturn
+  const { totalEquityPreferredReturn } = getEquityReturnAccuredToDate(
+    deals,
+    dealStats
+  );
+  portfolioStats.equityAccruedPreferredReturn = totalEquityPreferredReturn;
+
+  //Fix calculation for portfolioStats.portfolioValueToDate
+  portfolioStats.newPortfolioValueToDate =
+    portfolioStats.principalInvested +
+    portfolioStats.equityAccruedPreferredReturn +
+    portfolioStats.debtDistributionsToDate;
+
+  tableStats.equity.principalInvested = dealStats.reduce(
+    (acc, deal: ReturnsDealStats) => {
+      if (deal.financingType === DealFinancingType.equity) {
+        return acc + deal.committedAmount;
+      }
+      return acc;
+    },
+    0
+  );
+
+  tableStats.equity.accruedToDate = portfolioStats.equityAccruedPreferredReturn;
+  tableStats.equity.earnedToDate = portfolioStats.equityDistributionsToDate;
+  tableStats.equity.earningsProjected =
+    portfolioStats.projectedEquityDistributions -
+    tableStats.equity.principalInvested;
+  tableStats.equity.projectedReturn =
+    portfolioStats.projectedEquityDistributions;
+
+  tableStats.debt.principalInvested = dealStats.reduce(
+    (acc, deal: ReturnsDealStats) => {
+      if (deal.financingType !== DealFinancingType.equity) {
+        return acc + deal.committedAmount;
+      }
+      return acc;
+    },
+    0
+  );
+  tableStats.debt.accruedToDate = 0;
+  tableStats.debt.earnedToDate = portfolioStats.debtDistributionsToDate;
+  tableStats.debt.earningsProjected =
+    portfolioStats.projectedDebtDistributions -
+    tableStats.debt.principalInvested;
+  tableStats.debt.projectedReturn = portfolioStats.projectedDebtDistributions;
+};
