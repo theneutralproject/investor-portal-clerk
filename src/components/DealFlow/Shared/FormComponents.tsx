@@ -82,7 +82,6 @@ export function FormTextField<T extends FieldValues>({
             variant="standard"
             fullWidth
             error={!!error}
-            helperText={error?.message}
             onChange={format ? handleChange : field.onChange}
           />
         );
