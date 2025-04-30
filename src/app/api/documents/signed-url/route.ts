@@ -41,7 +41,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { type, organizationId, dealId, fileName } = validationResult.data;
+  const {
+    type,
+    organizationId,
+    dealId,
+    fileName: originalFileName,
+  } = validationResult.data;
+  let fileName = originalFileName;
+
+  // Add timestamp to the filename to avoid conflicts
+  const timestamp = Math.floor(Date.now() / 1000);
+  fileName = `${timestamp}-${originalFileName}`;
 
   const id = type === 'deal' ? dealId : organizationId;
   if (!id) {
