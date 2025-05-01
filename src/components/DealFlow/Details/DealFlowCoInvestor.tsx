@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Alert, AlertTitle, Box, Button } from '@mui/material';
+import { Alert, AlertTitle, Box, Button, Typography } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import CoInvestorCard from '@components/DealFlow/Details/CoInvestorCard';
@@ -18,9 +18,9 @@ import type {
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { EncryptionCard } from './EncryptionCard';
 import { MODAL_KEYS } from '../Shared/Modal/DealFlowLearnMoreModal';
-import { InfoIcon } from 'lucide-react';
 import { DealStage } from '@/libs/deal/schema';
-
+import InfoIcon from '@mui/icons-material/Info';
+import WarningIcon from '@mui/icons-material/Warning';
 export const LockedEntityAlert = () => {
   return (
     <Box sx={{ mt: 2, mb: 2 }}>
@@ -76,6 +76,7 @@ const DealFlowCoInvestor: React.FC = () => {
   const [localMembers, setLocalMembers] = useState<
     Partial<MemberWithPartialUser>[]
   >([]);
+  const [dirtyCards, setDirtyCards] = useState<number[]>([]);
   const router = useRouter();
 
   const organizationReadOnly = isOrganizationReadOnly(
@@ -125,6 +126,17 @@ const DealFlowCoInvestor: React.FC = () => {
     },
     []
   );
+
+  const handleDirtyChange = useCallback((index: number, isDirty: boolean) => {
+    setDirtyCards(prev => {
+      if (isDirty && !prev.includes(index)) {
+        return [...prev, index];
+      } else if (!isDirty && prev.includes(index)) {
+        return prev.filter(i => i !== index);
+      }
+      return prev;
+    });
+  }, []);
 
   const nextRoute = useCallback(() => {
     if (project?.slug && deal?.id) {
@@ -210,6 +222,7 @@ const DealFlowCoInvestor: React.FC = () => {
           onExpand={handleExpandCard}
           deleteOrganizationMember={deleteOrganizationMember}
           organizationReadOnly={organizationReadOnly}
+          onDirtyChange={handleDirtyChange}
         />
       ))}
 
@@ -225,7 +238,29 @@ const DealFlowCoInvestor: React.FC = () => {
         </Box>
       )}
       <EncryptionCard />
-      <DealFlowFooter onContinue={nextRoute} onBack={() => router.back()} />
+      {dirtyCards.length > 0 && (
+        <Box
+          mt={2}
+          sx={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            alignItems: 'center',
+            color: 'warning.main',
+          }}
+        >
+          <WarningIcon fontSize="small" color="warning" />
+
+          <Typography variant="body2" color={'warning.main'} sx={{ ml: 1 }}>
+            You have {dirtyCards.length} co-investors that need to be saved.
+          </Typography>
+        </Box>
+      )}
+
+      <DealFlowFooter
+        onContinue={nextRoute}
+        onBack={() => router.back()}
+        isContinueDisabled={dirtyCards.length > 0}
+      />
     </Box>
   );
 };
