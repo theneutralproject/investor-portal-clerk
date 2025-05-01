@@ -233,4 +233,48 @@ describe('POST /api/finix/webhook', () => {
     expect(Logger.warn).toHaveBeenCalledWith(message);
     expect(response).toEqual(jsonResponse({ message }));
   });
+
+  it('should log the new failure_code and return success response for a failed transfer', async () => {
+    const requestBody = {
+      _embedded: {
+        transfers: [
+          {
+            id: 'transfer-456',
+            subtype: 'API',
+            state: 'FAILED',
+            failure_code: 'insufficient_funds',
+            failure_message: 'Insufficient funds in source account',
+            tags: { dealHubspotId: 'hubspot-999' },
+            ready_to_settle_at: new Date(),
+          },
+        ],
+      },
+    };
+    const transfer = requestBody._embedded.transfers[0]!;
+
+    const mockRequest = nextRequestMock(requestBody, {
+      Authorization: validAuthHeader,
+    }) as any;
+    const response = await POST(mockRequest);
+
+    // The webhook should be processed but no deal update since state !== SUCCEEDED
+    expect(updateDeal).not.toHaveBeenCalled();
+    expect(Logger.warn).toHaveBeenLastCalledWith(
+      'Finix transfer failed',
+      mockRequest,
+      {
+        extra: {
+          transferId: transfer.id,
+          failureCode: transfer.failure_code,
+          failureMessage: transfer.failure_message,
+          tags: transfer.tags,
+        },
+      }
+    );
+    expect(response).toEqual(
+      jsonResponse({
+        message: `Transfer failed: ${transfer.failure_code} - ${transfer.failure_message}`,
+      })
+    );
+  });
 });

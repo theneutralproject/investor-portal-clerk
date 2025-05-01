@@ -1,3 +1,4 @@
+'use server';
 import { DealStage, type DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import Logger from '@/libs/logger';
@@ -52,6 +53,7 @@ export async function POST(request: NextRequest) {
   if (!valid) {
     return errorResponse(message, 401);
   }
+
   try {
     const body = (await request.json()) as {
       id: string;
@@ -68,6 +70,7 @@ export async function POST(request: NextRequest) {
             amount: number | null;
             currency: string | null;
             subtype: string | null;
+            operation_key?: string | null;
             tags: {
               transaction_id: string | null;
               dealHubspotId: string | null;
@@ -95,6 +98,20 @@ export async function POST(request: NextRequest) {
     }
 
     const transfer = body._embedded.transfers[0];
+
+    // Log operation_key parts if available
+    if (transfer.operation_key) {
+      const [fundingSpeed, resource, direction, rail] =
+        transfer.operation_key.split('_');
+      Logger.log(
+        {
+          message: 'Parsed operation_key from Finix webhook',
+          extra: { fundingSpeed, resource, direction, rail },
+        },
+        request
+      );
+    }
+
     if (transfer.subtype !== 'API') {
       Logger.warn('Webhook not processed because the subtype is not "API"');
       return jsonResponse({
@@ -109,11 +126,27 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    // Handle failed transactions
+    if (transfer.state?.toUpperCase() === 'FAILED') {
+      Logger.warn('Finix transfer failed', request, {
+        extra: {
+          transferId: transfer.id,
+          failureCode: transfer.failure_code,
+          failureMessage: transfer.failure_message,
+          tags: transfer.tags,
+        },
+      });
+      return jsonResponse({
+        message: `Transfer failed: ${transfer.failure_code} - ${transfer.failure_message}`,
+      });
+    }
+
     if (transfer.state?.toUpperCase() === 'SUCCEEDED') {
       Logger.log({
         message: 'Processing Transfer Succeeded Webhook: ',
         extra: transfer,
       });
+
       const { dealHubspotId } = transfer.tags;
       if (!dealHubspotId) {
         Logger.error(
@@ -130,14 +163,14 @@ export async function POST(request: NextRequest) {
       }
 
       try {
-        const dealData = {
+        const dealData: DealUpdateSchema = {
           hubspotId: dealHubspotId,
           dealStage: DealStage.CLOSED,
           closingDate: new Date(Date.now()),
           dateFundsSent: new Date(Date.now()),
           paymentMethod: PaymentMethod.ACH,
           paymentReferenceId: transfer.id,
-        } as DealUpdateSchema;
+        };
         await updateDeal(dealData, true);
       } catch (error) {
         Logger.warn('unable to set deal stage to 5 in webhook route', request, {
@@ -145,8 +178,11 @@ export async function POST(request: NextRequest) {
         });
         return errorResponse('The ACH transfer was NOT successful', 500);
       }
+
       return jsonResponse({ message: 'The ACH transfer was successful' });
     }
+
+    return jsonResponse({ message: 'Webhook processed but no action taken' });
   } catch (error) {
     Logger.error('Webhook not processed due to error:', request, {
       extra: error,

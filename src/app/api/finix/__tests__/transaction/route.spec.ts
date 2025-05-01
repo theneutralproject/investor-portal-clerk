@@ -7,10 +7,17 @@ import {
   DealUnitType,
   DealOwnershipType,
 } from '@prisma/client';
+import Logger from '@/libs/logger';
 import { debtDealFixture } from '@/fixtures/deals/deals.fixture';
 
 jest.mock('@clerk/nextjs/server', () => ({
   getAuth: jest.fn(),
+}));
+
+jest.mock('@/libs/logger', () => ({
+  log: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
 }));
 
 jest.mock('@/libs/finix/utils.server', () => ({
@@ -264,14 +271,19 @@ describe('POST /api/finix/transaction', () => {
     );
   });
 
-  it('should return an error if ACH transfer fails', async () => {
+  it('should return an error if ACH transfer fails with failure_code and failure_message', async () => {
     (getAuth as jest.Mock).mockReturnValue({ userId: 1 });
     jest.spyOn(prisma.user, 'findUnique').mockResolvedValueOnce(mockUser);
     jest.spyOn(prisma.deal, 'findUnique').mockResolvedValueOnce(dealFixture);
 
+    const failureCode = 'insufficient_funds';
+    const failureMessage = 'Insufficient funds in source account';
+
     (initializeFinixTransfer as jest.Mock).mockResolvedValueOnce({
       state: 'FAILED',
       id: 'transfer-xyz',
+      failure_code: failureCode,
+      failure_message: failureMessage,
     });
 
     const response = await POST(
@@ -284,9 +296,20 @@ describe('POST /api/finix/transaction', () => {
       }) as any
     );
 
+    expect(Logger.warn).toHaveBeenCalledWith(
+      'Finix transfer failed',
+      expect.any(Object),
+      {
+        extra: {
+          failureCode,
+          failureMessage,
+        },
+      }
+    );
+
     expect(response).toEqual(
       errorResponse(
-        'The ACH transfer failed. Please contact your Neutral Representative',
+        `The ACH transfer failed due to: ${failureMessage}. Please contact your Neutral Representative`,
         400
       )
     );
