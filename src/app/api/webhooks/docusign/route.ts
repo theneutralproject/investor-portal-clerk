@@ -5,7 +5,11 @@ import {
   instantiateApiClientFromUserAndDeal,
 } from '@/libs/docusign/utils.server';
 import prisma from '@/libs/prisma.server';
-import { getErrorMessage, jsonResponse } from '@/libs/utils.server';
+import {
+  getErrorMessage,
+  jsonResponse,
+  sanitizeFileName,
+} from '@/libs/utils.server';
 import {
   DocumentType,
   DealDocumentType,
@@ -154,21 +158,25 @@ async function fetchAndStoreCompletedPdfFromDocusign(
   );
   console.log('\n', pdfFile, '\n');
   // https://supabase.com/docs/reference/javascript/storage-from-upload
-  const { data, error } = await storageClient
+
+  const sanitizedName = sanitizeFileName(fileName);
+  const filePath = `deal-${deal.id}/${sanitizedName}`;
+
+  const { error } = await storageClient
     .from('deal-documents')
-    .upload(`deal-${deal.id}/${fileName}`, pdfFile);
+    .upload(filePath, pdfFile);
+
   if (error) {
     console.error('Failed to upload pdf to storage:', error);
     return jsonResponse({ message: 'Failed to upload pdf to storage' }, 500);
   }
   // store the pdf in supabase storage
-  const { path } = data;
 
   return await createDocumentEntry(
     'deal',
     deal.id,
-    fileName,
-    path,
+    sanitizedName,
+    filePath,
     '',
     parseInt(process.env.ADMIN_USER_ID!),
     DealDocumentType.INVESTMENT_DOCUMENT

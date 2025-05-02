@@ -6,6 +6,7 @@ import {
   errorResponse,
   getErrorMessage,
   jsonResponse,
+  sanitizeFileName,
 } from '@/libs/utils.server';
 import type { NextRequest } from 'next/server';
 import { zPdfAdminBulkUploadSchema } from '@/libs/document/schema';
@@ -166,10 +167,12 @@ export async function POST(request: NextRequest) {
 
     for (const file of parsedFiles) {
       if (file instanceof File) {
-        const { name, type } = file;
-        const { data, error } = await storageClient
+        const sanitizedName = sanitizeFileName(file.name);
+        const filePath = `deal-${dealId}/${sanitizedName}`;
+
+        const { error } = await storageClient
           .from('deal-documents')
-          .upload(`deal-${dealId}/${name}`, file, { contentType: type });
+          .upload(filePath, file, { contentType: file.type });
 
         if (error) {
           console.error(`unable to upload file ${name}:`);
@@ -184,8 +187,8 @@ export async function POST(request: NextRequest) {
           const doc = await createDocumentEntry(
             'deal',
             dealId,
-            name,
-            data.path,
+            sanitizedName,
+            filePath,
             '',
             adminUser.id,
             documentType,
