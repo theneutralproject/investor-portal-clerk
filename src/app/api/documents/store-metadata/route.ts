@@ -24,6 +24,11 @@ export async function POST(request: NextRequest) {
   const payload = await request.json();
   const validationResult = zPdfDocumentNoFileCreateSchema.safeParse(payload);
 
+  Logger.log({
+    message: 'Logging payload',
+    extra: payload,
+  });
+
   if (!validationResult.success) {
     Logger.error('Validation errors:', request, {
       validationError: validationResult.error,
@@ -46,6 +51,11 @@ export async function POST(request: NextRequest) {
     fileName,
     filePath,
   } = validationResult.data;
+
+  Logger.log({
+    message: 'Logging validationResult',
+    extra: validationResult.data,
+  });
 
   const id = type === 'deal' ? dealId : organizationId;
   if (!id) {
