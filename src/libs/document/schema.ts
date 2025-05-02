@@ -114,6 +114,7 @@ export const zPdfDocumentNoFileCreateSchema = z.object({
   key: z.string(),
   fileName: z.string(),
   filePath: z.string().optional(),
+  path: z.string().optional(),
   dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
 });
 

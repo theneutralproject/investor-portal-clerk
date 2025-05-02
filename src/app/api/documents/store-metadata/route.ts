@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     key,
     dealDocumentType,
     fileName,
-    filePath,
+    path,
   } = validationResult.data;
 
   Logger.log({
@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     type,
     id,
     fileName,
-    filePath || '',
+    path || payload.path,
     key,
     dbUser.id,
     dealDocumentType
