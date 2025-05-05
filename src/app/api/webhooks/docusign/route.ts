@@ -23,6 +23,7 @@ import { DealWithInvestmentStats } from '@/libs/types';
 import { updateHubspotDealFromDocusignEvent } from '@/libs/hubspot/utils.server';
 import { EnvelopesApi } from 'docusign-esign';
 import { DealStage } from '@/libs/deal/schema';
+import Logger from '@/libs/logger';
 
 type DocusignWebhookPayload = {
   event: string;
@@ -99,7 +100,7 @@ async function handleRecipientCompletedEvent(payload: DocusignWebhookPayload) {
 }
 
 // break this out into a function
-async function allEnvelopesAreCompleted(deal: DealWithInvestmentStats) {
+export async function allEnvelopesAreCompleted(deal: DealWithInvestmentStats) {
   const projectDocusignDocs = await prisma.projectDocument.findMany({
     where: {
       projectId: deal.projectId,
@@ -228,10 +229,16 @@ async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
       );
     }
   } catch (error) {
-    console.error(
-      `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`
+    Logger.warn(
+      `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`,
+      undefined,
+      {
+        error,
+      }
     );
-    throw error;
+    return jsonResponse({
+      message: `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`,
+    });
   }
 
   // update the hubspot deal so that the internal team can be notified
@@ -243,45 +250,44 @@ async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
       payload.data.envelopeId
     );
   } catch (error) {
-    console.error('Failed to update Hubspot deal:', error);
-    throw error;
+    Logger.warn(`Failed to update Hubspot deal: ${error}`, undefined, {
+      error,
+    });
+    return jsonResponse({ message: `Failed to update Hubspot deal: ${error}` });
   }
 
-  const allCompleted = await allEnvelopesAreCompleted(deal);
   try {
-    if (allCompleted) {
-      console.log(
-        `All documents signed for deal ${deal.id} - progressing to stage 4`
-      );
-      // update deal and hubspot
-      const dealData = {
-        hubspotId: deal.hubspotId,
-        // store as date at UTC midnight
-        signaturesCompletedDate: toUTCMidnight(
-          updatedDealEvent.dateCompleted ?? new Date()
-        ),
-        dealStage: DealStage.SIGNATURES_COMPLETED,
-      };
-      await updateDeal(dealData, true);
-      await fetchAndStoreCompletedPdfFromDocusign(
-        updatedDealEvent,
-        slug,
-        user,
-        deal
-      );
-      const successMessage = `Dealstage advanced to 4 and signed PDF successfully stored for deal ${deal.id}`;
-      console.log(successMessage);
+    console.log(
+      `All documents signed for deal ${deal.id} - progressing to stage 4`
+    );
+    // update deal and hubspot
+    const dealData = {
+      hubspotId: deal.hubspotId,
+      // store as date at UTC midnight
+      signaturesCompletedDate: toUTCMidnight(
+        updatedDealEvent.dateCompleted ?? new Date()
+      ),
+      dealStage: DealStage.SIGNATURES_COMPLETED,
+    };
+    await updateDeal(dealData, true);
+    await fetchAndStoreCompletedPdfFromDocusign(
+      updatedDealEvent,
+      slug,
+      user,
+      deal
+    );
+    const successMessage = `Dealstage advanced to 4 and signed PDF successfully stored for deal ${deal.id}`;
+    console.log(successMessage);
 
-      return jsonResponse({ message: successMessage });
-    }
+    return jsonResponse({ message: successMessage });
   } catch (error) {
-    console.error(`Failed to update dealstage for deal ${deal.id}`);
-    throw error;
+    Logger.warn(`Failed to update dealstage for deal ${deal.id}`, undefined, {
+      error,
+    });
+    return jsonResponse({
+      message: `Failed to update dealstage for deal ${deal.id}. ${error}`,
+    });
   }
-
-  return jsonResponse({
-    message: `Docusign webhook processes for deal ${deal.id}`,
-  });
 }
 
 /**
@@ -306,11 +312,9 @@ export async function POST(req: NextRequest) {
   }
   switch (payload.event) {
     case 'recipient-completed':
-      const recipientResult = await handleRecipientCompletedEvent(payload);
-      return jsonResponse(recipientResult);
+      return await handleRecipientCompletedEvent(payload);
     case 'envelope-completed':
-      const envelopeResult = await handleEnvelopeCompletedEvent(payload);
-      return jsonResponse(envelopeResult);
+      return await handleEnvelopeCompletedEvent(payload);
     default:
       console.log('Ignoring Docusign webhook:', payload.event);
       return jsonResponse({ message: 'Ignoring Docusign webhook' });
