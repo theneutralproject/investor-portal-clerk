@@ -10,13 +10,7 @@ import {
   jsonResponse,
   sanitizeFileName,
 } from '@/libs/utils.server';
-import {
-  DocumentType,
-  DealDocumentType,
-  User,
-  Deal,
-  DocusignEvent,
-} from '@prisma/client';
+import { DealDocumentType, User, Deal, DocusignEvent } from '@prisma/client';
 import type { NextRequest } from 'next/server';
 import { storageClient } from '@/libs/supabase';
 import { DealWithInvestmentStats } from '@/libs/types';
@@ -36,7 +30,10 @@ type DocusignWebhookPayload = {
   };
 };
 
-async function handleRecipientCompletedEvent(payload: DocusignWebhookPayload) {
+async function handleRecipientCompletedEvent(
+  payload: DocusignWebhookPayload,
+  request: NextRequest
+) {
   try {
     const updatedEvent = await prisma.docusignEvent.update({
       where: { envelopeId: payload.data.envelopeId },
@@ -61,14 +58,17 @@ async function handleRecipientCompletedEvent(payload: DocusignWebhookPayload) {
     const { deal, user } = updatedEvent;
     const { slug } = deal.project;
     if (!deal) {
+      Logger.error(
+        `Deal with envelopeId ${payload.data.envelopeId} does not exist in the database.`
+      );
       throw new Error(
         `Deal with envelopeId ${payload.data.envelopeId} does not exist in the database.`
       );
     }
 
-    console.log(
-      `Successfuly updated docusign event ${updatedEvent.id} due to "recipient-completed" webhook`
-    );
+    Logger.log({
+      message: `Successfuly updated docusign event ${updatedEvent.id} due to "recipient-completed" webhook`,
+    });
 
     // update the hubspot deal so that the internal team can be notified
     try {
@@ -79,49 +79,27 @@ async function handleRecipientCompletedEvent(payload: DocusignWebhookPayload) {
         payload.data.envelopeId
       );
     } catch (error) {
-      console.error('Failed to update Hubspot deal:', error);
+      Logger.error(`Failed to update Hubspot deal: ${error}`);
       throw error;
     }
 
     return {
       message: `Docusign webhook processed for envelopeId ${payload.data.envelopeId}`,
     };
-  } catch (__error) {
-    console.warn(
-      `Failed to update docusign event 1 for envelopeId ${payload.data.envelopeId}`
-    );
-    console.warn(
-      `The envelopeId ${payload.data.envelopeId} does not exist in the database and can be ignored.`
-    );
+  } catch (error) {
+    Logger.error(error, request);
     return {
       message: `Failed to update docusign event recipient-completed for envelopeId ${payload.data.envelopeId}`,
     };
   }
 }
 
-// break this out into a function
-export async function allEnvelopesAreCompleted(deal: DealWithInvestmentStats) {
-  const projectDocusignDocs = await prisma.projectDocument.findMany({
-    where: {
-      projectId: deal.projectId,
-      financingTypes: { has: deal.investmentStats.financingType },
-      documentType: DocumentType.DOCUSIGN,
-    },
-    include: { project: { select: { slug: true, id: true } } },
-  });
-
-  const dealEvents = await prisma.docusignEvent.findMany({
-    where: { dealId: deal.id, allSignaturesCompleted: true },
-  });
-
-  return dealEvents.length >= projectDocusignDocs.length;
-}
-
 async function fetchAndStoreCompletedPdfFromDocusign(
   docusignEvent: DocusignEvent,
   slug: string,
   user: User,
-  deal: Deal
+  deal: Deal,
+  request: NextRequest
 ) {
   const { envelopeId, templateId } = docusignEvent;
   // get documentName from projectdocs
@@ -157,7 +135,10 @@ async function fetchAndStoreCompletedPdfFromDocusign(
     envelopeId,
     fileName
   );
-  console.log('\n', pdfFile, '\n');
+  Logger.log({
+    message: 'pdfFile',
+    extra: pdfFile,
+  });
   // https://supabase.com/docs/reference/javascript/storage-from-upload
 
   const sanitizedName = sanitizeFileName(fileName);
@@ -168,7 +149,7 @@ async function fetchAndStoreCompletedPdfFromDocusign(
     .upload(filePath, pdfFile);
 
   if (error) {
-    console.error('Failed to upload pdf to storage:', error);
+    Logger.error('Failed to upload pdf to storage', request, { error });
     return jsonResponse({ message: 'Failed to upload pdf to storage' }, 500);
   }
   // store the pdf in supabase storage
@@ -184,7 +165,10 @@ async function fetchAndStoreCompletedPdfFromDocusign(
   );
 }
 
-async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
+async function handleEnvelopeCompletedEvent(
+  payload: DocusignWebhookPayload,
+  request: NextRequest
+) {
   // this means that all parties have signed the one envelope. We need to check if all envelopes for this deal have been signed to advance the dealstage
   console.log('Updating docusign event due to "envelope-completed" webhook');
   let deal: DealWithInvestmentStats | null = null;
@@ -229,9 +213,9 @@ async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
       );
     }
   } catch (error) {
-    Logger.warn(
+    Logger.error(
       `Failed to update docusign event envelope-completed for envelopeId ${payload.data.envelopeId}`,
-      undefined,
+      request,
       {
         error,
       }
@@ -274,7 +258,8 @@ async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
       updatedDealEvent,
       slug,
       user,
-      deal
+      deal,
+      request
     );
     const successMessage = `Dealstage advanced to 4 and signed PDF successfully stored for deal ${deal.id}`;
     console.log(successMessage);
@@ -292,18 +277,17 @@ async function handleEnvelopeCompletedEvent(payload: DocusignWebhookPayload) {
 
 /**
  * This webhook is called by DocuSign when a signature or an envelope is completed.
- * @param req
+ * @param request
  * @returns
  */
-export async function POST(req: NextRequest) {
-  const payload = (await req.json()) as DocusignWebhookPayload;
+export async function POST(request: NextRequest) {
+  const payload = (await request.json()) as DocusignWebhookPayload;
   const existingEvent = await prisma.docusignEvent.findUnique({
     where: { envelopeId: payload.data.envelopeId },
   });
   if (!existingEvent) {
-    console.warn(
-      'Failed to find existing docusign event for envelopeId - this envelope was likely created outside of the investor portal and can be ignored',
-      payload.data.envelopeId
+    Logger.warn(
+      `Failed to find existing docusign event for envelopeId - this envelope was likely created outside of the investor portal and can be ignored: ${payload.data.envelopeId}`
     );
 
     return jsonResponse({
@@ -312,9 +296,17 @@ export async function POST(req: NextRequest) {
   }
   switch (payload.event) {
     case 'recipient-completed':
-      return await handleRecipientCompletedEvent(payload);
+      const recipientResult = await handleRecipientCompletedEvent(
+        payload,
+        request
+      );
+      return jsonResponse(recipientResult);
     case 'envelope-completed':
-      return await handleEnvelopeCompletedEvent(payload);
+      const envelopeResult = await handleEnvelopeCompletedEvent(
+        payload,
+        request
+      );
+      return jsonResponse(envelopeResult);
     default:
       console.log('Ignoring Docusign webhook:', payload.event);
       return jsonResponse({ message: 'Ignoring Docusign webhook' });
