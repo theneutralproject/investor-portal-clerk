@@ -217,8 +217,11 @@ export interface AdvisorDocument {
   organizationId?: number;
   taxYear?: number;
   createdAt: string;
+  clientName: string;
 }
 
 export interface UseAdvisorDocumentsResponse {
   documents: AdvisorDocument[];
+  clients: string[];
+  types: string[];
 }

@@ -14,9 +14,7 @@ export const revalidate = 0;
  * @param input The raw search term from the user.
  * @returns A matching DealDocumentType or null if none matches.
  */
-export function mapDocumentTypeSearch(
-  input?: string | null
-): DealDocumentType | null {
+function mapDocumentTypeSearch(input?: string | null): DealDocumentType | null {
   if (!input) return null;
 
   const normalized = input.trim().toLowerCase();
@@ -169,7 +167,16 @@ export async function GET(request: NextRequest) {
       }))
     );
 
-    return jsonResponse({ documents, clients: Object.values(clients) });
+    const types = documents.reduce((acc: { [x: string]: string }, document) => {
+      acc[document.type] = document.type;
+      return acc;
+    }, {});
+
+    return jsonResponse({
+      documents,
+      clients: Object.values(clients),
+      types: Object.values(types),
+    });
   } catch (error) {
     Logger.error('Error fetching advisor documents', request, { extra: error });
     return errorResponse('Error fetching documents', 500, {

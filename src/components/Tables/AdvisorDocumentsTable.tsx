@@ -7,10 +7,12 @@ import {
 } from 'material-react-table';
 import { Box, Input, InputAdornment, Button } from '@mui/material';
 import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useAdvisorDocuments } from '@/app/hooks/useAdvisorDocuments';
-import { Search } from '@mui/icons-material';
 import DownloadIcon from '@mui/icons-material/Download';
+import Search from '@mui/icons-material/Search';
+import { AdvisorDocument } from '@/libs/types';
+import FilterMenu from '../Shared/FilterMenu';
 
 export default function AdvisorDocumentsTable({
   loadRequest,
@@ -28,6 +30,11 @@ export default function AdvisorDocumentsTable({
   const { data, isLoading, isError } = useAdvisorDocuments(
     loadRequest ?? true,
     debouncedSearch
+  );
+  const [clientFilter, setClientFilter] = useState<string>();
+  const [typeFilter, setTypeFilter] = useState<string>();
+  const [documents, setDocuments] = useState<AdvisorDocument[]>(
+    data?.documents || []
   );
 
   const columns = useMemo<MRT_ColumnDef<any>[]>(
@@ -56,20 +63,21 @@ export default function AdvisorDocumentsTable({
         header: '',
         id: 'download',
         Cell: ({ row }) => (
-          <Button
-            variant="outlined"
-            size="small"
-            color="inherit"
-            sx={{
-              opacity: '0.7',
-            }}
-            startIcon={<DownloadIcon />}
+          <a
             href={row.original.downloadUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            download
+            style={{ textDecoration: 'none' }}
           >
-            Download
-          </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              color="inherit"
+              sx={{ opacity: '0.7' }}
+              startIcon={<DownloadIcon />}
+            >
+              Download
+            </Button>
+          </a>
         ),
       },
     ],
@@ -79,11 +87,33 @@ export default function AdvisorDocumentsTable({
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSearch(e.target.value);
 
+  useEffect(() => {
+    if (data?.documents.length) {
+      setDocuments(data.documents);
+    }
+  }, [data?.documents]);
+
+  useEffect(() => {
+    if (!data?.documents.length) {
+      return;
+    }
+    let tempDocuments = data?.documents || [];
+    if (clientFilter) {
+      tempDocuments = tempDocuments?.filter(
+        doc => doc.clientName === clientFilter
+      );
+    }
+    if (typeFilter) {
+      tempDocuments = tempDocuments?.filter(doc => doc.type === typeFilter);
+    }
+    setDocuments(tempDocuments);
+  }, [clientFilter, data?.documents, typeFilter]);
+
   return (
     <Box sx={{ width: '100%', overflowX: 'auto' }}>
       <MaterialReactTable
         columns={columns}
-        data={data?.documents ?? []}
+        data={documents ?? []}
         manualPagination
         manualFiltering
         enableFullScreenToggle={false}
@@ -188,8 +218,21 @@ export default function AdvisorDocumentsTable({
         }}
         renderTopToolbar={({ table }) => {
           const handleDownload = () => {
-            table.getSelectedRowModel().flatRows.map(row => {
-              alert('deactivating ' + row.getValue('name'));
+            const selectedRows = table.getSelectedRowModel().flatRows;
+
+            selectedRows.forEach(row => {
+              const url = row.original.downloadUrl;
+              const name = row.original.name;
+
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = name; // use file name if desired
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
             });
           };
 
@@ -234,22 +277,37 @@ export default function AdvisorDocumentsTable({
               </Box>
               <Box sx={{ p: 1 }}>
                 <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-                  <Button
-                    disabled={
-                      !table.getIsAllRowsSelected() &&
-                      !table.getIsSomeRowsSelected()
-                    }
-                    onClick={handleDownload}
-                    variant="outlined"
-                    size="small"
-                    sx={{
-                      height: '36px',
-                    }}
-                    startIcon={<DownloadIcon />}
-                  >
-                    Download Selected ({table.getSelectedRowModel().rows.length}
-                    )
-                  </Button>
+                  <FilterMenu
+                    name={'Client'}
+                    items={data?.clients || []}
+                    onFilterChange={setClientFilter}
+                    selectedItem={clientFilter}
+                  />
+                  <FilterMenu
+                    name={'Type'}
+                    items={data?.types || []}
+                    onFilterChange={setTypeFilter}
+                    selectedItem={typeFilter}
+                  />
+                  {(table.getIsAllRowsSelected() ||
+                    table.getIsSomeRowsSelected()) && (
+                    <Button
+                      disabled={
+                        !table.getIsAllRowsSelected() &&
+                        !table.getIsSomeRowsSelected()
+                      }
+                      onClick={handleDownload}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        height: '36px',
+                      }}
+                      startIcon={<DownloadIcon />}
+                    >
+                      Download Selected (
+                      {table.getSelectedRowModel().rows.length})
+                    </Button>
+                  )}
                 </Box>
               </Box>
             </Box>
