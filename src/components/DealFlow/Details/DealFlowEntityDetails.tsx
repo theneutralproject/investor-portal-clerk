@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useDealFlow } from '@/components/DealFlow/Shared/DealFlowContext';
@@ -51,6 +51,7 @@ const DealFlowEntityDetails: React.FC = () => {
     organizationsOwned,
     organization
   );
+  const [hydrated, setHydrated] = useState(false);
 
   const {
     control,
@@ -61,16 +62,20 @@ const DealFlowEntityDetails: React.FC = () => {
   } = useEntityDetailsForm();
 
   useEffect(() => {
-    if (organization) {
-      // Set form values from organization data
+    if (!hydrated && organization) {
       setValue('id', organization.id);
       setValue('name', organization.name ?? '');
       setValue('tin', organization.tin ?? '');
       setValue('dateOfCreation', formatDate(organization.dateOfCreation));
       setValue('juristication', organization.juristication ?? '');
       trigger();
+      setHydrated(true); // prevent future resets
     }
-  }, [organization, setValue, trigger]);
+  }, [organization, hydrated, setValue, trigger]);
+
+  useEffect(() => {
+    setHydrated(false);
+  }, [organization?.id]);
 
   const handleContinue = async (data: EntityDetailsFormValues) => {
     try {
