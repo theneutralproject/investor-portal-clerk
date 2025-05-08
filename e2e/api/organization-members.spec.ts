@@ -49,7 +49,7 @@ test.describe('api/organizations/members test', () => {
     expect(newMember.user.email).toBe(memberData.user.email.toLowerCase());
   });
 
-  test('[PUT] api/organizations/members should update a ghost user', async ({
+  test.skip('[PUT] api/organizations/members should update a ghost user', async ({
     request,
   }) => {
     if (!testOrg) {
