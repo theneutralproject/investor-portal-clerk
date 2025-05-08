@@ -181,3 +181,47 @@ interface Pagination {
 export interface PaginatedResponse<T> {
   [x: string]: Array<T> | Pagination;
 }
+
+export interface AdvisorClient {
+  client: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  organization: {
+    id: number;
+    name: string;
+  };
+  totalInvested: number;
+  numberOfInvestments: number;
+  dealTypes: string[];
+  earningsToDate: number;
+  projectedEarnings: number;
+  totalProjectedReturn: number;
+}
+
+export interface AdvisorClientsResponse {
+  clients: AdvisorClient[];
+  pagination: Pagination;
+}
+
+export interface AdvisorDocument {
+  id: number;
+  name: string;
+  type: string;
+  path: string;
+  downloadUrl: string;
+  projectName?: string;
+  dealId?: number;
+  projectId?: number;
+  organizationId?: number;
+  taxYear?: number;
+  createdAt: string;
+  clientName: string;
+}
+
+export interface UseAdvisorDocumentsResponse {
+  documents: AdvisorDocument[];
+  clients: string[];
+  types: string[];
+}
