@@ -1,36 +1,7 @@
 'use client';
 
+import { AdvisorClientsResponse } from '@/libs/types';
 import { useQuery } from '@tanstack/react-query';
-
-interface AdvisorClient {
-  client: {
-    id: number;
-    name: string;
-    email: string;
-  };
-  organization: {
-    id: number;
-    name: string;
-  };
-  totalInvested: number;
-  numberOfInvestments: number;
-  dealTypes: string[];
-  earningsToDate: number;
-  projectedEarnings: number;
-  totalProjectedReturn: number;
-}
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  hasMore: boolean;
-}
-
-interface AdvisorClientsResponse {
-  clients: AdvisorClient[];
-  pagination: Pagination;
-}
 
 /**
  * Hook to fetch advisor clients with pagination support.
