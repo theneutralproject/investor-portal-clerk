@@ -62,14 +62,16 @@ const DealFlowEntityDetails: React.FC = () => {
   } = useEntityDetailsForm();
 
   useEffect(() => {
-    if (!hydrated && organization) {
+    if (organization && !hydrated) {
       setValue('id', organization.id);
-      setValue('name', organization.name ?? '');
-      setValue('tin', organization.tin ?? '');
-      setValue('dateOfCreation', formatDate(organization.dateOfCreation));
-      setValue('juristication', organization.juristication ?? '');
+      if (organization.name) setValue('name', organization.name);
+      if (organization.tin) setValue('tin', organization.tin);
+      if (organization.dateOfCreation)
+        setValue('dateOfCreation', formatDate(organization.dateOfCreation));
+      if (organization.juristication)
+        setValue('juristication', organization.juristication);
       trigger();
-      setHydrated(true); // prevent future resets
+      setHydrated(true);
     }
   }, [organization, hydrated, setValue, trigger]);
 
