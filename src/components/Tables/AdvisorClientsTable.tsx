@@ -133,14 +133,17 @@ export default function AdvisorClientsTable({
         columns={columns}
         data={data?.clients ?? []}
         manualPagination
-        manualFiltering
+        enableColumnActions={false}
+        manualFiltering={false}
         enableFullScreenToggle={false}
         enableGlobalFilter={false}
+        enableColumnResizing={false}
+        enableDensityToggle={false}
+        enableFilters={false}
         positionGlobalFilter="right"
         onPaginationChange={setPagination}
         onGlobalFilterChange={setSearch}
         rowCount={data?.pagination.total ?? 0}
-        enableColumnResizing={false}
         layoutMode="grid-no-grow"
         muiTablePaperProps={{
           elevation: 0,
