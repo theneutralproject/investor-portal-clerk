@@ -1,6 +1,9 @@
+import { Check } from '@mui/icons-material';
 import FilterList from '@mui/icons-material/FilterList';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { useState } from 'react';
@@ -28,7 +31,8 @@ export const FilterMenu = ({
     setAnchorEl(null);
   };
   const handleSelect = (item: string) => () => {
-    onFilterChange(item === defaultClientText ? '' : item);
+    const isDefaultOptionClick = item === defaultClientText;
+    onFilterChange(isDefaultOptionClick ? '' : item);
     handleClose();
   };
   const arrayItems = [defaultClientText, ...items];
@@ -43,8 +47,10 @@ export const FilterMenu = ({
           size="small"
           sx={{
             height: '36px',
-            color: 'rgba(0, 0, 0, 0.87)',
-            border: '1px solid rgba(0, 0, 0, 0.12)',
+            color: selectedItem
+              ? 'rgba(25, 118, 210, 1)'
+              : 'rgba(0, 0, 0, 0.87)',
+            border: `1px solid ${selectedItem ? 'rgba(25, 118, 210, 1)' : 'rgba(0, 0, 0, 0.12)'}`,
             fontWeight: 500,
             fontSize: '0,875rem',
             lineHeight: '24px',
@@ -100,8 +106,29 @@ export const FilterMenu = ({
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         {arrayItems.map((item, index) => (
-          <MenuItem onClick={handleSelect(item)} key={`${item}-${index}`}>
-            {item}
+          <MenuItem
+            onClick={handleSelect(item)}
+            key={`${item}-${index}`}
+            disabled={index === 0 && !selectedItem}
+          >
+            <ListItemIcon>
+              {selectedItem === item && (
+                <Check
+                  fontSize="small"
+                  sx={{ color: 'rgba(25, 118, 210, 1)' }}
+                />
+              )}
+            </ListItemIcon>
+            <ListItemText
+              sx={{
+                color:
+                  index === 0 && selectedItem
+                    ? 'rgba(25, 118, 210, 1)'
+                    : 'rgba(0, 0, 0, 0.87)',
+              }}
+            >
+              {index === 0 && selectedItem ? 'Clear filter' : item}
+            </ListItemText>
           </MenuItem>
         ))}
       </Menu>

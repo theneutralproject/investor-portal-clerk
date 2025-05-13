@@ -13,6 +13,7 @@ import DownloadIcon from '@mui/icons-material/Download';
 import Search from '@mui/icons-material/Search';
 import { AdvisorDocument } from '@/libs/types';
 import FilterMenu from '../Shared/FilterMenu';
+import { Close } from '@mui/icons-material';
 
 export default function AdvisorDocumentsTable({
   loadRequest,
@@ -87,6 +88,11 @@ export default function AdvisorDocumentsTable({
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSearch(e.target.value);
 
+  const handleClearFilters = () => {
+    setClientFilter('');
+    setTypeFilter('');
+  };
+
   useEffect(() => {
     if (data?.documents.length) {
       setDocuments(data.documents);
@@ -115,17 +121,19 @@ export default function AdvisorDocumentsTable({
         columns={columns}
         data={documents ?? []}
         manualPagination
-        manualFiltering
-        enableFullScreenToggle={false}
-        enableGlobalFilter={false}
         enableRowSelection
         enableGrouping
         enableFacetedValues
         enableBatchRowSelection
+        enableColumnActions={false}
+        manualFiltering={false}
+        enableFullScreenToggle={false}
+        enableGlobalFilter={false}
+        enableColumnResizing={false}
+        enableDensityToggle={false}
         positionGlobalFilter="right"
         onPaginationChange={setPagination}
         onGlobalFilterChange={setSearch}
-        enableColumnResizing={false}
         muiTablePaperProps={{
           elevation: 0,
           sx: {
@@ -289,6 +297,21 @@ export default function AdvisorDocumentsTable({
                     onFilterChange={setTypeFilter}
                     selectedItem={typeFilter}
                   />
+                  {(typeFilter || clientFilter) && (
+                    <Button
+                      onClick={handleClearFilters}
+                      variant="outlined"
+                      size="small"
+                      sx={{
+                        height: '36px',
+                        border: 'none',
+                        color: 'rgba(25, 118, 210, 1)',
+                      }}
+                      endIcon={<Close />}
+                    >
+                      Clear Filters
+                    </Button>
+                  )}
                   {(table.getIsAllRowsSelected() ||
                     table.getIsSomeRowsSelected()) && (
                     <Button
