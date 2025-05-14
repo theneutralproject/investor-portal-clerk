@@ -205,20 +205,17 @@ export interface AdvisorClientsResponse {
   pagination: Pagination;
 }
 
-export interface AdvisorDocument {
+export type AdvisorDocument = {
   id: number;
   name: string;
   type: string;
-  path: string;
-  downloadUrl: string;
-  projectName?: string;
-  dealId?: number;
-  projectId?: number;
-  organizationId?: number;
-  taxYear?: number;
-  createdAt: string;
+  projectName: string;
+  dealId: number;
+  projectId: number;
   clientName: string;
-}
+  dateCreated: string;
+  downloadUrl: string;
+};
 
 export interface UseAdvisorDocumentsResponse {
   documents: AdvisorDocument[];

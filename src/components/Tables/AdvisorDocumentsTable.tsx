@@ -2,10 +2,13 @@
 
 import {
   MaterialReactTable,
+  MRT_Cell,
+  MRT_Row,
   type MRT_ColumnDef,
   type MRT_PaginationState,
 } from 'material-react-table';
 import { Box, Input, InputAdornment, Button } from '@mui/material';
+import Grid from '@mui/material/Grid2';
 import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
 import { useState, useMemo, useEffect } from 'react';
 import { useAdvisorDocuments } from '@/app/hooks/useAdvisorDocuments';
@@ -15,10 +18,27 @@ import { AdvisorDocument } from '@/libs/types';
 import FilterMenu from '../Shared/FilterMenu';
 import { Close } from '@mui/icons-material';
 
+type FileRow = {
+  name: string;
+  type: string;
+  clientName: string;
+  dateCreated: string;
+  downloadUrl: string;
+};
+
+type FilterType = 'type' | 'client';
+type ColumnId = 'name' | 'type' | 'clientName' | 'dateCreated' | 'download';
+
 export default function AdvisorDocumentsTable({
   loadRequest,
+  hiddenColumns = [],
+  hiddenFilters = [],
+  clientId,
 }: {
   loadRequest?: boolean;
+  hiddenColumns?: ColumnId[];
+  hiddenFilters?: FilterType[];
+  clientId?: number;
 }) {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
@@ -30,59 +50,71 @@ export default function AdvisorDocumentsTable({
 
   const { data, isLoading, isError } = useAdvisorDocuments(
     loadRequest ?? true,
+    clientId,
     debouncedSearch
   );
+
   const [clientFilter, setClientFilter] = useState<string>();
   const [typeFilter, setTypeFilter] = useState<string>();
   const [documents, setDocuments] = useState<AdvisorDocument[]>(
     data?.documents || []
   );
 
-  const columns = useMemo<MRT_ColumnDef<any>[]>(
-    () => [
-      {
-        header: 'Name',
-        accessorKey: 'name',
-      },
-      {
-        header: 'Type',
-        accessorKey: 'type',
-      },
-      {
-        header: 'Client',
-        accessorKey: 'clientName',
-      },
-      {
-        header: 'Date Added',
-        accessorKey: 'dateCreated',
-        Cell: ({ cell }) =>
-          cell.getValue()
-            ? new Date(cell.getValue() as string).toLocaleDateString('en-US')
-            : '-',
-      },
-      {
-        header: '',
-        id: 'download',
-        Cell: ({ row }) => (
-          <a
-            href={row.original.downloadUrl}
-            download
-            style={{ textDecoration: 'none' }}
-          >
-            <Button
-              variant="outlined"
-              size="small"
-              color="inherit"
-              sx={{ opacity: '0.7' }}
-              startIcon={<DownloadIcon />}
+  const columns = useMemo<MRT_ColumnDef<FileRow>[]>(
+    () =>
+      [
+        {
+          header: 'Name',
+          accessorKey: 'name',
+          id: 'name',
+        },
+        {
+          header: 'Type',
+          accessorKey: 'type',
+          id: 'type',
+        },
+        {
+          header: 'Client',
+          accessorKey: 'clientName',
+          id: 'clientName',
+        },
+        {
+          header: 'Date Added',
+          accessorKey: 'dateCreated',
+          id: 'dateCreated',
+          Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) =>
+            cell.getValue()
+              ? new Date(cell.getValue() as string).toLocaleDateString('en-US')
+              : '-',
+        },
+        {
+          header: '',
+          id: 'download',
+          Cell: ({ row }: { row: MRT_Row<FileRow> }) => (
+            <a
+              href={row.original.downloadUrl}
+              download
+              target="_blank"
+              style={{ textDecoration: 'none' }}
             >
-              Download
-            </Button>
-          </a>
-        ),
-      },
-    ],
-    []
+              <Button
+                variant="outlined"
+                size="small"
+                color="inherit"
+                sx={{ opacity: '0.7' }}
+                startIcon={<DownloadIcon />}
+              >
+                Download
+              </Button>
+            </a>
+          ),
+        },
+      ].filter(
+        column =>
+          typeof column.id === 'string' &&
+          !hiddenColumns.includes(column.id as ColumnId)
+      ),
+    [hiddenColumns]
   );
 
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -122,9 +154,9 @@ export default function AdvisorDocumentsTable({
         data={documents ?? []}
         manualPagination
         enableRowSelection
-        enableGrouping
         enableFacetedValues
         enableBatchRowSelection
+        enableGrouping={false}
         enableColumnActions={false}
         manualFiltering={false}
         enableFullScreenToggle={false}
@@ -138,6 +170,7 @@ export default function AdvisorDocumentsTable({
           elevation: 0,
           sx: {
             border: '1px solid #e0e0e0',
+            overflowX: 'auto', // ensures table can scroll horizontally if needed
           },
         }}
         muiTableBodyCellProps={{
@@ -147,6 +180,10 @@ export default function AdvisorDocumentsTable({
             backgroundColor: '#ffffff',
             color: 'rgba(0, 0, 0, 0.87)',
             justifyContent: 'left',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            maxWidth: 160,
           },
         }}
         renderTopToolbarCustomActions={() => (
@@ -218,12 +255,6 @@ export default function AdvisorDocumentsTable({
         mrtTheme={() => ({
           baseBackgroundColor: '#ffffff',
         })}
-        initialState={{
-          columnPinning: {
-            left: ['mrt-row-expand', 'mrt-row-select'],
-            right: ['mrt-row-actions'],
-          },
-        }}
         renderTopToolbar={({ table }) => {
           const handleDownload = () => {
             const selectedRows = table.getSelectedRowModel().flatRows;
@@ -245,7 +276,9 @@ export default function AdvisorDocumentsTable({
           };
 
           return (
-            <Box
+            <Grid
+              container
+              spacing={2}
               sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -254,7 +287,7 @@ export default function AdvisorDocumentsTable({
                 width: '100%',
               }}
             >
-              <Box sx={{ p: 1 }}>
+              <Grid sx={{ p: 1 }}>
                 <Input
                   value={search}
                   onChange={onSearch}
@@ -267,7 +300,7 @@ export default function AdvisorDocumentsTable({
                     </InputAdornment>
                   }
                   sx={{
-                    width: 471,
+                    width: '100%',
                     height: 36,
                     backgroundColor: 'white',
                     borderRadius: '8px',
@@ -282,21 +315,25 @@ export default function AdvisorDocumentsTable({
                     },
                   }}
                 />
-              </Box>
-              <Box sx={{ p: 1 }}>
+              </Grid>
+              <Grid sx={{ p: 1 }}>
                 <Box sx={{ display: 'flex', gap: '0.5rem' }}>
-                  <FilterMenu
-                    name={'Client'}
-                    items={data?.clients || []}
-                    onFilterChange={setClientFilter}
-                    selectedItem={clientFilter}
-                  />
-                  <FilterMenu
-                    name={'Type'}
-                    items={data?.types || []}
-                    onFilterChange={setTypeFilter}
-                    selectedItem={typeFilter}
-                  />
+                  {!hiddenFilters.includes('client') && (
+                    <FilterMenu
+                      name={'Client'}
+                      items={data?.clients || []}
+                      onFilterChange={setClientFilter}
+                      selectedItem={clientFilter}
+                    />
+                  )}
+                  {!hiddenFilters.includes('type') && (
+                    <FilterMenu
+                      name={'Type'}
+                      items={data?.types || []}
+                      onFilterChange={setTypeFilter}
+                      selectedItem={typeFilter}
+                    />
+                  )}
                   {(typeFilter || clientFilter) && (
                     <Button
                       onClick={handleClearFilters}
@@ -332,8 +369,8 @@ export default function AdvisorDocumentsTable({
                     </Button>
                   )}
                 </Box>
-              </Box>
-            </Box>
+              </Grid>
+            </Grid>
           );
         }}
       />

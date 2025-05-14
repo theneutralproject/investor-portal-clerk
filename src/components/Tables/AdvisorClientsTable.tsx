@@ -5,16 +5,21 @@ import {
   type MRT_ColumnDef,
   type MRT_PaginationState,
 } from 'material-react-table';
-import { useMemo, useState } from 'react';
-import { useAdvisorClients } from '@/app/hooks/useAdvisorClients';
-import { Box, Input, InputAdornment } from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import Box from '@mui/material/Box';
+import Input from '@mui/material/Input';
+import InputAdornment from '@mui/material/InputAdornment';
+import Search from '@mui/icons-material/Search';
+import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
-import { Search } from '@mui/icons-material';
+import { useAdvisorClients } from '@/app/hooks/useAdvisorClients';
 
 export default function AdvisorClientsTable({
   loadRequest,
+  router,
 }: {
   loadRequest?: boolean;
+  router: AppRouterInstance;
 }) {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
@@ -31,12 +36,29 @@ export default function AdvisorClientsTable({
     debouncedSearch
   );
 
+  const handleClientClick =
+    (clientId: number) => (event: React.MouseEvent<HTMLElement>) => {
+      event.preventDefault();
+      router.push(`/advisor/clients/${clientId}`);
+    };
+
   const columns = useMemo<MRT_ColumnDef<any>[]>(
     () => [
       {
         header: 'Name',
-        accessorFn: row => row.client.name,
         id: 'name',
+        Cell: ({ row }: any) => {
+          console.log(row);
+          return (
+            <a
+              style={{ textDecoration: 'underline', cursor: 'pointer' }}
+              onClick={handleClientClick(row.original.organization.id)}
+              title="Go to client page"
+            >
+              {row.original.client.name}
+            </a>
+          );
+        },
       },
       {
         header: 'Email',
@@ -121,6 +143,7 @@ export default function AdvisorClientsTable({
             : '-',
       },
     ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -133,6 +156,7 @@ export default function AdvisorClientsTable({
         columns={columns}
         data={data?.clients ?? []}
         manualPagination
+        enableGrouping={false}
         enableColumnActions={false}
         manualFiltering={false}
         enableFullScreenToggle={false}

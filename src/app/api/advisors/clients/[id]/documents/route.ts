@@ -10,7 +10,10 @@ import { mapDocumentTypeSearch } from '@/libs/advisorFirm/utils.server';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
-export async function GET(request: NextRequest) {
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
   const { userId: clerkId, sessionClaims } = getAuth(request);
 
   if (!clerkId) {
@@ -55,6 +58,40 @@ export async function GET(request: NextRequest) {
     extra: { advisorFirm },
   });
 
+  const rawClientId = (await params).id;
+
+  if (!rawClientId) {
+    return errorResponse('Must specify client ID', 400, {
+      request,
+      extra: { user: dbUser, clientId: rawClientId },
+    });
+  }
+  const clientId = parseInt(rawClientId, 10);
+
+  if (Number.isNaN(clientId)) {
+    return errorResponse('Client ID not valid', 400, {
+      request,
+      extra: { user: dbUser, clientId: rawClientId },
+    });
+  }
+
+  const organization = await prisma.organization.findFirst({
+    where: {
+      id: clientId,
+    },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+
+  if (!organization) {
+    return errorResponse('Organization not found', 404, {
+      request,
+      extra: { user: dbUser, clientId, organization },
+    });
+  }
+
   const { searchParams } = new URL(request.url);
   const rawSearch = searchParams.get('search') ?? '';
   const search = rawSearch.trim().toLowerCase() ?? '';
@@ -90,36 +127,18 @@ export async function GET(request: NextRequest) {
       INNER JOIN "Project" p ON d."projectId" = p.id
       INNER JOIN "Organization" o ON d."organizationId" = o.id
       INNER JOIN "User" u ON o."ownerId" = u.id
-      WHERE o."advisorFirmId" = $1
+      WHERE o.id = $1 AND o."advisorFirmId" = $2
       ${
         matchedType
-          ? `AND dd.type = $2::"DealDocumentType"`
-          : `AND LOWER(dd.name) LIKE '%' || $2 || '%'`
+          ? `AND dd.type = $3::"DealDocumentType"`
+          : `AND LOWER(dd.name) LIKE '%' || $3 || '%'`
       }
       ORDER BY dd."dateCreated" DESC
       `,
+      clientId,
       advisorFirm.advisorFirmId,
       matchedType ?? search
     );
-
-    const clientIds = rows.map(row => row.userId);
-    const clients = (
-      await prisma.user.findMany({
-        where: {
-          id: {
-            in: clientIds,
-          },
-        },
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-        },
-      })
-    ).reduce((acc: { [x: string]: string }, user) => {
-      acc[user.id] = [user.firstName, user.lastName].join(' ');
-      return acc;
-    }, {});
 
     const documents = await Promise.all(
       rows.map(async row => ({
@@ -129,7 +148,7 @@ export async function GET(request: NextRequest) {
         projectName: row.projectName,
         dealId: row.dealId,
         projectId: row.projectId,
-        clientName: clients[row.userId],
+        clientName: '',
         dateCreated: row.dateCreated,
         downloadUrl: await getSupabaseDownloadUrl(row.path, 'deal-documents'),
       }))
@@ -142,11 +161,10 @@ export async function GET(request: NextRequest) {
 
     return jsonResponse({
       documents,
-      clients: Object.values(clients),
       types: Object.values(types),
     });
   } catch (error) {
-    Logger.error('Error fetching advisor documents', request, { extra: error });
+    Logger.error('Error fetching client documents', request, { extra: error });
     return errorResponse('Error fetching documents', 500, {
       request,
       extra: { error },

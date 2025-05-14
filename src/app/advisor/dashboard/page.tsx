@@ -7,9 +7,11 @@ import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import AdvisorClientsTable from '@/components/Tables/AdvisorClientsTable';
 import { Role } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 
 const AdvisorDashboardPage = () => {
   const { user, isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
 
   if (!isLoaded || user?.publicMetadata.role !== Role.ADVISOR) {
     return <DashboardSkeleton />;
@@ -51,7 +53,7 @@ const AdvisorDashboardPage = () => {
 
                 <Divider sx={{ mb: 3 }} />
 
-                <AdvisorClientsTable loadRequest={isSignedIn} />
+                <AdvisorClientsTable loadRequest={isSignedIn} router={router} />
                 <Divider sx={{ mb: 3 }} />
               </CardContent>
             </Card>
