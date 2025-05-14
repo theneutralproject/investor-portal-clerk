@@ -8,26 +8,21 @@ import { useQuery } from '@tanstack/react-query';
  * @param loadRequest Whether the request should be performed or not
  * @returns React Query result for advisor documents
  */
-export function useAdvisorDocuments(
+export function useAdvisorClientDocuments(
   loadRequest = false,
-  clientId?: number,
+  clientId: number,
   search: string = ''
 ) {
-  const queryKey = clientId
-    ? ['advisorClientDocuments', clientId, search]
-    : ['advisorDocuments', search];
-  const baseURL = clientId
-    ? `/api/advisors/clients/${clientId}/documents`
-    : `/api/advisors/documents`;
-
   return useQuery<UseAdvisorDocumentsResponse>({
-    queryKey,
+    queryKey: ['advisorClientDocuments', clientId, search],
     queryFn: async () => {
       const params = new URLSearchParams({
         search,
       });
-      const res = await fetch(`${baseURL}?${params.toString()}`);
-      if (!res.ok) throw new Error('Failed to fetch advisor documents');
+      const res = await fetch(
+        `/api/advisors/clients/${clientId}/documents?${params.toString()}`
+      );
+      if (!res.ok) throw new Error('Failed to fetch advisor client documents');
       return res.json();
     },
     retry: 1,
