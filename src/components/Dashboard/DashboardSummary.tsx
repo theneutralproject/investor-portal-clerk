@@ -12,11 +12,11 @@ import {
 } from './DashboardComponents';
 
 export interface IDashboardSummaryProps {
-  data: PortfolioReturnsResponse;
+  data?: PortfolioReturnsResponse;
 }
 export const DashboardSummary = ({ data }: IDashboardSummaryProps) => {
   // Calculate totals for the summary table
-  const tableStats = data.tableStats || {
+  const tableStats = data?.tableStats || {
     equity: {
       principalInvested: 0,
       accruedToDate: 0,
