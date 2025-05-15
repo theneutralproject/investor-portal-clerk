@@ -222,3 +222,21 @@ export interface UseAdvisorDocumentsResponse {
   clients: string[];
   types: string[];
 }
+
+export interface OrganizationWithDealsAndStats {
+  organizationId: number;
+  organizationName: string;
+  userId: number | null;
+  clerkId: string | null;
+  dealId: number | null;
+  closingDate: Date | null;
+  status: string | null;
+  investmentStatsId: number | null;
+  amount: number | null;
+  unitType: string | null;
+  financingType: string | null;
+}
+
+export interface UseAdvisorClientInvestmentsResponse {
+  deals: OrganizationWithDealsAndStats[];
+}

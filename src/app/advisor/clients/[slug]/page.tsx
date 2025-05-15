@@ -7,15 +7,16 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { useUser } from '@clerk/nextjs';
 import AdvisorDocumentsTable from '@/components/Tables/AdvisorDocumentsTable';
 import { NextClientPage } from '@/types/page';
-import DashboardSummary from '@/components/Dashboard/DashboardSummary';
 import DashboardPortfolio from '@/components/Dashboard/DashboardPortfolio';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
+import AdvisorClientInvestmentsTable from '@/components/Tables/AdvisorClientInvestments';
 
 const AdvisorClientPage = ({ params }: NextClientPage) => {
   const { slug: id } = use(params);
   const { isSignedIn, isLoaded } = useUser();
+  const clientId = parseInt(id, 10);
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
     queryKey: ['advisor', 'client-returns', id],
     queryFn: async () => {
@@ -63,7 +64,10 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                 </Typography>
                 <Divider sx={{ mb: 3 }} />
                 <DashboardPortfolio loggedIn={isSignedIn} data={data} />
-                <DashboardSummary data={data} />
+                <AdvisorClientInvestmentsTable
+                  clientId={clientId}
+                  loadRequest={isSignedIn}
+                />
               </CardContent>
             </Card>
           </Box>
@@ -85,7 +89,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                   loadRequest={isSignedIn}
                   hiddenFilters={['client']}
                   hiddenColumns={['clientName']}
-                  clientId={parseInt(id, 10)}
+                  clientId={clientId}
                 />
               </CardContent>
             </Card>

@@ -56,26 +56,26 @@ export async function GET(
     extra: { advisorFirm },
   });
 
-  const rawClientId = (await params).id;
+  const rawOrganizationId = (await params).id;
 
-  if (!rawClientId) {
+  if (!rawOrganizationId) {
     return errorResponse('Must specify client ID', 400, {
       request,
-      extra: { user: dbUser, clientId: rawClientId },
+      extra: { user: dbUser, organizationId: rawOrganizationId },
     });
   }
-  const clientId = parseInt(rawClientId, 10);
+  const organizationId = parseInt(rawOrganizationId, 10);
 
-  if (Number.isNaN(clientId)) {
+  if (Number.isNaN(organizationId)) {
     return errorResponse('Client ID not valid', 400, {
       request,
-      extra: { user: dbUser, clientId: rawClientId },
+      extra: { user: dbUser, organizationId: rawOrganizationId },
     });
   }
 
   const organization = await prisma.organization.findFirst({
     where: {
-      id: clientId,
+      id: organizationId,
     },
     select: {
       id: true,
@@ -92,14 +92,14 @@ export async function GET(
   if (!organization) {
     return errorResponse('Organization not found', 404, {
       request,
-      extra: { user: dbUser, clientId, organization },
+      extra: { user: dbUser, organizationId, organization },
     });
   }
 
   if (!organization.ownedBy.clerkId) {
     return errorResponse("Organization's owner not found", 404, {
       request,
-      extra: { user: dbUser, clientId, organization },
+      extra: { user: dbUser, organizationId, organization },
     });
   }
 
