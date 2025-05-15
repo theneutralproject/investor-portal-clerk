@@ -1,14 +1,13 @@
 import React from 'react';
 import { CardContent, Typography } from '@mui/material';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import DashboardCurrentInvestments from './DashboardCurrentInvestments';
 import { StyledCard } from './DashboardComponents';
 import DashboardSummary from './DashboardSummary';
 
 interface DashboardDealsProps {
   loggedIn: boolean;
+  data?: PortfolioReturnsResponse;
 }
 
 const EmptyInvestmentCard = () => (
@@ -32,18 +31,7 @@ const EmptyInvestmentCard = () => (
   </StyledCard>
 );
 
-const DashboardDeals: React.FC<DashboardDealsProps> = ({ loggedIn }) => {
-  const { data } = useQuery<PortfolioReturnsResponse, Error>({
-    queryKey: ['dashboard', 'portfolio'],
-    queryFn: async () => {
-      const response = await axios.get<PortfolioReturnsResponse>(
-        '/api/dashboard/returns'
-      );
-      return response.data;
-    },
-    enabled: loggedIn,
-  });
-
+const DashboardDeals: React.FC<DashboardDealsProps> = ({ data }) => {
   // Early return if no data
   if (!data?.dealStats || data.dealStats.length === 0) {
     return <EmptyInvestmentCard />;

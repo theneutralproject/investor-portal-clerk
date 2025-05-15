@@ -7,6 +7,8 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { useUser } from '@clerk/nextjs';
 import AdvisorDocumentsTable from '@/components/Tables/AdvisorDocumentsTable';
 import { NextClientPage } from '@/types/page';
+import DashboardSummary from '@/components/Dashboard/DashboardSummary';
+import DashboardPortfolio from '@/components/Dashboard/DashboardPortfolio';
 
 const AdvisorClientPage = ({ params }: NextClientPage) => {
   const { slug: id } = use(params);
@@ -46,8 +48,16 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                 >
                   Investments
                 </Typography>
-
                 <Divider sx={{ mb: 3 }} />
+                <DashboardPortfolio
+                  loggedIn={isSignedIn}
+                  data={
+                    {
+                      portfolioStats: {},
+                    } as any
+                  }
+                />
+                <DashboardSummary data={{} as any} />
               </CardContent>
             </Card>
           </Box>
@@ -63,6 +73,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                 >
                   Documents
                 </Typography>
+                <Divider sx={{ mb: 2 }} />
 
                 <AdvisorDocumentsTable
                   loadRequest={isSignedIn}
@@ -70,7 +81,6 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                   hiddenColumns={['clientName']}
                   clientId={parseInt(id, 10)}
                 />
-                <Divider sx={{ mb: 3 }} />
               </CardContent>
             </Card>
           </Box>
