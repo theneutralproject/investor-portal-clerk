@@ -168,16 +168,16 @@ class Logger {
    * Extracts useful request details including user session information.
    *
    * @param {NextRequest} req - The Next.js request object.
-   * @returns {Object} Extracted request details.
+   * @returns {string} Extracted request details.
    */
-  private static getRequestDetails(req: NextRequest): object {
-    return {
+  private static getRequestDetails(req: NextRequest): string {
+    return JSON.stringify({
       method: req.method,
       url: req.url,
-      session: parseSessionFromCookie(req),
+      userSession: parseSessionFromCookie(req),
       headers: req.headers,
       body: req.body || {},
-    };
+    });
   }
 
   /**

@@ -7,10 +7,26 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { useUser } from '@clerk/nextjs';
 import AdvisorDocumentsTable from '@/components/Tables/AdvisorDocumentsTable';
 import { NextClientPage } from '@/types/page';
+import DashboardPortfolio from '@/components/Dashboard/DashboardPortfolio';
+import { PortfolioReturnsResponse } from '@/libs/returns/schema';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
+import AdvisorClientInvestmentsTable from '@/components/Tables/AdvisorClientInvestments';
 
 const AdvisorClientPage = ({ params }: NextClientPage) => {
   const { slug: id } = use(params);
   const { isSignedIn, isLoaded } = useUser();
+  const clientId = parseInt(id, 10);
+  const { data } = useQuery<PortfolioReturnsResponse, Error>({
+    queryKey: ['advisor', 'client-returns', id],
+    queryFn: async () => {
+      const response = await axios.get<PortfolioReturnsResponse>(
+        `/api/advisors/clients/${id}/returns`
+      );
+      return response.data;
+    },
+    enabled: isSignedIn,
+  });
 
   if (!isLoaded) return <DashboardSkeleton />;
 
@@ -46,8 +62,12 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                 >
                   Investments
                 </Typography>
-
                 <Divider sx={{ mb: 3 }} />
+                <DashboardPortfolio loggedIn={isSignedIn} data={data} />
+                <AdvisorClientInvestmentsTable
+                  clientId={clientId}
+                  loadRequest={isSignedIn}
+                />
               </CardContent>
             </Card>
           </Box>
@@ -63,14 +83,14 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
                 >
                   Documents
                 </Typography>
+                <Divider sx={{ mb: 2 }} />
 
                 <AdvisorDocumentsTable
                   loadRequest={isSignedIn}
                   hiddenFilters={['client']}
                   hiddenColumns={['clientName']}
-                  clientId={parseInt(id, 10)}
+                  clientId={clientId}
                 />
-                <Divider sx={{ mb: 3 }} />
               </CardContent>
             </Card>
           </Box>

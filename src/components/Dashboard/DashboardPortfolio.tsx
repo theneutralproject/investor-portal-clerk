@@ -3,24 +3,14 @@ import { Box, Grid, Stack, Typography } from '@mui/material';
 import { CreateAccountButton, SignInButton } from './CreateAccount';
 
 import PortfolioMetric from './PortfolioMetric';
-import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import { getMetrics } from './Portfolio/portfolioHelpers';
 import { DASHBOARD_POSTFOLIO_TEST_ID } from 'e2e/testIds';
 
-const DashboardPortfolio: React.FC<{ loggedIn: boolean }> = ({ loggedIn }) => {
-  const { data } = useQuery<PortfolioReturnsResponse, Error>({
-    queryKey: ['dashboard', 'portfolio'],
-    queryFn: async () => {
-      const response = await axios.get<PortfolioReturnsResponse>(
-        '/api/dashboard/returns'
-      );
-      return response.data;
-    },
-    enabled: loggedIn,
-  });
-
+const DashboardPortfolio: React.FC<{
+  loggedIn: boolean;
+  data?: PortfolioReturnsResponse;
+}> = ({ loggedIn, data }) => {
   const metrics = getMetrics(data || null);
   return (
     <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}`}>

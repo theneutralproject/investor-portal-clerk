@@ -204,6 +204,15 @@ export async function POST(request: NextRequest) {
   try {
     const requestBody = (await request.json()) as DealCreateSchema;
     postData = requestBody;
+    Logger.log(
+      {
+        message: 'Creating deal',
+        extra: {
+          requestBody,
+        },
+      },
+      request
+    );
   } catch (parseError) {
     return errorResponse('Input data malformatted', 400, {
       request,

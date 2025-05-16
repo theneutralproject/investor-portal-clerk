@@ -35,8 +35,15 @@ const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
 });
 
-export function formatDateForHubspot(date: Date) {
-  return new Date(date.setUTCHours(0, 0, 0, 0)).getTime().toString();
+export function formatDateForHubspot(input: Date | string) {
+  const date = input instanceof Date ? input : new Date(input);
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date input');
+  }
+
+  date.setUTCHours(0, 0, 0, 0);
+  return date.getTime().toString();
 }
 
 export async function createOrUpdateHubspotContact(
