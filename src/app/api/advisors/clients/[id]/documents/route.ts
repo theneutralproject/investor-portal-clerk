@@ -162,6 +162,7 @@ export async function GET(
     return jsonResponse({
       documents,
       types: Object.values(types),
+      organization,
     });
   } catch (error) {
     Logger.error('Error fetching client documents', request, { extra: error });
