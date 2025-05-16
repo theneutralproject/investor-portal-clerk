@@ -130,6 +130,7 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
   });
 
   it('should return document list when everything is valid', async () => {
+    const organization: any = { id: 123, name: 'Acme Corp' };
     jest.mocked(getAuth).mockReturnValue({
       userId: clerkId,
       sessionClaims: { metadata: { investorPortalId } },
@@ -138,9 +139,7 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
     jest
       .mocked(prisma.advisorFirmEmployee.findFirst)
       .mockResolvedValue(advisorFirmEmployee);
-    jest
-      .mocked(prisma.organization.findFirst)
-      .mockResolvedValue({ id: 123, name: 'Acme Corp' } as any);
+    jest.mocked(prisma.organization.findFirst).mockResolvedValue(organization);
     jest.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
       {
         id: 1,
@@ -176,6 +175,10 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
           },
         ],
         types: ['K1'],
+        organization: {
+          id: organization.id,
+          name: organization.name,
+        },
       })
     );
   });
