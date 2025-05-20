@@ -3,6 +3,8 @@ import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAuth } from '@clerk/nextjs/server';
 import { GET } from '../route';
+import { Role } from '@prisma/client';
+import { NextRequest } from 'next/server';
 
 jest.mock('@/libs/prisma.server', () => ({
   __esModule: true,
@@ -38,7 +40,7 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
   const advisorUser: any = {
     id: investorPortalId,
     email: 'advisor@neutral.us',
-    role: 'ADVISOR',
+    role: Role.ADVISOR,
     clerkId,
   };
   const advisorFirmEmployee: any = {
@@ -47,100 +49,64 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.clearAllTimers();
   });
 
-  it('should return 401 if not authenticated', async () => {
-    jest
-      .mocked(getAuth)
-      .mockReturnValue({ userId: null, sessionClaims: null } as any);
-    const req = nextRequestMock();
-    const res = await GET(req as any, {
-      params: Promise.resolve({ id: '123' }),
-    });
-    expect(res).toEqual(errorResponse('User not authenticated', 401));
-  });
-
-  it('should return 404 if no investorPortalId in sessionClaims', async () => {
-    jest
-      .mocked(getAuth)
-      .mockReturnValue({ userId: clerkId, sessionClaims: {} } as any);
-    const req = nextRequestMock();
-    const res = await GET(req as any, {
-      params: Promise.resolve({ id: '123' }),
-    });
-    expect(res).toEqual(
-      errorResponse('User not found', 404, expect.anything())
-    );
-  });
-
-  it('should return 403 if user is not advisor', async () => {
+  it('should return empty documents if no organizationsOwned', async () => {
     jest.mocked(getAuth).mockReturnValue({
       userId: clerkId,
       sessionClaims: { metadata: { investorPortalId } },
     } as any);
     jest
       .mocked(prisma.user.findFirst)
-      .mockResolvedValue({ ...advisorUser, role: 'USER' });
-    const req = nextRequestMock();
-    const res = await GET(req as any, {
-      params: Promise.resolve({ id: '123' }),
-    });
-    expect(res).toEqual(
-      errorResponse('Unauthorized or not found', 403, expect.anything())
-    );
-  });
-
-  it('should return 400 if advisor firm not found', async () => {
-    jest.mocked(getAuth).mockReturnValue({
-      userId: clerkId,
-      sessionClaims: { metadata: { investorPortalId } },
-    } as any);
-    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
-    jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue(null);
-    const req = nextRequestMock();
-    const res = await GET(req as any, {
-      params: Promise.resolve({ id: '123' }),
-    });
-    expect(res).toEqual(
-      errorResponse(
-        'User is not assigned to an advisor firm',
-        400,
-        expect.anything()
-      )
-    );
-  });
-
-  it('should return 404 if organization not found', async () => {
-    jest.mocked(getAuth).mockReturnValue({
-      userId: clerkId,
-      sessionClaims: { metadata: { investorPortalId } },
-    } as any);
-    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
+      .mockImplementationOnce(() => Promise.resolve(advisorUser) as any); // for advisor
     jest
       .mocked(prisma.advisorFirmEmployee.findFirst)
       .mockResolvedValue(advisorFirmEmployee);
-    jest.mocked(prisma.organization.findFirst).mockResolvedValue(null);
+    jest.mocked(prisma.organization.findFirst).mockResolvedValue({
+      id: 123,
+      name: 'Org Name',
+      ownerId: 999,
+    } as any);
+    jest.mocked(prisma.user.findFirst).mockImplementationOnce(
+      () =>
+        Promise.resolve({
+          id: 999,
+          organizationMember: [], // no organizations
+        }) as any
+    );
+
     const req = nextRequestMock();
     const res = await GET(req as any, {
       params: Promise.resolve({ id: '123' }),
     });
-    expect(res).toEqual(
-      errorResponse('Organization not found', 404, expect.anything())
-    );
+
+    expect(res).toEqual(jsonResponse({ documents: [] }));
   });
 
-  it('should return document list when everything is valid', async () => {
+  it('should return document list with organizationName when valid', async () => {
     jest.mocked(getAuth).mockReturnValue({
       userId: clerkId,
       sessionClaims: { metadata: { investorPortalId } },
     } as any);
-    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
+    jest
+      .mocked(prisma.user.findFirst)
+      .mockImplementationOnce(() => Promise.resolve(advisorUser) as any); // for advisor
     jest
       .mocked(prisma.advisorFirmEmployee.findFirst)
       .mockResolvedValue(advisorFirmEmployee);
-    jest
-      .mocked(prisma.organization.findFirst)
-      .mockResolvedValue({ id: 123, name: 'Acme Corp' } as any);
+    jest.mocked(prisma.organization.findFirst).mockResolvedValue({
+      id: 123,
+      name: 'Org Name',
+      ownerId: 999,
+    } as any);
+    jest.mocked(prisma.user.findFirst).mockImplementationOnce(
+      () =>
+        Promise.resolve({
+          id: 999,
+          organizationMember: [{ organizationId: 1 }, { organizationId: 2 }],
+        }) as any
+    );
     jest.mocked(prisma.$queryRawUnsafe).mockResolvedValue([
       {
         id: 1,
@@ -152,6 +118,7 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
         dateCreated: new Date('2023-01-01'),
         path: 'some/path/to/file',
         userId: 100,
+        organizationName: 'Org Name',
       },
     ]);
 
@@ -173,10 +140,68 @@ describe('GET /api/advisors/clients/[id]/documents', () => {
             clientName: '',
             dateCreated: new Date('2023-01-01'),
             downloadUrl: 'https://mocked-url.com',
+            organizationName: 'Org Name',
           },
         ],
         types: ['K1'],
       })
+    );
+  });
+
+  it('should return 401 if not authenticated', async () => {
+    jest
+      .mocked(getAuth)
+      .mockReturnValue({ userId: null, sessionClaims: null } as any);
+    const res = await GET(nextRequestMock() as NextRequest, {
+      params: Promise.resolve({ id: '123' }),
+    });
+    expect(res).toEqual(errorResponse('User not authenticated', 401));
+  });
+
+  it('should return 404 if no investorPortalId in sessionClaims', async () => {
+    jest
+      .mocked(getAuth)
+      .mockReturnValue({ userId: clerkId, sessionClaims: {} } as any);
+    const res = await GET(nextRequestMock() as NextRequest, {
+      params: Promise.resolve({ id: '123' }),
+    });
+    expect(res).toEqual(
+      errorResponse('User not found', 404, expect.anything())
+    );
+  });
+
+  it('should return 403 if user is not advisor', async () => {
+    jest.mocked(getAuth).mockReturnValue({
+      userId: clerkId,
+      sessionClaims: { metadata: { investorPortalId } },
+    } as any);
+    jest
+      .mocked(prisma.user.findFirst)
+      .mockResolvedValue({ ...advisorUser, role: 'USER' });
+    const res = await GET(nextRequestMock() as NextRequest, {
+      params: Promise.resolve({ id: '123' }),
+    });
+    expect(res).toEqual(
+      errorResponse('Unauthorized or not found', 403, expect.anything())
+    );
+  });
+
+  it('should return 400 if advisor firm not found', async () => {
+    jest.mocked(getAuth).mockReturnValue({
+      userId: clerkId,
+      sessionClaims: { metadata: { investorPortalId } },
+    } as any);
+    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
+    jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue(null);
+    const res = await GET(nextRequestMock() as NextRequest, {
+      params: Promise.resolve({ id: '123' }),
+    });
+    expect(res).toEqual(
+      errorResponse(
+        'User is not assigned to an advisor firm',
+        400,
+        expect.anything()
+      )
     );
   });
 });
