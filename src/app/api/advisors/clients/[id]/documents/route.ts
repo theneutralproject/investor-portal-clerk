@@ -75,21 +75,31 @@ export async function GET(
     });
   }
 
-  const organization = await prisma.organization.findFirst({
+  const user = await prisma.user.findFirst({
     where: {
-      id: clientId,
+      organizationMember: {
+        some: {
+          organizationId: clientId,
+        },
+      },
     },
-    select: {
-      id: true,
-      name: true,
+    include: {
+      organizationMember: {
+        include: {
+          organization: {
+            select: {
+              id: true,
+            },
+          },
+        },
+      },
     },
   });
+  const organizationsMemberIds =
+    user?.organizationMember.map(o => o.organizationId) ?? [];
 
-  if (!organization) {
-    return errorResponse('Organization not found', 404, {
-      request,
-      extra: { user: dbUser, clientId, organization },
-    });
+  if (organizationsMemberIds.length === 0) {
+    return jsonResponse({ documents: [] });
   }
 
   const { searchParams } = new URL(request.url);
@@ -109,6 +119,7 @@ export async function GET(
         dateCreated: Date;
         path: string;
         userId: number;
+        organizationName: string;
       }>
     >(
       `
@@ -121,13 +132,14 @@ export async function GET(
         d."projectId",
         dd."dateCreated",
         dd.path,
-        u.id AS "userId"
+        u.id AS "userId",
+        o.name AS "organizationName"
       FROM "DealDocument" dd
       INNER JOIN "Deal" d ON dd."dealId" = d.id
       INNER JOIN "Project" p ON d."projectId" = p.id
       INNER JOIN "Organization" o ON d."organizationId" = o.id
       INNER JOIN "User" u ON o."ownerId" = u.id
-      WHERE o.id = $1 AND o."advisorFirmId" = $2
+      WHERE o.id = ANY($1::int[]) AND o."advisorFirmId" = $2
       ${
         matchedType
           ? `AND dd.type = $3::"DealDocumentType"`
@@ -135,7 +147,7 @@ export async function GET(
       }
       ORDER BY dd."dateCreated" DESC
       `,
-      clientId,
+      organizationsMemberIds,
       advisorFirm.advisorFirmId,
       matchedType ?? search
     );
@@ -151,6 +163,7 @@ export async function GET(
         clientName: '',
         dateCreated: row.dateCreated,
         downloadUrl: await getSupabaseDownloadUrl(row.path, 'deal-documents'),
+        organizationName: row.organizationName,
       }))
     );
 
@@ -162,7 +175,6 @@ export async function GET(
     return jsonResponse({
       documents,
       types: Object.values(types),
-      organization,
     });
   } catch (error) {
     Logger.error('Error fetching client documents', request, { extra: error });
