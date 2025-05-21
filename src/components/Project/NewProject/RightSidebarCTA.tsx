@@ -1,5 +1,5 @@
 // Modified RightSidebarCTA.tsx
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Card,
   CardContent,
@@ -9,6 +9,7 @@ import {
   Divider,
   useTheme,
   useMediaQuery,
+  Tooltip,
 } from '@mui/material';
 import { type ProjectWithAllNestedData } from '@/libs/types';
 import { LineDisplay } from '../Overview/InvestmentSummaryBox';
@@ -17,6 +18,10 @@ import {
   displayDebtInterest,
   displayEquityIRR,
 } from '@/components/Dashboard/DashboardProjects';
+import {
+  INACTIVE_BUTTON_TOOLTIP,
+  isInvestButtonDisabled,
+} from '@/libs/project/utils.client';
 
 interface RightSidebarCTAProps {
   project: ProjectWithAllNestedData;
@@ -37,6 +42,38 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
         100
     )
   );
+  const isButtonDisabled = isInvestButtonDisabled(project.status);
+
+  const ctaBtn = useMemo(() => {
+    const btn = (
+      <Button
+        fullWidth
+        variant="contained"
+        onClick={onInvest}
+        disabled={isButtonDisabled}
+        sx={{
+          backgroundColor: '#F0B642',
+          '&:hover': { backgroundColor: '#d4a33b' },
+          borderRadius: '24px',
+          boxShadow: 'none',
+        }}
+      >
+        Invest
+      </Button>
+    );
+    if (isButtonDisabled) {
+      return (
+        <Tooltip
+          title={INACTIVE_BUTTON_TOOLTIP[project.status]}
+          placement="top"
+        >
+          <span>{btn}</span>
+        </Tooltip>
+      );
+    }
+
+    return btn;
+  }, [isButtonDisabled, onInvest, project.status]);
 
   if (isMobile) return null;
 
@@ -115,19 +152,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
         </Box>
         <Divider sx={{ my: 2 }} />
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <Button
-            fullWidth
-            variant="contained"
-            onClick={onInvest}
-            sx={{
-              backgroundColor: '#F0B642',
-              '&:hover': { backgroundColor: '#d4a33b' },
-              borderRadius: '24px',
-              boxShadow: 'none',
-            }}
-          >
-            Invest
-          </Button>
+          {ctaBtn}
           <HubspotScheduleCall onExit={() => null} />
         </Box>
       </CardContent>
