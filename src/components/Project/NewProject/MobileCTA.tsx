@@ -1,8 +1,19 @@
 // MobileCTA.tsx
-import React from 'react';
-import { Box, AppBar, Container, Typography, Button } from '@mui/material';
+import React, { useMemo } from 'react';
+import {
+  Box,
+  AppBar,
+  Container,
+  Typography,
+  Button,
+  Tooltip,
+} from '@mui/material';
 import { type ProjectWithAllNestedData } from '@/libs/types';
 import HubspotScheduleCall from '@/components/HubspotScheduleCall';
+import {
+  INACTIVE_BUTTON_TOOLTIP,
+  isInvestButtonDisabled,
+} from '@/libs/project/utils.client';
 
 interface MobileCTAProps {
   project: ProjectWithAllNestedData;
@@ -18,6 +29,37 @@ const MobileCTA = ({ project, onInvest }: MobileCTAProps) => {
         100
     )
   );
+
+  const isButtonDisabled = isInvestButtonDisabled(project.status);
+  const ctaBtn = useMemo(() => {
+    const btn = (
+      <Button
+        fullWidth
+        variant="contained"
+        onClick={onInvest}
+        disabled={isButtonDisabled}
+        sx={{
+          backgroundColor: '#F0B642',
+          '&:hover': { backgroundColor: '#d4a33b' },
+          boxShadow: 'none',
+        }}
+      >
+        Invest
+      </Button>
+    );
+    if (isButtonDisabled) {
+      return (
+        <Tooltip
+          title={INACTIVE_BUTTON_TOOLTIP[project.status]}
+          placement="top"
+        >
+          <span>{btn}</span>
+        </Tooltip>
+      );
+    }
+
+    return btn;
+  }, [isButtonDisabled, onInvest, project.status]);
 
   return (
     <>
@@ -104,18 +146,7 @@ const MobileCTA = ({ project, onInvest }: MobileCTAProps) => {
       >
         <Container sx={{ py: 2 }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Button
-              fullWidth
-              variant="contained"
-              onClick={onInvest}
-              sx={{
-                backgroundColor: '#F0B642',
-                '&:hover': { backgroundColor: '#d4a33b' },
-                boxShadow: 'none',
-              }}
-            >
-              Invest
-            </Button>
+            {ctaBtn}
             <HubspotScheduleCall onExit={() => null} />
           </Box>
         </Container>
