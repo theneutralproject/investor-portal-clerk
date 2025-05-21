@@ -30,10 +30,6 @@ jest.mock('@/libs/supabase', () => ({
   getSupabaseDownloadUrl: jest.fn().mockResolvedValue('https://mocked-url.com'),
 }));
 
-jest.mock('@/libs/advisorFirm/utils.server', () => ({
-  mapDocumentTypeSearch: jest.fn().mockReturnValue(null),
-}));
-
 describe('GET /api/advisors/clients/[id]/documents', () => {
   const clerkId = 'clerk-abc';
   const investorPortalId = 100;

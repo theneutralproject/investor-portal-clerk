@@ -13,54 +13,17 @@ import {
 } from '@/libs/user/schema';
 import { updateHubspotContact } from '@/libs/hubspot/utils.server';
 import { HubspotContactCreateUpdateSchema } from '@/libs/hubspot/schema';
+import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
 
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { userId: clerkId, sessionClaims } = getAuth(request);
+  const context = await getAdvisorContext(request);
 
-  if (!clerkId) {
-    Logger.warn('User not authenticated');
-    return errorResponse('User not authenticated', 401);
-  }
+  if ('status' in context) return context;
 
-  const advisorUserId = sessionClaims?.metadata?.investorPortalId;
-
-  if (!advisorUserId) {
-    return errorResponse('User not found', 404, {
-      request,
-      extra: { method: 'sessionClaims?.metadata?.investorPortalId' },
-    });
-  }
-
-  const dbUser = await prisma.user.findFirst({
-    where: { OR: [{ clerkId }, { id: advisorUserId }] },
-  });
-
-  if (!dbUser || dbUser.role !== Role.ADVISOR) {
-    return errorResponse('Unauthorized or not found', 403, {
-      request,
-      extra: { advisorUser: dbUser },
-    });
-  }
-
-  const advisorFirm = await prisma.advisorFirmEmployee.findFirst({
-    where: { userId: dbUser.id },
-    select: { advisorFirmId: true },
-  });
-
-  if (!advisorFirm) {
-    return errorResponse('User is not assigned to an advisor firm', 400, {
-      request,
-      extra: { advisorUser: dbUser },
-    });
-  }
-
-  Logger.log({
-    message: `Advisor ${dbUser.email} is loading firm documents`,
-    extra: { advisorFirm },
-  });
+  const { dbUser } = context;
 
   const rawOrganizationId = (await params).id;
 
