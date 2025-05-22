@@ -6,8 +6,10 @@ import {
   AdvisorFirmEmployee,
   DealFinancingType,
   Organization,
+  User,
 } from '@prisma/client';
 import { PaginatedResponse } from '../types';
+import { errorResponse } from '../utils.server';
 
 export const zAdvisorFirmCreateSchema = z.object({
   name: z.string().min(1),
@@ -81,3 +83,11 @@ export type AdvisorFirmsResponse = PaginatedResponse<
     clientOrganizations: Organization[];
   }
 >;
+
+export type AdvisorContext =
+  | {
+      dbUser: User;
+      advisorFirmEmployee: AdvisorFirmEmployee & { advisorFirm: AdvisorFirm };
+      advisorFirm: AdvisorFirm;
+    }
+  | ReturnType<typeof errorResponse>;

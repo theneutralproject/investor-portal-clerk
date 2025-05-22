@@ -1,59 +1,23 @@
-import { getAuth } from '@clerk/nextjs/server';
-import { Role, DealDocumentType } from '@prisma/client';
+import { DealDocumentType } from '@prisma/client';
 import { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
 import { getSupabaseDownloadUrl } from '@/libs/supabase';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
-import { mapDocumentTypeSearch } from '@/libs/advisorFirm/utils.server';
+import {
+  getAdvisorContext,
+  mapDocumentTypeSearch,
+} from '@/libs/advisorFirm/utils.server';
 
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export async function GET(request: NextRequest) {
-  const { userId: clerkId, sessionClaims } = getAuth(request);
+  const context = await getAdvisorContext(request);
 
-  if (!clerkId) {
-    Logger.warn('User not authenticated');
-    return errorResponse('User not authenticated', 401);
-  }
+  if ('status' in context) return context;
 
-  const userId = sessionClaims?.metadata?.investorPortalId;
-
-  if (!userId) {
-    return errorResponse('User not found', 404, {
-      request,
-      extra: { method: 'sessionClaims?.metadata?.investorPortalId' },
-    });
-  }
-
-  const dbUser = await prisma.user.findFirst({
-    where: { OR: [{ clerkId }, { id: userId }] },
-  });
-
-  if (!dbUser || dbUser.role !== Role.ADVISOR) {
-    return errorResponse('Unauthorized or not found', 403, {
-      request,
-      extra: { user: dbUser },
-    });
-  }
-
-  const advisorFirm = await prisma.advisorFirmEmployee.findFirst({
-    where: { userId: dbUser.id },
-    select: { advisorFirmId: true },
-  });
-
-  if (!advisorFirm) {
-    return errorResponse('User is not assigned to an advisor firm', 400, {
-      request,
-      extra: { user: dbUser },
-    });
-  }
-
-  Logger.log({
-    message: `Advisor ${dbUser.email} is loading firm documents`,
-    extra: { advisorFirm },
-  });
+  const { advisorFirm } = context;
 
   const { searchParams } = new URL(request.url);
   const rawSearch = searchParams.get('search') ?? '';
@@ -98,7 +62,7 @@ export async function GET(request: NextRequest) {
       }
       ORDER BY dd."dateCreated" DESC
       `,
-      advisorFirm.advisorFirmId,
+      advisorFirm.id,
       matchedType ?? search
     );
 
