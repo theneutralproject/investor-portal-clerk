@@ -13,7 +13,7 @@ jest.mock('@/libs/advisorFirm/utils.server', () => ({
   getAdvisorContext: jest.fn(),
 }));
 
-describe('GET /api/advisors/firm', () => {
+describe('GET /api/advisors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
