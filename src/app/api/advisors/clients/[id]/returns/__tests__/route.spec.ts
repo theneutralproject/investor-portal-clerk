@@ -28,7 +28,7 @@ jest.mock('@/libs/returns/utils.server', () => ({
   getPortfolioReturns: jest.fn(),
 }));
 
-describe('GET /api/advisors/clients/client/[id]', () => {
+describe('GET /api/advisors/clients/[id]/returns', () => {
   const clerkId = 'clerk-abc';
   const investorPortalId = 100;
   const advisorUser: any = {

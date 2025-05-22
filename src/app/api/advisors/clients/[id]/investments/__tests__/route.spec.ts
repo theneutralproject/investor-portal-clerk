@@ -25,7 +25,7 @@ jest.mock('@clerk/nextjs/server', () => ({
   getAuth: jest.fn(),
 }));
 
-describe('GET /api/advisors/clients/client/[id]/deals', () => {
+describe('GET /api/advisors/clients/[id]/investments', () => {
   const clerkId = 'clerk-abc';
   const investorPortalId = 100;
   const advisorUser = {
