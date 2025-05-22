@@ -32,6 +32,7 @@ jest.mock('@clerk/nextjs/server', () => ({
 describe('DELETE /api/advisors/employees/:id', () => {
   const advisorFirm = { id: 123 };
   const validParams = { id: '555' };
+  const employeeId = 555;
 
   const mockContext = {
     dbUser: { id: 10, role: 'ADVISOR' },
@@ -75,12 +76,12 @@ describe('DELETE /api/advisors/employees/:id', () => {
     jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue(null);
 
     const res = await DELETE(nextRequestMock() as any, {
-      params: Promise.resolve({ id: 'abc' }),
+      params: Promise.resolve({ id: employeeId.toString() }),
     });
     expect(res).toEqual(
       errorResponse('Advisor employee not found', 404, {
         request: expect.anything(),
-        extra: { employeeId: 555 },
+        extra: { employeeId },
       })
     );
   });
@@ -94,12 +95,12 @@ describe('DELETE /api/advisors/employees/:id', () => {
     } as any);
 
     const res = await DELETE(nextRequestMock() as any, {
-      params: Promise.resolve({ id: 'abc' }),
+      params: Promise.resolve({ id: employeeId.toString() }),
     });
     expect(res).toEqual(
       errorResponse('Advisor employee not found', 404, {
         request: expect.anything(),
-        extra: { employeeId: 555 },
+        extra: { employeeId },
       })
     );
   });
@@ -107,7 +108,7 @@ describe('DELETE /api/advisors/employees/:id', () => {
   it('should delete advisor employee and Clerk user', async () => {
     const clerkId = 'clerk-uid-123';
     const employee: any = {
-      id: 555,
+      id: employeeId,
       advisorFirmId: 123,
       user: {
         id: 999,
@@ -129,10 +130,10 @@ describe('DELETE /api/advisors/employees/:id', () => {
       .mockResolvedValue({ users: { deleteUser: deleteUserMock } } as any);
 
     const res = await DELETE(nextRequestMock() as any, {
-      params: Promise.resolve({ id: 'abc' }),
+      params: Promise.resolve({ id: employeeId.toString() }),
     });
     expect(prisma.advisorFirmEmployee.delete).toHaveBeenCalledWith({
-      where: { id: 555 },
+      where: { id: employeeId },
     });
     expect(deleteUserMock).toHaveBeenCalledWith(clerkId);
     expect(res).toEqual(jsonResponse({ success: true }));
@@ -141,7 +142,7 @@ describe('DELETE /api/advisors/employees/:id', () => {
   it('should return 500 if deletion fails', async () => {
     const clerkId = 'clerk-uid-123';
     const employee: any = {
-      id: 555,
+      id: employeeId,
       advisorFirmId: 123,
       user: { id: 999, clerkId },
     };
@@ -158,7 +159,7 @@ describe('DELETE /api/advisors/employees/:id', () => {
       .mockResolvedValue({ users: { deleteUser: jest.fn() } } as any);
 
     const res = await DELETE(nextRequestMock() as any, {
-      params: Promise.resolve({ id: 'abc' }),
+      params: Promise.resolve({ id: employeeId.toString() }),
     });
 
     expect(res).toEqual(
