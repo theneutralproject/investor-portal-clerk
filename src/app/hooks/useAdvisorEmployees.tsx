@@ -1,10 +1,10 @@
 'use client';
 
-import { AdvisorFirmEmployee } from '@prisma/client';
+import { AdvisorEmployeeAndUser } from '@/libs/types';
 import { useQuery } from '@tanstack/react-query';
 
 export function useAdvisorEmployees(loadRequest = false) {
-  return useQuery<AdvisorFirmEmployee[], Error>({
+  return useQuery<AdvisorEmployeeAndUser[], Error>({
     queryKey: ['advisor', 'employees'],
     queryFn: async () => {
       const res = await fetch(`/api/advisors/employees`);

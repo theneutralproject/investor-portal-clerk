@@ -18,6 +18,7 @@ import {
   type ProjectPaymentInfo,
   DocusignEvent,
   DealConversion,
+  AdvisorFirmEmployee,
 } from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
@@ -240,3 +241,5 @@ export interface OrganizationWithDealsAndStats {
 export interface UseAdvisorClientInvestmentsResponse {
   deals: OrganizationWithDealsAndStats[];
 }
+
+export type AdvisorEmployeeAndUser = AdvisorFirmEmployee & { user: User };
