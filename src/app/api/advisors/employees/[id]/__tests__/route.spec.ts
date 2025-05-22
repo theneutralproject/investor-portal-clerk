@@ -48,7 +48,10 @@ describe('DELETE /api/advisors/employees/:id', () => {
       .mocked(getAdvisorContext)
       .mockResolvedValue(errorResponse('User not authenticated', 401));
 
-    const res = await DELETE(nextRequestMock() as any, { params: validParams });
+    const res = await DELETE(nextRequestMock() as any, {
+      params: Promise.resolve(validParams),
+    });
+
     expect(res).toEqual(errorResponse('User not authenticated', 401));
   });
 
@@ -56,8 +59,9 @@ describe('DELETE /api/advisors/employees/:id', () => {
     jest.mocked(getAdvisorContext).mockResolvedValue(mockContext as any);
 
     const res = await DELETE(nextRequestMock() as any, {
-      params: { id: 'abc' },
+      params: Promise.resolve({ id: 'abc' }),
     });
+
     expect(res).toEqual(
       errorResponse('Invalid advisor employee ID', 400, {
         request: expect.anything(),
@@ -70,7 +74,9 @@ describe('DELETE /api/advisors/employees/:id', () => {
     jest.mocked(getAdvisorContext).mockResolvedValue(mockContext as any);
     jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue(null);
 
-    const res = await DELETE(nextRequestMock() as any, { params: validParams });
+    const res = await DELETE(nextRequestMock() as any, {
+      params: Promise.resolve({ id: 'abc' }),
+    });
     expect(res).toEqual(
       errorResponse('Advisor employee not found', 404, {
         request: expect.anything(),
@@ -87,7 +93,9 @@ describe('DELETE /api/advisors/employees/:id', () => {
       user: null,
     } as any);
 
-    const res = await DELETE(nextRequestMock() as any, { params: validParams });
+    const res = await DELETE(nextRequestMock() as any, {
+      params: Promise.resolve({ id: 'abc' }),
+    });
     expect(res).toEqual(
       errorResponse('Advisor employee not found', 404, {
         request: expect.anything(),
@@ -120,8 +128,9 @@ describe('DELETE /api/advisors/employees/:id', () => {
       .mocked(clerkClient)
       .mockResolvedValue({ users: { deleteUser: deleteUserMock } } as any);
 
-    const res = await DELETE(nextRequestMock() as any, { params: validParams });
-
+    const res = await DELETE(nextRequestMock() as any, {
+      params: Promise.resolve({ id: 'abc' }),
+    });
     expect(prisma.advisorFirmEmployee.delete).toHaveBeenCalledWith({
       where: { id: 555 },
     });
@@ -148,7 +157,9 @@ describe('DELETE /api/advisors/employees/:id', () => {
       .mocked(clerkClient)
       .mockResolvedValue({ users: { deleteUser: jest.fn() } } as any);
 
-    const res = await DELETE(nextRequestMock() as any, { params: validParams });
+    const res = await DELETE(nextRequestMock() as any, {
+      params: Promise.resolve({ id: 'abc' }),
+    });
 
     expect(res).toEqual(
       errorResponse('Failed to delete advisor employee', 500, {

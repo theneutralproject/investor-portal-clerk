@@ -9,18 +9,20 @@ import { clerkClient } from '@clerk/nextjs/server';
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
-  const context = await getAdvisorContext(request);
-  if ('status' in context) return context;
+  const { id } = await context.params;
+  const advisorContext = await getAdvisorContext(request);
 
-  const { advisorFirm } = context;
-  const employeeId = parseInt(params.id, 10);
+  if ('status' in advisorContext) return advisorContext;
+
+  const { advisorFirm } = advisorContext;
+  const employeeId = parseInt(id, 10);
 
   if (Number.isNaN(employeeId)) {
     return errorResponse('Invalid advisor employee ID', 400, {
       request,
-      extra: { rawId: params.id },
+      extra: { rawId: id },
     });
   }
 
