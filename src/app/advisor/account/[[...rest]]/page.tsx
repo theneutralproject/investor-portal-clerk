@@ -35,7 +35,7 @@ const AdvisorAccountPage = () => {
         <Grid
           size={{
             xs: 12,
-            md: 7,
+            md: 8,
           }}
           justifyContent="center"
           sx={{ background: '#f5f5f5', width: '877', margin: '0 auto' }}
@@ -111,7 +111,7 @@ const AdvisorAccountPage = () => {
         <Grid
           size={{
             xs: 12,
-            md: 7,
+            md: 8,
           }}
           justifyContent="center"
           sx={{ background: '#f5f5f5', width: '877', margin: '0 auto' }}

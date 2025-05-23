@@ -16,13 +16,18 @@ import Grid from '@mui/material/Grid2';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
-import { User } from '@prisma/client';
+import { AdvisorEmployeeRole, User } from '@prisma/client';
 import { Add, DeleteOutline } from '@mui/icons-material';
 
 import { AdvisorEmployeeAndUser } from '@/libs/types';
 import { useAdvisorEmployees } from '@/app/hooks/useAdvisorEmployees';
 import Modal from '../Shared/Modal';
 import InviteMemberForm, { InviteFormValues } from '../Advisor/InviteMember';
+
+const ROLE_TO_TEXT = {
+  [AdvisorEmployeeRole.ADMIN]: 'Admin',
+  [AdvisorEmployeeRole.STAFF]: 'Staff',
+};
 
 export default function AdvisorEmployeesTable({
   loadRequest,
@@ -50,6 +55,7 @@ export default function AdvisorEmployeesTable({
       header: 'Name',
       accessorKey: 'user',
       id: 'user',
+      maxSize: 209,
       Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) => {
         const user = cell.getValue() as User;
         return [user.firstName, user.lastName].join(' ');
@@ -59,20 +65,22 @@ export default function AdvisorEmployeesTable({
       header: 'Email',
       accessorKey: 'user.email',
       id: 'user.email',
+      maxSize: 250,
     },
     {
       header: 'Role',
       accessorKey: 'role',
       id: 'role',
+      maxSize: 90,
       Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) => {
-        const role = cell.getValue() as string;
+        const role = cell.getValue() as AdvisorEmployeeRole;
         return (
           <Chip
-            key={role}
+            key={`role-${cell.row.original.id}`}
             color="default"
             size="small"
             variant="filled"
-            label={role}
+            label={ROLE_TO_TEXT[role]}
           />
         );
       },
@@ -80,6 +88,7 @@ export default function AdvisorEmployeesTable({
     {
       header: 'Date Added',
       accessorKey: 'dateAdded',
+      maxSize: 90,
       id: 'dateCreated',
       Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) =>
         cell.getValue()
@@ -88,29 +97,26 @@ export default function AdvisorEmployeesTable({
     },
     {
       header: '',
-      accessorKey: 'id',
       id: 'remove',
-      Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) => {
-        const employeeId = cell.getValue() as number;
-
-        return (
-          <Tooltip title={'Remove member'}>
-            <IconButton
-              color="inherit"
-              sx={{
-                height: '30px',
-                width: '36px',
-                opacity: '0.7',
-                border: '1px solid rgba(0, 0, 0, 0.12)',
-                borderRadius: 0,
-              }}
-              onClick={handleDeleteMember(employeeId)}
-            >
-              <DeleteOutline sx={{ width: 1 }} />
-            </IconButton>
-          </Tooltip>
-        );
-      },
+      size: 68,
+      Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) => (
+        <Tooltip title={'Remove member'}>
+          <IconButton
+            color="inherit"
+            sx={{
+              height: '30px',
+              width: '36px',
+              opacity: '0.7',
+              border: '1px solid rgba(0, 0, 0, 0.12)',
+              borderRadius: 0,
+              float: 'right',
+            }}
+            onClick={handleDeleteMember(cell.row.original.id)}
+          >
+            <DeleteOutline sx={{ width: 1 }} />
+          </IconButton>
+        </Tooltip>
+      ),
     },
   ];
 

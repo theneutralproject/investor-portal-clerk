@@ -12,7 +12,7 @@ const inviteSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email'),
   role: z.literal('ADMIN'),
-  phoneNumber: z.string({ message: 'Phone Number is required' }),
+  phoneNumber: z.string().min(9, 'Phone Number is required'),
 });
 
 export type InviteFormValues = z.infer<typeof inviteSchema>;
