@@ -1,6 +1,12 @@
 'use client';
 
-import { Modal as MUIModal, Paper, Box, Typography } from '@mui/material';
+import {
+  Modal as MUIModal,
+  Paper,
+  Box,
+  Typography,
+  Divider,
+} from '@mui/material';
 import { styled } from '@mui/material/styles';
 import { ReactNode } from 'react';
 
@@ -14,7 +20,6 @@ const ModalContainer = styled(Paper)(({ theme }) => ({
   maxWidth: '90vw',
   maxHeight: '90vh',
   overflow: 'auto',
-  padding: theme.spacing(3),
   borderRadius: theme.shape.borderRadius,
   display: 'flex',
   flexDirection: 'column',
@@ -24,15 +29,17 @@ const ModalHeader = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
+  paddingLeft: theme.spacing(3),
+  paddingTop: theme.spacing(3),
   marginBottom: theme.spacing(2),
 }));
 
 const ModalFooter = styled(Box)(({ theme }) => ({
   display: 'flex',
   justifyContent: 'flex-end',
-  marginTop: theme.spacing(1),
-  paddingTop: theme.spacing(2),
-  borderTop: `1px solid ${theme.palette.divider}`,
+  marginTop: theme.spacing(),
+  marginBottom: theme.spacing(1),
+  paddingRight: theme.spacing(1),
 }));
 
 type CenteredModalProps = {
@@ -55,13 +62,25 @@ export default function Modal({
       <ModalContainer elevation={3}>
         {title && (
           <ModalHeader>
-            <Typography variant="h6">{title}</Typography>
+            <Typography
+              variant="h6"
+              color="rgba(0, 0, 0, 0.87)"
+              fontWeight={600}
+            >
+              {title}
+            </Typography>
           </ModalHeader>
         )}
 
+        <Divider />
         <Box flex="1">{children}</Box>
 
-        {footer && <ModalFooter>{footer}</ModalFooter>}
+        {footer && (
+          <>
+            <Divider sx={{ pt: 1, mt: 1 }} />
+            <ModalFooter>{footer}</ModalFooter>
+          </>
+        )}
       </ModalContainer>
     </MUIModal>
   );

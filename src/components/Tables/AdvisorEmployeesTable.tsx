@@ -6,10 +6,15 @@ import Search from '@mui/icons-material/Search';
 import { MaterialReactTable, MRT_Cell } from 'material-react-table';
 import { Box, Button, Chip, Input, InputAdornment } from '@mui/material';
 import Grid from '@mui/material/Grid2';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useQueryClient } from '@tanstack/react-query';
+
 import { AdvisorEmployeeAndUser } from '@/libs/types';
 import { useAdvisorEmployees } from '@/app/hooks/useAdvisorEmployees';
 import { Add } from '@mui/icons-material';
 import Modal from '../Shared/Modal';
+import InviteMemberForm, { InviteFormValues } from '../Advisor/InviteMember';
 
 export default function AdvisorEmployeesTable({
   loadRequest,
@@ -18,6 +23,7 @@ export default function AdvisorEmployeesTable({
 }) {
   const { data, isLoading, isError } = useAdvisorEmployees(loadRequest);
   const [search, setSearch] = useState('');
+  const queryClient = useQueryClient();
 
   const [employees, setEmployees] = useState<AdvisorEmployeeAndUser[]>(
     data || []
@@ -76,6 +82,24 @@ export default function AdvisorEmployeesTable({
 
   const onSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
     setSearch(e.target.value);
+
+  const onInviteMember = async (data: InviteFormValues) => {
+    try {
+      const { role, ...user } = data;
+      const payload = {
+        user,
+        role,
+      };
+      const response = await axios.post('/api/advisors/employees', payload);
+      if (response.status === 201) {
+        toast.success(`Invited new member ${data.firstName} ${data.lastName}`);
+        queryClient.invalidateQueries({ queryKey: ['advisor', 'employees'] }); // refetch members
+        toggleModal(false)(); // close modal
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to invite member');
+    }
+  };
 
   return (
     <Box sx={{ width: '100%', overflowX: 'auto' }}>
@@ -259,7 +283,10 @@ export default function AdvisorEmployeesTable({
         aria-labelledby="Invite Employee Modal"
         aria-describedby="This Modal opens a form to add a employee to the firm"
       >
-        <Box>Modal content</Box>
+        <InviteMemberForm
+          onCancel={toggleModal(false)}
+          onInvite={onInviteMember}
+        />
       </Modal>
     </Box>
   );
