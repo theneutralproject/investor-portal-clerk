@@ -12,6 +12,7 @@ const inviteSchema = z.object({
   lastName: z.string().min(1, 'Last name is required'),
   email: z.string().email('Invalid email'),
   role: z.literal('ADMIN'),
+  phoneNumber: z.string({ message: 'Phone Number is required' }),
 });
 
 export type InviteFormValues = z.infer<typeof inviteSchema>;
@@ -35,6 +36,7 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
       firstName: '',
       lastName: '',
       email: '',
+      phoneNumber: '',
       role: 'ADMIN',
     },
   });
@@ -94,6 +96,19 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
             control={control}
             name="email"
             label="Email"
+            required
+            variant="standard"
+          />
+        </Grid>
+        <Grid
+          size={{
+            xs: 12,
+          }}
+        >
+          <FormTextField<InviteFormValues>
+            control={control}
+            name="phoneNumber"
+            label="Phone Number"
             required
             variant="standard"
           />

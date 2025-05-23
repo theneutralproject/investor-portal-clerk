@@ -1,18 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User } from '@sentry/nextjs';
 import Search from '@mui/icons-material/Search';
 import { MaterialReactTable, MRT_Cell } from 'material-react-table';
-import { Box, Button, Chip, Input, InputAdornment } from '@mui/material';
+import {
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Input,
+  InputAdornment,
+  Tooltip,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useQueryClient } from '@tanstack/react-query';
+import { User } from '@prisma/client';
+import { Add, DeleteOutline } from '@mui/icons-material';
 
 import { AdvisorEmployeeAndUser } from '@/libs/types';
 import { useAdvisorEmployees } from '@/app/hooks/useAdvisorEmployees';
-import { Add } from '@mui/icons-material';
 import Modal from '../Shared/Modal';
 import InviteMemberForm, { InviteFormValues } from '../Advisor/InviteMember';
 
@@ -30,6 +38,12 @@ export default function AdvisorEmployeesTable({
   );
   const [openModal, setOpenModal] = useState(false);
   const toggleModal = (isOpen: boolean) => () => setOpenModal(isOpen);
+
+  const handleDeleteMember = (employeeId: number) => () => {
+    if (window.confirm('Are you sure you want to remove this team member?')) {
+      onRemoveMember(employeeId);
+    }
+  };
 
   const columns = [
     {
@@ -72,6 +86,32 @@ export default function AdvisorEmployeesTable({
           ? new Date(cell.getValue() as string).toLocaleDateString('en-US')
           : '-',
     },
+    {
+      header: '',
+      accessorKey: 'id',
+      id: 'remove',
+      Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) => {
+        const employeeId = cell.getValue() as number;
+
+        return (
+          <Tooltip title={'Remove member'}>
+            <IconButton
+              color="inherit"
+              sx={{
+                height: '30px',
+                width: '36px',
+                opacity: '0.7',
+                border: '1px solid rgba(0, 0, 0, 0.12)',
+                borderRadius: 0,
+              }}
+              onClick={handleDeleteMember(employeeId)}
+            >
+              <DeleteOutline sx={{ width: 1 }} />
+            </IconButton>
+          </Tooltip>
+        );
+      },
+    },
   ];
 
   useEffect(() => {
@@ -98,6 +138,20 @@ export default function AdvisorEmployeesTable({
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to invite member');
+    }
+  };
+
+  const onRemoveMember = async (employeeId: number) => {
+    try {
+      const response = await axios.delete(
+        `/api/advisors/employees/${employeeId}`
+      );
+      if (response.status === 200) {
+        toast.success(`Removed team member`);
+        queryClient.invalidateQueries({ queryKey: ['advisor', 'employees'] });
+      }
+    } catch (err: any) {
+      toast.error(err.response?.data?.error || 'Failed to remove member');
     }
   };
 
