@@ -9,6 +9,7 @@ import Grid from '@mui/material/Grid2';
 import { AdvisorEmployeeAndUser } from '@/libs/types';
 import { useAdvisorEmployees } from '@/app/hooks/useAdvisorEmployees';
 import { Add } from '@mui/icons-material';
+import Modal from '../Shared/Modal';
 
 export default function AdvisorEmployeesTable({
   loadRequest,
@@ -21,6 +22,8 @@ export default function AdvisorEmployeesTable({
   const [employees, setEmployees] = useState<AdvisorEmployeeAndUser[]>(
     data || []
   );
+  const [openModal, setOpenModal] = useState(false);
+  const toggleModal = (isOpen: boolean) => () => setOpenModal(isOpen);
 
   const columns = [
     {
@@ -163,44 +166,6 @@ export default function AdvisorEmployeesTable({
           size: 'small',
           variant: 'outlined',
         }}
-        renderTopToolbarCustomActions={() => (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-start',
-              width: '100%',
-              p: 1,
-            }}
-          >
-            <Input
-              value={search}
-              onChange={onSearch}
-              placeholder="Search"
-              size="small"
-              disableUnderline
-              startAdornment={
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              }
-              sx={{
-                width: 471,
-                height: 36,
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                fontSize: '14px',
-                paddingLeft: 1,
-                border: '1px solid rgba(0, 0, 0, 0.12)',
-                '&:hover': {
-                  borderColor: '#999',
-                },
-                '&.Mui-focused': {
-                  borderColor: '#1976d2',
-                },
-              }}
-            />
-          </Box>
-        )}
         renderTopToolbar={() => {
           return (
             <Grid
@@ -209,7 +174,7 @@ export default function AdvisorEmployeesTable({
               sx={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center', // optional, centers vertically
+                alignItems: 'center',
                 p: 1,
                 width: '100%',
               }}
@@ -278,6 +243,7 @@ export default function AdvisorEmployeesTable({
                     color: 'rgba(0, 0, 0, 0.87)',
                     textTransform: 'none',
                   }}
+                  onClick={toggleModal(true)}
                 >
                   Invite User
                 </Button>
@@ -286,6 +252,15 @@ export default function AdvisorEmployeesTable({
           );
         }}
       />
+      <Modal
+        open={openModal}
+        onClose={toggleModal(false)}
+        title={'Invite Team Member'}
+        aria-labelledby="Invite Employee Modal"
+        aria-describedby="This Modal opens a form to add a employee to the firm"
+      >
+        <Box>Modal content</Box>
+      </Modal>
     </Box>
   );
 }

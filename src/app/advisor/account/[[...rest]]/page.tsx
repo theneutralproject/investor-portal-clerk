@@ -7,7 +7,6 @@ import {
   Button,
   Card,
   CardContent,
-  Divider,
   TextField,
   Typography,
 } from '@mui/material';
@@ -43,7 +42,13 @@ const AdvisorAccountPage = () => {
         >
           <Card sx={{ borderRadius: '8px', position: 'relative' }}>
             {isLoaded && !isLoadingAdvisor && advisorFirm ? (
-              <CardContent>
+              <CardContent
+                sx={{
+                  '&:last-child': {
+                    paddingBottom: '16px',
+                  },
+                }}
+              >
                 <Typography
                   variant="body1"
                   sx={{
@@ -62,7 +67,7 @@ const AdvisorAccountPage = () => {
                   />
                 </Box>
 
-                <Box>
+                <Box mt={1}>
                   <Typography variant="caption" color="textSecondary">
                     Company Logo
                   </Typography>
@@ -73,6 +78,10 @@ const AdvisorAccountPage = () => {
                       width={291}
                       height={109}
                       className="border rounded-md"
+                      style={{
+                        borderRadius: '8px',
+                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                      }}
                     />
                     <Button
                       variant="outlined"
@@ -89,7 +98,6 @@ const AdvisorAccountPage = () => {
                     </Button>
                   </Box>
                 </Box>
-                <Divider sx={{ mb: 3 }} />
               </CardContent>
             ) : (
               <CardContent>
