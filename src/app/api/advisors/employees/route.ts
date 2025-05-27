@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
         cleanPhone,
         {
           role: Role.ADVISOR,
+          invite: true,
         }
       );
 

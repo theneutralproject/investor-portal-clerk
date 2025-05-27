@@ -1,6 +1,8 @@
 // LearnPage.tsx
 'use client';
 
+import { useEffect } from 'react';
+import { Role } from '@prisma/client';
 import {
   Box,
   Card,
@@ -42,7 +44,13 @@ const DashboardPage = () => {
     enabled: loggedIn,
   });
 
-  if (isLoading) return <DashboardSkeleton />;
+  useEffect(() => {
+    if (user?.publicMetadata.role === Role.ADVISOR) {
+      window.location.href = '/advisor/dashboard';
+    }
+  }, [user]);
+
+  if (isLoading || !deals) return <DashboardSkeleton />;
 
   const headline = loggedIn
     ? `Welcome to Neutral, ${user?.firstName}`

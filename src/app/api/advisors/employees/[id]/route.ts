@@ -41,10 +41,10 @@ export async function DELETE(
     },
   });
 
-  if (!employee || !employee.user || !employee.user.clerkId) {
+  if (!employee || !employee.user) {
     return errorResponse('Advisor employee not found', 404, {
       request,
-      extra: { employeeId },
+      extra: { employeeId, employee },
     });
   }
 
@@ -53,7 +53,12 @@ export async function DELETE(
     await prisma.advisorFirmEmployee.delete({
       where: { id: employeeId },
     });
-    await authClient.users.deleteUser(employee.user.clerkId);
+    await prisma.user.delete({
+      where: { id: employee.user.id },
+    });
+    if (employee.user.clerkId) {
+      await authClient.users.deleteUser(employee.user.clerkId);
+    }
 
     Logger.log(
       {

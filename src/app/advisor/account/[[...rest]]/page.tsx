@@ -7,23 +7,19 @@ import {
   Button,
   Card,
   CardContent,
-  Divider,
   TextField,
   Typography,
 } from '@mui/material';
 import Grid from '@mui/material/Grid2';
-import { Pencil } from 'lucide-react';
 import { useAdvisor } from '@/app/hooks/useAdvisor';
-import { useAdvisorEmployees } from '@/app/hooks/useAdvisorEmployees';
+import AdvisorEmployeesTable from '@/components/Tables/AdvisorEmployeesTable';
+import { Repeat } from '@mui/icons-material';
 
 const AdvisorAccountPage = () => {
   const { isSignedIn, isLoaded } = useUser();
   const { data: advisorFirm, isLoading: isLoadingAdvisor } =
     useAdvisor(isSignedIn);
-  const { data: advisorFirmEmployees, isLoading: isLoadingAdvisorEmployees } =
-    useAdvisorEmployees(isSignedIn);
 
-  console.log({ advisorFirmEmployees, isLoadingAdvisorEmployees });
   return (
     <Box sx={{ width: '100%' }}>
       <Grid
@@ -39,14 +35,20 @@ const AdvisorAccountPage = () => {
         <Grid
           size={{
             xs: 12,
-            md: 7,
+            md: 8,
           }}
           justifyContent="center"
           sx={{ background: '#f5f5f5', width: '877', margin: '0 auto' }}
         >
           <Card sx={{ borderRadius: '8px', position: 'relative' }}>
             {isLoaded && !isLoadingAdvisor && advisorFirm ? (
-              <CardContent>
+              <CardContent
+                sx={{
+                  '&:last-child': {
+                    paddingBottom: '16px',
+                  },
+                }}
+              >
                 <Typography
                   variant="body1"
                   sx={{
@@ -65,7 +67,7 @@ const AdvisorAccountPage = () => {
                   />
                 </Box>
 
-                <Box>
+                <Box mt={1}>
                   <Typography variant="caption" color="textSecondary">
                     Company Logo
                   </Typography>
@@ -76,13 +78,26 @@ const AdvisorAccountPage = () => {
                       width={291}
                       height={109}
                       className="border rounded-md"
+                      style={{
+                        borderRadius: '8px',
+                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                      }}
                     />
-                    <Button variant="outlined" size="medium">
-                      Replace Logo <Pencil className="w-4 h-4 ml-2" />
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      endIcon={<Repeat />}
+                      sx={{
+                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.87)',
+                        textTransform: 'none',
+                        alignSelf: 'flex-end',
+                      }}
+                    >
+                      Replace Logo
                     </Button>
                   </Box>
                 </Box>
-                <Divider sx={{ mb: 3 }} />
               </CardContent>
             ) : (
               <CardContent>
@@ -91,6 +106,29 @@ const AdvisorAccountPage = () => {
                 </Typography>
               </CardContent>
             )}
+          </Card>
+        </Grid>
+        <Grid
+          size={{
+            xs: 12,
+            md: 8,
+          }}
+          justifyContent="center"
+          sx={{ background: '#f5f5f5', width: '877', margin: '0 auto' }}
+        >
+          <Card sx={{ borderRadius: '8px', position: 'relative' }}>
+            <CardContent>
+              <Typography
+                variant="body1"
+                sx={{
+                  fontSize: '20px',
+                  mb: 2,
+                }}
+              >
+                Team Members
+              </Typography>
+              <AdvisorEmployeesTable loadRequest={isSignedIn} />
+            </CardContent>
           </Card>
         </Grid>
       </Grid>

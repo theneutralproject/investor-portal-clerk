@@ -18,6 +18,9 @@ jest.mock('@/libs/prisma.server', () => ({
       findFirst: jest.fn(),
       delete: jest.fn(),
     },
+    user: {
+      delete: jest.fn(),
+    },
   },
 }));
 
@@ -125,6 +128,7 @@ describe('DELETE /api/advisors/employees/:id', () => {
     jest
       .mocked(prisma.advisorFirmEmployee.delete)
       .mockResolvedValue(true as any);
+    jest.mocked(prisma.user.delete).mockResolvedValue(true as any);
     jest
       .mocked(clerkClient)
       .mockResolvedValue({ users: { deleteUser: deleteUserMock } } as any);
@@ -136,6 +140,41 @@ describe('DELETE /api/advisors/employees/:id', () => {
       where: { id: employeeId },
     });
     expect(deleteUserMock).toHaveBeenCalledWith(clerkId);
+    expect(res).toEqual(jsonResponse({ success: true }));
+  });
+
+  it('should delete only advisor employee but not clerk user if clerkId not defined', async () => {
+    const clerkId = null;
+    const employee: any = {
+      id: employeeId,
+      advisorFirmId: 123,
+      user: {
+        id: 999,
+        clerkId,
+      },
+    };
+
+    const deleteUserMock = jest.fn().mockResolvedValue(true);
+
+    jest.mocked(getAdvisorContext).mockResolvedValue(mockContext as any);
+    jest
+      .mocked(prisma.advisorFirmEmployee.findFirst)
+      .mockResolvedValue(employee);
+    jest.mocked(prisma.user.delete).mockResolvedValue(true as any);
+    jest
+      .mocked(prisma.advisorFirmEmployee.delete)
+      .mockResolvedValue(true as any);
+    jest
+      .mocked(clerkClient)
+      .mockResolvedValue({ users: { deleteUser: deleteUserMock } } as any);
+
+    const res = await DELETE(nextRequestMock() as any, {
+      params: Promise.resolve({ id: employeeId.toString() }),
+    });
+    expect(prisma.advisorFirmEmployee.delete).toHaveBeenCalledWith({
+      where: { id: employeeId },
+    });
+    expect(deleteUserMock).not.toHaveBeenCalled();
     expect(res).toEqual(jsonResponse({ success: true }));
   });
 

@@ -267,7 +267,7 @@ describe('/api/advisors/employees', () => {
         'New',
         'User',
         '5551234567',
-        { role: Role.ADVISOR }
+        { role: Role.ADVISOR, invite: true }
       );
       expect(createUserInDbAndHubspot).toHaveBeenCalledWith(
         expect.objectContaining({

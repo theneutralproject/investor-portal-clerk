@@ -82,6 +82,7 @@ describe('POST /api/user', () => {
     (getAuth as jest.Mock).mockReturnValue({ userId: mockClerkUser.id });
     (prisma.user.findUnique as jest.Mock).mockResolvedValue({
       clerkId: mockClerkUser.id,
+      role: 'ADMIN',
     });
     (clerkClient as jest.Mock).mockReturnValue({
       users: {
@@ -108,7 +109,7 @@ describe('POST /api/user', () => {
     const json = await response.json();
 
     expect(response.status).toBe(200);
-    expect(json).toEqual({ data: 'User exists' });
+    expect(json).toEqual({ data: 'User exists', role: 'ADMIN' });
   });
 
   it('should create a new user if not found in the database', async () => {

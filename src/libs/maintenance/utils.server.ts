@@ -54,9 +54,15 @@ export async function findOrCreateClerkUser(
       );
       return null;
     }
+    const { invite, ...publicMetadata } = metadata || {};
+    if (invite) {
+      await authClient.invitations.createInvitation({
+        emailAddress: email,
+      });
+    }
     const newClerkUser = await authClient.users.createUser({
       ...clerkData,
-      publicMetadata: metadata,
+      publicMetadata,
     });
     if (!newClerkUser) {
       throw new Error('Error creating Clerk user');

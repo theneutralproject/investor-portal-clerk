@@ -16,7 +16,7 @@ import AdvisorDocumentsTable from '@/components/Tables/AdvisorDocumentsTable';
 import { NextClientPage } from '@/types/page';
 import DashboardPortfolio from '@/components/Dashboard/DashboardPortfolio';
 import axios from 'axios';
-import AdvisorClientInvestmentsTable from '@/components/Tables/AdvisorClientInvestments';
+import AdvisorClientInvestmentsTable from '@/components/Tables/AdvisorClientInvestmentsTable';
 import AccountProfileDetails from '@/components/Account/AccountProfileDetails';
 import { UserWithAddress } from '@/libs/types';
 import { toast } from 'react-toastify';

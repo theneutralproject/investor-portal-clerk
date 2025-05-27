@@ -11,6 +11,7 @@ import type {
 } from '@/libs/types';
 import { sendGTMEvent } from '@next/third-parties/google';
 import { DealStage } from '@/libs/deal/schema';
+import { Role } from '@prisma/client';
 
 interface DashboardContextType {
   projects: ProjectWithAllNestedData[];
@@ -31,7 +32,8 @@ export function DashboardProvider({ children }: { children: React.ReactNode }) {
 
   const pathname = usePathname();
   const loggedIn = !!user;
-  const isRequestEnabled = pathname !== '/onboarding' && loggedIn;
+  const isAdvisor = loggedIn && user?.publicMetadata.role === Role.ADVISOR;
+  const isRequestEnabled = pathname !== '/onboarding' && loggedIn && !isAdvisor;
 
   const {
     isLoading: projectsLoading,
