@@ -3,7 +3,6 @@
 
 import { useEffect } from 'react';
 import { Role } from '@prisma/client';
-import { useRouter } from 'next/navigation';
 import {
   Box,
   Card,
@@ -32,7 +31,6 @@ import RecentActivity from '@/components/Dashboard/RecentActivity';
 import { PortfolioReturnsResponse } from '@/libs/returns/schema';
 
 const DashboardPage = () => {
-  const router = useRouter();
   const { loggedIn, user, projects, deals, isLoading } = useDashboard();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const { data } = useQuery<PortfolioReturnsResponse, Error>({
@@ -48,9 +46,9 @@ const DashboardPage = () => {
 
   useEffect(() => {
     if (user?.publicMetadata.role === Role.ADVISOR) {
-      router.push('/advisor/dashboard');
+      window.location.href = '/advisor/dashboard';
     }
-  }, [router, user]);
+  }, [user]);
 
   if (isLoading || !deals) return <DashboardSkeleton />;
 
