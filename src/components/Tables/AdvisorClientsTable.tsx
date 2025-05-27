@@ -48,7 +48,6 @@ export default function AdvisorClientsTable({
         header: 'Name',
         id: 'name',
         Cell: ({ row }: any) => {
-          console.log(row);
           return (
             <a
               style={{ textDecoration: 'underline', cursor: 'pointer' }}
