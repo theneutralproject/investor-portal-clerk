@@ -16,7 +16,7 @@ const DashboardPageBanner = ({
         height: '220px',
         width: '100%',
         borderRadius: '8px',
-        background: `linear-gradient(180deg, rgba(0, 0, 0, 0.00) 0%, rgba(0, 0, 0, 0.60) 100%), url("${background}") lightgray 0px -122.163px / 100% 391.783% no-repeat`,
+        background: `linear-gradient(rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.6) 100%), url(${background}) center 80% / cover no-repeat lightgray`,
       }}
       data-testid={DASHBOARD_PAGE_BANNER_TEST_ID}
     >
