@@ -110,7 +110,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
         <Grid
           size={{
             xs: 12,
-            md: 7,
+            md: 8,
           }}
           justifyContent="center"
           sx={{ background: '#f5f5f5' }}
