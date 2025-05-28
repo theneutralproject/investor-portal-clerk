@@ -5,7 +5,7 @@ import {
   type MRT_ColumnDef,
   type MRT_PaginationState,
 } from 'material-react-table';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Input from '@mui/material/Input';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -13,17 +13,21 @@ import Search from '@mui/icons-material/Search';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
 import { useAdvisorClients } from '@/app/hooks/useAdvisorClients';
+import { AdvisorClientsResponse } from '@/libs/types';
+import { isEqual } from 'lodash';
 
 export default function AdvisorClientsTable({
   loadRequest,
   router,
+  getResults,
 }: {
-  loadRequest?: boolean;
   router: AppRouterInstance;
+  loadRequest?: boolean;
+  getResults?: (data: AdvisorClientsResponse) => void;
 }) {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
-    pageSize: 300,
+    pageSize: 100,
   });
 
   const [search, setSearch] = useState('');
@@ -35,6 +39,16 @@ export default function AdvisorClientsTable({
     pagination.pageSize,
     debouncedSearch
   );
+  const lastDataRef = useRef<AdvisorClientsResponse | null>(null);
+
+  useEffect(() => {
+    if (!data || isLoading || isError || !getResults) return;
+
+    if (!isEqual(data, lastDataRef.current)) {
+      lastDataRef.current = data;
+      getResults(data);
+    }
+  }, [data, isLoading, isError, getResults]);
 
   const handleClientClick =
     (clientId: number) => (event: React.MouseEvent<HTMLElement>) => {
