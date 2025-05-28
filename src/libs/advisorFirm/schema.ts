@@ -18,6 +18,16 @@ export const zAdvisorFirmCreateSchema = z.object({
 
 export type AdvisorFirmCreateSchema = z.infer<typeof zAdvisorFirmCreateSchema>;
 
+export const zAdvisorFirmUpdateSchema = z.object({
+  name: z.string().min(1, 'Company name is required').optional(),
+  file: z
+    .custom<File>()
+    .refine(file => file instanceof File, { message: 'Invalid file type' })
+    .optional(),
+});
+
+export type AdvisorFirmUpdateSchema = z.infer<typeof zAdvisorFirmUpdateSchema>;
+
 export const zAdvisorEmployeeCreateSchema = z.object({
   role: z.nativeEnum(AdvisorEmployeeRole),
   user: zUserCreateSchema,
