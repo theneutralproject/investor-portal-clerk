@@ -62,7 +62,7 @@ export default function AdvisorClientInvestmentsTable({
           id: 'amount',
           Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) =>
             cell.getValue()
-              ? `$${Number(cell.getValue()).toLocaleString()}`
+              ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
               : '-',
         },
         {

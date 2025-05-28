@@ -69,7 +69,7 @@ export default function AdvisorClientsTable({
         accessorKey: 'totalInvested',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
       {
@@ -122,7 +122,7 @@ export default function AdvisorClientsTable({
         accessorKey: 'earningsToDate',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
       {
@@ -130,7 +130,7 @@ export default function AdvisorClientsTable({
         accessorKey: 'projectedEarnings',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
       {
@@ -138,7 +138,7 @@ export default function AdvisorClientsTable({
         accessorKey: 'totalProjectedReturn',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
     ],
