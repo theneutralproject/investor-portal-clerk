@@ -87,7 +87,7 @@ export default function AdvisorEmployeesTable({
     },
     {
       header: 'Date Added',
-      accessorKey: 'dateAdded',
+      accessorKey: 'user.dateCreated',
       maxSize: 90,
       id: 'dateCreated',
       Cell: ({ cell }: { cell: MRT_Cell<AdvisorEmployeeAndUser> }) =>

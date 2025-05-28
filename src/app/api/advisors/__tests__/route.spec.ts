@@ -13,75 +13,101 @@ jest.mock('@/libs/advisorFirm/utils.server', () => ({
   getAdvisorContext: jest.fn(),
 }));
 
-describe('GET /api/advisors', () => {
+jest.mock('@/libs/advisorFirm/utils.server', () => ({
+  getAdvisorContext: jest.fn(),
+}));
+
+jest.mock('@/libs/prisma.server', () => ({
+  __esModule: true,
+  default: {
+    advisorFirm: {
+      update: jest.fn(),
+    },
+  },
+}));
+
+jest.mock('@/libs/supabase', () => ({
+  storageClient: {
+    from: jest.fn(() => ({
+      upload: jest.fn().mockResolvedValue({ error: null }),
+      getPublicUrl: jest.fn(() => ({
+        data: { publicUrl: 'https://mocked-public-url.com/logo.png' },
+      })),
+    })),
+  },
+}));
+
+describe('/api/advisors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return 401 if user is not authenticated', async () => {
-    jest
-      .mocked(getAdvisorContext)
-      .mockResolvedValue(errorResponse('User not authenticated', 401));
+  describe('GET /api/advisors', () => {
+    it('should return 401 if user is not authenticated', async () => {
+      jest
+        .mocked(getAdvisorContext)
+        .mockResolvedValue(errorResponse('User not authenticated', 401));
 
-    const res = await GET(nextRequestMock() as any);
-    expect(res).toEqual(errorResponse('User not authenticated', 401));
-  });
+      const res = await GET(nextRequestMock() as any);
+      expect(res).toEqual(errorResponse('User not authenticated', 401));
+    });
 
-  it('should return 403 if user is not advisor', async () => {
-    jest.mocked(getAdvisorContext).mockResolvedValue(
-      errorResponse('Unauthorized or not found', 403, {
-        request: expect.anything(),
-        extra: { user: expect.anything() },
-      })
-    );
+    it('should return 403 if user is not advisor', async () => {
+      jest.mocked(getAdvisorContext).mockResolvedValue(
+        errorResponse('Unauthorized or not found', 403, {
+          request: expect.anything(),
+          extra: { user: expect.anything() },
+        })
+      );
 
-    const res = await GET(nextRequestMock() as any);
-    expect(res).toEqual(
-      errorResponse('Unauthorized or not found', 403, {
-        request: expect.anything(),
-        extra: { user: expect.anything() },
-      })
-    );
-  });
+      const res = await GET(nextRequestMock() as any);
+      expect(res).toEqual(
+        errorResponse('Unauthorized or not found', 403, {
+          request: expect.anything(),
+          extra: { user: expect.anything() },
+        })
+      );
+    });
 
-  it('should return 400 if user is not assigned to an advisor firm', async () => {
-    jest.mocked(getAdvisorContext).mockResolvedValue(
-      errorResponse('User is not assigned to an advisor firm', 400, {
-        request: expect.anything(),
-        extra: { user: expect.anything() },
-      })
-    );
+    it('should return 400 if user is not assigned to an advisor firm', async () => {
+      jest.mocked(getAdvisorContext).mockResolvedValue(
+        errorResponse('User is not assigned to an advisor firm', 400, {
+          request: expect.anything(),
+          extra: { user: expect.anything() },
+        })
+      );
 
-    const res = await GET(nextRequestMock() as any);
-    expect(res).toEqual(
-      errorResponse('User is not assigned to an advisor firm', 400, {
-        request: expect.anything(),
-        extra: { user: expect.anything() },
-      })
-    );
-  });
+      const res = await GET(nextRequestMock() as any);
+      expect(res).toEqual(
+        errorResponse('User is not assigned to an advisor firm', 400, {
+          request: expect.anything(),
+          extra: { user: expect.anything() },
+        })
+      );
+    });
 
-  it('should return advisor firm info when authorized', async () => {
-    const advisorFirm = {
-      id: 123,
-      name: 'Central Wealth Management',
-      createdAt: new Date('2024-01-01'),
-    };
+    it('should return advisor firm info when authorized', async () => {
+      const advisorFirm = {
+        id: 123,
+        name: 'Central Wealth Management',
+        createdAt: new Date('2024-01-01'),
+      };
 
-    jest.mocked(getAdvisorContext).mockResolvedValue({
-      dbUser: {
-        id: 100,
-        role: 'ADVISOR',
-        email: 'advisor@example.com',
-      },
-      advisorFirmEmployee: {
-        advisorFirmId: 123,
+      jest.mocked(getAdvisorContext).mockResolvedValue({
+        dbUser: {
+          id: 100,
+          role: 'ADVISOR',
+          email: 'advisor@example.com',
+        },
+        advisorFirmEmployee: {
+          advisorFirmId: 123,
+          advisorFirm,
+        },
         advisorFirm,
-      },
-      advisorFirm,
-    } as any);
+      } as any);
 
-    const res = await GET(nextRequestMock() as any);
-    expect(res).toEqual(jsonResponse(advisorFirm));
+      const res = await GET(nextRequestMock() as any);
+      expect(res).toEqual(jsonResponse(advisorFirm));
+    });
   });
 });
