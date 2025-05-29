@@ -74,6 +74,18 @@ const nextConfig = {
       },
     ];
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'pexctjxeeidyfprrcnca.supabase.co',
+      },
+      {
+        protocol: 'https',
+        hostname: 'wozumwkyltloehxggvzc.supabase.co',
+      },
+    ],
+  },
 };
 
 // Make sure adding Sentry options is the last code to run before exporting
