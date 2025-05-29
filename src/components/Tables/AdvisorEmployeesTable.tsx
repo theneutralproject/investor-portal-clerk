@@ -35,6 +35,8 @@ export default function AdvisorEmployeesTable({
   loadRequest?: boolean;
 }) {
   const { data, isLoading, isError } = useAdvisorEmployees(loadRequest);
+  const [isLoadingMemberAction, setIsLoadingMemberAction] =
+    useState<boolean>(false);
   const [search, setSearch] = useState('');
   const queryClient = useQueryClient();
 
@@ -130,6 +132,7 @@ export default function AdvisorEmployeesTable({
     setSearch(e.target.value);
 
   const onInviteMember = async (data: InviteFormValues) => {
+    setIsLoadingMemberAction(true);
     try {
       const { role, ...user } = data;
       const payload = {
@@ -144,10 +147,13 @@ export default function AdvisorEmployeesTable({
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to invite member');
+    } finally {
+      setIsLoadingMemberAction(false);
     }
   };
 
   const onRemoveMember = async (employeeId: number) => {
+    setIsLoadingMemberAction(true);
     try {
       const response = await axios.delete(
         `/api/advisors/employees/${employeeId}`
@@ -158,6 +164,8 @@ export default function AdvisorEmployeesTable({
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to remove member');
+    } finally {
+      setIsLoadingMemberAction(false);
     }
   };
 
@@ -238,7 +246,7 @@ export default function AdvisorEmployeesTable({
           },
         }}
         state={{
-          isLoading,
+          isLoading: isLoading || isLoadingMemberAction,
           showAlertBanner: isError,
           showGlobalFilter: true,
           globalFilter: search,

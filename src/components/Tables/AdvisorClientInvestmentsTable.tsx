@@ -45,25 +45,31 @@ export default function AdvisorClientInvestmentsTable({
           header: 'ID',
           accessorKey: 'dealId',
           id: 'dealId',
+          maxSize: 75,
         },
         {
           header: 'Entity',
           accessorKey: 'organizationName',
           id: 'organizationName',
+          grow: true,
+          size: 300,
         },
         {
           header: 'Amount',
           accessorKey: 'amount',
+          grow: true,
+          size: 120,
           id: 'amount',
           Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) =>
             cell.getValue()
-              ? `$${Number(cell.getValue()).toLocaleString()}`
+              ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
               : '-',
         },
         {
           header: 'Type',
           accessorKey: 'financingType',
           id: 'financingType',
+          maxSize: 110,
           Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) => {
             const financingType = cell.getValue() as string;
             const isEquity = financingType === DealFinancingType.equity;
@@ -90,6 +96,7 @@ export default function AdvisorClientInvestmentsTable({
           header: 'Close Date',
           accessorKey: 'closingDate',
           id: 'closingDate',
+          maxSize: 100,
           Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) =>
             cell.getValue()
               ? new Date(cell.getValue() as string).toLocaleDateString('en-US')
@@ -130,6 +137,7 @@ export default function AdvisorClientInvestmentsTable({
         enableGlobalFilter={false}
         enableColumnResizing={false}
         enableDensityToggle={false}
+        layoutMode="semantic"
         muiTablePaperProps={{
           elevation: 0,
           sx: {

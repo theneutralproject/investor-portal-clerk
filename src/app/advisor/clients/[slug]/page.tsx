@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useMemo } from 'react';
 import {
   Box,
   Card,
@@ -38,6 +38,15 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
     data: clientUserOrganizationData,
     isLoading: isLoadingClientUserData,
   } = useAdvisorClientUser(isSignedIn, clientId);
+
+  const clientName = useMemo(() => {
+    if (!clientUserOrganizationData?.user) return '';
+
+    return [
+      clientUserOrganizationData?.user.firstName,
+      clientUserOrganizationData?.user.lastName,
+    ].join(' ');
+  }, [clientUserOrganizationData]);
 
   const handleProfileUpdate = async (updatedUser: UserWithAddress) => {
     try {
@@ -84,7 +93,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
             mb: 3,
           }}
         >
-          {clientUserOrganizationData?.organization.name}
+          {clientName}
         </Typography>
         <Divider sx={{ mb: 3, width: '140%', ml: '-10%' }} />
       </Grid>
@@ -101,7 +110,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
         <Grid
           size={{
             xs: 12,
-            md: 7,
+            md: 8,
           }}
           justifyContent="center"
           sx={{ background: '#f5f5f5' }}

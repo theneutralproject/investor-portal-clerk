@@ -5,7 +5,7 @@ import {
   type MRT_ColumnDef,
   type MRT_PaginationState,
 } from 'material-react-table';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import Box from '@mui/material/Box';
 import Input from '@mui/material/Input';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -13,17 +13,21 @@ import Search from '@mui/icons-material/Search';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
 import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
 import { useAdvisorClients } from '@/app/hooks/useAdvisorClients';
+import { AdvisorClientsResponse } from '@/libs/types';
+import { isEqual } from 'lodash';
 
 export default function AdvisorClientsTable({
   loadRequest,
   router,
+  getResults,
 }: {
-  loadRequest?: boolean;
   router: AppRouterInstance;
+  loadRequest?: boolean;
+  getResults?: (data: AdvisorClientsResponse) => void;
 }) {
   const [pagination, setPagination] = useState<MRT_PaginationState>({
     pageIndex: 0,
-    pageSize: 300,
+    pageSize: 100,
   });
 
   const [search, setSearch] = useState('');
@@ -35,6 +39,16 @@ export default function AdvisorClientsTable({
     pagination.pageSize,
     debouncedSearch
   );
+  const lastDataRef = useRef<AdvisorClientsResponse | null>(null);
+
+  useEffect(() => {
+    if (!data || isLoading || isError || !getResults) return;
+
+    if (!isEqual(data, lastDataRef.current)) {
+      lastDataRef.current = data;
+      getResults(data);
+    }
+  }, [data, isLoading, isError, getResults]);
 
   const handleClientClick =
     (clientId: number) => (event: React.MouseEvent<HTMLElement>) => {
@@ -47,6 +61,8 @@ export default function AdvisorClientsTable({
       {
         header: 'Name',
         id: 'name',
+        maxSize: 120,
+        grow: true,
         Cell: ({ row }: any) => {
           return (
             <a
@@ -63,18 +79,22 @@ export default function AdvisorClientsTable({
         header: 'Email',
         accessorFn: row => row.client.email,
         id: 'email',
+        maxSize: 156,
+        grow: true,
       },
       {
         header: 'Invested Amount',
         accessorKey: 'totalInvested',
+        maxSize: 156,
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
       {
         header: 'Types',
         accessorKey: 'dealTypes',
+        maxSize: 156,
         Cell: ({ cell }) => {
           const dealTypes = cell.getValue() as string[];
           const hasDebtDeals = dealTypes.some(type => type === 'debt');
@@ -115,30 +135,37 @@ export default function AdvisorClientsTable({
       },
       {
         header: 'Number of Investments',
+        maxSize: 156,
         accessorKey: 'numberOfInvestments',
       },
       {
         header: 'Earnings to Date',
+        maxSize: 156,
+        grow: true,
         accessorKey: 'earningsToDate',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
       {
         header: 'Total Earnings Projected',
+        maxSize: 156,
+        grow: true,
         accessorKey: 'projectedEarnings',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
       {
         header: 'Total Projected Return',
+        maxSize: 156,
+        grow: true,
         accessorKey: 'totalProjectedReturn',
         Cell: ({ cell }) =>
           cell.getValue()
-            ? `$${Number(cell.getValue()).toLocaleString()}`
+            ? `$${Math.round(Number(cell.getValue())).toLocaleString()}`
             : '-',
       },
     ],
@@ -240,6 +267,13 @@ export default function AdvisorClientsTable({
                 alignSelf: 'flex-start',
                 paddingTop: '2px',
               },
+            },
+            '&:nth-of-type(3) .Mui-TableHeadCell-Content, \
+              &:nth-of-type(5) .Mui-TableHeadCell-Content, \
+              &:nth-of-type(6) .Mui-TableHeadCell-Content, \
+              &:nth-of-type(7) .Mui-TableHeadCell-Content, \
+              &:nth-of-type(8) .Mui-TableHeadCell-Content': {
+              justifyContent: 'flex-end',
             },
           },
         }}

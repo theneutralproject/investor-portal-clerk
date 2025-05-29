@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Box, Button, Divider } from '@mui/material';
+import { Box, Button, Divider, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { z } from 'zod';
 import { useValidatedForm } from '@/hooks/useValidatedForm';
@@ -30,7 +30,7 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
     control,
     handleSubmit,
     reset,
-    formState: { isValid, isDirty },
+    formState: { isValid, isDirty, isSubmitting, isLoading },
   } = useValidatedForm(inviteSchema, {
     defaultValues: {
       firstName: '',
@@ -112,6 +112,16 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
             required
             variant="standard"
           />
+          <Typography mt={3} color={'rgba(0, 0, 0, 0.38)'} fontSize={'0.75ren'}>
+            Please invite only trusted individuals within your organization. By
+            clicking “Send Invite,” you acknowledge that you are authorizing
+            this individual to access confidential investor information and
+            firm-level data. You are solely responsible for managing access and
+            ensuring that all invited users comply with applicable privacy and
+            data protection laws. Neutral is not liable for any actions taken by
+            users added to your firm’s account, including but not limited to
+            unauthorized data sharing or misuse.
+          </Typography>
         </Grid>
         <Grid
           size={{
@@ -134,6 +144,7 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
           >
             <Button
               onClick={handleCancel}
+              disabled={isSubmitting || isLoading}
               variant="outlined"
               size="medium"
               sx={{
@@ -147,7 +158,8 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
               type="submit"
               variant="contained"
               size="medium"
-              disabled={!isValid || !isDirty}
+              disabled={!isValid || !isDirty || isSubmitting || isLoading}
+              loading={isSubmitting || isLoading}
               sx={{
                 backgroundColor: 'black',
                 color: 'white',
@@ -156,7 +168,7 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
                 },
               }}
             >
-              Invite User
+              Send Invite
             </Button>
           </Box>
         </Grid>
