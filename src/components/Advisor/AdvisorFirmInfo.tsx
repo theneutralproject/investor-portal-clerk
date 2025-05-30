@@ -20,6 +20,7 @@ import {
   zAdvisorFirmUpdateSchema,
 } from '@/libs/advisorFirm/schema';
 import { FormFileUpload } from '../DealFlow/Shared/FormFileUpload';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface AdvisorFirmInfoFormProps {
   onSave?: (data: AdvisorFirmUpdateSchema) => void;
@@ -43,10 +44,12 @@ export const AdvisorFirmInfoFormSkeleton = () => (
     </CardContent>
   </Card>
 );
+
 const AdvisorFirmInfoForm: React.FC<AdvisorFirmInfoFormProps> = ({
   onCancel,
   defaultValues,
 }) => {
+  const queryClient = useQueryClient();
   const {
     control,
     handleSubmit,
@@ -86,6 +89,7 @@ const AdvisorFirmInfoForm: React.FC<AdvisorFirmInfoFormProps> = ({
 
       if (response.status === 200) {
         toast.success('Updated company info successfully');
+        queryClient.invalidateQueries({ queryKey: ['advisor'] });
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to update company info');

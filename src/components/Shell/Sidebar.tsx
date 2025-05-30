@@ -28,6 +28,8 @@ import UserAvatar from './UserAvatar';
 import MobileSidebar from './MobileSidebar';
 import { SIDEBAR_TEST_ID } from 'e2e/testIds';
 import { OverridableComponent } from '@mui/material/OverridableComponent';
+import { AdvisorFirm } from '@prisma/client';
+import { useAdvisorContext } from '@/app/context/AdvisorContext';
 
 export const buttonItems = [
   {
@@ -99,7 +101,6 @@ export const capitalize = (s: string) => s && s[0]?.toUpperCase() + s.slice(1);
 
 interface ISidebarProps {
   children: React.ReactNode;
-  isAdvisor?: boolean;
   routes: {
     name: string;
     path: string;
@@ -108,6 +109,8 @@ interface ISidebarProps {
     };
     dataTestId?: string;
   }[];
+  isAdvisor?: boolean;
+  advisor?: AdvisorFirm;
 }
 
 export default function Sidebar(props: ISidebarProps) {
@@ -126,10 +129,23 @@ export default function Sidebar(props: ISidebarProps) {
       (routeRoot && currentRoot === routeRoot && pathName.startsWith(routePath))
     );
   };
+  const { isAdvisor } = props;
+  const advisorContext = useAdvisorContext(isAdvisor);
+  const imageSource = isAdvisor
+    ? advisorContext?.advisor?.logoUrl || '/Neutral_White_Medium.png'
+    : '/Neutral_White_Medium.png';
+  const imageSize = isAdvisor
+    ? { width: 104, height: 51 }
+    : { width: 94, height: 21 };
 
   if (isMobile) {
     return (
-      <MobileSidebar routes={props.routes}>{props.children}</MobileSidebar>
+      <MobileSidebar
+        routes={props.routes}
+        logoURL={advisorContext?.advisor?.logoUrl}
+      >
+        {props.children}
+      </MobileSidebar>
     );
   }
 
@@ -138,27 +154,27 @@ export default function Sidebar(props: ISidebarProps) {
       <AppBar position="absolute">
         <Toolbar
           sx={{
-            boxShadow: props.isAdvisor
+            boxShadow: isAdvisor
               ? `0px 2px 4px -1px #00000033;`
               : `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
             border: 'none !important',
             [theme.breakpoints.down('md')]: {
               display: 'none',
             },
-            backgroundColor: props.isAdvisor ? '#FFFFFF' : 'black',
+            backgroundColor: isAdvisor ? '#FFFFFF' : 'black',
           }}
         >
           <Image
-            width="94"
-            height="21"
-            src="/Neutral_White_Medium.png"
+            {...imageSize}
+            src={imageSource}
             alt="Neutral Logo"
-            onClick={() => router.push('/dashboard')}
+            onClick={() =>
+              router.push(isAdvisor ? '/advisor/dashboard' : '/dashboard')
+            }
             style={{
               cursor: 'pointer',
-              background: props.isAdvisor
-                ? 'rgba(105, 156, 219, 1)'
-                : 'transparent',
+              background: 'transparent',
+              objectFit: 'none',
             }}
           />
 
@@ -174,14 +190,14 @@ export default function Sidebar(props: ISidebarProps) {
                     borderRadius: '15px',
                     padding: '5px 10px',
 
-                    color: props.isAdvisor
+                    color: isAdvisor
                       ? isActiveRoute(route.path)
                         ? 'rgba(0, 0, 0, 0.87)'
                         : 'rgba(0, 0, 0, 0.6)'
                       : isActiveRoute(route.path)
                         ? 'white'
                         : 'rgba(255, 255, 255, 0.66)',
-                    backgroundColor: props.isAdvisor
+                    backgroundColor: isAdvisor
                       ? isActiveRoute(route.path)
                         ? 'rgba(0, 0, 0, 0.08)'
                         : 'transparent'
@@ -189,7 +205,7 @@ export default function Sidebar(props: ISidebarProps) {
                         ? 'rgba(255, 255, 255, 0.2)'
                         : 'transparent',
                     '&:hover': {
-                      backgroundColor: props.isAdvisor
+                      backgroundColor: isAdvisor
                         ? 'rgba(0, 0, 0, 0.08)'
                         : isActiveRoute(route.path)
                           ? 'rgba(255, 255, 255, 0.3)'
@@ -214,7 +230,7 @@ export default function Sidebar(props: ISidebarProps) {
               alignItems: 'center',
             }}
           >
-            <UserAvatar isAdvisor={props.isAdvisor} />
+            <UserAvatar isAdvisor={isAdvisor} />
           </Box>
         </Toolbar>
       </AppBar>
