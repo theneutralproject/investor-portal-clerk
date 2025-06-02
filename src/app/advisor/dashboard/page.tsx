@@ -1,6 +1,13 @@
 'use client';
 
-import { Box, Card, CardContent, Divider, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  Divider,
+  Typography,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useUser } from '@clerk/nextjs';
 import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
@@ -30,12 +37,16 @@ const AdvisorDashboardPage = () => {
       fundsAllocated: `$${Math.round(fundsAllocated).toLocaleString()}`,
     });
   };
+  const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
+
+  const onResourceCenterClick = () => {
+    router.push('/advisor/faq');
+  };
 
   if (!isLoaded || user?.publicMetadata.role !== Role.ADVISOR) {
     return <DashboardSkeleton />;
   }
 
-  const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
   return (
     <Box>
       <DashboardPageBanner
@@ -60,7 +71,8 @@ const AdvisorDashboardPage = () => {
           {clientResults?.clients && (
             <Grid
               size={{
-                xs: 2,
+                xs: 6,
+                sm: 3,
                 md: 2,
               }}
               sx={{ background: 'transparent' }}
@@ -95,7 +107,8 @@ const AdvisorDashboardPage = () => {
           {clientResults?.fundsAllocated && (
             <Grid
               size={{
-                xs: 3,
+                xs: 6,
+                sm: 4,
                 md: 3,
               }}
               sx={{ background: 'transparent' }}
@@ -129,34 +142,67 @@ const AdvisorDashboardPage = () => {
           )}
           <Grid
             size={{
-              xs: 7,
+              xs: 12,
+              sm: 5,
               md: 7,
             }}
             sx={{ background: 'transparent' }}
           >
             <Card sx={{ borderRadius: '8px' }}>
               <CardContent>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontSize: '14px',
-                    color: 'rgba(0, 0, 0, 0.6)',
-                    fontWeight: 500,
-                  }}
-                >
-                  Resource Center
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontSize: '16px',
-                    color: 'rgba(29, 41, 57, 0.5)',
-                    fontWeight: 400,
-                  }}
-                >
-                  Access articles, FAQs, template emails, <br />
-                  investment materials and more!
-                </Typography>
+                <Grid container>
+                  <Grid
+                    size={{ xs: 12 }}
+                    sx={{
+                      display: 'flex',
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontSize: '14px',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Resource Center
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontSize: '16px',
+                        color: 'rgba(29, 41, 57, 0.5)',
+                        fontWeight: 400,
+                      }}
+                    >
+                      Access articles, FAQs, template emails,
+                      <br />
+                      investment materials and more!
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    size={{ xs: 12, sm: 6 }}
+                    sx={{
+                      alignContent: 'flex-end',
+                      alignItems: 'flex-end',
+                      textAlign: 'right',
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      onClick={onResourceCenterClick}
+                      sx={{
+                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      }}
+                    >
+                      Resource Center
+                    </Button>
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
           </Grid>
