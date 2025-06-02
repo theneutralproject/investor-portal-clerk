@@ -4,7 +4,7 @@ import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
-import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { createUserInDb } from '@/libs/user/utils.server';
 import { Role } from '@prisma/client';
 import { ReferralSource } from '@/libs/hubspot/utils.client';
 
@@ -31,7 +31,7 @@ jest.mock('@/libs/maintenance/utils.server', () => ({
 }));
 
 jest.mock('@/libs/user/utils.server', () => ({
-  createUserInDbAndHubspot: jest.fn(),
+  createUserInDb: jest.fn(),
 }));
 
 describe('/api/advisors/employees', () => {
@@ -246,9 +246,7 @@ describe('/api/advisors/employees', () => {
       jest
         .mocked(findOrCreateClerkUser)
         .mockResolvedValue({ id: 'clerk-uid-999' } as any);
-      jest
-        .mocked(createUserInDbAndHubspot)
-        .mockResolvedValue(createdUser as any);
+      jest.mocked(createUserInDb).mockResolvedValue(createdUser as any);
       jest
         .mocked(prisma.$transaction)
         .mockImplementation(async fn => fn(prisma));
@@ -269,16 +267,15 @@ describe('/api/advisors/employees', () => {
         '5551234567',
         { role: Role.ADVISOR, invite: true }
       );
-      expect(createUserInDbAndHubspot).toHaveBeenCalledWith(
+      expect(createUserInDb).toHaveBeenCalledWith(
         expect.objectContaining({
           email: 'new@user.com',
           firstName: 'New',
           lastName: 'User',
           phoneNumber: '5551234567',
-          referralSource: ReferralSource.ADVISOR_UPDATE,
+          referralSource: ReferralSource.ADVISOR_FIRM_EMPLOYEE,
           role: Role.ADVISOR,
         }),
-        undefined,
         expect.anything()
       );
       expect(prisma.advisorFirmEmployee.create).toHaveBeenCalledWith({

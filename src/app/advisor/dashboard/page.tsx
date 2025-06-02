@@ -1,6 +1,14 @@
 'use client';
 
-import { Box, Card, CardContent, Divider, Typography } from '@mui/material';
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  Divider,
+  Typography,
+} from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { useUser } from '@clerk/nextjs';
 import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
@@ -9,7 +17,7 @@ import AdvisorClientsTable from '@/components/Tables/AdvisorClientsTable';
 import { Role } from '@prisma/client';
 import { useRouter } from 'next/navigation';
 import { AdvisorClientsResponse } from '@/libs/types';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 
 const AdvisorDashboardPage = () => {
   const { user, isSignedIn, isLoaded } = useUser();
@@ -30,12 +38,34 @@ const AdvisorDashboardPage = () => {
       fundsAllocated: `$${Math.round(fundsAllocated).toLocaleString()}`,
     });
   };
+  const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
+
+  const onResourceCenterClick = () => {
+    router.push('/advisor/faq');
+  };
+  const clientsText = useMemo(
+    () =>
+      clientResults ? (
+        clientResults?.clients || 'N/A'
+      ) : (
+        <CircularProgress size={32} />
+      ),
+    [clientResults]
+  );
+  const fundsAllowedText = useMemo(
+    () =>
+      clientResults ? (
+        clientResults?.fundsAllocated || 'N/A'
+      ) : (
+        <CircularProgress size={32} />
+      ),
+    [clientResults]
+  );
 
   if (!isLoaded || user?.publicMetadata.role !== Role.ADVISOR) {
     return <DashboardSkeleton />;
   }
 
-  const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
   return (
     <Box>
       <DashboardPageBanner
@@ -57,80 +87,11 @@ const AdvisorDashboardPage = () => {
           display="flex"
           sx={{ background: '#f5f5f5' }}
         >
-          {clientResults?.clients && (
-            <Grid
-              size={{
-                xs: 2,
-                md: 2,
-              }}
-              sx={{ background: 'transparent' }}
-            >
-              <Card sx={{ borderRadius: '8px' }}>
-                <CardContent>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      mb: 1,
-                      color: 'rgba(0, 0, 0, 0.6)',
-                    }}
-                  >
-                    Clients
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontSize: '32px',
-                      fontWeight: 600,
-                      color: 'rgba(0, 0, 0, 0.87)',
-                    }}
-                  >
-                    {clientResults?.clients || 'N/A'}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
-          {clientResults?.fundsAllocated && (
-            <Grid
-              size={{
-                xs: 3,
-                md: 3,
-              }}
-              sx={{ background: 'transparent' }}
-            >
-              <Card sx={{ borderRadius: '8px' }}>
-                <CardContent>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      fontSize: '14px',
-                      fontWeight: 500,
-                      mb: 1,
-                      color: 'rgba(0, 0, 0, 0.6)',
-                    }}
-                  >
-                    Funds Allocated
-                  </Typography>
-                  <Typography
-                    variant="h4"
-                    sx={{
-                      fontSize: '32px',
-                      fontWeight: 600,
-                      color: 'rgba(0, 0, 0, 0.87)',
-                    }}
-                  >
-                    {clientResults?.fundsAllocated || ''}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          )}
           <Grid
             size={{
-              xs: 7,
-              md: 7,
+              xs: 6,
+              sm: 3,
+              md: 2,
             }}
             sx={{ background: 'transparent' }}
           >
@@ -140,23 +101,123 @@ const AdvisorDashboardPage = () => {
                   variant="body1"
                   sx={{
                     fontSize: '14px',
-                    color: 'rgba(0, 0, 0, 0.6)',
                     fontWeight: 500,
+                    mb: 1,
+                    color: 'rgba(0, 0, 0, 0.6)',
                   }}
                 >
-                  Resource Center
+                  Clients
                 </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontSize: '32px',
+                    fontWeight: 600,
+                    color: 'rgba(0, 0, 0, 0.87)',
+                  }}
+                >
+                  {clientsText}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid
+            size={{
+              xs: 6,
+              sm: 4,
+              md: 3,
+            }}
+            sx={{ background: 'transparent' }}
+          >
+            <Card sx={{ borderRadius: '8px' }}>
+              <CardContent>
                 <Typography
                   variant="body1"
                   sx={{
-                    fontSize: '16px',
-                    color: 'rgba(29, 41, 57, 0.5)',
-                    fontWeight: 400,
+                    fontSize: '14px',
+                    fontWeight: 500,
+                    mb: 1,
+                    color: 'rgba(0, 0, 0, 0.6)',
                   }}
                 >
-                  Access articles, FAQs, template emails, <br />
-                  investment materials and more!
+                  Funds Allocated
                 </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontSize: '32px',
+                    fontWeight: 600,
+                    color: 'rgba(0, 0, 0, 0.87)',
+                  }}
+                >
+                  {fundsAllowedText}
+                </Typography>
+              </CardContent>
+            </Card>
+          </Grid>
+          <Grid
+            size={{
+              xs: 12,
+              sm: 5,
+              md: 7,
+            }}
+            sx={{ background: 'transparent' }}
+          >
+            <Card sx={{ borderRadius: '8px' }}>
+              <CardContent>
+                <Grid container>
+                  <Grid
+                    size={{ xs: 12 }}
+                    sx={{
+                      display: 'flex',
+                    }}
+                  >
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontSize: '14px',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                        fontWeight: 500,
+                      }}
+                    >
+                      Resource Center
+                    </Typography>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 6 }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontSize: '16px',
+                        color: 'rgba(29, 41, 57, 0.5)',
+                        fontWeight: 400,
+                      }}
+                    >
+                      Access articles, FAQs, template emails,
+                      <br />
+                      investment materials and more!
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    size={{ xs: 12, sm: 6 }}
+                    sx={{
+                      alignContent: 'flex-end',
+                      alignItems: 'flex-end',
+                      textAlign: 'right',
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      size="medium"
+                      onClick={onResourceCenterClick}
+                      sx={{
+                        border: '1px solid rgba(0, 0, 0, 0.12)',
+                        color: 'rgba(0, 0, 0, 0.6)',
+                      }}
+                    >
+                      Resource Center
+                    </Button>
+                  </Grid>
+                </Grid>
               </CardContent>
             </Card>
           </Grid>
@@ -182,8 +243,6 @@ const AdvisorDashboardPage = () => {
                 >
                   Clients
                 </Typography>
-
-                <Divider sx={{ mb: 3 }} />
 
                 <AdvisorClientsTable
                   loadRequest={isSignedIn}

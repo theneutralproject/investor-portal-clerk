@@ -7,6 +7,7 @@ import { promisify } from 'util';
 import { getErrorMessage } from '../utils.server';
 import { clerkClient } from '@clerk/nextjs/server';
 import prisma from '../prisma.server';
+import Logger from '../logger';
 
 const finishedAsync = promisify(finished);
 
@@ -56,9 +57,22 @@ export async function findOrCreateClerkUser(
     }
     const { invite, ...publicMetadata } = metadata || {};
     if (invite) {
-      await authClient.invitations.createInvitation({
-        emailAddress: email,
-      });
+      try {
+        await authClient.invitations.createInvitation({
+          emailAddress: email,
+        });
+      } catch (err) {
+        Logger.error(
+          `An error occured while trying to send invite to ${email}`,
+          null,
+          {
+            extra: {
+              error: err,
+              email,
+            },
+          }
+        );
+      }
     }
     const newClerkUser = await authClient.users.createUser({
       ...clerkData,
