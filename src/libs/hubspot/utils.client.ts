@@ -36,6 +36,9 @@ export enum ReferralSource {
   // Online Ads
   ONLINE_ADS = 'online_ads',
 
+  // Advisor Firm
+  ADVISOR_FIRM_EMPLOYEE = 'advisor_firm_employee',
+
   OTHER = 'other',
 }
 

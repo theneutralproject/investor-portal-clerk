@@ -275,7 +275,7 @@ describe('/api/advisors/employees', () => {
           firstName: 'New',
           lastName: 'User',
           phoneNumber: '5551234567',
-          referralSource: ReferralSource.ADVISOR_UPDATE,
+          referralSource: ReferralSource.ADVISOR_FIRM_EMPLOYEE,
           role: Role.ADVISOR,
         }),
         undefined,

@@ -93,7 +93,7 @@ export async function POST(request: NextRequest) {
         phoneNumber: cleanPhone,
         clerkId: clerkUser?.id,
         role: Role.ADVISOR,
-        referralSource: ReferralSource.ADVISOR_UPDATE,
+        referralSource: ReferralSource.ADVISOR_FIRM_EMPLOYEE,
       };
 
       const createdUser = await createUserInDbAndHubspot(
