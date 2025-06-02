@@ -183,8 +183,6 @@ const AdvisorDashboardPage = () => {
                   Clients
                 </Typography>
 
-                <Divider sx={{ mb: 3 }} />
-
                 <AdvisorClientsTable
                   loadRequest={isSignedIn}
                   router={router}
