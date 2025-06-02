@@ -9,7 +9,7 @@ import {
 } from '@/libs/utils.server';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { UserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { createUserInDb } from '@/libs/user/utils.server';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import { Prisma, Role } from '@prisma/client';
 import Logger from '@/libs/logger';
@@ -135,9 +135,8 @@ export async function POST(
         referralSource: ReferralSource.ADVISOR_FIRM_EMPLOYEE,
       };
 
-      const createdUser = await createUserInDbAndHubspot(
+      const createdUser = await createUserInDb(
         dbPayload,
-        undefined,
         tx as Prisma.TransactionClient
       );
 

@@ -331,3 +331,56 @@ export function sanitizeUser(user: User | UserWithAddress) {
     ssn: user.ssn ? `***-**-${user.ssn.slice(-4)}` : null,
   };
 }
+
+export async function createUserInDb(
+  data: UserCreateSchema,
+  tx?: PrismaClient | Prisma.TransactionClient
+): Promise<User> {
+  const db = tx ?? prisma;
+  const { address, ...userData } = data;
+  userData.email = userData.email.toLowerCase();
+
+  let userCreateData: Prisma.UserCreateInput = {
+    ...userData,
+    hubspotId: userData.hubspotId ?? '',
+  };
+
+  if (address) {
+    const userAddress = await db.address.create({ data: address });
+    const addressId = userAddress.id;
+    userCreateData = {
+      ...userCreateData,
+      hubspotId: 'N/A',
+      address: { connect: { id: addressId } },
+    };
+  }
+
+  Logger.log({ message: 'begin creating user in db', extra: userCreateData });
+
+  const dbUser = await db.user.create({
+    data: userCreateData,
+  });
+
+  const userOrg = await db.organization.create({
+    data: {
+      name: `${userData.firstName} ${userData.lastName}'s Organization`,
+      ownedBy: { connect: { id: dbUser.id } },
+      members: { create: { userId: dbUser.id, type: MembershipType.OWNER } },
+      isPrimary: true,
+    },
+  });
+
+  const updatedUser = await db.user.update({
+    where: { id: dbUser.id },
+    data: {
+      userOrgId: userOrg.id,
+    },
+  });
+
+  Logger.log({
+    message: 'done creating user with org in db',
+    extra: updatedUser,
+  });
+
+  return updatedUser;
+}

@@ -12,7 +12,7 @@ import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import { Prisma, Role } from '@prisma/client';
 import { UserCreateSchema } from '@/libs/user/schema';
 import { ReferralSource } from '@/libs/hubspot/utils.client';
-import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { createUserInDb } from '@/libs/user/utils.server';
 
 export async function GET(request: NextRequest) {
   const context = await getAdvisorContext(request);
@@ -96,9 +96,8 @@ export async function POST(request: NextRequest) {
         referralSource: ReferralSource.ADVISOR_FIRM_EMPLOYEE,
       };
 
-      const createdUser = await createUserInDbAndHubspot(
+      const createdUser = await createUserInDb(
         dbPayload,
-        undefined,
         tx as Prisma.TransactionClient
       );
 
