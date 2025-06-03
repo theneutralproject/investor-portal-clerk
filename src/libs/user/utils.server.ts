@@ -100,7 +100,7 @@ export async function createUserInDbAndHubspot(
 
   // If created by admin, tag HubSpot with custom source and omit sign up date
   if (isFromAdmin) {
-    hsUserData.properties.hs_analytics_source_data_1 = 'retool';
+    hsUserData.properties.hs_object_source_detail_1 = 'retool';
   } else {
     hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
   }
