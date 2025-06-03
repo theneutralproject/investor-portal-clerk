@@ -80,7 +80,8 @@ const getHsUserData = (
 export async function createUserInDbAndHubspot(
   data: UserCreateSchema,
   dealId?: number,
-  tx?: PrismaClient | Prisma.TransactionClient
+  tx?: PrismaClient | Prisma.TransactionClient,
+  isFromAdmin?: boolean
 ): Promise<User> {
   const db = tx ?? prisma;
   const { address, ...userData } = data;
@@ -97,12 +98,18 @@ export async function createUserInDbAndHubspot(
 
   const hsUserData = getHsUserData(userData, address);
 
+  // If created by admin, tag HubSpot with custom source and omit sign up date
+  if (isFromAdmin) {
+    hsUserData.properties.hs_analytics_source_data_1 = 'retool';
+  } else {
+    hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
+  }
+
   let hsContactId: string;
   if (userData.hubspotId) {
     // we know that the user already exists in hubspot. Just update the HS with the new user data
     hsUserData.hubspotId = userData.hubspotId;
     hsContactId = userData.hubspotId;
-    hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
     // update user in hubspot
     try {
       await updateHubspotContact(hsUserData);
@@ -193,6 +200,12 @@ export async function createUserInDbAndHubspot(
     extra: updatedUser,
   });
   return updatedUser;
+}
+
+export async function createUserInDbAndHubspotFromAdmin(
+  data: UserCreateSchema
+) {
+  return await createUserInDbAndHubspot(data, undefined, undefined, true);
 }
 
 async function updateUserInClerk(
