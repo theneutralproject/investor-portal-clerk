@@ -98,9 +98,14 @@ export async function createOrUpdateHubspotContact(
     Logger.log({
       message: `Contact with email ${hubspotContact.email} does not exist. Creating a new contact.`,
     });
-    const signupDate = formatDateForHubspot(new Date());
 
-    hubspotContact.properties.date_signed_up = signupDate;
+    if (!hubspotContact.properties.hs_analytics_source_data_1) {
+      // Only set signup date if not created via admin
+      hubspotContact.properties.date_signed_up = formatDateForHubspot(
+        new Date()
+      );
+    }
+
     hubspotContact.properties.email = hubspotContact.email;
     try {
       const hubspotCreateResponse =
