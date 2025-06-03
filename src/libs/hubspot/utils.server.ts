@@ -99,7 +99,7 @@ export async function createOrUpdateHubspotContact(
       message: `Contact with email ${hubspotContact.email} does not exist. Creating a new contact.`,
     });
 
-    if (!hubspotContact.properties.hs_object_source_detail_1) {
+    if (!hubspotContact.properties.created_in_retool_) {
       // Only set signup date if not created via admin
       hubspotContact.properties.date_signed_up = formatDateForHubspot(
         new Date()
