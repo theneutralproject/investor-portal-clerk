@@ -174,7 +174,7 @@ export default function Sidebar(props: ISidebarProps) {
             style={{
               cursor: 'pointer',
               background: 'transparent',
-              objectFit: 'none',
+              objectFit: 'contain',
             }}
           />
 
