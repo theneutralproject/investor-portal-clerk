@@ -267,7 +267,7 @@ export async function POST(request: NextRequest) {
     );
 
   try {
-    const newDeal = await createDealForUser(postData, ownerOrg.ownedBy);
+    const newDeal = await createDealForUser(postData, ownerOrg.ownedBy, true);
     return jsonResponse(newDeal);
   } catch (error) {
     return errorResponse('unable to create deal', 500, {

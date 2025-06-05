@@ -601,12 +601,14 @@ export async function updateHubspotDealProperties(
 export function initHubspotDealProps(
   project: Project,
   user: User,
-  dealData: DealCreateSchema
+  dealData: DealCreateSchema,
+  isFromAdmin?: boolean
 ) {
+  const dealTypeName = isFromAdmin ? 'R' : 'IP';
   const properties = [
     {
       name: 'dealname',
-      value: `IP | ${project.displayName} | ${user.firstName} ${user.lastName}`,
+      value: `${dealTypeName} | ${project.displayName} | ${user.firstName} ${user.lastName}`,
     },
     {
       name: 'investment_entity',
@@ -620,6 +622,10 @@ export function initHubspotDealProps(
     { name: 'transaction_id', value: dealData.transactionId! },
     { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
     { name: 'deal_status', value: dealData.status ?? DealStatus.ACTIVE },
+    {
+      name: 'origin_source',
+      value: isFromAdmin ? 'Retool' : 'Investor Portal',
+    },
   ];
   const hsDealStageString = getHsDealStageStrFromInt(
     dealData.dealStage ?? 1,
@@ -652,7 +658,8 @@ export function initHubspotDealProps(
 
 export function getHsDealPropsFromDeal(
   deal: DealUpdateSchema,
-  projectSlug: string
+  projectSlug: string,
+  isFromAdmin?: boolean
 ) {
   const {
     dealStage,
@@ -669,7 +676,7 @@ export function getHsDealPropsFromDeal(
 
   hsReturnObject.properties.push({
     name: 'origin_source',
-    value: 'Investor Portal',
+    value: isFromAdmin ? 'Retool' : 'Investor Portal',
   });
 
   if (transactionId)
