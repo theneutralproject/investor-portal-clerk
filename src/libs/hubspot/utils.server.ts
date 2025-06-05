@@ -676,7 +676,7 @@ export function getHsDealPropsFromDeal(
 
   hsReturnObject.properties.push({
     name: 'origin_source',
-    value: isFromAdmin ? 'retool' : 'Investor Portal',
+    value: isFromAdmin ? 'Retool' : 'Investor Portal',
   });
 
   if (transactionId)
