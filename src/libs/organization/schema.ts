@@ -23,6 +23,7 @@ export const zOrganizationCreateSchema = z.object({
   ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
   address: zAddressCreateSchema.nullish(),
   ownerId: z.number().int().nullish(), // used in admin route
+  advisorFirmId: z.number().int().optional(),
 });
 
 export type OrganizationCreateSchema = z.infer<
