@@ -8,6 +8,7 @@ import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import { DealStage } from '@/libs/deal/schema';
 import { AdvisorClientsResponse } from '@/libs/advisorFirm/schema';
 import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
+import { DealWithInvestmentStats } from '@/libs/types';
 
 /**
  * GET /api/advisors/clients
@@ -27,7 +28,7 @@ import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
  * @param {NextRequest} request - The incoming API request.
  * @returns {Promise<Response>} JSON response containing client summaries and pagination info.
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
   const context = await getAdvisorContext(request);
 
   if ('status' in context) return context;
@@ -102,7 +103,7 @@ export async function GET(request: NextRequest) {
         deals: {
           where: {
             dealStage: DealStage.CLOSED,
-            status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
+            status: DealStatus.ACTIVE,
           },
           include: {
             startDealConversion: true,
@@ -121,22 +122,51 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.organization.count({
-      where: {
-        advisorFirmId: advisorFirmEmployee.advisorFirmId,
-      },
+      where: whereClause,
     }),
   ]);
 
-  const clients = [];
+  const dealsByClient: Record<string, any> = orgs.reduce(
+    (acc, org) => {
+      const orgDeals = org.deals.filter(
+        deal => deal.investmentStats && deal.project
+      );
+      const clientId = org.ownedBy.id;
+      const clientName = [org.ownedBy.firstName, org.ownedBy.lastName].join(
+        ' '
+      );
 
-  for (const org of orgs) {
-    const deals = org.deals.filter(
-      deal => deal.investmentStats && deal.project
-    );
+      if (acc[clientId]) {
+        acc[clientId] = {
+          ...acc[clientId],
+          deals: [...(acc[clientId].deals || []), ...orgDeals],
+        };
+      } else {
+        acc[clientId] = {
+          client: {
+            id: clientId,
+            name: clientName,
+            email: org.ownedBy.email,
+          },
+          organization: {
+            id: org.id,
+            name: org.name,
+          },
+          deals: orgDeals,
+        };
+      }
 
-    const clientName = [org.ownedBy.firstName, org.ownedBy.lastName].join(' ');
+      return acc;
+    },
+    {} as Record<string, any>
+  );
 
+  const investments = [];
+
+  for (const clientId of Object.keys(dealsByClient)) {
+    const { deals, client, organization } = dealsByClient[clientId];
     const { tableStats } = await getPortfolioReturns(deals);
+
     const totalInvested =
       tableStats.debt.principalInvested + tableStats.equity.principalInvested;
     const earningsToDate =
@@ -146,26 +176,22 @@ export async function GET(request: NextRequest) {
     const totalProjectedReturn =
       tableStats.debt.projectedReturn + tableStats.equity.projectedReturn;
 
-    const dealTypes = [
-      ...new Set(
+    const dealTypes: DealFinancingType[] = Array.from(
+      new Set(
         deals
           .map(
-            deal => deal?.investmentStats?.financingType as DealFinancingType
+            (deal: DealWithInvestmentStats) =>
+              deal?.investmentStats?.financingType
           )
-          .filter(Boolean)
-      ),
-    ];
+          .filter((ft: DealFinancingType): ft is DealFinancingType =>
+            Boolean(ft)
+          )
+      )
+    );
 
-    clients.push({
-      client: {
-        id: org.ownedBy.id,
-        name: clientName,
-        email: org.ownedBy.email,
-      },
-      organization: {
-        id: org.id,
-        name: org.name,
-      },
+    investments.push({
+      client,
+      organization,
       totalInvested,
       numberOfInvestments: deals.length,
       dealTypes,
@@ -176,12 +202,12 @@ export async function GET(request: NextRequest) {
   }
 
   const response: AdvisorClientsResponse = {
-    clients,
+    clients: investments,
     pagination: {
       page,
       limit,
       total,
-      hasMore: skip + clients.length < total,
+      hasMore: skip + investments.length < total,
     },
   };
 

@@ -2,7 +2,7 @@ import { NextRequest } from 'next/server';
 import { DealStatus } from '@prisma/client';
 
 import prisma from '@/libs/prisma.server';
-import type { OrganizationWithDealsAndStats } from '@/libs/types';
+import type { AdvisorClientInvestment } from '@/libs/types';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealStage } from '@/libs/deal/schema';
 import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
@@ -76,6 +76,12 @@ export async function GET(
                       financingType: true,
                     },
                   },
+                  project: {
+                    select: {
+                      id: true,
+                      name: true,
+                    },
+                  },
                 },
               },
             },
@@ -84,8 +90,6 @@ export async function GET(
       },
     },
   });
-
-  const organizationDeals: OrganizationWithDealsAndStats[] = [];
 
   if (!userWithDeals?.organizationMember.length) {
     return errorResponse('Organization not found', 404, {
@@ -98,11 +102,15 @@ export async function GET(
     });
   }
 
+  const organizationDealObjects: Record<string, AdvisorClientInvestment> = {};
+
   for (const org of userWithDeals?.organizationMember) {
     const { deals } = org.organization;
-    if (deals.length) {
-      for (const deal of deals) {
-        organizationDeals.push({
+    if (!deals.length) continue; // If not deal, no need to add
+
+    for (const deal of deals) {
+      if (!organizationDealObjects[deal.id]) {
+        organizationDealObjects[deal.id] = {
           organizationId: org.organization.id,
           organizationName: org.organization.name,
           userId: userWithDeals.id,
@@ -114,10 +122,15 @@ export async function GET(
           amount: deal.investmentStats?.amount ?? null,
           unitType: deal.investmentStats?.unitType ?? null,
           financingType: deal.investmentStats?.financingType ?? null,
-        });
+          ownershipType: org.organization.ownershipType,
+          projectName: deal.project.name,
+        };
       }
     }
   }
+  const organizationDeals: AdvisorClientInvestment[] = Object.values(
+    organizationDealObjects
+  );
 
   if (!organizationDeals || !organizationDeals.length) {
     return errorResponse('Organization deals not found', 404, {

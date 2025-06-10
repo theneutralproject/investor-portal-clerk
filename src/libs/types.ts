@@ -19,6 +19,7 @@ import {
   DocusignEvent,
   DealConversion,
   AdvisorFirmEmployee,
+  DealOwnershipType,
 } from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
@@ -238,8 +239,13 @@ export interface OrganizationWithDealsAndStats {
   financingType: string | null;
 }
 
+export type AdvisorClientInvestment = OrganizationWithDealsAndStats & {
+  ownershipType?: DealOwnershipType;
+  projectName: string;
+};
+
 export interface UseAdvisorClientInvestmentsResponse {
-  deals: OrganizationWithDealsAndStats[];
+  deals: AdvisorClientInvestment[];
 }
 
 export type AdvisorEmployeeAndUser = AdvisorFirmEmployee & { user: User };

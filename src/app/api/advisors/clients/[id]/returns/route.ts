@@ -100,7 +100,10 @@ export async function GET(
   if (!user) {
     return errorResponse('User not found in database', 404, { request });
   }
-  const deals: DealWithInvestmentStatsAndProjectWithPics[] = [];
+  const dealsObjects: Record<
+    string,
+    DealWithInvestmentStatsAndProjectWithPics
+  > = {};
   // iterate through user organizations and get deals
   let equityFileLastUpdated: Date | null = null;
   for (const member of user.organizationMember) {
@@ -120,11 +123,13 @@ export async function GET(
           `Deal ${deal.id} has no investment stats and cannot be shown in user dashboard!`
         );
       }
-      if (deal.investmentStats && deal.project) {
-        deals.push(deal);
+      if (deal.investmentStats && deal.project && !dealsObjects[deal.id]) {
+        dealsObjects[deal.id] = deal;
       }
     }
   }
+  const deals = Object.values(dealsObjects);
+
   try {
     const portfolioReturns = await getPortfolioReturns(deals);
     return jsonResponse({
