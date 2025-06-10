@@ -91,8 +91,6 @@ export async function GET(
     },
   });
 
-  const organizationDeals: AdvisorClientInvestment[] = [];
-
   if (!userWithDeals?.organizationMember.length) {
     return errorResponse('Organization not found', 404, {
       request,
@@ -104,11 +102,15 @@ export async function GET(
     });
   }
 
+  const organizationDealObjects: Record<string, AdvisorClientInvestment> = {};
+
   for (const org of userWithDeals?.organizationMember) {
     const { deals } = org.organization;
-    if (deals.length) {
-      for (const deal of deals) {
-        organizationDeals.push({
+    if (!deals.length) continue; // If not deal, no need to add
+
+    for (const deal of deals) {
+      if (!organizationDealObjects[deal.id]) {
+        organizationDealObjects[deal.id] = {
           organizationId: org.organization.id,
           organizationName: org.organization.name,
           userId: userWithDeals.id,
@@ -122,10 +124,13 @@ export async function GET(
           financingType: deal.investmentStats?.financingType ?? null,
           ownershipType: org.organization.ownershipType,
           projectName: deal.project.name,
-        });
+        };
       }
     }
   }
+  const organizationDeals: AdvisorClientInvestment[] = Object.values(
+    organizationDealObjects
+  );
 
   if (!organizationDeals || !organizationDeals.length) {
     return errorResponse('Organization deals not found', 404, {

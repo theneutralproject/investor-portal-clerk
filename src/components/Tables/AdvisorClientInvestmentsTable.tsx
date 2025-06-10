@@ -70,7 +70,7 @@ export default function AdvisorClientInvestmentsTable({
           accessorKey: 'ownershipType',
           id: 'ownershipType',
           grow: true,
-          size: 150,
+          size: 110,
           Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) =>
             cell.getValue() ? capitalize(cell.getValue() as string) : '-',
         },

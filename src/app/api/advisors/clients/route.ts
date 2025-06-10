@@ -27,7 +27,7 @@ import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
  * @param {NextRequest} request - The incoming API request.
  * @returns {Promise<Response>} JSON response containing client summaries and pagination info.
  */
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<Response> {
   const context = await getAdvisorContext(request);
 
   if ('status' in context) return context;
@@ -102,7 +102,7 @@ export async function GET(request: NextRequest) {
         deals: {
           where: {
             dealStage: DealStage.CLOSED,
-            status: DealStatus.ACTIVE, //Ignore Converted, Deleted and Future Conversion deals
+            status: DealStatus.ACTIVE,
           },
           include: {
             startDealConversion: true,
@@ -135,8 +135,8 @@ export async function GET(request: NextRequest) {
     );
 
     const clientName = [org.ownedBy.firstName, org.ownedBy.lastName].join(' ');
-
     const { tableStats } = await getPortfolioReturns(deals);
+
     const totalInvested =
       tableStats.debt.principalInvested + tableStats.equity.principalInvested;
     const earningsToDate =
