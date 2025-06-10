@@ -225,6 +225,10 @@ describe('GET /api/advisors/clients/[id]/investments', () => {
         unitType: 'SHARE',
         financingType: 'EQUITY',
       },
+      project: {
+        id: 124,
+        name: 'Bakers Place',
+      },
     };
     jest.mocked(getAuth).mockReturnValue({
       userId: clerkId,
@@ -247,6 +251,7 @@ describe('GET /api/advisors/clients/[id]/investments', () => {
               organization: {
                 id: 1,
                 name: 'Org A',
+                ownershipType: 'INDIVIDUAL',
                 deals: [deal],
               },
             },
@@ -273,6 +278,8 @@ describe('GET /api/advisors/clients/[id]/investments', () => {
             amount: 10000,
             unitType: 'SHARE',
             financingType: 'EQUITY',
+            ownershipType: 'INDIVIDUAL',
+            projectName: 'Bakers Place',
           },
         ],
       })

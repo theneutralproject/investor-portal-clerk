@@ -1,13 +1,15 @@
 'use client';
 
+import { useState, useMemo, useEffect } from 'react';
 import {
   MaterialReactTable,
   MRT_Cell,
   type MRT_ColumnDef,
 } from 'material-react-table';
 import { Box } from '@mui/material';
-import { useState, useMemo, useEffect } from 'react';
-import { OrganizationWithDealsAndStats } from '@/libs/types';
+import { capitalize } from 'lodash';
+
+import { AdvisorClientInvestment } from '@/libs/types';
 import { useAdvisorClientInvestments } from '@/app/hooks/useAdvisorClientInvestments';
 import { DealFinancingType } from '@prisma/client';
 
@@ -16,9 +18,11 @@ type ColumnId =
   | 'organizationName'
   | 'amount'
   | 'financingType'
-  | 'closingDate';
+  | 'closingDate'
+  | 'projectName'
+  | 'ownershipType';
 
-type FileRow = Pick<OrganizationWithDealsAndStats, ColumnId>;
+type FileRow = Pick<AdvisorClientInvestment, ColumnId>;
 
 export default function AdvisorClientInvestmentsTable({
   loadRequest,
@@ -34,7 +38,7 @@ export default function AdvisorClientInvestmentsTable({
     clientId
   );
 
-  const [deals, setDeals] = useState<OrganizationWithDealsAndStats[]>(
+  const [deals, setDeals] = useState<AdvisorClientInvestment[]>(
     data?.deals || []
   );
 
@@ -52,7 +56,23 @@ export default function AdvisorClientInvestmentsTable({
           accessorKey: 'organizationName',
           id: 'organizationName',
           grow: true,
-          size: 300,
+          size: 270,
+        },
+        {
+          header: 'Project',
+          accessorKey: 'projectName',
+          id: 'projectName',
+          grow: true,
+          size: 110,
+        },
+        {
+          header: 'Entity Type',
+          accessorKey: 'ownershipType',
+          id: 'ownershipType',
+          grow: true,
+          size: 150,
+          Cell: ({ cell }: { cell: MRT_Cell<FileRow> }) =>
+            cell.getValue() ? capitalize(cell.getValue() as string) : '-',
         },
         {
           header: 'Amount',
