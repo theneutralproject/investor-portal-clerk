@@ -15,6 +15,7 @@ import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
 import { useAdvisorClients } from '@/app/hooks/useAdvisorClients';
 import { AdvisorClientsResponse } from '@/libs/types';
 import { isEqual } from 'lodash';
+import { DealFinancingType } from '@prisma/client';
 
 export default function AdvisorClientsTable({
   loadRequest,
@@ -96,40 +97,35 @@ export default function AdvisorClientsTable({
         accessorKey: 'dealTypes',
         maxSize: 156,
         Cell: ({ cell }) => {
-          const dealTypes = cell.getValue() as string[];
-          const hasDebtDeals = dealTypes.some(type => type === 'debt');
-          const hasEquityDeals = dealTypes.some(type => type !== 'debt');
+          const financingType = cell.getValue();
+          const isArray = Array.isArray(financingType);
+          if (
+            (isArray && !financingType.length) ||
+            !financingType ||
+            financingType === ''
+          ) {
+            return '';
+          }
+
+          const isEquity = isArray
+            ? financingType.some(type => type === DealFinancingType.equity)
+            : financingType === DealFinancingType.equity;
+          const dealType = isEquity ? 'equity' : 'debt';
+          const dealText = dealType.toUpperCase();
+          const dealColor = isEquity ? '#2e7d32' : '#1976d2';
           return (
-            <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-              {hasDebtDeals && (
-                <span
-                  key={'debt'}
-                  style={{
-                    backgroundColor: '#1976d2',
-                    color: '#fff',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                  }}
-                >
-                  DEBT
-                </span>
-              )}
-              {hasEquityDeals && (
-                <span
-                  key={'equity'}
-                  style={{
-                    backgroundColor: '#2e7d32',
-                    color: '#fff',
-                    padding: '2px 6px',
-                    borderRadius: '4px',
-                    fontSize: '0.75rem',
-                  }}
-                >
-                  EQUITY
-                </span>
-              )}
-            </div>
+            <span
+              key={dealType}
+              style={{
+                backgroundColor: dealColor,
+                color: '#fff',
+                padding: '2px 6px',
+                borderRadius: '4px',
+                fontSize: '0.75rem',
+              }}
+            >
+              {dealText}
+            </span>
           );
         },
       },
