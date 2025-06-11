@@ -39,7 +39,8 @@ import { createInvestmentCompletedActivityItem } from '../activityFeedItem/utils
  */
 export async function createDealForUser(
   dealData: DealCreateSchema,
-  dealOwner: User
+  dealOwner: User,
+  isFromAdmin?: boolean
 ) {
   const project = await prisma.project.findUnique({
     where: { id: dealData.projectId },
@@ -61,7 +62,12 @@ export async function createDealForUser(
 
   if (!dealData.hubspotId) {
     // create deal in hubspot
-    const hsDealInput = initHubspotDealProps(project, dealOwner, dealData);
+    const hsDealInput = initHubspotDealProps(
+      project,
+      dealOwner,
+      dealData,
+      isFromAdmin
+    );
     if (!hsDealInput) {
       throw new Error(
         'Deal cannot be created. Project not yet supported in Hubspot'

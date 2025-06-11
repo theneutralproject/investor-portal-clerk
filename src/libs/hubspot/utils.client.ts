@@ -21,6 +21,7 @@ export enum ReferralSource {
   NEWSLETTER = 'newsletter',
   INSTAGRAM = 'instagram',
   LINKEDIN = 'linkedin',
+  REDDIT = 'reddit',
 
   // News / Media
   CRE_DAILY = 'cre_daily',
@@ -34,6 +35,9 @@ export enum ReferralSource {
 
   // Online Ads
   ONLINE_ADS = 'online_ads',
+
+  // Advisor Firm
+  ADVISOR_FIRM_EMPLOYEE = 'advisor_firm_employee',
 
   OTHER = 'other',
 }
@@ -80,6 +84,11 @@ export const REFERRAL_SOURCES: ReferralSourceItem[] = [
   {
     name: 'LinkedIn',
     value: ReferralSource.LINKEDIN,
+    category: ReferralCategory.COMPANY_CHANNELS,
+  },
+  {
+    name: 'Reddit',
+    value: ReferralSource.REDDIT,
     category: ReferralCategory.COMPANY_CHANNELS,
   },
 

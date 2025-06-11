@@ -6,8 +6,10 @@ import {
   AdvisorFirmEmployee,
   DealFinancingType,
   Organization,
+  User,
 } from '@prisma/client';
 import { PaginatedResponse } from '../types';
+import { errorResponse } from '../utils.server';
 
 export const zAdvisorFirmCreateSchema = z.object({
   name: z.string().min(1),
@@ -15,6 +17,16 @@ export const zAdvisorFirmCreateSchema = z.object({
 });
 
 export type AdvisorFirmCreateSchema = z.infer<typeof zAdvisorFirmCreateSchema>;
+
+export const zAdvisorFirmUpdateSchema = z.object({
+  name: z.string().min(1, 'Company name is required').optional(),
+  file: z
+    .custom<File>()
+    .refine(file => file instanceof File, { message: 'Invalid file type' })
+    .optional(),
+});
+
+export type AdvisorFirmUpdateSchema = z.infer<typeof zAdvisorFirmUpdateSchema>;
 
 export const zAdvisorEmployeeCreateSchema = z.object({
   role: z.nativeEnum(AdvisorEmployeeRole),
@@ -81,3 +93,11 @@ export type AdvisorFirmsResponse = PaginatedResponse<
     clientOrganizations: Organization[];
   }
 >;
+
+export type AdvisorContext =
+  | {
+      dbUser: User;
+      advisorFirmEmployee: AdvisorFirmEmployee & { advisorFirm: AdvisorFirm };
+      advisorFirm: AdvisorFirm;
+    }
+  | ReturnType<typeof errorResponse>;

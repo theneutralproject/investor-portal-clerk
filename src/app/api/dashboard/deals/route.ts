@@ -3,7 +3,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
-import { DealStatus } from '@prisma/client';
+import { DealStatus, Role } from '@prisma/client';
 import { DealStage } from '@/libs/deal/schema';
 
 // get deals by logged in user
@@ -23,6 +23,11 @@ export async function GET(request: NextRequest) {
       extra: { method: 'prisma.user.findUnique' },
     });
   }
+
+  if (dbUser.role === Role.ADVISOR) {
+    return jsonResponse([]);
+  }
+
   try {
     // Get all organizations where user is a member
     const userOrgs = await prisma.organization.findMany({

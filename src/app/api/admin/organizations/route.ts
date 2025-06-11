@@ -58,6 +58,22 @@ export async function POST(request: NextRequest) {
     postData.name = `${owner.firstName} ${owner.lastName}'s ${startCase(postData.ownershipType.toLowerCase())} Organization`;
   }
 
+  if (postData.advisorFirmId) {
+    const advisorFirm = await prisma.advisorFirm.findUnique({
+      where: {
+        id: postData.advisorFirmId,
+      },
+    });
+
+    if (!advisorFirm) {
+      return errorResponse(
+        `unable to find advisor firm with id ${postData.advisorFirmId}`,
+        404,
+        { request }
+      );
+    }
+  }
+
   const data: Prisma.OrganizationUncheckedCreateInput = {
     ownerId: postData.ownerId,
     name: postData.name,
@@ -69,7 +85,9 @@ export async function POST(request: NextRequest) {
         userId: postData.ownerId,
       },
     },
+    advisorFirmId: postData.advisorFirmId || null,
   };
+
   if (postData.tin) {
     const presanitizedTIN = postData.tin.replace(/\D/g, '');
     if (presanitizedTIN.length !== 9) {

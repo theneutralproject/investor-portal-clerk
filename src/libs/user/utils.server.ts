@@ -80,7 +80,8 @@ const getHsUserData = (
 export async function createUserInDbAndHubspot(
   data: UserCreateSchema,
   dealId?: number,
-  tx?: PrismaClient | Prisma.TransactionClient
+  tx?: PrismaClient | Prisma.TransactionClient,
+  isFromAdmin?: boolean
 ): Promise<User> {
   const db = tx ?? prisma;
   const { address, ...userData } = data;
@@ -97,12 +98,18 @@ export async function createUserInDbAndHubspot(
 
   const hsUserData = getHsUserData(userData, address);
 
+  // If created by admin, tag HubSpot with custom source and omit sign up date
+  if (isFromAdmin) {
+    hsUserData.properties.created_in_retool_ = 'true';
+  } else {
+    hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
+  }
+
   let hsContactId: string;
   if (userData.hubspotId) {
     // we know that the user already exists in hubspot. Just update the HS with the new user data
     hsUserData.hubspotId = userData.hubspotId;
     hsContactId = userData.hubspotId;
-    hsUserData.properties.date_signed_up = formatDateForHubspot(new Date());
     // update user in hubspot
     try {
       await updateHubspotContact(hsUserData);
@@ -193,6 +200,12 @@ export async function createUserInDbAndHubspot(
     extra: updatedUser,
   });
   return updatedUser;
+}
+
+export async function createUserInDbAndHubspotFromAdmin(
+  data: UserCreateSchema
+) {
+  return await createUserInDbAndHubspot(data, undefined, undefined, true);
 }
 
 async function updateUserInClerk(
@@ -330,4 +343,57 @@ export function sanitizeUser(user: User | UserWithAddress) {
     ...user,
     ssn: user.ssn ? `***-**-${user.ssn.slice(-4)}` : null,
   };
+}
+
+export async function createUserInDb(
+  data: UserCreateSchema,
+  tx?: PrismaClient | Prisma.TransactionClient
+): Promise<User> {
+  const db = tx ?? prisma;
+  const { address, ...userData } = data;
+  userData.email = userData.email.toLowerCase();
+
+  let userCreateData: Prisma.UserCreateInput = {
+    ...userData,
+    hubspotId: userData.hubspotId ?? '',
+  };
+
+  if (address) {
+    const userAddress = await db.address.create({ data: address });
+    const addressId = userAddress.id;
+    userCreateData = {
+      ...userCreateData,
+      hubspotId: 'N/A',
+      address: { connect: { id: addressId } },
+    };
+  }
+
+  Logger.log({ message: 'begin creating user in db', extra: userCreateData });
+
+  const dbUser = await db.user.create({
+    data: userCreateData,
+  });
+
+  const userOrg = await db.organization.create({
+    data: {
+      name: `${userData.firstName} ${userData.lastName}'s Organization`,
+      ownedBy: { connect: { id: dbUser.id } },
+      members: { create: { userId: dbUser.id, type: MembershipType.OWNER } },
+      isPrimary: true,
+    },
+  });
+
+  const updatedUser = await db.user.update({
+    where: { id: dbUser.id },
+    data: {
+      userOrgId: userOrg.id,
+    },
+  });
+
+  Logger.log({
+    message: 'done creating user with org in db',
+    extra: updatedUser,
+  });
+
+  return updatedUser;
 }

@@ -1,23 +1,15 @@
 'use client';
 
 import { Box, Card, CardContent, Divider, Typography } from '@mui/material';
-import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
 import Grid from '@mui/material/Grid2';
-import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { useUser } from '@clerk/nextjs';
+import AdvisorDocumentsTable from '@/components/Tables/AdvisorDocumentsTable';
 
 const AdvisorDocumentsPage = () => {
-  const { user, isSignedIn, isLoaded } = useUser();
+  const { isSignedIn } = useUser();
 
-  if (!isLoaded) return <DashboardSkeleton />;
-
-  const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
   return (
     <Box>
-      <DashboardPageBanner
-        background="/AdvisorDashboardHeader.jpeg"
-        headline={headline}
-      />
       <Grid
         container
         spacing={2}
@@ -45,6 +37,7 @@ const AdvisorDocumentsPage = () => {
                   Documents
                 </Typography>
 
+                <AdvisorDocumentsTable loadRequest={isSignedIn} />
                 <Divider sx={{ mb: 3 }} />
               </CardContent>
             </Card>

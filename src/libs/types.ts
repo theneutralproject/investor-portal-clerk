@@ -18,6 +18,8 @@ import {
   type ProjectPaymentInfo,
   DocusignEvent,
   DealConversion,
+  AdvisorFirmEmployee,
+  DealOwnershipType,
 } from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
@@ -181,3 +183,69 @@ interface Pagination {
 export interface PaginatedResponse<T> {
   [x: string]: Array<T> | Pagination;
 }
+
+export interface AdvisorClient {
+  client: {
+    id: number;
+    name: string;
+    email: string;
+  };
+  organization: {
+    id: number;
+    name: string;
+  };
+  totalInvested: number;
+  numberOfInvestments: number;
+  dealTypes: string[];
+  earningsToDate: number;
+  projectedEarnings: number;
+  totalProjectedReturn: number;
+}
+
+export interface AdvisorClientsResponse {
+  clients: AdvisorClient[];
+  pagination: Pagination;
+}
+
+export type AdvisorDocument = {
+  id: number;
+  name: string;
+  type: string;
+  projectName: string;
+  dealId: number;
+  projectId: number;
+  clientName: string;
+  dateCreated: string;
+  downloadUrl: string;
+};
+
+export interface UseAdvisorDocumentsResponse {
+  documents: AdvisorDocument[];
+  clients: string[];
+  types: string[];
+}
+
+export interface OrganizationWithDealsAndStats {
+  organizationId: number;
+  organizationName: string;
+  userId: number | null;
+  clerkId: string | null;
+  dealId: number | null;
+  closingDate: Date | null;
+  status: string | null;
+  investmentStatsId: number | null;
+  amount: number | null;
+  unitType: string | null;
+  financingType: string | null;
+}
+
+export type AdvisorClientInvestment = OrganizationWithDealsAndStats & {
+  ownershipType?: DealOwnershipType;
+  projectName: string;
+};
+
+export interface UseAdvisorClientInvestmentsResponse {
+  deals: AdvisorClientInvestment[];
+}
+
+export type AdvisorEmployeeAndUser = AdvisorFirmEmployee & { user: User };

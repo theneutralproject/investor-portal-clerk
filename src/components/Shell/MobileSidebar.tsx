@@ -34,6 +34,7 @@ interface IMobileSidebarProps {
     };
     dataTestId?: string;
   }[];
+  logoURL?: string | null;
 }
 
 const MobileSidebar = (props: IMobileSidebarProps) => {
@@ -102,6 +103,9 @@ const MobileSidebar = (props: IMobileSidebarProps) => {
   if (!isMobile) {
     return null;
   }
+  const imageSize = !!props.logoURL
+    ? { width: 100, height: 51 }
+    : { width: 90, height: 21 };
 
   return (
     <div>
@@ -129,10 +133,14 @@ const MobileSidebar = (props: IMobileSidebarProps) => {
             style={{ flexGrow: 1, display: 'flex', justifyContent: 'center' }}
           >
             <Image
-              width="90"
-              height="21"
-              src="/Neutral_White_Medium.png"
+              {...imageSize}
+              src={props.logoURL || '/Neutral_White_Medium.png'}
               alt={''}
+              style={{
+                cursor: 'pointer',
+                background: 'transparent',
+                objectFit: props.logoURL ? 'cover' : 'unset',
+              }}
             />
           </div>
         </Toolbar>

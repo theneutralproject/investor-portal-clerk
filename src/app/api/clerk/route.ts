@@ -43,10 +43,13 @@ export async function POST(request: NextRequest): Promise<Response> {
         },
       });
     }
-    return new Response(JSON.stringify({ data: 'User exists' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ data: 'User exists', role: dbUser.role }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   } else {
     Logger.log({
       message: `Creating new user with Clerk ID: ${userId}`,
@@ -114,6 +117,7 @@ export async function POST(request: NextRequest): Promise<Response> {
           clerkId: user.clerkId,
           referralSource: user.referralSource,
           hubspotId: user.hubspotId,
+          role: user.role,
         },
       }),
       {

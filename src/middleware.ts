@@ -1,8 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { Role } from '@prisma/client';
 import { NextRequest, NextResponse } from 'next/server';
 
 const publicRoutes = [
   '/terms',
+  '/privacy',
+  '/cybersecurity',
   '/support',
   '/learn',
   '/contact',
@@ -25,7 +28,12 @@ const ignoredRoutes = [
 const isIgnoredRoute = createRouteMatcher(ignoredRoutes);
 const isOnboardingRoute = createRouteMatcher(['/onboarding']);
 const isPublicRoute = createRouteMatcher(publicRoutes);
-const isAdvisorRoute = createRouteMatcher(['/advisor', '/advisor/(.*)']);
+const isAdvisorRoute = createRouteMatcher([
+  '/advisor',
+  '/advisor/(.*)',
+  '/api/advisors',
+  '/api/advisors/(.*)',
+]);
 const isUsersRoute = createRouteMatcher([
   '/api/users',
   '/api/users/(.*)',
@@ -61,13 +69,13 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
   const role = sessionClaims?.metadata?.role;
 
   // Only allow advisors into /advisor routes
-  if (isAdvisorRoute(request) && role !== 'ADVISOR') {
+  if (isAdvisorRoute(request) && role !== Role.ADVISOR) {
     return NextResponse.redirect(new URL('/dashboard', request.url));
   }
 
   // If user is an advisor and accessing non-advisor routes, redirect them
   if (
-    role === 'ADVISOR' &&
+    role === Role.ADVISOR &&
     !isAdvisorRoute(request) &&
     !isPublicRoute(request) &&
     !isUsersRoute(request)
@@ -77,7 +85,9 @@ export default clerkMiddleware(async (auth, request: NextRequest) => {
 
   // If the user is logged in and the route is protected, let them view.
   if (userId && request.nextUrl.pathname === '/login') {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    const properPath =
+      role === Role.ADVISOR ? '/advisor/dashboard' : '/dashboard';
+    return NextResponse.redirect(new URL(properPath, request.url));
   }
 
   // If the user is logged in and the route is onboarding, redirect to dashboard.

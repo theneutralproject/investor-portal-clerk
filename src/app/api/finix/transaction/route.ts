@@ -138,8 +138,15 @@ export async function POST(request: NextRequest) {
     }
 
     if (achTransferResponseData.state?.toUpperCase() === 'FAILED') {
+      Logger.warn('Finix transfer failed', request, {
+        extra: {
+          failureCode: achTransferResponseData.failure_code,
+          failureMessage: achTransferResponseData.failure_message,
+        },
+      });
+
       return errorResponse(
-        'The ACH transfer failed. Please contact your Neutral Representative',
+        `The ACH transfer failed due to: ${achTransferResponseData.failure_message || ''}. Please contact your Neutral Representative`,
         400,
         { request, extra: { response: achTransferResponseData } }
       );

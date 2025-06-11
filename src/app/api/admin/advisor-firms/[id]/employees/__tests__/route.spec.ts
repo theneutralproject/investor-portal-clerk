@@ -3,7 +3,7 @@ import { nextRequestMock } from '@/mocks/nextRequest.mock';
 import prisma from '@/libs/prisma.server';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
-import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { createUserInDb } from '@/libs/user/utils.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
 
@@ -16,7 +16,7 @@ jest.mock('@/libs/maintenance/utils.server', () => ({
 }));
 
 jest.mock('@/libs/user/utils.server', () => ({
-  createUserInDbAndHubspot: jest.fn(),
+  createUserInDb: jest.fn(),
 }));
 
 jest.mock('@/libs/prisma.server', () => ({
@@ -141,7 +141,7 @@ describe('POST /api/admin/advisor-firms/[advisorFirmId]/employees', () => {
       } as any);
     });
 
-    jest.mocked(createUserInDbAndHubspot).mockResolvedValue(createdUser);
+    jest.mocked(createUserInDb).mockResolvedValue(createdUser);
 
     const goodRequest = {
       ...mockRequest,

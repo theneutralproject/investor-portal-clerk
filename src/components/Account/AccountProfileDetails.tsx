@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect } from 'react';
-import { Box, Typography, Tooltip, Button } from '@mui/material';
+import { Box, Typography, Tooltip, Button, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import InfoIcon from '@mui/icons-material/Info';
 import SaveIcon from '@mui/icons-material/Save';
@@ -129,6 +129,38 @@ const AccountProfileDetails: React.FC<AccountProfileDetailsProps> = ({
             label="Last Name"
             required
           />
+        </Grid>
+        <Grid size={12}>
+          <Tooltip
+            slotProps={{
+              popper: {
+                sx: {
+                  '.MuiTooltip-tooltip': {
+                    backgroundColor: '#ffffff',
+                    boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.15)',
+                  },
+                },
+              },
+            }}
+            title={
+              <Typography variant="body2">
+                User email cannot be modified
+              </Typography>
+            }
+            placement="right"
+          >
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <TextField
+                label="Email"
+                type="email"
+                value={user?.email}
+                variant="standard"
+                disabled
+                fullWidth
+              />
+              <InfoIcon color="disabled" fontSize="small" />
+            </Box>
+          </Tooltip>
         </Grid>
 
         {/* Address Section */}

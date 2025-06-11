@@ -204,6 +204,15 @@ export async function POST(request: NextRequest) {
   try {
     const requestBody = (await request.json()) as DealCreateSchema;
     postData = requestBody;
+    Logger.log(
+      {
+        message: 'Creating deal',
+        extra: {
+          requestBody,
+        },
+      },
+      request
+    );
   } catch (parseError) {
     return errorResponse('Input data malformatted', 400, {
       request,
@@ -258,7 +267,7 @@ export async function POST(request: NextRequest) {
     );
 
   try {
-    const newDeal = await createDealForUser(postData, ownerOrg.ownedBy);
+    const newDeal = await createDealForUser(postData, ownerOrg.ownedBy, true);
     return jsonResponse(newDeal);
   } catch (error) {
     return errorResponse('unable to create deal', 500, {

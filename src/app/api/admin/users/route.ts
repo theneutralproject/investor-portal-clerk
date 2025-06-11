@@ -4,7 +4,7 @@ import Logger from '@/libs/logger';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
 import prisma from '@/libs/prisma.server';
 import { UserCreateSchema, zUserCreateSchema } from '@/libs/user/schema';
-import { createUserInDbAndHubspot } from '@/libs/user/utils.server';
+import { createUserInDbAndHubspotFromAdmin } from '@/libs/user/utils.server';
 import {
   errorResponse,
   getErrorMessage,
@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     );
     postData.clerkId = clerkUser?.id;
     postData.phoneNumber = cleanPhone;
-    const newUser = await createUserInDbAndHubspot(postData);
+    const newUser = await createUserInDbAndHubspotFromAdmin(postData);
     const userWithOrgs = await prisma.user.findUnique({
       where: { id: newUser.id },
       include: {

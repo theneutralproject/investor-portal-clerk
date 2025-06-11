@@ -1,7 +1,7 @@
 import '@/styles/globals.css';
-
 import Sidebar from '@/components/Shell/Sidebar';
 import { ADVISOR_ROUTES } from '@/constants/routes';
+import { AdvisorProvider } from '../context/AdvisorContext';
 
 export const metadata = {
   title: 'Advisor Portal',
@@ -15,8 +15,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <Sidebar routes={ADVISOR_ROUTES} isAdvisor>
-      {children}
-    </Sidebar>
+    <AdvisorProvider>
+      <Sidebar routes={ADVISOR_ROUTES} isAdvisor>
+        {children}
+      </Sidebar>
+    </AdvisorProvider>
   );
 }

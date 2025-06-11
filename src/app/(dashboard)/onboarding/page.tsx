@@ -6,6 +6,7 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import useRegisterUser from '@/app/hooks/useRegisterUser';
 import { useUser } from '@clerk/nextjs';
 import { useRedirect } from '@/app/context/RedirectContext';
+import { Role } from '@prisma/client';
 
 const OnboardingPage = () => {
   const router = useRouter();
@@ -20,10 +21,12 @@ const OnboardingPage = () => {
   }, []);
 
   useEffect(() => {
-    async function onboardedProcess() {
+    async function onboardedProcess(userData: any) {
       await user?.reload();
       if (redirectUrl) {
-        router.push(redirectUrl || '/dashboard');
+        const rolePath =
+          userData.role === Role.ADVISOR ? '/advisor/dashboard' : '/dashboard';
+        router.push(redirectUrl || rolePath);
       } else {
         // Do redirect to page but do not remove the path
         doRedirect({
@@ -33,7 +36,7 @@ const OnboardingPage = () => {
     }
 
     if (data) {
-      void onboardedProcess();
+      void onboardedProcess(data);
     }
   }, [router, data, user, redirectUrl, doRedirect]);
 

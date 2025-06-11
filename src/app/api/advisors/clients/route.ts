@@ -1,14 +1,14 @@
 'use server';
-import { getAuth } from '@clerk/nextjs/server';
 import { NextRequest } from 'next/server';
+import { DealFinancingType, DealStatus } from '@prisma/client';
+
 import prisma from '@/libs/prisma.server';
-import { errorResponse, jsonResponse } from '@/libs/utils.server';
-import Logger from '@/libs/logger';
-import { DealFinancingType, Role } from '@prisma/client';
-import {
-  AdvisorClientsResponse,
-  AdvisorClientSummary,
-} from '@/libs/advisorFirm/schema';
+import { jsonResponse } from '@/libs/utils.server';
+import { getPortfolioReturns } from '@/libs/returns/utils.server';
+import { DealStage } from '@/libs/deal/schema';
+import { AdvisorClientsResponse } from '@/libs/advisorFirm/schema';
+import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
+import { DealWithInvestmentStats } from '@/libs/types';
 
 /**
  * GET /api/advisors/clients
@@ -28,67 +28,70 @@ import {
  * @param {NextRequest} request - The incoming API request.
  * @returns {Promise<Response>} JSON response containing client summaries and pagination info.
  */
-export async function GET(request: NextRequest) {
-  const { userId: clerkId, sessionClaims } = getAuth(request);
+export async function GET(request: NextRequest): Promise<Response> {
+  const context = await getAdvisorContext(request);
 
-  if (!clerkId) {
-    Logger.warn('User not authenticated');
-    return errorResponse('User not authenticated', 401);
-  }
+  if ('status' in context) return context;
 
-  const userId = sessionClaims?.metadata?.investorPortalId;
-
-  if (!userId) {
-    return errorResponse('User not found', 404, {
-      request,
-      extra: { method: 'sessionClaims?.metadata?.investorPortalId' },
-    });
-  }
-
-  const dbUser = await prisma.user.findFirst({
-    where: { OR: [{ clerkId }, { id: userId }] },
-  });
-
-  if (!dbUser || dbUser.role !== Role.ADVISOR) {
-    return errorResponse('Unauthorized or not found', 403, {
-      request,
-      extra: { user: dbUser },
-    });
-  }
-
-  const advisorFirm = await prisma.advisorFirmEmployee.findFirst({
-    where: { userId: dbUser.id },
-    select: { advisorFirmId: true },
-  });
-
-  if (!advisorFirm) {
-    return errorResponse('User is not assigned to an advisor firm', 400, {
-      request,
-      extra: { user: dbUser },
-    });
-  }
-  Logger.log({
-    message: `Advisor ${dbUser.email} is loading advisor firm clients`,
-    extra: { advisorFirm },
-  });
+  const { advisorFirmEmployee } = context;
 
   // Pagination parameters
   const url = new URL(request.url);
+  const search = url.searchParams.get('search')?.toLowerCase() || '';
   const page = Number(url.searchParams.get('page') || '1');
   const limit = Number(url.searchParams.get('limit') || '20');
   const skip = (page - 1) * limit;
+  const normalizedSearch = search?.toLowerCase();
+  const financingTypeFilter = Object.values(DealFinancingType).find(
+    type => type.toLowerCase() === normalizedSearch
+  );
+
+  const whereClause = {
+    advisorFirmId: advisorFirmEmployee.advisorFirmId,
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' as const } },
+        {
+          ownedBy: {
+            firstName: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        {
+          ownedBy: {
+            lastName: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        {
+          ownedBy: {
+            email: { contains: search, mode: 'insensitive' as const },
+          },
+        },
+        ...(financingTypeFilter
+          ? [
+              {
+                deals: {
+                  some: {
+                    investmentStats: {
+                      is: {
+                        financingType: financingTypeFilter,
+                      },
+                    },
+                  },
+                },
+              },
+            ]
+          : []),
+      ],
+    }),
+  };
 
   // Get client orgs from advisor firm
   const [orgs, total] = await Promise.all([
     prisma.organization.findMany({
-      where: {
-        advisorFirmId: advisorFirm.advisorFirmId,
-      },
+      where: whereClause,
       skip,
       take: limit,
-      select: {
-        id: true,
-        name: true,
+      include: {
         ownedBy: {
           select: {
             id: true,
@@ -98,12 +101,20 @@ export async function GET(request: NextRequest) {
           },
         },
         deals: {
-          select: {
-            investmentStats: {
-              select: {
-                amount: true,
-                equityPreferredReturn: true,
-                financingType: true,
+          where: {
+            dealStage: DealStage.CLOSED,
+            status: DealStatus.ACTIVE,
+          },
+          include: {
+            startDealConversion: true,
+            endDealConversion: true,
+            investmentStats: true,
+            project: {
+              include: {
+                milestones: true,
+                pictures: true,
+                equityMilestoneFiles: true,
+                investmentStats: true,
               },
             },
           },
@@ -111,63 +122,92 @@ export async function GET(request: NextRequest) {
       },
     }),
     prisma.organization.count({
-      where: {
-        advisorFirmId: advisorFirm.advisorFirmId,
-      },
+      where: whereClause,
     }),
   ]);
 
-  const clients: AdvisorClientSummary[] = orgs.map(org => {
-    const deals = org.deals.map(d => d.investmentStats).filter(Boolean);
-    const clientName = [org.ownedBy.firstName, org.ownedBy.lastName].join(' ');
+  const dealsByClient: Record<string, any> = orgs.reduce(
+    (acc, org) => {
+      const orgDeals = org.deals.filter(
+        deal => deal.investmentStats && deal.project
+      );
+      const clientId = org.ownedBy.id;
+      const clientName = [org.ownedBy.firstName, org.ownedBy.lastName].join(
+        ' '
+      );
 
-    const totalInvested = deals.reduce(
-      (sum, stat) => sum + (stat?.amount ?? 0),
-      0
+      if (acc[clientId]) {
+        acc[clientId] = {
+          ...acc[clientId],
+          deals: [...(acc[clientId].deals || []), ...orgDeals],
+        };
+      } else {
+        acc[clientId] = {
+          client: {
+            id: clientId,
+            name: clientName,
+            email: org.ownedBy.email,
+          },
+          organization: {
+            id: org.id,
+            name: org.name,
+          },
+          deals: orgDeals,
+        };
+      }
+
+      return acc;
+    },
+    {} as Record<string, any>
+  );
+
+  const investments = [];
+
+  for (const clientId of Object.keys(dealsByClient)) {
+    const { deals, client, organization } = dealsByClient[clientId];
+    const { tableStats } = await getPortfolioReturns(deals);
+
+    const totalInvested =
+      tableStats.debt.principalInvested + tableStats.equity.principalInvested;
+    const earningsToDate =
+      tableStats.debt.earnedToDate + tableStats.equity.earnedToDate;
+    const projectedEarnings =
+      tableStats.debt.earningsProjected + tableStats.equity.earningsProjected;
+    const totalProjectedReturn =
+      tableStats.debt.projectedReturn + tableStats.equity.projectedReturn;
+
+    const dealTypes: DealFinancingType[] = Array.from(
+      new Set(
+        deals
+          .map(
+            (deal: DealWithInvestmentStats) =>
+              deal?.investmentStats?.financingType
+          )
+          .filter((ft: DealFinancingType): ft is DealFinancingType =>
+            Boolean(ft)
+          )
+      )
     );
-    const earningsToDate = deals.reduce(
-      (sum, stat) =>
-        sum + (stat?.amount ?? 0) * (stat?.equityPreferredReturn ?? 0),
-      0
-    );
-    const totalProjected = deals.reduce((sum, stat) => {
-      const amt = stat?.amount ?? 0;
-      const ret = stat?.equityPreferredReturn ?? 0;
-      return sum + amt + amt * ret;
-    }, 0);
 
-    const dealTypes = [
-      ...new Set(
-        deals.map(d => d?.financingType as DealFinancingType).filter(Boolean)
-      ),
-    ];
-
-    return {
-      client: {
-        id: org.ownedBy.id,
-        name: clientName,
-        email: org.ownedBy.email,
-      },
-      organization: {
-        id: org.id,
-        name: org.name,
-      },
+    investments.push({
+      client,
+      organization,
       totalInvested,
       numberOfInvestments: deals.length,
       dealTypes,
       earningsToDate,
-      projectedEarnings: totalProjected - totalInvested,
-      totalProjectedReturn: totalProjected,
-    };
-  });
+      projectedEarnings,
+      totalProjectedReturn,
+    });
+  }
 
   const response: AdvisorClientsResponse = {
-    clients,
+    clients: investments,
     pagination: {
       page,
       limit,
       total,
-      hasMore: skip + clients.length < total,
+      hasMore: skip + investments.length < total,
     },
   };
 

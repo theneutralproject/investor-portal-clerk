@@ -1,6 +1,8 @@
 // LearnPage.tsx
 'use client';
 
+import { useEffect } from 'react';
+import { Role } from '@prisma/client';
 import {
   Box,
   Card,
@@ -9,6 +11,8 @@ import {
   Typography,
   useMediaQuery,
 } from '@mui/material';
+import { useQuery } from '@tanstack/react-query';
+import axios from 'axios';
 import DashboardPageBanner from '@/components/Dashboard/DashboardPageBanner';
 import DashboardPortfolio from '@/components/Dashboard/DashboardPortfolio';
 import Grid from '@mui/material/Grid2';
@@ -24,11 +28,29 @@ import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { DealStage } from '@/libs/deal/schema';
 import RecentActivity from '@/components/Dashboard/RecentActivity';
+import { PortfolioReturnsResponse } from '@/libs/returns/schema';
+
 const DashboardPage = () => {
   const { loggedIn, user, projects, deals, isLoading } = useDashboard();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const { data } = useQuery<PortfolioReturnsResponse, Error>({
+    queryKey: ['dashboard', 'portfolio'],
+    queryFn: async () => {
+      const response = await axios.get<PortfolioReturnsResponse>(
+        '/api/dashboard/returns'
+      );
+      return response.data;
+    },
+    enabled: loggedIn,
+  });
 
-  if (isLoading) return <DashboardSkeleton />;
+  useEffect(() => {
+    if (user?.publicMetadata.role === Role.ADVISOR) {
+      window.location.href = '/advisor/dashboard';
+    }
+  }, [user]);
+
+  if (isLoading || !deals) return <DashboardSkeleton />;
 
   const headline = loggedIn
     ? `Welcome to Neutral, ${user?.firstName}`
@@ -68,8 +90,8 @@ const DashboardPage = () => {
 
                 <Divider sx={{ mb: 3 }} />
 
-                <DashboardPortfolio loggedIn={loggedIn} />
-                <DashboardDeals loggedIn={loggedIn} />
+                <DashboardPortfolio loggedIn={loggedIn} data={data} />
+                <DashboardDeals loggedIn={loggedIn} data={data} />
               </CardContent>
             </Card>
             <DashboardProjects projects={projects ?? []} />

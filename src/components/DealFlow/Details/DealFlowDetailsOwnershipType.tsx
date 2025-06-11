@@ -12,6 +12,12 @@ import DealFlowFooter from '@components/DealFlow/Shared/DealFlowFooter';
 import { useRouter } from 'next/navigation';
 import DealFlowTitle from '@components/DealFlow/Shared/DealFlowTitle';
 import { sendGTMEvent } from '@next/third-parties/google';
+
+// Remove Trust and IRA
+const dealOwnerShipValues = Object.values(DealOwnershipType).filter(
+  type => type !== DealOwnershipType.TRUST && type !== DealOwnershipType.IRA
+);
+
 const DealFlowDetailsOwnershipType: React.FC = () => {
   const { deal, updateDeal, createOrganization, project } = useDealFlow();
   const [ownershipType, setOwnershipType] = useState<DealOwnershipType>(
@@ -80,7 +86,7 @@ const DealFlowDetailsOwnershipType: React.FC = () => {
         value={ownershipType}
         onChange={handleOwnershipTypeChange}
       >
-        {Object.values(DealOwnershipType).map(type => (
+        {dealOwnerShipValues.map(type => (
           <FormControlLabel
             key={type}
             value={type}

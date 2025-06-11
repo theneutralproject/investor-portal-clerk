@@ -35,8 +35,15 @@ const hubspotClient = new Client({
   accessToken: process.env.HUBSPOT_ACCESS_TOKEN,
 });
 
-export function formatDateForHubspot(date: Date) {
-  return new Date(date.setUTCHours(0, 0, 0, 0)).getTime().toString();
+export function formatDateForHubspot(input: Date | string) {
+  const date = input instanceof Date ? input : new Date(input);
+
+  if (isNaN(date.getTime())) {
+    throw new Error('Invalid date input');
+  }
+
+  date.setUTCHours(0, 0, 0, 0);
+  return date.getTime().toString();
 }
 
 export async function createOrUpdateHubspotContact(
@@ -91,9 +98,14 @@ export async function createOrUpdateHubspotContact(
     Logger.log({
       message: `Contact with email ${hubspotContact.email} does not exist. Creating a new contact.`,
     });
-    const signupDate = formatDateForHubspot(new Date());
 
-    hubspotContact.properties.date_signed_up = signupDate;
+    if (!hubspotContact.properties.created_in_retool_) {
+      // Only set signup date if not created via admin
+      hubspotContact.properties.date_signed_up = formatDateForHubspot(
+        new Date()
+      );
+    }
+
     hubspotContact.properties.email = hubspotContact.email;
     try {
       const hubspotCreateResponse =
@@ -589,12 +601,14 @@ export async function updateHubspotDealProperties(
 export function initHubspotDealProps(
   project: Project,
   user: User,
-  dealData: DealCreateSchema
+  dealData: DealCreateSchema,
+  isFromAdmin?: boolean
 ) {
+  const dealTypeName = isFromAdmin ? 'R' : 'IP';
   const properties = [
     {
       name: 'dealname',
-      value: `IP | ${project.displayName} | ${user.firstName} ${user.lastName}`,
+      value: `${dealTypeName} | ${project.displayName} | ${user.firstName} ${user.lastName}`,
     },
     {
       name: 'investment_entity',
@@ -608,6 +622,10 @@ export function initHubspotDealProps(
     { name: 'transaction_id', value: dealData.transactionId! },
     { name: 'hubspot_owner_id', value: process.env.HUBSPOT_OWNER_ID },
     { name: 'deal_status', value: dealData.status ?? DealStatus.ACTIVE },
+    {
+      name: 'origin_source',
+      value: isFromAdmin ? 'Retool' : 'Investor Portal',
+    },
   ];
   const hsDealStageString = getHsDealStageStrFromInt(
     dealData.dealStage ?? 1,
@@ -640,7 +658,8 @@ export function initHubspotDealProps(
 
 export function getHsDealPropsFromDeal(
   deal: DealUpdateSchema,
-  projectSlug: string
+  projectSlug: string,
+  isFromAdmin?: boolean
 ) {
   const {
     dealStage,
@@ -657,7 +676,7 @@ export function getHsDealPropsFromDeal(
 
   hsReturnObject.properties.push({
     name: 'origin_source',
-    value: 'Investor Portal',
+    value: isFromAdmin ? 'Retool' : 'Investor Portal',
   });
 
   if (transactionId)

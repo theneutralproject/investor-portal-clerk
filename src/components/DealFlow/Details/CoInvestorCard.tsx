@@ -16,6 +16,7 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DeleteIcon from '@mui/icons-material/Delete';
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
+import WarningIcon from '@mui/icons-material/Warning';
 import { MembershipType, type User } from '@prisma/client';
 import type { MemberWithUser } from '@/libs/types';
 
@@ -64,6 +65,7 @@ interface CoInvestorCardProps {
   onExpand: (index: number) => void;
   deleteOrganizationMember?: (memberId: number) => void;
   organizationReadOnly: boolean;
+  onDirtyChange?: (index: number, isDirty: boolean) => void;
 }
 
 const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
@@ -76,9 +78,12 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
   onExpand,
   deleteOrganizationMember,
   organizationReadOnly,
+  onDirtyChange,
 }) => {
   // Track which fields have been touched
   const [touchedFields, setTouchedFields] = useState<Set<string>>(new Set());
+  // Track if the form is dirty (has unsaved changes)
+  const [isDirty, setIsDirty] = useState(false);
 
   // Validation functions
   const isEmailValid = (email: string | null | undefined) => {
@@ -105,7 +110,7 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
 
   // Check if all required fields are filled and valid
   const isFormValid = () => {
-    const { firstName, lastName, email } = coInvestor.user;
+    const { firstName, lastName, email, phoneNumber } = coInvestor.user;
     const { title } = coInvestor;
 
     return (
@@ -116,12 +121,17 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
       isEmailValid(email) &&
       isNameValid(firstName) &&
       isNameValid(lastName) &&
-      isTitleValid(title)
+      isTitleValid(title) &&
+      isPhoneValid(phoneNumber)
     );
   };
 
   const handleChange = (field: keyof User | 'title', value: string) => {
     setTouchedFields(prev => new Set(prev).add(field));
+    setIsDirty(true);
+    if (onDirtyChange) {
+      onDirtyChange(index, true);
+    }
     onChange(index, field, value);
   };
 
@@ -182,6 +192,11 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
           )}
         </Box>
         <Box display="flex" alignItems="center">
+          {isDirty && !expanded && (
+            <Tooltip title="Unsaved changes">
+              <WarningIcon color="warning" fontSize="small" sx={{ mr: 1 }} />
+            </Tooltip>
+          )}
           {showDelete && (
             <Tooltip title="Delete Member">
               <IconButton
@@ -311,14 +326,26 @@ const CoInvestorCard: React.FC<CoInvestorCardProps> = ({
         <CardActions sx={{ justifyContent: 'flex-end', mb: 1 }}>
           <Button
             variant="grayPill"
-            onClick={() => onCancel(index)}
+            onClick={() => {
+              onCancel(index);
+              setIsDirty(false);
+              if (onDirtyChange) {
+                onDirtyChange(index, false);
+              }
+            }}
             disabled={readOnly || isRegisteredUser}
           >
             Cancel
           </Button>
           <Button
             variant="blackPill"
-            onClick={() => onSave(index)}
+            onClick={() => {
+              onSave(index);
+              setIsDirty(false);
+              if (onDirtyChange) {
+                onDirtyChange(index, false);
+              }
+            }}
             disabled={readOnly || isRegisteredUser || !isFormValid()}
           >
             Save {investorType}
