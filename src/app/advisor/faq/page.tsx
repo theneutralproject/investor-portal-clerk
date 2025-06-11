@@ -1,15 +1,19 @@
 'use client';
+import { useState } from 'react';
 
 import { Box, Card, CardContent, Divider, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import { useUser } from '@clerk/nextjs';
+
 import { useWebFlowContent } from '@/app/hooks/useWebFlowContent';
 import NewsComponent from '@/components/Dashboard/DashboardNews';
 import FAQs from '@/components/Resources/FAQs';
 import ShortArticles from '@/components/Resources/ShortArticles';
 import QuickLinks from '@/components/Resources/QuickLinks';
 import ReferencePDFs from '@/components/Resources/ReferencePDFs';
+import { ResourceItem } from '@/libs/types';
+import Modal from '@/components/Shared/Modal';
 
 const ContentDivider = () => <Divider sx={{ mb: 2 }} />;
 
@@ -19,6 +23,17 @@ const AdvisorResourceCenter = () => {
     collection: 'resource',
     loadRequest: isSignedIn,
   });
+  const [open, setOpen] = useState(false);
+  const [shortArticle, setShortArticle] = useState<ResourceItem>();
+
+  const toggleModal = (isOpen: boolean) => () => {
+    setOpen(isOpen);
+  };
+
+  const handleArticleClick = (resource: ResourceItem) => {
+    setShortArticle(resource);
+    toggleModal(true)();
+  };
 
   if (!isLoaded || isLoading) return <DashboardSkeleton />;
   if (!data) return;
@@ -95,6 +110,7 @@ const AdvisorResourceCenter = () => {
                 <ShortArticles
                   resources={data['short-article']}
                   contentField="summary"
+                  onArticleClick={handleArticleClick}
                 />
               </CardContent>
             </Card>
@@ -147,6 +163,39 @@ const AdvisorResourceCenter = () => {
           </Box>
         </Grid>
       </Grid>
+
+      <Modal open={open} onClose={toggleModal(false)}>
+        <Box
+          key={shortArticle?.id}
+          sx={{
+            p: 4,
+            border: 'none',
+          }}
+        >
+          <Typography
+            variant="h4"
+            sx={{
+              fontSize: '1.25rem',
+              fontWeight: '500',
+              color: 'rgba(0, 0, 0, 0.87)',
+            }}
+            id={shortArticle?.fieldData?.slug || ''}
+          >
+            {shortArticle?.fieldData?.name || ''}
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              fontSize: '0.85rem',
+              fontWeight: '400',
+              color: 'rgba(0, 0, 0, 0.87)',
+            }}
+            dangerouslySetInnerHTML={{
+              __html: shortArticle?.fieldData?.content || '',
+            }}
+          ></Typography>
+        </Box>
+      </Modal>
     </Box>
   );
 };

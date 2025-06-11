@@ -53,8 +53,8 @@ const ReferencePDFs = ({ resources }: { resources: ResourceItem[] }) => {
             <Typography
               variant="body1"
               sx={{
-                fontSize: '16px',
-                fontWeight: '600',
+                fontSize: '14px',
+                fontWeight: '500',
                 color: 'rgba(0, 0, 0, 0.87)',
               }}
               id={pdf.fieldData.slug}

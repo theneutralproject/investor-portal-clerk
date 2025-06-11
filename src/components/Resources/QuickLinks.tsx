@@ -28,7 +28,7 @@ const QuickLinks = ({ resources }: { resources: ResourceItem[] }) => {
             <Typography
               sx={{
                 fontWeight: 500,
-                fontSize: '16px',
+                fontSize: '14px',
                 color: 'rgba(25, 118, 210, 1)',
                 textDecoration: 'underline',
               }}

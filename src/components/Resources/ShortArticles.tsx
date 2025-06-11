@@ -2,11 +2,17 @@ import Grid from '@mui/material/Grid2';
 
 import { renderResourceItem } from './helpers';
 import { IResourceCenterComponentProps } from './types';
+import { ResourceItem } from '@/libs/types';
+
+interface IShortArticleProps extends IResourceCenterComponentProps {
+  onArticleClick: (resource: ResourceItem) => void;
+}
 
 const ShortArticles = ({
   resources,
   contentField,
-}: IResourceCenterComponentProps) => {
+  onArticleClick,
+}: IShortArticleProps) => {
   if (!resources.length) return;
 
   return (
@@ -19,7 +25,9 @@ const ShortArticles = ({
         gap: 2,
       }}
     >
-      {resources.map(article => renderResourceItem(article, contentField))}
+      {resources.map(article =>
+        renderResourceItem(article, contentField, onArticleClick)
+      )}
     </Grid>
   );
 };
