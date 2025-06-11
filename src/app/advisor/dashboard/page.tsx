@@ -43,6 +43,7 @@ const AdvisorDashboardPage = () => {
   const onResourceCenterClick = () => {
     router.push('/advisor/faq');
   };
+
   const clientsText = useMemo(
     () =>
       clientResults ? (
@@ -52,6 +53,7 @@ const AdvisorDashboardPage = () => {
       ),
     [clientResults]
   );
+
   const fundsAllowedText = useMemo(
     () =>
       clientResults ? (

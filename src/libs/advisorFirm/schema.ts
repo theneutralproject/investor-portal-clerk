@@ -101,3 +101,13 @@ export type AdvisorContext =
       advisorFirm: AdvisorFirm;
     }
   | ReturnType<typeof errorResponse>;
+
+export const zAdvisorGetResourceSchema = z.object({
+  collectionId: z.string().min(1),
+  offset: z.number().min(0).optional(),
+  limit: z.number().min(1).optional(),
+});
+
+export type AdvisorGetResourceSchema = z.infer<
+  typeof zAdvisorGetResourceSchema
+>;
