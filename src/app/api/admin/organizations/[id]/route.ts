@@ -24,7 +24,6 @@ export async function PUT(request: NextRequest) {
   let orgId: number;
   try {
     const url = new URL(request.url);
-    console.log(url.pathname.split('/'));
     orgId = parseInt(url.pathname.split('/')[4] ?? '');
     if (!orgId || !isNumber(orgId)) {
       throw new Error('orgId is required in url');
@@ -73,6 +72,22 @@ export async function PUT(request: NextRequest) {
           return errorResponse(`TIN ${orgData.tin} must be 9 digits`, 400);
         }
         orgData.tin = presanitizedTIN;
+      }
+    }
+
+    if (orgData.advisorFirmId) {
+      const advisorFirm = await prisma.advisorFirm.findUnique({
+        where: {
+          id: orgData.advisorFirmId,
+        },
+      });
+
+      if (!advisorFirm) {
+        return errorResponse(
+          `unable to find advisor firm with id ${orgData.advisorFirmId}`,
+          404,
+          { request }
+        );
       }
     }
 

@@ -7,7 +7,7 @@ export function nextRequestMock(
   method: string = 'GET',
   pathname: string = '/api/test',
   cookies: Record<string, string> = {}
-): Partial<NextRequest> {
+): Partial<NextRequest> | any {
   const url = `http://localhost:3000${pathname}`;
 
   return {
