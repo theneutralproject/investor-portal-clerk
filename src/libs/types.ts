@@ -249,3 +249,42 @@ export interface UseAdvisorClientInvestmentsResponse {
 }
 
 export type AdvisorEmployeeAndUser = AdvisorFirmEmployee & { user: User };
+
+export type ResourceResponse = {
+  items: ResourceItem[];
+  pagination: {
+    limit: number;
+    offset: number;
+    total: number;
+  };
+};
+
+export type ResourceItem = {
+  id: string;
+  cmsLocaleId: string;
+  lastPublished: string;
+  lastUpdated: string;
+  createdOn: string;
+  isArchived: boolean;
+  isDraft: boolean;
+  fieldData: ResourceFieldData;
+};
+
+export type ResourceFieldData = {
+  featured: boolean;
+  name: string;
+  slug: string;
+  'resource-type-label': ResourceType;
+  'downloadable-file'?: {
+    fileId: string;
+    url: string;
+    alt: string | null;
+  };
+  'external-link'?: string;
+  summary?: string;
+  content?: string;
+};
+
+export type ResourceType = 'pdf' | 'faq' | 'quick-link' | 'short-article';
+
+export type WebFlowContent = Record<ResourceType, ResourceItem[]>;
