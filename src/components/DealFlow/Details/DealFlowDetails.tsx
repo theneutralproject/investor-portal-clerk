@@ -24,7 +24,6 @@ const DealFlowDetails: React.FC = () => {
     handleSubmit,
     setValue,
     formState: { isValid },
-    trigger,
   } = useDealFlowDetailsForm();
 
   useEffect(() => {
@@ -43,9 +42,8 @@ const DealFlowDetails: React.FC = () => {
       setValue('address.state', user.address?.state ?? '');
       setValue('address.zipcode', user.address?.zipcode ?? '');
       setValue('address.country', 'United States');
-      trigger();
     }
-  }, [user, setValue, trigger]);
+  }, [user, setValue]);
 
   const onSubmit = (data: DealFlowDetailsFormValues) => {
     try {
