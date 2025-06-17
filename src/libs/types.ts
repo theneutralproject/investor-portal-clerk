@@ -288,3 +288,10 @@ export type ResourceFieldData = {
 export type ResourceType = 'pdf' | 'faq' | 'quick-link' | 'short-article';
 
 export type WebFlowContent = Record<ResourceType, ResourceItem[]>;
+
+export interface AdvisorClientKPIsResponse {
+  totalInvested: number;
+  numberOfClients: number;
+  debtPrincipalInvested: number;
+  equityPrincipalInvested: number;
+}
