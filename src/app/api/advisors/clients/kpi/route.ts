@@ -3,8 +3,7 @@ import { NextRequest } from 'next/server';
 import { DealStatus } from '@prisma/client';
 
 import prisma from '@/libs/prisma.server';
-import { jsonResponse } from '@/libs/utils.server';
-import { getPortfolioReturns } from '@/libs/returns/utils.server';
+import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { DealStage } from '@/libs/deal/schema';
 import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
 
@@ -34,47 +33,39 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const { advisorFirmEmployee } = context;
 
-  // Pagination parameters
+  const kpis = await prisma.$queryRaw<
+    { number_of_clients: number; total_invested: number }[]
+  >`SELECT
+    CAST((
+      SELECT COUNT(*)
+      FROM "Organization" o
+      WHERE o."advisorFirmId" = ${advisorFirmEmployee.advisorFirmId}
+    ) AS INTEGER) AS number_of_clients,
+    CAST((
+      SELECT COALESCE(SUM(dis.amount), 0)
+      FROM "Deal" d
+      JOIN "Organization" o ON o.id = d."organizationId"
+      JOIN "DealInvestmentStats" dis ON dis."dealId" = d.id
+      JOIN "Project" p ON p.id = d."projectId"
+      WHERE o."advisorFirmId" = ${advisorFirmEmployee.advisorFirmId}
+        AND d."dealStage" = ${DealStage.CLOSED}
+        AND d.status = ${DealStatus.ACTIVE}::"DealStatus"
+    ) AS INTEGER) AS total_invested`;
 
-  const whereClause = {
-    advisorFirmId: advisorFirmEmployee.advisorFirmId,
-  };
-
-  // Get client orgs from advisor firm
-  const [deals, total] = await Promise.all([
-    prisma.deal.findMany({
-      where: {
-        dealStage: DealStage.CLOSED,
-        status: DealStatus.ACTIVE,
+  if (!kpis.length)
+    return errorResponse('There are no deals assigned to this advisor', 404, {
+      request,
+      extra: {
+        kpis,
+        advisorFirmEmployee,
       },
-      include: {
-        startDealConversion: true,
-        endDealConversion: true,
-        investmentStats: true,
-        project: {
-          include: {
-            milestones: true,
-            pictures: true,
-            equityMilestoneFiles: true,
-            investmentStats: true,
-          },
-        },
-      },
-    }),
-    prisma.organization.count({
-      where: whereClause,
-    }),
-  ]);
+    });
 
-  const { tableStats } = await getPortfolioReturns(deals);
-
-  const totalInvested =
-    tableStats.debt.principalInvested + tableStats.equity.principalInvested;
+  const totalInvested = Number(kpis[0]?.total_invested);
+  const numberOfClients = Number(kpis[0]?.number_of_clients);
 
   return jsonResponse({
     totalInvested,
-    numberOfClients: total,
-    debtPrincipalInvested: tableStats.debt.principalInvested,
-    equityPrincipalInvested: tableStats.equity.principalInvested,
+    numberOfClients,
   });
 }
