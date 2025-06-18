@@ -1,5 +1,4 @@
 import prisma from '@/libs/prisma.server';
-import { getPortfolioReturns } from '@/libs/returns/utils.server';
 import { getAdvisorContext } from '@/libs/advisorFirm/utils.server';
 import { errorResponse } from '@/libs/utils.server';
 import { nextRequestMock } from '@/mocks/nextRequest.mock';
@@ -8,13 +7,8 @@ import { GET } from '../route';
 jest.mock('@/libs/prisma.server', () => ({
   __esModule: true,
   default: {
-    deal: { findMany: jest.fn() },
-    organization: { count: jest.fn() },
+    $queryRaw: jest.fn(),
   },
-}));
-
-jest.mock('@/libs/returns/utils.server', () => ({
-  getPortfolioReturns: jest.fn(),
 }));
 
 jest.mock('@/libs/advisorFirm/utils.server', () => ({
@@ -36,39 +30,12 @@ describe('/api/advisors/clients/kpis', () => {
       advisorFirmEmployee: { advisorFirmId: 123 },
     } as any);
 
-    jest.mocked(prisma.deal.findMany).mockResolvedValue([
+    jest.mocked(prisma.$queryRaw).mockResolvedValue([
       {
-        id: 1,
-        investmentStats: {},
-        project: {
-          milestones: [],
-          pictures: [],
-          equityMilestoneFiles: [],
-          investmentStats: {},
-        },
+        number_of_clients: 5,
+        total_invested: 300000,
       },
-    ] as any);
-
-    jest.mocked(prisma.organization.count).mockResolvedValue(5);
-
-    jest.mocked(getPortfolioReturns).mockResolvedValue({
-      tableStats: {
-        debt: {
-          principalInvested: 100000,
-          earnedToDate: 0,
-          earningsProjected: 0,
-          projectedReturn: 0,
-          accruedToDate: 0,
-        },
-        equity: {
-          principalInvested: 200000,
-          earnedToDate: 0,
-          earningsProjected: 0,
-          projectedReturn: 0,
-          accruedToDate: 0,
-        },
-      },
-    } as any);
+    ]);
 
     const res = await GET(nextRequestMock() as any);
     const json = await res.json();
@@ -76,7 +43,16 @@ describe('/api/advisors/clients/kpis', () => {
     expect(res.status).toBe(200);
     expect(json.totalInvested).toBe(300000);
     expect(json.numberOfClients).toBe(5);
-    expect(json.debtPrincipalInvested).toBe(100000);
-    expect(json.equityPrincipalInvested).toBe(200000);
+  });
+
+  it('returns 404 if no KPI data found', async () => {
+    jest.mocked(getAdvisorContext).mockResolvedValue({
+      advisorFirmEmployee: { advisorFirmId: 123 },
+    } as any);
+
+    jest.mocked(prisma.$queryRaw).mockResolvedValue([]);
+
+    const res = await GET(nextRequestMock() as any);
+    expect(res.status).toBe(404);
   });
 });
