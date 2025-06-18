@@ -90,6 +90,10 @@ const AdvisorFirmInfoForm: React.FC<AdvisorFirmInfoFormProps> = ({
       if (response.status === 200) {
         toast.success('Updated company info successfully');
         queryClient.invalidateQueries({ queryKey: ['advisor'] });
+        reset({
+          file: data.file,
+          name: data.name,
+        });
       }
     } catch (err: any) {
       toast.error(err.response?.data?.error || 'Failed to update company info');
@@ -100,7 +104,6 @@ const AdvisorFirmInfoForm: React.FC<AdvisorFirmInfoFormProps> = ({
 
   const onSubmit = async (data: AdvisorFirmUpdateSchema) => {
     await onSave(data);
-    reset(data);
   };
 
   if (isSubmitting) return <AdvisorFirmInfoFormSkeleton />;
