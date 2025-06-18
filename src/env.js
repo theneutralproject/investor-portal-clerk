@@ -59,6 +59,8 @@ export const env = createEnv({
     SENTRY_AUTH_TOKEN: z.string().optional(),
     SENTRY_DSN: z.string().optional(),
     DEBT_INTEREST_PERIOD_OVERRIDES: z.string().optional(),
+    WEBFLOW_ACCESS_TOKEN: z.string(),
+    WEBFLOW_RESOURCE_CENTER_COLLECTION: z.string(),
   },
 
   /**
@@ -151,6 +153,9 @@ export const env = createEnv({
     NEXT_PUBLIC_CURRENT_TERMS_REVISION:
       process.env.NEXT_PUBLIC_CURRENT_TERMS_REVISION,
     DEBT_INTEREST_PERIOD_OVERRIDES: process.env.DEBT_INTEREST_PERIOD_OVERRIDES,
+    WEBFLOW_ACCESS_TOKEN: process.env.WEBFLOW_ACCESS_TOKEN,
+    WEBFLOW_RESOURCE_CENTER_COLLECTION:
+      process.env.WEBFLOW_RESOURCE_CENTER_COLLECTION,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially

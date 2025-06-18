@@ -94,10 +94,12 @@ export default function AccountPage() {
                       Personal Information
                     </Typography>
                     <Divider sx={{ mb: 2 }} />
-                    <AccountProfileDetails
-                      user={user}
-                      onUpdate={handleProfileUpdate}
-                    />
+                    {user && (
+                      <AccountProfileDetails
+                        user={user}
+                        onUpdate={handleProfileUpdate}
+                      />
+                    )}
                   </CardContent>
                 </Card>
               </Grid>

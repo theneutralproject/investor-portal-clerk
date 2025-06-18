@@ -16,50 +16,39 @@ import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
 import AdvisorClientsTable from '@/components/Tables/AdvisorClientsTable';
 import { Role } from '@prisma/client';
 import { useRouter } from 'next/navigation';
-import { AdvisorClientsResponse } from '@/libs/types';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
+import { useAdvisorClientKPIs } from '@/app/hooks/useAdvisorClientKPIs';
 
 const AdvisorDashboardPage = () => {
   const { user, isSignedIn, isLoaded } = useUser();
-  const [clientResults, setClientResults] = useState<{
-    clients: number;
-    fundsAllocated: string;
-  }>();
   const router = useRouter();
+  const { data: kpis, isLoading: isLoadingKPI } =
+    useAdvisorClientKPIs(isSignedIn);
 
-  const getClientResults = (data: AdvisorClientsResponse) => {
-    const clients = data.clients.length;
-    const fundsAllocated = data.clients.reduce(
-      (sum, item) => (sum += item.totalInvested),
-      0
-    );
-    setClientResults({
-      clients,
-      fundsAllocated: `$${Math.round(fundsAllocated).toLocaleString()}`,
-    });
-  };
   const headline = isSignedIn ? `Welcome, ${user?.firstName}` : 'Welcome';
 
   const onResourceCenterClick = () => {
     router.push('/advisor/faq');
   };
+
   const clientsText = useMemo(
     () =>
-      clientResults ? (
-        clientResults?.clients || 'N/A'
-      ) : (
+      isLoadingKPI || !kpis ? (
         <CircularProgress size={32} />
+      ) : (
+        kpis?.numberOfClients || 'N/A'
       ),
-    [clientResults]
+    [kpis, isLoadingKPI]
   );
+
   const fundsAllowedText = useMemo(
     () =>
-      clientResults ? (
-        clientResults?.fundsAllocated || 'N/A'
-      ) : (
+      isLoadingKPI || !kpis ? (
         <CircularProgress size={32} />
+      ) : (
+        `$${Math.round(kpis?.totalInvested).toLocaleString()}` || 'N/A'
       ),
-    [clientResults]
+    [kpis, isLoadingKPI]
   );
 
   if (!isLoaded || user?.publicMetadata.role !== Role.ADVISOR) {
@@ -244,11 +233,7 @@ const AdvisorDashboardPage = () => {
                   Clients
                 </Typography>
 
-                <AdvisorClientsTable
-                  loadRequest={isSignedIn}
-                  router={router}
-                  getResults={getClientResults}
-                />
+                <AdvisorClientsTable loadRequest={isSignedIn} router={router} />
                 <Divider sx={{ mb: 3 }} />
               </CardContent>
             </Card>

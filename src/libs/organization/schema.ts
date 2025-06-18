@@ -10,6 +10,7 @@ export const zOrganizationUpdateSchema = z.object({
   juristication: z.string().max(120, '120 characters max').optional(),
   ownershipType: z.nativeEnum(DealOwnershipType).optional(),
   address: zAddressCreateSchema.nullish(),
+  advisorFirmId: z.number().int().optional(),
 });
 export type OrganizationUpdateSchema = z.infer<
   typeof zOrganizationUpdateSchema

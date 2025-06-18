@@ -46,6 +46,7 @@ export async function GET(request: NextRequest) {
         tin: true,
         ownershipType: true,
         isPrimary: true,
+        advisorFirmId: true,
         deals: {
           where: { dealStage: { not: DealStage.CLOSED_LOST } },
           select: {
@@ -118,7 +119,6 @@ export async function PUT(request: NextRequest) {
   let userId: number;
   try {
     const url = new URL(request.url);
-    console.log(url.pathname.split('/'));
     userId = parseInt(url.pathname.split('/')[4] ?? '');
     if (!userId || !isNumber(userId)) {
       throw new Error('userId is required in url');

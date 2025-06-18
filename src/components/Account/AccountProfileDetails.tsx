@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Box, Typography, Tooltip, Button, TextField } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import InfoIcon from '@mui/icons-material/Info';
@@ -47,7 +47,7 @@ const profileSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
 interface AccountProfileDetailsProps {
-  user: UserWithAddress | null;
+  user: UserWithAddress;
   onUpdate: (updatedUser: UserWithAddress) => Promise<void>;
 }
 
@@ -58,44 +58,24 @@ const AccountProfileDetails: React.FC<AccountProfileDetailsProps> = ({
   const {
     control,
     handleSubmit,
-    setValue,
     formState: { isValid, isDirty },
-    trigger,
   } = useValidatedForm(profileSchema, {
     defaultValues: {
-      firstName: '',
-      lastName: '',
-      ssn: '',
-      dateOfBirth: '',
+      id: user.id,
+      firstName: user.firstName ?? '',
+      lastName: user.lastName ?? '',
+      ssn: user.ssn ?? '',
+      dateOfBirth: formatDate(user.dateOfBirth) ?? '',
       address: {
-        street: '',
+        street: user.address?.street ?? '',
         street2: '',
-        city: '',
-        state: '',
-        zipcode: '',
+        city: user.address?.city ?? '',
+        state: user.address?.state ?? '',
+        zipcode: user.address?.zipcode ?? '',
         country: 'United States',
       },
     },
   });
-
-  useEffect(() => {
-    if (user) {
-      setValue('id', user.id);
-      setValue('firstName', user.firstName ?? '');
-      setValue('lastName', user.lastName ?? '');
-      setValue('ssn', user.ssn ?? '');
-      setValue('dateOfBirth', formatDate(user.dateOfBirth) ?? '');
-
-      setValue('address.street', user.address?.street ?? '');
-      // setValue('address.street2', user.address?.street2 ?? '');
-      setValue('address.city', user.address?.city ?? '');
-      setValue('address.state', user.address?.state ?? '');
-      setValue('address.zipcode', user.address?.zipcode ?? '');
-      setValue('address.country', 'United States');
-
-      trigger();
-    }
-  }, [user, setValue, trigger]);
 
   const onSubmit = async (data: ProfileFormValues) => {
     const dateOfBirth = data.dateOfBirth ? new Date(data.dateOfBirth) : null;

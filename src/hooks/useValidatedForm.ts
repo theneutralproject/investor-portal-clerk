@@ -9,7 +9,8 @@ export function useValidatedForm<T extends z.ZodType<any, any>>(
 ): UseFormReturn<z.infer<T>> {
   return useForm<z.infer<T>>({
     resolver: zodResolver(schema),
-    mode: 'onBlur',
+    mode: 'onTouched',
+    shouldUnregister: true,
     ...options,
   });
 }
@@ -83,6 +84,8 @@ export const useDealFlowDetailsForm = (
       },
     },
     ...options,
+    mode: 'onTouched',
+    shouldUnregister: true,
   });
 };
 
