@@ -1,82 +1,42 @@
-import { DealFinancingType, DealUnitType, PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client';
 import _ from 'lodash';
 
 const prisma = new PrismaClient();
 
-const setUnitType = (amount?: number, bNoteThresholdAmount?: number | null): DealUnitType => {
-  if (!amount || !bNoteThresholdAmount) return DealUnitType.ANOTE;
-
-  return (amount >= bNoteThresholdAmount) ? DealUnitType.BNOTE : DealUnitType.ANOTE;
-};
-
 async function main() {
-  console.log('Seeding Activity Feed...');
+  console.log('Setting unit type to promissory_note_now deals...');
 
-  // Fetch promissory_note_now Deals
-  // const dealInvestments = await prisma.dealInvestmentStats.findMany({
-  //   where: {
-  //     financingType: DealFinancingType.promissory_note_now,
-  //   },
-  //   select: {
-  //     id: true,
-  //     financingType: true,
-  //     unitType: true,
-  //     amount: true,
-  //   }
-  // });
+  const data = await prisma.$queryRaw<{
+    total_updated: number, updated_to_anote: number, updated_to_bnote: number,
+  }[]>`
+    WITH updated AS (
+      UPDATE "DealInvestmentStats" dealInvestmentStats
+      SET "unitType" = (
+        CASE
+          WHEN dealInvestmentStats."amount" >= pis."bNoteThresholdAmount" THEN 'BNOTE'
+          ELSE 'ANOTE'
+        END
+      )::"DealUnitType"
+      FROM "Deal" deal
+      JOIN "Project" project ON project.id = deal."projectId"
+      JOIN "ProjectInvestmentStats" pis ON pis."projectId" = project.id
+      WHERE dealInvestmentStats."dealId" = deal.id
+        AND dealInvestmentStats."financingType" = 'promissory_note_now'
+      RETURNING dealInvestmentStats.id, dealInvestmentStats."unitType"
+    )
+    SELECT
+      COUNT(*) AS total_updated,
+      SUM(CASE WHEN "unitType" = 'ANOTE' THEN 1 ELSE 0 END) AS updated_to_anote,
+      SUM(CASE WHEN "unitType" = 'BNOTE' THEN 1 ELSE 0 END) AS updated_to_bnote
+    FROM updated;
+    `;
 
-  const deals = await prisma.deal.findMany({
-    select: {
-      id: true,
-      project: {
-        select: {
-          investmentStats: {
-            select: {
-              bNoteThresholdAmount: true,
-              cUnitThresholdAmount: true,
-            }
-          }
-        }
-      },
-      investmentStats: {
-        where: {
-          financingType: DealFinancingType.promissory_note_now,
-        },
-        select: {
-          financingType: true,
-          unitType: true,
-          amount: true,
-        }
-      }
-    }
-  });
-
-  console.log(`Found ${deals.length} deals`);
-
-  // bNoteThresholdAmount
-  // cNoteThresholdAmount
-
-  const dealsToUpdate = [];
-
-  for (const deal of deals) {
-    const unitType = setUnitType(deal.investmentStats?.amount, deal.project.investmentStats?.bNoteThresholdAmount);
-
-    // console.log(`Deal #${deal.id}: currentUnitType = ${deal.investmentStats?.unitType}, newUnitType: ${unitType}`);
-
-    dealsToUpdate.push({
-      id: deal.id,
-      amount: deal.investmentStats?.amount,
-      bNoteThresholdAmount: deal.project.investmentStats?.bNoteThresholdAmount,
-      currentUnitType: deal.investmentStats?.unitType,
-      unitType,
-    });
-
-  }
-
-  console.table(dealsToUpdate);
   
+  const [result] = data;
 
-  console.log('Seed Completed!');
+  console.log(`Deals found: ${result?.total_updated}\n# Updated to ANOTE: ${result?.updated_to_anote}\n# Updated to BNOTE: ${result?.updated_to_bnote}`);
+
+  console.log('Migration completed!');
 }
 
 main()
