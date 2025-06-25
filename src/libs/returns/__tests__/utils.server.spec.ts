@@ -10,6 +10,7 @@ import {
   getEquityPayoutScheduleForDeal,
   getEquityPayoutScheduleForProject,
   getPortfolioReturns,
+  getPromissoryNoteUnitType,
 } from '../utils.server';
 import { DealFinancingType, DealUnitType } from '@prisma/client';
 import { jest } from '@jest/globals';
@@ -140,6 +141,7 @@ describe('utils.server', () => {
       interestRateDollarThreshold: 100000,
       interestRateMax: 10,
       interestRateMin: 5,
+      bNoteThresholdAmount: 250000,
     };
 
     it('should return BUNIT if amount exceeds threshold', () => {
@@ -149,7 +151,92 @@ describe('utils.server', () => {
     it('should return AUNIT if amount is below threshold', () => {
       expect(getDebtUnitType(50000, investmentStats)).toBe(DealUnitType.AUNIT);
     });
+
+    describe('promissory_note_now', () => {
+      it('should return BNOTE if amount exceeds note threshold', () => {
+        expect(
+          getDebtUnitType(
+            260000,
+            investmentStats,
+            DealFinancingType.promissory_note_now
+          )
+        ).toBe(DealUnitType.BNOTE);
+      });
+
+      it('should return BNOTE if amount is equals to note threshold', () => {
+        expect(
+          getDebtUnitType(
+            250000,
+            investmentStats,
+            DealFinancingType.promissory_note_now
+          )
+        ).toBe(DealUnitType.BNOTE);
+      });
+
+      it('should return ANOTE if amount is below to note threshold', () => {
+        expect(
+          getDebtUnitType(
+            240000,
+            investmentStats,
+            DealFinancingType.promissory_note_now
+          )
+        ).toBe(DealUnitType.ANOTE);
+      });
+
+      it('should return ANOTE if bNoteThresholdAmount is null', () => {
+        expect(
+          getDebtUnitType(
+            240000,
+            { ...investmentStats, bNoteThresholdAmount: null },
+            DealFinancingType.promissory_note_now
+          )
+        ).toBe(DealUnitType.ANOTE);
+      });
+
+      it('should return ANOTE if amount is null', () => {
+        expect(
+          getDebtUnitType(
+            null as any,
+            { ...investmentStats, bNoteThresholdAmount: null },
+            DealFinancingType.promissory_note_now
+          )
+        ).toBe(DealUnitType.ANOTE);
+      });
+    });
   });
+
+  describe('getPromissoryNoteUnitType', () => {
+    const bNoteThresholdAmount = 250000;
+
+    it('should return BNOTE if amount exceeds note threshold', () => {
+      expect(getPromissoryNoteUnitType(260000, bNoteThresholdAmount)).toBe(
+        DealUnitType.BNOTE
+      );
+    });
+
+    it('should return BNOTE if amount is equals to note threshold', () => {
+      expect(getPromissoryNoteUnitType(250000, bNoteThresholdAmount)).toBe(
+        DealUnitType.BNOTE
+      );
+    });
+
+    it('should return ANOTE if amount is below to note threshold', () => {
+      expect(getPromissoryNoteUnitType(240000, bNoteThresholdAmount)).toBe(
+        DealUnitType.ANOTE
+      );
+    });
+
+    it('should return ANOTE if bNoteThresholdAmount is null', () => {
+      expect(getPromissoryNoteUnitType(240000, null)).toBe(DealUnitType.ANOTE);
+    });
+
+    it('should return ANOTE if amount is null', () => {
+      expect(getPromissoryNoteUnitType(null as any, bNoteThresholdAmount)).toBe(
+        DealUnitType.ANOTE
+      );
+    });
+  });
+
   describe('getPayoutScheduleStartDate', () => {
     it('should return the last day of the first month of the next quarter for Q1', () => {
       const closingDate = new Date('2024-02-15'); // Q1
