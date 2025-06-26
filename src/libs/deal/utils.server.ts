@@ -493,7 +493,11 @@ export function populateDealDebtStats(
     stats.amount,
     project.investmentStats
   );
-  stats.unitType = getDebtUnitType(stats.amount, project.investmentStats);
+  stats.unitType = getDebtUnitType(
+    stats.amount,
+    project.investmentStats,
+    stats.financingType
+  );
 
   // set all equity related fields to null
   stats.equityTermMonths = 0;
