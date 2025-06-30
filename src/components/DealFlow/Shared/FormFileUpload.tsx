@@ -37,7 +37,9 @@ export function FormFileUpload<T extends FieldValues>({
 
         const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           const file = e.target.files?.[0];
-          if (file) onChange(file);
+          if (file) {
+            onChange(file);
+          }
         };
         const image = previewUrl || defaultValue;
 

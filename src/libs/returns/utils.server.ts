@@ -139,10 +139,29 @@ export function getDebtInterestRate(
     : investmentStats.interestRateMin;
 }
 
+export const getPromissoryNoteUnitType = (
+  amount: number,
+  bNoteThresholdAmount?: number | null
+): DealUnitType => {
+  if (!amount || !bNoteThresholdAmount) return DealUnitType.ANOTE;
+
+  return amount >= bNoteThresholdAmount
+    ? DealUnitType.BNOTE
+    : DealUnitType.ANOTE;
+};
+
 export function getDebtUnitType(
   amount: number,
-  investmentStats: ProjectInvestmentStats
+  investmentStats: ProjectInvestmentStats,
+  financingType?: DealFinancingType
 ) {
+  if (financingType === DealFinancingType.promissory_note_now) {
+    return getPromissoryNoteUnitType(
+      amount,
+      investmentStats.bNoteThresholdAmount
+    );
+  }
+
   return amount >= investmentStats.interestRateDollarThreshold
     ? DealUnitType.BUNIT
     : DealUnitType.AUNIT;

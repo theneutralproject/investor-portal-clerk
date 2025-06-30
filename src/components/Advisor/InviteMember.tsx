@@ -5,7 +5,11 @@ import { Box, Button, Divider, Typography } from '@mui/material';
 import Grid from '@mui/material/Grid2';
 import { z } from 'zod';
 import { useValidatedForm } from '@/hooks/useValidatedForm';
-import { FormTextField } from '@components/DealFlow/Shared/FormComponents';
+import {
+  FormAutocomplete,
+  FormTextField,
+} from '@components/DealFlow/Shared/FormComponents';
+import { AdvisorEmployeeRole } from '@prisma/client';
 
 const inviteSchema = z.object({
   firstName: z.string().min(1, 'First name is required'),
@@ -98,6 +102,19 @@ const InviteMemberForm: React.FC<InviteMemberFormProps> = ({
             label="Email"
             required
             variant="standard"
+          />
+        </Grid>
+        <Grid
+          size={{
+            xs: 12,
+          }}
+        >
+          <FormAutocomplete<InviteFormValues>
+            control={control}
+            name="role"
+            label="Role"
+            disabled
+            options={[AdvisorEmployeeRole.ADMIN, AdvisorEmployeeRole.STAFF]}
           />
         </Grid>
         <Grid

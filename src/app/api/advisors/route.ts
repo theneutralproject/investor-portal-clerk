@@ -42,13 +42,14 @@ export async function PUT(request: NextRequest) {
   if (file) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
+    const fileName = normalizeFilename(file.name);
 
-    const uploadPath = `${advisorFirm.id}/${file.name}`;
-    const fullPath = `${ADVISOR_LOGOS_BUCKET}/${advisorFirm.id}/${file.name}`;
+    const uploadPath = `${advisorFirm.id}/${fileName}`;
+    const fullPath = `${ADVISOR_LOGOS_BUCKET}/${advisorFirm.id}/${fileName}`;
 
     Logger.log(
       {
-        message: `Uploading file '${file.name}' to ${fullPath}`,
+        message: `Uploading file '${fileName}' to ${fullPath}`,
         extra: {
           advisorFirm,
           dbUser,
@@ -97,3 +98,10 @@ export async function PUT(request: NextRequest) {
 
   return jsonResponse(updated);
 }
+
+const normalizeFilename = (filename: string) => {
+  return filename
+    .replace(/\s+/g, '_') // replace spaces with underscores
+    .replace(/[^a-zA-Z0-9_.-]/g, '') // remove unsafe characters
+    .toLowerCase();
+};
