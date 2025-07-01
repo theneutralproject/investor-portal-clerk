@@ -21,7 +21,19 @@ export interface DealDocumentActivityItemCreate {
 export const createInvestmentCompletedActivityItem = async (
   deal: DealActivityItemCreate
 ) => {
-  const closingDate = deal.closingDate || new Date();
+  const closingDate = (() => {
+    try {
+      const dealClosingDate = deal.closingDate;
+      const date =
+        dealClosingDate instanceof Date || typeof dealClosingDate === 'string'
+          ? new Date(dealClosingDate)
+          : new Date();
+      return isNaN(date.getTime()) ? new Date() : date;
+    } catch {
+      return new Date();
+    }
+  })();
+
   return await prisma.activityFeedItem.upsert({
     where: {
       activity_user_item_type: {
