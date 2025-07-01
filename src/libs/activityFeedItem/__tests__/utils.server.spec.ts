@@ -73,6 +73,68 @@ describe('Activity Feed Item Creation', () => {
 
       expect(prisma.activityFeedItem.upsert).toHaveBeenCalledTimes(1);
     });
+
+    it('should convert an invalid date to a current one and create record', async () => {
+      const deal: any = {
+        userId: 100,
+        itemId: 1,
+        projectName: 'Project A',
+        projectSlug: 'project-a',
+        financingType: 'equity',
+        closingDate: false,
+        dateCreated: new Date('2025-01-01'),
+      };
+      const date = new Date();
+
+      await createInvestmentCompletedActivityItem(deal);
+
+      expect(prisma.activityFeedItem.upsert).toHaveBeenCalledWith({
+        where: {
+          activity_user_item_type: {
+            userId: 100,
+            type: ActivityType.NEW_INVESTMENT,
+            itemId: 1,
+          },
+        },
+        update: {},
+        create: {
+          userId: 100,
+          header: 'Investment Completed',
+          body: `You successfully initiated an Equity investment into Project A on ${date.toDateString()}.`,
+          type: ActivityType.NEW_INVESTMENT,
+          dateCreated: deal.dateCreated,
+          link: '/projects/project-a',
+          itemId: 1,
+        },
+      });
+
+      const deal2: any = {
+        ...deal,
+        closingDate: {},
+      };
+
+      await createInvestmentCompletedActivityItem(deal2);
+
+      expect(prisma.activityFeedItem.upsert).toHaveBeenLastCalledWith({
+        where: {
+          activity_user_item_type: {
+            userId: 100,
+            type: ActivityType.NEW_INVESTMENT,
+            itemId: 1,
+          },
+        },
+        update: {},
+        create: {
+          userId: 100,
+          header: 'Investment Completed',
+          body: `You successfully initiated an Equity investment into Project A on ${date.toDateString()}.`,
+          type: ActivityType.NEW_INVESTMENT,
+          dateCreated: deal.dateCreated,
+          link: '/projects/project-a',
+          itemId: 1,
+        },
+      });
+    });
   });
 
   describe('createInvestmentAvailableActivityItem', () => {
