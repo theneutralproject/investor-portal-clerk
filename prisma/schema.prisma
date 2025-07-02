@@ -504,6 +504,7 @@ enum DealUnitType {
   BUNIT
   ANOTE
   BNOTE
+  A1UNIT
 }
 
 enum DealStatus {
