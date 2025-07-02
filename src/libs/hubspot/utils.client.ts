@@ -34,7 +34,7 @@ export enum ReferralSource {
   OTHER_MEDIA = 'other_media',
 
   // Online Ads
-  ONLINE_ADS = 'online_ads',
+  ONLINE_ADS = 'advertisement_online',
 
   // Advisor Firm
   ADVISOR_FIRM_EMPLOYEE = 'advisor_firm_employee',
