@@ -196,7 +196,7 @@ describe('GET /api/advisors/clients', () => {
           lastName: 'Doe',
           email: 'jane@doe.com',
         },
-        deals: [{ investmentStats: {}, project: {} }],
+        deals: [{ investmentStats: { financingType: 'equity' }, project: {} }],
       },
     ] as any);
     jest.mocked(prisma.organization.count).mockResolvedValue(1);
@@ -222,7 +222,7 @@ describe('GET /api/advisors/clients', () => {
       {},
       {},
       'GET',
-      '/api/advisors/clients?search=debt&page=1&limit=10'
+      '/api/advisors/clients?search=equity&page=1&limit=10'
     );
     const res = await GET(request as any);
 
@@ -234,7 +234,7 @@ describe('GET /api/advisors/clients', () => {
             organization: { id: 1, name: 'Filtered Org' },
             totalInvested: 15000,
             numberOfInvestments: 1,
-            dealTypes: [],
+            dealTypes: ['equity'],
             earningsToDate: 1500,
             projectedEarnings: 1500,
             totalProjectedReturn: 16500,
@@ -243,6 +243,143 @@ describe('GET /api/advisors/clients', () => {
         pagination: {
           page: 1,
           limit: 10,
+          total: 1,
+          hasMore: false,
+        },
+      })
+    );
+  });
+
+  it('should filter clients by name when no financingType match using search query', async () => {
+    jest.mocked(getAuth).mockReturnValue({
+      userId: clerkId,
+      sessionClaims: { metadata: { investorPortalId } },
+    } as any);
+    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
+    jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue({
+      advisorFirmId: 42,
+    } as any);
+
+    jest.mocked(prisma.organization.findMany).mockResolvedValue([
+      {
+        id: 1,
+        name: 'Doe Investments',
+        ownedBy: {
+          id: 1000,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          email: 'jane@doe.com',
+        },
+        deals: [{ investmentStats: {}, project: {} }],
+      },
+      {
+        id: 2,
+        name: 'Smith Capital',
+        ownedBy: {
+          id: 2000,
+          firstName: 'John',
+          lastName: 'Smith',
+          email: 'john@smith.com',
+        },
+        deals: [{ investmentStats: {}, project: {} }],
+      },
+    ] as any);
+
+    jest.mocked(prisma.organization.count).mockResolvedValue(2);
+
+    const request = nextRequestMock(
+      {},
+      {},
+      'GET',
+      '/api/advisors/clients?search=jane'
+    );
+    const res = await GET(request as any);
+
+    expect(res).toEqual(
+      jsonResponse({
+        clients: [
+          {
+            client: { id: 1000, name: 'Jane Doe', email: 'jane@doe.com' },
+            organization: { id: 1, name: 'Doe Investments' },
+            totalInvested: 30000,
+            numberOfInvestments: 1,
+            dealTypes: [],
+            earningsToDate: 4000,
+            projectedEarnings: 4000,
+            totalProjectedReturn: 34000,
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total: 1,
+          hasMore: false,
+        },
+      })
+    );
+  });
+  it('should filter clients by email when no financingType match using search query', async () => {
+    jest.mocked(getAuth).mockReturnValue({
+      userId: clerkId,
+      sessionClaims: { metadata: { investorPortalId } },
+    } as any);
+    jest.mocked(prisma.user.findFirst).mockResolvedValue(advisorUser);
+    jest.mocked(prisma.advisorFirmEmployee.findFirst).mockResolvedValue({
+      advisorFirmId: 42,
+    } as any);
+
+    jest.mocked(prisma.organization.findMany).mockResolvedValue([
+      {
+        id: 1,
+        name: 'Doe Investments',
+        ownedBy: {
+          id: 1000,
+          firstName: 'Jane',
+          lastName: 'Doe',
+          email: 'jane@doe.com',
+        },
+        deals: [{ investmentStats: {}, project: {} }],
+      },
+      {
+        id: 2,
+        name: 'Smith Capital',
+        ownedBy: {
+          id: 2000,
+          firstName: 'John',
+          lastName: 'Smith',
+          email: 'john@smith.com',
+        },
+        deals: [{ investmentStats: {}, project: {} }],
+      },
+    ] as any);
+
+    jest.mocked(prisma.organization.count).mockResolvedValue(2);
+
+    const request = nextRequestMock(
+      {},
+      {},
+      'GET',
+      '/api/advisors/clients?search=john@smith.com'
+    );
+    const res = await GET(request as any);
+
+    expect(res).toEqual(
+      jsonResponse({
+        clients: [
+          {
+            client: { id: 2000, name: 'John Smith', email: 'john@smith.com' },
+            organization: { id: 2, name: 'Smith Capital' },
+            totalInvested: 30000,
+            numberOfInvestments: 1,
+            dealTypes: [],
+            earningsToDate: 4000,
+            projectedEarnings: 4000,
+            totalProjectedReturn: 34000,
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 20,
           total: 1,
           hasMore: false,
         },
