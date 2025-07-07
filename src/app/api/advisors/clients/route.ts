@@ -201,22 +201,12 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
   }
 
-  let total =
+  const total =
     search || financingTypeFilter
       ? investments.length
       : await prisma.organization.count({
           where: whereClause,
         });
-
-  // Since some filtering (e.g., by encrypted user fields) is done in memory after DB fetch,
-  // the total count from the database may not reflect the number of visible results.
-  // To prevent pagination inconsistencies on the frontend, we cap the total to the
-  // actual number of filtered investments.
-  // This is a necessary workaround because SOC2 constraints prevent us from storing
-  // decrypted data or searchable hashes, which makes accurate DB-level filtering impossible.
-  if (total > investments.length) {
-    total = investments.length;
-  }
 
   const response: AdvisorClientsResponse = {
     clients: investments,
