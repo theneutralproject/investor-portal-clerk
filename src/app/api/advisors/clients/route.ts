@@ -111,7 +111,12 @@ export async function GET(request: NextRequest): Promise<Response> {
         );
       });
 
-  const total = filteredOrgs.length;
+  const total =
+    search || financingTypeFilter
+      ? filteredOrgs.length
+      : await prisma.organization.count({
+          where: whereClause,
+        });
   const paginatedOrgs = filteredOrgs.slice(skip, skip + limit);
 
   const dealsByClient: Record<string, any> = paginatedOrgs.reduce(
