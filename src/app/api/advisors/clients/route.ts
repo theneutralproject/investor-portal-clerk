@@ -42,9 +42,22 @@ export async function GET(request: NextRequest): Promise<Response> {
   const limit = Number(url.searchParams.get('limit') || '20');
   const skip = (page - 1) * limit;
   const normalizedSearch = search?.toLowerCase();
-  const financingTypeFilter = Object.values(DealFinancingType).find(
-    type => type.toLowerCase() === normalizedSearch
-  );
+
+  let financingTypeFilter: DealFinancingType[] | null = null;
+
+  if (normalizedSearch === 'debt') {
+    financingTypeFilter = [
+      DealFinancingType.promissory_note_now,
+      DealFinancingType.promissory_to_equity,
+      DealFinancingType.promissory_note_at_closing,
+    ];
+  } else if (
+    Object.values(DealFinancingType).includes(
+      normalizedSearch as DealFinancingType
+    )
+  ) {
+    financingTypeFilter = [normalizedSearch as DealFinancingType];
+  }
 
   const whereClause: Prisma.OrganizationWhereInput = {
     advisorFirmId: advisorFirmEmployee.advisorFirmId,
@@ -53,7 +66,7 @@ export async function GET(request: NextRequest): Promise<Response> {
         some: {
           investmentStats: {
             is: {
-              financingType: financingTypeFilter,
+              financingType: { in: financingTypeFilter },
             },
           },
         },
@@ -97,29 +110,23 @@ export async function GET(request: NextRequest): Promise<Response> {
     },
   });
 
-  const filteredOrgs = financingTypeFilter
-    ? allOrgs
-    : allOrgs.filter(org => {
-        const searchLower = search.toLowerCase();
-        const fullName =
-          `${org.ownedBy.firstName} ${org.ownedBy.lastName}`.toLowerCase();
+  let filteredOrgs = allOrgs;
 
-        return (
-          org.name?.toLowerCase().includes(searchLower) ||
-          fullName.includes(searchLower) ||
-          org.ownedBy.email?.toLowerCase().includes(searchLower)
-        );
-      });
+  if (search && !financingTypeFilter?.length) {
+    filteredOrgs = allOrgs.filter(org => {
+      const searchLower = search.toLowerCase();
+      const fullName =
+        `${org.ownedBy.firstName} ${org.ownedBy.lastName}`.toLowerCase();
 
-  const total =
-    search || financingTypeFilter
-      ? filteredOrgs.length
-      : await prisma.organization.count({
-          where: whereClause,
-        });
-  const paginatedOrgs = filteredOrgs.slice(skip, skip + limit);
+      return (
+        org.name?.toLowerCase().includes(searchLower) ||
+        fullName.includes(searchLower) ||
+        org.ownedBy.email?.toLowerCase().includes(searchLower)
+      );
+    });
+  }
 
-  const dealsByClient: Record<string, any> = paginatedOrgs.reduce(
+  const dealsByClient: Record<string, any> = filteredOrgs.reduce(
     (acc, org) => {
       const orgDeals = org.deals.filter(
         deal => deal.investmentStats && deal.project
@@ -192,6 +199,23 @@ export async function GET(request: NextRequest): Promise<Response> {
       projectedEarnings,
       totalProjectedReturn,
     });
+  }
+
+  let total =
+    search || financingTypeFilter
+      ? investments.length
+      : await prisma.organization.count({
+          where: whereClause,
+        });
+
+  // Since some filtering (e.g., by encrypted user fields) is done in memory after DB fetch,
+  // the total count from the database may not reflect the number of visible results.
+  // To prevent pagination inconsistencies on the frontend, we cap the total to the
+  // actual number of filtered investments.
+  // This is a necessary workaround because SOC2 constraints prevent us from storing
+  // decrypted data or searchable hashes, which makes accurate DB-level filtering impossible.
+  if (total > investments.length) {
+    total = investments.length;
   }
 
   const response: AdvisorClientsResponse = {
