@@ -1,6 +1,6 @@
 'use server';
 import { NextRequest } from 'next/server';
-import { DealFinancingType, DealStatus } from '@prisma/client';
+import { DealFinancingType, DealStatus, Prisma } from '@prisma/client';
 
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils.server';
@@ -42,91 +42,91 @@ export async function GET(request: NextRequest): Promise<Response> {
   const limit = Number(url.searchParams.get('limit') || '20');
   const skip = (page - 1) * limit;
   const normalizedSearch = search?.toLowerCase();
-  const financingTypeFilter = Object.values(DealFinancingType).find(
-    type => type.toLowerCase() === normalizedSearch
-  );
 
-  const whereClause = {
+  let financingTypeFilter: DealFinancingType[] | null = null;
+
+  if (normalizedSearch === 'debt') {
+    financingTypeFilter = [
+      DealFinancingType.promissory_note_now,
+      DealFinancingType.promissory_to_equity,
+      DealFinancingType.promissory_note_at_closing,
+    ];
+  } else if (
+    Object.values(DealFinancingType).includes(
+      normalizedSearch as DealFinancingType
+    )
+  ) {
+    financingTypeFilter = [normalizedSearch as DealFinancingType];
+  }
+
+  const whereClause: Prisma.OrganizationWhereInput = {
     advisorFirmId: advisorFirmEmployee.advisorFirmId,
-    ...(search && {
-      OR: [
-        { name: { contains: search, mode: 'insensitive' as const } },
-        {
-          ownedBy: {
-            firstName: { contains: search, mode: 'insensitive' as const },
-          },
-        },
-        {
-          ownedBy: {
-            lastName: { contains: search, mode: 'insensitive' as const },
-          },
-        },
-        {
-          ownedBy: {
-            email: { contains: search, mode: 'insensitive' as const },
-          },
-        },
-        ...(financingTypeFilter
-          ? [
-              {
-                deals: {
-                  some: {
-                    investmentStats: {
-                      is: {
-                        financingType: financingTypeFilter,
-                      },
-                    },
-                  },
-                },
-              },
-            ]
-          : []),
-      ],
-    }),
-  };
-
-  // Get client orgs from advisor firm
-  const [orgs, total] = await Promise.all([
-    prisma.organization.findMany({
-      where: whereClause,
-      skip,
-      take: limit,
-      include: {
-        ownedBy: {
-          select: {
-            id: true,
-            firstName: true,
-            lastName: true,
-            email: true,
-          },
-        },
-        deals: {
-          where: {
-            dealStage: DealStage.CLOSED,
-            status: DealStatus.ACTIVE,
-          },
-          include: {
-            startDealConversion: true,
-            endDealConversion: true,
-            investmentStats: true,
-            project: {
-              include: {
-                milestones: true,
-                pictures: true,
-                equityMilestoneFiles: true,
-                investmentStats: true,
-              },
+    ...(financingTypeFilter && {
+      deals: {
+        some: {
+          investmentStats: {
+            is: {
+              financingType: { in: financingTypeFilter },
             },
           },
         },
       },
     }),
-    prisma.organization.count({
-      where: whereClause,
-    }),
-  ]);
+  };
 
-  const dealsByClient: Record<string, any> = orgs.reduce(
+  // Get client orgs from advisor firm
+  const allOrgs = await prisma.organization.findMany({
+    where: whereClause,
+    skip,
+    take: limit,
+    include: {
+      ownedBy: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          email: true,
+        },
+      },
+      deals: {
+        where: {
+          dealStage: DealStage.CLOSED,
+          status: DealStatus.ACTIVE,
+        },
+        include: {
+          startDealConversion: true,
+          endDealConversion: true,
+          investmentStats: true,
+          project: {
+            include: {
+              milestones: true,
+              pictures: true,
+              equityMilestoneFiles: true,
+              investmentStats: true,
+            },
+          },
+        },
+      },
+    },
+  });
+
+  let filteredOrgs = allOrgs;
+
+  if (search && !financingTypeFilter?.length) {
+    filteredOrgs = allOrgs.filter(org => {
+      const searchLower = search.toLowerCase();
+      const fullName =
+        `${org.ownedBy.firstName} ${org.ownedBy.lastName}`.toLowerCase();
+
+      return (
+        org.name?.toLowerCase().includes(searchLower) ||
+        fullName.includes(searchLower) ||
+        org.ownedBy.email?.toLowerCase().includes(searchLower)
+      );
+    });
+  }
+
+  const dealsByClient: Record<string, any> = filteredOrgs.reduce(
     (acc, org) => {
       const orgDeals = org.deals.filter(
         deal => deal.investmentStats && deal.project
@@ -200,6 +200,13 @@ export async function GET(request: NextRequest): Promise<Response> {
       totalProjectedReturn,
     });
   }
+
+  const total =
+    search || financingTypeFilter
+      ? investments.length
+      : await prisma.organization.count({
+          where: whereClause,
+        });
 
   const response: AdvisorClientsResponse = {
     clients: investments,
