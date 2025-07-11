@@ -263,6 +263,12 @@ export default function AdvisorClientsTable({
             borderBottom: '1px solid #f0f0f0',
           },
         }}
+        initialState={{
+          pagination: {
+            pageSize: 100,
+            pageIndex: 0,
+          },
+        }}
         state={{
           isLoading,
           showAlertBanner: isError,
