@@ -204,7 +204,6 @@ export interface AdvisorClient {
 
 export interface AdvisorClientsResponse {
   clients: AdvisorClient[];
-  pagination: Pagination;
 }
 
 export type AdvisorDocument = {

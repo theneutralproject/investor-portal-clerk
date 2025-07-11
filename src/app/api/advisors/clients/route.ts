@@ -13,7 +13,7 @@ import { DealWithInvestmentStats } from '@/libs/types';
 /**
  * GET /api/advisors/clients
  *
- * Fetches a paginated list of all advisor clients that belong to the advisor firm
+ * Fetches a list of all advisor clients that belong to the advisor firm
  * associated with the currently authenticated advisor user.
  *
  * For each client organization, the response includes:
@@ -23,10 +23,8 @@ import { DealWithInvestmentStats } from '@/libs/types';
  *
  * Authentication is required via Clerk. Only users with the `ADVISOR` role are allowed.
  *
- * Pagination is controlled via `page` and `limit` query parameters.
- *
  * @param {NextRequest} request - The incoming API request.
- * @returns {Promise<Response>} JSON response containing client summaries and pagination info.
+ * @returns {Promise<Response>} JSON response containing client summaries.
  */
 export async function GET(request: NextRequest): Promise<Response> {
   const context = await getAdvisorContext(request);
@@ -38,9 +36,6 @@ export async function GET(request: NextRequest): Promise<Response> {
   // Pagination parameters
   const url = new URL(request.url);
   const search = url.searchParams.get('search')?.toLowerCase() || '';
-  const page = Number(url.searchParams.get('page') || '1');
-  const limit = Number(url.searchParams.get('limit') || '20');
-  const skip = (page - 1) * limit;
   const normalizedSearch = search?.toLowerCase();
 
   let financingTypeFilter: DealFinancingType[] | null = null;
@@ -59,6 +54,8 @@ export async function GET(request: NextRequest): Promise<Response> {
     financingTypeFilter = [normalizedSearch as DealFinancingType];
   }
 
+  const matchingUserIds: number[] = [];
+
   const whereClause: Prisma.OrganizationWhereInput = {
     advisorFirmId: advisorFirmEmployee.advisorFirmId,
     ...(financingTypeFilter && {
@@ -72,13 +69,14 @@ export async function GET(request: NextRequest): Promise<Response> {
         },
       },
     }),
+    ...(matchingUserIds.length > 0 && {
+      ownerId: { in: matchingUserIds },
+    }),
   };
 
   // Get client orgs from advisor firm
   const allOrgs = await prisma.organization.findMany({
     where: whereClause,
-    skip,
-    take: limit,
     include: {
       ownedBy: {
         select: {
@@ -201,21 +199,8 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
   }
 
-  const total =
-    search || financingTypeFilter
-      ? investments.length
-      : await prisma.organization.count({
-          where: whereClause,
-        });
-
   const response: AdvisorClientsResponse = {
     clients: investments,
-    pagination: {
-      page,
-      limit,
-      total,
-      hasMore: skip + investments.length < total,
-    },
   };
 
   return jsonResponse(response);
