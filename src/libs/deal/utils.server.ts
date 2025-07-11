@@ -375,7 +375,7 @@ export async function updateDeal(
       'Setting closing date to today for deal with id',
       existingDeal.id
     );
-    dealData.closingDate = new Date();
+    dealData.closingDate = toCST10AM(new Date());
   }
 
   try {
@@ -527,4 +527,48 @@ export function toUTCMidnight(date: Date): Date {
     Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
   );
   return utcMidnight;
+}
+
+/**
+ * Converts a date to CST 10:00 AM (4:00 PM UTC) to avoid timezone issues
+ * This ensures manually input dates don't default to 00:00:00 which causes
+ * timezone conversion problems (showing previous day in CST)
+ */
+export function toCST10AM(date: Date): Date {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+
+  // Create date at 10:00 AM CST (4:00 PM UTC)
+  // CST is UTC-6, so 10:00 AM CST = 4:00 PM UTC
+  const cstDate = new Date(Date.UTC(year, month, day, 16, 0, 0, 0));
+  return cstDate;
+}
+
+/**
+ * Safely parses a date string or Date object, defaulting to 10:00 AM CST
+ * to avoid timezone issues with dates that default to 00:00:00
+ */
+export function parseWithCSTDefault(dateInput: string | Date): Date {
+  let date: Date;
+
+  if (typeof dateInput === 'string') {
+    // If it's a string, parse it
+    date = new Date(dateInput);
+  } else {
+    // If it's already a Date object, use it
+    date = dateInput;
+  }
+
+  // Check if the time is exactly midnight (00:00:00)
+  if (
+    date.getHours() === 0 &&
+    date.getMinutes() === 0 &&
+    date.getSeconds() === 0
+  ) {
+    // Default to 10:00 AM CST instead of midnight
+    return toCST10AM(date);
+  }
+
+  return date;
 }
