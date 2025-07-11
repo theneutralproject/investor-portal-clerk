@@ -88,6 +88,19 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // Sort taxDocuments by taxYear descending, if taxYear exists
+    taxDocuments.sort((a, b) => {
+      // If both have taxYear, sort descending
+      if (a.taxYear && b.taxYear) {
+        return b.taxYear - a.taxYear;
+      }
+      // If only one has taxYear, that one comes first
+      if (a.taxYear && !b.taxYear) return -1;
+      if (!a.taxYear && b.taxYear) return 1;
+      // Otherwise, keep original order
+      return 0;
+    });
+
     return jsonResponse({ taxDocuments, investmentDocuments });
   } catch (error) {
     return errorResponse('Error fetching deal documents', 500, {
