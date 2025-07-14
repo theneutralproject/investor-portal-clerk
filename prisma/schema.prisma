@@ -40,6 +40,7 @@ model User {
   organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
+  Changelog                    Changelog[]
 }
 
 model Deal {
@@ -419,6 +420,22 @@ model AdvisorFirmEmployee {
   AdvisorFirmAsPrimaryContact AdvisorFirm[] @relation("PrimaryContact")
 
   @@unique([advisorFirmId, userId])
+}
+
+model Changelog {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  entityId      Int
+  entityName    String
+  createdAt     DateTime @default(now())
+  previousValue Json
+  newValue      Json
+
+  // Optional relation if you have a User model
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([entityId, entityName])
+  @@index([userId])
 }
 
 enum AdvisorEmployeeRole {
