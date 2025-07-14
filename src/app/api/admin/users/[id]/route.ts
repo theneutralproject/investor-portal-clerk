@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 import { DealStage } from '@/libs/deal/schema';
 import Logger from '@/libs/logger';
 import prisma from '@/libs/prisma.server';
@@ -109,8 +110,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  let adminUser;
   try {
-    await getAdminFromRequest(request);
+    adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -140,10 +142,25 @@ export async function PUT(request: NextRequest) {
       extra: { error: parseError },
     });
   }
+  const previousDataUser = await prisma.user.findUnique({
+    where: { id: userId },
+    include: {
+      address: true,
+    },
+  });
 
   try {
     putData.id = userId;
     const updatedUser = await updateUserInDbAndHubspotAndClerk(putData);
+
+    await createChangeLog({
+      userId: adminUser.id,
+      entityId: userId,
+      entityName: 'USER',
+      previousValue: previousDataUser,
+      newValue: putData,
+    });
+
     return jsonResponse(updatedUser);
   } catch (error) {
     return errorResponse('unable to update user', 500, {

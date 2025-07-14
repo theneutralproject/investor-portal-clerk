@@ -1,5 +1,6 @@
 import { createInvestmentCompletedActivityItem } from '@/libs/activityFeedItem/utils.server';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 import { DealStage, DealUpdateSchema } from '@/libs/deal/schema';
 import { updateDeal } from '@/libs/deal/utils.server';
 import {
@@ -140,8 +141,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
+  let adminUser;
   try {
-    await getAdminFromRequest(request);
+    adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -170,6 +172,11 @@ export async function PUT(request: NextRequest) {
       extra: { error: parseError, method: 'parseError' },
     });
   }
+
+  const previousDataDeal = await prisma.deal.findUnique({
+    where: { id: dealId },
+  });
+
   try {
     await updateDeal(putData, true, true);
   } catch (error) {
@@ -211,6 +218,14 @@ export async function PUT(request: NextRequest) {
       projectSlug: deal.project.slug,
     });
   }
+
+  await createChangeLog({
+    userId: adminUser.id,
+    entityId: dealId,
+    entityName: 'DEAL',
+    previousValue: previousDataDeal,
+    newValue: putData,
+  });
 
   try {
     const {

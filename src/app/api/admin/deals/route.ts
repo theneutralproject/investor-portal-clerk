@@ -15,6 +15,7 @@ import {
 import { DealCreateSchema, DealStage } from '@/libs/deal/schema';
 import { createDealForUser } from '@/libs/deal/utils.server';
 import Logger from '@/libs/logger';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 
 /**
  * can filter by email, projectSlug, minDealstage (default = 5), maxDealstage (default = 5), includeTaxDocument (default = false)
@@ -195,8 +196,9 @@ export async function GET(request: NextRequest) {
  * @param request
  */
 export async function POST(request: NextRequest) {
+  let adminUser;
   try {
-    await getAdminFromRequest(request);
+    adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -270,6 +272,12 @@ export async function POST(request: NextRequest) {
 
   try {
     const newDeal = await createDealForUser(postData, ownerOrg.ownedBy, true);
+    await createChangeLog({
+      userId: adminUser.id,
+      entityId: newDeal.id,
+      entityName: 'DEAL',
+      newValue: postData,
+    });
     return jsonResponse(newDeal);
   } catch (error) {
     return errorResponse('unable to create deal', 500, {
