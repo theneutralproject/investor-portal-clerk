@@ -1,6 +1,6 @@
 'use server';
 import { NextRequest } from 'next/server';
-import { DealFinancingType, DealStatus, Prisma } from '@prisma/client';
+import { DealFinancingType, DealStatus } from '@prisma/client';
 
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils.server';
@@ -33,50 +33,11 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const { advisorFirmEmployee } = context;
 
-  // Pagination parameters
-  const url = new URL(request.url);
-  const search = url.searchParams.get('search')?.toLowerCase() || '';
-  const normalizedSearch = search?.toLowerCase();
-
-  let financingTypeFilter: DealFinancingType[] | null = null;
-
-  if (normalizedSearch === 'debt') {
-    financingTypeFilter = [
-      DealFinancingType.promissory_note_now,
-      DealFinancingType.promissory_to_equity,
-      DealFinancingType.promissory_note_at_closing,
-    ];
-  } else if (
-    Object.values(DealFinancingType).includes(
-      normalizedSearch as DealFinancingType
-    )
-  ) {
-    financingTypeFilter = [normalizedSearch as DealFinancingType];
-  }
-
-  const matchingUserIds: number[] = [];
-
-  const whereClause: Prisma.OrganizationWhereInput = {
-    advisorFirmId: advisorFirmEmployee.advisorFirmId,
-    ...(financingTypeFilter && {
-      deals: {
-        some: {
-          investmentStats: {
-            is: {
-              financingType: { in: financingTypeFilter },
-            },
-          },
-        },
-      },
-    }),
-    ...(matchingUserIds.length > 0 && {
-      ownerId: { in: matchingUserIds },
-    }),
-  };
-
   // Get client orgs from advisor firm
   const allOrgs = await prisma.organization.findMany({
-    where: whereClause,
+    where: {
+      advisorFirmId: advisorFirmEmployee.advisorFirmId,
+    },
     include: {
       ownedBy: {
         select: {
@@ -108,23 +69,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     },
   });
 
-  let filteredOrgs = allOrgs;
-
-  if (search && !financingTypeFilter?.length) {
-    filteredOrgs = allOrgs.filter(org => {
-      const searchLower = search.toLowerCase();
-      const fullName =
-        `${org.ownedBy.firstName} ${org.ownedBy.lastName}`.toLowerCase();
-
-      return (
-        org.name?.toLowerCase().includes(searchLower) ||
-        fullName.includes(searchLower) ||
-        org.ownedBy.email?.toLowerCase().includes(searchLower)
-      );
-    });
-  }
-
-  const dealsByClient: Record<string, any> = filteredOrgs.reduce(
+  const dealsByClient: Record<string, any> = allOrgs.reduce(
     (acc, org) => {
       const orgDeals = org.deals.filter(
         deal => deal.investmentStats && deal.project
