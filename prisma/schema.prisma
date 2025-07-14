@@ -431,7 +431,6 @@ model Changelog {
   previousValue Json
   newValue      Json
 
-  // Optional relation if you have a User model
   user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([entityId, entityName])
