@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 import { shareProjectDocsWithUser } from '@/libs/hubspot/utils.server';
 import Logger from '@/libs/logger';
 import { findOrCreateClerkUser } from '@/libs/maintenance/utils.server';
@@ -48,8 +49,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  let adminUser;
   try {
-    await getAdminFromRequest(request);
+    adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -104,6 +106,12 @@ export async function POST(request: NextRequest) {
         postData.projectSlug
       );
     }
+    await createChangeLog({
+      userId: adminUser.id,
+      entityId: newUser.id,
+      entityName: 'USER',
+      newValue: postData,
+    });
 
     return jsonResponse(userWithOrgs);
   } catch (error) {

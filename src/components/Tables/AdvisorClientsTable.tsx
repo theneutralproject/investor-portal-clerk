@@ -1,17 +1,9 @@
 'use client';
 
-import {
-  MaterialReactTable,
-  type MRT_ColumnDef,
-  type MRT_PaginationState,
-} from 'material-react-table';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { MaterialReactTable, type MRT_ColumnDef } from 'material-react-table';
+import React, { useEffect, useMemo, useRef } from 'react';
 import Box from '@mui/material/Box';
-import Input from '@mui/material/Input';
-import InputAdornment from '@mui/material/InputAdornment';
-import Search from '@mui/icons-material/Search';
 import { AppRouterInstance } from 'next/dist/shared/lib/app-router-context.shared-runtime';
-import { useDebouncedValue } from '@/app/hooks/useDebouncedValue';
 import { useAdvisorClients } from '@/app/hooks/useAdvisorClients';
 import { AdvisorClientsResponse } from '@/libs/types';
 import { isEqual } from 'lodash';
@@ -26,20 +18,7 @@ export default function AdvisorClientsTable({
   loadRequest?: boolean;
   getResults?: (data: AdvisorClientsResponse) => void;
 }) {
-  const [pagination, setPagination] = useState<MRT_PaginationState>({
-    pageIndex: 0,
-    pageSize: 100,
-  });
-
-  const [search, setSearch] = useState('');
-  const debouncedSearch = useDebouncedValue(search, 300);
-
-  const { data, isLoading, isError } = useAdvisorClients(
-    loadRequest ?? true,
-    pagination.pageIndex + 1,
-    pagination.pageSize,
-    debouncedSearch
-  );
+  const { data, isLoading, isError } = useAdvisorClients(loadRequest ?? true);
   const lastDataRef = useRef<AdvisorClientsResponse | null>(null);
 
   useEffect(() => {
@@ -62,6 +41,8 @@ export default function AdvisorClientsTable({
       {
         header: 'Name',
         id: 'name',
+        accessorKey: 'client.name',
+        enableGlobalFilter: true,
         maxSize: 120,
         grow: true,
         Cell: ({ row }: any) => {
@@ -78,7 +59,8 @@ export default function AdvisorClientsTable({
       },
       {
         header: 'Email',
-        accessorFn: row => row.client.email,
+        accessorKey: 'client.email',
+        enableGlobalFilter: true,
         id: 'email',
         maxSize: 156,
         grow: true,
@@ -95,38 +77,56 @@ export default function AdvisorClientsTable({
       {
         header: 'Types',
         accessorKey: 'dealTypes',
+        id: 'dealTypes',
+        enableGlobalFilter: true,
         maxSize: 156,
-        Cell: ({ cell }) => {
-          const financingType = cell.getValue();
-          const isArray = Array.isArray(financingType);
-          if (
-            (isArray && !financingType.length) ||
-            !financingType ||
-            financingType === ''
-          ) {
-            return '';
+        Cell: ({ row }) => {
+          const financingType: string = row.original.dealTypes;
+          const financingTypes = financingType.split(' ');
+
+          if (financingType === '') return '';
+
+          const hasEquity = financingTypes.includes(DealFinancingType.equity);
+          const hasDebt = financingTypes.some(
+            dealType => dealType !== DealFinancingType.equity
+          );
+
+          const tags = [];
+          if (hasEquity) {
+            tags.push(
+              <span
+                key="equity"
+                style={{
+                  backgroundColor: '#2e7d32',
+                  color: '#fff',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                }}
+              >
+                EQUITY
+              </span>
+            );
           }
 
-          const isEquity = isArray
-            ? financingType.some(type => type === DealFinancingType.equity)
-            : financingType === DealFinancingType.equity;
-          const dealType = isEquity ? 'equity' : 'debt';
-          const dealText = dealType.toUpperCase();
-          const dealColor = isEquity ? '#2e7d32' : '#1976d2';
-          return (
-            <span
-              key={dealType}
-              style={{
-                backgroundColor: dealColor,
-                color: '#fff',
-                padding: '2px 6px',
-                borderRadius: '4px',
-                fontSize: '0.75rem',
-              }}
-            >
-              {dealText}
-            </span>
-          );
+          if (hasDebt) {
+            tags.push(
+              <span
+                key="debt"
+                style={{
+                  backgroundColor: '#1976d2',
+                  color: '#fff',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                }}
+              >
+                DEBT
+              </span>
+            );
+          }
+
+          return <div style={{ display: 'flex', gap: '5px' }}>{tags}</div>;
         },
       },
       {
@@ -169,27 +169,30 @@ export default function AdvisorClientsTable({
     []
   );
 
-  const onSearch = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setSearch(e.target.value);
+  const tableData = useMemo(() => {
+    return (
+      data?.clients.map(row => ({
+        ...row,
+        dealTypes: row.dealTypes.join(' '), // transform for global filter
+      })) ?? []
+    );
+  }, [data]);
 
   return (
     <Box sx={{ width: '100%', overflowX: 'auto' }}>
       <MaterialReactTable
         columns={columns}
-        data={data?.clients ?? []}
-        manualPagination
+        data={tableData || []}
+        enableGlobalFilter
+        enablePagination
+        manualPagination={false}
+        manualFiltering={false}
         enableGrouping={false}
         enableColumnActions={false}
-        manualFiltering={false}
         enableFullScreenToggle={false}
-        enableGlobalFilter={false}
         enableColumnResizing={false}
         enableDensityToggle={false}
-        enableFilters={false}
-        positionGlobalFilter="right"
-        onPaginationChange={setPagination}
-        onGlobalFilterChange={setSearch}
-        rowCount={data?.pagination.total ?? 0}
+        positionGlobalFilter="left"
         layoutMode="grid-no-grow"
         muiTablePaperProps={{
           elevation: 0,
@@ -212,44 +215,26 @@ export default function AdvisorClientsTable({
             },
           },
         }}
-        renderTopToolbarCustomActions={() => (
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-start',
-              width: '100%',
-              p: 1,
-            }}
-          >
-            <Input
-              value={search}
-              onChange={onSearch}
-              placeholder="Search"
-              size="small"
-              disableUnderline
-              startAdornment={
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              }
-              sx={{
-                width: 471,
-                height: 36,
-                backgroundColor: 'white',
-                borderRadius: '8px',
-                fontSize: '14px',
-                paddingLeft: 1,
-                border: '1px solid rgba(0, 0, 0, 0.12)',
-                '&:hover': {
-                  borderColor: '#999',
-                },
-                '&.Mui-focused': {
-                  borderColor: '#1976d2',
-                },
-              }}
-            />
-          </Box>
-        )}
+        muiSearchTextFieldProps={{
+          placeholder: 'Search',
+          style: {
+            width: 471,
+            height: 36,
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            fontSize: '14px',
+            paddingLeft: 1,
+          },
+          sx: {
+            '&:hover': {
+              borderColor: '#999',
+            },
+            '&.Mui-focused': {
+              borderColor: '#1976d2',
+            },
+          },
+          variant: 'outlined',
+        }}
         muiTableHeadCellProps={{
           sx: {
             fontWeight: 'bold',
@@ -278,14 +263,44 @@ export default function AdvisorClientsTable({
             borderBottom: '1px solid #f0f0f0',
           },
         }}
+        initialState={{
+          pagination: {
+            pageSize: 100,
+            pageIndex: 0,
+          },
+        }}
         state={{
           isLoading,
-          pagination,
           showAlertBanner: isError,
+          showGlobalFilter: true,
         }}
         mrtTheme={() => ({
           baseBackgroundColor: '#ffffff',
         })}
+        filterFns={{
+          myCustomFilterFn: (row, columnId, filterValue) => {
+            const value = row.getValue<any>(columnId);
+
+            const filter = filterValue.toLowerCase();
+
+            if (columnId === 'dealTypes') {
+              const dealTypes = value.split(' ');
+              if (filter === 'debt') {
+                return dealTypes.some(
+                  (dealType: DealFinancingType | string) =>
+                    dealType !== '' && dealType !== DealFinancingType.equity
+                );
+              }
+
+              return dealTypes.some((v: string) =>
+                String(v).toLowerCase().includes(filter)
+              );
+            }
+
+            return String(value).toLowerCase().includes(filter);
+          },
+        }}
+        globalFilterFn="myCustomFilterFn"
       />
     </Box>
   );

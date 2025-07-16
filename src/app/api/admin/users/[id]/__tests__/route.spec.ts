@@ -14,6 +14,7 @@ jest.mock('@/libs/prisma.server', () => ({
     user: { findUnique: jest.fn() },
     organization: { findMany: jest.fn() },
     deal: { findMany: jest.fn() },
+    changelog: { create: jest.fn() },
   },
 }));
 
@@ -22,6 +23,7 @@ jest.mock('@/libs/user/utils.server', () => ({
 }));
 
 describe('/api/admin/users/[id]', () => {
+  const adminUser: any = { id: 1, email: 'admin@firm.com', role: 'ADMIN' };
   describe('GET', () => {
     it('returns 500 if admin check fails', async () => {
       (getAdminFromRequest as jest.Mock).mockRejectedValueOnce(
@@ -34,7 +36,7 @@ describe('/api/admin/users/[id]', () => {
     });
 
     it('returns 500 if userId is invalid', async () => {
-      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(true);
+      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(adminUser);
 
       const request = nextRequestMock({}, {}, 'GET', '/api/admin/users/abc');
       const res = await GET(request);
@@ -49,7 +51,7 @@ describe('/api/admin/users/[id]', () => {
         deals: [],
         advisorFirmId: 1,
       };
-      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(true);
+      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(adminUser);
       (prisma.user.findUnique as jest.Mock).mockResolvedValue({ id: 3 });
       (prisma.organization.findMany as jest.Mock).mockResolvedValue([
         organization,
@@ -82,7 +84,7 @@ describe('/api/admin/users/[id]', () => {
     });
 
     it('returns 500 if userId is invalid', async () => {
-      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(true);
+      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(adminUser);
 
       const request = nextRequestMock({}, {}, 'PUT', '/api/admin/users/abc');
       const res = await PUT(request);
@@ -90,7 +92,7 @@ describe('/api/admin/users/[id]', () => {
     });
 
     it('returns 500 if validation fails', async () => {
-      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(true);
+      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(adminUser);
 
       const request = nextRequestMock(
         {
@@ -104,8 +106,8 @@ describe('/api/admin/users/[id]', () => {
       expect(res.status).toBe(500);
     });
 
-    it('updates and returns user', async () => {
-      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(true);
+    it('updates and returns user and creates changelog', async () => {
+      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(adminUser);
       (updateUserInDbAndHubspotAndClerk as jest.Mock).mockResolvedValue({
         id: 3,
         email: 'user@example.com',
@@ -116,6 +118,13 @@ describe('/api/admin/users/[id]', () => {
         firstName: 'John',
         lastName: 'Doe',
       };
+      (prisma.changelog.create as jest.Mock).mockResolvedValue({
+        userId: adminUser.id,
+        entityId: 3,
+        entityName: 'USER',
+        previousValue: {},
+        newValue: validUserUpdate,
+      });
 
       const request = nextRequestMock(
         validUserUpdate,

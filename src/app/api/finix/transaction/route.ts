@@ -134,6 +134,16 @@ export async function POST(request: NextRequest) {
     }
 
     if (achTransferResponseData.state?.toUpperCase() === 'SUCCEEDED') {
+      await updateDeal(
+        {
+          hubspotId: deal.hubspotId,
+          closingDate: new Date(Date.now()),
+          dateFundsSent: new Date(Date.now()),
+          paymentMethod: PaymentMethod.ACH,
+          paymentReferenceId: achTransferResponseData.id,
+        },
+        true
+      );
       return jsonResponse({ message: 'The ACH transfer was successful' });
     }
 

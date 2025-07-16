@@ -1,6 +1,6 @@
 'use server';
 import { NextRequest } from 'next/server';
-import { DealFinancingType, DealStatus, Prisma } from '@prisma/client';
+import { DealFinancingType, DealStatus } from '@prisma/client';
 
 import prisma from '@/libs/prisma.server';
 import { jsonResponse } from '@/libs/utils.server';
@@ -13,7 +13,7 @@ import { DealWithInvestmentStats } from '@/libs/types';
 /**
  * GET /api/advisors/clients
  *
- * Fetches a paginated list of all advisor clients that belong to the advisor firm
+ * Fetches a list of all advisor clients that belong to the advisor firm
  * associated with the currently authenticated advisor user.
  *
  * For each client organization, the response includes:
@@ -23,10 +23,8 @@ import { DealWithInvestmentStats } from '@/libs/types';
  *
  * Authentication is required via Clerk. Only users with the `ADVISOR` role are allowed.
  *
- * Pagination is controlled via `page` and `limit` query parameters.
- *
  * @param {NextRequest} request - The incoming API request.
- * @returns {Promise<Response>} JSON response containing client summaries and pagination info.
+ * @returns {Promise<Response>} JSON response containing client summaries.
  */
 export async function GET(request: NextRequest): Promise<Response> {
   const context = await getAdvisorContext(request);
@@ -35,50 +33,11 @@ export async function GET(request: NextRequest): Promise<Response> {
 
   const { advisorFirmEmployee } = context;
 
-  // Pagination parameters
-  const url = new URL(request.url);
-  const search = url.searchParams.get('search')?.toLowerCase() || '';
-  const page = Number(url.searchParams.get('page') || '1');
-  const limit = Number(url.searchParams.get('limit') || '20');
-  const skip = (page - 1) * limit;
-  const normalizedSearch = search?.toLowerCase();
-
-  let financingTypeFilter: DealFinancingType[] | null = null;
-
-  if (normalizedSearch === 'debt') {
-    financingTypeFilter = [
-      DealFinancingType.promissory_note_now,
-      DealFinancingType.promissory_to_equity,
-      DealFinancingType.promissory_note_at_closing,
-    ];
-  } else if (
-    Object.values(DealFinancingType).includes(
-      normalizedSearch as DealFinancingType
-    )
-  ) {
-    financingTypeFilter = [normalizedSearch as DealFinancingType];
-  }
-
-  const whereClause: Prisma.OrganizationWhereInput = {
-    advisorFirmId: advisorFirmEmployee.advisorFirmId,
-    ...(financingTypeFilter && {
-      deals: {
-        some: {
-          investmentStats: {
-            is: {
-              financingType: { in: financingTypeFilter },
-            },
-          },
-        },
-      },
-    }),
-  };
-
   // Get client orgs from advisor firm
   const allOrgs = await prisma.organization.findMany({
-    where: whereClause,
-    skip,
-    take: limit,
+    where: {
+      advisorFirmId: advisorFirmEmployee.advisorFirmId,
+    },
     include: {
       ownedBy: {
         select: {
@@ -110,23 +69,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     },
   });
 
-  let filteredOrgs = allOrgs;
-
-  if (search && !financingTypeFilter?.length) {
-    filteredOrgs = allOrgs.filter(org => {
-      const searchLower = search.toLowerCase();
-      const fullName =
-        `${org.ownedBy.firstName} ${org.ownedBy.lastName}`.toLowerCase();
-
-      return (
-        org.name?.toLowerCase().includes(searchLower) ||
-        fullName.includes(searchLower) ||
-        org.ownedBy.email?.toLowerCase().includes(searchLower)
-      );
-    });
-  }
-
-  const dealsByClient: Record<string, any> = filteredOrgs.reduce(
+  const dealsByClient: Record<string, any> = allOrgs.reduce(
     (acc, org) => {
       const orgDeals = org.deals.filter(
         deal => deal.investmentStats && deal.project
@@ -201,21 +144,8 @@ export async function GET(request: NextRequest): Promise<Response> {
     });
   }
 
-  const total =
-    search || financingTypeFilter
-      ? investments.length
-      : await prisma.organization.count({
-          where: whereClause,
-        });
-
   const response: AdvisorClientsResponse = {
     clients: investments,
-    pagination: {
-      page,
-      limit,
-      total,
-      hasMore: skip + investments.length < total,
-    },
   };
 
   return jsonResponse(response);

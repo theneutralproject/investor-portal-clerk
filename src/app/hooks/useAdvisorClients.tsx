@@ -10,21 +10,11 @@ import { useQuery } from '@tanstack/react-query';
  * @param limit Number of items per page
  * @returns React Query result for advisor clients
  */
-export function useAdvisorClients(
-  loadRequest = false,
-  page = 1,
-  limit = 20,
-  search = ''
-) {
+export function useAdvisorClients(loadRequest = false) {
   return useQuery<AdvisorClientsResponse>({
-    queryKey: ['advisorClients', page, limit, search],
+    queryKey: ['advisorClients'],
     queryFn: async () => {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        search,
-      });
-      const res = await fetch(`/api/advisors/clients?${params.toString()}`);
+      const res = await fetch(`/api/advisors/clients`);
       if (!res.ok) throw new Error('Failed to fetch advisor clients');
       return res.json();
     },
