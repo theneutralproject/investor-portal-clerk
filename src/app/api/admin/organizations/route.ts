@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 import Logger from '@/libs/logger';
 import { OrganizationCreateSchema } from '@/libs/organization/schema';
 import prisma from '@/libs/prisma.server';
@@ -13,8 +14,9 @@ import { startCase } from 'lodash';
 import type { NextRequest } from 'next/server';
 
 export async function POST(request: NextRequest) {
+  let adminUser;
   try {
-    await getAdminFromRequest(request);
+    adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -100,6 +102,13 @@ export async function POST(request: NextRequest) {
   try {
     const newOrg = await prisma.organization.create({
       data,
+    });
+
+    await createChangeLog({
+      userId: adminUser.id,
+      entityId: newOrg.id,
+      entityName: 'ORGANIZATION',
+      newValue: newOrg,
     });
     return jsonResponse(newOrg);
   } catch (error) {
