@@ -1,4 +1,5 @@
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 import Logger from '@/libs/logger';
 import {
   OrganizationUpdateSchema,
@@ -14,8 +15,9 @@ import { isNumber } from 'lodash';
 import { NextRequest } from 'next/server';
 
 export async function PUT(request: NextRequest) {
+  let adminUser;
   try {
-    await getAdminFromRequest(request);
+    adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
     return jsonResponse(getErrorMessage(error), 500);
@@ -91,12 +93,30 @@ export async function PUT(request: NextRequest) {
       }
     }
 
+    const previousOrganizationValues = await prisma.organization.findUnique({
+      where: {
+        id: orgId,
+      },
+      include: { address: true },
+    });
+
     const updatedOrg = await prisma.organization.update({
       where: {
         id: orgId,
       },
       data: orgData,
       include: { address: true },
+    });
+
+    await createChangeLog({
+      userId: adminUser.id,
+      entityId: orgId,
+      entityName: 'ORGANIZATION',
+      previousValue: previousOrganizationValues,
+      newValue: {
+        ...previousOrganizationValues,
+        ...putData,
+      },
     });
     return jsonResponse(updatedOrg);
   } catch (error) {
