@@ -114,7 +114,8 @@ describe('POST /api/documents/store-metadata', () => {
       'documents/sample.pdf',
       'unique-key',
       1,
-      DealDocumentType.INVESTMENT_DOCUMENT
+      DealDocumentType.INVESTMENT_DOCUMENT,
+      undefined
     );
 
     expect(res).toEqual(
