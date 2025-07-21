@@ -70,15 +70,28 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const newDocEntry = await createDocumentEntry(
-    type,
-    id,
-    fileName,
-    path || payload.path,
-    key,
-    adminUser.id,
-    dealDocumentType
-  );
+  try {
+    const newDocEntry = await createDocumentEntry(
+      type,
+      id,
+      fileName,
+      path || payload.path,
+      key,
+      adminUser.id,
+      dealDocumentType,
+      payload.taxYear
+    );
 
-  return jsonResponse({ success: true, document: newDocEntry });
+    return jsonResponse({ success: true, document: newDocEntry });
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    return errorResponse(
+      `An error has occurred while trying to store document metadata: ${errorMessage}`,
+      500,
+      {
+        request,
+        extra: { error, errorMessage },
+      }
+    );
+  }
 }
