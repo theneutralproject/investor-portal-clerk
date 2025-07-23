@@ -8,7 +8,11 @@ interface TermsContextState {
   hasAcceptedCurrentRevision: boolean | null; // Null initially, boolean after API resolves
   showModal: boolean;
   acceptTerms: () => void;
-  setTermsStatus: (termStatus: { hasAcceptedCurrentRevision: boolean }) => void;
+  setTermsStatus: (termStatus: {
+    hasAcceptedCurrentRevision: boolean;
+    isAdvisor: boolean;
+  }) => void;
+  isAdvisor?: boolean;
 }
 
 // Create the context
@@ -22,6 +26,7 @@ export const TermsProvider: React.FC<{ children: React.ReactNode }> = ({
   const [onAcceptTerms, setOnAcceptTerms] = useState<boolean>(false);
   const [termsStatus, setTermsStatus] = useState<{
     hasAcceptedCurrentRevision: boolean;
+    isAdvisor: boolean;
   } | null>(null);
   const {
     data: dataAcceptTerms,
@@ -59,6 +64,7 @@ export const TermsProvider: React.FC<{ children: React.ReactNode }> = ({
         showModal,
         acceptTerms,
         setTermsStatus,
+        isAdvisor: termsStatus?.isAdvisor,
       }}
     >
       {children}
