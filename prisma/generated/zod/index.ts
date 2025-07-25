@@ -88,7 +88,7 @@ export const ProjectMilestonesScalarFieldEnumSchema = z.enum(['id','projectId','
 
 export const ProjectPictureScalarFieldEnumSchema = z.enum(['id','projectId','url','type']);
 
-export const ProjectDocumentScalarFieldEnumSchema = z.enum(['id','name','fileName','description','link','projectId','dealStage','financingTypes','documentType','docusignTemplateId','dateCreated','dateUpdated']);
+export const ProjectDocumentScalarFieldEnumSchema = z.enum(['id','name','fileName','description','link','projectId','dealStage','financingTypes','documentType','docusignTemplateId','dateCreated','dateUpdated','isPublic','requiresNDA']);
 
 export const ProjectReportScalarFieldEnumSchema = z.enum(['id','projectId','dateCreated','dateUpdated','quarter','year','path','name']);
 
@@ -562,6 +562,8 @@ export const ProjectDocumentSchema = z.object({
   docusignTemplateId: z.string().nullable(),
   dateCreated: z.coerce.date().nullable(),
   dateUpdated: z.coerce.date().nullable(),
+  isPublic: z.boolean(),
+  requiresNDA: z.boolean(),
 })
 
 export type ProjectDocument = z.infer<typeof ProjectDocumentSchema>
@@ -1312,6 +1314,8 @@ export const ProjectDocumentSelectSchema: z.ZodType<Prisma.ProjectDocumentSelect
   docusignTemplateId: z.boolean().optional(),
   dateCreated: z.boolean().optional(),
   dateUpdated: z.boolean().optional(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional(),
   documentEvents: z.union([z.boolean(),z.lazy(() => DocumentEventFindManyArgsSchema)]).optional(),
   project: z.union([z.boolean(),z.lazy(() => ProjectArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ProjectDocumentCountOutputTypeArgsSchema)]).optional(),
@@ -3326,6 +3330,8 @@ export const ProjectDocumentWhereInputSchema: z.ZodType<Prisma.ProjectDocumentWh
   docusignTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   dateCreated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  isPublic: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  requiresNDA: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
   project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict();
@@ -3343,6 +3349,8 @@ export const ProjectDocumentOrderByWithRelationInputSchema: z.ZodType<Prisma.Pro
   docusignTemplateId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   dateCreated: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   dateUpdated: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  isPublic: z.lazy(() => SortOrderSchema).optional(),
+  requiresNDA: z.lazy(() => SortOrderSchema).optional(),
   documentEvents: z.lazy(() => DocumentEventOrderByRelationAggregateInputSchema).optional(),
   project: z.lazy(() => ProjectOrderByWithRelationInputSchema).optional()
 }).strict();
@@ -3366,6 +3374,8 @@ export const ProjectDocumentWhereUniqueInputSchema: z.ZodType<Prisma.ProjectDocu
   docusignTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   dateCreated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  isPublic: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  requiresNDA: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
   documentEvents: z.lazy(() => DocumentEventListRelationFilterSchema).optional(),
   project: z.union([ z.lazy(() => ProjectScalarRelationFilterSchema),z.lazy(() => ProjectWhereInputSchema) ]).optional(),
 }).strict());
@@ -3383,6 +3393,8 @@ export const ProjectDocumentOrderByWithAggregationInputSchema: z.ZodType<Prisma.
   docusignTemplateId: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   dateCreated: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
   dateUpdated: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  isPublic: z.lazy(() => SortOrderSchema).optional(),
+  requiresNDA: z.lazy(() => SortOrderSchema).optional(),
   _count: z.lazy(() => ProjectDocumentCountOrderByAggregateInputSchema).optional(),
   _avg: z.lazy(() => ProjectDocumentAvgOrderByAggregateInputSchema).optional(),
   _max: z.lazy(() => ProjectDocumentMaxOrderByAggregateInputSchema).optional(),
@@ -3406,6 +3418,8 @@ export const ProjectDocumentScalarWhereWithAggregatesInputSchema: z.ZodType<Pris
   docusignTemplateId: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
   dateCreated: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+  isPublic: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
+  requiresNDA: z.union([ z.lazy(() => BoolWithAggregatesFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const ProjectReportWhereInputSchema: z.ZodType<Prisma.ProjectReportWhereInput> = z.object({
@@ -5728,6 +5742,8 @@ export const ProjectDocumentCreateInputSchema: z.ZodType<Prisma.ProjectDocumentC
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
   dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutDocumentInputSchema).optional(),
   project: z.lazy(() => ProjectCreateNestedOneWithoutDocumentsInputSchema)
 }).strict();
@@ -5745,6 +5761,8 @@ export const ProjectDocumentUncheckedCreateInputSchema: z.ZodType<Prisma.Project
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
   dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutDocumentInputSchema).optional()
 }).strict();
 
@@ -5759,6 +5777,8 @@ export const ProjectDocumentUpdateInputSchema: z.ZodType<Prisma.ProjectDocumentU
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutDocumentNestedInputSchema).optional(),
   project: z.lazy(() => ProjectUpdateOneRequiredWithoutDocumentsNestedInputSchema).optional()
 }).strict();
@@ -5776,6 +5796,8 @@ export const ProjectDocumentUncheckedUpdateInputSchema: z.ZodType<Prisma.Project
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutDocumentNestedInputSchema).optional()
 }).strict();
 
@@ -5791,7 +5813,9 @@ export const ProjectDocumentCreateManyInputSchema: z.ZodType<Prisma.ProjectDocum
   documentType: z.lazy(() => DocumentTypeSchema).optional(),
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
-  dateUpdated: z.coerce.date().optional().nullable()
+  dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional()
 }).strict();
 
 export const ProjectDocumentUpdateManyMutationInputSchema: z.ZodType<Prisma.ProjectDocumentUpdateManyMutationInput> = z.object({
@@ -5805,6 +5829,8 @@ export const ProjectDocumentUpdateManyMutationInputSchema: z.ZodType<Prisma.Proj
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectDocumentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.ProjectDocumentUncheckedUpdateManyInput> = z.object({
@@ -5820,6 +5846,8 @@ export const ProjectDocumentUncheckedUpdateManyInputSchema: z.ZodType<Prisma.Pro
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectReportCreateInputSchema: z.ZodType<Prisma.ProjectReportCreateInput> = z.object({
@@ -8066,7 +8094,9 @@ export const ProjectDocumentCountOrderByAggregateInputSchema: z.ZodType<Prisma.P
   documentType: z.lazy(() => SortOrderSchema).optional(),
   docusignTemplateId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
-  dateUpdated: z.lazy(() => SortOrderSchema).optional()
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  isPublic: z.lazy(() => SortOrderSchema).optional(),
+  requiresNDA: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ProjectDocumentAvgOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectDocumentAvgOrderByAggregateInput> = z.object({
@@ -8086,7 +8116,9 @@ export const ProjectDocumentMaxOrderByAggregateInputSchema: z.ZodType<Prisma.Pro
   documentType: z.lazy(() => SortOrderSchema).optional(),
   docusignTemplateId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
-  dateUpdated: z.lazy(() => SortOrderSchema).optional()
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  isPublic: z.lazy(() => SortOrderSchema).optional(),
+  requiresNDA: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ProjectDocumentMinOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectDocumentMinOrderByAggregateInput> = z.object({
@@ -8100,7 +8132,9 @@ export const ProjectDocumentMinOrderByAggregateInputSchema: z.ZodType<Prisma.Pro
   documentType: z.lazy(() => SortOrderSchema).optional(),
   docusignTemplateId: z.lazy(() => SortOrderSchema).optional(),
   dateCreated: z.lazy(() => SortOrderSchema).optional(),
-  dateUpdated: z.lazy(() => SortOrderSchema).optional()
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  isPublic: z.lazy(() => SortOrderSchema).optional(),
+  requiresNDA: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const ProjectDocumentSumOrderByAggregateInputSchema: z.ZodType<Prisma.ProjectDocumentSumOrderByAggregateInput> = z.object({
@@ -13979,6 +14013,8 @@ export const ProjectDocumentCreateWithoutProjectInputSchema: z.ZodType<Prisma.Pr
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
   dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional(),
   documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutDocumentInputSchema).optional()
 }).strict();
 
@@ -13994,6 +14030,8 @@ export const ProjectDocumentUncheckedCreateWithoutProjectInputSchema: z.ZodType<
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
   dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional(),
   documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutDocumentInputSchema).optional()
 }).strict();
 
@@ -14274,6 +14312,8 @@ export const ProjectDocumentScalarWhereInputSchema: z.ZodType<Prisma.ProjectDocu
   docusignTemplateId: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
   dateCreated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
   dateUpdated: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  isPublic: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
+  requiresNDA: z.union([ z.lazy(() => BoolFilterSchema),z.boolean() ]).optional(),
 }).strict();
 
 export const ProjectInvestmentStatsUpsertWithoutProjectInputSchema: z.ZodType<Prisma.ProjectInvestmentStatsUpsertWithoutProjectInput> = z.object({
@@ -15261,6 +15301,8 @@ export const ProjectDocumentCreateWithoutDocumentEventsInputSchema: z.ZodType<Pr
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
   dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional(),
   project: z.lazy(() => ProjectCreateNestedOneWithoutDocumentsInputSchema)
 }).strict();
 
@@ -15276,7 +15318,9 @@ export const ProjectDocumentUncheckedCreateWithoutDocumentEventsInputSchema: z.Z
   documentType: z.lazy(() => DocumentTypeSchema).optional(),
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
-  dateUpdated: z.coerce.date().optional().nullable()
+  dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional()
 }).strict();
 
 export const ProjectDocumentCreateOrConnectWithoutDocumentEventsInputSchema: z.ZodType<Prisma.ProjectDocumentCreateOrConnectWithoutDocumentEventsInput> = z.object({
@@ -15364,6 +15408,8 @@ export const ProjectDocumentUpdateWithoutDocumentEventsInputSchema: z.ZodType<Pr
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   project: z.lazy(() => ProjectUpdateOneRequiredWithoutDocumentsNestedInputSchema).optional()
 }).strict();
 
@@ -15380,6 +15426,8 @@ export const ProjectDocumentUncheckedUpdateWithoutDocumentEventsInputSchema: z.Z
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const UserUpsertWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserUpsertWithoutDocumentEventsInput> = z.object({
@@ -17364,7 +17412,9 @@ export const ProjectDocumentCreateManyProjectInputSchema: z.ZodType<Prisma.Proje
   documentType: z.lazy(() => DocumentTypeSchema).optional(),
   docusignTemplateId: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional().nullable(),
-  dateUpdated: z.coerce.date().optional().nullable()
+  dateUpdated: z.coerce.date().optional().nullable(),
+  isPublic: z.boolean().optional(),
+  requiresNDA: z.boolean().optional()
 }).strict();
 
 export const ProjectPaymentInfoCreateManyProjectInputSchema: z.ZodType<Prisma.ProjectPaymentInfoCreateManyProjectInput> = z.object({
@@ -17495,6 +17545,8 @@ export const ProjectDocumentUpdateWithoutProjectInputSchema: z.ZodType<Prisma.Pr
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutDocumentNestedInputSchema).optional()
 }).strict();
 
@@ -17510,6 +17562,8 @@ export const ProjectDocumentUncheckedUpdateWithoutProjectInputSchema: z.ZodType<
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutDocumentNestedInputSchema).optional()
 }).strict();
 
@@ -17525,6 +17579,8 @@ export const ProjectDocumentUncheckedUpdateManyWithoutProjectInputSchema: z.ZodT
   docusignTemplateId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  isPublic: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
+  requiresNDA: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const ProjectPaymentInfoUpdateWithoutProjectInputSchema: z.ZodType<Prisma.ProjectPaymentInfoUpdateWithoutProjectInput> = z.object({

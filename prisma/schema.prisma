@@ -301,6 +301,8 @@ model ProjectDocument {
   docusignTemplateId String?
   dateCreated        DateTime?           @default(now())
   dateUpdated        DateTime?           @updatedAt
+  isPublic           Boolean             @default(false) // New: Public vs Gated
+  requiresNDA        Boolean             @default(false) // New: NDA required
   documentEvents     DocumentEvent[]
   project            Project             @relation(fields: [projectId], references: [id])
 }
