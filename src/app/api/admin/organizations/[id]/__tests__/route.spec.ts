@@ -12,12 +12,19 @@ jest.mock('@/libs/prisma.server', () => ({
   default: {
     address: { upsert: jest.fn() },
     advisorFirm: { findUnique: jest.fn() },
-    organization: { update: jest.fn(), delete: jest.fn() },
+    organization: {
+      findUnique: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
     deal: { findMany: jest.fn() },
+    changelog: { create: jest.fn() },
   },
 }));
 
 describe('/api/admin/organizations/[id]', () => {
+  const adminUser: any = { id: 1, email: 'admin@sample.com', role: 'ADMIN' };
+
   describe('PUT', () => {
     it('returns 500 if admin check fails', async () => {
       (getAdminFromRequest as jest.Mock).mockRejectedValueOnce(
@@ -66,17 +73,37 @@ describe('/api/admin/organizations/[id]', () => {
     });
 
     it('updates organization and returns data', async () => {
-      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(true);
+      const organization = {
+        id: 1,
+        name: 'Org',
+        advisorFirmId: 1,
+      };
+      const newOrganizationData = {
+        ...organization,
+        name: 'Updated Org',
+      };
+      const changelog = {
+        userId: adminUser.id,
+        entityId: organization.id,
+        entityName: 'ORGANIZATION',
+        previousValue: organization,
+        newValue: newOrganizationData,
+        createdAt: new Date(),
+      };
+      (getAdminFromRequest as jest.Mock).mockResolvedValueOnce(adminUser);
       (prisma.advisorFirm.findUnique as jest.Mock).mockResolvedValueOnce({
         id: 1,
       });
-      (prisma.organization.update as jest.Mock).mockResolvedValueOnce({
-        id: 1,
-        name: 'Updated Org',
-      });
+      (prisma.organization.findUnique as jest.Mock).mockResolvedValueOnce(
+        organization
+      );
+      (prisma.organization.update as jest.Mock).mockResolvedValueOnce(
+        newOrganizationData
+      );
+      (prisma.changelog.create as jest.Mock).mockResolvedValue(changelog);
 
       const req = nextRequestMock(
-        { name: 'Updated Org', advisorFirmId: 1 },
+        newOrganizationData,
         {},
         'PUT',
         '/api/admin/organizations/1'
@@ -85,7 +112,13 @@ describe('/api/admin/organizations/[id]', () => {
       const json = await res.json();
 
       expect(res.status).toBe(200);
-      expect(json.name).toBe('Updated Org');
+      expect(json.name).toBe(newOrganizationData.name);
+      expect(prisma.changelog.create).toHaveBeenCalledWith({
+        data: {
+          ...changelog,
+          createdAt: expect.any(Date),
+        },
+      });
     });
   });
 
