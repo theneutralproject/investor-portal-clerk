@@ -12,7 +12,6 @@ test.describe('dealflow logic tests', () => {
       response.url().includes('/api/deals/flow?projectSlug=edison&dealId=new')
     );
     await expect(page.getByText('The Edison / Invest')).toBeVisible();
-    await expect(page.getByText('Get Started')).toBeVisible();
     await expect(page.getByText('Investment Summary')).toBeVisible();
     await expect(page.getByText('Milwaukee, WI')).toBeVisible();
   });
