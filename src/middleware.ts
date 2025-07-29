@@ -22,6 +22,7 @@ const ignoredRoutes = [
   '/api/finix/webhooks',
   '/api/clerk',
   '/api/public/projects',
+  '/api/documents/project',
   '/api/hubspot/token',
 ];
 

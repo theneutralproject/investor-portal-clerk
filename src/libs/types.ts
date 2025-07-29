@@ -20,6 +20,7 @@ import {
   DealConversion,
   AdvisorFirmEmployee,
   DealOwnershipType,
+  DocumentEvent,
 } from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
@@ -292,3 +293,7 @@ export interface AdvisorClientKPIsResponse {
   totalInvested: number;
   numberOfClients: number;
 }
+
+export type ProjectDocumentWithDocumentEvents = ProjectDocument & {
+  documentEvents: DocumentEvent[];
+};
