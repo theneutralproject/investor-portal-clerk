@@ -41,6 +41,8 @@ model User {
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
   Changelog                    Changelog[]
+
+  NDAAgreement NDAAgreement[]
 }
 
 model Deal {
@@ -437,6 +439,16 @@ model Changelog {
 
   @@index([entityId, entityName])
   @@index([userId])
+}
+
+model NDAAgreement {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @unique
+  accepted   Boolean  @default(true)
+  dateSigned DateTime @default(now())
+  revision   Int
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum AdvisorEmployeeRole {
