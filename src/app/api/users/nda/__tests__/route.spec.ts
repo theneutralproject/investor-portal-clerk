@@ -28,7 +28,7 @@ jest.mock('@/libs/prisma.server', () => ({
   },
 }));
 
-describe('/api/nda', () => {
+describe('/api/users/nda', () => {
   const CURRENT_REVISION = parseInt(
     process.env.NEXT_PUBLIC_CURRENT_NDA_REVISION || '1',
     10
@@ -38,7 +38,7 @@ describe('/api/nda', () => {
     jest.clearAllMocks();
   });
 
-  describe('POST /api/nda', () => {
+  describe('POST /api/users/nda', () => {
     it('should return 404 if Clerk user is not found', async () => {
       jest.mocked(getAuth).mockReturnValue({ userId: null } as any);
 
