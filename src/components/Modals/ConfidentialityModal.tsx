@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Typography,
   Link,
@@ -8,16 +8,34 @@ import {
   DialogActions,
   Button,
 } from '@mui/material';
+import useAcceptNDA from '@/app/hooks/useAcceptNDA';
 
 interface IConfidentialityModalProps {
   open: boolean;
   onClose: () => void;
+  documentsQueryKey: (string | number | undefined)[];
 }
 
 const ConfidentialityModal = ({
   open,
   onClose,
+  documentsQueryKey,
 }: IConfidentialityModalProps) => {
+  const [hasAcceptedNDA, setHasAcceptedNDA] = useState<boolean>(false);
+  const { isLoading, error, data } = useAcceptNDA(
+    hasAcceptedNDA,
+    documentsQueryKey
+  );
+  const onAcceptNDA = () => {
+    setHasAcceptedNDA(true);
+  };
+
+  useEffect(() => {
+    if (hasAcceptedNDA && data) {
+      onClose();
+    }
+  }, [hasAcceptedNDA, data, onClose]);
+
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md">
       <DialogTitle
@@ -29,7 +47,11 @@ const ConfidentialityModal = ({
           alignItems: 'center',
         }}
       >
-        <Typography variant="h6" sx={{ fontWeight: 500, fontSize: '20px' }}>
+        <Typography
+          variant="h6"
+          sx={{ fontWeight: 500, fontSize: '20px' }}
+          component={'span'}
+        >
           Accept Confidentiality Agreement to View
         </Typography>
       </DialogTitle>
@@ -46,6 +68,12 @@ const ConfidentialityModal = ({
           </Link>
           .
         </Typography>
+        {error && (
+          <Typography sx={{ mb: 2 }} color="error">
+            Sorry, an error has occurred while trying to accept confidentiality
+            agreement.
+          </Typography>
+        )}
       </DialogContent>
       <DialogActions>
         <Button
@@ -54,11 +82,13 @@ const ConfidentialityModal = ({
           sx={{
             bgcolor: 'black',
             borderRadius: 12,
+            textTransform: 'uppercase',
             '&:hover': { bgcolor: '#333' },
           }}
-          onClick={onClose}
+          onClick={onAcceptNDA}
+          loading={isLoading}
         >
-          I AGREE
+          I Agree
         </Button>
       </DialogActions>
     </Dialog>

@@ -40,6 +40,8 @@ const DocumentsNew = ({
   const canSeeDocument = (document: DocumentWithCompletion) =>
     document.isPublic || document.link !== '';
 
+  const documentsQueryKey = ['documents', project.id, 1];
+
   const {
     isLoading,
     isError,
@@ -118,6 +120,7 @@ const DocumentsNew = ({
         <ConfidentialityModal
           open={openNDAModal}
           onClose={handleCloseNDAModal}
+          documentsQueryKey={documentsQueryKey}
         />
       </CardContent>
     </Card>

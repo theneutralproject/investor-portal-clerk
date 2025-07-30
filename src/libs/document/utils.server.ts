@@ -69,7 +69,6 @@ export async function validateUser(request: NextRequest) {
  *
  * @example
  * const docs = await getProjectDocuments(101, 5);
- * console.log(docs);
  */
 export async function getProjectDocuments(
   projectId: number,
@@ -132,7 +131,6 @@ export async function getProjectDocuments(
  *
  * @example
  * const docs = await getProjectDocumentsWithAccessCheck(101, 'equity', 2, currentUser);
- * console.log(docs);
  */
 export async function getProjectDocumentsWithAccessCheck(
   projectId: number,
@@ -169,7 +167,6 @@ export async function getProjectDocumentsWithAccessCheck(
       ),
     }))
     .sort((a, b) => {
-      if (!a.link || !b.link) return 0;
       if (a.link.includes('youtube') && !b.link.includes('youtube')) return -1;
       if (!a.link.includes('youtube') && b.link.includes('youtube')) return 1;
       if (a.link.includes('docusign') && !b.link.includes('docusign')) return 1;

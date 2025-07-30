@@ -76,7 +76,6 @@ export async function POST(request: NextRequest) {
     });
 
     if (existingNDA && existingNDA.revision === CURRENT_REVISION) {
-      console.log(existingNDA);
       return jsonResponse({
         meta: {
           success: true,

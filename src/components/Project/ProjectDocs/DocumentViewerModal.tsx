@@ -83,7 +83,9 @@ const DocumentViewerModal = ({
           alignItems: 'center',
         }}
       >
-        <Typography variant="h6">Document Viewer</Typography>
+        <Typography variant="h6" component={'span'}>
+          Document Viewer
+        </Typography>
         <IconButton
           aria-label="close"
           onClick={onClose}
