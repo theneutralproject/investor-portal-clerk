@@ -28,11 +28,11 @@ const DocumentCard = ({
   loggedIn: boolean;
   handleViewDocument: (document: DocumentWithCompletion) => void;
   handleDownloadDocument: (document: DocumentWithCompletion) => void;
+  handleCloseNDAModal: () => void;
   handleSignDocument?: (document: DocumentWithCompletion) => void;
 }) => {
   const { openSignIn } = useClerk();
   const documentLocked = dealStage < document.dealStage;
-  const isDisabled = !document.link || document.link === '';
   const requiresLogin = !document.isPublic && !loggedIn;
 
   const handleSignIn = () => openSignIn();
@@ -112,7 +112,7 @@ const DocumentCard = ({
           onClick={() => {
             handleViewDocument(document);
           }}
-          disabled={isDisabled}
+          disabled={requiresLogin}
         >
           <VisibilityIcon />
         </IconButton>
@@ -120,7 +120,7 @@ const DocumentCard = ({
           <IconButton
             aria-label="download document"
             size="large"
-            disabled={isDisabled}
+            disabled={requiresLogin}
             onClick={() => {
               handleDownloadDocument(document);
             }}

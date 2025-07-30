@@ -11,6 +11,7 @@ import {
   captureDocumentDownloadEvent,
   captureDocumentViewEvent,
 } from '@/libs/posthog/events';
+import ConfidentialityModal from '@/components/Modals/ConfidentialityModal';
 
 type ApiError = {
   message: string;
@@ -24,11 +25,20 @@ const DocumentsNew = ({
   loggedIn: boolean;
 }) => {
   const [openModal, setOpenModal] = useState(false);
+  const [openNDAModal, setOpenNDAModal] = useState<boolean>(false);
   const [currentDocument, setCurrentDocument] = useState<
     DocumentWithCompletion | undefined
   >(undefined);
 
   const posthog = usePostHog();
+  const handleCloseNDAModal = () => {
+    setOpenNDAModal(false);
+  };
+  const handleOpenNDAModal = () => {
+    setOpenNDAModal(true);
+  };
+  const canSeeDocument = (document: DocumentWithCompletion) =>
+    document.isPublic || document.link !== '';
 
   const {
     isLoading,
@@ -47,6 +57,11 @@ const DocumentsNew = ({
     return <div>Error fetching documents: {error.message}</div>;
 
   const handleViewDocument = (document: DocumentWithCompletion) => {
+    if (!canSeeDocument(document) && loggedIn) {
+      handleOpenNDAModal();
+      return;
+    }
+
     captureDocumentViewEvent(posthog, {
       documentId: document.id,
       documentName: document.name,
@@ -58,6 +73,11 @@ const DocumentsNew = ({
   };
 
   const handleDownloadDocument = (document: DocumentWithCompletion) => {
+    if (!canSeeDocument(document) && loggedIn) {
+      handleOpenNDAModal();
+      return;
+    }
+
     captureDocumentDownloadEvent(posthog, {
       documentId: document.id,
       documentName: document.name,
@@ -91,7 +111,13 @@ const DocumentsNew = ({
           currentDocument={currentDocument}
           openModal={openModal}
           handleCloseModal={handleCloseModal}
+          handleCloseNDAModal={handleCloseNDAModal}
           loggedIn={loggedIn}
+        />
+
+        <ConfidentialityModal
+          open={openNDAModal}
+          onClose={handleCloseNDAModal}
         />
       </CardContent>
     </Card>
@@ -106,6 +132,7 @@ const DocumentsList = ({
   openModal,
   handleCloseModal,
   loggedIn,
+  handleCloseNDAModal,
 }: {
   documents: DocumentWithCompletion[];
   handleViewDocument: (document: DocumentWithCompletion) => void;
@@ -114,6 +141,7 @@ const DocumentsList = ({
   openModal: boolean;
   handleCloseModal: () => void;
   loggedIn: boolean;
+  handleCloseNDAModal: () => void;
 }) => {
   return (
     <>
@@ -126,6 +154,7 @@ const DocumentsList = ({
           handleDownloadDocument={handleDownloadDocument}
           data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-card`}
           loggedIn={loggedIn}
+          handleCloseNDAModal={handleCloseNDAModal}
         />
       ))}
       {currentDocument?.link && (
