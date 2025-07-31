@@ -60,7 +60,7 @@ const ConfidentialityModal = ({
         <Typography sx={{ mb: 2 }}>
           By clicking “I Agree”, you agree to our{' '}
           <Link
-            href="/confidentiality-agreement"
+            href="/terms/confidentiality"
             target="_blank"
             sx={{ color: 'rgba(0, 0, 0, 0.87)' }}
           >
