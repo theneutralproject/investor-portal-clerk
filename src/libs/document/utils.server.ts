@@ -6,9 +6,17 @@ import {
 } from '../types';
 import { getAuth } from '@clerk/nextjs/server';
 import { canSeeDocument } from '../nda/utils.server';
-import { DealFinancingType, DocumentEvent, Prisma, User } from '@prisma/client';
+import {
+  DealDocumentType,
+  DealFinancingType,
+  DocumentEvent,
+  Prisma,
+  User,
+} from '@prisma/client';
 import { storageClient } from '@/libs/supabase';
 import { DocumentEntityType } from './schema';
+import Logger from '../logger';
+import { ICreateGenericDocumentEntry } from './types';
 
 export async function validateAccess(
   dbUser: UserWithOrganizations,
@@ -207,3 +215,60 @@ export const createDocumentSignedUrl = async (
     bucketName,
   };
 };
+
+export async function createGenericDocumentEntry(
+  props: ICreateGenericDocumentEntry
+) {
+  const { type } = props;
+  Logger.log({
+    message: `Creating '${type}' document entry.`,
+    extra: props,
+  });
+  try {
+    if (type === 'deal') {
+      const { id, name, path, userId, dealDocumentType, taxYear } = props;
+      if (!dealDocumentType) {
+        throw new Error('Missing required dealDocumentType field');
+      }
+      if (dealDocumentType === DealDocumentType.K1 && !taxYear) {
+        throw new Error('Missing required taxYear field for K1 document');
+      }
+      return await prisma.dealDocument.create({
+        data: {
+          dealId: id,
+          name,
+          path,
+          type: dealDocumentType,
+          uploadedById: userId,
+          taxYear,
+        },
+      });
+    }
+
+    if (type === 'organization') {
+      const { id, name, path, userId, key } = props;
+      return await prisma.organizationDocument.create({
+        data: {
+          organizationId: id,
+          name,
+          path,
+          key,
+          uploadedById: userId,
+        },
+      });
+    }
+
+    if (type === 'project') {
+      return await prisma.projectDocument.create({
+        data: props,
+      });
+    }
+
+    throw new Error('Document type not permitted');
+  } catch (error) {
+    Logger.error(error, null, {
+      message: `Error creating document entry: ${(error as Error).message}`,
+    });
+    throw error;
+  }
+}
