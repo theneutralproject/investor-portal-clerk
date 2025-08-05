@@ -7,6 +7,8 @@ import {
 import { getAuth } from '@clerk/nextjs/server';
 import { canSeeDocument } from '../nda/utils.server';
 import { DealFinancingType, DocumentEvent, Prisma, User } from '@prisma/client';
+import { storageClient } from '@/libs/supabase';
+import { DocumentEntityType } from './schema';
 
 export async function validateAccess(
   dbUser: UserWithOrganizations,
@@ -175,3 +177,33 @@ export async function getProjectDocumentsWithAccessCheck(
       return 0;
     });
 }
+
+export const createDocumentSignedUrl = async (
+  type: DocumentEntityType,
+  id: number | string,
+  fileName: string,
+  projectName?: string
+) => {
+  if (!id) {
+    throw new Error(`${type} ID is required`);
+  }
+
+  const isProject = type === 'project';
+  const projectFolder = isProject ? projectName?.replaceAll(' ', '') : '';
+  const folder = isProject ? projectFolder : `${type}-${id}`;
+  const bucketName = `${type}-documents`;
+
+  const { data, error } = await storageClient
+    .from(bucketName)
+    .createSignedUploadUrl(`${folder}/${fileName}`);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    ...data,
+    folder,
+    bucketName,
+  };
+};

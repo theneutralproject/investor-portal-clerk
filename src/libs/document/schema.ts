@@ -162,3 +162,25 @@ export const FILE_VALIDATION = {
   MAX_FILE_SIZE,
   sizeInMB,
 };
+
+export type DocumentEntityType = 'deal' | 'organization' | 'project';
+export const zDocumentEntityType = z.enum(['deal', 'organization', 'project']);
+export type DocumentEntityTypeSchema = z.infer<typeof zDocumentEntityType>;
+
+export const zDocumentSignedUrlCreateSchema = z.object({
+  entityId: z.union([z.string(), z.number()]).transform(val => {
+    const num = Number(val);
+    if (isNaN(num)) {
+      throw new Error('entityId must be a valid number');
+    }
+    return num;
+  }),
+
+  fileName: z.string().min(1, { message: 'fileName is required' }),
+
+  entityType: zDocumentEntityType,
+});
+
+export type DocumentSignedURLCreateSchema = z.infer<
+  typeof zDocumentSignedUrlCreateSchema
+>;
