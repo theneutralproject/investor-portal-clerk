@@ -1,4 +1,9 @@
-import { DealDocumentType, DocumentEventType } from '@prisma/client';
+import {
+  DealDocumentType,
+  DealFinancingType,
+  DocumentEventType,
+  DocumentType,
+} from '@prisma/client';
 import { z } from 'zod';
 
 const ACCEPTED_FILE_TYPES = [
@@ -184,3 +189,41 @@ export const zDocumentSignedUrlCreateSchema = z.object({
 export type DocumentSignedURLCreateSchema = z.infer<
   typeof zDocumentSignedUrlCreateSchema
 >;
+
+export const zDealOrOrganizationDocumentCreateSchema = z.object({
+  type: z.union([z.literal('deal'), z.literal('organization')]),
+  id: z.number().int().positive(),
+  name: z.string().min(1),
+  path: z.string().min(1),
+  key: z.string().min(1),
+  userId: z.number().int().positive(),
+  dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
+  taxYear: z.number().int().optional(),
+});
+
+export type DealOrOrganizationDocumentCreateSchema = z.infer<
+  typeof zDealOrOrganizationDocumentCreateSchema
+>;
+
+export const zProjectDocumentCreateSchema = z.object({
+  type: z.literal('project'),
+  name: z.string().min(1),
+  fileName: z.string().min(1),
+  description: z.string().optional(),
+  link: z.string().url(),
+  projectId: z.number().int().positive(),
+  dealStage: z.number().int(),
+  financingTypes: z.array(z.nativeEnum(DealFinancingType)).optional(),
+  documentType: z.nativeEnum(DocumentType),
+  docusignTemplateId: z.string().optional(),
+  isPublic: z.boolean(),
+  requiresNDA: z.boolean(),
+});
+
+export type ProjectDocumentCreateSchema = z.infer<
+  typeof zProjectDocumentCreateSchema
+>;
+
+export type DocumentCreateGenericSchema =
+  | ProjectDocumentCreateSchema
+  | DealOrOrganizationDocumentCreateSchema;

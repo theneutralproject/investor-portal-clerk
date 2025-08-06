@@ -14,9 +14,8 @@ import {
   User,
 } from '@prisma/client';
 import { storageClient } from '@/libs/supabase';
-import { DocumentEntityType } from './schema';
+import { DocumentEntityType, DocumentCreateGenericSchema } from './schema';
 import Logger from '../logger';
-import { ICreateGenericDocumentEntry } from './types';
 
 export async function validateAccess(
   dbUser: UserWithOrganizations,
@@ -217,13 +216,15 @@ export const createDocumentSignedUrl = async (
 };
 
 export async function createGenericDocumentEntry(
-  props: ICreateGenericDocumentEntry
+  props: DocumentCreateGenericSchema
 ) {
   const { type } = props;
+
   Logger.log({
     message: `Creating '${type}' document entry.`,
     extra: props,
   });
+
   try {
     if (type === 'deal') {
       const { id, name, path, userId, dealDocumentType, taxYear } = props;
