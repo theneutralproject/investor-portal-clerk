@@ -198,7 +198,7 @@ export const createDocumentSignedUrl = async (
 
   const isProject = type === 'project';
   const projectFolder = isProject ? projectName?.replaceAll(' ', '') : '';
-  const folder = isProject ? projectFolder : `${type}-${id}`;
+  const folder = isProject ? projectFolder || '' : `${type}-${id}`;
   const bucketName = `${type}-documents`;
 
   const { data, error } = await storageClient
