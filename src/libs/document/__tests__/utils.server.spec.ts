@@ -1,8 +1,18 @@
+import { getAuth } from '@clerk/nextjs/server';
+import {
+  DealDocumentType,
+  DealFinancingType,
+  DocumentType,
+} from '@prisma/client';
 import prisma from '@/libs/prisma.server';
-import { createDocumentSignedUrl, validateUser } from '../utils.server';
+import {
+  createDocumentSignedUrl,
+  createGenericDocumentEntry,
+  validateUser,
+} from '../utils.server';
 import { storageClient } from '@/libs/supabase';
 import { nextRequestMock } from '@/mocks/nextRequest.mock';
-import { getAuth } from '@clerk/nextjs/server';
+import Logger from '@/libs/logger';
 
 const API_PATH = '/any/route';
 
@@ -40,6 +50,14 @@ jest.mock('@/libs/supabase', () => ({
     from: jest.fn(() => ({
       createSignedUploadUrl: jest.fn(),
     })),
+  },
+}));
+
+jest.mock('@/libs/logger', () => ({
+  __esModule: true,
+  default: {
+    log: jest.fn(),
+    error: jest.fn(),
   },
 }));
 
@@ -194,6 +212,217 @@ describe('document/utils.server.ts', () => {
           folder: '',
           bucketName: 'project-documents',
         });
+      });
+    });
+  });
+
+  describe('createGenericDocumentEntry', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('deal', () => {
+      it('creates a deal document', async () => {
+        const input = {
+          type: 'deal' as const,
+          id: 1,
+          name: 'Deal Doc',
+          path: '/deal.pdf',
+          key: 'k',
+          userId: 10,
+          dealDocumentType: DealDocumentType.VERIFICATION_ACCREDITATION,
+        };
+
+        (prisma.dealDocument.create as jest.Mock).mockResolvedValue({ id: 99 });
+
+        const result = await createGenericDocumentEntry(input);
+        expect(result).toEqual({ id: 99 });
+
+        expect(prisma.dealDocument.create).toHaveBeenCalledWith({
+          data: {
+            dealId: input.id,
+            name: input.name,
+            path: input.path,
+            type: input.dealDocumentType,
+            uploadedById: input.userId,
+            taxYear: undefined,
+          },
+        });
+      });
+
+      it('throws if dealDocumentType is missing', async () => {
+        const input = {
+          type: 'deal' as const,
+          id: 1,
+          name: 'Deal Doc',
+          path: '/deal.pdf',
+          key: 'k',
+          userId: 10,
+        };
+
+        await expect(createGenericDocumentEntry(input as any)).rejects.toThrow(
+          'Missing required dealDocumentType field'
+        );
+        expect(Logger.error).toHaveBeenCalled();
+      });
+
+      it('throws if K1 document is missing taxYear', async () => {
+        const input = {
+          type: 'deal' as const,
+          id: 1,
+          name: 'K1 Doc',
+          path: '/k1.pdf',
+          key: 'k',
+          userId: 10,
+          dealDocumentType: DealDocumentType.K1,
+        };
+
+        await expect(createGenericDocumentEntry(input as any)).rejects.toThrow(
+          'Missing required taxYear field for K1 document'
+        );
+        expect(Logger.error).toHaveBeenCalled();
+      });
+
+      it('logs and throws if prisma.dealDocument.create fails', async () => {
+        const errorMessage = 'DB error';
+        const input = {
+          type: 'deal' as const,
+          id: 1,
+          name: 'Deal Doc',
+          path: '/deal.pdf',
+          key: 'k',
+          userId: 10,
+          dealDocumentType: DealDocumentType.VERIFICATION_ACCREDITATION,
+        };
+
+        (prisma.dealDocument.create as jest.Mock).mockRejectedValue(
+          new Error(errorMessage)
+        );
+
+        await expect(createGenericDocumentEntry(input)).rejects.toThrow(
+          errorMessage
+        );
+        expect(Logger.error).toHaveBeenCalled();
+      });
+    });
+
+    describe('organization', () => {
+      it('creates an organization document', async () => {
+        const input = {
+          type: 'organization' as const,
+          id: 2,
+          name: 'Org Doc',
+          path: '/org.pdf',
+          key: 'org-key',
+          userId: 22,
+        };
+
+        (prisma.organizationDocument.create as jest.Mock).mockResolvedValue({
+          id: 88,
+        });
+
+        const result = await createGenericDocumentEntry(input);
+        expect(result).toEqual({ id: 88 });
+
+        expect(prisma.organizationDocument.create).toHaveBeenCalledWith({
+          data: {
+            organizationId: input.id,
+            name: input.name,
+            path: input.path,
+            key: input.key,
+            uploadedById: input.userId,
+          },
+        });
+      });
+
+      it('logs and throws if prisma.organizationDocument.create fails', async () => {
+        const errorMessage = 'Org create failed';
+        const input = {
+          type: 'organization' as const,
+          id: 2,
+          name: 'Org Doc',
+          path: '/org.pdf',
+          key: 'org-key',
+          userId: 22,
+        };
+
+        (prisma.organizationDocument.create as jest.Mock).mockRejectedValue(
+          new Error(errorMessage)
+        );
+
+        await expect(createGenericDocumentEntry(input)).rejects.toThrow(
+          errorMessage
+        );
+        expect(Logger.error).toHaveBeenCalled();
+      });
+    });
+
+    describe('project', () => {
+      it('creates a project document', async () => {
+        const input = {
+          type: 'project' as const,
+          name: 'Project Doc',
+          fileName: 'project.pdf',
+          description: 'desc',
+          link: 'https://example.com',
+          projectId: 5,
+          dealStage: 1,
+          financingTypes: [DealFinancingType.equity],
+          documentType: DocumentType.DOCUMENT,
+          isPublic: true,
+          requiresNDA: false,
+        };
+
+        (prisma.projectDocument.create as jest.Mock).mockResolvedValue({
+          id: 77,
+        });
+
+        const result = await createGenericDocumentEntry(input);
+        expect(result).toEqual({ id: 77 });
+
+        expect(prisma.projectDocument.create).toHaveBeenCalledWith({
+          data: input,
+        });
+      });
+
+      it('throws if unknown type', async () => {
+        const invalid: any = {
+          type: 'invalid',
+          id: 1,
+          name: 'Doc',
+          path: '/doc.pdf',
+        };
+
+        await expect(createGenericDocumentEntry(invalid)).rejects.toThrow(
+          'Document type not permitted'
+        );
+        expect(Logger.error).toHaveBeenCalled();
+      });
+
+      it('logs and throws if prisma.projectDocument.create fails', async () => {
+        const errorMessage = 'Project creation failed';
+        const input = {
+          type: 'project' as const,
+          name: 'Project Doc',
+          fileName: 'project.pdf',
+          description: 'desc',
+          link: 'https://example.com',
+          projectId: 5,
+          dealStage: 1,
+          financingTypes: [DealFinancingType.equity],
+          documentType: DocumentType.DOCUMENT,
+          isPublic: true,
+          requiresNDA: false,
+        };
+
+        (prisma.projectDocument.create as jest.Mock).mockRejectedValue(
+          new Error(errorMessage)
+        );
+
+        await expect(createGenericDocumentEntry(input)).rejects.toThrow(
+          errorMessage
+        );
+        expect(Logger.error).toHaveBeenCalled();
       });
     });
   });
