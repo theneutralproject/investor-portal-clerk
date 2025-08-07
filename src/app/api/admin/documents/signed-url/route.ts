@@ -46,8 +46,10 @@ const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
  *    }
  *    ```
  *  - `400 Bad Request` if Zod validation fails
+ *  - `401` if authentication fails
  *  - `404 Not Found` if the referenced entity (project, deal, or organization) does not exist
  *  - `500 Internal Server Error` if authentication fails or an unexpected error occurs
+ *  - `500` if internal error occurs
  *
  * @throws Will return a JSON error response with appropriate status code and message if:
  *  - Admin authentication fails
@@ -69,12 +71,11 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     adminUser = await getAdminFromRequest(request);
   } catch (error) {
-    Logger.log({ message: getErrorMessage(error) }, request);
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 401, { request });
   }
 
   if (!adminUser) {
-    return errorResponse('admin user not found', 500, { request });
+    return errorResponse('admin user not found', 401, { request });
   }
 
   const payload = await request.json();

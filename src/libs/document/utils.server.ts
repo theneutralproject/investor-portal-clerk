@@ -320,3 +320,91 @@ export async function createGenericDocumentEntry(
     throw error;
   }
 }
+
+export const getGenericDocument = async (
+  entity: string,
+  docId: number
+): Promise<{ name: string; path: string; bucketName: string }> => {
+  let name;
+  let path;
+  let fileDocument;
+
+  if (entity === 'deal') {
+    fileDocument = await prisma.dealDocument.findUnique({
+      where: {
+        id: docId,
+      },
+      select: {
+        path: true,
+        name: true,
+      },
+    });
+    name = fileDocument?.name;
+    path = fileDocument?.path;
+  }
+
+  if (entity === 'organization') {
+    fileDocument = await prisma.organizationDocument.findUnique({
+      where: {
+        id: docId,
+      },
+      select: {
+        path: true,
+        name: true,
+      },
+    });
+    name = fileDocument?.name;
+    path = fileDocument?.path;
+  }
+
+  if (entity === 'project') {
+    fileDocument = await prisma.projectDocument.findUnique({
+      where: {
+        id: docId,
+      },
+      select: {
+        fileName: true,
+        project: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    name = fileDocument?.fileName;
+    path = fileDocument?.project.name.replaceAll(' ', '') || '';
+  }
+
+  if (!fileDocument) {
+    throw new APIError(`Document from '${entity}' not found`, 404);
+  }
+  if (!name) {
+    throw new APIError(`File name invalid for file`, 500);
+  }
+  if (!path) {
+    throw new APIError(`Path invalid for file '${name}'`, 500);
+  }
+
+  return {
+    name,
+    path,
+    bucketName: `${entity}-documents`,
+  };
+};
+
+export const deleteGenericDocument = async (entity: string, docId: number) => {
+  const entityDeleteHandlers = {
+    deal: () => prisma.dealDocument.delete({ where: { id: docId } }),
+    organization: () =>
+      prisma.organizationDocument.delete({ where: { id: docId } }),
+    project: () => prisma.projectDocument.delete({ where: { id: docId } }),
+  } as const;
+
+  const handler =
+    entityDeleteHandlers[entity as keyof typeof entityDeleteHandlers];
+  if (!handler) {
+    throw new APIError(`Unsupported entity type '${entity}'`, 400);
+  }
+
+  await handler();
+};

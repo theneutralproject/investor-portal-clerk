@@ -36,7 +36,7 @@ describe('POST /api/documents/signed-url', () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-key';
   });
 
-  it('returns 500 if getAdminFromRequest throws', async () => {
+  it('returns 401 if getAdminFromRequest throws', async () => {
     jest
       .mocked(getAdminFromRequest)
       .mockRejectedValue(new Error('auth failed'));
@@ -44,17 +44,17 @@ describe('POST /api/documents/signed-url', () => {
     const req = nextRequestMock(validPayload);
     const res = await POST(req as any);
 
-    expect(res).toEqual(jsonResponse('auth failed', 500));
+    expect(res).toEqual(jsonResponse({ error: 'auth failed' }, 401));
   });
 
-  it('returns 500 if adminUser is null', async () => {
+  it('returns 401 if adminUser is null', async () => {
     jest.mocked(getAdminFromRequest).mockResolvedValue(null as any);
 
     const req = nextRequestMock(validPayload);
     const res = await POST(req as any);
 
     expect(res).toEqual(
-      errorResponse('admin user not found', 500, {
+      errorResponse('admin user not found', 401, {
         request: expect.any(Object),
       })
     );

@@ -1,17 +1,16 @@
 openapi: 3.0.3
 info:
-  title: Admin Document Download API
-  version: 1.0.0
+  title: Admin Document Management API
+  version: 1.0.1
   description: >
-    Endpoint to download documents from Supabase Storage based on entity type and document ID.
-    Requires admin authentication.
+    Authenticated admin endpoints for downloading and deleting documents from Supabase Storage and the database.
 
 paths:
   /api/admin/documents:
-    get:
-      summary: Download document by entity and ID
+    delete:
+      summary: Delete document by entity and ID
       description: >
-        Authenticated admin route that downloads a file from Supabase Storage for a specific document.
+        Authenticated admin route that deletes a document from Supabase Storage and the database.
         Supports documents associated with a `deal`, `organization`, or `project`.
       tags:
         - Documents
@@ -26,23 +25,24 @@ paths:
         - in: query
           name: docId
           required: true
-          description: The numeric ID of the document to download.
+          description: The ID of the document to delete.
           schema:
             type: integer
             format: int64
       responses:
         '200':
-          description: Successfully downloaded the document
+          description: Document deleted successfully
           content:
-            application/octet-stream:
+            application/json:
               schema:
-                type: string
-                format: binary
-          headers:
-            Content-Disposition:
-              description: Indicates the filename of the downloaded document
-              schema:
-                type: string
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Document deleted successfully
         '400':
           description: Missing or invalid query parameters
           content:
@@ -55,7 +55,7 @@ paths:
                   details:
                     type: object
         '401':
-          description: Authentication failed (e.g., missing or invalid token)
+          description: Authentication failed
           content:
             application/json:
               schema:
@@ -63,9 +63,8 @@ paths:
                 properties:
                   error:
                     type: string
-                    example: admin user not found
         '404':
-          description: Document or file not found in storage
+          description: Document or file not found
           content:
             application/json:
               schema:
@@ -74,7 +73,7 @@ paths:
                   error:
                     type: string
         '500':
-          description: Server error during file resolution or download
+          description: Server error during deletion
           content:
             application/json:
               schema:

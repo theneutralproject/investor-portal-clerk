@@ -28,7 +28,8 @@ import { createGenericDocumentEntry } from '@/libs/document/utils.server';
  * @returns {Promise<Response>} JSON response:
  *  - `200` with `{ success: true, document }` on success
  *  - `400` if validation fails
- *  - `500` if authentication fails or a database error occurs
+ *  - `401` if authentication fails
+ *  - `500` if internal error occurs
  *
  * @throws Will throw a generic error if authentication fails or internal logic errors occur.
  *
@@ -50,12 +51,11 @@ export async function POST(request: NextRequest): Promise<Response> {
   try {
     adminUser = await getAdminFromRequest(request);
   } catch (error) {
-    Logger.log({ message: getErrorMessage(error) }, request);
-    return jsonResponse(getErrorMessage(error), 500);
+    return errorResponse(getErrorMessage(error), 401, { request });
   }
 
   if (!adminUser) {
-    return errorResponse('admin user not found', 500, { request });
+    return errorResponse('admin user not found', 401, { request });
   }
 
   const payload = await request.json();

@@ -9,8 +9,11 @@ import Logger from '@/libs/logger';
 import { zDocumentDownloadSchema } from '@/libs/document/schema';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { APIError } from '@/libs/types';
-import prisma from '@/libs/prisma.server';
 import { storageClient } from '@/libs/supabase';
+import {
+  deleteGenericDocument,
+  getGenericDocument,
+} from '@/libs/document/utils.server';
 
 /**
  * @function GET
@@ -34,8 +37,9 @@ import { storageClient } from '@/libs/supabase';
  * @returns {Promise<Response>} Response:
  *  - `200` with a file stream and headers to trigger download
  *  - `400` if query params are missing or invalid
+ *  - `401` if authentication fails
  *  - `404` if the document or file is not found
- *  - `500` if authentication fails or internal error occurs
+ *  - `500` if internal error occurs
  *
  * @throws {APIError} Structured application-level error if validation, auth, or file resolution fails
  *
@@ -44,6 +48,105 @@ import { storageClient } from '@/libs/supabase';
  *   -H "Authorization: Bearer your-token"
  */
 export async function GET(request: NextRequest): Promise<Response> {
+  let adminUser: User | null = null;
+  try {
+    adminUser = await getAdminFromRequest(request);
+  } catch (error) {
+    return errorResponse(getErrorMessage(error), 401, { request });
+  }
+
+  if (!adminUser) {
+    return errorResponse('admin user not found', 401, { request });
+  }
+
+  const { searchParams } = new URL(request.url);
+
+  const type = searchParams.get('entity');
+  const id = searchParams.get('docId');
+
+  if (!type) {
+    return errorResponse('entity param is missing', 400, { request });
+  }
+
+  if (!id) {
+    return errorResponse('docId param is missing', 400, { request });
+  }
+
+  const validationResult = zDocumentDownloadSchema.safeParse({
+    entity: type,
+    docId: id,
+  });
+
+  if (!validationResult.success) {
+    Logger.error('Validation errors:', request, {
+      validationError: validationResult.error,
+    });
+    return jsonResponse(
+      {
+        error: 'Validation failed',
+        details: validationResult.error.format(),
+      },
+      400
+    );
+  }
+  const { docId, entity } = validationResult.data;
+
+  try {
+    const fileData = await getGenericDocument(entity, docId);
+
+    const { data, error } = await storageClient
+      .from(fileData.bucketName)
+      .download(fileData.path);
+
+    if (error || !data) {
+      throw new APIError('File not found', 404);
+    }
+
+    return new Response(data, {
+      headers: {
+        'Content-Type': data.type,
+        'Content-Disposition': `attachment; filename="${fileData.name}"`,
+      },
+    });
+  } catch (error) {
+    return errorResponse(
+      (error as Error).message,
+      (error as APIError).status || 500,
+      { request }
+    );
+  }
+}
+
+/**
+ * @function DELETE
+ * @description
+ * DELETE handler for removing a document and its metadata from both Supabase Storage and the database.
+ *
+ * **Endpoint:** `DELETE /api/admin/documents?entity={entity}&docId={docId}`
+ *
+ * This route:
+ *  - Authenticates the admin user.
+ *  - Parses and validates the query parameters (`entity` and `docId`).
+ *  - Fetches the file's metadata and location via `getGenericDocument`.
+ *  - Deletes the file from Supabase Storage.
+ *  - Deletes the document metadata from the database via `deleteGenericDocument`.
+ *  - Returns success or a structured 4xx/5xx error response.
+ *
+ * @param {NextRequest} request - The incoming request object from Next.js
+ *
+ * @returns {Promise<Response>} JSON response:
+ *  - `200` with `{ success: true, message }` on successful deletion
+ *  - `400` if query params are missing or validation fails
+ *  - `401` if authentication fails
+ *  - `404` if the document or file is not found
+ *  - `500` if internal error occurs
+ *
+ * @throws Will return a structured error response if validation, auth, or internal logic fails.
+ *
+ * @example
+ * curl -X DELETE /api/admin/documents?entity=deal&docId=123
+ */
+export async function DELETE(request: NextRequest): Promise<Response> {
   let adminUser: User | null = null;
   try {
     adminUser = await getAdminFromRequest(request);
@@ -89,80 +192,25 @@ export async function GET(request: NextRequest): Promise<Response> {
   const { docId, entity } = validationResult.data;
 
   try {
-    const fileData: { name?: string; path?: string } = {};
-    let fileDocument;
-    const bucketName = `${entity}-documents`;
+    const fileData = await getGenericDocument(entity, docId);
 
-    if (entity === 'deal') {
-      fileDocument = await prisma.dealDocument.findUnique({
-        where: {
-          id: docId,
-        },
-        select: {
-          path: true,
-          name: true,
-        },
-      });
-      fileData.name = fileDocument?.name;
-      fileData.path = fileDocument?.path;
+    const { error: storageError } = await storageClient
+      .from(fileData.bucketName)
+      .remove([fileData.path]);
+
+    if (storageError) {
+      throw new APIError(
+        `Failed to delete file in storage: ${storageError.message}`,
+        500
+      );
     }
 
-    if (entity === 'organization') {
-      fileDocument = await prisma.organizationDocument.findUnique({
-        where: {
-          id: docId,
-        },
-        select: {
-          path: true,
-          name: true,
-        },
-      });
-      fileData.name = fileDocument?.name;
-      fileData.path = fileDocument?.path;
-    }
+    await deleteGenericDocument(entity, docId);
 
-    if (entity === 'project') {
-      fileDocument = await prisma.projectDocument.findUnique({
-        where: {
-          id: docId,
-        },
-        select: {
-          fileName: true,
-          project: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-      fileData.name = fileDocument?.fileName;
-      fileData.path = fileDocument?.project.name.replaceAll(' ', '') || '';
-    }
-
-    if (!fileDocument) {
-      throw new APIError(`Document from '${entity}' not found`, 404);
-    }
-    if (!fileData.name) {
-      throw new APIError(`File name invalid for file`, 500);
-    }
-    if (!fileData.path) {
-      throw new APIError(`Path invalid for file '${fileData.name}'`, 500);
-    }
-
-    const { data, error } = await storageClient
-      .from(bucketName)
-      .download(fileData.path);
-
-    if (error || !data) {
-      throw new APIError('File not found', 404);
-    }
-
-    return new Response(data, {
-      headers: {
-        'Content-Type': data.type,
-        'Content-Disposition': `attachment; filename="${fileData.name}"`,
-      },
-    });
+    return jsonResponse(
+      { success: true, message: 'Document deleted successfully' },
+      200
+    );
   } catch (error) {
     return errorResponse(
       (error as Error).message,
