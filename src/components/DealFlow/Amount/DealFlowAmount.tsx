@@ -92,12 +92,17 @@ const DealFlowAmount: React.FC = () => {
   const handleUpdateDeal = async () => {
     if (!deal || validationError) return;
 
+    const amount = Math.min(
+      Math.max(deal.investmentStats.amount ?? 0, MIN_INVESTMENT),
+      MAX_INVESTMENT
+    );
+
     await updateDeal({
       ...deal,
       dealStage: DealStage.DISCOVERY,
       investmentStats: {
         ...deal.investmentStats,
-        amount: Math.min(Math.max(amount, MIN_INVESTMENT), MAX_INVESTMENT),
+        amount,
       },
     });
 
@@ -107,7 +112,7 @@ const DealFlowAmount: React.FC = () => {
       dealStage: deal.dealStage,
       eventCategory: 'Deal Flow',
       event: `Step 2: Amount Input`,
-      eventLabel: `Amount selected: ${deal.investmentStats.amount}`,
+      eventLabel: `Amount selected: ${amount}`,
     });
   };
 
