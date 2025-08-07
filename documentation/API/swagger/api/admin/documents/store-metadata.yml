@@ -1,0 +1,204 @@
+openapi: 3.0.3
+info:
+  title: Document Metadata API
+  version: 1.0.0
+  description: API for creating document metadata entries in the database.
+
+paths:
+  /api/admin/documents/store-metadata:
+    post:
+      summary: Create document metadata
+      description: |
+        Creates a document metadata entry based on the provided entity type.
+        Authenticates the admin user, validates the request body, and stores metadata in the appropriate table.
+      tags:
+        - Documents
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DealDocumentInput'
+                - $ref: '#/components/schemas/OrganizationDocumentInput'
+                - $ref: '#/components/schemas/ProjectDocumentInput'
+            examples:
+              deal:
+                summary: Deal Document Input
+                value:
+                  type: deal
+                  id: 123
+                  name: 'My Deal Doc'
+                  path: '/documents/deal.pdf'
+                  key: 'abc123'
+                  userId: 456
+                  dealDocumentType: VERIFICATION_ACCREDITATION
+              organization:
+                summary: Organization Document Input
+                value:
+                  type: organization
+                  id: 456
+                  name: 'Org Doc'
+                  path: '/documents/org.pdf'
+                  key: 'orgKey'
+                  userId: 789
+              project:
+                summary: Project Document Input
+                value:
+                  type: project
+                  name: 'Project Document'
+                  fileName: 'project.doc'
+                  link: '/project.doc'
+                  projectId: 321
+                  dealStage: 1
+                  financingTypes: [equity]
+                  documentType: DOCUMENT
+                  isPublic: true
+                  requiresNDA: false
+      responses:
+        '200':
+          description: Document metadata created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  document:
+                    type: object
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Server or authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+
+components:
+  schemas:
+    DealDocumentInput:
+      type: object
+      required:
+        - type
+        - id
+        - name
+        - path
+        - key
+        - userId
+        - dealDocumentType
+      properties:
+        type:
+          type: string
+          enum: [deal]
+        id:
+          type: integer
+        name:
+          type: string
+        path:
+          type: string
+        key:
+          type: string
+        userId:
+          type: integer
+        dealDocumentType:
+          type: string
+          enum:
+            - VERIFICATION_ACCREDITATION
+            - WIRE_INSTRUCTIONS
+            - K1
+        taxYear:
+          type: integer
+          nullable: true
+
+    OrganizationDocumentInput:
+      type: object
+      required:
+        - type
+        - id
+        - name
+        - path
+        - key
+        - userId
+      properties:
+        type:
+          type: string
+          enum: [organization]
+        id:
+          type: integer
+        name:
+          type: string
+        path:
+          type: string
+        key:
+          type: string
+        userId:
+          type: integer
+
+    ProjectDocumentInput:
+      type: object
+      required:
+        - type
+        - name
+        - fileName
+        - link
+        - projectId
+        - dealStage
+        - documentType
+        - isPublic
+        - requiresNDA
+      properties:
+        type:
+          type: string
+          enum: [project]
+        name:
+          type: string
+        fileName:
+          type: string
+        description:
+          type: string
+          nullable: true
+        link:
+          type: string
+          format: uri
+        projectId:
+          type: integer
+        dealStage:
+          type: integer
+        financingTypes:
+          type: array
+          items:
+            type: string
+            enum: [equity, debt]
+        documentType:
+          type: string
+          enum: [DOCUMENT, OTHER]
+        docusignTemplateId:
+          type: string
+          nullable: true
+        isPublic:
+          type: boolean
+        requiresNDA:
+          type: boolean
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: object
+
+    ServerError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: An error has occurred while trying to store document metadata.

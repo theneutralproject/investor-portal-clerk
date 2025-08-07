@@ -1,0 +1,81 @@
+openapi: 3.0.3
+info:
+  title: Admin Document Download API
+  version: 1.0.0
+  description: Endpoint to download documents from Supabase Storage based on entity type and document ID.
+
+paths:
+  /api/admin/documents:
+    get:
+      summary: Download document by entity and ID
+      description: >
+        Authenticated admin route that downloads a file from Supabase Storage for a specific document.
+        Supports documents associated with a deal, organization, or project.
+      tags:
+        - Documents
+      parameters:
+        - in: query
+          name: entity
+          required: true
+          description: The entity type of the document.
+          schema:
+            type: string
+            enum: [deal, organization, project]
+        - in: query
+          name: docId
+          required: true
+          description: The ID of the document to download.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successfully downloaded the document
+          content:
+            application/octet-stream:
+              schema:
+                type: string
+                format: binary
+          headers:
+            Content-Disposition:
+              description: Indicates the filename of the downloaded document
+              schema:
+                type: string
+        '400':
+          description: Missing or invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: object
+        '404':
+          description: Document or file not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Server error or admin authentication failure
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

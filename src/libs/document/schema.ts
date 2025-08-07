@@ -252,3 +252,17 @@ export type DocumentCreateGenericSchema =
   | ProjectDocumentCreateSchema
   | DealDocumentCreateSchema
   | OrganizationDocumentCreateSchema;
+
+export const zDocumentDownloadSchema = z.object({
+  docId: z.union([z.string(), z.number()]).transform(val => {
+    const num = Number(val);
+    if (isNaN(num)) {
+      throw new Error('docId must be a valid number');
+    }
+    return num;
+  }),
+
+  entity: zDocumentEntityType,
+});
+
+export type DocumentDownloadSchema = z.infer<typeof zDocumentDownloadSchema>;
