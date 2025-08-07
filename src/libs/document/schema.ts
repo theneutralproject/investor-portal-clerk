@@ -190,20 +190,38 @@ export type DocumentSignedURLCreateSchema = z.infer<
   typeof zDocumentSignedUrlCreateSchema
 >;
 
-export const zDealOrOrganizationDocumentCreateSchema = z.object({
-  type: z.union([z.literal('deal'), z.literal('organization')]),
+const zDealDocumentCreateSchema = z.object({
+  type: z.literal('deal'),
   id: z.number().int().positive(),
   name: z.string().min(1),
   path: z.string().min(1),
   key: z.string().min(1),
   userId: z.number().int().positive(),
-  dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
+  dealDocumentType: z.nativeEnum(DealDocumentType),
   taxYear: z.number().int().optional(),
 });
 
-export type DealOrOrganizationDocumentCreateSchema = z.infer<
-  typeof zDealOrOrganizationDocumentCreateSchema
+export type DealDocumentCreateSchema = z.infer<
+  typeof zDealDocumentCreateSchema
 >;
+
+const zOrganizationDocumentCreateSchema = z.object({
+  type: z.literal('organization'),
+  id: z.number().int().positive(),
+  name: z.string().min(1),
+  path: z.string().min(1),
+  key: z.string().min(1),
+  userId: z.number().int().positive(),
+});
+
+export type OrganizationDocumentCreateSchema = z.infer<
+  typeof zOrganizationDocumentCreateSchema
+>;
+
+export const DealOrOrganizationDocumentCreateSchema = z.discriminatedUnion(
+  'type',
+  [zDealDocumentCreateSchema, zOrganizationDocumentCreateSchema]
+);
 
 export const zProjectDocumentCreateSchema = z.object({
   type: z.literal('project'),
@@ -224,6 +242,13 @@ export type ProjectDocumentCreateSchema = z.infer<
   typeof zProjectDocumentCreateSchema
 >;
 
+export const zDocumentCreateGenericSchema = z.discriminatedUnion('type', [
+  zProjectDocumentCreateSchema,
+  zDealDocumentCreateSchema,
+  zOrganizationDocumentCreateSchema,
+]);
+
 export type DocumentCreateGenericSchema =
   | ProjectDocumentCreateSchema
-  | DealOrOrganizationDocumentCreateSchema;
+  | DealDocumentCreateSchema
+  | OrganizationDocumentCreateSchema;

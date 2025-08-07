@@ -109,7 +109,12 @@ describe('document/utils.server.ts', () => {
 
     it('throws error if id is missing', async () => {
       await expect(
-        createDocumentSignedUrl('deal', '' as unknown as number, 'file.pdf')
+        createDocumentSignedUrl(
+          'deal',
+          '' as unknown as number,
+          'file.pdf',
+          'deal/'
+        )
       ).rejects.toThrow('deal ID is required');
     });
 
@@ -122,7 +127,7 @@ describe('document/utils.server.ts', () => {
       });
 
       await expect(
-        createDocumentSignedUrl('deal', 123, 'file.pdf')
+        createDocumentSignedUrl('deal', 123, 'file.pdf', `deal-${123}`)
       ).rejects.toEqual({ message: 'storage error' });
     });
 
@@ -135,7 +140,12 @@ describe('document/utils.server.ts', () => {
           }),
         });
 
-        const result = await createDocumentSignedUrl('deal', 123, 'file.pdf');
+        const result = await createDocumentSignedUrl(
+          'deal',
+          123,
+          'file.pdf',
+          `deal-${123}`
+        );
 
         expect(storageClient.from).toHaveBeenCalledWith('deal-documents');
         expect(result).toEqual({
@@ -155,10 +165,13 @@ describe('document/utils.server.ts', () => {
           }),
         });
 
+        const id = 555;
+
         const result = await createDocumentSignedUrl(
           'organization',
-          555,
-          'orgfile.pdf'
+          id,
+          'orgfile.pdf',
+          `organization-${id}`
         );
 
         expect(storageClient.from).toHaveBeenCalledWith(
@@ -166,7 +179,7 @@ describe('document/utils.server.ts', () => {
         );
         expect(result).toEqual({
           signedUrl: 'https://signed-url-org',
-          folder: 'organization-555',
+          folder: `organization-${id}`,
           bucketName: 'organization-documents',
         });
       });
@@ -185,13 +198,13 @@ describe('document/utils.server.ts', () => {
           'project',
           999,
           'doc.pdf',
-          'My Project'
+          `Bakers`
         );
 
         expect(storageClient.from).toHaveBeenCalledWith('project-documents');
         expect(result).toEqual({
           signedUrl: 'https://signed-url-project',
-          folder: 'MyProject',
+          folder: 'Bakers',
           bucketName: 'project-documents',
         });
       });
@@ -204,7 +217,12 @@ describe('document/utils.server.ts', () => {
           }),
         });
 
-        const result = await createDocumentSignedUrl('project', 999, 'doc.pdf');
+        const result = await createDocumentSignedUrl(
+          'project',
+          999,
+          'doc.pdf',
+          ``
+        );
 
         expect(storageClient.from).toHaveBeenCalledWith('project-documents');
         expect(result).toEqual({

@@ -8,7 +8,11 @@ import {
 import Logger from '@/libs/logger';
 import { zDocumentSignedUrlCreateSchema } from '@/libs/document/schema';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
-import { createDocumentSignedUrl } from '@/libs/document/utils.server';
+import {
+  createDocumentSignedUrl,
+  getFolderName,
+} from '@/libs/document/utils.server';
+import { APIError } from '@/libs/types';
 
 const STORAGE_URL = process.env.SUPABASE_STORAGE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -44,20 +48,28 @@ export async function POST(request: NextRequest) {
 
   const { entityId, entityType, fileName } = validationResult.data;
 
-  let data;
-
   try {
-    data = await createDocumentSignedUrl(entityType, entityId, fileName);
-  } catch (error) {
-    return errorResponse((error as Error).message, 500, { request });
-  }
+    const folder = await getFolderName(entityType, entityId);
+    const data = await createDocumentSignedUrl(
+      entityType,
+      entityId,
+      fileName,
+      folder
+    );
 
-  return jsonResponse({
-    t: SERVICE_KEY,
-    u: STORAGE_URL,
-    bucketName: data?.bucketName,
-    fileName,
-    uploadUrl: data?.signedUrl,
-    filePath: `${data?.folder}/${fileName}`,
-  });
+    return jsonResponse({
+      t: SERVICE_KEY,
+      u: STORAGE_URL,
+      bucketName: data?.bucketName,
+      fileName,
+      uploadUrl: data?.signedUrl,
+      filePath: `${data?.folder}/${fileName}`,
+    });
+  } catch (error) {
+    return errorResponse(
+      (error as Error).message,
+      (error as APIError).status || 500,
+      { request }
+    );
+  }
 }

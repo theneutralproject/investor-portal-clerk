@@ -2,7 +2,10 @@ import { nextRequestMock } from '@/mocks/nextRequest.mock';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { POST } from '../route';
-import { createDocumentSignedUrl } from '@/libs/document/utils.server';
+import {
+  createDocumentSignedUrl,
+  getFolderName,
+} from '@/libs/document/utils.server';
 
 jest.mock('@/libs/admin/utils.server', () => ({
   getAdminFromRequest: jest.fn(),
@@ -15,6 +18,7 @@ jest.mock('@/libs/logger', () => ({
 
 jest.mock('@/libs/document/utils.server', () => ({
   createDocumentSignedUrl: jest.fn(),
+  getFolderName: jest.fn(),
 }));
 
 describe('POST /api/documents/signed-url', () => {
@@ -197,6 +201,8 @@ describe('POST /api/documents/signed-url', () => {
 
   it('returns 500 if Supabase upload URL creation fails', async () => {
     jest.mocked(getAdminFromRequest).mockResolvedValue(adminUser);
+
+    jest.mocked(getFolderName).mockResolvedValueOnce('');
 
     jest
       .mocked(createDocumentSignedUrl)

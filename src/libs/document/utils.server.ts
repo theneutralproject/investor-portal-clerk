@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server';
 import prisma from '../prisma.server';
 import {
+  APIError,
   ProjectDocumentWithDocumentEvents,
   UserWithOrganizations,
 } from '../types';
@@ -187,17 +188,14 @@ export async function getProjectDocumentsWithAccessCheck(
 
 export const createDocumentSignedUrl = async (
   type: DocumentEntityType,
-  id: number | string,
+  id: number,
   fileName: string,
-  projectName?: string
+  folder: string
 ) => {
   if (!id) {
     throw new Error(`${type} ID is required`);
   }
 
-  const isProject = type === 'project';
-  const projectFolder = isProject ? projectName?.replaceAll(' ', '') : '';
-  const folder = isProject ? projectFolder || '' : `${type}-${id}`;
   const bucketName = `${type}-documents`;
 
   const { data, error } = await storageClient
@@ -213,6 +211,55 @@ export const createDocumentSignedUrl = async (
     folder,
     bucketName,
   };
+};
+
+export const getFolderName = async (
+  entityName: DocumentEntityType,
+  entityId: number
+) => {
+  const whereClause = {
+    id: entityId,
+  };
+
+  if (entityName === 'project') {
+    const project = await prisma.project.findFirst({
+      where: whereClause,
+      select: {
+        name: true,
+      },
+    });
+    if (!project)
+      throw new APIError(`Project with id '${entityId}' not found`, 404);
+
+    return project.name.replaceAll(' ', '');
+  }
+
+  if (entityName === 'deal') {
+    const deal = await prisma.deal.findFirst({
+      where: whereClause,
+      select: {
+        id: true,
+      },
+    });
+    if (!deal) throw new APIError(`Deal with id '${entityId}' not found`, 404);
+
+    return `${entityName}-${entityId}`;
+  }
+
+  if (entityName === 'organization') {
+    const organization = await prisma.organization.findFirst({
+      where: whereClause,
+      select: {
+        id: true,
+      },
+    });
+    if (!organization)
+      throw new APIError(`Organization with id '${entityId}' not found`, 404);
+
+    return `${entityName}-${entityId}`;
+  }
+
+  throw new APIError(`Project with id '${entityId}' not found`, 400);
 };
 
 export async function createGenericDocumentEntry(
