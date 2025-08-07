@@ -1,0 +1,167 @@
+openapi: 3.0.0
+info:
+  title: Admin - Update Deal
+  version: 1.0.1
+  description: Endpoint for updating an existing deal by ID.
+
+paths:
+  /api/admin/deals/{id}:
+    put:
+      summary: Update a deal
+      description: Updates a deal and logs the change.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deal ID to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealUpdate'
+      responses:
+        '200':
+          description: Deal updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  id: 123
+                  name: 'Updated Deal'
+        '400':
+          description: Bad request or malformed input
+        '404':
+          description: Deal not found
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    DealUpdate:
+      type: object
+      required:
+        - hubspotId
+      properties:
+        hubspotId:
+          type: string
+          example: 'abc-123'
+        projectId:
+          type: integer
+          example: 101
+        organizationId:
+          type: integer
+          nullable: true
+          example: 55
+        dealStage:
+          type: integer
+          minimum: 0
+          maximum: 6
+          example: 3
+        accreditationVerifierId:
+          type: integer
+          nullable: true
+          example: null
+        investmentStats:
+          $ref: '#/components/schemas/DealInvestmentStatsUpdate'
+        closingDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-07-01T00:00:00Z'
+        signaturesCompletedDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-07-02T00:00:00Z'
+        dateFundsSent:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-07-03T00:00:00Z'
+        paymentMethod:
+          $ref: '#/components/schemas/PaymentMethod'
+        paymentReferenceId:
+          type: string
+          nullable: true
+          example: 'WIRE-REF-2025'
+        transactionId:
+          type: string
+          example: 'TXN-000123'
+        status:
+          $ref: '#/components/schemas/DealStatus'
+
+    DealInvestmentStatsUpdate:
+      type: object
+      properties:
+        amount:
+          type: number
+          example: 100000
+        ownershipType:
+          $ref: '#/components/schemas/DealOwnershipType'
+        financingType:
+          $ref: '#/components/schemas/DealFinancingType'
+        unitType:
+          $ref: '#/components/schemas/DealUnitType'
+        numberAUnits:
+          type: number
+          minimum: 0
+          example: 10
+        numberCUnits:
+          type: number
+          minimum: 0
+          example: 5
+
+    DealFinancingType:
+      type: string
+      enum:
+        - equity
+        - promissory_note_now
+        - promissory_to_equity
+        - promissory_note_at_closing
+      example: equity
+
+    DealOwnershipType:
+      type: string
+      enum:
+        - INDIVIDUAL
+        - JOINT
+        - CORPORATION
+        - TRUST
+        - OTHER
+        - MARITAL
+        - COMMON
+        - PARTNERSHIP
+        - IRA
+      example: INDIVIDUAL
+
+    DealUnitType:
+      type: string
+      enum:
+        - AUNIT
+        - CUNIT
+        - BUNIT
+        - ANOTE
+        - BNOTE
+        - A1UNIT
+      example: AUNIT
+
+    DealStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - PENDING
+        - MATURED
+        - LOST
+      example: ACTIVE
+
+    PaymentMethod:
+      type: string
+      enum:
+        - ACH
+        - WIRE
+        - CHECK
+      example: WIRE

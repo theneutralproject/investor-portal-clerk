@@ -17,7 +17,54 @@ import { APIError } from '@/libs/types';
 const STORAGE_URL = process.env.SUPABASE_STORAGE_URL;
 const SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export async function POST(request: NextRequest) {
+/**
+ * @function POST
+ * @description
+ * POST handler for generating a signed Supabase Storage URL for uploading documents.
+ *
+ * **Endpoint:** `POST /api/admin/documents/signed-url`
+ *
+ * This endpoint:
+ *  - Authenticates the admin user using the request context.
+ *  - Validates the request body against a discriminated Zod schema based on `entityType`.
+ *  - Looks up the entity (project, deal, or organization) to determine the storage folder name.
+ *  - Generates a signed Supabase upload URL scoped to the proper bucket and folder.
+ *  - Returns metadata required to perform the upload client-side.
+ *
+ * @param {NextRequest} request - The incoming Next.js API request object
+ *
+ * @returns {Promise<Response>} JSON response:
+ *  - `200 OK` with:
+ *    ```ts
+ *    {
+ *      t: string; // Supabase service key
+ *      u: string; // Supabase storage URL
+ *      bucketName: string;
+ *      fileName: string;
+ *      uploadUrl: string;
+ *      filePath: string; // Format: "<folder>/<fileName>"
+ *    }
+ *    ```
+ *  - `400 Bad Request` if Zod validation fails
+ *  - `404 Not Found` if the referenced entity (project, deal, or organization) does not exist
+ *  - `500 Internal Server Error` if authentication fails or an unexpected error occurs
+ *
+ * @throws Will return a JSON error response with appropriate status code and message if:
+ *  - Admin authentication fails
+ *  - Request validation fails
+ *  - Referenced entity is not found
+ *  - Supabase errors or internal logic fails
+ *
+ * @example
+ * curl -X POST /api/admin/documents/signed-url \
+ *   -H "Content-Type: application/json" \
+ *   -d '{
+ *         "entityType": "deal",
+ *         "entityId": 123,
+ *         "fileName": "my-document.pdf"
+ *       }'
+ */
+export async function POST(request: NextRequest): Promise<Response> {
   let adminUser: User | null = null;
   try {
     adminUser = await getAdminFromRequest(request);
