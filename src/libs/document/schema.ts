@@ -257,7 +257,7 @@ export type DocumentCreateGenericSchema =
   | DealDocumentCreateSchema
   | OrganizationDocumentCreateSchema;
 
-export const zDocumentDownloadSchema = z.object({
+export const zDocumentFetchSchema = z.object({
   docId: z.union([z.string(), z.number()]).transform(val => {
     const num = Number(val);
     if (isNaN(num)) {
@@ -269,13 +269,15 @@ export const zDocumentDownloadSchema = z.object({
   entity: zDocumentEntityType,
 });
 
-export type DocumentDownloadSchema = z.infer<typeof zDocumentDownloadSchema>;
+export type DocumentFetchSchema = z.infer<typeof zDocumentFetchSchema>;
+export const zDocumentUpdateSchema = zDocumentFetchSchema;
+export type DocumentUpdateSchema = z.infer<typeof zDocumentUpdateSchema>;
 
 const zDealDocumentUpdateSchema = z
   .object({
     type: z.literal('deal'),
-    key: z.string().min(1),
-    dealDocumentType: z.nativeEnum(DealDocumentType),
+    key: z.string().min(1).optional(),
+    dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
     taxYear: z.number().int().optional(),
   })
   .strict();
@@ -287,8 +289,7 @@ export type DealDocumentUpdateSchema = z.infer<
 const zOrganizationDocumentUpdateSchema = z
   .object({
     type: z.literal('organization'),
-    key: z.string().min(1),
-    userId: z.number().int().positive(),
+    key: z.string().min(1).optional(),
   })
   .strict();
 
@@ -305,12 +306,12 @@ export const zProjectDocumentUpdateSchema = z
   .object({
     type: z.literal('project'),
     description: z.string().optional(),
-    dealStage: z.number().int(),
+    dealStage: z.number().int().optional(),
     financingTypes: z.array(z.nativeEnum(DealFinancingType)).optional(),
-    documentType: z.nativeEnum(DocumentType),
+    documentType: z.nativeEnum(DocumentType).optional(),
     docusignTemplateId: z.string().optional(),
-    isPublic: z.boolean(),
-    requiresNDA: z.boolean(),
+    isPublic: z.boolean().optional(),
+    requiresNDA: z.boolean().optional(),
   })
   .strict();
 

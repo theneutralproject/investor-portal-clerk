@@ -15,7 +15,11 @@ import {
   User,
 } from '@prisma/client';
 import { storageClient } from '@/libs/supabase';
-import { DocumentEntityType, DocumentCreateGenericSchema } from './schema';
+import {
+  DocumentEntityType,
+  DocumentCreateGenericSchema,
+  DocumentUpdateGenericSchema,
+} from './schema';
 import Logger from '../logger';
 
 export async function validateAccess(
@@ -318,6 +322,63 @@ export async function createGenericDocumentEntry(
   } catch (error) {
     Logger.error(error, null, {
       message: `Error creating document entry: ${(error as Error).message}`,
+    });
+    throw error;
+  }
+}
+
+export async function updateGenericDocumentEntry(
+  docId: number,
+  props: DocumentUpdateGenericSchema
+) {
+  const { type } = props;
+
+  Logger.log({
+    message: `Creating '${type}' document entry.`,
+    extra: props,
+  });
+
+  try {
+    if (type === 'deal') {
+      const { dealDocumentType, taxYear } = props;
+      if (dealDocumentType === DealDocumentType.K1 && !taxYear) {
+        throw new Error('Missing required taxYear field for K1 document');
+      }
+      return await prisma.dealDocument.update({
+        where: {
+          id: docId,
+        },
+        data: {
+          type: dealDocumentType,
+          taxYear,
+        },
+      });
+    }
+
+    if (type === 'organization') {
+      const { key } = props;
+      return await prisma.organizationDocument.update({
+        where: {
+          id: docId,
+        },
+        data: {
+          key,
+        },
+      });
+    }
+
+    if (type === 'project') {
+      const { type: _, ...payload } = props;
+      return await prisma.projectDocument.update({
+        where: { id: docId },
+        data: payload,
+      });
+    }
+
+    throw new Error('Document type not permitted');
+  } catch (error) {
+    Logger.error(error, null, {
+      message: `Error updating document: ${(error as Error).message}`,
     });
     throw error;
   }

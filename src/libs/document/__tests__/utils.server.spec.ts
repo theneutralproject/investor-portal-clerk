@@ -3,11 +3,13 @@ import {
   DealDocumentType,
   DealFinancingType,
   DocumentType,
+  ProjectDocument,
 } from '@prisma/client';
 import prisma from '@/libs/prisma.server';
 import {
   createDocumentSignedUrl,
   createGenericDocumentEntry,
+  updateGenericDocumentEntry,
   validateUser,
 } from '../utils.server';
 import { storageClient } from '@/libs/supabase';
@@ -32,15 +34,18 @@ jest.mock('@/libs/prisma.server', () => ({
     projectDocument: {
       findMany: jest.fn(),
       create: jest.fn(),
+      update: jest.fn(),
     },
     nDAAgreement: {
       findFirst: jest.fn(),
     },
     dealDocument: {
       create: jest.fn(),
+      update: jest.fn(),
     },
     organizationDocument: {
       create: jest.fn(),
+      update: jest.fn(),
     },
   },
 }));
@@ -387,6 +392,7 @@ describe('document/utils.server.ts', () => {
           isPublic: true,
           requiresNDA: false,
         };
+        const { type: _, ...updatePayload } = input;
 
         (prisma.projectDocument.create as jest.Mock).mockResolvedValue({
           id: 77,
@@ -396,7 +402,7 @@ describe('document/utils.server.ts', () => {
         expect(result).toEqual({ id: 77 });
 
         expect(prisma.projectDocument.create).toHaveBeenCalledWith({
-          data: input,
+          data: updatePayload,
         });
       });
 
@@ -438,6 +444,150 @@ describe('document/utils.server.ts', () => {
           errorMessage
         );
         expect(Logger.error).toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('updateGenericDocumentEntry', () => {
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    describe('deal', () => {
+      const docId = 1;
+
+      it('updates a deal document', async () => {
+        const input = {
+          type: 'deal' as const,
+          dealDocumentType: DealDocumentType.VERIFICATION_ACCREDITATION,
+        };
+
+        jest
+          .mocked(prisma.dealDocument.update)
+          .mockResolvedValue({ id: docId } as any);
+
+        const result = await updateGenericDocumentEntry(docId, input);
+
+        expect(result).toEqual({ id: docId });
+        expect(prisma.dealDocument.update).toHaveBeenCalledWith({
+          where: { id: docId },
+          data: {
+            type: DealDocumentType.VERIFICATION_ACCREDITATION,
+            taxYear: undefined,
+          },
+        });
+      });
+
+      it('throws if dealDocumentType is K1 and taxYear is missing', async () => {
+        const input = {
+          type: 'deal' as const,
+          dealDocumentType: DealDocumentType.K1,
+        };
+
+        await expect(updateGenericDocumentEntry(docId, input)).rejects.toThrow(
+          'Missing required taxYear field for K1 document'
+        );
+        expect(Logger.error).toHaveBeenCalled();
+      });
+    });
+
+    describe('organization', () => {
+      const docId = 2;
+
+      it('updates an organization document', async () => {
+        const input = {
+          type: 'organization' as const,
+          key: 'some-key',
+        };
+
+        jest
+          .mocked(prisma.organizationDocument.update)
+          .mockResolvedValue({ id: docId } as any);
+
+        const result = await updateGenericDocumentEntry(docId, input);
+
+        expect(result).toEqual({ id: docId });
+        expect(prisma.organizationDocument.update).toHaveBeenCalledWith({
+          where: { id: docId },
+          data: { key: 'some-key' },
+        });
+      });
+    });
+
+    describe('project', () => {
+      const docId = 3;
+
+      it('updates a project document', async () => {
+        const projectDocument: ProjectDocument = {
+          id: 1,
+          name: 'Updated Doc',
+          fileName: 'updated.pdf',
+          link: 'https://updated.com',
+          projectId: 5,
+          dealStage: 1,
+          financingTypes: [DealFinancingType.equity],
+          documentType: DocumentType.DOCUMENT,
+          isPublic: true,
+          requiresNDA: false,
+          dateCreated: new Date(),
+          dateUpdated: new Date(),
+          description: null,
+          docusignTemplateId: '1234',
+        };
+
+        const input = {
+          type: 'project' as const,
+          dealStage: 2,
+          description: 'Doc Description',
+          isPublic: false,
+          requiresNDA: true,
+        };
+        const { type: _, ...updatePayload } = input;
+
+        jest.mocked(prisma.projectDocument.update).mockResolvedValue({
+          ...projectDocument,
+          ...updatePayload,
+        });
+
+        const result = await updateGenericDocumentEntry(docId, input);
+
+        expect(result).toEqual({
+          ...projectDocument,
+          ...updatePayload,
+        });
+        expect(prisma.projectDocument.update).toHaveBeenCalledWith({
+          where: { id: docId },
+          data: expect.objectContaining({
+            ...updatePayload,
+          }),
+        });
+      });
+    });
+
+    it('throws if type is unsupported', async () => {
+      const invalid = {
+        type: 'invalid',
+      } as any;
+
+      await expect(updateGenericDocumentEntry(99, invalid)).rejects.toThrow(
+        'Document type not permitted'
+      );
+      expect(Logger.error).toHaveBeenCalled();
+    });
+
+    it('logs and throws if any update fails', async () => {
+      const input = {
+        type: 'organization' as const,
+        key: 'test-key',
+      };
+      const error = new Error('DB failure');
+      jest.mocked(prisma.organizationDocument.update).mockRejectedValue(error);
+
+      await expect(updateGenericDocumentEntry(88, input)).rejects.toThrow(
+        'DB failure'
+      );
+      expect(Logger.error).toHaveBeenCalledWith(error, null, {
+        message: `Error updating document: ${error.message}`,
       });
     });
   });

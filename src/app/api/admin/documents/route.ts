@@ -6,7 +6,7 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
-import { zDocumentDownloadSchema } from '@/libs/document/schema';
+import { zDocumentFetchSchema } from '@/libs/document/schema';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { APIError } from '@/libs/types';
 import { storageClient } from '@/libs/supabase';
@@ -72,7 +72,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     return errorResponse('docId param is missing', 400, { request });
   }
 
-  const validationResult = zDocumentDownloadSchema.safeParse({
+  const validationResult = zDocumentFetchSchema.safeParse({
     entity: type,
     docId: id,
   });
@@ -172,7 +172,7 @@ export async function DELETE(request: NextRequest): Promise<Response> {
     return errorResponse('docId param is missing', 400, { request });
   }
 
-  const validationResult = zDocumentDownloadSchema.safeParse({
+  const validationResult = zDocumentFetchSchema.safeParse({
     entity: type,
     docId: id,
   });
