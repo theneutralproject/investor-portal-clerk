@@ -308,8 +308,9 @@ export async function createGenericDocumentEntry(
     }
 
     if (type === 'project') {
+      const { type: _, ...payload } = props;
       return await prisma.projectDocument.create({
-        data: props,
+        data: payload,
       });
     }
 
