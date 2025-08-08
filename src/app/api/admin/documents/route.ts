@@ -14,6 +14,7 @@ import {
   deleteGenericDocument,
   getGenericDocument,
 } from '@/libs/document/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 
 /**
  * @function GET
@@ -204,6 +205,13 @@ export async function DELETE(request: NextRequest): Promise<Response> {
         500
       );
     }
+
+    await createChangeLog({
+      entityId: docId,
+      entityName: `${entity}Document`.toUpperCase(),
+      newValue: null,
+      userId: adminUser.id,
+    });
 
     await deleteGenericDocument(entity, docId);
 

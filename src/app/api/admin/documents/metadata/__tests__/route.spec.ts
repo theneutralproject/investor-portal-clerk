@@ -8,6 +8,7 @@ import {
   OrganizationDocumentCreateSchema,
   ProjectDocumentCreateSchema,
 } from '@/libs/document/schema';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 
 jest.mock('@/libs/admin/utils.server', () => ({
   getAdminFromRequest: jest.fn(),
@@ -20,6 +21,10 @@ jest.mock('@/libs/document/utils.server', () => ({
 jest.mock('@/libs/logger', () => ({
   log: jest.fn(),
   error: jest.fn(),
+}));
+
+jest.mock('@/libs/changelog/utils.server', () => ({
+  createChangeLog: jest.fn(),
 }));
 
 describe('POST /api/admin/documents/store-metadata', () => {
@@ -101,6 +106,7 @@ describe('POST /api/admin/documents/store-metadata', () => {
       const mockDoc = { ...payload, id: 333 };
 
       (createGenericDocumentEntry as jest.Mock).mockResolvedValueOnce(mockDoc);
+      (createChangeLog as jest.Mock).mockResolvedValueOnce(true);
 
       const req = nextRequestMock(payload);
       const res = await POST(req as any);
@@ -129,6 +135,7 @@ describe('POST /api/admin/documents/store-metadata', () => {
       };
 
       (createGenericDocumentEntry as jest.Mock).mockResolvedValueOnce(mockDoc);
+      (createChangeLog as jest.Mock).mockResolvedValueOnce(true);
 
       const req = nextRequestMock(payload);
       const res = await POST(req as any);
@@ -159,6 +166,7 @@ describe('POST /api/admin/documents/store-metadata', () => {
       const mockDoc = { ...payload, id: 1001 };
 
       (createGenericDocumentEntry as jest.Mock).mockResolvedValueOnce(mockDoc);
+      (createChangeLog as jest.Mock).mockResolvedValueOnce(true);
 
       const req = nextRequestMock(payload);
       const res = await POST(req as any);

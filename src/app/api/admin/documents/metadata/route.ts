@@ -17,6 +17,7 @@ import {
   getGenericDocument,
   updateGenericDocumentEntry,
 } from '@/libs/document/utils.server';
+import { createChangeLog } from '@/libs/changelog/utils.server';
 
 /**
  * @function POST
@@ -96,6 +97,14 @@ export async function POST(request: NextRequest): Promise<Response> {
       validationResult.data,
       adminUser.id
     );
+
+    await createChangeLog({
+      entityId: newDocEntry.id,
+      entityName: `${payload.type}Document`.toUpperCase(),
+      newValue: newDocEntry,
+      previousValue: null,
+      userId: adminUser.id,
+    });
 
     return jsonResponse({ success: true, document: newDocEntry });
   } catch (error) {
@@ -221,12 +230,20 @@ export async function PUT(request: NextRequest): Promise<Response> {
     // Check if document exists
     await getGenericDocument(entity, docId);
 
-    const newDocEntry = await updateGenericDocumentEntry(
+    const updatedDocEntry = await updateGenericDocumentEntry(
       docId,
       validationResult.data
     );
 
-    return jsonResponse({ success: true, document: newDocEntry });
+    await createChangeLog({
+      entityId: updatedDocEntry.id,
+      entityName: `${entity}Document`.toUpperCase(),
+      newValue: updatedDocEntry,
+      previousValue: null,
+      userId: adminUser.id,
+    });
+
+    return jsonResponse({ success: true, document: updatedDocEntry });
   } catch (error) {
     const errorMessage = getErrorMessage(error);
     return errorResponse(
