@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const publicRoutes = [
   '/terms',
   '/privacy',
+  '/terms/confidentiality',
   '/cybersecurity',
   '/support',
   '/learn',
@@ -22,6 +23,7 @@ const ignoredRoutes = [
   '/api/finix/webhooks',
   '/api/clerk',
   '/api/public/projects',
+  '/api/documents/project',
   '/api/hubspot/token',
 ];
 

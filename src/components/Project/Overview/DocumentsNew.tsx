@@ -1,17 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Divider,
-  Stack,
-  Typography,
-  Skeleton,
-} from '@mui/material';
-import {
-  CreateAccountButton,
-  SignInButton,
-} from '@/components/Dashboard/CreateAccount';
+import { Card, CardContent, Divider, Typography } from '@mui/material';
 import { type ProjectWithStats } from '@/libs/types';
 import useDocuments from '@/app/hooks/useDocuments';
 import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
@@ -23,6 +11,7 @@ import {
   captureDocumentDownloadEvent,
   captureDocumentViewEvent,
 } from '@/libs/posthog/events';
+import ConfidentialityModal from '@/components/Modals/ConfidentialityModal';
 
 type ApiError = {
   message: string;
@@ -36,11 +25,22 @@ const DocumentsNew = ({
   loggedIn: boolean;
 }) => {
   const [openModal, setOpenModal] = useState(false);
+  const [openNDAModal, setOpenNDAModal] = useState<boolean>(false);
   const [currentDocument, setCurrentDocument] = useState<
     DocumentWithCompletion | undefined
   >(undefined);
 
   const posthog = usePostHog();
+  const handleCloseNDAModal = () => {
+    setOpenNDAModal(false);
+  };
+  const handleOpenNDAModal = () => {
+    setOpenNDAModal(true);
+  };
+  const canSeeDocument = (document: DocumentWithCompletion) =>
+    document.isPublic || document.link !== '';
+
+  const documentsQueryKey = ['documents', project.id, 1];
 
   const {
     isLoading,
@@ -59,6 +59,11 @@ const DocumentsNew = ({
     return <div>Error fetching documents: {error.message}</div>;
 
   const handleViewDocument = (document: DocumentWithCompletion) => {
+    if (!canSeeDocument(document) && loggedIn) {
+      handleOpenNDAModal();
+      return;
+    }
+
     captureDocumentViewEvent(posthog, {
       documentId: document.id,
       documentName: document.name,
@@ -70,6 +75,11 @@ const DocumentsNew = ({
   };
 
   const handleDownloadDocument = (document: DocumentWithCompletion) => {
+    if (!canSeeDocument(document) && loggedIn) {
+      handleOpenNDAModal();
+      return;
+    }
+
     captureDocumentDownloadEvent(posthog, {
       documentId: document.id,
       documentName: document.name,
@@ -96,18 +106,22 @@ const DocumentsNew = ({
         </Typography>
         <Divider sx={{ mt: 2, mb: 2 }} />
 
-        {loggedIn ? (
-          <DocumentsList
-            documents={data}
-            handleViewDocument={handleViewDocument}
-            handleDownloadDocument={handleDownloadDocument}
-            currentDocument={currentDocument}
-            openModal={openModal}
-            handleCloseModal={handleCloseModal}
-          />
-        ) : (
-          <NonLoggedInView />
-        )}
+        <DocumentsList
+          documents={data}
+          handleViewDocument={handleViewDocument}
+          handleDownloadDocument={handleDownloadDocument}
+          currentDocument={currentDocument}
+          openModal={openModal}
+          handleCloseModal={handleCloseModal}
+          handleCloseNDAModal={handleCloseNDAModal}
+          loggedIn={loggedIn}
+        />
+
+        <ConfidentialityModal
+          open={openNDAModal}
+          onClose={handleCloseNDAModal}
+          documentsQueryKey={documentsQueryKey}
+        />
       </CardContent>
     </Card>
   );
@@ -120,6 +134,8 @@ const DocumentsList = ({
   currentDocument,
   openModal,
   handleCloseModal,
+  loggedIn,
+  handleCloseNDAModal,
 }: {
   documents: DocumentWithCompletion[];
   handleViewDocument: (document: DocumentWithCompletion) => void;
@@ -127,6 +143,8 @@ const DocumentsList = ({
   currentDocument: DocumentWithCompletion | undefined;
   openModal: boolean;
   handleCloseModal: () => void;
+  loggedIn: boolean;
+  handleCloseNDAModal: () => void;
 }) => {
   return (
     <>
@@ -138,6 +156,8 @@ const DocumentsList = ({
           handleViewDocument={handleViewDocument}
           handleDownloadDocument={handleDownloadDocument}
           data-testid={`${DOCUMENTS_NEW_TEST_ID}-document-card`}
+          loggedIn={loggedIn}
+          handleCloseNDAModal={handleCloseNDAModal}
         />
       ))}
       {currentDocument?.link && (
@@ -149,99 +169,6 @@ const DocumentsList = ({
         />
       )}
     </>
-  );
-};
-
-const NonLoggedInView = () => {
-  return (
-    <>
-      <SkeletonDocuments />
-      <LoginOverlay />
-    </>
-  );
-};
-
-const SkeletonDocuments = () => {
-  return (
-    <>
-      {[1, 2, 3, 4].map((_, index) => (
-        <Box
-          key={index}
-          sx={{
-            mb: 2,
-            opacity: 0.6,
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 1,
-          }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Skeleton
-              variant="rectangular"
-              width={40}
-              height={40}
-              sx={{ borderRadius: 1 }}
-            />
-            <Box sx={{ flex: 1 }}>
-              <Skeleton variant="text" width="60%" height={24} />
-              <Skeleton variant="text" width="40%" height={20} />
-            </Box>
-            <Skeleton
-              variant="rectangular"
-              width={100}
-              height={36}
-              sx={{ borderRadius: 1 }}
-            />
-          </Box>
-          <Skeleton variant="rectangular" height={2} />
-        </Box>
-      ))}
-    </>
-  );
-};
-
-const LoginOverlay = () => {
-  return (
-    <Box
-      sx={{
-        position: 'absolute',
-        top: 80,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: 'blur(4px)',
-        borderRadius: '8px',
-      }}
-      data-testid={`${DOCUMENTS_NEW_TEST_ID}-create-account`}
-    >
-      <Stack spacing={3} alignItems="center" maxWidth="600px" p={4}>
-        <Typography variant="body1" align="center" fontWeight="500">
-          Create an account
-        </Typography>
-        <Typography variant="subtitle2" align="center" color="text.secondary">
-          Create an account or sign in to view documents such as Market Study,
-          Tax Analysis, and Investment Deck.
-        </Typography>
-        <Stack direction="row" spacing={2} alignItems="center">
-          <div data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up`}>
-            <CreateAccountButton
-              variant="neutralYellow"
-              data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-up-btn`}
-            />
-          </div>
-          <div data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in`}>
-            <SignInButton
-              variant="text"
-              data-testid={`${DOCUMENTS_NEW_TEST_ID}-sign-in-btn`}
-            />
-          </div>
-        </Stack>
-      </Stack>
-    </Box>
   );
 };
 

@@ -1,7 +1,16 @@
 import React from 'react';
-import { Box, Card, CardContent, IconButton, Typography } from '@mui/material';
+import {
+  Box,
+  Card,
+  CardContent,
+  Chip,
+  IconButton,
+  Typography,
+} from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useClerk } from '@clerk/nextjs';
+
 import LiteYouTubeEmbed from 'react-lite-youtube-embed';
 import 'react-lite-youtube-embed/dist/LiteYouTubeEmbed.css';
 import { theme } from '@/components/Shell/NeutralThemeProvider';
@@ -10,16 +19,23 @@ import { type DocumentWithCompletion } from '@/app/hooks/useDocuments';
 const DocumentCard = ({
   document,
   dealStage,
+  loggedIn,
   handleViewDocument,
   handleDownloadDocument,
 }: {
   document: DocumentWithCompletion;
   dealStage: number;
+  loggedIn: boolean;
   handleViewDocument: (document: DocumentWithCompletion) => void;
   handleDownloadDocument: (document: DocumentWithCompletion) => void;
+  handleCloseNDAModal: () => void;
   handleSignDocument?: (document: DocumentWithCompletion) => void;
 }) => {
+  const { openSignIn } = useClerk();
   const documentLocked = dealStage < document.dealStage;
+  const requiresLogin = !document.isPublic && !loggedIn;
+
+  const handleSignIn = () => openSignIn();
 
   // const renderIcon = () => {
   //   if (document.completed) {
@@ -83,12 +99,20 @@ const DocumentCard = ({
           p: theme.spacing(1),
         }}
       >
+        {requiresLogin && (
+          <Chip
+            label="Sign In to View"
+            onClick={handleSignIn}
+            sx={{ marginBottom: '7px' }}
+          />
+        )}
         <IconButton
           aria-label="view document"
           size="large"
           onClick={() => {
             handleViewDocument(document);
           }}
+          disabled={requiresLogin}
         >
           <VisibilityIcon />
         </IconButton>
@@ -96,6 +120,7 @@ const DocumentCard = ({
           <IconButton
             aria-label="download document"
             size="large"
+            disabled={requiresLogin}
             onClick={() => {
               handleDownloadDocument(document);
             }}
