@@ -2,10 +2,10 @@ openapi: 3.0.3
 info:
   title: Document Metadata API
   version: 1.0.0
-  description: API for creating document metadata entries in the database.
+  description: API for creating and updating document metadata entries in the database.
 
 paths:
-  /api/admin/documents/store-metadata:
+  /api/admin/documents/metadata:
     post:
       summary: Create document metadata
       description: |
@@ -79,6 +79,82 @@ paths:
               schema:
                 $ref: '#/components/schemas/ServerError'
 
+    put:
+      summary: Update document metadata
+      description: |
+        Updates a document metadata entry based on query params and request body.
+        Authenticates the admin user, validates query and body, and applies updates.
+      tags:
+        - Documents
+      parameters:
+        - in: query
+          name: entity
+          required: true
+          schema:
+            type: string
+            enum: [deal, organization, project]
+        - in: query
+          name: docId
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DealDocumentUpdateInput'
+                - $ref: '#/components/schemas/OrganizationDocumentUpdateInput'
+                - $ref: '#/components/schemas/ProjectDocumentUpdateInput'
+            examples:
+              deal:
+                summary: Deal Document Update
+                value:
+                  dealDocumentType: K1
+                  taxYear: 2022
+              organization:
+                summary: Organization Document Update
+                value:
+                  key: updated-org-key
+              project:
+                summary: Project Document Update
+                value:
+                  isPublic: true
+                  requiresNDA: true
+                  documentType: DOCUMENT
+      responses:
+        '200':
+          description: Document metadata updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  document:
+                    type: object
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '401':
+          description: Unauthorized (authentication failure)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+
 components:
   schemas:
     DealDocumentInput:
@@ -89,7 +165,6 @@ components:
         - name
         - path
         - key
-        - userId
         - dealDocumentType
       properties:
         type:
@@ -103,8 +178,6 @@ components:
           type: string
         key:
           type: string
-        userId:
-          type: integer
         dealDocumentType:
           type: string
           enum:
@@ -123,7 +196,6 @@ components:
         - name
         - path
         - key
-        - userId
       properties:
         type:
           type: string
@@ -178,6 +250,60 @@ components:
         docusignTemplateId:
           type: string
           nullable: true
+        isPublic:
+          type: boolean
+        requiresNDA:
+          type: boolean
+
+    DealDocumentUpdateInput:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [deal]
+        dealDocumentType:
+          type: string
+          enum: [VERIFICATION_ACCREDITATION, WIRE_INSTRUCTIONS, K1]
+        taxYear:
+          type: integer
+        key:
+          type: string
+
+    OrganizationDocumentUpdateInput:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [organization]
+        key:
+          type: string
+
+    ProjectDocumentUpdateInput:
+      type: object
+      required:
+        - type
+      properties:
+        type:
+          type: string
+          enum: [project]
+        description:
+          type: string
+        dealStage:
+          type: integer
+        financingTypes:
+          type: array
+          items:
+            type: string
+            enum: [equity, debt]
+        documentType:
+          type: string
+          enum: [DOCUMENT, OTHER]
+        docusignTemplateId:
+          type: string
         isPublic:
           type: boolean
         requiresNDA:

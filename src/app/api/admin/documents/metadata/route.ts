@@ -23,7 +23,7 @@ import {
  * @description
  * POST handler for creating a document metadata entry in the database.
  *
- * **Endpoint:** `POST /api/admin/documents/store-metadata`
+ * **Endpoint:** `POST /api/admin/documents/metadata`
  *
  * This route:
  *  - Authenticates the admin user.
@@ -42,7 +42,7 @@ import {
  * @throws Will throw a generic error if authentication fails or internal logic errors occur.
  *
  * @example
- * curl -X POST /api/admin/documents/store-metadata \
+ * curl -X POST /api/admin/documents/metadata \
  *   -H "Content-Type: application/json" \
  *   -d '{
  *         "type": "deal",
@@ -111,6 +111,39 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 }
 
+/**
+ * @function PUT
+ * @description
+ * PUT handler for updating a document metadata entry in the database.
+ *
+ * **Endpoint:** `PUT /api/admin/documents/metadata?entity={entity}&docId={docId}`
+ *
+ * This route:
+ *  - Authenticates the admin user.
+ *  - Validates `entity` and `docId` query parameters.
+ *  - Parses and validates the request body against a discriminated Zod schema.
+ *  - Ensures the referenced document exists.
+ *  - Updates the document based on the `type` provided.
+ *  - Returns success with the updated document metadata, or a 4xx/5xx error response.
+ *
+ * @param {NextRequest} request - The incoming request object from Next.js
+ *
+ * @returns {Promise<Response>} JSON response:
+ *  - `200` with `{ success: true, document }` on success
+ *  - `400` if query or body validation fails
+ *  - `401` if authentication fails
+ *  - `500` if internal error occurs
+ *
+ * @throws Will throw a generic error if authentication fails or internal logic errors occur.
+ *
+ * @example
+ * curl -X PUT '/api/admin/documents/metadata?entity=deal&docId=123' \
+ *   -H "Content-Type: application/json" \
+ *   -d '{
+ *         "dealDocumentType": "K1",
+ *         "taxYear": 2022
+ *       }'
+ */
 export async function PUT(request: NextRequest): Promise<Response> {
   let adminUser: User | null = null;
   try {
