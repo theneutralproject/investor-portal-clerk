@@ -38,11 +38,10 @@ import { createGenericDocumentEntry } from '@/libs/document/utils.server';
  *   -H "Content-Type: application/json" \
  *   -d '{
  *         "type": "deal",
- *         "id": 123,
+ *         "dealId": 123,
  *         "name": "My Deal Doc",
  *         "path": "/some/path.pdf",
  *         "key": "abc123",
- *         "userId": 456,
  *         "dealDocumentType": "VERIFICATION_ACCREDITATION"
  *       }'
  */
@@ -85,7 +84,10 @@ export async function POST(request: NextRequest): Promise<Response> {
   });
 
   try {
-    const newDocEntry = await createGenericDocumentEntry(validationResult.data);
+    const newDocEntry = await createGenericDocumentEntry(
+      validationResult.data,
+      adminUser.id
+    );
 
     return jsonResponse({ success: true, document: newDocEntry });
   } catch (error) {

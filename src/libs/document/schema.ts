@@ -192,11 +192,10 @@ export type DocumentSignedURLCreateSchema = z.infer<
 
 const zDealDocumentCreateSchema = z.object({
   type: z.literal('deal'),
-  id: z.number().int().positive(),
+  dealId: z.number().int().positive(),
   name: z.string().min(1),
   path: z.string().min(1),
   key: z.string().min(1),
-  userId: z.number().int().positive(),
   dealDocumentType: z.nativeEnum(DealDocumentType),
   taxYear: z.number().int().optional(),
 });
@@ -207,11 +206,10 @@ export type DealDocumentCreateSchema = z.infer<
 
 const zOrganizationDocumentCreateSchema = z.object({
   type: z.literal('organization'),
-  id: z.number().int().positive(),
+  organizationId: z.number().int().positive(),
   name: z.string().min(1),
   path: z.string().min(1),
   key: z.string().min(1),
-  userId: z.number().int().positive(),
 });
 
 export type OrganizationDocumentCreateSchema = z.infer<
@@ -266,3 +264,58 @@ export const zDocumentDownloadSchema = z.object({
 });
 
 export type DocumentDownloadSchema = z.infer<typeof zDocumentDownloadSchema>;
+
+const zDealDocumentUpdateSchema = z.object({
+  type: z.literal('deal'),
+  id: z.number().int().positive(),
+  key: z.string().min(1),
+  userId: z.number().int().positive(),
+  dealDocumentType: z.nativeEnum(DealDocumentType),
+  taxYear: z.number().int().optional(),
+});
+
+export type DealDocumentUpdateSchema = z.infer<
+  typeof zDealDocumentUpdateSchema
+>;
+
+const zOrganizationDocumentUpdateSchema = z.object({
+  type: z.literal('organization'),
+  id: z.number().int().positive(),
+  key: z.string().min(1),
+  userId: z.number().int().positive(),
+});
+
+export type OrganizationDocumentUpdateSchema = z.infer<
+  typeof zOrganizationDocumentUpdateSchema
+>;
+
+export const DealOrOrganizationDocumentUpdateSchema = z.discriminatedUnion(
+  'type',
+  [zDealDocumentUpdateSchema, zOrganizationDocumentUpdateSchema]
+);
+
+export const zProjectDocumentUpdateSchema = z.object({
+  type: z.literal('project'),
+  description: z.string().optional(),
+  projectId: z.number().int().positive(),
+  dealStage: z.number().int(),
+  financingTypes: z.array(z.nativeEnum(DealFinancingType)).optional(),
+  documentType: z.nativeEnum(DocumentType),
+  docusignTemplateId: z.string().optional(),
+  isPublic: z.boolean(),
+  requiresNDA: z.boolean(),
+});
+
+export type ProjectDocumentUpdateSchema = z.infer<
+  typeof zProjectDocumentUpdateSchema
+>;
+
+export const zDocumentUpdateGenericSchema = z.discriminatedUnion('type', [
+  zProjectDocumentUpdateSchema,
+  zDealDocumentUpdateSchema,
+  zOrganizationDocumentUpdateSchema,
+]);
+
+export type DocumentUpdateGenericSchema = z.infer<
+  typeof zDocumentUpdateGenericSchema
+>;

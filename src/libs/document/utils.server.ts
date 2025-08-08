@@ -263,7 +263,8 @@ export const getFolderName = async (
 };
 
 export async function createGenericDocumentEntry(
-  props: DocumentCreateGenericSchema
+  props: DocumentCreateGenericSchema,
+  userId: number
 ) {
   const { type } = props;
 
@@ -274,7 +275,7 @@ export async function createGenericDocumentEntry(
 
   try {
     if (type === 'deal') {
-      const { id, name, path, userId, dealDocumentType, taxYear } = props;
+      const { dealId, name, path, dealDocumentType, taxYear } = props;
       if (!dealDocumentType) {
         throw new Error('Missing required dealDocumentType field');
       }
@@ -283,7 +284,7 @@ export async function createGenericDocumentEntry(
       }
       return await prisma.dealDocument.create({
         data: {
-          dealId: id,
+          dealId,
           name,
           path,
           type: dealDocumentType,
@@ -294,10 +295,10 @@ export async function createGenericDocumentEntry(
     }
 
     if (type === 'organization') {
-      const { id, name, path, userId, key } = props;
+      const { organizationId, name, path, key } = props;
       return await prisma.organizationDocument.create({
         data: {
-          organizationId: id,
+          organizationId,
           name,
           path,
           key,

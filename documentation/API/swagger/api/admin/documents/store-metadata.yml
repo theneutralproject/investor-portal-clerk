@@ -27,21 +27,19 @@ paths:
                 summary: Deal Document Input
                 value:
                   type: deal
-                  id: 123
+                  dealId: 123
                   name: 'My Deal Doc'
                   path: '/documents/deal.pdf'
                   key: 'abc123'
-                  userId: 456
                   dealDocumentType: VERIFICATION_ACCREDITATION
               organization:
                 summary: Organization Document Input
                 value:
                   type: organization
-                  id: 456
+                  organizationId: 456
                   name: 'Org Doc'
                   path: '/documents/org.pdf'
                   key: 'orgKey'
-                  userId: 789
               project:
                 summary: Project Document Input
                 value:
@@ -87,7 +85,7 @@ components:
       type: object
       required:
         - type
-        - id
+        - dealId
         - name
         - path
         - key
@@ -97,7 +95,7 @@ components:
         type:
           type: string
           enum: [deal]
-        id:
+        dealId:
           type: integer
         name:
           type: string
@@ -121,7 +119,7 @@ components:
       type: object
       required:
         - type
-        - id
+        - organizationId
         - name
         - path
         - key
@@ -130,7 +128,7 @@ components:
         type:
           type: string
           enum: [organization]
-        id:
+        organizationId:
           type: integer
         name:
           type: string
@@ -138,8 +136,6 @@ components:
           type: string
         key:
           type: string
-        userId:
-          type: integer
 
     ProjectDocumentInput:
       type: object

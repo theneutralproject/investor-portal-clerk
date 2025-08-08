@@ -71,11 +71,10 @@ describe('POST /api/admin/documents/store-metadata', () => {
 
     const validPayload = {
       type: 'deal',
-      id: 1,
+      dealId: 1,
       name: 'test.pdf',
       path: 'documents/',
       key: 'key',
-      userId: 1,
       dealDocumentType: 'VERIFICATION_ACCREDITATION',
     };
 
@@ -92,11 +91,10 @@ describe('POST /api/admin/documents/store-metadata', () => {
 
       const payload: DealDocumentCreateSchema = {
         type: 'deal' as const,
-        id: 1,
+        dealId: 1,
         name: 'doc.pdf',
         path: '/documents/deal.pdf',
         key: 'abc123',
-        userId: 1,
         dealDocumentType: 'VERIFICATION_ACCREDITATION',
       };
 
@@ -119,11 +117,10 @@ describe('POST /api/admin/documents/store-metadata', () => {
 
       const payload: OrganizationDocumentCreateSchema = {
         type: 'organization' as const,
-        id: 2,
+        organizationId: 2,
         name: 'org-doc.pdf',
         path: '/documents/org.pdf',
         key: 'orgKey',
-        userId: 2,
       };
 
       const mockDoc = {

@@ -240,29 +240,29 @@ describe('document/utils.server.ts', () => {
     });
 
     describe('deal', () => {
+      const userId = 10;
       it('creates a deal document', async () => {
         const input = {
           type: 'deal' as const,
-          id: 1,
+          dealId: 1,
           name: 'Deal Doc',
           path: '/deal.pdf',
           key: 'k',
-          userId: 10,
           dealDocumentType: DealDocumentType.VERIFICATION_ACCREDITATION,
         };
 
         (prisma.dealDocument.create as jest.Mock).mockResolvedValue({ id: 99 });
 
-        const result = await createGenericDocumentEntry(input);
+        const result = await createGenericDocumentEntry(input, userId);
         expect(result).toEqual({ id: 99 });
 
         expect(prisma.dealDocument.create).toHaveBeenCalledWith({
           data: {
-            dealId: input.id,
+            dealId: input.dealId,
             name: input.name,
             path: input.path,
             type: input.dealDocumentType,
-            uploadedById: input.userId,
+            uploadedById: userId,
             taxYear: undefined,
           },
         });
@@ -271,33 +271,31 @@ describe('document/utils.server.ts', () => {
       it('throws if dealDocumentType is missing', async () => {
         const input = {
           type: 'deal' as const,
-          id: 1,
+          dealId: 1,
           name: 'Deal Doc',
           path: '/deal.pdf',
           key: 'k',
-          userId: 10,
         };
 
-        await expect(createGenericDocumentEntry(input as any)).rejects.toThrow(
-          'Missing required dealDocumentType field'
-        );
+        await expect(
+          createGenericDocumentEntry(input as any, userId)
+        ).rejects.toThrow('Missing required dealDocumentType field');
         expect(Logger.error).toHaveBeenCalled();
       });
 
       it('throws if K1 document is missing taxYear', async () => {
         const input = {
           type: 'deal' as const,
-          id: 1,
+          dealId: 1,
           name: 'K1 Doc',
           path: '/k1.pdf',
           key: 'k',
-          userId: 10,
           dealDocumentType: DealDocumentType.K1,
         };
 
-        await expect(createGenericDocumentEntry(input as any)).rejects.toThrow(
-          'Missing required taxYear field for K1 document'
-        );
+        await expect(
+          createGenericDocumentEntry(input as any, userId)
+        ).rejects.toThrow('Missing required taxYear field for K1 document');
         expect(Logger.error).toHaveBeenCalled();
       });
 
@@ -305,11 +303,10 @@ describe('document/utils.server.ts', () => {
         const errorMessage = 'DB error';
         const input = {
           type: 'deal' as const,
-          id: 1,
+          dealId: 1,
           name: 'Deal Doc',
           path: '/deal.pdf',
           key: 'k',
-          userId: 10,
           dealDocumentType: DealDocumentType.VERIFICATION_ACCREDITATION,
         };
 
@@ -317,7 +314,7 @@ describe('document/utils.server.ts', () => {
           new Error(errorMessage)
         );
 
-        await expect(createGenericDocumentEntry(input)).rejects.toThrow(
+        await expect(createGenericDocumentEntry(input, userId)).rejects.toThrow(
           errorMessage
         );
         expect(Logger.error).toHaveBeenCalled();
@@ -325,30 +322,30 @@ describe('document/utils.server.ts', () => {
     });
 
     describe('organization', () => {
+      const userId = 11;
       it('creates an organization document', async () => {
         const input = {
           type: 'organization' as const,
-          id: 2,
+          organizationId: 2,
           name: 'Org Doc',
           path: '/org.pdf',
           key: 'org-key',
-          userId: 22,
         };
 
         (prisma.organizationDocument.create as jest.Mock).mockResolvedValue({
           id: 88,
         });
 
-        const result = await createGenericDocumentEntry(input);
+        const result = await createGenericDocumentEntry(input, userId);
         expect(result).toEqual({ id: 88 });
 
         expect(prisma.organizationDocument.create).toHaveBeenCalledWith({
           data: {
-            organizationId: input.id,
+            organizationId: input.organizationId,
             name: input.name,
             path: input.path,
             key: input.key,
-            uploadedById: input.userId,
+            uploadedById: userId,
           },
         });
       });
@@ -357,18 +354,17 @@ describe('document/utils.server.ts', () => {
         const errorMessage = 'Org create failed';
         const input = {
           type: 'organization' as const,
-          id: 2,
+          organizationId: 2,
           name: 'Org Doc',
           path: '/org.pdf',
           key: 'org-key',
-          userId: 22,
         };
 
         (prisma.organizationDocument.create as jest.Mock).mockRejectedValue(
           new Error(errorMessage)
         );
 
-        await expect(createGenericDocumentEntry(input)).rejects.toThrow(
+        await expect(createGenericDocumentEntry(input, userId)).rejects.toThrow(
           errorMessage
         );
         expect(Logger.error).toHaveBeenCalled();
@@ -376,6 +372,7 @@ describe('document/utils.server.ts', () => {
     });
 
     describe('project', () => {
+      const userId = 12;
       it('creates a project document', async () => {
         const input = {
           type: 'project' as const,
@@ -395,7 +392,7 @@ describe('document/utils.server.ts', () => {
           id: 77,
         });
 
-        const result = await createGenericDocumentEntry(input);
+        const result = await createGenericDocumentEntry(input, userId);
         expect(result).toEqual({ id: 77 });
 
         expect(prisma.projectDocument.create).toHaveBeenCalledWith({
@@ -406,14 +403,14 @@ describe('document/utils.server.ts', () => {
       it('throws if unknown type', async () => {
         const invalid: any = {
           type: 'invalid',
-          id: 1,
+          projectId: 1,
           name: 'Doc',
           path: '/doc.pdf',
         };
 
-        await expect(createGenericDocumentEntry(invalid)).rejects.toThrow(
-          'Document type not permitted'
-        );
+        await expect(
+          createGenericDocumentEntry(invalid, userId)
+        ).rejects.toThrow('Document type not permitted');
         expect(Logger.error).toHaveBeenCalled();
       });
 
@@ -437,7 +434,7 @@ describe('document/utils.server.ts', () => {
           new Error(errorMessage)
         );
 
-        await expect(createGenericDocumentEntry(input)).rejects.toThrow(
+        await expect(createGenericDocumentEntry(input, userId)).rejects.toThrow(
           errorMessage
         );
         expect(Logger.error).toHaveBeenCalled();
