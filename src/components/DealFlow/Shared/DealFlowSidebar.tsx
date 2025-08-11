@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography, Box, Divider, Chip, Link } from '@mui/material';
+import { Typography, Box, Divider, Chip, Button } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { DealFinancingType } from '@prisma/client';
 import Image from 'next/image';
@@ -135,13 +135,14 @@ const DealFlowSidebar = () => {
                 mt: 1,
               }}
             >
-              <Link
+              <Button
                 href="mailto:invest@neutral.us"
                 target="_blank"
-                style={{ textDecoration: 'none', color: '#000000DE' }}
+                rel="noopener noreferrer"
+                variant="grayPill"
               >
-                Message
-              </Link>
+                Email us
+              </Button>
               <Typography variant="body2" color="text.secondary">
                 (608) 205-8336
               </Typography>

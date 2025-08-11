@@ -5,7 +5,7 @@ import {
   Typography,
   Stack,
   Divider,
-  Link,
+  Button,
 } from '@mui/material';
 import Image from 'next/image';
 
@@ -48,13 +48,14 @@ const Questions: React.FC<QuestionsProps> = ({
         </Stack>
 
         <Stack direction="row" spacing={2}>
-          <Link
+          <Button
             href="mailto:invest@neutral.us"
             target="_blank"
-            style={{ textDecoration: 'none', color: '#000000DE' }}
+            rel="noopener noreferrer"
+            variant="grayPill"
           >
-            Message
-          </Link>
+            Email us
+          </Button>
           <Typography
             variant="subtitle2"
             sx={{ display: 'flex', alignItems: 'center' }}
