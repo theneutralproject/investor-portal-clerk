@@ -1,10 +1,9 @@
 import React from 'react';
-import { Typography, Box, Divider, Chip } from '@mui/material';
+import { Typography, Box, Divider, Chip, Button } from '@mui/material';
 import { useDealFlow } from '@components/DealFlow/Shared/DealFlowContext';
 import { DealFinancingType } from '@prisma/client';
 import Image from 'next/image';
 import DealFlowSidebarDetails from './DealFlowSidebarDetails';
-import ChatInterface from '@/components/ChatInterface';
 import { getProjectImage } from '@/components/Dashboard/DashboardProjects';
 import DealFlowSidebarLoading from './DealFlowSidebarLoading';
 const DealFlowSidebar = () => {
@@ -111,7 +110,7 @@ const DealFlowSidebar = () => {
             <Image
               width="40"
               height="40"
-              src="/StormAvatar.png"
+              src="/chat_thumbnail_sarah.png"
               alt="Support Avatar"
             />
           </Box>
@@ -136,7 +135,14 @@ const DealFlowSidebar = () => {
                 mt: 1,
               }}
             >
-              <ChatInterface type="DEALFLOW_BUTTON" />
+              <Button
+                href="mailto:invest@neutral.us"
+                target="_blank"
+                rel="noopener noreferrer"
+                variant="grayPill"
+              >
+                Email us
+              </Button>
               <Typography variant="body2" color="text.secondary">
                 (608) 205-8336
               </Typography>
