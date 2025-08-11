@@ -1,0 +1,136 @@
+openapi: 3.0.3
+info:
+  title: Document Upload - Signed URL Generator
+  description: Generates a signed URL to upload a document to Supabase Storage based on the entity type.
+  version: 1.0.1
+
+paths:
+  /api/admin/documents/signed-url:
+    post:
+      summary: Generate signed URL for document upload
+      description: |
+        Authenticates an admin user and returns a signed Supabase Storage URL to upload a document.  
+        Supported types: `deal`, `organization`, `project`.
+
+        May return `404` if the referenced entity is not found in the database.
+      tags:
+        - Admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/DealOrOrganizationDocumentInput'
+                - $ref: '#/components/schemas/ProjectDocumentInput'
+            examples:
+              DealDocument:
+                summary: Deal document
+                value:
+                  entityType: deal
+                  entityId: 101
+                  fileName: deal-doc.pdf
+              OrganizationDocument:
+                summary: Organization document
+                value:
+                  entityType: organization
+                  entityId: 202
+                  fileName: org-doc.pdf
+              ProjectDocument:
+                summary: Project document
+                value:
+                  entityType: project
+                  entityId: 303
+                  fileName: project-overview.pdf
+      responses:
+        '200':
+          description: Signed URL and upload metadata returned
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  t:
+                    type: string
+                    description: Supabase service key (server-provided)
+                  u:
+                    type: string
+                    description: Supabase storage URL
+                  bucketName:
+                    type: string
+                    example: deal-documents
+                  fileName:
+                    type: string
+                    example: deal-doc.pdf
+                  uploadUrl:
+                    type: string
+                    format: uri
+                  filePath:
+                    type: string
+                    example: deal-101/deal-doc.pdf
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: object
+        '404':
+          description: Referenced entity not found (e.g., missing project, deal, or organization)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Project with id '303' not found
+        '500':
+          description: Internal server or authentication error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+
+components:
+  schemas:
+    DealOrOrganizationDocumentInput:
+      type: object
+      required:
+        - entityType
+        - entityId
+        - fileName
+      properties:
+        entityType:
+          type: string
+          enum: [deal, organization]
+        entityId:
+          type: integer
+          minimum: 1
+        fileName:
+          type: string
+          example: document.pdf
+
+    ProjectDocumentInput:
+      type: object
+      required:
+        - entityType
+        - entityId
+        - fileName
+      properties:
+        entityType:
+          type: string
+          enum: [project]
+        entityId:
+          type: integer
+          minimum: 1
+        fileName:
+          type: string
+          example: project-file.pdf

@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: Admin Document Management API
+  version: 1.0.1
+  description: >
+    Authenticated admin endpoints for downloading and deleting documents from Supabase Storage and the database.
+
+paths:
+  /api/admin/documents:
+    delete:
+      summary: Delete document by entity and ID
+      description: >
+        Authenticated admin route that deletes a document from Supabase Storage and the database.
+        Supports documents associated with a `deal`, `organization`, or `project`.
+      tags:
+        - Documents
+      parameters:
+        - in: query
+          name: entity
+          required: true
+          description: The entity type of the document.
+          schema:
+            type: string
+            enum: [deal, organization, project]
+        - in: query
+          name: docId
+          required: true
+          description: The ID of the document to delete.
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Document deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: Document deleted successfully
+        '400':
+          description: Missing or invalid query parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  details:
+                    type: object
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '404':
+          description: Document or file not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Server error during deletion
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+      security:
+        - bearerAuth: []
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

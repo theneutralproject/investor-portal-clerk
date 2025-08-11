@@ -1,12 +1,26 @@
 import { NextRequest } from 'next/server';
 import prisma from '../prisma.server';
 import {
+  APIError,
   ProjectDocumentWithDocumentEvents,
   UserWithOrganizations,
 } from '../types';
 import { getAuth } from '@clerk/nextjs/server';
 import { canSeeDocument } from '../nda/utils.server';
-import { DealFinancingType, DocumentEvent, Prisma, User } from '@prisma/client';
+import {
+  DealDocumentType,
+  DealFinancingType,
+  DocumentEvent,
+  Prisma,
+  User,
+} from '@prisma/client';
+import { storageClient } from '@/libs/supabase';
+import {
+  DocumentEntityType,
+  DocumentCreateGenericSchema,
+  DocumentUpdateGenericSchema,
+} from './schema';
+import Logger from '../logger';
 
 export async function validateAccess(
   dbUser: UserWithOrganizations,
@@ -175,3 +189,285 @@ export async function getProjectDocumentsWithAccessCheck(
       return 0;
     });
 }
+
+export const createDocumentSignedUrl = async (
+  type: DocumentEntityType,
+  id: number,
+  fileName: string,
+  folder: string
+) => {
+  if (!id) {
+    throw new Error(`${type} ID is required`);
+  }
+
+  const bucketName = `${type}-documents`;
+
+  const { data, error } = await storageClient
+    .from(bucketName)
+    .createSignedUploadUrl(`${folder}/${fileName}`);
+
+  if (error) {
+    throw error;
+  }
+
+  return {
+    ...data,
+    folder,
+    bucketName,
+  };
+};
+
+export const getFolderName = async (
+  entityName: DocumentEntityType,
+  entityId: number
+) => {
+  const whereClause = {
+    id: entityId,
+  };
+
+  if (entityName === 'project') {
+    const project = await prisma.project.findFirst({
+      where: whereClause,
+      select: {
+        name: true,
+      },
+    });
+    if (!project)
+      throw new APIError(`Project with id '${entityId}' not found`, 404);
+
+    return project.name.replaceAll(' ', '');
+  }
+
+  if (entityName === 'deal') {
+    const deal = await prisma.deal.findFirst({
+      where: whereClause,
+      select: {
+        id: true,
+      },
+    });
+    if (!deal) throw new APIError(`Deal with id '${entityId}' not found`, 404);
+
+    return `${entityName}-${entityId}`;
+  }
+
+  if (entityName === 'organization') {
+    const organization = await prisma.organization.findFirst({
+      where: whereClause,
+      select: {
+        id: true,
+      },
+    });
+    if (!organization)
+      throw new APIError(`Organization with id '${entityId}' not found`, 404);
+
+    return `${entityName}-${entityId}`;
+  }
+
+  throw new APIError(`Project with id '${entityId}' not found`, 400);
+};
+
+export async function createGenericDocumentEntry(
+  props: DocumentCreateGenericSchema,
+  userId: number
+) {
+  const { type } = props;
+
+  Logger.log({
+    message: `Creating '${type}' document entry.`,
+    extra: props,
+  });
+
+  try {
+    if (type === 'deal') {
+      const { dealId, name, path, dealDocumentType, taxYear } = props;
+      if (!dealDocumentType) {
+        throw new Error('Missing required dealDocumentType field');
+      }
+      if (dealDocumentType === DealDocumentType.K1 && !taxYear) {
+        throw new Error('Missing required taxYear field for K1 document');
+      }
+      return await prisma.dealDocument.create({
+        data: {
+          dealId,
+          name,
+          path,
+          type: dealDocumentType,
+          uploadedById: userId,
+          taxYear,
+        },
+      });
+    }
+
+    if (type === 'organization') {
+      const { organizationId, name, path, key } = props;
+      return await prisma.organizationDocument.create({
+        data: {
+          organizationId,
+          name,
+          path,
+          key,
+          uploadedById: userId,
+        },
+      });
+    }
+
+    if (type === 'project') {
+      const { type: _, ...payload } = props;
+      return await prisma.projectDocument.create({
+        data: payload,
+      });
+    }
+
+    throw new Error('Document type not permitted');
+  } catch (error) {
+    Logger.error(error, null, {
+      message: `Error creating document entry: ${(error as Error).message}`,
+    });
+    throw error;
+  }
+}
+
+export async function updateGenericDocumentEntry(
+  docId: number,
+  props: DocumentUpdateGenericSchema
+) {
+  const { type } = props;
+
+  Logger.log({
+    message: `Creating '${type}' document entry.`,
+    extra: props,
+  });
+
+  try {
+    if (type === 'deal') {
+      const { dealDocumentType, taxYear } = props;
+      if (dealDocumentType === DealDocumentType.K1 && !taxYear) {
+        throw new Error('Missing required taxYear field for K1 document');
+      }
+      return await prisma.dealDocument.update({
+        where: {
+          id: docId,
+        },
+        data: {
+          type: dealDocumentType,
+          taxYear,
+        },
+      });
+    }
+
+    if (type === 'organization') {
+      const { key } = props;
+      return await prisma.organizationDocument.update({
+        where: {
+          id: docId,
+        },
+        data: {
+          key,
+        },
+      });
+    }
+
+    if (type === 'project') {
+      const { type: _, ...payload } = props;
+      return await prisma.projectDocument.update({
+        where: { id: docId },
+        data: payload,
+      });
+    }
+
+    throw new Error('Document type not permitted');
+  } catch (error) {
+    Logger.error(error, null, {
+      message: `Error updating document: ${(error as Error).message}`,
+    });
+    throw error;
+  }
+}
+
+export const getGenericDocument = async (
+  entity: string,
+  docId: number
+): Promise<{ name: string; path: string; bucketName: string }> => {
+  let name;
+  let path;
+  let fileDocument;
+
+  if (entity === 'deal') {
+    fileDocument = await prisma.dealDocument.findUnique({
+      where: {
+        id: docId,
+      },
+      select: {
+        path: true,
+        name: true,
+      },
+    });
+    name = fileDocument?.name;
+    path = fileDocument?.path;
+  }
+
+  if (entity === 'organization') {
+    fileDocument = await prisma.organizationDocument.findUnique({
+      where: {
+        id: docId,
+      },
+      select: {
+        path: true,
+        name: true,
+      },
+    });
+    name = fileDocument?.name;
+    path = fileDocument?.path;
+  }
+
+  if (entity === 'project') {
+    fileDocument = await prisma.projectDocument.findUnique({
+      where: {
+        id: docId,
+      },
+      select: {
+        fileName: true,
+        project: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    name = fileDocument?.fileName;
+    path = fileDocument?.project.name.replaceAll(' ', '') || '';
+  }
+
+  if (!fileDocument) {
+    throw new APIError(`Document from '${entity}' not found`, 404);
+  }
+  if (!name) {
+    throw new APIError(`File name invalid for file`, 500);
+  }
+  if (!path) {
+    throw new APIError(`Path invalid for file '${name}'`, 500);
+  }
+
+  return {
+    name,
+    path,
+    bucketName: `${entity}-documents`,
+  };
+};
+
+export const deleteGenericDocument = async (entity: string, docId: number) => {
+  const entityDeleteHandlers = {
+    deal: () => prisma.dealDocument.delete({ where: { id: docId } }),
+    organization: () =>
+      prisma.organizationDocument.delete({ where: { id: docId } }),
+    project: () => prisma.projectDocument.delete({ where: { id: docId } }),
+  } as const;
+
+  const handler =
+    entityDeleteHandlers[entity as keyof typeof entityDeleteHandlers];
+  if (!handler) {
+    throw new APIError(`Unsupported entity type '${entity}'`, 400);
+  }
+
+  await handler();
+};
