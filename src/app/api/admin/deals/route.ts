@@ -171,7 +171,11 @@ export async function GET(request: NextRequest) {
         where: where,
         include: {
           organization: {
-            include: { ownedBy: { include: { address: true } }, address: true },
+            include: {
+              ownedBy: { include: { address: true } },
+              address: true,
+              advisorFirm: true,
+            },
           },
           investmentStats: true,
           document: true,
