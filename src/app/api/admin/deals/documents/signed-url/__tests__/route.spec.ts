@@ -22,7 +22,7 @@ jest.mock('@/libs/supabase', () => ({
   },
 }));
 
-describe('POST /api/documents/signed-url', () => {
+describe('POST /api/deals/documents/signed-url', () => {
   const adminUser: any = { id: 1, email: 'admin@example.com', role: 'ADMIN' };
 
   const validPayload = {

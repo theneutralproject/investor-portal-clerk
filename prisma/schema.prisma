@@ -41,6 +41,8 @@ model User {
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
   Changelog                    Changelog[]
+
+  NDAAgreement NDAAgreement[]
 }
 
 model Deal {
@@ -301,6 +303,8 @@ model ProjectDocument {
   docusignTemplateId String?
   dateCreated        DateTime?           @default(now())
   dateUpdated        DateTime?           @updatedAt
+  isPublic           Boolean             @default(false) // New: Public vs Gated
+  requiresNDA        Boolean             @default(false) // New: NDA required
   documentEvents     DocumentEvent[]
   project            Project             @relation(fields: [projectId], references: [id])
 }
@@ -435,6 +439,16 @@ model Changelog {
 
   @@index([entityId, entityName])
   @@index([userId])
+}
+
+model NDAAgreement {
+  id         Int      @id @default(autoincrement())
+  userId     Int      @unique
+  accepted   Boolean  @default(true)
+  dateSigned DateTime @default(now())
+  revision   Int
+
+  user User @relation(fields: [userId], references: [id])
 }
 
 enum AdvisorEmployeeRole {

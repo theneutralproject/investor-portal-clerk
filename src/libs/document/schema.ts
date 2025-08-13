@@ -1,4 +1,9 @@
-import { DealDocumentType, DocumentEventType } from '@prisma/client';
+import {
+  DealDocumentType,
+  DealFinancingType,
+  DocumentEventType,
+  DocumentType,
+} from '@prisma/client';
 import { z } from 'zod';
 
 const ACCEPTED_FILE_TYPES = [
@@ -162,3 +167,164 @@ export const FILE_VALIDATION = {
   MAX_FILE_SIZE,
   sizeInMB,
 };
+
+export type DocumentEntityType = 'deal' | 'organization' | 'project';
+export const zDocumentEntityType = z.enum(['deal', 'organization', 'project']);
+export type DocumentEntityTypeSchema = z.infer<typeof zDocumentEntityType>;
+
+export const zDocumentSignedUrlCreateSchema = z.object({
+  entityId: z.union([z.string(), z.number()]).transform(val => {
+    const num = Number(val);
+    if (isNaN(num)) {
+      throw new Error('entityId must be a valid number');
+    }
+    return num;
+  }),
+
+  fileName: z.string().min(1, { message: 'fileName is required' }),
+
+  entityType: zDocumentEntityType,
+});
+
+export type DocumentSignedURLCreateSchema = z.infer<
+  typeof zDocumentSignedUrlCreateSchema
+>;
+
+const zDealDocumentCreateSchema = z
+  .object({
+    type: z.literal('deal'),
+    dealId: z.number().int().positive(),
+    name: z.string().min(1),
+    path: z.string().min(1),
+    key: z.string().min(1),
+    dealDocumentType: z.nativeEnum(DealDocumentType),
+    taxYear: z.number().int().optional(),
+  })
+  .strict();
+
+export type DealDocumentCreateSchema = z.infer<
+  typeof zDealDocumentCreateSchema
+>;
+
+const zOrganizationDocumentCreateSchema = z
+  .object({
+    type: z.literal('organization'),
+    organizationId: z.number().int().positive(),
+    name: z.string().min(1),
+    path: z.string().min(1),
+    key: z.string().min(1),
+  })
+  .strict();
+
+export type OrganizationDocumentCreateSchema = z.infer<
+  typeof zOrganizationDocumentCreateSchema
+>;
+
+export const DealOrOrganizationDocumentCreateSchema = z.discriminatedUnion(
+  'type',
+  [zDealDocumentCreateSchema, zOrganizationDocumentCreateSchema]
+);
+
+export const zProjectDocumentCreateSchema = z
+  .object({
+    type: z.literal('project'),
+    name: z.string().min(1),
+    fileName: z.string().min(1),
+    description: z.string().optional(),
+    link: z.string().url(),
+    projectId: z.number().int().positive(),
+    dealStage: z.number().int(),
+    financingTypes: z.array(z.nativeEnum(DealFinancingType)).optional(),
+    documentType: z.nativeEnum(DocumentType),
+    docusignTemplateId: z.string().optional(),
+    isPublic: z.boolean(),
+    requiresNDA: z.boolean(),
+  })
+  .strict();
+
+export type ProjectDocumentCreateSchema = z.infer<
+  typeof zProjectDocumentCreateSchema
+>;
+
+export const zDocumentCreateGenericSchema = z.discriminatedUnion('type', [
+  zProjectDocumentCreateSchema,
+  zDealDocumentCreateSchema,
+  zOrganizationDocumentCreateSchema,
+]);
+
+export type DocumentCreateGenericSchema =
+  | ProjectDocumentCreateSchema
+  | DealDocumentCreateSchema
+  | OrganizationDocumentCreateSchema;
+
+export const zDocumentFetchSchema = z.object({
+  docId: z.union([z.string(), z.number()]).transform(val => {
+    const num = Number(val);
+    if (isNaN(num)) {
+      throw new Error('docId must be a valid number');
+    }
+    return num;
+  }),
+
+  entity: zDocumentEntityType,
+});
+
+export type DocumentFetchSchema = z.infer<typeof zDocumentFetchSchema>;
+export const zDocumentUpdateSchema = zDocumentFetchSchema;
+export type DocumentUpdateSchema = z.infer<typeof zDocumentUpdateSchema>;
+
+const zDealDocumentUpdateSchema = z
+  .object({
+    type: z.literal('deal'),
+    key: z.string().min(1).optional(),
+    dealDocumentType: z.nativeEnum(DealDocumentType).optional(),
+    taxYear: z.number().int().optional(),
+  })
+  .strict();
+
+export type DealDocumentUpdateSchema = z.infer<
+  typeof zDealDocumentUpdateSchema
+>;
+
+const zOrganizationDocumentUpdateSchema = z
+  .object({
+    type: z.literal('organization'),
+    key: z.string().min(1).optional(),
+  })
+  .strict();
+
+export type OrganizationDocumentUpdateSchema = z.infer<
+  typeof zOrganizationDocumentUpdateSchema
+>;
+
+export const DealOrOrganizationDocumentUpdateSchema = z.discriminatedUnion(
+  'type',
+  [zDealDocumentUpdateSchema, zOrganizationDocumentUpdateSchema]
+);
+
+export const zProjectDocumentUpdateSchema = z
+  .object({
+    type: z.literal('project'),
+    description: z.string().optional(),
+    dealStage: z.number().int().optional(),
+    financingTypes: z.array(z.nativeEnum(DealFinancingType)).optional(),
+    documentType: z.nativeEnum(DocumentType).optional(),
+    docusignTemplateId: z.string().optional(),
+    isPublic: z.boolean().optional(),
+    requiresNDA: z.boolean().optional(),
+  })
+  .strict();
+
+export type ProjectDocumentUpdateSchema = z.infer<
+  typeof zProjectDocumentUpdateSchema
+>;
+
+export const zDocumentUpdateGenericSchema = z.discriminatedUnion('type', [
+  zProjectDocumentUpdateSchema,
+  zDealDocumentUpdateSchema,
+  zOrganizationDocumentUpdateSchema,
+]);
+
+export type DocumentUpdateGenericSchema = z.infer<
+  typeof zDocumentUpdateGenericSchema
+>;
