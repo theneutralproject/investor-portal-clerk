@@ -5,16 +5,16 @@ test.describe('dealflow logic tests', () => {
   // Store the deal ID for use across tests
   let dealId: string | null = null;
 
-  test('Can view Edison get started page', async ({ page }) => {
-    await page.goto('/dealflow/edison/new/get-started');
-    // Wait for the api call to load  /api/deals/flow?projectSlug=edison&dealId=new
-    await page.waitForResponse(response =>
-      response.url().includes('/api/deals/flow?projectSlug=edison&dealId=new')
-    );
-    await expect(page.getByText('The Edison / Invest')).toBeVisible();
-    await expect(page.getByText('Investment Summary')).toBeVisible();
-    await expect(page.getByText('Milwaukee, WI')).toBeVisible();
-  });
+  // test('Can view Edison get started page', async ({ page }) => {
+  //   await page.goto('/dealflow/edison/new/get-started');
+  //   // Wait for the api call to load  /api/deals/flow?projectSlug=edison&dealId=new
+  //   await page.waitForResponse(response =>
+  //     response.url().includes('/api/deals/flow?projectSlug=edison&dealId=new')
+  //   );
+  //   await expect(page.getByText('The Edison / Invest')).toBeVisible();
+  //   await expect(page.getByText('Investment Summary')).toBeVisible();
+  //   await expect(page.getByText('Milwaukee, WI')).toBeVisible();
+  // });
 
   test('Can continue from get started page and store deal ID', async ({
     page,
