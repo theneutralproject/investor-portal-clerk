@@ -65,6 +65,7 @@ describe('GET /api/activity-feed', () => {
     expect(json).toEqual(mockActivityItems);
     expect(prisma.activityFeedItem.findMany).toHaveBeenCalledWith({
       where: { userId: 100 },
+      orderBy: { dateCreated: 'desc' },
     });
   });
 
@@ -113,6 +114,7 @@ describe('GET /api/activity-feed', () => {
     expect(json).toEqual([]);
     expect(prisma.activityFeedItem.findMany).toHaveBeenCalledWith({
       where: { userId: 100 },
+      orderBy: { dateCreated: 'desc' },
     });
   });
 

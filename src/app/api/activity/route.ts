@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
     // Get all activity items for logged user
     const activityItems = await prisma.activityFeedItem.findMany({
       where: { userId: dbUserId },
+      orderBy: { dateCreated: 'desc' },
     });
 
     return jsonResponse(activityItems);
