@@ -64,3 +64,52 @@ export async function POST(request: NextRequest) {
     return errorResponse(getErrorMessage(error), 500, { request });
   }
 }
+
+export async function GET(request: NextRequest) {
+  let adminUser: User | null = null;
+  try {
+    adminUser = await getAdminFromRequest(request);
+  } catch (error) {
+    Logger.log({ message: getErrorMessage(error) }, request);
+    return jsonResponse(getErrorMessage(error), 401);
+  }
+
+  if (!adminUser) {
+    return errorResponse('Restricted Access', 401, { request });
+  }
+
+  try {
+    const platforms = await prisma.advisorProjectPlatform.findMany({
+      include: {
+        advisorFirm: {
+          select: {
+            id: true,
+            name: true,
+            logoUrl: true,
+          },
+        },
+        project: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    return jsonResponse({ success: true, data: platforms });
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+    Logger.error('Failed to fetch advisor project platforms', request, {
+      error,
+      errorMessage,
+    });
+    return errorResponse('Internal Server Error', 500, { request });
+  }
+}
