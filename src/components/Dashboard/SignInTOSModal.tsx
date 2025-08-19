@@ -13,10 +13,15 @@ import { usePathname } from 'next/navigation';
 import { useTermsContext } from '@/app/context/TermsContext';
 
 const SignInTOSModal = () => {
-  const { acceptTerms, showModal } = useTermsContext();
+  const { acceptTerms, showModal, isAdvisor } = useTermsContext();
   const pathname = usePathname();
 
-  if (pathname === '/terms' || pathname === '/privacy') {
+  if (
+    pathname === '/terms' ||
+    pathname === '/privacy' ||
+    pathname === '/advisor/terms' ||
+    pathname === '/advisor/privacy'
+  ) {
     return null;
   }
 
@@ -38,11 +43,17 @@ const SignInTOSModal = () => {
           </Typography>
           <Typography variant="body1" color="text.secondary">
             By clicking continue, you agree to our{' '}
-            <Link href="/terms" underline="hover">
+            <Link
+              href={isAdvisor ? `/advisor/terms` : `/terms`}
+              underline="hover"
+            >
               terms
             </Link>{' '}
             and have read our{' '}
-            <Link href="/privacy" underline="hover">
+            <Link
+              href={isAdvisor ? `/advisor/privacy` : `/privacy`}
+              underline="hover"
+            >
               privacy policy
             </Link>
           </Typography>

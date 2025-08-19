@@ -3,6 +3,7 @@ import { getAuth } from '@clerk/nextjs/server';
 import prisma from '@/libs/prisma.server';
 import { errorResponse, jsonResponse } from '@/libs/utils.server';
 import { NextRequest } from 'next/server';
+import { Role } from '@prisma/client';
 
 /**
  * Current terms revision number from environment variable.
@@ -25,7 +26,7 @@ const CURRENT_REVISION = parseInt(
 const getUser = async (clerkUserId: string) => {
   return await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
-    select: { id: true, TermsEvents: true },
+    select: { id: true, TermsEvents: true, role: true },
   });
 };
 
@@ -59,6 +60,7 @@ export async function GET(request: NextRequest) {
     userId: user.id,
     clerkUserId: clerkId,
     hasAcceptedCurrentRevision: !!currentRevisionTermEvent,
+    isAdvisor: user.role === Role.ADVISOR,
   });
 }
 
