@@ -6,6 +6,8 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
+import { AdvisorProjectBroker } from '@/libs/types';
+import { Status } from '@prisma/client';
 
 /**
  * GET handler to fetch all advisor project platform entries by project ID.
@@ -28,9 +30,15 @@ export async function GET(
     return errorResponse('projectId is invalid', 400, { request });
 
   try {
-    const platforms = await prisma.advisorProjectPlatform.findMany({
+    const platforms: AdvisorProjectBroker[] = await prisma.advisorProjectPlatform.findMany({
       where: {
         projectId,
+        NOT: {
+          status: Status.INACTIVE, // filter out INACTIVE
+        },
+      },
+      orderBy: {
+        status: 'asc', // will bring ACTIVE first (assuming alphabetical order)
       },
       include: {
         advisorFirm: {

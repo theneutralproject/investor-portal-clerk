@@ -9,6 +9,7 @@ import Logger from '@/libs/logger';
 import { getAdminFromRequest } from '@/libs/admin/utils.server';
 import { zAdvisorProjectPlatformCreateSchema } from '@/libs/advisorProjectPlatform/schema';
 import { User } from '@prisma/client';
+import { AdvisorProjectBroker } from '@/libs/types';
 
 /**
  * @function POST
@@ -126,29 +127,30 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const platforms = await prisma.advisorProjectPlatform.findMany({
-      include: {
-        advisorFirm: {
-          select: {
-            id: true,
-            name: true,
-            logoUrl: true,
+    const platforms: AdvisorProjectBroker[] =
+      await prisma.advisorProjectPlatform.findMany({
+        include: {
+          advisorFirm: {
+            select: {
+              id: true,
+              name: true,
+              logoUrl: true,
+            },
+          },
+          project: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+          createdBy: {
+            select: {
+              id: true,
+              email: true,
+            },
           },
         },
-        project: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        createdBy: {
-          select: {
-            id: true,
-            email: true,
-          },
-        },
-      },
-    });
+      });
 
     return jsonResponse({ success: true, data: platforms });
   } catch (error) {

@@ -37,6 +37,7 @@ import { useRedirect } from '@/app/context/RedirectContext';
 import { sendGTMEvent } from '@next/third-parties/google';
 import { INVESTMENTS } from 'e2e/testIds';
 import { capturePageView } from '@/libs/posthog/events';
+import AdvisorPlatforms from '@/components/Project/Overview/AdvisorPlatforms';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -184,6 +185,7 @@ export default function Page({ params }: NextClientPage) {
 
           <BuildingDetailsNew data={project} />
           <ProjectDescriptionNew data={project} />
+          <AdvisorPlatforms projectId={project.id} />
           <MarketHighlightsNew data={project} />
           <InvestmentCalculatorNew project={project} />
           <Box sx={{ position: 'relative' }}>
