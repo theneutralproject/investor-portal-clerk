@@ -64,7 +64,7 @@ const DashboardPage = () => {
       <Grid
         container
         spacing={2}
-        sx={{ mt: 2, background: '#f5f5f5', borderRadius: '8px' }}
+        sx={{ mt: 2, background: '#FFFFFF', borderRadius: '8px' }}
       >
         <Grid
           size={{
@@ -73,7 +73,7 @@ const DashboardPage = () => {
           }}
           display="flex"
           justifyContent="center"
-          sx={{ background: '#f5f5f5' }}
+          sx={{ background: '#FFFFFF' }}
         >
           <Box sx={{ width: '100%' }}>
             <Card sx={{ borderRadius: '8px', position: 'relative' }}>
@@ -100,7 +100,7 @@ const DashboardPage = () => {
         </Grid>
 
         <Grid size={{ xs: 12, md: 4 }} display="flex" justifyContent="flex-end">
-          <Box sx={{ width: '100%', backgroundColor: '#f5f5f5' }}>
+          <Box sx={{ width: '100%' }}>
             {!loggedIn && <CreateAccount />}
             {deals && deals.length > 0 && !isMobile && (
               <CompleteInvestment

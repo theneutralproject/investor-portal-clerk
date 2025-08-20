@@ -48,7 +48,11 @@ const SignInTOSModal = () => {
           </Typography>
         </CardContent>
         <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
-          <Button onClick={acceptTerms} variant="neutralYellow" color="primary">
+          <Button
+            onClick={acceptTerms}
+            variant="neutralRustTerracotta"
+            color="primary"
+          >
             Continue
           </Button>
         </CardActions>

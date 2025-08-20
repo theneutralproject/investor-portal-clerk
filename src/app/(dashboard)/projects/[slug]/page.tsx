@@ -163,16 +163,15 @@ export default function Page({ params }: NextClientPage) {
         container
         spacing={2}
         direction={{ xs: 'column-reverse', md: 'row' }}
-        sx={{ mt: 2, background: '#f5f5f5', borderRadius: '8px' }}
+        sx={{ mt: 2, background: '#FFFFFF', borderRadius: '8px' }}
       >
         <Grid
           size={{ xs: 12, md: 8 }}
           display="flex"
           justifyContent="center"
           flexDirection="column"
-          bgcolor="#f5f5f5"
         >
-          <Card sx={{ position: 'relative' }}>
+          <Card variant="green" sx={{ position: 'relative' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Investment Summary

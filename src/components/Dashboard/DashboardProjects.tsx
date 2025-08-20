@@ -146,6 +146,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
 
           return (
             <StyledCard
+              variant="bordered"
               key={project.id}
               elevation={1}
               onClick={() => {
@@ -283,7 +284,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
 
                   {isMobile && (
                     <Button
-                      variant="neutralYellow"
+                      variant="neutralRustTerracotta"
                       href={`/projects/${project.slug}`}
                       fullWidth
                       sx={{ mt: 2, padding: '8px 16px' }}

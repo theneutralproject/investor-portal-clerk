@@ -46,8 +46,11 @@ const statusIconColorMapper = {
 
 const CustodianPlatforms = ({ projectId }: { projectId: number }) => {
   const { data, isLoading } = useCustodianPlatforms(projectId);
+
+  if (!isLoading && !data?.data.length) return null;
+
   return (
-    <Card sx={{ mt: 2 }}>
+    <Card sx={{ mt: 2 }} variant="marble">
       <CardContent>
         <Typography variant="h6" gutterBottom>
           For Registered Investment Advisors & Broker Dealers
@@ -65,7 +68,6 @@ const CustodianPlatforms = ({ projectId }: { projectId: number }) => {
         <List
           sx={{
             width: '100%',
-            bgcolor: 'background.paper',
             color: 'rgba(0, 0, 0, 0.6)',
           }}
         >
@@ -103,7 +105,6 @@ const CustodianPlatforms = ({ projectId }: { projectId: number }) => {
         <List
           sx={{
             width: '100%',
-            bgcolor: 'background.paper',
             color: 'rgba(0, 0, 0, 0.6)',
             padding: '0px',
           }}

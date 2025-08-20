@@ -133,7 +133,7 @@ export default function Sidebar(props: ISidebarProps) {
   const advisorContext = useAdvisorContext(isAdvisor);
   const imageSource = isAdvisor
     ? advisorContext?.advisor?.logoUrl || '/Neutral_White_Medium.png'
-    : '/Neutral_White_Medium.png';
+    : '/logo.png';
   const imageSize = isAdvisor
     ? { width: 104, height: 51 }
     : { width: 94, height: 21 };
@@ -154,14 +154,12 @@ export default function Sidebar(props: ISidebarProps) {
       <AppBar position="absolute">
         <Toolbar
           sx={{
-            boxShadow: isAdvisor
-              ? `0px 2px 4px -1px #00000033;`
-              : `0px 1px 3px 0px rgba(0, 0, 0, 0.12), 0px 1px 1px 0px rgba(0, 0, 0, 0.14), 0px 2px 1px -1px rgba(0, 0, 0, 0.20)`,
+            boxShadow: `0px 1px 3px 0px rgba(0, 0, 0, 0.12)`,
             border: 'none !important',
             [theme.breakpoints.down('md')]: {
               display: 'none',
             },
-            backgroundColor: isAdvisor ? '#FFFFFF' : 'black',
+            backgroundColor: '#FFFFFF',
           }}
         >
           <Image
@@ -190,26 +188,15 @@ export default function Sidebar(props: ISidebarProps) {
                     borderRadius: '15px',
                     padding: '5px 10px',
 
-                    color: isAdvisor
-                      ? isActiveRoute(route.path)
-                        ? 'rgba(0, 0, 0, 0.87)'
-                        : 'rgba(0, 0, 0, 0.6)'
-                      : isActiveRoute(route.path)
-                        ? 'white'
-                        : 'rgba(255, 255, 255, 0.66)',
-                    backgroundColor: isAdvisor
-                      ? isActiveRoute(route.path)
-                        ? 'rgba(0, 0, 0, 0.08)'
-                        : 'transparent'
-                      : isActiveRoute(route.path)
-                        ? 'rgba(255, 255, 255, 0.2)'
-                        : 'transparent',
+                    color: isActiveRoute(route.path)
+                      ? 'rgba(172, 78, 11, 1)'
+                      : 'rgba(0, 0, 0, 0.6)',
+                    backgroundColor: isActiveRoute(route.path)
+                      ? 'rgba(243, 238, 226, 1)'
+                      : 'transparent',
                     '&:hover': {
-                      backgroundColor: isAdvisor
-                        ? 'rgba(0, 0, 0, 0.08)'
-                        : isActiveRoute(route.path)
-                          ? 'rgba(255, 255, 255, 0.3)'
-                          : 'rgba(255, 255, 255, 0.1)',
+                      backgroundColor: 'rgba(243, 238, 226, 1)',
+                      color: 'rgba(172, 78, 11, 1)',
                     },
                     fontSize: '14px',
                     mr: '10px',
@@ -240,7 +227,7 @@ export default function Sidebar(props: ISidebarProps) {
           flexGrow: 1,
           height: '100vh',
           overflow: 'auto',
-          backgroundColor: '#f5f5f5',
+          backgroundColor: '#FFFFFF',
         }}
       >
         <Toolbar />
