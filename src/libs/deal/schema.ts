@@ -6,6 +6,7 @@ import {
   DealStatus,
 } from '@prisma/client';
 import { z } from 'zod';
+import { parseWithCSTDefault } from './utils.server';
 
 export const zDealInvestmentStatsUpdateSchema = z.object({
   amount: z.number().optional(),
@@ -28,11 +29,17 @@ export const zDealUpdateSchema = z.object({
   dealStage: z.number().min(0).max(6).optional(),
   accreditationVerifierId: z.number().optional().nullable(),
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
-  closingDate: z.date().nullish(),
-  signaturesCompletedDate: z.date().nullish(),
+  closingDate: z
+    .date()
+    .nullish()
+    .transform(val => (val ? parseWithCSTDefault(val) : val)),
+  signaturesCompletedDate: z
+    .date()
+    .nullish()
+    .transform(val => (val ? parseWithCSTDefault(val) : val)),
   dateFundsSent: z
     .date()
-    .or(z.string().transform(str => new Date(str)))
+    .or(z.string().transform(str => parseWithCSTDefault(str)))
     .nullish(),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
@@ -51,13 +58,22 @@ export const zDealCreateSchema = z.object({
   financingType: z.nativeEnum(DealFinancingType).nullish(),
   ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
   transactionId: z.string().optional(),
-  closingDate: z.date().nullish(),
-  signaturesCompletedDate: z.date().nullish(),
+  closingDate: z
+    .date()
+    .nullish()
+    .transform(val => (val ? parseWithCSTDefault(val) : val)),
+  signaturesCompletedDate: z
+    .date()
+    .nullish()
+    .transform(val => (val ? parseWithCSTDefault(val) : val)),
   dateFundsSent: z
     .date()
-    .or(z.string().transform(str => new Date(str)))
+    .or(z.string().transform(str => parseWithCSTDefault(str)))
     .nullish(),
-  dateMatured: z.date().nullish(),
+  dateMatured: z
+    .date()
+    .nullish()
+    .transform(val => (val ? parseWithCSTDefault(val) : val)),
   paymentMethod: z.nativeEnum(PaymentMethod).nullish(),
   paymentReferenceId: z.string().nullish(),
   debtMinTerm: z.number().int().nullish(), //used for maintenance scripts to create old deals

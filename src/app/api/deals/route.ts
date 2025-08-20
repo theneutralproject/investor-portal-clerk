@@ -179,12 +179,6 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const requestBody = (await request.json()) as DealUpdateSchema;
-    // parse the date strings into Date objects for zod to validate
-    if (requestBody.closingDate) {
-      requestBody.closingDate = new Date(
-        Date.parse(requestBody.closingDate.toString())
-      );
-    }
 
     let deal: DealUpdateSchema;
     try {
