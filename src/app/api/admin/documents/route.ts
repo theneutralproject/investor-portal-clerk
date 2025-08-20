@@ -153,11 +153,11 @@ export async function DELETE(request: NextRequest): Promise<Response> {
     adminUser = await getAdminFromRequest(request);
   } catch (error) {
     Logger.log({ message: getErrorMessage(error) }, request);
-    return jsonResponse(getErrorMessage(error), 500);
+    return jsonResponse(getErrorMessage(error), 401);
   }
 
   if (!adminUser) {
-    return errorResponse('admin user not found', 500, { request });
+    return errorResponse('Restricted Access', 401, { request });
   }
 
   const { searchParams } = new URL(request.url);
