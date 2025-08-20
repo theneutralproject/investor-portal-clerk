@@ -12,6 +12,8 @@ import Grid from '@mui/material/Grid2';
 import 'react-image-gallery/styles/css/image-gallery.css';
 import { use, useEffect } from 'react';
 import axios from 'axios';
+import { usePostHog } from 'posthog-js/react';
+import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { POSTHOG_EVENTS, type ProjectWithAllNestedData } from '@/libs/types';
 import InvestmentSummaryBox from '@/components/Project/Overview/InvestmentSummaryBox';
@@ -29,15 +31,13 @@ import MobileCTA from '@/components/Project/NewProject/MobileCTA';
 import { useDashboard } from '@/components/Dashboard/DashboardContext';
 import CompleteInvestment from '@/components/Dashboard/CompleteInvestment';
 import DashboardSkeleton from '@/components/SkeletonLoading/DashboardSkeleton';
-import { usePostHog } from 'posthog-js/react';
-import { useRouter } from 'next/navigation';
+import CustodianPlatforms from '@/components/Project/Overview/CustodianPlatforms';
 import { NextClientPage } from '@/types/page';
 import { DealStage } from '@/libs/deal/schema';
 import { useRedirect } from '@/app/context/RedirectContext';
 import { sendGTMEvent } from '@next/third-parties/google';
 import { INVESTMENTS } from 'e2e/testIds';
 import { capturePageView } from '@/libs/posthog/events';
-import AdvisorPlatforms from '@/components/Project/Overview/AdvisorPlatforms';
 
 export default function Page({ params }: NextClientPage) {
   const { slug } = use(params);
@@ -185,7 +185,7 @@ export default function Page({ params }: NextClientPage) {
 
           <BuildingDetailsNew data={project} />
           <ProjectDescriptionNew data={project} />
-          <AdvisorPlatforms projectId={project.id} />
+          <CustodianPlatforms projectId={project.id} />
           <MarketHighlightsNew data={project} />
           <InvestmentCalculatorNew project={project} />
           <Box sx={{ position: 'relative' }}>

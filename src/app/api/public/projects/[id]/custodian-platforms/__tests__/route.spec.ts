@@ -7,7 +7,7 @@ import { GET } from '../route';
 jest.mock('@/libs/prisma.server', () => ({
   __esModule: true,
   default: {
-    advisorProjectPlatform: {
+    custodianPlatform: {
       findMany: jest.fn(),
     },
   },
@@ -19,7 +19,7 @@ jest.mock('@/libs/logger', () => ({
   warn: jest.fn(),
 }));
 
-describe('GET /api/admin/advisor-project-platform/[id]', () => {
+describe('GET /api/admin/custodian-platform/[id]', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -37,24 +37,13 @@ describe('GET /api/admin/advisor-project-platform/[id]', () => {
       {
         id: 1,
         status: 'UPCOMING',
-        advisorFirm: {
-          id: 100,
-          name: 'Schwab',
-          logoUrl: 'https://logo.url',
-        },
-        project: {
-          id: 200,
-          name: 'Project Alpha',
-        },
-        createdBy: {
-          id: 1,
-          email: 'admin@example.com',
-        },
+        name: 'Schwab',
+        logoUrl: 'https://logo.url',
       },
     ];
 
     jest
-      .mocked(prisma.advisorProjectPlatform.findMany as jest.Mock)
+      .mocked(prisma.custodianPlatform.findMany as jest.Mock)
       .mockResolvedValue(mockData);
 
     const res = await GET(nextRequestMock(), {
@@ -71,7 +60,7 @@ describe('GET /api/admin/advisor-project-platform/[id]', () => {
 
   it('returns 500 if database throws an error', async () => {
     jest
-      .mocked(prisma.advisorProjectPlatform.findMany)
+      .mocked(prisma.custodianPlatform.findMany)
       .mockRejectedValue(new Error('Unexpected DB error'));
 
     const res = await GET(nextRequestMock(), {

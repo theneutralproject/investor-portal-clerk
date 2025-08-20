@@ -21,7 +21,7 @@ import {
   AdvisorFirmEmployee,
   DealOwnershipType,
   DocumentEvent,
-  AdvisorProjectPlatform,
+  Status,
 } from '@prisma/client';
 
 export type ProjectWithAllNestedData = Project & {
@@ -299,18 +299,9 @@ export type ProjectDocumentWithDocumentEvents = ProjectDocument & {
   documentEvents: DocumentEvent[];
 };
 
-export type AdvisorProjectBroker = {
-  project: {
-    name: string;
-    id: number;
-  };
-  advisorFirm: {
-    name: string;
-    id: number;
-    logoUrl: string | null;
-  };
-  createdBy: {
-    id: number;
-    email: string;
-  };
-} & AdvisorProjectPlatform;
+export type Custodian = {
+  id: number;
+  name: string;
+  logoUrl: string | null;
+  status: Status;
+};

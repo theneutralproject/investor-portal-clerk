@@ -1,14 +1,14 @@
 'use client';
 
-import { AdvisorProjectBroker } from '@/libs/types';
+import { Custodian } from '@/libs/types';
 import { useQuery } from '@tanstack/react-query';
 
-export function useAdvisorProjectPlatforms(projectId: number) {
-  return useQuery<{ data: AdvisorProjectBroker[] }, Error>({
-    queryKey: ['advisor-project-platforms', projectId],
+export function useCustodianPlatforms(projectId: number) {
+  return useQuery<{ data: Custodian[] }, Error>({
+    queryKey: ['custodian-platforms', projectId],
     queryFn: async () => {
       const res = await fetch(
-        `/api/public/projects/${projectId}/advisor-project-platforms`
+        `/api/public/projects/${projectId}/custodian-platforms`
       );
       if (!res.ok) throw new Error('Failed to fetch advisor data');
       return res.json();

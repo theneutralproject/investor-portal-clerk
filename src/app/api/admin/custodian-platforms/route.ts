@@ -6,22 +6,21 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
-import { getAdminFromRequest } from '@/libs/admin/utils.server';
-import { zAdvisorProjectPlatformCreateSchema } from '@/libs/advisorProjectPlatform/schema';
 import { User } from '@prisma/client';
-import { AdvisorProjectBroker } from '@/libs/types';
+import { getAdminFromRequest } from '@/libs/admin/utils.server';
+import { zCustodianPlatformCreateSchema } from '@/libs/custodianPlatform/schema';
 
 /**
  * @function POST
  * @description
- * Creates a new advisor-project platform entry linking an advisor to a project with a status.
+ * Creates a new custodian platform entry linking an advisor to a project with a status.
  *
- * **Endpoint:** `POST /api/admin/advisor-project-platform`
+ * **Endpoint:** `POST /api/admin/custodian-platforms`
  *
  * This route:
  *  - Authenticates the admin user.
  *  - Validates the incoming body using Zod schema.
- *  - Creates a new `advisorProjectPlatform` entry in the database.
+ *  - Creates a new `custodianPlatform` entry in the database.
  *
  * @param {NextRequest} request - The incoming request object containing JSON with:
  * ```json
@@ -33,7 +32,7 @@ import { AdvisorProjectBroker } from '@/libs/types';
  * ```
  *
  * @returns {Promise<Response>} JSON response:
- *  - `200` with `{ success: true, advisorProjectPlatform }` on success
+ *  - `200` with `{ success: true, custodianPlatform }` on success
  *  - `400` if validation fails
  *  - `401` if authentication fails
  *  - `500` on internal error
@@ -62,7 +61,7 @@ export async function POST(request: NextRequest): Promise<Response> {
   );
 
   const { error, data, success } =
-    zAdvisorProjectPlatformCreateSchema.safeParse(body);
+    zCustodianPlatformCreateSchema.safeParse(body);
 
   if (!success) {
     Logger.error('Validation errors:', request, {
@@ -78,16 +77,34 @@ export async function POST(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const newEntry = await prisma.advisorProjectPlatform.create({
+    const newEntry = await prisma.custodianPlatform.create({
       data: {
-        advisorId: data.advisorId,
-        projectId: data.projectId,
+        name: data.name,
+        logoUrl: data.logoUrl,
         status: data.status,
         createdById: adminUser.id,
+        // Handle advisor firm relations
+        advisorFirms:
+          data.advisorIds && data.advisorIds.length > 0
+            ? {
+                connect: data.advisorIds.map(id => ({ id })),
+              }
+            : undefined,
+        // Handle project relations
+        projects:
+          data.projectIds && data.projectIds.length > 0
+            ? {
+                connect: data.projectIds.map(id => ({ id })),
+              }
+            : undefined,
+      },
+      include: {
+        advisorFirms: true,
+        projects: true,
       },
     });
 
-    return jsonResponse({ success: true, advisorProjectPlatform: newEntry });
+    return jsonResponse({ success: true, data: newEntry });
   } catch (error) {
     return errorResponse(getErrorMessage(error), 500, { request });
   }
@@ -96,16 +113,10 @@ export async function POST(request: NextRequest): Promise<Response> {
 /**
  * @function GET
  * @description
- * Retrieves all advisor-project platform entries, including related advisor firm and project details.
+ * Retrieves all custodian platform entries, including related advisor firm and project details.
  *
- * **Endpoint:** `GET /api/admin/advisor-project-platform`
+ * **Endpoint:** `GET /api/admin/custodian-platforms`
  *
- * This route:
- *  - Authenticates the admin user.
- *  - Returns all `advisorProjectPlatform` records, including:
- *    - `advisorFirm`: id, name, logoUrl
- *    - `project`: id, name
- *    - `createdBy`: id, email
  *
  * @param {NextRequest} request - The incoming request object
  * @returns {Promise<Response>} JSON response:
@@ -127,30 +138,29 @@ export async function GET(request: NextRequest): Promise<Response> {
   }
 
   try {
-    const platforms: AdvisorProjectBroker[] =
-      await prisma.advisorProjectPlatform.findMany({
-        include: {
-          advisorFirm: {
-            select: {
-              id: true,
-              name: true,
-              logoUrl: true,
-            },
-          },
-          project: {
-            select: {
-              id: true,
-              name: true,
-            },
-          },
-          createdBy: {
-            select: {
-              id: true,
-              email: true,
-            },
+    const platforms = await prisma.custodianPlatform.findMany({
+      include: {
+        advisorFirms: {
+          select: {
+            id: true,
+            name: true,
+            logoUrl: true,
           },
         },
-      });
+        projects: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
 
     return jsonResponse({ success: true, data: platforms });
   } catch (error) {

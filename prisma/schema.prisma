@@ -13,10 +13,10 @@ datasource db {
 }
 
 model User {
-  id                           Int                      @id @default(autoincrement())
-  clerkId                      String?                  @unique
-  role                         Role                     @default(USER)
-  email                        String                   @unique
+  id                           Int                    @id @default(autoincrement())
+  clerkId                      String?                @unique
+  role                         Role                   @default(USER)
+  email                        String                 @unique
   /// @encrypted
   firstName                    String
   /// @encrypted
@@ -24,12 +24,12 @@ model User {
   phoneNumber                  String?
   hubspotId                    String
   /// @encrypted?mode=strict
-  ssn                          String?                  @unique
-  userOrgId                    Int?                     @unique
+  ssn                          String?                @unique
+  userOrgId                    Int?                   @unique
   referralSource               String?
   dateOfBirth                  DateTime?
-  dateCreated                  DateTime?                @default(now())
-  dateUpdated                  DateTime?                @updatedAt
+  dateCreated                  DateTime?              @default(now())
+  dateUpdated                  DateTime?              @updatedAt
   ActivityFeedItem             ActivityFeedItem[]
   address                      Address?
   AdvisorFirmEmployee          AdvisorFirmEmployee[]
@@ -37,12 +37,13 @@ model User {
   documentEvents               DocumentEvent[]
   DocusignEvent                DocusignEvent[]
   organizationMember           Member[]
-  organizationsOwned           Organization[]           @relation("userOrg")
+  organizationsOwned           Organization[]         @relation("userOrg")
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
   Changelog                    Changelog[]
   NDAAgreement                 NDAAgreement[]
-  AdvisorProjectPlatform       AdvisorProjectPlatform[]
+
+  CustodianPlatform CustodianPlatform[]
 }
 
 model Deal {
@@ -187,27 +188,28 @@ model OrganizationDocument {
 }
 
 model Project {
-  id                     Int                      @id @default(autoincrement())
-  name                   String                   @unique
-  location               String
-  tags                   String                   @default("")
-  status                 Status                   @default(ACTIVE)
-  description            String
-  marketHighlights       String                   @default("")
-  youtubeUrl             String                   @default("")
-  slug                   String                   @unique
-  equityReturnsFile      String
-  displayName            String                   @default("")
-  deals                  Deal[]
-  equityMilestoneFiles   EquityMilestoneFile[]
-  documents              ProjectDocument[]
-  investmentStats        ProjectInvestmentStats?
-  milestones             ProjectMilestones?
-  projectPaymentInfo     ProjectPaymentInfo[]
-  pictures               ProjectPicture[]
-  propertyStats          ProjectPropertyStats?
-  ProjectReport          ProjectReport[]
-  AdvisorProjectPlatform AdvisorProjectPlatform[]
+  id                   Int                     @id @default(autoincrement())
+  name                 String                  @unique
+  location             String
+  tags                 String                  @default("")
+  status               Status                  @default(ACTIVE)
+  description          String
+  marketHighlights     String                  @default("")
+  youtubeUrl           String                  @default("")
+  slug                 String                  @unique
+  equityReturnsFile    String
+  displayName          String                  @default("")
+  deals                Deal[]
+  equityMilestoneFiles EquityMilestoneFile[]
+  documents            ProjectDocument[]
+  investmentStats      ProjectInvestmentStats?
+  milestones           ProjectMilestones?
+  projectPaymentInfo   ProjectPaymentInfo[]
+  pictures             ProjectPicture[]
+  propertyStats        ProjectPropertyStats?
+  ProjectReport        ProjectReport[]
+
+  CustodianPlatform CustodianPlatform[] @relation("CustodianToProject")
 }
 
 model ProjectPropertyStats {
@@ -411,7 +413,7 @@ model AdvisorFirm {
   dateCreated         DateTime              @default(now())
   dateUpdated         DateTime              @updatedAt
 
-  AdvisorProjectPlatform AdvisorProjectPlatform[]
+  CustodianPlatform CustodianPlatform[] @relation("CustodianToAdvisor")
 }
 
 model AdvisorFirmEmployee {
@@ -454,18 +456,19 @@ model NDAAgreement {
   user User @relation(fields: [userId], references: [id])
 }
 
-model AdvisorProjectPlatform {
-  id          Int    @id @default(autoincrement())
-  advisorId   Int
-  projectId   Int
-  status      Status @default(UPCOMING)
+model CustodianPlatform {
+  id          Int      @id @default(autoincrement())
+  name        String
+  logoUrl     String?
+  status      Status   @default(UPCOMING)
+  dateCreated DateTime @default(now())
+  dateUpdated DateTime @updatedAt
   createdById Int
 
-  advisorFirm AdvisorFirm @relation(fields: [advisorId], references: [id])
-  project     Project     @relation(fields: [projectId], references: [id])
-  createdBy   User        @relation(fields: [createdById], references: [id])
+  createdBy User @relation(fields: [createdById], references: [id])
 
-  @@unique([advisorId, projectId])
+  advisorFirms AdvisorFirm[] @relation("CustodianToAdvisor")
+  projects     Project[]     @relation("CustodianToProject")
 }
 
 enum AdvisorEmployeeRole {

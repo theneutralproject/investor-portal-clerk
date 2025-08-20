@@ -6,11 +6,11 @@ import {
   jsonResponse,
 } from '@/libs/utils.server';
 import Logger from '@/libs/logger';
-import { AdvisorProjectBroker } from '@/libs/types';
+import { Custodian } from '@/libs/types';
 import { Status } from '@prisma/client';
 
 /**
- * GET handler to fetch all advisor project platform entries by project ID.
+ * GET handler to fetch all custodian platform entries by project ID.
  *
  * @param {NextRequest} request - The incoming Next.js API request.
  * @param {Object} paramsWrapper - An object containing the dynamic route params.
@@ -30,9 +30,13 @@ export async function GET(
     return errorResponse('projectId is invalid', 400, { request });
 
   try {
-    const platforms: AdvisorProjectBroker[] = await prisma.advisorProjectPlatform.findMany({
+    const platforms: Custodian[] = await prisma.custodianPlatform.findMany({
       where: {
-        projectId,
+        projects: {
+          some: {
+            id: projectId
+          }
+        },
         NOT: {
           status: Status.INACTIVE, // filter out INACTIVE
         },
@@ -40,33 +44,18 @@ export async function GET(
       orderBy: {
         status: 'asc', // will bring ACTIVE first (assuming alphabetical order)
       },
-      include: {
-        advisorFirm: {
-          select: {
-            id: true,
-            name: true,
-            logoUrl: true,
-          },
-        },
-        project: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        createdBy: {
-          select: {
-            id: true,
-            email: true,
-          },
-        },
-      },
+      select: {
+        id: true,
+        name: true,
+        status: true,
+        logoUrl: true,
+      }
     });
 
     return jsonResponse({ success: true, data: platforms });
   } catch (error) {
     const errorMessage = getErrorMessage(error);
-    Logger.error('Failed to fetch advisor project platforms', request, {
+    Logger.error('Failed to fetch custodian platforms', request, {
       error,
       errorMessage,
     });

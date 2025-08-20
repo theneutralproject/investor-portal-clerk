@@ -15,7 +15,7 @@ import {
   Box,
 } from '@mui/material';
 import CheckIcon from '@mui/icons-material/Check';
-import { useAdvisorProjectPlatforms } from '@/app/hooks/useAdvisorProjectPlatforms';
+import { useCustodianPlatforms } from '@/app/hooks/useCustodianPlatforms';
 import { Status } from '@prisma/client';
 import { Circle } from '@mui/icons-material';
 
@@ -44,8 +44,8 @@ const statusIconColorMapper = {
   [Status.INACTIVE]: 'rgba(223, 175, 68, 1)',
 };
 
-const AdvisorPlatforms = ({ projectId }: { projectId: number }) => {
-  const { data, isLoading } = useAdvisorProjectPlatforms(projectId);
+const CustodianPlatforms = ({ projectId }: { projectId: number }) => {
+  const { data, isLoading } = useCustodianPlatforms(projectId);
   return (
     <Card sx={{ mt: 2 }}>
       <CardContent>
@@ -108,7 +108,7 @@ const AdvisorPlatforms = ({ projectId }: { projectId: number }) => {
             padding: '0px',
           }}
         >
-          {(data?.data || []).map((broker, index) => (
+          {(data?.data || []).map((custodian, index) => (
             <ListItem
               key={index}
               disableGutters
@@ -117,24 +117,25 @@ const AdvisorPlatforms = ({ projectId }: { projectId: number }) => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: statusColorMapper[broker.status],
+                      color: statusColorMapper[custodian.status],
                     }}
                   >
-                    {statusMapper[broker.status]}
+                    {statusMapper[custodian.status]}
                   </Typography>
                 </Button>
               }
             >
               <ListItemAvatar>
                 <Avatar
-                  alt="Remy Sharp"
-                  src={broker.advisorFirm.logoUrl || ''}
+                  alt={`${custodian.name} logo`}
+                  src={custodian.logoUrl || ''}
+                  sx={{ width: '36px', height: '36px' }}
                   variant="square"
                 />
               </ListItemAvatar>
               <ListItemText
                 sx={{
-                  color: statusColorMapper[broker.status],
+                  color: statusColorMapper[custodian.status],
                   fontWeight: '700',
                   fontSize: '1rem',
                 }}
@@ -142,17 +143,17 @@ const AdvisorPlatforms = ({ projectId }: { projectId: number }) => {
                 <Typography
                   variant="subtitle1"
                   sx={{
-                    color: statusColorMapper[broker.status],
+                    color: statusColorMapper[custodian.status],
                     fontWeight: '500',
                   }}
                 >
-                  {broker.advisorFirm.name}
+                  {custodian.name}
                   <Circle
                     sx={{
                       width: '8px',
                       height: '8px',
                       marginLeft: '5px',
-                      color: statusIconColorMapper[broker.status],
+                      color: statusIconColorMapper[custodian.status],
                     }}
                   />
                 </Typography>
@@ -165,4 +166,4 @@ const AdvisorPlatforms = ({ projectId }: { projectId: number }) => {
   );
 };
 
-export default AdvisorPlatforms;
+export default CustodianPlatforms;
