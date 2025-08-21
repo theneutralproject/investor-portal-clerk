@@ -144,7 +144,7 @@ const DealFlowSidebar = () => {
                 Email us
               </Button>
               <Typography variant="body2" color="text.secondary">
-                (608) 205-8336
+                (608) 903-1627
               </Typography>
             </Box>
           </Box>
