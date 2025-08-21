@@ -41,8 +41,9 @@ model User {
   OrganizationDocumentUploaded OrganizationDocument[]
   TermsEvents                  TermsEvents[]
   Changelog                    Changelog[]
+  NDAAgreement                 NDAAgreement[]
 
-  NDAAgreement NDAAgreement[]
+  CustodianPlatform CustodianPlatform[]
 }
 
 model Deal {
@@ -207,6 +208,8 @@ model Project {
   pictures             ProjectPicture[]
   propertyStats        ProjectPropertyStats?
   ProjectReport        ProjectReport[]
+
+  CustodianPlatform CustodianPlatform[] @relation("CustodianToProject")
 }
 
 model ProjectPropertyStats {
@@ -409,6 +412,8 @@ model AdvisorFirm {
   clientOrganizations Organization[]        @relation("advisorClientOrganizations")
   dateCreated         DateTime              @default(now())
   dateUpdated         DateTime              @updatedAt
+
+  CustodianPlatform CustodianPlatform[] @relation("CustodianToAdvisor")
 }
 
 model AdvisorFirmEmployee {
@@ -449,6 +454,21 @@ model NDAAgreement {
   revision   Int
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model CustodianPlatform {
+  id          Int      @id @default(autoincrement())
+  name        String
+  logoUrl     String?
+  status      Status   @default(UPCOMING)
+  dateCreated DateTime @default(now())
+  dateUpdated DateTime @updatedAt
+  createdById Int
+
+  createdBy User @relation(fields: [createdById], references: [id])
+
+  advisorFirms AdvisorFirm[] @relation("CustodianToAdvisor")
+  projects     Project[]     @relation("CustodianToProject")
 }
 
 enum AdvisorEmployeeRole {

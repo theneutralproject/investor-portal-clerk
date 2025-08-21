@@ -215,7 +215,7 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
             <Stack direction="row" spacing={2} alignItems="center">
               <div data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up`}>
                 <CreateAccountButton
-                  variant="neutralYellow"
+                  variant="neutralRustTerracotta"
                   data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-sign-up-btn`}
                 />
               </div>

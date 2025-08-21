@@ -13,6 +13,7 @@ export const useTermsStatus = (
 ) => {
   const [data, setData] = useState<null | {
     hasAcceptedCurrentRevision: boolean;
+    isAdvisor: boolean;
   }>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export const useTermsStatus = (
             hasAcceptedCurrentRevision,
             revision,
             clerkUserId: cachedClerkUserId,
+            isAdvisor,
           } = JSON.parse(cachedTerms);
 
           // If revision changed or has not accepted revision or
@@ -44,7 +46,7 @@ export const useTermsStatus = (
             localStorageHandler.set(TERMS_CACHE_KEY, null); // Clear outdated cache
           } else {
             // Otherwise use cached data, no API call needed
-            setData({ hasAcceptedCurrentRevision });
+            setData({ hasAcceptedCurrentRevision, isAdvisor });
             setIsLoading(false);
             return;
           }

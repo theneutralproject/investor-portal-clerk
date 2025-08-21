@@ -48,13 +48,10 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
     const btn = (
       <Button
         fullWidth
-        variant="contained"
+        variant="neutralRustTerracotta"
         onClick={onInvest}
         disabled={isButtonDisabled}
         sx={{
-          backgroundColor: '#F0B642',
-          '&:hover': { backgroundColor: '#d4a33b' },
-          borderRadius: '24px',
           boxShadow: 'none',
         }}
       >
@@ -103,7 +100,7 @@ const RightSidebarCTA: React.FC<RightSidebarCTAProps> = ({
               width: '50px',
               height: '50px',
               borderRadius: '50%',
-              background: `conic-gradient(#F0B642 ${fundingPercentage}%, #E5E7EB ${fundingPercentage}% 100%)`,
+              background: `conic-gradient(#2E5F47 ${fundingPercentage}%, #E5E7EB ${fundingPercentage}% 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',

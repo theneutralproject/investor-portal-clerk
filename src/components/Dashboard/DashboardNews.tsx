@@ -29,7 +29,7 @@ const NewsCard = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(1.5),
   marginBottom: theme.spacing(1),
   borderRadius: theme.spacing(1),
-  backgroundColor: theme.palette.background.paper,
+  backgroundColor: theme.palette.neutralMarble.main,
   cursor: 'pointer',
   '&:hover': {
     boxShadow: theme.shadows[2],
@@ -123,6 +123,7 @@ const NewsComponent: React.FC = () => {
         borderRadius: 1.5,
         overflow: 'hidden',
       }}
+      variant="marble"
     >
       <CardContent sx={{ p: isMobile ? 1.5 : 2 }}>
         <Typography

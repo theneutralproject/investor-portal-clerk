@@ -51,7 +51,7 @@ const UserAvatar = ({ isAdvisor }: IUserAvatarProps) => {
       >
         <div data-testid={`${USER_AVATAR_TEST_ID}-sign-up`}>
           <CreateAccountButton
-            variant="neutralYellow"
+            variant="neutralRustTerracotta"
             data-testid={`${USER_AVATAR_TEST_ID}-sign-up-btn`}
           >
             Create account

@@ -183,7 +183,7 @@ const DashboardCurrentInvestments: React.FC<
       {hasMoreDeals && (
         <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
           <Button
-            variant="neutralYellow"
+            variant="neutralRustTerracotta"
             onClick={() => setShowAllDeals(!showAllDeals)}
           >
             {showAllDeals ? 'Show Less' : 'View All Investments'}

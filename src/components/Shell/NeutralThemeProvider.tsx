@@ -11,6 +11,8 @@ declare module '@mui/material/styles' {
     snowdayGray: Palette['primary'];
     snowdayText: Palette['primary'];
     neutralDarkGray: Palette['primary'];
+    neutralMarble: Palette['primary'];
+    neutralRustTerracotta: Palette['primary'];
   }
   interface PaletteOptions {
     snowdayGray: PaletteOptions['primary'];
@@ -27,12 +29,31 @@ declare module '@mui/material/Button' {
     grayCancel: true;
     grayPill: true;
     blackPill: true;
+    neutralRustTerracotta: true;
+  }
+}
+
+declare module '@mui/material/Card' {
+  interface CardPropsVariantOverrides {
+    bordered: true;
+    green: true;
+    marble: true;
+    greenForest: true;
+  }
+}
+
+declare module '@mui/material/Paper' {
+  interface PaperPropsVariantOverrides {
+    bordered: true;
+    green: true;
+    marble: true;
+    greenForest: true;
   }
 }
 
 const palette = {
   background: {
-    default: '#F3F5F6',
+    default: '#FFFFFF',
   },
   primary: {
     main: '#556cd6',
@@ -55,6 +76,12 @@ const palette = {
   },
   snowdayText: {
     main: '#212830',
+  },
+  neutralMarble: {
+    main: '#F9F6F1',
+  },
+  neutralRustTerracotta: {
+    main: '#CB5C0D',
   },
 };
 
@@ -181,7 +208,7 @@ export const theme = createTheme({
             border: '1px solid rgba(0, 0, 0, 0.12)',
             fontSize: '13px',
             borderRadius: '24px',
-            padding: '4px 14px',
+            padding: '8px 22px',
             '&:hover': {
               backgroundColor: '#F3F4F6',
               border: '1px solid #D1D5DB',
@@ -214,15 +241,58 @@ export const theme = createTheme({
             },
           },
         },
+        {
+          props: { variant: 'neutralRustTerracotta' },
+          style: {
+            borderRadius: '56px',
+            background: '#CB5C0D',
+            padding: '8px 22px',
+            color: '#fff',
+            '&:hover': {
+              backgroundColor: '#CB5C0D',
+            },
+            '&:disabled': {
+              color: '#fff',
+              backgroundColor: 'rgba(203, 92, 13, 0.7)',
+              opacity: 0.5,
+            },
+          },
+        },
       ],
     },
     MuiCard: {
+      variants: [
+        {
+          props: { variant: 'bordered' },
+          style: {
+            border: '1px solid rgba(0, 0, 0, 0.12)',
+          },
+        },
+        {
+          props: { variant: 'green' },
+          style: {
+            backgroundColor: '#E4F1EC',
+          },
+        },
+        {
+          props: { variant: 'marble' },
+          style: {
+            backgroundColor: '#F9F6F1',
+          },
+        },
+        {
+          props: { variant: 'greenForest' },
+          style: {
+            backgroundColor: '#224437',
+          },
+        },
+      ],
       styleOverrides: {
         root: {
+          backgroundColor: '#FFFFFF',
           borderRadius: '4px',
-          border: `1px solid rgba(0, 0, 0, 0.12)`,
-          boxShadow:
-            '0 1px 2px rgba(204,210,218,.07), 0 2px 4px rgba(204,210,218,.07), 0 4px 8px rgba(204,210,218,.07), 0 8px 16px rgba(204,210,218,.07), 0 16px 32px rgba(204,210,218,.07), 0 32px 64px rgba(204,210,218,.07)',
+          border: `none`,
+          boxShadow: 'none',
         },
       },
     },
@@ -246,8 +316,7 @@ export const theme = createTheme({
     MuiPaper: {
       styleOverrides: {
         root: {
-          boxShadow:
-            '1px 0 1px rgba(33,40,48,.01), 4px 0 4px rgba(33,40,48,.01), 16px 0 16px rgba(33,40,48,.01)',
+          boxShadow: 'none',
         },
       },
     },

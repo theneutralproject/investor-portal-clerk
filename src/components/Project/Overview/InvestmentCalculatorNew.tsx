@@ -229,7 +229,7 @@ const InvestmentCalculatorNew = ({
   };
 
   return (
-    <Card sx={{ mt: 2 }}>
+    <Card sx={{ mt: 2 }} variant="marble">
       <CardContent>
         <Typography variant="h6" gutterBottom>
           Investment Calculator

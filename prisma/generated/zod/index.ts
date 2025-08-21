@@ -112,6 +112,8 @@ export const ChangelogScalarFieldEnumSchema = z.enum(['id','userId','entityId','
 
 export const NDAAgreementScalarFieldEnumSchema = z.enum(['id','userId','accepted','dateSigned','revision']);
 
+export const CustodianPlatformScalarFieldEnumSchema = z.enum(['id','name','logoUrl','status','dateCreated','dateUpdated','createdById']);
+
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
@@ -750,6 +752,22 @@ export const NDAAgreementSchema = z.object({
 export type NDAAgreement = z.infer<typeof NDAAgreementSchema>
 
 /////////////////////////////////////////
+// CUSTODIAN PLATFORM SCHEMA
+/////////////////////////////////////////
+
+export const CustodianPlatformSchema = z.object({
+  status: StatusSchema,
+  id: z.number().int(),
+  name: z.string(),
+  logoUrl: z.string().nullable(),
+  dateCreated: z.coerce.date(),
+  dateUpdated: z.coerce.date(),
+  createdById: z.number().int(),
+})
+
+export type CustodianPlatform = z.infer<typeof CustodianPlatformSchema>
+
+/////////////////////////////////////////
 // SELECT & INCLUDE
 /////////////////////////////////////////
 
@@ -769,6 +787,7 @@ export const UserIncludeSchema: z.ZodType<Prisma.UserInclude> = z.object({
   TermsEvents: z.union([z.boolean(),z.lazy(() => TermsEventsFindManyArgsSchema)]).optional(),
   Changelog: z.union([z.boolean(),z.lazy(() => ChangelogFindManyArgsSchema)]).optional(),
   NDAAgreement: z.union([z.boolean(),z.lazy(() => NDAAgreementFindManyArgsSchema)]).optional(),
+  CustodianPlatform: z.union([z.boolean(),z.lazy(() => CustodianPlatformFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -793,6 +812,7 @@ export const UserCountOutputTypeSelectSchema: z.ZodType<Prisma.UserCountOutputTy
   TermsEvents: z.boolean().optional(),
   Changelog: z.boolean().optional(),
   NDAAgreement: z.boolean().optional(),
+  CustodianPlatform: z.boolean().optional(),
 }).strict();
 
 export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
@@ -822,6 +842,7 @@ export const UserSelectSchema: z.ZodType<Prisma.UserSelect> = z.object({
   TermsEvents: z.union([z.boolean(),z.lazy(() => TermsEventsFindManyArgsSchema)]).optional(),
   Changelog: z.union([z.boolean(),z.lazy(() => ChangelogFindManyArgsSchema)]).optional(),
   NDAAgreement: z.union([z.boolean(),z.lazy(() => NDAAgreementFindManyArgsSchema)]).optional(),
+  CustodianPlatform: z.union([z.boolean(),z.lazy(() => CustodianPlatformFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => UserCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1118,6 +1139,7 @@ export const ProjectIncludeSchema: z.ZodType<Prisma.ProjectInclude> = z.object({
   pictures: z.union([z.boolean(),z.lazy(() => ProjectPictureFindManyArgsSchema)]).optional(),
   propertyStats: z.union([z.boolean(),z.lazy(() => ProjectPropertyStatsArgsSchema)]).optional(),
   ProjectReport: z.union([z.boolean(),z.lazy(() => ProjectReportFindManyArgsSchema)]).optional(),
+  CustodianPlatform: z.union([z.boolean(),z.lazy(() => CustodianPlatformFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ProjectCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1137,6 +1159,7 @@ export const ProjectCountOutputTypeSelectSchema: z.ZodType<Prisma.ProjectCountOu
   projectPaymentInfo: z.boolean().optional(),
   pictures: z.boolean().optional(),
   ProjectReport: z.boolean().optional(),
+  CustodianPlatform: z.boolean().optional(),
 }).strict();
 
 export const ProjectSelectSchema: z.ZodType<Prisma.ProjectSelect> = z.object({
@@ -1160,6 +1183,7 @@ export const ProjectSelectSchema: z.ZodType<Prisma.ProjectSelect> = z.object({
   pictures: z.union([z.boolean(),z.lazy(() => ProjectPictureFindManyArgsSchema)]).optional(),
   propertyStats: z.union([z.boolean(),z.lazy(() => ProjectPropertyStatsArgsSchema)]).optional(),
   ProjectReport: z.union([z.boolean(),z.lazy(() => ProjectReportFindManyArgsSchema)]).optional(),
+  CustodianPlatform: z.union([z.boolean(),z.lazy(() => CustodianPlatformFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => ProjectCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1519,6 +1543,7 @@ export const AdvisorFirmIncludeSchema: z.ZodType<Prisma.AdvisorFirmInclude> = z.
   primaryContact: z.union([z.boolean(),z.lazy(() => AdvisorFirmEmployeeArgsSchema)]).optional(),
   employees: z.union([z.boolean(),z.lazy(() => AdvisorFirmEmployeeFindManyArgsSchema)]).optional(),
   clientOrganizations: z.union([z.boolean(),z.lazy(() => OrganizationFindManyArgsSchema)]).optional(),
+  CustodianPlatform: z.union([z.boolean(),z.lazy(() => CustodianPlatformFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => AdvisorFirmCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1534,6 +1559,7 @@ export const AdvisorFirmCountOutputTypeArgsSchema: z.ZodType<Prisma.AdvisorFirmC
 export const AdvisorFirmCountOutputTypeSelectSchema: z.ZodType<Prisma.AdvisorFirmCountOutputTypeSelect> = z.object({
   employees: z.boolean().optional(),
   clientOrganizations: z.boolean().optional(),
+  CustodianPlatform: z.boolean().optional(),
 }).strict();
 
 export const AdvisorFirmSelectSchema: z.ZodType<Prisma.AdvisorFirmSelect> = z.object({
@@ -1546,6 +1572,7 @@ export const AdvisorFirmSelectSchema: z.ZodType<Prisma.AdvisorFirmSelect> = z.ob
   primaryContact: z.union([z.boolean(),z.lazy(() => AdvisorFirmEmployeeArgsSchema)]).optional(),
   employees: z.union([z.boolean(),z.lazy(() => AdvisorFirmEmployeeFindManyArgsSchema)]).optional(),
   clientOrganizations: z.union([z.boolean(),z.lazy(() => OrganizationFindManyArgsSchema)]).optional(),
+  CustodianPlatform: z.union([z.boolean(),z.lazy(() => CustodianPlatformFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => AdvisorFirmCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1628,6 +1655,44 @@ export const NDAAgreementSelectSchema: z.ZodType<Prisma.NDAAgreementSelect> = z.
   user: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
 }).strict()
 
+// CUSTODIAN PLATFORM
+//------------------------------------------------------
+
+export const CustodianPlatformIncludeSchema: z.ZodType<Prisma.CustodianPlatformInclude> = z.object({
+  createdBy: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  advisorFirms: z.union([z.boolean(),z.lazy(() => AdvisorFirmFindManyArgsSchema)]).optional(),
+  projects: z.union([z.boolean(),z.lazy(() => ProjectFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => CustodianPlatformCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
+export const CustodianPlatformArgsSchema: z.ZodType<Prisma.CustodianPlatformDefaultArgs> = z.object({
+  select: z.lazy(() => CustodianPlatformSelectSchema).optional(),
+  include: z.lazy(() => CustodianPlatformIncludeSchema).optional(),
+}).strict();
+
+export const CustodianPlatformCountOutputTypeArgsSchema: z.ZodType<Prisma.CustodianPlatformCountOutputTypeDefaultArgs> = z.object({
+  select: z.lazy(() => CustodianPlatformCountOutputTypeSelectSchema).nullish(),
+}).strict();
+
+export const CustodianPlatformCountOutputTypeSelectSchema: z.ZodType<Prisma.CustodianPlatformCountOutputTypeSelect> = z.object({
+  advisorFirms: z.boolean().optional(),
+  projects: z.boolean().optional(),
+}).strict();
+
+export const CustodianPlatformSelectSchema: z.ZodType<Prisma.CustodianPlatformSelect> = z.object({
+  id: z.boolean().optional(),
+  name: z.boolean().optional(),
+  logoUrl: z.boolean().optional(),
+  status: z.boolean().optional(),
+  dateCreated: z.boolean().optional(),
+  dateUpdated: z.boolean().optional(),
+  createdById: z.boolean().optional(),
+  createdBy: z.union([z.boolean(),z.lazy(() => UserArgsSchema)]).optional(),
+  advisorFirms: z.union([z.boolean(),z.lazy(() => AdvisorFirmFindManyArgsSchema)]).optional(),
+  projects: z.union([z.boolean(),z.lazy(() => ProjectFindManyArgsSchema)]).optional(),
+  _count: z.union([z.boolean(),z.lazy(() => CustodianPlatformCountOutputTypeArgsSchema)]).optional(),
+}).strict()
+
 
 /////////////////////////////////////////
 // INPUT TYPES
@@ -1662,7 +1727,8 @@ export const UserWhereInputSchema: z.ZodType<Prisma.UserWhereInput> = z.object({
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentListRelationFilterSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsListRelationFilterSchema).optional(),
   Changelog: z.lazy(() => ChangelogListRelationFilterSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementListRelationFilterSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementListRelationFilterSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformListRelationFilterSchema).optional()
 }).strict();
 
 export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWithRelationInput> = z.object({
@@ -1691,7 +1757,8 @@ export const UserOrderByWithRelationInputSchema: z.ZodType<Prisma.UserOrderByWit
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentOrderByRelationAggregateInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsOrderByRelationAggregateInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogOrderByRelationAggregateInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementOrderByRelationAggregateInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementOrderByRelationAggregateInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> = z.union([
@@ -1867,7 +1934,8 @@ export const UserWhereUniqueInputSchema: z.ZodType<Prisma.UserWhereUniqueInput> 
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentListRelationFilterSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsListRelationFilterSchema).optional(),
   Changelog: z.lazy(() => ChangelogListRelationFilterSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementListRelationFilterSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementListRelationFilterSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformListRelationFilterSchema).optional()
 }).strict());
 
 export const UserOrderByWithAggregationInputSchema: z.ZodType<Prisma.UserOrderByWithAggregationInput> = z.object({
@@ -2764,7 +2832,8 @@ export const ProjectWhereInputSchema: z.ZodType<Prisma.ProjectWhereInput> = z.ob
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional(),
   pictures: z.lazy(() => ProjectPictureListRelationFilterSchema).optional(),
   propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableScalarRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
-  ProjectReport: z.lazy(() => ProjectReportListRelationFilterSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportListRelationFilterSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformListRelationFilterSchema).optional()
 }).strict();
 
 export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrderByWithRelationInput> = z.object({
@@ -2787,7 +2856,8 @@ export const ProjectOrderByWithRelationInputSchema: z.ZodType<Prisma.ProjectOrde
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoOrderByRelationAggregateInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureOrderByRelationAggregateInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsOrderByWithRelationInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportOrderByRelationAggregateInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportOrderByRelationAggregateInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueInput> = z.union([
@@ -2841,7 +2911,8 @@ export const ProjectWhereUniqueInputSchema: z.ZodType<Prisma.ProjectWhereUniqueI
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoListRelationFilterSchema).optional(),
   pictures: z.lazy(() => ProjectPictureListRelationFilterSchema).optional(),
   propertyStats: z.union([ z.lazy(() => ProjectPropertyStatsNullableScalarRelationFilterSchema),z.lazy(() => ProjectPropertyStatsWhereInputSchema) ]).optional().nullable(),
-  ProjectReport: z.lazy(() => ProjectReportListRelationFilterSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportListRelationFilterSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformListRelationFilterSchema).optional()
 }).strict());
 
 export const ProjectOrderByWithAggregationInputSchema: z.ZodType<Prisma.ProjectOrderByWithAggregationInput> = z.object({
@@ -4055,7 +4126,8 @@ export const AdvisorFirmWhereInputSchema: z.ZodType<Prisma.AdvisorFirmWhereInput
   dateUpdated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   primaryContact: z.union([ z.lazy(() => AdvisorFirmEmployeeNullableScalarRelationFilterSchema),z.lazy(() => AdvisorFirmEmployeeWhereInputSchema) ]).optional().nullable(),
   employees: z.lazy(() => AdvisorFirmEmployeeListRelationFilterSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationListRelationFilterSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationListRelationFilterSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformListRelationFilterSchema).optional()
 }).strict();
 
 export const AdvisorFirmOrderByWithRelationInputSchema: z.ZodType<Prisma.AdvisorFirmOrderByWithRelationInput> = z.object({
@@ -4067,7 +4139,8 @@ export const AdvisorFirmOrderByWithRelationInputSchema: z.ZodType<Prisma.Advisor
   dateUpdated: z.lazy(() => SortOrderSchema).optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeOrderByWithRelationInputSchema).optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeOrderByRelationAggregateInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationOrderByRelationAggregateInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationOrderByRelationAggregateInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmWhereUniqueInputSchema: z.ZodType<Prisma.AdvisorFirmWhereUniqueInput> = z.union([
@@ -4094,7 +4167,8 @@ export const AdvisorFirmWhereUniqueInputSchema: z.ZodType<Prisma.AdvisorFirmWher
   dateUpdated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
   primaryContact: z.union([ z.lazy(() => AdvisorFirmEmployeeNullableScalarRelationFilterSchema),z.lazy(() => AdvisorFirmEmployeeWhereInputSchema) ]).optional().nullable(),
   employees: z.lazy(() => AdvisorFirmEmployeeListRelationFilterSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationListRelationFilterSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationListRelationFilterSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformListRelationFilterSchema).optional()
 }).strict());
 
 export const AdvisorFirmOrderByWithAggregationInputSchema: z.ZodType<Prisma.AdvisorFirmOrderByWithAggregationInput> = z.object({
@@ -4338,6 +4412,82 @@ export const NDAAgreementScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.
   revision: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
+export const CustodianPlatformWhereInputSchema: z.ZodType<Prisma.CustodianPlatformWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => CustodianPlatformWhereInputSchema),z.lazy(() => CustodianPlatformWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CustodianPlatformWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CustodianPlatformWhereInputSchema),z.lazy(() => CustodianPlatformWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  logoUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => EnumStatusFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  dateUpdated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  createdById: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  createdBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmListRelationFilterSchema).optional(),
+  projects: z.lazy(() => ProjectListRelationFilterSchema).optional()
+}).strict();
+
+export const CustodianPlatformOrderByWithRelationInputSchema: z.ZodType<Prisma.CustodianPlatformOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  logoUrl: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional(),
+  createdBy: z.lazy(() => UserOrderByWithRelationInputSchema).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmOrderByRelationAggregateInputSchema).optional(),
+  projects: z.lazy(() => ProjectOrderByRelationAggregateInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformWhereUniqueInputSchema: z.ZodType<Prisma.CustodianPlatformWhereUniqueInput> = z.object({
+  id: z.number().int()
+})
+.and(z.object({
+  id: z.number().int().optional(),
+  AND: z.union([ z.lazy(() => CustodianPlatformWhereInputSchema),z.lazy(() => CustodianPlatformWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CustodianPlatformWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CustodianPlatformWhereInputSchema),z.lazy(() => CustodianPlatformWhereInputSchema).array() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  logoUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => EnumStatusFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  dateUpdated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  createdById: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  createdBy: z.union([ z.lazy(() => UserScalarRelationFilterSchema),z.lazy(() => UserWhereInputSchema) ]).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmListRelationFilterSchema).optional(),
+  projects: z.lazy(() => ProjectListRelationFilterSchema).optional()
+}).strict());
+
+export const CustodianPlatformOrderByWithAggregationInputSchema: z.ZodType<Prisma.CustodianPlatformOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  logoUrl: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional(),
+  _count: z.lazy(() => CustodianPlatformCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => CustodianPlatformAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => CustodianPlatformMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => CustodianPlatformMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => CustodianPlatformSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.CustodianPlatformScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => CustodianPlatformScalarWhereWithAggregatesInputSchema),z.lazy(() => CustodianPlatformScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CustodianPlatformScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CustodianPlatformScalarWhereWithAggregatesInputSchema),z.lazy(() => CustodianPlatformScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringWithAggregatesFilterSchema),z.string() ]).optional(),
+  logoUrl: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => EnumStatusWithAggregatesFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  dateUpdated: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  createdById: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+}).strict();
+
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object({
   clerkId: z.string().optional().nullable(),
   role: z.lazy(() => RoleSchema).optional(),
@@ -4363,7 +4513,8 @@ export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreateInput> = z.object({
@@ -4392,7 +4543,8 @@ export const UserUncheckedCreateInputSchema: z.ZodType<Prisma.UserUncheckedCreat
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object({
@@ -4420,7 +4572,8 @@ export const UserUpdateInputSchema: z.ZodType<Prisma.UserUpdateInput> = z.object
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdateInput> = z.object({
@@ -4449,7 +4602,8 @@ export const UserUncheckedUpdateInputSchema: z.ZodType<Prisma.UserUncheckedUpdat
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateManyInputSchema: z.ZodType<Prisma.UserCreateManyInput> = z.object({
@@ -5265,7 +5419,8 @@ export const ProjectCreateInputSchema: z.ZodType<Prisma.ProjectCreateInput> = z.
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateInput> = z.object({
@@ -5288,7 +5443,8 @@ export const ProjectUncheckedCreateInputSchema: z.ZodType<Prisma.ProjectUnchecke
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.object({
@@ -5310,7 +5466,8 @@ export const ProjectUpdateInputSchema: z.ZodType<Prisma.ProjectUpdateInput> = z.
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateInput> = z.object({
@@ -5333,7 +5490,8 @@ export const ProjectUncheckedUpdateInputSchema: z.ZodType<Prisma.ProjectUnchecke
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateManyInputSchema: z.ZodType<Prisma.ProjectCreateManyInput> = z.object({
@@ -6470,7 +6628,8 @@ export const AdvisorFirmCreateInputSchema: z.ZodType<Prisma.AdvisorFirmCreateInp
   dateUpdated: z.coerce.date().optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeCreateNestedOneWithoutAdvisorFirmAsPrimaryContactInputSchema).optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedCreateInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedCreateInput> = z.object({
@@ -6481,7 +6640,8 @@ export const AdvisorFirmUncheckedCreateInputSchema: z.ZodType<Prisma.AdvisorFirm
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUpdateInputSchema: z.ZodType<Prisma.AdvisorFirmUpdateInput> = z.object({
@@ -6491,7 +6651,8 @@ export const AdvisorFirmUpdateInputSchema: z.ZodType<Prisma.AdvisorFirmUpdateInp
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeUpdateOneWithoutAdvisorFirmAsPrimaryContactNestedInputSchema).optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedUpdateInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateInput> = z.object({
@@ -6502,7 +6663,8 @@ export const AdvisorFirmUncheckedUpdateInputSchema: z.ZodType<Prisma.AdvisorFirm
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmCreateManyInputSchema: z.ZodType<Prisma.AdvisorFirmCreateManyInput> = z.object({
@@ -6703,6 +6865,80 @@ export const NDAAgreementUncheckedUpdateManyInputSchema: z.ZodType<Prisma.NDAAgr
   revision: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
+export const CustodianPlatformCreateInputSchema: z.ZodType<Prisma.CustodianPlatformCreateInput> = z.object({
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdBy: z.lazy(() => UserCreateNestedOneWithoutCustodianPlatformInputSchema),
+  advisorFirms: z.lazy(() => AdvisorFirmCreateNestedManyWithoutCustodianPlatformInputSchema).optional(),
+  projects: z.lazy(() => ProjectCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedCreateInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdById: z.number().int(),
+  advisorFirms: z.lazy(() => AdvisorFirmUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema).optional(),
+  projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUpdateInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdBy: z.lazy(() => UserUpdateOneRequiredWithoutCustodianPlatformNestedInputSchema).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUpdateManyWithoutCustodianPlatformNestedInputSchema).optional(),
+  projects: z.lazy(() => ProjectUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema).optional(),
+  projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformCreateManyInputSchema: z.ZodType<Prisma.CustodianPlatformCreateManyInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdById: z.number().int()
+}).strict();
+
+export const CustodianPlatformUpdateManyMutationInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyMutationInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
 export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
   equals: z.number().optional(),
   in: z.number().array().optional(),
@@ -6844,6 +7080,12 @@ export const NDAAgreementListRelationFilterSchema: z.ZodType<Prisma.NDAAgreement
   none: z.lazy(() => NDAAgreementWhereInputSchema).optional()
 }).strict();
 
+export const CustodianPlatformListRelationFilterSchema: z.ZodType<Prisma.CustodianPlatformListRelationFilter> = z.object({
+  every: z.lazy(() => CustodianPlatformWhereInputSchema).optional(),
+  some: z.lazy(() => CustodianPlatformWhereInputSchema).optional(),
+  none: z.lazy(() => CustodianPlatformWhereInputSchema).optional()
+}).strict();
+
 export const SortOrderInputSchema: z.ZodType<Prisma.SortOrderInput> = z.object({
   sort: z.lazy(() => SortOrderSchema),
   nulls: z.lazy(() => NullsOrderSchema).optional()
@@ -6890,6 +7132,10 @@ export const ChangelogOrderByRelationAggregateInputSchema: z.ZodType<Prisma.Chan
 }).strict();
 
 export const NDAAgreementOrderByRelationAggregateInputSchema: z.ZodType<Prisma.NDAAgreementOrderByRelationAggregateInput> = z.object({
+  _count: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CustodianPlatformOrderByRelationAggregateInputSchema: z.ZodType<Prisma.CustodianPlatformOrderByRelationAggregateInput> = z.object({
   _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
@@ -8927,6 +9173,56 @@ export const NDAAgreementSumOrderByAggregateInputSchema: z.ZodType<Prisma.NDAAgr
   revision: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const ProjectListRelationFilterSchema: z.ZodType<Prisma.ProjectListRelationFilter> = z.object({
+  every: z.lazy(() => ProjectWhereInputSchema).optional(),
+  some: z.lazy(() => ProjectWhereInputSchema).optional(),
+  none: z.lazy(() => ProjectWhereInputSchema).optional()
+}).strict();
+
+export const ProjectOrderByRelationAggregateInputSchema: z.ZodType<Prisma.ProjectOrderByRelationAggregateInput> = z.object({
+  _count: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CustodianPlatformCountOrderByAggregateInputSchema: z.ZodType<Prisma.CustodianPlatformCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  logoUrl: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CustodianPlatformAvgOrderByAggregateInputSchema: z.ZodType<Prisma.CustodianPlatformAvgOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CustodianPlatformMaxOrderByAggregateInputSchema: z.ZodType<Prisma.CustodianPlatformMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  logoUrl: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CustodianPlatformMinOrderByAggregateInputSchema: z.ZodType<Prisma.CustodianPlatformMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  name: z.lazy(() => SortOrderSchema).optional(),
+  logoUrl: z.lazy(() => SortOrderSchema).optional(),
+  status: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dateUpdated: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const CustodianPlatformSumOrderByAggregateInputSchema: z.ZodType<Prisma.CustodianPlatformSumOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  createdById: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
 export const ActivityFeedItemCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.ActivityFeedItemCreateNestedManyWithoutUserInput> = z.object({
   create: z.union([ z.lazy(() => ActivityFeedItemCreateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemCreateWithoutUserInputSchema).array(),z.lazy(() => ActivityFeedItemUncheckedCreateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => ActivityFeedItemCreateOrConnectWithoutUserInputSchema),z.lazy(() => ActivityFeedItemCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
@@ -9010,6 +9306,13 @@ export const NDAAgreementCreateNestedManyWithoutUserInputSchema: z.ZodType<Prism
   connect: z.union([ z.lazy(() => NDAAgreementWhereUniqueInputSchema),z.lazy(() => NDAAgreementWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformCreateNestedManyWithoutCreatedByInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CustodianPlatformCreateManyCreatedByInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const ActivityFeedItemUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.ActivityFeedItemUncheckedCreateNestedManyWithoutUserInput> = z.object({
   create: z.union([ z.lazy(() => ActivityFeedItemCreateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemCreateWithoutUserInputSchema).array(),z.lazy(() => ActivityFeedItemUncheckedCreateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => ActivityFeedItemCreateOrConnectWithoutUserInputSchema),z.lazy(() => ActivityFeedItemCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
@@ -9091,6 +9394,13 @@ export const NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema: z.ZodT
   connectOrCreate: z.union([ z.lazy(() => NDAAgreementCreateOrConnectWithoutUserInputSchema),z.lazy(() => NDAAgreementCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
   createMany: z.lazy(() => NDAAgreementCreateManyUserInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => NDAAgreementWhereUniqueInputSchema),z.lazy(() => NDAAgreementWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CustodianPlatformCreateManyCreatedByInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const NullableStringFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableStringFieldUpdateOperationsInput> = z.object({
@@ -9281,6 +9591,20 @@ export const NDAAgreementUpdateManyWithoutUserNestedInputSchema: z.ZodType<Prism
   deleteMany: z.union([ z.lazy(() => NDAAgreementScalarWhereInputSchema),z.lazy(() => NDAAgreementScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyWithoutCreatedByNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutCreatedByInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CustodianPlatformCreateManyCreatedByInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutCreatedByInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutCreatedByInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const IntFieldUpdateOperationsInputSchema: z.ZodType<Prisma.IntFieldUpdateOperationsInput> = z.object({
   set: z.number().optional(),
   increment: z.number().optional(),
@@ -9451,6 +9775,20 @@ export const NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema: z.ZodT
   update: z.union([ z.lazy(() => NDAAgreementUpdateWithWhereUniqueWithoutUserInputSchema),z.lazy(() => NDAAgreementUpdateWithWhereUniqueWithoutUserInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => NDAAgreementUpdateManyWithWhereWithoutUserInputSchema),z.lazy(() => NDAAgreementUpdateManyWithWhereWithoutUserInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => NDAAgreementScalarWhereInputSchema),z.lazy(() => NDAAgreementScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutCreatedByInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => CustodianPlatformCreateManyCreatedByInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutCreatedByInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutCreatedByInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const AccreditationVerificationCreateNestedOneWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationCreateNestedOneWithoutDealInput> = z.object({
@@ -10181,6 +10519,12 @@ export const ProjectReportCreateNestedManyWithoutProjectInputSchema: z.ZodType<P
   connect: z.union([ z.lazy(() => ProjectReportWhereUniqueInputSchema),z.lazy(() => ProjectReportWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const CustodianPlatformCreateNestedManyWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformCreateNestedManyWithoutProjectsInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const DealUncheckedCreateNestedManyWithoutProjectInputSchema: z.ZodType<Prisma.DealUncheckedCreateNestedManyWithoutProjectInput> = z.object({
   create: z.union([ z.lazy(() => DealCreateWithoutProjectInputSchema),z.lazy(() => DealCreateWithoutProjectInputSchema).array(),z.lazy(() => DealUncheckedCreateWithoutProjectInputSchema),z.lazy(() => DealUncheckedCreateWithoutProjectInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => DealCreateOrConnectWithoutProjectInputSchema),z.lazy(() => DealCreateOrConnectWithoutProjectInputSchema).array() ]).optional(),
@@ -10239,6 +10583,12 @@ export const ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema: z.
   connectOrCreate: z.union([ z.lazy(() => ProjectReportCreateOrConnectWithoutProjectInputSchema),z.lazy(() => ProjectReportCreateOrConnectWithoutProjectInputSchema).array() ]).optional(),
   createMany: z.lazy(() => ProjectReportCreateManyProjectInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => ProjectReportWhereUniqueInputSchema),z.lazy(() => ProjectReportWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const EnumStatusFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumStatusFieldUpdateOperationsInput> = z.object({
@@ -10359,6 +10709,19 @@ export const ProjectReportUpdateManyWithoutProjectNestedInputSchema: z.ZodType<P
   deleteMany: z.union([ z.lazy(() => ProjectReportScalarWhereInputSchema),z.lazy(() => ProjectReportScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyWithoutProjectsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutProjectsInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutProjectsInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutProjectsInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const DealUncheckedUpdateManyWithoutProjectNestedInputSchema: z.ZodType<Prisma.DealUncheckedUpdateManyWithoutProjectNestedInput> = z.object({
   create: z.union([ z.lazy(() => DealCreateWithoutProjectInputSchema),z.lazy(() => DealCreateWithoutProjectInputSchema).array(),z.lazy(() => DealUncheckedCreateWithoutProjectInputSchema),z.lazy(() => DealUncheckedCreateWithoutProjectInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => DealCreateOrConnectWithoutProjectInputSchema),z.lazy(() => DealCreateOrConnectWithoutProjectInputSchema).array() ]).optional(),
@@ -10471,6 +10834,19 @@ export const ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema: z.
   update: z.union([ z.lazy(() => ProjectReportUpdateWithWhereUniqueWithoutProjectInputSchema),z.lazy(() => ProjectReportUpdateWithWhereUniqueWithoutProjectInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => ProjectReportUpdateManyWithWhereWithoutProjectInputSchema),z.lazy(() => ProjectReportUpdateManyWithWhereWithoutProjectInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => ProjectReportScalarWhereInputSchema),z.lazy(() => ProjectReportScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutProjectsInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutProjectsInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutProjectsInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutProjectsInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const ProjectCreateNestedOneWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectCreateNestedOneWithoutPropertyStatsInput> = z.object({
@@ -10796,6 +11172,12 @@ export const OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema: z.ZodTyp
   connect: z.union([ z.lazy(() => OrganizationWhereUniqueInputSchema),z.lazy(() => OrganizationWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const CustodianPlatformCreateNestedManyWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformCreateNestedManyWithoutAdvisorFirmsInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema: z.ZodType<Prisma.AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInput> = z.object({
   create: z.union([ z.lazy(() => AdvisorFirmEmployeeCreateWithoutAdvisorFirmInputSchema),z.lazy(() => AdvisorFirmEmployeeCreateWithoutAdvisorFirmInputSchema).array(),z.lazy(() => AdvisorFirmEmployeeUncheckedCreateWithoutAdvisorFirmInputSchema),z.lazy(() => AdvisorFirmEmployeeUncheckedCreateWithoutAdvisorFirmInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => AdvisorFirmEmployeeCreateOrConnectWithoutAdvisorFirmInputSchema),z.lazy(() => AdvisorFirmEmployeeCreateOrConnectWithoutAdvisorFirmInputSchema).array() ]).optional(),
@@ -10808,6 +11190,12 @@ export const OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema:
   connectOrCreate: z.union([ z.lazy(() => OrganizationCreateOrConnectWithoutAdvisorFirmInputSchema),z.lazy(() => OrganizationCreateOrConnectWithoutAdvisorFirmInputSchema).array() ]).optional(),
   createMany: z.lazy(() => OrganizationCreateManyAdvisorFirmInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => OrganizationWhereUniqueInputSchema),z.lazy(() => OrganizationWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedCreateNestedManyWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateNestedManyWithoutAdvisorFirmsInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const AdvisorFirmEmployeeUpdateOneWithoutAdvisorFirmAsPrimaryContactNestedInputSchema: z.ZodType<Prisma.AdvisorFirmEmployeeUpdateOneWithoutAdvisorFirmAsPrimaryContactNestedInput> = z.object({
@@ -10848,6 +11236,19 @@ export const OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema: z.ZodTyp
   deleteMany: z.union([ z.lazy(() => OrganizationScalarWhereInputSchema),z.lazy(() => OrganizationScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpdateManyWithoutAdvisorFirmsNestedInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyWithoutAdvisorFirmsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema: z.ZodType<Prisma.AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInput> = z.object({
   create: z.union([ z.lazy(() => AdvisorFirmEmployeeCreateWithoutAdvisorFirmInputSchema),z.lazy(() => AdvisorFirmEmployeeCreateWithoutAdvisorFirmInputSchema).array(),z.lazy(() => AdvisorFirmEmployeeUncheckedCreateWithoutAdvisorFirmInputSchema),z.lazy(() => AdvisorFirmEmployeeUncheckedCreateWithoutAdvisorFirmInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => AdvisorFirmEmployeeCreateOrConnectWithoutAdvisorFirmInputSchema),z.lazy(() => AdvisorFirmEmployeeCreateOrConnectWithoutAdvisorFirmInputSchema).array() ]).optional(),
@@ -10874,6 +11275,19 @@ export const OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema:
   update: z.union([ z.lazy(() => OrganizationUpdateWithWhereUniqueWithoutAdvisorFirmInputSchema),z.lazy(() => OrganizationUpdateWithWhereUniqueWithoutAdvisorFirmInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => OrganizationUpdateManyWithWhereWithoutAdvisorFirmInputSchema),z.lazy(() => OrganizationUpdateManyWithWhereWithoutAdvisorFirmInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => OrganizationScalarWhereInputSchema),z.lazy(() => OrganizationScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsNestedInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema).array(),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUpsertWithWhereUniqueWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => CustodianPlatformWhereUniqueInputSchema),z.lazy(() => CustodianPlatformWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUpdateWithWhereUniqueWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUpdateManyWithWhereWithoutAdvisorFirmsInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const AdvisorFirmCreateNestedOneWithoutEmployeesInputSchema: z.ZodType<Prisma.AdvisorFirmCreateNestedOneWithoutEmployeesInput> = z.object({
@@ -10978,6 +11392,96 @@ export const UserUpdateOneRequiredWithoutNDAAgreementNestedInputSchema: z.ZodTyp
   upsert: z.lazy(() => UserUpsertWithoutNDAAgreementInputSchema).optional(),
   connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
   update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutNDAAgreementInputSchema),z.lazy(() => UserUpdateWithoutNDAAgreementInputSchema),z.lazy(() => UserUncheckedUpdateWithoutNDAAgreementInputSchema) ]).optional(),
+}).strict();
+
+export const UserCreateNestedOneWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserCreateNestedOneWithoutCustodianPlatformInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedCreateWithoutCustodianPlatformInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutCustodianPlatformInputSchema).optional(),
+  connect: z.lazy(() => UserWhereUniqueInputSchema).optional()
+}).strict();
+
+export const AdvisorFirmCreateNestedManyWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmCreateNestedManyWithoutCustodianPlatformInput> = z.object({
+  create: z.union([ z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const ProjectCreateNestedManyWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectCreateNestedManyWithoutCustodianPlatformInput> = z.object({
+  create: z.union([ z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const AdvisorFirmUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedCreateNestedManyWithoutCustodianPlatformInput> = z.object({
+  create: z.union([ z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const ProjectUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateNestedManyWithoutCustodianPlatformInput> = z.object({
+  create: z.union([ z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const UserUpdateOneRequiredWithoutCustodianPlatformNestedInputSchema: z.ZodType<Prisma.UserUpdateOneRequiredWithoutCustodianPlatformNestedInput> = z.object({
+  create: z.union([ z.lazy(() => UserCreateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedCreateWithoutCustodianPlatformInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => UserCreateOrConnectWithoutCustodianPlatformInputSchema).optional(),
+  upsert: z.lazy(() => UserUpsertWithoutCustodianPlatformInputSchema).optional(),
+  connect: z.lazy(() => UserWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => UserUpdateToOneWithWhereWithoutCustodianPlatformInputSchema),z.lazy(() => UserUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedUpdateWithoutCustodianPlatformInputSchema) ]).optional(),
+}).strict();
+
+export const AdvisorFirmUpdateManyWithoutCustodianPlatformNestedInputSchema: z.ZodType<Prisma.AdvisorFirmUpdateManyWithoutCustodianPlatformNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => AdvisorFirmUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => AdvisorFirmUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => AdvisorFirmUpdateManyWithWhereWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUpdateManyWithWhereWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => AdvisorFirmScalarWhereInputSchema),z.lazy(() => AdvisorFirmScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const ProjectUpdateManyWithoutCustodianPlatformNestedInputSchema: z.ZodType<Prisma.ProjectUpdateManyWithoutCustodianPlatformNestedInput> = z.object({
+  create: z.union([ z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => ProjectUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => ProjectUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => ProjectUpdateManyWithWhereWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUpdateManyWithWhereWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => ProjectScalarWhereInputSchema),z.lazy(() => ProjectScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformNestedInput> = z.object({
+  create: z.union([ z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => AdvisorFirmUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => AdvisorFirmWhereUniqueInputSchema),z.lazy(() => AdvisorFirmWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => AdvisorFirmUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => AdvisorFirmUpdateManyWithWhereWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUpdateManyWithWhereWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => AdvisorFirmScalarWhereInputSchema),z.lazy(() => AdvisorFirmScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const ProjectUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateManyWithoutCustodianPlatformNestedInput> = z.object({
+  create: z.union([ z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema).array(),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectCreateOrConnectWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => ProjectUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  set: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => ProjectWhereUniqueInputSchema),z.lazy(() => ProjectWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => ProjectUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => ProjectUpdateManyWithWhereWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUpdateManyWithWhereWithoutCustodianPlatformInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => ProjectScalarWhereInputSchema),z.lazy(() => ProjectScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const NestedIntFilterSchema: z.ZodType<Prisma.NestedIntFilter> = z.object({
@@ -11834,6 +12338,37 @@ export const NDAAgreementCreateManyUserInputEnvelopeSchema: z.ZodType<Prisma.NDA
   skipDuplicates: z.boolean().optional()
 }).strict();
 
+export const CustodianPlatformCreateWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformCreateWithoutCreatedByInput> = z.object({
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmCreateNestedManyWithoutCustodianPlatformInputSchema).optional(),
+  projects: z.lazy(() => ProjectCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateWithoutCreatedByInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema).optional(),
+  projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformCreateOrConnectWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformCreateOrConnectWithoutCreatedByInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformCreateManyCreatedByInputEnvelopeSchema: z.ZodType<Prisma.CustodianPlatformCreateManyCreatedByInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => CustodianPlatformCreateManyCreatedByInputSchema),z.lazy(() => CustodianPlatformCreateManyCreatedByInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
 export const ActivityFeedItemUpsertWithWhereUniqueWithoutUserInputSchema: z.ZodType<Prisma.ActivityFeedItemUpsertWithWhereUniqueWithoutUserInput> = z.object({
   where: z.lazy(() => ActivityFeedItemWhereUniqueInputSchema),
   update: z.union([ z.lazy(() => ActivityFeedItemUpdateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemUncheckedUpdateWithoutUserInputSchema) ]),
@@ -12183,6 +12718,35 @@ export const NDAAgreementScalarWhereInputSchema: z.ZodType<Prisma.NDAAgreementSc
   revision: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpsertWithWhereUniqueWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUpsertWithWhereUniqueWithoutCreatedByInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateWithoutCreatedByInputSchema) ]),
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutCreatedByInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformUpdateWithWhereUniqueWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateWithWhereUniqueWithoutCreatedByInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => CustodianPlatformUpdateWithoutCreatedByInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateWithoutCreatedByInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformUpdateManyWithWhereWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyWithWhereWithoutCreatedByInput> = z.object({
+  where: z.lazy(() => CustodianPlatformScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => CustodianPlatformUpdateManyMutationInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformScalarWhereInputSchema: z.ZodType<Prisma.CustodianPlatformScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => CustodianPlatformScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => CustodianPlatformScalarWhereInputSchema),z.lazy(() => CustodianPlatformScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  logoUrl: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  status: z.union([ z.lazy(() => EnumStatusFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  dateUpdated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  createdById: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+}).strict();
+
 export const AccreditationVerificationCreateWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationCreateWithoutDealInput> = z.object({
   method: z.lazy(() => VerificationMethodSchema),
   basis: z.lazy(() => VerificationBasisSchema),
@@ -12253,7 +12817,8 @@ export const ProjectCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreat
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutDealsInput> = z.object({
@@ -12275,7 +12840,8 @@ export const ProjectUncheckedCreateWithoutDealsInputSchema: z.ZodType<Prisma.Pro
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutDealsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutDealsInput> = z.object({
@@ -12520,7 +13086,8 @@ export const ProjectUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUpdat
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutDealsInput> = z.object({
@@ -12542,7 +13109,8 @@ export const ProjectUncheckedUpdateWithoutDealsInputSchema: z.ZodType<Prisma.Pro
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const DealConversionUpsertWithoutEndDealInputSchema: z.ZodType<Prisma.DealConversionUpsertWithoutEndDealInput> = z.object({
@@ -13113,7 +13681,8 @@ export const AdvisorFirmCreateWithoutClientOrganizationsInputSchema: z.ZodType<P
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeCreateNestedOneWithoutAdvisorFirmAsPrimaryContactInputSchema).optional(),
-  employees: z.lazy(() => AdvisorFirmEmployeeCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  employees: z.lazy(() => AdvisorFirmEmployeeCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedCreateWithoutClientOrganizationsInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedCreateWithoutClientOrganizationsInput> = z.object({
@@ -13123,7 +13692,8 @@ export const AdvisorFirmUncheckedCreateWithoutClientOrganizationsInputSchema: z.
   primaryContactId: z.number().int().optional().nullable(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
-  employees: z.lazy(() => AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  employees: z.lazy(() => AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmCreateOrConnectWithoutClientOrganizationsInputSchema: z.ZodType<Prisma.AdvisorFirmCreateOrConnectWithoutClientOrganizationsInput> = z.object({
@@ -13155,7 +13725,8 @@ export const UserCreateWithoutOrganizationsOwnedInputSchema: z.ZodType<Prisma.Us
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutOrganizationsOwnedInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutOrganizationsOwnedInput> = z.object({
@@ -13183,7 +13754,8 @@ export const UserUncheckedCreateWithoutOrganizationsOwnedInputSchema: z.ZodType<
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutOrganizationsOwnedInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutOrganizationsOwnedInput> = z.object({
@@ -13319,7 +13891,8 @@ export const AdvisorFirmUpdateWithoutClientOrganizationsInputSchema: z.ZodType<P
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeUpdateOneWithoutAdvisorFirmAsPrimaryContactNestedInputSchema).optional(),
-  employees: z.lazy(() => AdvisorFirmEmployeeUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  employees: z.lazy(() => AdvisorFirmEmployeeUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedUpdateWithoutClientOrganizationsInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateWithoutClientOrganizationsInput> = z.object({
@@ -13329,7 +13902,8 @@ export const AdvisorFirmUncheckedUpdateWithoutClientOrganizationsInputSchema: z.
   primaryContactId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  employees: z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  employees: z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const UserUpsertWithoutOrganizationsOwnedInputSchema: z.ZodType<Prisma.UserUpsertWithoutOrganizationsOwnedInput> = z.object({
@@ -13367,7 +13941,8 @@ export const UserUpdateWithoutOrganizationsOwnedInputSchema: z.ZodType<Prisma.Us
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutOrganizationsOwnedInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutOrganizationsOwnedInput> = z.object({
@@ -13395,7 +13970,8 @@ export const UserUncheckedUpdateWithoutOrganizationsOwnedInputSchema: z.ZodType<
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const OrganizationDocumentUpsertWithWhereUniqueWithoutOrganizationInputSchema: z.ZodType<Prisma.OrganizationDocumentUpsertWithWhereUniqueWithoutOrganizationInput> = z.object({
@@ -13472,7 +14048,8 @@ export const UserCreateWithoutOrganizationMemberInputSchema: z.ZodType<Prisma.Us
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutOrganizationMemberInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutOrganizationMemberInput> = z.object({
@@ -13500,7 +14077,8 @@ export const UserUncheckedCreateWithoutOrganizationMemberInputSchema: z.ZodType<
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutOrganizationMemberInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutOrganizationMemberInput> = z.object({
@@ -13583,7 +14161,8 @@ export const UserUpdateWithoutOrganizationMemberInputSchema: z.ZodType<Prisma.Us
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutOrganizationMemberInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutOrganizationMemberInput> = z.object({
@@ -13611,7 +14190,8 @@ export const UserUncheckedUpdateWithoutOrganizationMemberInputSchema: z.ZodType<
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const DealCreateWithoutAccreditationVerificationInputSchema: z.ZodType<Prisma.DealCreateWithoutAccreditationVerificationInput> = z.object({
@@ -13892,7 +14472,8 @@ export const UserCreateWithoutDealDocumentUploadedInputSchema: z.ZodType<Prisma.
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutDealDocumentUploadedInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutDealDocumentUploadedInput> = z.object({
@@ -13920,7 +14501,8 @@ export const UserUncheckedCreateWithoutDealDocumentUploadedInputSchema: z.ZodTyp
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutDealDocumentUploadedInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutDealDocumentUploadedInput> = z.object({
@@ -14021,7 +14603,8 @@ export const UserUpdateWithoutDealDocumentUploadedInputSchema: z.ZodType<Prisma.
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutDealDocumentUploadedInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutDealDocumentUploadedInput> = z.object({
@@ -14049,7 +14632,8 @@ export const UserUncheckedUpdateWithoutDealDocumentUploadedInputSchema: z.ZodTyp
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const OrganizationCreateWithoutDocumentInputSchema: z.ZodType<Prisma.OrganizationCreateWithoutDocumentInput> = z.object({
@@ -14110,7 +14694,8 @@ export const UserCreateWithoutOrganizationDocumentUploadedInputSchema: z.ZodType
   organizationsOwned: z.lazy(() => OrganizationCreateNestedManyWithoutOwnedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutOrganizationDocumentUploadedInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutOrganizationDocumentUploadedInput> = z.object({
@@ -14138,7 +14723,8 @@ export const UserUncheckedCreateWithoutOrganizationDocumentUploadedInputSchema: 
   organizationsOwned: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutOwnedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutOrganizationDocumentUploadedInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutOrganizationDocumentUploadedInput> = z.object({
@@ -14221,7 +14807,8 @@ export const UserUpdateWithoutOrganizationDocumentUploadedInputSchema: z.ZodType
   organizationsOwned: z.lazy(() => OrganizationUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutOrganizationDocumentUploadedInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutOrganizationDocumentUploadedInput> = z.object({
@@ -14249,7 +14836,8 @@ export const UserUncheckedUpdateWithoutOrganizationDocumentUploadedInputSchema: 
   organizationsOwned: z.lazy(() => OrganizationUncheckedUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const DealCreateWithoutProjectInputSchema: z.ZodType<Prisma.DealCreateWithoutProjectInput> = z.object({
@@ -14570,6 +15158,32 @@ export const ProjectReportCreateManyProjectInputEnvelopeSchema: z.ZodType<Prisma
   skipDuplicates: z.boolean().optional()
 }).strict();
 
+export const CustodianPlatformCreateWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformCreateWithoutProjectsInput> = z.object({
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdBy: z.lazy(() => UserCreateNestedOneWithoutCustodianPlatformInputSchema),
+  advisorFirms: z.lazy(() => AdvisorFirmCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedCreateWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateWithoutProjectsInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdById: z.number().int(),
+  advisorFirms: z.lazy(() => AdvisorFirmUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformCreateOrConnectWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformCreateOrConnectWithoutProjectsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema) ]),
+}).strict();
+
 export const DealUpsertWithWhereUniqueWithoutProjectInputSchema: z.ZodType<Prisma.DealUpsertWithWhereUniqueWithoutProjectInput> = z.object({
   where: z.lazy(() => DealWhereUniqueInputSchema),
   update: z.union([ z.lazy(() => DealUpdateWithoutProjectInputSchema),z.lazy(() => DealUncheckedUpdateWithoutProjectInputSchema) ]),
@@ -14869,6 +15483,22 @@ export const ProjectReportScalarWhereInputSchema: z.ZodType<Prisma.ProjectReport
   name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpsertWithWhereUniqueWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUpsertWithWhereUniqueWithoutProjectsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateWithoutProjectsInputSchema) ]),
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutProjectsInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformUpdateWithWhereUniqueWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateWithWhereUniqueWithoutProjectsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => CustodianPlatformUpdateWithoutProjectsInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateWithoutProjectsInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformUpdateManyWithWhereWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyWithWhereWithoutProjectsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => CustodianPlatformUpdateManyMutationInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsInputSchema) ]),
+}).strict();
+
 export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPropertyStatsInput> = z.object({
   name: z.string(),
   location: z.string(),
@@ -14887,7 +15517,8 @@ export const ProjectCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutPropertyStatsInput> = z.object({
@@ -14909,7 +15540,8 @@ export const ProjectUncheckedCreateWithoutPropertyStatsInputSchema: z.ZodType<Pr
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutPropertyStatsInput> = z.object({
@@ -14946,7 +15578,8 @@ export const ProjectUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.Proj
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutPropertyStatsInput> = z.object({
@@ -14968,7 +15601,8 @@ export const ProjectUncheckedUpdateWithoutPropertyStatsInputSchema: z.ZodType<Pr
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectCreateWithoutInvestmentStatsInput> = z.object({
@@ -14989,7 +15623,8 @@ export const ProjectCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutInvestmentStatsInput> = z.object({
@@ -15011,7 +15646,8 @@ export const ProjectUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutInvestmentStatsInput> = z.object({
@@ -15048,7 +15684,8 @@ export const ProjectUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.Pr
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutInvestmentStatsInput> = z.object({
@@ -15070,7 +15707,8 @@ export const ProjectUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectCreateWithoutProjectPaymentInfoInput> = z.object({
@@ -15091,7 +15729,8 @@ export const ProjectCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutProjectPaymentInfoInput> = z.object({
@@ -15113,7 +15752,8 @@ export const ProjectUncheckedCreateWithoutProjectPaymentInfoInputSchema: z.ZodTy
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutProjectPaymentInfoInput> = z.object({
@@ -15150,7 +15790,8 @@ export const ProjectUpdateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutProjectPaymentInfoInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutProjectPaymentInfoInput> = z.object({
@@ -15172,7 +15813,8 @@ export const ProjectUncheckedUpdateWithoutProjectPaymentInfoInputSchema: z.ZodTy
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutMilestonesInput> = z.object({
@@ -15193,7 +15835,8 @@ export const ProjectCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutMilestonesInput> = z.object({
@@ -15215,7 +15858,8 @@ export const ProjectUncheckedCreateWithoutMilestonesInputSchema: z.ZodType<Prism
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutMilestonesInput> = z.object({
@@ -15252,7 +15896,8 @@ export const ProjectUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.Project
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutMilestonesInput> = z.object({
@@ -15274,7 +15919,8 @@ export const ProjectUncheckedUpdateWithoutMilestonesInputSchema: z.ZodType<Prism
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutPicturesInput> = z.object({
@@ -15295,7 +15941,8 @@ export const ProjectCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCr
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutPicturesInput> = z.object({
@@ -15317,7 +15964,8 @@ export const ProjectUncheckedCreateWithoutPicturesInputSchema: z.ZodType<Prisma.
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutPicturesInput> = z.object({
@@ -15354,7 +16002,8 @@ export const ProjectUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUp
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutPicturesInput> = z.object({
@@ -15376,7 +16025,8 @@ export const ProjectUncheckedUpdateWithoutPicturesInputSchema: z.ZodType<Prisma.
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const DocumentEventCreateWithoutDocumentInputSchema: z.ZodType<Prisma.DocumentEventCreateWithoutDocumentInput> = z.object({
@@ -15424,7 +16074,8 @@ export const ProjectCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectC
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutDocumentsInput> = z.object({
@@ -15446,7 +16097,8 @@ export const ProjectUncheckedCreateWithoutDocumentsInputSchema: z.ZodType<Prisma
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutDocumentsInput> = z.object({
@@ -15499,7 +16151,8 @@ export const ProjectUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectU
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutDocumentsInput> = z.object({
@@ -15521,7 +16174,8 @@ export const ProjectUncheckedUpdateWithoutDocumentsInputSchema: z.ZodType<Prisma
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutProjectReportInputSchema: z.ZodType<Prisma.ProjectCreateWithoutProjectReportInput> = z.object({
@@ -15542,7 +16196,8 @@ export const ProjectCreateWithoutProjectReportInputSchema: z.ZodType<Prisma.Proj
   milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
-  propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional()
+  propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutProjectReportInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutProjectReportInput> = z.object({
@@ -15564,7 +16219,8 @@ export const ProjectUncheckedCreateWithoutProjectReportInputSchema: z.ZodType<Pr
   milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
-  propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional()
+  propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutProjectReportInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutProjectReportInput> = z.object({
@@ -15601,7 +16257,8 @@ export const ProjectUpdateWithoutProjectReportInputSchema: z.ZodType<Prisma.Proj
   milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
-  propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional()
+  propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutProjectReportInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutProjectReportInput> = z.object({
@@ -15623,7 +16280,8 @@ export const ProjectUncheckedUpdateWithoutProjectReportInputSchema: z.ZodType<Pr
   milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
-  propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional()
+  propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectDocumentCreateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.ProjectDocumentCreateWithoutDocumentEventsInput> = z.object({
@@ -15688,7 +16346,8 @@ export const UserCreateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserCr
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutDocumentEventsInput> = z.object({
@@ -15716,7 +16375,8 @@ export const UserUncheckedCreateWithoutDocumentEventsInputSchema: z.ZodType<Pris
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutDocumentEventsInput> = z.object({
@@ -15803,7 +16463,8 @@ export const UserUpdateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserUp
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutDocumentEventsInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutDocumentEventsInput> = z.object({
@@ -15831,7 +16492,8 @@ export const UserUncheckedUpdateWithoutDocumentEventsInputSchema: z.ZodType<Pris
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const DealCreateWithoutDocusignEventInputSchema: z.ZodType<Prisma.DealCreateWithoutDocusignEventInput> = z.object({
@@ -15910,7 +16572,8 @@ export const UserCreateWithoutDocusignEventInputSchema: z.ZodType<Prisma.UserCre
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutDocusignEventInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutDocusignEventInput> = z.object({
@@ -15938,7 +16601,8 @@ export const UserUncheckedCreateWithoutDocusignEventInputSchema: z.ZodType<Prism
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutDocusignEventInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutDocusignEventInput> = z.object({
@@ -16039,7 +16703,8 @@ export const UserUpdateWithoutDocusignEventInputSchema: z.ZodType<Prisma.UserUpd
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutDocusignEventInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutDocusignEventInput> = z.object({
@@ -16067,7 +16732,8 @@ export const UserUncheckedUpdateWithoutDocusignEventInputSchema: z.ZodType<Prism
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const OrganizationCreateWithoutAddressInputSchema: z.ZodType<Prisma.OrganizationCreateWithoutAddressInput> = z.object({
@@ -16128,7 +16794,8 @@ export const UserCreateWithoutAddressInputSchema: z.ZodType<Prisma.UserCreateWit
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutAddressInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutAddressInput> = z.object({
@@ -16156,7 +16823,8 @@ export const UserUncheckedCreateWithoutAddressInputSchema: z.ZodType<Prisma.User
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutAddressInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutAddressInput> = z.object({
@@ -16239,7 +16907,8 @@ export const UserUpdateWithoutAddressInputSchema: z.ZodType<Prisma.UserUpdateWit
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutAddressInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutAddressInput> = z.object({
@@ -16267,7 +16936,8 @@ export const UserUncheckedUpdateWithoutAddressInputSchema: z.ZodType<Prisma.User
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutTermsEventsInputSchema: z.ZodType<Prisma.UserCreateWithoutTermsEventsInput> = z.object({
@@ -16294,7 +16964,8 @@ export const UserCreateWithoutTermsEventsInputSchema: z.ZodType<Prisma.UserCreat
   organizationsOwned: z.lazy(() => OrganizationCreateNestedManyWithoutOwnedByInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutTermsEventsInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutTermsEventsInput> = z.object({
@@ -16322,7 +16993,8 @@ export const UserUncheckedCreateWithoutTermsEventsInputSchema: z.ZodType<Prisma.
   organizationsOwned: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutOwnedByInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutTermsEventsInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutTermsEventsInput> = z.object({
@@ -16365,7 +17037,8 @@ export const UserUpdateWithoutTermsEventsInputSchema: z.ZodType<Prisma.UserUpdat
   organizationsOwned: z.lazy(() => OrganizationUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutTermsEventsInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutTermsEventsInput> = z.object({
@@ -16393,7 +17066,8 @@ export const UserUncheckedUpdateWithoutTermsEventsInputSchema: z.ZodType<Prisma.
   organizationsOwned: z.lazy(() => OrganizationUncheckedUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutActivityFeedItemInputSchema: z.ZodType<Prisma.UserCreateWithoutActivityFeedItemInput> = z.object({
@@ -16420,7 +17094,8 @@ export const UserCreateWithoutActivityFeedItemInputSchema: z.ZodType<Prisma.User
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutActivityFeedItemInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutActivityFeedItemInput> = z.object({
@@ -16448,7 +17123,8 @@ export const UserUncheckedCreateWithoutActivityFeedItemInputSchema: z.ZodType<Pr
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutActivityFeedItemInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutActivityFeedItemInput> = z.object({
@@ -16491,7 +17167,8 @@ export const UserUpdateWithoutActivityFeedItemInputSchema: z.ZodType<Prisma.User
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutActivityFeedItemInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutActivityFeedItemInput> = z.object({
@@ -16519,7 +17196,8 @@ export const UserUncheckedUpdateWithoutActivityFeedItemInputSchema: z.ZodType<Pr
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const ProjectCreateWithoutEquityMilestoneFilesInputSchema: z.ZodType<Prisma.ProjectCreateWithoutEquityMilestoneFilesInput> = z.object({
@@ -16540,7 +17218,8 @@ export const ProjectCreateWithoutEquityMilestoneFilesInputSchema: z.ZodType<Pris
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedCreateWithoutEquityMilestoneFilesInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutEquityMilestoneFilesInput> = z.object({
@@ -16562,7 +17241,8 @@ export const ProjectUncheckedCreateWithoutEquityMilestoneFilesInputSchema: z.Zod
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutProjectsInputSchema).optional()
 }).strict();
 
 export const ProjectCreateOrConnectWithoutEquityMilestoneFilesInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutEquityMilestoneFilesInput> = z.object({
@@ -16599,7 +17279,8 @@ export const ProjectUpdateWithoutEquityMilestoneFilesInputSchema: z.ZodType<Pris
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const ProjectUncheckedUpdateWithoutEquityMilestoneFilesInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutEquityMilestoneFilesInput> = z.object({
@@ -16621,7 +17302,8 @@ export const ProjectUncheckedUpdateWithoutEquityMilestoneFilesInputSchema: z.Zod
   projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
   propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
-  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutProjectsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmEmployeeCreateWithoutAdvisorFirmAsPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmEmployeeCreateWithoutAdvisorFirmAsPrimaryContactInput> = z.object({
@@ -16708,6 +17390,32 @@ export const OrganizationCreateManyAdvisorFirmInputEnvelopeSchema: z.ZodType<Pri
   skipDuplicates: z.boolean().optional()
 }).strict();
 
+export const CustodianPlatformCreateWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformCreateWithoutAdvisorFirmsInput> = z.object({
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdBy: z.lazy(() => UserCreateNestedOneWithoutCustodianPlatformInputSchema),
+  projects: z.lazy(() => ProjectCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  createdById: z.number().int(),
+  projects: z.lazy(() => ProjectUncheckedCreateNestedManyWithoutCustodianPlatformInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformCreateOrConnectWithoutAdvisorFirmsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema) ]),
+}).strict();
+
 export const AdvisorFirmEmployeeUpsertWithoutAdvisorFirmAsPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmEmployeeUpsertWithoutAdvisorFirmAsPrimaryContactInput> = z.object({
   update: z.union([ z.lazy(() => AdvisorFirmEmployeeUpdateWithoutAdvisorFirmAsPrimaryContactInputSchema),z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateWithoutAdvisorFirmAsPrimaryContactInputSchema) ]),
   create: z.union([ z.lazy(() => AdvisorFirmEmployeeCreateWithoutAdvisorFirmAsPrimaryContactInputSchema),z.lazy(() => AdvisorFirmEmployeeUncheckedCreateWithoutAdvisorFirmAsPrimaryContactInputSchema) ]),
@@ -16766,13 +17474,30 @@ export const OrganizationUpdateManyWithWhereWithoutAdvisorFirmInputSchema: z.Zod
   data: z.union([ z.lazy(() => OrganizationUpdateManyMutationInputSchema),z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmInputSchema) ]),
 }).strict();
 
+export const CustodianPlatformUpsertWithWhereUniqueWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUpsertWithWhereUniqueWithoutAdvisorFirmsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => CustodianPlatformUpdateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateWithoutAdvisorFirmsInputSchema) ]),
+  create: z.union([ z.lazy(() => CustodianPlatformCreateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedCreateWithoutAdvisorFirmsInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformUpdateWithWhereUniqueWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateWithWhereUniqueWithoutAdvisorFirmsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => CustodianPlatformUpdateWithoutAdvisorFirmsInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateWithoutAdvisorFirmsInputSchema) ]),
+}).strict();
+
+export const CustodianPlatformUpdateManyWithWhereWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyWithWhereWithoutAdvisorFirmsInput> = z.object({
+  where: z.lazy(() => CustodianPlatformScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => CustodianPlatformUpdateManyMutationInputSchema),z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsInputSchema) ]),
+}).strict();
+
 export const AdvisorFirmCreateWithoutEmployeesInputSchema: z.ZodType<Prisma.AdvisorFirmCreateWithoutEmployeesInput> = z.object({
   name: z.string(),
   logoUrl: z.string().optional().nullable(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeCreateNestedOneWithoutAdvisorFirmAsPrimaryContactInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedCreateWithoutEmployeesInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedCreateWithoutEmployeesInput> = z.object({
@@ -16782,7 +17507,8 @@ export const AdvisorFirmUncheckedCreateWithoutEmployeesInputSchema: z.ZodType<Pr
   primaryContactId: z.number().int().optional().nullable(),
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
-  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmCreateOrConnectWithoutEmployeesInputSchema: z.ZodType<Prisma.AdvisorFirmCreateOrConnectWithoutEmployeesInput> = z.object({
@@ -16814,7 +17540,8 @@ export const UserCreateWithoutAdvisorFirmEmployeeInputSchema: z.ZodType<Prisma.U
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutAdvisorFirmEmployeeInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutAdvisorFirmEmployeeInput> = z.object({
@@ -16842,7 +17569,8 @@ export const UserUncheckedCreateWithoutAdvisorFirmEmployeeInputSchema: z.ZodType
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutAdvisorFirmEmployeeInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutAdvisorFirmEmployeeInput> = z.object({
@@ -16856,7 +17584,8 @@ export const AdvisorFirmCreateWithoutPrimaryContactInputSchema: z.ZodType<Prisma
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedCreateWithoutPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedCreateWithoutPrimaryContactInput> = z.object({
@@ -16866,7 +17595,8 @@ export const AdvisorFirmUncheckedCreateWithoutPrimaryContactInputSchema: z.ZodTy
   dateCreated: z.coerce.date().optional(),
   dateUpdated: z.coerce.date().optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutAdvisorFirmsInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmCreateOrConnectWithoutPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmCreateOrConnectWithoutPrimaryContactInput> = z.object({
@@ -16896,7 +17626,8 @@ export const AdvisorFirmUpdateWithoutEmployeesInputSchema: z.ZodType<Prisma.Advi
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   primaryContact: z.lazy(() => AdvisorFirmEmployeeUpdateOneWithoutAdvisorFirmAsPrimaryContactNestedInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedUpdateWithoutEmployeesInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateWithoutEmployeesInput> = z.object({
@@ -16906,7 +17637,8 @@ export const AdvisorFirmUncheckedUpdateWithoutEmployeesInputSchema: z.ZodType<Pr
   primaryContactId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const UserUpsertWithoutAdvisorFirmEmployeeInputSchema: z.ZodType<Prisma.UserUpsertWithoutAdvisorFirmEmployeeInput> = z.object({
@@ -16944,7 +17676,8 @@ export const UserUpdateWithoutAdvisorFirmEmployeeInputSchema: z.ZodType<Prisma.U
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutAdvisorFirmEmployeeInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutAdvisorFirmEmployeeInput> = z.object({
@@ -16972,7 +17705,8 @@ export const UserUncheckedUpdateWithoutAdvisorFirmEmployeeInputSchema: z.ZodType
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
   Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUpsertWithWhereUniqueWithoutPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmUpsertWithWhereUniqueWithoutPrimaryContactInput> = z.object({
@@ -17027,7 +17761,8 @@ export const UserCreateWithoutChangelogInputSchema: z.ZodType<Prisma.UserCreateW
   organizationsOwned: z.lazy(() => OrganizationCreateNestedManyWithoutOwnedByInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutChangelogInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutChangelogInput> = z.object({
@@ -17055,7 +17790,8 @@ export const UserUncheckedCreateWithoutChangelogInputSchema: z.ZodType<Prisma.Us
   organizationsOwned: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutOwnedByInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutChangelogInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutChangelogInput> = z.object({
@@ -17098,7 +17834,8 @@ export const UserUpdateWithoutChangelogInputSchema: z.ZodType<Prisma.UserUpdateW
   organizationsOwned: z.lazy(() => OrganizationUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutChangelogInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutChangelogInput> = z.object({
@@ -17126,7 +17863,8 @@ export const UserUncheckedUpdateWithoutChangelogInputSchema: z.ZodType<Prisma.Us
   organizationsOwned: z.lazy(() => OrganizationUncheckedUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserCreateWithoutNDAAgreementInputSchema: z.ZodType<Prisma.UserCreateWithoutNDAAgreementInput> = z.object({
@@ -17153,7 +17891,8 @@ export const UserCreateWithoutNDAAgreementInputSchema: z.ZodType<Prisma.UserCrea
   organizationsOwned: z.lazy(() => OrganizationCreateNestedManyWithoutOwnedByInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
-  Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional()
+  Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserUncheckedCreateWithoutNDAAgreementInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutNDAAgreementInput> = z.object({
@@ -17181,7 +17920,8 @@ export const UserUncheckedCreateWithoutNDAAgreementInputSchema: z.ZodType<Prisma
   organizationsOwned: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutOwnedByInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
-  Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+  Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedCreateNestedManyWithoutCreatedByInputSchema).optional()
 }).strict();
 
 export const UserCreateOrConnectWithoutNDAAgreementInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutNDAAgreementInput> = z.object({
@@ -17224,7 +17964,8 @@ export const UserUpdateWithoutNDAAgreementInputSchema: z.ZodType<Prisma.UserUpda
   organizationsOwned: z.lazy(() => OrganizationUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
-  Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional()
+  Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutCreatedByNestedInputSchema).optional()
 }).strict();
 
 export const UserUncheckedUpdateWithoutNDAAgreementInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutNDAAgreementInput> = z.object({
@@ -17252,7 +17993,263 @@ export const UserUncheckedUpdateWithoutNDAAgreementInputSchema: z.ZodType<Prisma
   organizationsOwned: z.lazy(() => OrganizationUncheckedUpdateManyWithoutOwnedByNestedInputSchema).optional(),
   OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
   TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
-  Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+  Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutCreatedByNestedInputSchema).optional()
+}).strict();
+
+export const UserCreateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserCreateWithoutCustodianPlatformInput> = z.object({
+  clerkId: z.string().optional().nullable(),
+  role: z.lazy(() => RoleSchema).optional(),
+  email: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  phoneNumber: z.string().optional().nullable(),
+  hubspotId: z.string(),
+  ssn: z.string().optional().nullable(),
+  userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
+  dateOfBirth: z.coerce.date().optional().nullable(),
+  dateCreated: z.coerce.date().optional().nullable(),
+  dateUpdated: z.coerce.date().optional().nullable(),
+  ActivityFeedItem: z.lazy(() => ActivityFeedItemCreateNestedManyWithoutUserInputSchema).optional(),
+  address: z.lazy(() => AddressCreateNestedOneWithoutUserInputSchema).optional(),
+  AdvisorFirmEmployee: z.lazy(() => AdvisorFirmEmployeeCreateNestedManyWithoutUserInputSchema).optional(),
+  DealDocumentUploaded: z.lazy(() => DealDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
+  documentEvents: z.lazy(() => DocumentEventCreateNestedManyWithoutUserInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutUserInputSchema).optional(),
+  organizationMember: z.lazy(() => MemberCreateNestedManyWithoutUserInputSchema).optional(),
+  organizationsOwned: z.lazy(() => OrganizationCreateNestedManyWithoutOwnedByInputSchema).optional(),
+  OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentCreateNestedManyWithoutUploadedByInputSchema).optional(),
+  TermsEvents: z.lazy(() => TermsEventsCreateNestedManyWithoutUserInputSchema).optional(),
+  Changelog: z.lazy(() => ChangelogCreateNestedManyWithoutUserInputSchema).optional(),
+  NDAAgreement: z.lazy(() => NDAAgreementCreateNestedManyWithoutUserInputSchema).optional()
+}).strict();
+
+export const UserUncheckedCreateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserUncheckedCreateWithoutCustodianPlatformInput> = z.object({
+  id: z.number().int().optional(),
+  clerkId: z.string().optional().nullable(),
+  role: z.lazy(() => RoleSchema).optional(),
+  email: z.string(),
+  firstName: z.string(),
+  lastName: z.string(),
+  phoneNumber: z.string().optional().nullable(),
+  hubspotId: z.string(),
+  ssn: z.string().optional().nullable(),
+  userOrgId: z.number().int().optional().nullable(),
+  referralSource: z.string().optional().nullable(),
+  dateOfBirth: z.coerce.date().optional().nullable(),
+  dateCreated: z.coerce.date().optional().nullable(),
+  dateUpdated: z.coerce.date().optional().nullable(),
+  ActivityFeedItem: z.lazy(() => ActivityFeedItemUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  address: z.lazy(() => AddressUncheckedCreateNestedOneWithoutUserInputSchema).optional(),
+  AdvisorFirmEmployee: z.lazy(() => AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  DealDocumentUploaded: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
+  documentEvents: z.lazy(() => DocumentEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  organizationMember: z.lazy(() => MemberUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  organizationsOwned: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutOwnedByInputSchema).optional(),
+  OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedCreateNestedManyWithoutUploadedByInputSchema).optional(),
+  TermsEvents: z.lazy(() => TermsEventsUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  Changelog: z.lazy(() => ChangelogUncheckedCreateNestedManyWithoutUserInputSchema).optional(),
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedCreateNestedManyWithoutUserInputSchema).optional()
+}).strict();
+
+export const UserCreateOrConnectWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserCreateOrConnectWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => UserWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => UserCreateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedCreateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const AdvisorFirmCreateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmCreateWithoutCustodianPlatformInput> = z.object({
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  primaryContact: z.lazy(() => AdvisorFirmEmployeeCreateNestedOneWithoutAdvisorFirmAsPrimaryContactInputSchema).optional(),
+  employees: z.lazy(() => AdvisorFirmEmployeeCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  clientOrganizations: z.lazy(() => OrganizationCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+}).strict();
+
+export const AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedCreateWithoutCustodianPlatformInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  primaryContactId: z.number().int().optional().nullable(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional(),
+  employees: z.lazy(() => AdvisorFirmEmployeeUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional(),
+  clientOrganizations: z.lazy(() => OrganizationUncheckedCreateNestedManyWithoutAdvisorFirmInputSchema).optional()
+}).strict();
+
+export const AdvisorFirmCreateOrConnectWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmCreateOrConnectWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => AdvisorFirmWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const ProjectCreateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectCreateWithoutCustodianPlatformInput> = z.object({
+  name: z.string(),
+  location: z.string(),
+  tags: z.string().optional(),
+  status: z.lazy(() => StatusSchema).optional(),
+  description: z.string(),
+  marketHighlights: z.string().optional(),
+  youtubeUrl: z.string().optional(),
+  slug: z.string(),
+  equityReturnsFile: z.string(),
+  displayName: z.string().optional(),
+  deals: z.lazy(() => DealCreateNestedManyWithoutProjectInputSchema).optional(),
+  equityMilestoneFiles: z.lazy(() => EquityMilestoneFileCreateNestedManyWithoutProjectInputSchema).optional(),
+  documents: z.lazy(() => ProjectDocumentCreateNestedManyWithoutProjectInputSchema).optional(),
+  investmentStats: z.lazy(() => ProjectInvestmentStatsCreateNestedOneWithoutProjectInputSchema).optional(),
+  milestones: z.lazy(() => ProjectMilestonesCreateNestedOneWithoutProjectInputSchema).optional(),
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoCreateNestedManyWithoutProjectInputSchema).optional(),
+  pictures: z.lazy(() => ProjectPictureCreateNestedManyWithoutProjectInputSchema).optional(),
+  propertyStats: z.lazy(() => ProjectPropertyStatsCreateNestedOneWithoutProjectInputSchema).optional(),
+  ProjectReport: z.lazy(() => ProjectReportCreateNestedManyWithoutProjectInputSchema).optional()
+}).strict();
+
+export const ProjectUncheckedCreateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUncheckedCreateWithoutCustodianPlatformInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  location: z.string(),
+  tags: z.string().optional(),
+  status: z.lazy(() => StatusSchema).optional(),
+  description: z.string(),
+  marketHighlights: z.string().optional(),
+  youtubeUrl: z.string().optional(),
+  slug: z.string(),
+  equityReturnsFile: z.string(),
+  displayName: z.string().optional(),
+  deals: z.lazy(() => DealUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  equityMilestoneFiles: z.lazy(() => EquityMilestoneFileUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  documents: z.lazy(() => ProjectDocumentUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
+  milestones: z.lazy(() => ProjectMilestonesUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  pictures: z.lazy(() => ProjectPictureUncheckedCreateNestedManyWithoutProjectInputSchema).optional(),
+  propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedCreateNestedOneWithoutProjectInputSchema).optional(),
+  ProjectReport: z.lazy(() => ProjectReportUncheckedCreateNestedManyWithoutProjectInputSchema).optional()
+}).strict();
+
+export const ProjectCreateOrConnectWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectCreateOrConnectWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => ProjectWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const UserUpsertWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserUpsertWithoutCustodianPlatformInput> = z.object({
+  update: z.union([ z.lazy(() => UserUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedUpdateWithoutCustodianPlatformInputSchema) ]),
+  create: z.union([ z.lazy(() => UserCreateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedCreateWithoutCustodianPlatformInputSchema) ]),
+  where: z.lazy(() => UserWhereInputSchema).optional()
+}).strict();
+
+export const UserUpdateToOneWithWhereWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserUpdateToOneWithWhereWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => UserWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => UserUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => UserUncheckedUpdateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const UserUpdateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserUpdateWithoutCustodianPlatformInput> = z.object({
+  clerkId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.lazy(() => RoleSchema),z.lazy(() => EnumRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateOfBirth: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ActivityFeedItem: z.lazy(() => ActivityFeedItemUpdateManyWithoutUserNestedInputSchema).optional(),
+  address: z.lazy(() => AddressUpdateOneWithoutUserNestedInputSchema).optional(),
+  AdvisorFirmEmployee: z.lazy(() => AdvisorFirmEmployeeUpdateManyWithoutUserNestedInputSchema).optional(),
+  DealDocumentUploaded: z.lazy(() => DealDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
+  documentEvents: z.lazy(() => DocumentEventUpdateManyWithoutUserNestedInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutUserNestedInputSchema).optional(),
+  organizationMember: z.lazy(() => MemberUpdateManyWithoutUserNestedInputSchema).optional(),
+  organizationsOwned: z.lazy(() => OrganizationUpdateManyWithoutOwnedByNestedInputSchema).optional(),
+  OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUpdateManyWithoutUploadedByNestedInputSchema).optional(),
+  TermsEvents: z.lazy(() => TermsEventsUpdateManyWithoutUserNestedInputSchema).optional(),
+  Changelog: z.lazy(() => ChangelogUpdateManyWithoutUserNestedInputSchema).optional(),
+  NDAAgreement: z.lazy(() => NDAAgreementUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict();
+
+export const UserUncheckedUpdateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.UserUncheckedUpdateWithoutCustodianPlatformInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  clerkId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  role: z.union([ z.lazy(() => RoleSchema),z.lazy(() => EnumRoleFieldUpdateOperationsInputSchema) ]).optional(),
+  email: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  firstName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  lastName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  phoneNumber: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  ssn: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  userOrgId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  referralSource: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateOfBirth: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  ActivityFeedItem: z.lazy(() => ActivityFeedItemUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  address: z.lazy(() => AddressUncheckedUpdateOneWithoutUserNestedInputSchema).optional(),
+  AdvisorFirmEmployee: z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  DealDocumentUploaded: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
+  documentEvents: z.lazy(() => DocumentEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  organizationMember: z.lazy(() => MemberUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  organizationsOwned: z.lazy(() => OrganizationUncheckedUpdateManyWithoutOwnedByNestedInputSchema).optional(),
+  OrganizationDocumentUploaded: z.lazy(() => OrganizationDocumentUncheckedUpdateManyWithoutUploadedByNestedInputSchema).optional(),
+  TermsEvents: z.lazy(() => TermsEventsUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  Changelog: z.lazy(() => ChangelogUncheckedUpdateManyWithoutUserNestedInputSchema).optional(),
+  NDAAgreement: z.lazy(() => NDAAgreementUncheckedUpdateManyWithoutUserNestedInputSchema).optional()
+}).strict();
+
+export const AdvisorFirmUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUpsertWithWhereUniqueWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => AdvisorFirmWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => AdvisorFirmUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedUpdateWithoutCustodianPlatformInputSchema) ]),
+  create: z.union([ z.lazy(() => AdvisorFirmCreateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedCreateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const AdvisorFirmUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUpdateWithWhereUniqueWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => AdvisorFirmWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => AdvisorFirmUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => AdvisorFirmUncheckedUpdateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const AdvisorFirmUpdateManyWithWhereWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUpdateManyWithWhereWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => AdvisorFirmScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => AdvisorFirmUpdateManyMutationInputSchema),z.lazy(() => AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const ProjectUpsertWithWhereUniqueWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUpsertWithWhereUniqueWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => ProjectWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => ProjectUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedUpdateWithoutCustodianPlatformInputSchema) ]),
+  create: z.union([ z.lazy(() => ProjectCreateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedCreateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const ProjectUpdateWithWhereUniqueWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUpdateWithWhereUniqueWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => ProjectWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => ProjectUpdateWithoutCustodianPlatformInputSchema),z.lazy(() => ProjectUncheckedUpdateWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const ProjectUpdateManyWithWhereWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUpdateManyWithWhereWithoutCustodianPlatformInput> = z.object({
+  where: z.lazy(() => ProjectScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => ProjectUpdateManyMutationInputSchema),z.lazy(() => ProjectUncheckedUpdateManyWithoutCustodianPlatformInputSchema) ]),
+}).strict();
+
+export const ProjectScalarWhereInputSchema: z.ZodType<Prisma.ProjectScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => ProjectScalarWhereInputSchema),z.lazy(() => ProjectScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => ProjectScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => ProjectScalarWhereInputSchema),z.lazy(() => ProjectScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  name: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  location: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  tags: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  status: z.union([ z.lazy(() => EnumStatusFilterSchema),z.lazy(() => StatusSchema) ]).optional(),
+  description: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  marketHighlights: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  youtubeUrl: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  slug: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  equityReturnsFile: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
+  displayName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
 export const ActivityFeedItemCreateManyUserInputSchema: z.ZodType<Prisma.ActivityFeedItemCreateManyUserInput> = z.object({
@@ -17352,6 +18349,15 @@ export const NDAAgreementCreateManyUserInputSchema: z.ZodType<Prisma.NDAAgreemen
   accepted: z.boolean().optional(),
   dateSigned: z.coerce.date().optional(),
   revision: z.number().int()
+}).strict();
+
+export const CustodianPlatformCreateManyCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformCreateManyCreatedByInput> = z.object({
+  id: z.number().int().optional(),
+  name: z.string(),
+  logoUrl: z.string().optional().nullable(),
+  status: z.lazy(() => StatusSchema).optional(),
+  dateCreated: z.coerce.date().optional(),
+  dateUpdated: z.coerce.date().optional()
 }).strict();
 
 export const ActivityFeedItemUpdateWithoutUserInputSchema: z.ZodType<Prisma.ActivityFeedItemUpdateWithoutUserInput> = z.object({
@@ -17649,6 +18655,36 @@ export const NDAAgreementUncheckedUpdateManyWithoutUserInputSchema: z.ZodType<Pr
   accepted: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
   dateSigned: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   revision: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const CustodianPlatformUpdateWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateWithoutCreatedByInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUpdateManyWithoutCustodianPlatformNestedInputSchema).optional(),
+  projects: z.lazy(() => ProjectUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateWithoutCreatedByInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema).optional(),
+  projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyWithoutCreatedByInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyWithoutCreatedByInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 export const DealDocumentCreateManyDealInputSchema: z.ZodType<Prisma.DealDocumentCreateManyDealInput> = z.object({
@@ -18166,6 +19202,37 @@ export const ProjectReportUncheckedUpdateManyWithoutProjectInputSchema: z.ZodTyp
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateWithoutProjectsInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdBy: z.lazy(() => UserUpdateOneRequiredWithoutCustodianPlatformNestedInputSchema).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateWithoutProjectsInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  advisorFirms: z.lazy(() => AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyWithoutProjectsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyWithoutProjectsInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
 export const DocumentEventCreateManyDocumentInputSchema: z.ZodType<Prisma.DocumentEventCreateManyDocumentInput> = z.object({
   id: z.number().int().optional(),
   userId: z.number().int(),
@@ -18281,6 +19348,37 @@ export const OrganizationUncheckedUpdateManyWithoutAdvisorFirmInputSchema: z.Zod
   isPrimary: z.union([ z.boolean(),z.lazy(() => BoolFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
+export const CustodianPlatformUpdateWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUpdateWithoutAdvisorFirmsInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdBy: z.lazy(() => UserUpdateOneRequiredWithoutCustodianPlatformNestedInputSchema).optional(),
+  projects: z.lazy(() => ProjectUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateWithoutAdvisorFirmsInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  projects: z.lazy(() => ProjectUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema).optional()
+}).strict();
+
+export const CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsInputSchema: z.ZodType<Prisma.CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
 export const AdvisorFirmCreateManyPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmCreateManyPrimaryContactInput> = z.object({
   id: z.number().int().optional(),
   name: z.string(),
@@ -18295,7 +19393,8 @@ export const AdvisorFirmUpdateWithoutPrimaryContactInputSchema: z.ZodType<Prisma
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedUpdateWithoutPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateWithoutPrimaryContactInput> = z.object({
@@ -18305,7 +19404,8 @@ export const AdvisorFirmUncheckedUpdateWithoutPrimaryContactInputSchema: z.ZodTy
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   employees: z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
-  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  CustodianPlatform: z.lazy(() => CustodianPlatformUncheckedUpdateManyWithoutAdvisorFirmsNestedInputSchema).optional()
 }).strict();
 
 export const AdvisorFirmUncheckedUpdateManyWithoutPrimaryContactInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateManyWithoutPrimaryContactInput> = z.object({
@@ -18314,6 +19414,95 @@ export const AdvisorFirmUncheckedUpdateManyWithoutPrimaryContactInputSchema: z.Z
   logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
   dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const AdvisorFirmUpdateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUpdateWithoutCustodianPlatformInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  primaryContact: z.lazy(() => AdvisorFirmEmployeeUpdateOneWithoutAdvisorFirmAsPrimaryContactNestedInputSchema).optional(),
+  employees: z.lazy(() => AdvisorFirmEmployeeUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  clientOrganizations: z.lazy(() => OrganizationUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+}).strict();
+
+export const AdvisorFirmUncheckedUpdateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateWithoutCustodianPlatformInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  primaryContactId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  employees: z.lazy(() => AdvisorFirmEmployeeUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional(),
+  clientOrganizations: z.lazy(() => OrganizationUncheckedUpdateManyWithoutAdvisorFirmNestedInputSchema).optional()
+}).strict();
+
+export const AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.AdvisorFirmUncheckedUpdateManyWithoutCustodianPlatformInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  logoUrl: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  primaryContactId: z.union([ z.number().int(),z.lazy(() => NullableIntFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+}).strict();
+
+export const ProjectUpdateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUpdateWithoutCustodianPlatformInput> = z.object({
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  deals: z.lazy(() => DealUpdateManyWithoutProjectNestedInputSchema).optional(),
+  equityMilestoneFiles: z.lazy(() => EquityMilestoneFileUpdateManyWithoutProjectNestedInputSchema).optional(),
+  documents: z.lazy(() => ProjectDocumentUpdateManyWithoutProjectNestedInputSchema).optional(),
+  investmentStats: z.lazy(() => ProjectInvestmentStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
+  milestones: z.lazy(() => ProjectMilestonesUpdateOneWithoutProjectNestedInputSchema).optional(),
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUpdateManyWithoutProjectNestedInputSchema).optional(),
+  pictures: z.lazy(() => ProjectPictureUpdateManyWithoutProjectNestedInputSchema).optional(),
+  propertyStats: z.lazy(() => ProjectPropertyStatsUpdateOneWithoutProjectNestedInputSchema).optional(),
+  ProjectReport: z.lazy(() => ProjectReportUpdateManyWithoutProjectNestedInputSchema).optional()
+}).strict();
+
+export const ProjectUncheckedUpdateWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateWithoutCustodianPlatformInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  deals: z.lazy(() => DealUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  equityMilestoneFiles: z.lazy(() => EquityMilestoneFileUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  documents: z.lazy(() => ProjectDocumentUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  investmentStats: z.lazy(() => ProjectInvestmentStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
+  milestones: z.lazy(() => ProjectMilestonesUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
+  projectPaymentInfo: z.lazy(() => ProjectPaymentInfoUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  pictures: z.lazy(() => ProjectPictureUncheckedUpdateManyWithoutProjectNestedInputSchema).optional(),
+  propertyStats: z.lazy(() => ProjectPropertyStatsUncheckedUpdateOneWithoutProjectNestedInputSchema).optional(),
+  ProjectReport: z.lazy(() => ProjectReportUncheckedUpdateManyWithoutProjectNestedInputSchema).optional()
+}).strict();
+
+export const ProjectUncheckedUpdateManyWithoutCustodianPlatformInputSchema: z.ZodType<Prisma.ProjectUncheckedUpdateManyWithoutCustodianPlatformInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  location: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  tags: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  status: z.union([ z.lazy(() => StatusSchema),z.lazy(() => EnumStatusFieldUpdateOperationsInputSchema) ]).optional(),
+  description: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  marketHighlights: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  youtubeUrl: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  slug: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  equityReturnsFile: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  displayName: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
 /////////////////////////////////////////
@@ -20056,6 +21245,68 @@ export const NDAAgreementFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.NDAAgreem
   where: NDAAgreementWhereUniqueInputSchema,
 }).strict() ;
 
+export const CustodianPlatformFindFirstArgsSchema: z.ZodType<Prisma.CustodianPlatformFindFirstArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereInputSchema.optional(),
+  orderBy: z.union([ CustodianPlatformOrderByWithRelationInputSchema.array(),CustodianPlatformOrderByWithRelationInputSchema ]).optional(),
+  cursor: CustodianPlatformWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ CustodianPlatformScalarFieldEnumSchema,CustodianPlatformScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const CustodianPlatformFindFirstOrThrowArgsSchema: z.ZodType<Prisma.CustodianPlatformFindFirstOrThrowArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereInputSchema.optional(),
+  orderBy: z.union([ CustodianPlatformOrderByWithRelationInputSchema.array(),CustodianPlatformOrderByWithRelationInputSchema ]).optional(),
+  cursor: CustodianPlatformWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ CustodianPlatformScalarFieldEnumSchema,CustodianPlatformScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const CustodianPlatformFindManyArgsSchema: z.ZodType<Prisma.CustodianPlatformFindManyArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereInputSchema.optional(),
+  orderBy: z.union([ CustodianPlatformOrderByWithRelationInputSchema.array(),CustodianPlatformOrderByWithRelationInputSchema ]).optional(),
+  cursor: CustodianPlatformWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ CustodianPlatformScalarFieldEnumSchema,CustodianPlatformScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const CustodianPlatformAggregateArgsSchema: z.ZodType<Prisma.CustodianPlatformAggregateArgs> = z.object({
+  where: CustodianPlatformWhereInputSchema.optional(),
+  orderBy: z.union([ CustodianPlatformOrderByWithRelationInputSchema.array(),CustodianPlatformOrderByWithRelationInputSchema ]).optional(),
+  cursor: CustodianPlatformWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const CustodianPlatformGroupByArgsSchema: z.ZodType<Prisma.CustodianPlatformGroupByArgs> = z.object({
+  where: CustodianPlatformWhereInputSchema.optional(),
+  orderBy: z.union([ CustodianPlatformOrderByWithAggregationInputSchema.array(),CustodianPlatformOrderByWithAggregationInputSchema ]).optional(),
+  by: CustodianPlatformScalarFieldEnumSchema.array(),
+  having: CustodianPlatformScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const CustodianPlatformFindUniqueArgsSchema: z.ZodType<Prisma.CustodianPlatformFindUniqueArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereUniqueInputSchema,
+}).strict() ;
+
+export const CustodianPlatformFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.CustodianPlatformFindUniqueOrThrowArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereUniqueInputSchema,
+}).strict() ;
+
 export const UserCreateArgsSchema: z.ZodType<Prisma.UserCreateArgs> = z.object({
   select: UserSelectSchema.optional(),
   include: UserIncludeSchema.optional(),
@@ -21565,5 +22816,59 @@ export const NDAAgreementUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.NDAAgre
 
 export const NDAAgreementDeleteManyArgsSchema: z.ZodType<Prisma.NDAAgreementDeleteManyArgs> = z.object({
   where: NDAAgreementWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const CustodianPlatformCreateArgsSchema: z.ZodType<Prisma.CustodianPlatformCreateArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  data: z.union([ CustodianPlatformCreateInputSchema,CustodianPlatformUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const CustodianPlatformUpsertArgsSchema: z.ZodType<Prisma.CustodianPlatformUpsertArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereUniqueInputSchema,
+  create: z.union([ CustodianPlatformCreateInputSchema,CustodianPlatformUncheckedCreateInputSchema ]),
+  update: z.union([ CustodianPlatformUpdateInputSchema,CustodianPlatformUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const CustodianPlatformCreateManyArgsSchema: z.ZodType<Prisma.CustodianPlatformCreateManyArgs> = z.object({
+  data: z.union([ CustodianPlatformCreateManyInputSchema,CustodianPlatformCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const CustodianPlatformCreateManyAndReturnArgsSchema: z.ZodType<Prisma.CustodianPlatformCreateManyAndReturnArgs> = z.object({
+  data: z.union([ CustodianPlatformCreateManyInputSchema,CustodianPlatformCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const CustodianPlatformDeleteArgsSchema: z.ZodType<Prisma.CustodianPlatformDeleteArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  where: CustodianPlatformWhereUniqueInputSchema,
+}).strict() ;
+
+export const CustodianPlatformUpdateArgsSchema: z.ZodType<Prisma.CustodianPlatformUpdateArgs> = z.object({
+  select: CustodianPlatformSelectSchema.optional(),
+  include: CustodianPlatformIncludeSchema.optional(),
+  data: z.union([ CustodianPlatformUpdateInputSchema,CustodianPlatformUncheckedUpdateInputSchema ]),
+  where: CustodianPlatformWhereUniqueInputSchema,
+}).strict() ;
+
+export const CustodianPlatformUpdateManyArgsSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyArgs> = z.object({
+  data: z.union([ CustodianPlatformUpdateManyMutationInputSchema,CustodianPlatformUncheckedUpdateManyInputSchema ]),
+  where: CustodianPlatformWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const CustodianPlatformUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.CustodianPlatformUpdateManyAndReturnArgs> = z.object({
+  data: z.union([ CustodianPlatformUpdateManyMutationInputSchema,CustodianPlatformUncheckedUpdateManyInputSchema ]),
+  where: CustodianPlatformWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const CustodianPlatformDeleteManyArgsSchema: z.ZodType<Prisma.CustodianPlatformDeleteManyArgs> = z.object({
+  where: CustodianPlatformWhereInputSchema.optional(),
   limit: z.number().optional(),
 }).strict() ;
