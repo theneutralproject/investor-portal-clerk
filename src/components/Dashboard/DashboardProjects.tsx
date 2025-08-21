@@ -217,7 +217,7 @@ const DashboardProjects: React.FC<DashboardProjectsProps> = ({ projects }) => {
                         }}
                         data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-projet-card-details-btn`}
                       >
-                        VIEW DETAILS
+                        VIEW PROJECT
                       </Button>
                     )}
                   </Box>

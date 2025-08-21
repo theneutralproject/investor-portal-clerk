@@ -133,7 +133,7 @@ export default function Sidebar(props: ISidebarProps) {
   const advisorContext = useAdvisorContext(isAdvisor);
   const imageSource = isAdvisor
     ? advisorContext?.advisor?.logoUrl || '/Neutral_White_Medium.png'
-    : '/logo.png';
+    : '/logo.svg';
   const imageSize = isAdvisor
     ? { width: 104, height: 51 }
     : { width: 94, height: 21 };

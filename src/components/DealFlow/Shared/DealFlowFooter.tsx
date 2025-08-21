@@ -32,18 +32,14 @@ const DealFlowFooter: React.FC<DealFlowFooterProps> = ({
           </Button>
         )}
         <Button
-          variant="contained"
+          variant="neutralRustTerracotta"
           onClick={onContinue}
           disabled={isLoading || isContinueDisabled}
           sx={{
-            backgroundColor: '#f0b84a',
-            color: 'white',
             boxShadow: 0,
             borderRadius: '25px',
             padding: '8px 25px',
             textTransform: 'uppercase',
-            '&:hover': { backgroundColor: '#e0a83a' },
-            minWidth: '120px',
           }}
         >
           {isLoading ? (
