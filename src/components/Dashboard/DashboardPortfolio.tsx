@@ -42,6 +42,7 @@ const DashboardPortfolio: React.FC<{
             backgroundColor: 'rgba(255, 255, 255, 0.6)',
             backdropFilter: 'blur(4px)',
             borderRadius: '8px',
+            boxShadow: 'none',
           }}
           data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-create-account`}
         >
@@ -62,7 +63,7 @@ const DashboardPortfolio: React.FC<{
             <Stack direction="row" spacing={2} alignItems="center">
               <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up`}>
                 <CreateAccountButton
-                  variant="neutralYellow"
+                  variant="neutralRustTerracotta"
                   data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}-sign-up-btn`}
                 />
               </div>

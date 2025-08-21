@@ -2,7 +2,7 @@ import { Box, Card, Chip, styled } from '@mui/material';
 
 // Shared styled components for dashboard elements
 export const StyledCard = styled(Card)({
-  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.05)',
+  boxShadow: 'none',
   borderRadius: 8,
 });
 

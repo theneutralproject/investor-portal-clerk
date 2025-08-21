@@ -12,17 +12,6 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 
-const StyledCreateButton = styled(Button)(() => ({
-  backgroundColor: '#dfaf43',
-  color: 'white',
-  borderRadius: '56px',
-  textTransform: 'none',
-  padding: '10px 20px',
-  '&:hover': {
-    backgroundColor: '#E6BF69',
-  },
-}));
-
 const StyledSignInLink = styled(Link)(({}) => ({
   color: 'black',
   textDecoration: 'none',
@@ -44,12 +33,13 @@ export const CreateAccountButton = ({ ...props }) => {
   }, []);
 
   return (
-    <StyledCreateButton
+    <Button
       href={`https://accounts.neutral.us/sign-up?redirectUrl=${path}`}
       {...props}
+      variant="neutralRustTerracotta"
     >
       CREATE ACCOUNT
-    </StyledCreateButton>
+    </Button>
   );
 };
 
@@ -79,8 +69,8 @@ interface CreateAccountProps {
 const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
   return (
     <Card
+      variant="greenForest"
       sx={{
-        backgroundColor: 'black',
         borderRadius: '8px',
         color: 'white',
         mb: 2,
@@ -98,7 +88,7 @@ const CreateAccount: React.FC<CreateAccountProps> = ({}) => {
             Create Your Account
           </Typography>
 
-          <Divider sx={{ mb: 2, borderColor: '#3C3C3C' }} />
+          <Divider sx={{ mb: 2, borderColor: 'rgba(255, 255, 255, 0.5)' }} />
 
           <Typography variant="subtitle1" color="rgba(255, 255, 255, 0.7)">
             Create your free account to access exclusive investment information.

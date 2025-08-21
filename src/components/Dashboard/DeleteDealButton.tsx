@@ -83,7 +83,7 @@ const DeleteDealButton: React.FC<DeleteDealButtonProps> = ({ dealId }) => {
             </Button>
             <Button
               onClick={handleDelete}
-              variant="neutralYellow"
+              variant="neutralRustTerracotta"
               sx={{
                 backgroundColor: '#d43031',
                 '&:hover': { backgroundColor: '#d43031' },

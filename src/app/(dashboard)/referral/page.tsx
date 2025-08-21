@@ -262,7 +262,7 @@ function ReferralForm(): JSX.Element {
         </Button>
         <Button
           type="submit"
-          variant="neutralYellow"
+          variant="neutralRustTerracotta"
           disabled={!referralSource || isLoading}
           onClick={handleSubmit}
           startIcon={

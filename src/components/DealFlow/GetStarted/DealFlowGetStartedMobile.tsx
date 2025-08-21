@@ -108,7 +108,7 @@ const DealFlowGetStartedMobile: React.FC = () => {
           justifyContent: 'center',
         }}
       >
-        {/* <Button variant="neutralYellow" fullWidth>
+        {/* <Button variant="neutralRustTerracotta" fullWidth>
           Email me the link
         </Button> */}
         <Button

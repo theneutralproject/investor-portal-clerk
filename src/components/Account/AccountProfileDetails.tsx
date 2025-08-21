@@ -255,7 +255,7 @@ const AccountProfileDetails: React.FC<AccountProfileDetailsProps> = ({
         <Grid size={12} sx={{ mt: 2 }}>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <Button
-              variant="neutralYellow"
+              variant="neutralRustTerracotta"
               color="primary"
               type="submit"
               disabled={!isValid || !isDirty}
