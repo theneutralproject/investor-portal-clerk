@@ -50,6 +50,7 @@ export const zDealCreateSchema = z.object({
   dealStage: z.number().min(0).max(6).nullish(),
   financingType: z.nativeEnum(DealFinancingType).nullish(),
   ownershipType: z.nativeEnum(DealOwnershipType).nullish(),
+  unitType: z.nativeEnum(DealUnitType).optional(),
   transactionId: z.string().optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
