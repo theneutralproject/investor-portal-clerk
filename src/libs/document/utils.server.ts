@@ -387,13 +387,17 @@ export async function updateGenericDocumentEntry(
 export const getGenericDocument = async (
   entity: string,
   docId: number
-): Promise<{ name: string; path: string; bucketName: string }> => {
+): Promise<{
+  name: string;
+  path: string;
+  bucketName: string;
+}> => {
   let name;
   let path;
-  let fileDocument;
+  const bucketName = `${entity}-documents`;
 
-  if (entity === 'deal') {
-    fileDocument = await prisma.dealDocument.findUnique({
+  const documentQueryMapper: { [x: string]: any } = {
+    deal: prisma.dealDocument.findUnique({
       where: {
         id: docId,
       },
@@ -401,13 +405,8 @@ export const getGenericDocument = async (
         path: true,
         name: true,
       },
-    });
-    name = fileDocument?.name;
-    path = fileDocument?.path;
-  }
-
-  if (entity === 'organization') {
-    fileDocument = await prisma.organizationDocument.findUnique({
+    }),
+    organization: prisma.organizationDocument.findUnique({
       where: {
         id: docId,
       },
@@ -415,27 +414,32 @@ export const getGenericDocument = async (
         path: true,
         name: true,
       },
-    });
-    name = fileDocument?.name;
-    path = fileDocument?.path;
-  }
-
-  if (entity === 'project') {
-    fileDocument = await prisma.projectDocument.findUnique({
+    }),
+    project: prisma.projectDocument.findUnique({
       where: {
         id: docId,
       },
       select: {
         fileName: true,
+        link: true,
         project: {
           select: {
             name: true,
           },
         },
       },
-    });
+    }),
+  };
+
+  const fileDocument = await documentQueryMapper[entity];
+
+  if (['deal', 'organization'].includes(entity)) {
+    name = fileDocument?.name;
+    path = fileDocument?.path;
+  } else {
     name = fileDocument?.fileName;
-    path = fileDocument?.project.name.replaceAll(' ', '') || '';
+    const projectPath = fileDocument.link.split(bucketName)[1];
+    path = projectPath;
   }
 
   if (!fileDocument) {
@@ -451,7 +455,7 @@ export const getGenericDocument = async (
   return {
     name,
     path,
-    bucketName: `${entity}-documents`,
+    bucketName,
   };
 };
 
