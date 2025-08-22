@@ -28,6 +28,7 @@ export const zDealUpdateSchema = z.object({
   dealStage: z.number().min(0).max(6).optional(),
   accreditationVerifierId: z.number().optional().nullable(),
   investmentStats: zDealInvestmentStatsUpdateSchema.optional(),
+  unitType: z.nativeEnum(DealUnitType).optional(),
   closingDate: z.date().nullish(),
   signaturesCompletedDate: z.date().nullish(),
   dateFundsSent: z
