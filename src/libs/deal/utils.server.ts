@@ -259,8 +259,17 @@ export async function updateDeal(
   updateHubspot = false,
   allowMaintenanceOfCompletedDeals = false
 ) {
-  const { investmentStats: investmentStatsToUpdate, ...dealData } =
-    updateDealData;
+  const {
+    investmentStats: investmentStatsToUpdate,
+    unitType,
+    ...dealData
+  } = updateDealData;
+
+  // If unitType is provided at the top level, move it to investmentStats
+  const investmentStatsWithUnitType = investmentStatsToUpdate || {};
+  if (unitType !== undefined) {
+    investmentStatsWithUnitType.unitType = unitType;
+  }
   const existingDeal = await prisma.deal.findUnique({
     where: { hubspotId: dealData.hubspotId },
     include: {
@@ -295,10 +304,10 @@ export async function updateDeal(
       `Deal with id ${existingDeal.id} is already signed, and the investmentStats will not be updated, but the deal itself will be.`
     );
   } else {
-    if (investmentStatsToUpdate) {
+    if (investmentStatsWithUnitType) {
       // the only investment stats fields that can be updated  from outside this function are amount, unitType, and financingType.
       const { amount, financingType, unitType, ...ignoredInvestmentStats } =
-        investmentStatsToUpdate;
+        investmentStatsWithUnitType;
 
       for (const key in ignoredInvestmentStats) {
         console.warn(
