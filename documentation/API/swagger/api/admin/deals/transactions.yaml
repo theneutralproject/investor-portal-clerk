@@ -1,0 +1,287 @@
+openapi: 3.0.0
+info:
+  title: Admin - Deal Transactions
+  version: 1.0.0
+  description: Endpoints for managing deal transactions.
+
+paths:
+  /api/admin/deals/{dealId}/transactions:
+    get:
+      summary: Get all transactions for a deal
+      description: Retrieves all transactions for a specific deal, ordered by transaction date (newest first).
+      parameters:
+        - name: dealId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deal ID to fetch transactions for
+      responses:
+        '200':
+          description: List of deal transactions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DealTransaction'
+        '400':
+          description: Bad request - invalid dealId
+        '404':
+          description: Deal not found
+        '500':
+          description: Server error
+
+    post:
+      summary: Create a new transaction for a deal
+      description: Creates a new transaction for a specific deal.
+      parameters:
+        - name: dealId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deal ID to create transaction for
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealTransactionCreate'
+      responses:
+        '200':
+          description: Transaction created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DealTransaction'
+        '400':
+          description: Bad request or validation error
+        '404':
+          description: Deal not found
+        '500':
+          description: Server error
+
+  /api/admin/deals/{dealId}/transactions/{transactionId}:
+    patch:
+      summary: Update a specific transaction
+      description: Updates a specific transaction for a deal.
+      parameters:
+        - name: dealId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deal ID
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Transaction ID to update
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DealTransactionUpdate'
+      responses:
+        '200':
+          description: Transaction updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DealTransaction'
+        '400':
+          description: Bad request or validation error
+        '404':
+          description: Transaction not found
+        '500':
+          description: Server error
+
+    delete:
+      summary: Delete a specific transaction
+      description: Deletes a specific transaction for a deal.
+      parameters:
+        - name: dealId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Deal ID
+        - name: transactionId
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Transaction ID to delete
+      responses:
+        '200':
+          description: Transaction deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Transaction deleted successfully'
+        '400':
+          description: Bad request - invalid IDs
+        '404':
+          description: Transaction not found
+        '500':
+          description: Server error
+
+components:
+  schemas:
+    DealTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 123
+        dateCreated:
+          type: string
+          format: date-time
+          example: '2025-08-26T10:00:00Z'
+        dealId:
+          type: integer
+          example: 456
+        type:
+          $ref: '#/components/schemas/DealTransactionType'
+        transactionDate:
+          type: string
+          format: date-time
+          example: '2025-08-25T00:00:00Z'
+        fullTransactionAmount:
+          type: number
+          nullable: true
+          example: 50000.00
+        interestAmount:
+          type: number
+          nullable: true
+          example: 2500.00
+        principalAmount:
+          type: number
+          nullable: true
+          example: 47500.00
+        startPeriod:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-01-01T00:00:00Z'
+        endPeriod:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-03-31T00:00:00Z'
+        notes:
+          type: string
+          nullable: true
+          example: 'Q1 2025 interest payment'
+        newMaturityDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-08-25T00:00:00Z'
+
+    DealTransactionCreate:
+      type: object
+      required:
+        - type
+        - transactionDate
+      properties:
+        type:
+          $ref: '#/components/schemas/DealTransactionType'
+        transactionDate:
+          type: string
+          format: date-time
+          example: '2025-08-25T00:00:00Z'
+        fullTransactionAmount:
+          type: number
+          nullable: true
+          example: 50000.00
+        interestAmount:
+          type: number
+          nullable: true
+          example: 2500.00
+        principalAmount:
+          type: number
+          nullable: true
+          example: 47500.00
+        startPeriod:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-01-01T00:00:00Z'
+        endPeriod:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-03-31T00:00:00Z'
+        notes:
+          type: string
+          nullable: true
+          example: 'Q1 2025 interest payment'
+        newMaturityDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-08-25T00:00:00Z'
+
+    DealTransactionUpdate:
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/DealTransactionType'
+        transactionDate:
+          type: string
+          format: date-time
+          example: '2025-08-25T00:00:00Z'
+        fullTransactionAmount:
+          type: number
+          nullable: true
+          example: 50000.00
+        interestAmount:
+          type: number
+          nullable: true
+          example: 2500.00
+        principalAmount:
+          type: number
+          nullable: true
+          example: 47500.00
+        startPeriod:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-01-01T00:00:00Z'
+        endPeriod:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2025-03-31T00:00:00Z'
+        notes:
+          type: string
+          nullable: true
+          example: 'Q1 2025 interest payment'
+        newMaturityDate:
+          type: string
+          format: date-time
+          nullable: true
+          example: '2026-08-25T00:00:00Z'
+
+    DealTransactionType:
+      type: string
+      enum:
+        - NOTE_MATURITY
+        - NOTE_COMPLETION
+        - NOTE_INTEREST_PAYMENT
+        - NOTE_PRINCIPAL_PAYMENT
+        - NOTE_EXTENSION
+        - NOTE_CONVERSION
+        - EQUITY_ASSIGNMENT
+        - EQUITY_DISTRIBUTION
+        - EQUITY_EXIT
+        - EQUITY_PARTIAL_PAYMENT
+      example: NOTE_INTEREST_PAYMENT

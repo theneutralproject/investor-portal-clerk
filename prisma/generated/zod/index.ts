@@ -114,6 +114,8 @@ export const NDAAgreementScalarFieldEnumSchema = z.enum(['id','userId','accepted
 
 export const CustodianPlatformScalarFieldEnumSchema = z.enum(['id','name','logoUrl','status','dateCreated','dateUpdated','createdById']);
 
+export const DealTransactionScalarFieldEnumSchema = z.enum(['id','dateCreated','dealId','type','transactionDate','fullTransactionAmount','interestAmount','principalAmount','startPeriod','endPeriod','notes','newMaturityDate']);
+
 export const SortOrderSchema = z.enum(['asc','desc']);
 
 export const JsonNullValueInputSchema = z.enum(['JsonNull',]).transform((value) => (value === 'JsonNull' ? Prisma.JsonNull : value));
@@ -187,6 +189,10 @@ export type VerificationMethodType = `${z.infer<typeof VerificationMethodSchema>
 export const PaymentMethodSchema = z.enum(['ACH','WIRE','CHECK']);
 
 export type PaymentMethodType = `${z.infer<typeof PaymentMethodSchema>}`
+
+export const DealTransactionTypeSchema = z.enum(['NOTE_MATURITY','NOTE_COMPLETION','NOTE_INTEREST_PAYMENT','NOTE_PRINCIPAL_PAYMENT','NOTE_EXTENSION','NOTE_CONVERSION','EQUITY_ASSIGNMENT','EQUITY_DISTRIBUTION','EQUITY_EXIT','EQUITY_PARTIAL_PAYMENT']);
+
+export type DealTransactionTypeType = `${z.infer<typeof DealTransactionTypeSchema>}`
 
 /////////////////////////////////////////
 // MODELS
@@ -768,6 +774,27 @@ export const CustodianPlatformSchema = z.object({
 export type CustodianPlatform = z.infer<typeof CustodianPlatformSchema>
 
 /////////////////////////////////////////
+// DEAL TRANSACTION SCHEMA
+/////////////////////////////////////////
+
+export const DealTransactionSchema = z.object({
+  type: DealTransactionTypeSchema,
+  id: z.number().int(),
+  dateCreated: z.coerce.date(),
+  dealId: z.number().int(),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().nullable(),
+  interestAmount: z.number().nullable(),
+  principalAmount: z.number().nullable(),
+  startPeriod: z.coerce.date().nullable(),
+  endPeriod: z.coerce.date().nullable(),
+  notes: z.string().nullable(),
+  newMaturityDate: z.coerce.date().nullable(),
+})
+
+export type DealTransaction = z.infer<typeof DealTransactionSchema>
+
+/////////////////////////////////////////
 // SELECT & INCLUDE
 /////////////////////////////////////////
 
@@ -858,6 +885,7 @@ export const DealIncludeSchema: z.ZodType<Prisma.DealInclude> = z.object({
   document: z.union([z.boolean(),z.lazy(() => DealDocumentFindManyArgsSchema)]).optional(),
   investmentStats: z.union([z.boolean(),z.lazy(() => DealInvestmentStatsArgsSchema)]).optional(),
   DocusignEvent: z.union([z.boolean(),z.lazy(() => DocusignEventFindManyArgsSchema)]).optional(),
+  transactions: z.union([z.boolean(),z.lazy(() => DealTransactionFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => DealCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -873,6 +901,7 @@ export const DealCountOutputTypeArgsSchema: z.ZodType<Prisma.DealCountOutputType
 export const DealCountOutputTypeSelectSchema: z.ZodType<Prisma.DealCountOutputTypeSelect> = z.object({
   document: z.boolean().optional(),
   DocusignEvent: z.boolean().optional(),
+  transactions: z.boolean().optional(),
 }).strict();
 
 export const DealSelectSchema: z.ZodType<Prisma.DealSelect> = z.object({
@@ -900,6 +929,7 @@ export const DealSelectSchema: z.ZodType<Prisma.DealSelect> = z.object({
   document: z.union([z.boolean(),z.lazy(() => DealDocumentFindManyArgsSchema)]).optional(),
   investmentStats: z.union([z.boolean(),z.lazy(() => DealInvestmentStatsArgsSchema)]).optional(),
   DocusignEvent: z.union([z.boolean(),z.lazy(() => DocusignEventFindManyArgsSchema)]).optional(),
+  transactions: z.union([z.boolean(),z.lazy(() => DealTransactionFindManyArgsSchema)]).optional(),
   _count: z.union([z.boolean(),z.lazy(() => DealCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
@@ -1693,6 +1723,34 @@ export const CustodianPlatformSelectSchema: z.ZodType<Prisma.CustodianPlatformSe
   _count: z.union([z.boolean(),z.lazy(() => CustodianPlatformCountOutputTypeArgsSchema)]).optional(),
 }).strict()
 
+// DEAL TRANSACTION
+//------------------------------------------------------
+
+export const DealTransactionIncludeSchema: z.ZodType<Prisma.DealTransactionInclude> = z.object({
+  deal: z.union([z.boolean(),z.lazy(() => DealArgsSchema)]).optional(),
+}).strict()
+
+export const DealTransactionArgsSchema: z.ZodType<Prisma.DealTransactionDefaultArgs> = z.object({
+  select: z.lazy(() => DealTransactionSelectSchema).optional(),
+  include: z.lazy(() => DealTransactionIncludeSchema).optional(),
+}).strict();
+
+export const DealTransactionSelectSchema: z.ZodType<Prisma.DealTransactionSelect> = z.object({
+  id: z.boolean().optional(),
+  dateCreated: z.boolean().optional(),
+  dealId: z.boolean().optional(),
+  type: z.boolean().optional(),
+  transactionDate: z.boolean().optional(),
+  fullTransactionAmount: z.boolean().optional(),
+  interestAmount: z.boolean().optional(),
+  principalAmount: z.boolean().optional(),
+  startPeriod: z.boolean().optional(),
+  endPeriod: z.boolean().optional(),
+  notes: z.boolean().optional(),
+  newMaturityDate: z.boolean().optional(),
+  deal: z.union([z.boolean(),z.lazy(() => DealArgsSchema)]).optional(),
+}).strict()
+
 
 /////////////////////////////////////////
 // INPUT TYPES
@@ -2007,7 +2065,8 @@ export const DealWhereInputSchema: z.ZodType<Prisma.DealWhereInput> = z.object({
   startDealConversion: z.union([ z.lazy(() => DealConversionNullableScalarRelationFilterSchema),z.lazy(() => DealConversionWhereInputSchema) ]).optional().nullable(),
   document: z.lazy(() => DealDocumentListRelationFilterSchema).optional(),
   investmentStats: z.union([ z.lazy(() => DealInvestmentStatsNullableScalarRelationFilterSchema),z.lazy(() => DealInvestmentStatsWhereInputSchema) ]).optional().nullable(),
-  DocusignEvent: z.lazy(() => DocusignEventListRelationFilterSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventListRelationFilterSchema).optional(),
+  transactions: z.lazy(() => DealTransactionListRelationFilterSchema).optional()
 }).strict();
 
 export const DealOrderByWithRelationInputSchema: z.ZodType<Prisma.DealOrderByWithRelationInput> = z.object({
@@ -2034,7 +2093,8 @@ export const DealOrderByWithRelationInputSchema: z.ZodType<Prisma.DealOrderByWit
   startDealConversion: z.lazy(() => DealConversionOrderByWithRelationInputSchema).optional(),
   document: z.lazy(() => DealDocumentOrderByRelationAggregateInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsOrderByWithRelationInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventOrderByRelationAggregateInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventOrderByRelationAggregateInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionOrderByRelationAggregateInputSchema).optional()
 }).strict();
 
 export const DealWhereUniqueInputSchema: z.ZodType<Prisma.DealWhereUniqueInput> = z.union([
@@ -2076,7 +2136,8 @@ export const DealWhereUniqueInputSchema: z.ZodType<Prisma.DealWhereUniqueInput> 
   startDealConversion: z.union([ z.lazy(() => DealConversionNullableScalarRelationFilterSchema),z.lazy(() => DealConversionWhereInputSchema) ]).optional().nullable(),
   document: z.lazy(() => DealDocumentListRelationFilterSchema).optional(),
   investmentStats: z.union([ z.lazy(() => DealInvestmentStatsNullableScalarRelationFilterSchema),z.lazy(() => DealInvestmentStatsWhereInputSchema) ]).optional().nullable(),
-  DocusignEvent: z.lazy(() => DocusignEventListRelationFilterSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventListRelationFilterSchema).optional(),
+  transactions: z.lazy(() => DealTransactionListRelationFilterSchema).optional()
 }).strict());
 
 export const DealOrderByWithAggregationInputSchema: z.ZodType<Prisma.DealOrderByWithAggregationInput> = z.object({
@@ -4488,6 +4549,101 @@ export const CustodianPlatformScalarWhereWithAggregatesInputSchema: z.ZodType<Pr
   createdById: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
 }).strict();
 
+export const DealTransactionWhereInputSchema: z.ZodType<Prisma.DealTransactionWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => DealTransactionWhereInputSchema),z.lazy(() => DealTransactionWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DealTransactionWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DealTransactionWhereInputSchema),z.lazy(() => DealTransactionWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  dealId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  type: z.union([ z.lazy(() => EnumDealTransactionTypeFilterSchema),z.lazy(() => DealTransactionTypeSchema) ]).optional(),
+  transactionDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  fullTransactionAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  interestAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  principalAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  startPeriod: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  endPeriod: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  notes: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  newMaturityDate: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+}).strict();
+
+export const DealTransactionOrderByWithRelationInputSchema: z.ZodType<Prisma.DealTransactionOrderByWithRelationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  transactionDate: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  interestAmount: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  principalAmount: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  startPeriod: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  endPeriod: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  notes: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  newMaturityDate: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  deal: z.lazy(() => DealOrderByWithRelationInputSchema).optional()
+}).strict();
+
+export const DealTransactionWhereUniqueInputSchema: z.ZodType<Prisma.DealTransactionWhereUniqueInput> = z.object({
+  id: z.number().int()
+})
+.and(z.object({
+  id: z.number().int().optional(),
+  AND: z.union([ z.lazy(() => DealTransactionWhereInputSchema),z.lazy(() => DealTransactionWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DealTransactionWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DealTransactionWhereInputSchema),z.lazy(() => DealTransactionWhereInputSchema).array() ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  dealId: z.union([ z.lazy(() => IntFilterSchema),z.number().int() ]).optional(),
+  type: z.union([ z.lazy(() => EnumDealTransactionTypeFilterSchema),z.lazy(() => DealTransactionTypeSchema) ]).optional(),
+  transactionDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  fullTransactionAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  interestAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  principalAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  startPeriod: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  endPeriod: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  notes: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  newMaturityDate: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  deal: z.union([ z.lazy(() => DealScalarRelationFilterSchema),z.lazy(() => DealWhereInputSchema) ]).optional(),
+}).strict());
+
+export const DealTransactionOrderByWithAggregationInputSchema: z.ZodType<Prisma.DealTransactionOrderByWithAggregationInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  transactionDate: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  interestAmount: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  principalAmount: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  startPeriod: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  endPeriod: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  notes: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  newMaturityDate: z.union([ z.lazy(() => SortOrderSchema),z.lazy(() => SortOrderInputSchema) ]).optional(),
+  _count: z.lazy(() => DealTransactionCountOrderByAggregateInputSchema).optional(),
+  _avg: z.lazy(() => DealTransactionAvgOrderByAggregateInputSchema).optional(),
+  _max: z.lazy(() => DealTransactionMaxOrderByAggregateInputSchema).optional(),
+  _min: z.lazy(() => DealTransactionMinOrderByAggregateInputSchema).optional(),
+  _sum: z.lazy(() => DealTransactionSumOrderByAggregateInputSchema).optional()
+}).strict();
+
+export const DealTransactionScalarWhereWithAggregatesInputSchema: z.ZodType<Prisma.DealTransactionScalarWhereWithAggregatesInput> = z.object({
+  AND: z.union([ z.lazy(() => DealTransactionScalarWhereWithAggregatesInputSchema),z.lazy(() => DealTransactionScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DealTransactionScalarWhereWithAggregatesInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DealTransactionScalarWhereWithAggregatesInputSchema),z.lazy(() => DealTransactionScalarWhereWithAggregatesInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  dealId: z.union([ z.lazy(() => IntWithAggregatesFilterSchema),z.number() ]).optional(),
+  type: z.union([ z.lazy(() => EnumDealTransactionTypeWithAggregatesFilterSchema),z.lazy(() => DealTransactionTypeSchema) ]).optional(),
+  transactionDate: z.union([ z.lazy(() => DateTimeWithAggregatesFilterSchema),z.coerce.date() ]).optional(),
+  fullTransactionAmount: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  interestAmount: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  principalAmount: z.union([ z.lazy(() => FloatNullableWithAggregatesFilterSchema),z.number() ]).optional().nullable(),
+  startPeriod: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+  endPeriod: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+  notes: z.union([ z.lazy(() => StringNullableWithAggregatesFilterSchema),z.string() ]).optional().nullable(),
+  newMaturityDate: z.union([ z.lazy(() => DateTimeNullableWithAggregatesFilterSchema),z.coerce.date() ]).optional().nullable(),
+}).strict();
+
 export const UserCreateInputSchema: z.ZodType<Prisma.UserCreateInput> = z.object({
   clerkId: z.string().optional().nullable(),
   role: z.lazy(() => RoleSchema).optional(),
@@ -4677,7 +4833,8 @@ export const DealCreateInputSchema: z.ZodType<Prisma.DealCreateInput> = z.object
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateInputSchema: z.ZodType<Prisma.DealUncheckedCreateInput> = z.object({
@@ -4702,7 +4859,8 @@ export const DealUncheckedCreateInputSchema: z.ZodType<Prisma.DealUncheckedCreat
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUpdateInputSchema: z.ZodType<Prisma.DealUpdateInput> = z.object({
@@ -4726,7 +4884,8 @@ export const DealUpdateInputSchema: z.ZodType<Prisma.DealUpdateInput> = z.object
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateInputSchema: z.ZodType<Prisma.DealUncheckedUpdateInput> = z.object({
@@ -4751,7 +4910,8 @@ export const DealUncheckedUpdateInputSchema: z.ZodType<Prisma.DealUncheckedUpdat
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealCreateManyInputSchema: z.ZodType<Prisma.DealCreateManyInput> = z.object({
@@ -6939,6 +7099,107 @@ export const CustodianPlatformUncheckedUpdateManyInputSchema: z.ZodType<Prisma.C
   createdById: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
 }).strict();
 
+export const DealTransactionCreateInputSchema: z.ZodType<Prisma.DealTransactionCreateInput> = z.object({
+  dateCreated: z.coerce.date().optional(),
+  type: z.lazy(() => DealTransactionTypeSchema),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().optional().nullable(),
+  interestAmount: z.number().optional().nullable(),
+  principalAmount: z.number().optional().nullable(),
+  startPeriod: z.coerce.date().optional().nullable(),
+  endPeriod: z.coerce.date().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  newMaturityDate: z.coerce.date().optional().nullable(),
+  deal: z.lazy(() => DealCreateNestedOneWithoutTransactionsInputSchema)
+}).strict();
+
+export const DealTransactionUncheckedCreateInputSchema: z.ZodType<Prisma.DealTransactionUncheckedCreateInput> = z.object({
+  id: z.number().int().optional(),
+  dateCreated: z.coerce.date().optional(),
+  dealId: z.number().int(),
+  type: z.lazy(() => DealTransactionTypeSchema),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().optional().nullable(),
+  interestAmount: z.number().optional().nullable(),
+  principalAmount: z.number().optional().nullable(),
+  startPeriod: z.coerce.date().optional().nullable(),
+  endPeriod: z.coerce.date().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  newMaturityDate: z.coerce.date().optional().nullable()
+}).strict();
+
+export const DealTransactionUpdateInputSchema: z.ZodType<Prisma.DealTransactionUpdateInput> = z.object({
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  deal: z.lazy(() => DealUpdateOneRequiredWithoutTransactionsNestedInputSchema).optional()
+}).strict();
+
+export const DealTransactionUncheckedUpdateInputSchema: z.ZodType<Prisma.DealTransactionUncheckedUpdateInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dealId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DealTransactionCreateManyInputSchema: z.ZodType<Prisma.DealTransactionCreateManyInput> = z.object({
+  id: z.number().int().optional(),
+  dateCreated: z.coerce.date().optional(),
+  dealId: z.number().int(),
+  type: z.lazy(() => DealTransactionTypeSchema),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().optional().nullable(),
+  interestAmount: z.number().optional().nullable(),
+  principalAmount: z.number().optional().nullable(),
+  startPeriod: z.coerce.date().optional().nullable(),
+  endPeriod: z.coerce.date().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  newMaturityDate: z.coerce.date().optional().nullable()
+}).strict();
+
+export const DealTransactionUpdateManyMutationInputSchema: z.ZodType<Prisma.DealTransactionUpdateManyMutationInput> = z.object({
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DealTransactionUncheckedUpdateManyInputSchema: z.ZodType<Prisma.DealTransactionUncheckedUpdateManyInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  dealId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
 export const IntFilterSchema: z.ZodType<Prisma.IntFilter> = z.object({
   equals: z.number().optional(),
   in: z.number().array().optional(),
@@ -7329,6 +7590,16 @@ export const DealConversionNullableScalarRelationFilterSchema: z.ZodType<Prisma.
 export const DealInvestmentStatsNullableScalarRelationFilterSchema: z.ZodType<Prisma.DealInvestmentStatsNullableScalarRelationFilter> = z.object({
   is: z.lazy(() => DealInvestmentStatsWhereInputSchema).optional().nullable(),
   isNot: z.lazy(() => DealInvestmentStatsWhereInputSchema).optional().nullable()
+}).strict();
+
+export const DealTransactionListRelationFilterSchema: z.ZodType<Prisma.DealTransactionListRelationFilter> = z.object({
+  every: z.lazy(() => DealTransactionWhereInputSchema).optional(),
+  some: z.lazy(() => DealTransactionWhereInputSchema).optional(),
+  none: z.lazy(() => DealTransactionWhereInputSchema).optional()
+}).strict();
+
+export const DealTransactionOrderByRelationAggregateInputSchema: z.ZodType<Prisma.DealTransactionOrderByRelationAggregateInput> = z.object({
+  _count: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
 export const DealCountOrderByAggregateInputSchema: z.ZodType<Prisma.DealCountOrderByAggregateInput> = z.object({
@@ -9223,6 +9494,84 @@ export const CustodianPlatformSumOrderByAggregateInputSchema: z.ZodType<Prisma.C
   createdById: z.lazy(() => SortOrderSchema).optional()
 }).strict();
 
+export const EnumDealTransactionTypeFilterSchema: z.ZodType<Prisma.EnumDealTransactionTypeFilter> = z.object({
+  equals: z.lazy(() => DealTransactionTypeSchema).optional(),
+  in: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  notIn: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => NestedEnumDealTransactionTypeFilterSchema) ]).optional(),
+}).strict();
+
+export const DealTransactionCountOrderByAggregateInputSchema: z.ZodType<Prisma.DealTransactionCountOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  transactionDate: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.lazy(() => SortOrderSchema).optional(),
+  interestAmount: z.lazy(() => SortOrderSchema).optional(),
+  principalAmount: z.lazy(() => SortOrderSchema).optional(),
+  startPeriod: z.lazy(() => SortOrderSchema).optional(),
+  endPeriod: z.lazy(() => SortOrderSchema).optional(),
+  notes: z.lazy(() => SortOrderSchema).optional(),
+  newMaturityDate: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DealTransactionAvgOrderByAggregateInputSchema: z.ZodType<Prisma.DealTransactionAvgOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.lazy(() => SortOrderSchema).optional(),
+  interestAmount: z.lazy(() => SortOrderSchema).optional(),
+  principalAmount: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DealTransactionMaxOrderByAggregateInputSchema: z.ZodType<Prisma.DealTransactionMaxOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  transactionDate: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.lazy(() => SortOrderSchema).optional(),
+  interestAmount: z.lazy(() => SortOrderSchema).optional(),
+  principalAmount: z.lazy(() => SortOrderSchema).optional(),
+  startPeriod: z.lazy(() => SortOrderSchema).optional(),
+  endPeriod: z.lazy(() => SortOrderSchema).optional(),
+  notes: z.lazy(() => SortOrderSchema).optional(),
+  newMaturityDate: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DealTransactionMinOrderByAggregateInputSchema: z.ZodType<Prisma.DealTransactionMinOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dateCreated: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  type: z.lazy(() => SortOrderSchema).optional(),
+  transactionDate: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.lazy(() => SortOrderSchema).optional(),
+  interestAmount: z.lazy(() => SortOrderSchema).optional(),
+  principalAmount: z.lazy(() => SortOrderSchema).optional(),
+  startPeriod: z.lazy(() => SortOrderSchema).optional(),
+  endPeriod: z.lazy(() => SortOrderSchema).optional(),
+  notes: z.lazy(() => SortOrderSchema).optional(),
+  newMaturityDate: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const DealTransactionSumOrderByAggregateInputSchema: z.ZodType<Prisma.DealTransactionSumOrderByAggregateInput> = z.object({
+  id: z.lazy(() => SortOrderSchema).optional(),
+  dealId: z.lazy(() => SortOrderSchema).optional(),
+  fullTransactionAmount: z.lazy(() => SortOrderSchema).optional(),
+  interestAmount: z.lazy(() => SortOrderSchema).optional(),
+  principalAmount: z.lazy(() => SortOrderSchema).optional()
+}).strict();
+
+export const EnumDealTransactionTypeWithAggregatesFilterSchema: z.ZodType<Prisma.EnumDealTransactionTypeWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => DealTransactionTypeSchema).optional(),
+  in: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  notIn: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => NestedEnumDealTransactionTypeWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumDealTransactionTypeFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumDealTransactionTypeFilterSchema).optional()
+}).strict();
+
 export const ActivityFeedItemCreateNestedManyWithoutUserInputSchema: z.ZodType<Prisma.ActivityFeedItemCreateNestedManyWithoutUserInput> = z.object({
   create: z.union([ z.lazy(() => ActivityFeedItemCreateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemCreateWithoutUserInputSchema).array(),z.lazy(() => ActivityFeedItemUncheckedCreateWithoutUserInputSchema),z.lazy(() => ActivityFeedItemUncheckedCreateWithoutUserInputSchema).array() ]).optional(),
   connectOrCreate: z.union([ z.lazy(() => ActivityFeedItemCreateOrConnectWithoutUserInputSchema),z.lazy(() => ActivityFeedItemCreateOrConnectWithoutUserInputSchema).array() ]).optional(),
@@ -9841,6 +10190,13 @@ export const DocusignEventCreateNestedManyWithoutDealInputSchema: z.ZodType<Pris
   connect: z.union([ z.lazy(() => DocusignEventWhereUniqueInputSchema),z.lazy(() => DocusignEventWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
+export const DealTransactionCreateNestedManyWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionCreateNestedManyWithoutDealInput> = z.object({
+  create: z.union([ z.lazy(() => DealTransactionCreateWithoutDealInputSchema),z.lazy(() => DealTransactionCreateWithoutDealInputSchema).array(),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema),z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DealTransactionCreateManyDealInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
 export const AccreditationVerificationUncheckedCreateNestedOneWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedCreateNestedOneWithoutDealInput> = z.object({
   create: z.union([ z.lazy(() => AccreditationVerificationCreateWithoutDealInputSchema),z.lazy(() => AccreditationVerificationUncheckedCreateWithoutDealInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => AccreditationVerificationCreateOrConnectWithoutDealInputSchema).optional(),
@@ -9877,6 +10233,13 @@ export const DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema: z.Zod
   connectOrCreate: z.union([ z.lazy(() => DocusignEventCreateOrConnectWithoutDealInputSchema),z.lazy(() => DocusignEventCreateOrConnectWithoutDealInputSchema).array() ]).optional(),
   createMany: z.lazy(() => DocusignEventCreateManyDealInputEnvelopeSchema).optional(),
   connect: z.union([ z.lazy(() => DocusignEventWhereUniqueInputSchema),z.lazy(() => DocusignEventWhereUniqueInputSchema).array() ]).optional(),
+}).strict();
+
+export const DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUncheckedCreateNestedManyWithoutDealInput> = z.object({
+  create: z.union([ z.lazy(() => DealTransactionCreateWithoutDealInputSchema),z.lazy(() => DealTransactionCreateWithoutDealInputSchema).array(),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema),z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DealTransactionCreateManyDealInputEnvelopeSchema).optional(),
+  connect: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
 }).strict();
 
 export const NullableEnumPaymentMethodFieldUpdateOperationsInputSchema: z.ZodType<Prisma.NullableEnumPaymentMethodFieldUpdateOperationsInput> = z.object({
@@ -9971,6 +10334,20 @@ export const DocusignEventUpdateManyWithoutDealNestedInputSchema: z.ZodType<Pris
   deleteMany: z.union([ z.lazy(() => DocusignEventScalarWhereInputSchema),z.lazy(() => DocusignEventScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const DealTransactionUpdateManyWithoutDealNestedInputSchema: z.ZodType<Prisma.DealTransactionUpdateManyWithoutDealNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DealTransactionCreateWithoutDealInputSchema),z.lazy(() => DealTransactionCreateWithoutDealInputSchema).array(),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema),z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => DealTransactionUpsertWithWhereUniqueWithoutDealInputSchema),z.lazy(() => DealTransactionUpsertWithWhereUniqueWithoutDealInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DealTransactionCreateManyDealInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => DealTransactionUpdateWithWhereUniqueWithoutDealInputSchema),z.lazy(() => DealTransactionUpdateWithWhereUniqueWithoutDealInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => DealTransactionUpdateManyWithWhereWithoutDealInputSchema),z.lazy(() => DealTransactionUpdateManyWithWhereWithoutDealInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => DealTransactionScalarWhereInputSchema),z.lazy(() => DealTransactionScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
 export const AccreditationVerificationUncheckedUpdateOneWithoutDealNestedInputSchema: z.ZodType<Prisma.AccreditationVerificationUncheckedUpdateOneWithoutDealNestedInput> = z.object({
   create: z.union([ z.lazy(() => AccreditationVerificationCreateWithoutDealInputSchema),z.lazy(() => AccreditationVerificationUncheckedCreateWithoutDealInputSchema) ]).optional(),
   connectOrCreate: z.lazy(() => AccreditationVerificationCreateOrConnectWithoutDealInputSchema).optional(),
@@ -10037,6 +10414,20 @@ export const DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema: z.Zod
   update: z.union([ z.lazy(() => DocusignEventUpdateWithWhereUniqueWithoutDealInputSchema),z.lazy(() => DocusignEventUpdateWithWhereUniqueWithoutDealInputSchema).array() ]).optional(),
   updateMany: z.union([ z.lazy(() => DocusignEventUpdateManyWithWhereWithoutDealInputSchema),z.lazy(() => DocusignEventUpdateManyWithWhereWithoutDealInputSchema).array() ]).optional(),
   deleteMany: z.union([ z.lazy(() => DocusignEventScalarWhereInputSchema),z.lazy(() => DocusignEventScalarWhereInputSchema).array() ]).optional(),
+}).strict();
+
+export const DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema: z.ZodType<Prisma.DealTransactionUncheckedUpdateManyWithoutDealNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DealTransactionCreateWithoutDealInputSchema),z.lazy(() => DealTransactionCreateWithoutDealInputSchema).array(),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema).array() ]).optional(),
+  connectOrCreate: z.union([ z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema),z.lazy(() => DealTransactionCreateOrConnectWithoutDealInputSchema).array() ]).optional(),
+  upsert: z.union([ z.lazy(() => DealTransactionUpsertWithWhereUniqueWithoutDealInputSchema),z.lazy(() => DealTransactionUpsertWithWhereUniqueWithoutDealInputSchema).array() ]).optional(),
+  createMany: z.lazy(() => DealTransactionCreateManyDealInputEnvelopeSchema).optional(),
+  set: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  disconnect: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  delete: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  connect: z.union([ z.lazy(() => DealTransactionWhereUniqueInputSchema),z.lazy(() => DealTransactionWhereUniqueInputSchema).array() ]).optional(),
+  update: z.union([ z.lazy(() => DealTransactionUpdateWithWhereUniqueWithoutDealInputSchema),z.lazy(() => DealTransactionUpdateWithWhereUniqueWithoutDealInputSchema).array() ]).optional(),
+  updateMany: z.union([ z.lazy(() => DealTransactionUpdateManyWithWhereWithoutDealInputSchema),z.lazy(() => DealTransactionUpdateManyWithWhereWithoutDealInputSchema).array() ]).optional(),
+  deleteMany: z.union([ z.lazy(() => DealTransactionScalarWhereInputSchema),z.lazy(() => DealTransactionScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
 export const DealCreateNestedOneWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealCreateNestedOneWithoutInvestmentStatsInput> = z.object({
@@ -11484,6 +11875,24 @@ export const ProjectUncheckedUpdateManyWithoutCustodianPlatformNestedInputSchema
   deleteMany: z.union([ z.lazy(() => ProjectScalarWhereInputSchema),z.lazy(() => ProjectScalarWhereInputSchema).array() ]).optional(),
 }).strict();
 
+export const DealCreateNestedOneWithoutTransactionsInputSchema: z.ZodType<Prisma.DealCreateNestedOneWithoutTransactionsInput> = z.object({
+  create: z.union([ z.lazy(() => DealCreateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedCreateWithoutTransactionsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => DealCreateOrConnectWithoutTransactionsInputSchema).optional(),
+  connect: z.lazy(() => DealWhereUniqueInputSchema).optional()
+}).strict();
+
+export const EnumDealTransactionTypeFieldUpdateOperationsInputSchema: z.ZodType<Prisma.EnumDealTransactionTypeFieldUpdateOperationsInput> = z.object({
+  set: z.lazy(() => DealTransactionTypeSchema).optional()
+}).strict();
+
+export const DealUpdateOneRequiredWithoutTransactionsNestedInputSchema: z.ZodType<Prisma.DealUpdateOneRequiredWithoutTransactionsNestedInput> = z.object({
+  create: z.union([ z.lazy(() => DealCreateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedCreateWithoutTransactionsInputSchema) ]).optional(),
+  connectOrCreate: z.lazy(() => DealCreateOrConnectWithoutTransactionsInputSchema).optional(),
+  upsert: z.lazy(() => DealUpsertWithoutTransactionsInputSchema).optional(),
+  connect: z.lazy(() => DealWhereUniqueInputSchema).optional(),
+  update: z.union([ z.lazy(() => DealUpdateToOneWithWhereWithoutTransactionsInputSchema),z.lazy(() => DealUpdateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedUpdateWithoutTransactionsInputSchema) ]).optional(),
+}).strict();
+
 export const NestedIntFilterSchema: z.ZodType<Prisma.NestedIntFilter> = z.object({
   equals: z.number().optional(),
   in: z.number().array().optional(),
@@ -12004,6 +12413,23 @@ export const NestedJsonFilterSchema: z.ZodType<Prisma.NestedJsonFilter> = z.obje
   gt: InputJsonValueSchema.optional(),
   gte: InputJsonValueSchema.optional(),
   not: InputJsonValueSchema.optional()
+}).strict();
+
+export const NestedEnumDealTransactionTypeFilterSchema: z.ZodType<Prisma.NestedEnumDealTransactionTypeFilter> = z.object({
+  equals: z.lazy(() => DealTransactionTypeSchema).optional(),
+  in: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  notIn: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => NestedEnumDealTransactionTypeFilterSchema) ]).optional(),
+}).strict();
+
+export const NestedEnumDealTransactionTypeWithAggregatesFilterSchema: z.ZodType<Prisma.NestedEnumDealTransactionTypeWithAggregatesFilter> = z.object({
+  equals: z.lazy(() => DealTransactionTypeSchema).optional(),
+  in: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  notIn: z.lazy(() => DealTransactionTypeSchema).array().optional(),
+  not: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => NestedEnumDealTransactionTypeWithAggregatesFilterSchema) ]).optional(),
+  _count: z.lazy(() => NestedIntFilterSchema).optional(),
+  _min: z.lazy(() => NestedEnumDealTransactionTypeFilterSchema).optional(),
+  _max: z.lazy(() => NestedEnumDealTransactionTypeFilterSchema).optional()
 }).strict();
 
 export const ActivityFeedItemCreateWithoutUserInputSchema: z.ZodType<Prisma.ActivityFeedItemCreateWithoutUserInput> = z.object({
@@ -12993,6 +13419,43 @@ export const DocusignEventCreateManyDealInputEnvelopeSchema: z.ZodType<Prisma.Do
   skipDuplicates: z.boolean().optional()
 }).strict();
 
+export const DealTransactionCreateWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionCreateWithoutDealInput> = z.object({
+  dateCreated: z.coerce.date().optional(),
+  type: z.lazy(() => DealTransactionTypeSchema),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().optional().nullable(),
+  interestAmount: z.number().optional().nullable(),
+  principalAmount: z.number().optional().nullable(),
+  startPeriod: z.coerce.date().optional().nullable(),
+  endPeriod: z.coerce.date().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  newMaturityDate: z.coerce.date().optional().nullable()
+}).strict();
+
+export const DealTransactionUncheckedCreateWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUncheckedCreateWithoutDealInput> = z.object({
+  id: z.number().int().optional(),
+  dateCreated: z.coerce.date().optional(),
+  type: z.lazy(() => DealTransactionTypeSchema),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().optional().nullable(),
+  interestAmount: z.number().optional().nullable(),
+  principalAmount: z.number().optional().nullable(),
+  startPeriod: z.coerce.date().optional().nullable(),
+  endPeriod: z.coerce.date().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  newMaturityDate: z.coerce.date().optional().nullable()
+}).strict();
+
+export const DealTransactionCreateOrConnectWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionCreateOrConnectWithoutDealInput> = z.object({
+  where: z.lazy(() => DealTransactionWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => DealTransactionCreateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema) ]),
+}).strict();
+
+export const DealTransactionCreateManyDealInputEnvelopeSchema: z.ZodType<Prisma.DealTransactionCreateManyDealInputEnvelope> = z.object({
+  data: z.union([ z.lazy(() => DealTransactionCreateManyDealInputSchema),z.lazy(() => DealTransactionCreateManyDealInputSchema).array() ]),
+  skipDuplicates: z.boolean().optional()
+}).strict();
+
 export const AccreditationVerificationUpsertWithoutDealInputSchema: z.ZodType<Prisma.AccreditationVerificationUpsertWithoutDealInput> = z.object({
   update: z.union([ z.lazy(() => AccreditationVerificationUpdateWithoutDealInputSchema),z.lazy(() => AccreditationVerificationUncheckedUpdateWithoutDealInputSchema) ]),
   create: z.union([ z.lazy(() => AccreditationVerificationCreateWithoutDealInputSchema),z.lazy(() => AccreditationVerificationUncheckedCreateWithoutDealInputSchema) ]),
@@ -13241,6 +13704,40 @@ export const DocusignEventUpdateManyWithWhereWithoutDealInputSchema: z.ZodType<P
   data: z.union([ z.lazy(() => DocusignEventUpdateManyMutationInputSchema),z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealInputSchema) ]),
 }).strict();
 
+export const DealTransactionUpsertWithWhereUniqueWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUpsertWithWhereUniqueWithoutDealInput> = z.object({
+  where: z.lazy(() => DealTransactionWhereUniqueInputSchema),
+  update: z.union([ z.lazy(() => DealTransactionUpdateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedUpdateWithoutDealInputSchema) ]),
+  create: z.union([ z.lazy(() => DealTransactionCreateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedCreateWithoutDealInputSchema) ]),
+}).strict();
+
+export const DealTransactionUpdateWithWhereUniqueWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUpdateWithWhereUniqueWithoutDealInput> = z.object({
+  where: z.lazy(() => DealTransactionWhereUniqueInputSchema),
+  data: z.union([ z.lazy(() => DealTransactionUpdateWithoutDealInputSchema),z.lazy(() => DealTransactionUncheckedUpdateWithoutDealInputSchema) ]),
+}).strict();
+
+export const DealTransactionUpdateManyWithWhereWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUpdateManyWithWhereWithoutDealInput> = z.object({
+  where: z.lazy(() => DealTransactionScalarWhereInputSchema),
+  data: z.union([ z.lazy(() => DealTransactionUpdateManyMutationInputSchema),z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealInputSchema) ]),
+}).strict();
+
+export const DealTransactionScalarWhereInputSchema: z.ZodType<Prisma.DealTransactionScalarWhereInput> = z.object({
+  AND: z.union([ z.lazy(() => DealTransactionScalarWhereInputSchema),z.lazy(() => DealTransactionScalarWhereInputSchema).array() ]).optional(),
+  OR: z.lazy(() => DealTransactionScalarWhereInputSchema).array().optional(),
+  NOT: z.union([ z.lazy(() => DealTransactionScalarWhereInputSchema),z.lazy(() => DealTransactionScalarWhereInputSchema).array() ]).optional(),
+  id: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  dateCreated: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  dealId: z.union([ z.lazy(() => IntFilterSchema),z.number() ]).optional(),
+  type: z.union([ z.lazy(() => EnumDealTransactionTypeFilterSchema),z.lazy(() => DealTransactionTypeSchema) ]).optional(),
+  transactionDate: z.union([ z.lazy(() => DateTimeFilterSchema),z.coerce.date() ]).optional(),
+  fullTransactionAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  interestAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  principalAmount: z.union([ z.lazy(() => FloatNullableFilterSchema),z.number() ]).optional().nullable(),
+  startPeriod: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  endPeriod: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+  notes: z.union([ z.lazy(() => StringNullableFilterSchema),z.string() ]).optional().nullable(),
+  newMaturityDate: z.union([ z.lazy(() => DateTimeNullableFilterSchema),z.coerce.date() ]).optional().nullable(),
+}).strict();
+
 export const DealCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealCreateWithoutInvestmentStatsInput> = z.object({
   dealStage: z.number().int().optional(),
   hubspotId: z.string(),
@@ -13261,7 +13758,8 @@ export const DealCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealC
   endDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutEndDealInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutInvestmentStatsInput> = z.object({
@@ -13285,7 +13783,8 @@ export const DealUncheckedCreateWithoutInvestmentStatsInputSchema: z.ZodType<Pri
   endDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutEndDealInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutInvestmentStatsInput> = z.object({
@@ -13324,7 +13823,8 @@ export const DealUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealU
   endDealConversion: z.lazy(() => DealConversionUpdateOneWithoutEndDealNestedInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutInvestmentStatsInput> = z.object({
@@ -13348,7 +13848,8 @@ export const DealUncheckedUpdateWithoutInvestmentStatsInputSchema: z.ZodType<Pri
   endDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutEndDealNestedInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealCreateWithoutEndDealConversionInputSchema: z.ZodType<Prisma.DealCreateWithoutEndDealConversionInput> = z.object({
@@ -13371,7 +13872,8 @@ export const DealCreateWithoutEndDealConversionInputSchema: z.ZodType<Prisma.Dea
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutEndDealConversionInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutEndDealConversionInput> = z.object({
@@ -13395,7 +13897,8 @@ export const DealUncheckedCreateWithoutEndDealConversionInputSchema: z.ZodType<P
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutEndDealConversionInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutEndDealConversionInput> = z.object({
@@ -13423,7 +13926,8 @@ export const DealCreateWithoutStartDealConversionInputSchema: z.ZodType<Prisma.D
   endDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutEndDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutStartDealConversionInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutStartDealConversionInput> = z.object({
@@ -13447,7 +13951,8 @@ export const DealUncheckedCreateWithoutStartDealConversionInputSchema: z.ZodType
   endDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutEndDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutStartDealConversionInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutStartDealConversionInput> = z.object({
@@ -13486,7 +13991,8 @@ export const DealUpdateWithoutEndDealConversionInputSchema: z.ZodType<Prisma.Dea
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutEndDealConversionInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutEndDealConversionInput> = z.object({
@@ -13510,7 +14016,8 @@ export const DealUncheckedUpdateWithoutEndDealConversionInputSchema: z.ZodType<P
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUpsertWithoutStartDealConversionInputSchema: z.ZodType<Prisma.DealUpsertWithoutStartDealConversionInput> = z.object({
@@ -13544,7 +14051,8 @@ export const DealUpdateWithoutStartDealConversionInputSchema: z.ZodType<Prisma.D
   endDealConversion: z.lazy(() => DealConversionUpdateOneWithoutEndDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutStartDealConversionInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutStartDealConversionInput> = z.object({
@@ -13568,7 +14076,8 @@ export const DealUncheckedUpdateWithoutStartDealConversionInputSchema: z.ZodType
   endDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutEndDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const AddressCreateWithoutOrganizationInputSchema: z.ZodType<Prisma.AddressCreateWithoutOrganizationInput> = z.object({
@@ -13615,7 +14124,8 @@ export const DealCreateWithoutOrganizationInputSchema: z.ZodType<Prisma.DealCrea
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutOrganizationInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutOrganizationInput> = z.object({
@@ -13639,7 +14149,8 @@ export const DealUncheckedCreateWithoutOrganizationInputSchema: z.ZodType<Prisma
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutOrganizationInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutOrganizationInput> = z.object({
@@ -14214,7 +14725,8 @@ export const DealCreateWithoutAccreditationVerificationInputSchema: z.ZodType<Pr
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutAccreditationVerificationInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutAccreditationVerificationInput> = z.object({
@@ -14238,7 +14750,8 @@ export const DealUncheckedCreateWithoutAccreditationVerificationInputSchema: z.Z
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutAccreditationVerificationInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutAccreditationVerificationInput> = z.object({
@@ -14299,7 +14812,8 @@ export const DealUpdateWithoutAccreditationVerificationInputSchema: z.ZodType<Pr
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutAccreditationVerificationInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutAccreditationVerificationInput> = z.object({
@@ -14323,7 +14837,8 @@ export const DealUncheckedUpdateWithoutAccreditationVerificationInputSchema: z.Z
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const AccreditationVerifierUpsertWithoutAccreditationVerificationInputSchema: z.ZodType<Prisma.AccreditationVerifierUpsertWithoutAccreditationVerificationInput> = z.object({
@@ -14416,7 +14931,8 @@ export const DealCreateWithoutDocumentInputSchema: z.ZodType<Prisma.DealCreateWi
   endDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutEndDealInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutDocumentInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutDocumentInput> = z.object({
@@ -14440,7 +14956,8 @@ export const DealUncheckedCreateWithoutDocumentInputSchema: z.ZodType<Prisma.Dea
   endDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutEndDealInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutDocumentInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutDocumentInput> = z.object({
@@ -14541,7 +15058,8 @@ export const DealUpdateWithoutDocumentInputSchema: z.ZodType<Prisma.DealUpdateWi
   endDealConversion: z.lazy(() => DealConversionUpdateOneWithoutEndDealNestedInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutDocumentInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutDocumentInput> = z.object({
@@ -14565,7 +15083,8 @@ export const DealUncheckedUpdateWithoutDocumentInputSchema: z.ZodType<Prisma.Dea
   endDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutEndDealNestedInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const UserUpsertWithoutDealDocumentUploadedInputSchema: z.ZodType<Prisma.UserUpsertWithoutDealDocumentUploadedInput> = z.object({
@@ -14860,7 +15379,8 @@ export const DealCreateWithoutProjectInputSchema: z.ZodType<Prisma.DealCreateWit
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutProjectInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutProjectInput> = z.object({
@@ -14884,7 +15404,8 @@ export const DealUncheckedCreateWithoutProjectInputSchema: z.ZodType<Prisma.Deal
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutProjectInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutProjectInput> = z.object({
@@ -16516,7 +17037,8 @@ export const DealCreateWithoutDocusignEventInputSchema: z.ZodType<Prisma.DealCre
   endDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutEndDealInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
-  investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional()
+  investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealUncheckedCreateWithoutDocusignEventInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutDocusignEventInput> = z.object({
@@ -16540,7 +17062,8 @@ export const DealUncheckedCreateWithoutDocusignEventInputSchema: z.ZodType<Prism
   endDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutEndDealInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
-  investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional()
+  investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedCreateNestedManyWithoutDealInputSchema).optional()
 }).strict();
 
 export const DealCreateOrConnectWithoutDocusignEventInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutDocusignEventInput> = z.object({
@@ -16641,7 +17164,8 @@ export const DealUpdateWithoutDocusignEventInputSchema: z.ZodType<Prisma.DealUpd
   endDealConversion: z.lazy(() => DealConversionUpdateOneWithoutEndDealNestedInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
-  investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional()
+  investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutDocusignEventInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutDocusignEventInput> = z.object({
@@ -16665,7 +17189,8 @@ export const DealUncheckedUpdateWithoutDocusignEventInputSchema: z.ZodType<Prism
   endDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutEndDealNestedInputSchema).optional(),
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
-  investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional()
+  investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const UserUpsertWithoutDocusignEventInputSchema: z.ZodType<Prisma.UserUpsertWithoutDocusignEventInput> = z.object({
@@ -18252,6 +18777,120 @@ export const ProjectScalarWhereInputSchema: z.ZodType<Prisma.ProjectScalarWhereI
   displayName: z.union([ z.lazy(() => StringFilterSchema),z.string() ]).optional(),
 }).strict();
 
+export const DealCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.DealCreateWithoutTransactionsInput> = z.object({
+  dealStage: z.number().int().optional(),
+  hubspotId: z.string(),
+  transactionId: z.string().optional(),
+  investmentEntity: z.string(),
+  closingDate: z.coerce.date().optional().nullable(),
+  signaturesCompletedDate: z.coerce.date().optional().nullable(),
+  dateFundsSent: z.coerce.date().optional().nullable(),
+  paymentMethod: z.lazy(() => PaymentMethodSchema).optional().nullable(),
+  paymentReferenceId: z.string().optional().nullable(),
+  dateCreated: z.coerce.date().optional().nullable(),
+  dateUpdated: z.coerce.date().optional().nullable(),
+  dateMatured: z.coerce.date().optional().nullable(),
+  status: z.lazy(() => DealStatusSchema).optional().nullable(),
+  accreditationVerification: z.lazy(() => AccreditationVerificationCreateNestedOneWithoutDealInputSchema).optional(),
+  organization: z.lazy(() => OrganizationCreateNestedOneWithoutDealsInputSchema),
+  project: z.lazy(() => ProjectCreateNestedOneWithoutDealsInputSchema),
+  endDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutEndDealInputSchema).optional(),
+  startDealConversion: z.lazy(() => DealConversionCreateNestedOneWithoutStartDealInputSchema).optional(),
+  document: z.lazy(() => DealDocumentCreateNestedManyWithoutDealInputSchema).optional(),
+  investmentStats: z.lazy(() => DealInvestmentStatsCreateNestedOneWithoutDealInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventCreateNestedManyWithoutDealInputSchema).optional()
+}).strict();
+
+export const DealUncheckedCreateWithoutTransactionsInputSchema: z.ZodType<Prisma.DealUncheckedCreateWithoutTransactionsInput> = z.object({
+  id: z.number().int().optional(),
+  projectId: z.number().int(),
+  dealStage: z.number().int().optional(),
+  hubspotId: z.string(),
+  transactionId: z.string().optional(),
+  investmentEntity: z.string(),
+  organizationId: z.number().int(),
+  closingDate: z.coerce.date().optional().nullable(),
+  signaturesCompletedDate: z.coerce.date().optional().nullable(),
+  dateFundsSent: z.coerce.date().optional().nullable(),
+  paymentMethod: z.lazy(() => PaymentMethodSchema).optional().nullable(),
+  paymentReferenceId: z.string().optional().nullable(),
+  dateCreated: z.coerce.date().optional().nullable(),
+  dateUpdated: z.coerce.date().optional().nullable(),
+  dateMatured: z.coerce.date().optional().nullable(),
+  status: z.lazy(() => DealStatusSchema).optional().nullable(),
+  accreditationVerification: z.lazy(() => AccreditationVerificationUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
+  endDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutEndDealInputSchema).optional(),
+  startDealConversion: z.lazy(() => DealConversionUncheckedCreateNestedOneWithoutStartDealInputSchema).optional(),
+  document: z.lazy(() => DealDocumentUncheckedCreateNestedManyWithoutDealInputSchema).optional(),
+  investmentStats: z.lazy(() => DealInvestmentStatsUncheckedCreateNestedOneWithoutDealInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedCreateNestedManyWithoutDealInputSchema).optional()
+}).strict();
+
+export const DealCreateOrConnectWithoutTransactionsInputSchema: z.ZodType<Prisma.DealCreateOrConnectWithoutTransactionsInput> = z.object({
+  where: z.lazy(() => DealWhereUniqueInputSchema),
+  create: z.union([ z.lazy(() => DealCreateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedCreateWithoutTransactionsInputSchema) ]),
+}).strict();
+
+export const DealUpsertWithoutTransactionsInputSchema: z.ZodType<Prisma.DealUpsertWithoutTransactionsInput> = z.object({
+  update: z.union([ z.lazy(() => DealUpdateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedUpdateWithoutTransactionsInputSchema) ]),
+  create: z.union([ z.lazy(() => DealCreateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedCreateWithoutTransactionsInputSchema) ]),
+  where: z.lazy(() => DealWhereInputSchema).optional()
+}).strict();
+
+export const DealUpdateToOneWithWhereWithoutTransactionsInputSchema: z.ZodType<Prisma.DealUpdateToOneWithWhereWithoutTransactionsInput> = z.object({
+  where: z.lazy(() => DealWhereInputSchema).optional(),
+  data: z.union([ z.lazy(() => DealUpdateWithoutTransactionsInputSchema),z.lazy(() => DealUncheckedUpdateWithoutTransactionsInputSchema) ]),
+}).strict();
+
+export const DealUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma.DealUpdateWithoutTransactionsInput> = z.object({
+  dealStage: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  investmentEntity: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  closingDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  signaturesCompletedDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateFundsSent: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentMethod: z.union([ z.lazy(() => PaymentMethodSchema),z.lazy(() => NullableEnumPaymentMethodFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentReferenceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateMatured: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => DealStatusSchema),z.lazy(() => NullableEnumDealStatusFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  accreditationVerification: z.lazy(() => AccreditationVerificationUpdateOneWithoutDealNestedInputSchema).optional(),
+  organization: z.lazy(() => OrganizationUpdateOneRequiredWithoutDealsNestedInputSchema).optional(),
+  project: z.lazy(() => ProjectUpdateOneRequiredWithoutDealsNestedInputSchema).optional(),
+  endDealConversion: z.lazy(() => DealConversionUpdateOneWithoutEndDealNestedInputSchema).optional(),
+  startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
+  document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
+  investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+}).strict();
+
+export const DealUncheckedUpdateWithoutTransactionsInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutTransactionsInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  projectId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  dealStage: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  hubspotId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionId: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  investmentEntity: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
+  organizationId: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  closingDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  signaturesCompletedDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateFundsSent: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentMethod: z.union([ z.lazy(() => PaymentMethodSchema),z.lazy(() => NullableEnumPaymentMethodFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  paymentReferenceId: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  dateMatured: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  status: z.union([ z.lazy(() => DealStatusSchema),z.lazy(() => NullableEnumDealStatusFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  accreditationVerification: z.lazy(() => AccreditationVerificationUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
+  endDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutEndDealNestedInputSchema).optional(),
+  startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
+  document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+}).strict();
+
 export const ActivityFeedItemCreateManyUserInputSchema: z.ZodType<Prisma.ActivityFeedItemCreateManyUserInput> = z.object({
   id: z.string().uuid().optional(),
   header: z.string(),
@@ -18711,6 +19350,20 @@ export const DocusignEventCreateManyDealInputSchema: z.ZodType<Prisma.DocusignEv
   dateUpdated: z.coerce.date().optional().nullable()
 }).strict();
 
+export const DealTransactionCreateManyDealInputSchema: z.ZodType<Prisma.DealTransactionCreateManyDealInput> = z.object({
+  id: z.number().int().optional(),
+  dateCreated: z.coerce.date().optional(),
+  type: z.lazy(() => DealTransactionTypeSchema),
+  transactionDate: z.coerce.date(),
+  fullTransactionAmount: z.number().optional().nullable(),
+  interestAmount: z.number().optional().nullable(),
+  principalAmount: z.number().optional().nullable(),
+  startPeriod: z.coerce.date().optional().nullable(),
+  endPeriod: z.coerce.date().optional().nullable(),
+  notes: z.string().optional().nullable(),
+  newMaturityDate: z.coerce.date().optional().nullable()
+}).strict();
+
 export const DealDocumentUpdateWithoutDealInputSchema: z.ZodType<Prisma.DealDocumentUpdateWithoutDealInput> = z.object({
   name: z.union([ z.string(),z.lazy(() => StringFieldUpdateOperationsInputSchema) ]).optional(),
   type: z.union([ z.lazy(() => DealDocumentTypeSchema),z.lazy(() => EnumDealDocumentTypeFieldUpdateOperationsInputSchema) ]).optional(),
@@ -18781,6 +19434,47 @@ export const DocusignEventUncheckedUpdateManyWithoutDealInputSchema: z.ZodType<P
   dateUpdated: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
 }).strict();
 
+export const DealTransactionUpdateWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUpdateWithoutDealInput> = z.object({
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DealTransactionUncheckedUpdateWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUncheckedUpdateWithoutDealInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
+export const DealTransactionUncheckedUpdateManyWithoutDealInputSchema: z.ZodType<Prisma.DealTransactionUncheckedUpdateManyWithoutDealInput> = z.object({
+  id: z.union([ z.number().int(),z.lazy(() => IntFieldUpdateOperationsInputSchema) ]).optional(),
+  dateCreated: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  type: z.union([ z.lazy(() => DealTransactionTypeSchema),z.lazy(() => EnumDealTransactionTypeFieldUpdateOperationsInputSchema) ]).optional(),
+  transactionDate: z.union([ z.coerce.date(),z.lazy(() => DateTimeFieldUpdateOperationsInputSchema) ]).optional(),
+  fullTransactionAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  interestAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  principalAmount: z.union([ z.number(),z.lazy(() => NullableFloatFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  startPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  endPeriod: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  notes: z.union([ z.string(),z.lazy(() => NullableStringFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+  newMaturityDate: z.union([ z.coerce.date(),z.lazy(() => NullableDateTimeFieldUpdateOperationsInputSchema) ]).optional().nullable(),
+}).strict();
+
 export const DealCreateManyOrganizationInputSchema: z.ZodType<Prisma.DealCreateManyOrganizationInput> = z.object({
   id: z.number().int().optional(),
   projectId: z.number().int(),
@@ -18835,7 +19529,8 @@ export const DealUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma.DealUpda
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutOrganizationInput> = z.object({
@@ -18859,7 +19554,8 @@ export const DealUncheckedUpdateWithoutOrganizationInputSchema: z.ZodType<Prisma
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateManyWithoutOrganizationInputSchema: z.ZodType<Prisma.DealUncheckedUpdateManyWithoutOrganizationInput> = z.object({
@@ -19013,7 +19709,8 @@ export const DealUpdateWithoutProjectInputSchema: z.ZodType<Prisma.DealUpdateWit
   startDealConversion: z.lazy(() => DealConversionUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Prisma.DealUncheckedUpdateWithoutProjectInput> = z.object({
@@ -19037,7 +19734,8 @@ export const DealUncheckedUpdateWithoutProjectInputSchema: z.ZodType<Prisma.Deal
   startDealConversion: z.lazy(() => DealConversionUncheckedUpdateOneWithoutStartDealNestedInputSchema).optional(),
   document: z.lazy(() => DealDocumentUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
   investmentStats: z.lazy(() => DealInvestmentStatsUncheckedUpdateOneWithoutDealNestedInputSchema).optional(),
-  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
+  DocusignEvent: z.lazy(() => DocusignEventUncheckedUpdateManyWithoutDealNestedInputSchema).optional(),
+  transactions: z.lazy(() => DealTransactionUncheckedUpdateManyWithoutDealNestedInputSchema).optional()
 }).strict();
 
 export const DealUncheckedUpdateManyWithoutProjectInputSchema: z.ZodType<Prisma.DealUncheckedUpdateManyWithoutProjectInput> = z.object({
@@ -21307,6 +22005,68 @@ export const CustodianPlatformFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.Cust
   where: CustodianPlatformWhereUniqueInputSchema,
 }).strict() ;
 
+export const DealTransactionFindFirstArgsSchema: z.ZodType<Prisma.DealTransactionFindFirstArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereInputSchema.optional(),
+  orderBy: z.union([ DealTransactionOrderByWithRelationInputSchema.array(),DealTransactionOrderByWithRelationInputSchema ]).optional(),
+  cursor: DealTransactionWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ DealTransactionScalarFieldEnumSchema,DealTransactionScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const DealTransactionFindFirstOrThrowArgsSchema: z.ZodType<Prisma.DealTransactionFindFirstOrThrowArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereInputSchema.optional(),
+  orderBy: z.union([ DealTransactionOrderByWithRelationInputSchema.array(),DealTransactionOrderByWithRelationInputSchema ]).optional(),
+  cursor: DealTransactionWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ DealTransactionScalarFieldEnumSchema,DealTransactionScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const DealTransactionFindManyArgsSchema: z.ZodType<Prisma.DealTransactionFindManyArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereInputSchema.optional(),
+  orderBy: z.union([ DealTransactionOrderByWithRelationInputSchema.array(),DealTransactionOrderByWithRelationInputSchema ]).optional(),
+  cursor: DealTransactionWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+  distinct: z.union([ DealTransactionScalarFieldEnumSchema,DealTransactionScalarFieldEnumSchema.array() ]).optional(),
+}).strict() ;
+
+export const DealTransactionAggregateArgsSchema: z.ZodType<Prisma.DealTransactionAggregateArgs> = z.object({
+  where: DealTransactionWhereInputSchema.optional(),
+  orderBy: z.union([ DealTransactionOrderByWithRelationInputSchema.array(),DealTransactionOrderByWithRelationInputSchema ]).optional(),
+  cursor: DealTransactionWhereUniqueInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const DealTransactionGroupByArgsSchema: z.ZodType<Prisma.DealTransactionGroupByArgs> = z.object({
+  where: DealTransactionWhereInputSchema.optional(),
+  orderBy: z.union([ DealTransactionOrderByWithAggregationInputSchema.array(),DealTransactionOrderByWithAggregationInputSchema ]).optional(),
+  by: DealTransactionScalarFieldEnumSchema.array(),
+  having: DealTransactionScalarWhereWithAggregatesInputSchema.optional(),
+  take: z.number().optional(),
+  skip: z.number().optional(),
+}).strict() ;
+
+export const DealTransactionFindUniqueArgsSchema: z.ZodType<Prisma.DealTransactionFindUniqueArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereUniqueInputSchema,
+}).strict() ;
+
+export const DealTransactionFindUniqueOrThrowArgsSchema: z.ZodType<Prisma.DealTransactionFindUniqueOrThrowArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereUniqueInputSchema,
+}).strict() ;
+
 export const UserCreateArgsSchema: z.ZodType<Prisma.UserCreateArgs> = z.object({
   select: UserSelectSchema.optional(),
   include: UserIncludeSchema.optional(),
@@ -22870,5 +23630,59 @@ export const CustodianPlatformUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.Cu
 
 export const CustodianPlatformDeleteManyArgsSchema: z.ZodType<Prisma.CustodianPlatformDeleteManyArgs> = z.object({
   where: CustodianPlatformWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const DealTransactionCreateArgsSchema: z.ZodType<Prisma.DealTransactionCreateArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  data: z.union([ DealTransactionCreateInputSchema,DealTransactionUncheckedCreateInputSchema ]),
+}).strict() ;
+
+export const DealTransactionUpsertArgsSchema: z.ZodType<Prisma.DealTransactionUpsertArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereUniqueInputSchema,
+  create: z.union([ DealTransactionCreateInputSchema,DealTransactionUncheckedCreateInputSchema ]),
+  update: z.union([ DealTransactionUpdateInputSchema,DealTransactionUncheckedUpdateInputSchema ]),
+}).strict() ;
+
+export const DealTransactionCreateManyArgsSchema: z.ZodType<Prisma.DealTransactionCreateManyArgs> = z.object({
+  data: z.union([ DealTransactionCreateManyInputSchema,DealTransactionCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const DealTransactionCreateManyAndReturnArgsSchema: z.ZodType<Prisma.DealTransactionCreateManyAndReturnArgs> = z.object({
+  data: z.union([ DealTransactionCreateManyInputSchema,DealTransactionCreateManyInputSchema.array() ]),
+  skipDuplicates: z.boolean().optional(),
+}).strict() ;
+
+export const DealTransactionDeleteArgsSchema: z.ZodType<Prisma.DealTransactionDeleteArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  where: DealTransactionWhereUniqueInputSchema,
+}).strict() ;
+
+export const DealTransactionUpdateArgsSchema: z.ZodType<Prisma.DealTransactionUpdateArgs> = z.object({
+  select: DealTransactionSelectSchema.optional(),
+  include: DealTransactionIncludeSchema.optional(),
+  data: z.union([ DealTransactionUpdateInputSchema,DealTransactionUncheckedUpdateInputSchema ]),
+  where: DealTransactionWhereUniqueInputSchema,
+}).strict() ;
+
+export const DealTransactionUpdateManyArgsSchema: z.ZodType<Prisma.DealTransactionUpdateManyArgs> = z.object({
+  data: z.union([ DealTransactionUpdateManyMutationInputSchema,DealTransactionUncheckedUpdateManyInputSchema ]),
+  where: DealTransactionWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const DealTransactionUpdateManyAndReturnArgsSchema: z.ZodType<Prisma.DealTransactionUpdateManyAndReturnArgs> = z.object({
+  data: z.union([ DealTransactionUpdateManyMutationInputSchema,DealTransactionUncheckedUpdateManyInputSchema ]),
+  where: DealTransactionWhereInputSchema.optional(),
+  limit: z.number().optional(),
+}).strict() ;
+
+export const DealTransactionDeleteManyArgsSchema: z.ZodType<Prisma.DealTransactionDeleteManyArgs> = z.object({
+  where: DealTransactionWhereInputSchema.optional(),
   limit: z.number().optional(),
 }).strict() ;

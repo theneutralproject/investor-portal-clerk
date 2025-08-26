@@ -72,6 +72,7 @@ model Deal {
   document                  DealDocument[]
   investmentStats           DealInvestmentStats?
   DocusignEvent             DocusignEvent[]
+  transactions              DealTransaction[]
 }
 
 /// used to manifest the agreed upon terms of the deal
@@ -581,4 +582,34 @@ enum PaymentMethod {
   ACH
   WIRE
   CHECK
+}
+
+model DealTransaction {
+  id                    Int                 @id @default(autoincrement())
+  dateCreated           DateTime            @default(now())
+  dealId                Int
+  type                  DealTransactionType
+  transactionDate       DateTime
+  fullTransactionAmount Float? // Main transaction amount
+  interestAmount        Float? // Interest portion
+  principalAmount       Float? // Principal portion
+  startPeriod           DateTime? // Period start for interest payments
+  endPeriod             DateTime? // Period end for interest payments
+  notes                 String?
+  newMaturityDate       DateTime? //If Extension, we move the Maturity Date
+  deal                  Deal                @relation(fields: [dealId], references: [id], onDelete: Cascade)
+}
+
+// Add these enums
+enum DealTransactionType {
+  NOTE_MATURITY
+  NOTE_COMPLETION
+  NOTE_INTEREST_PAYMENT
+  NOTE_PRINCIPAL_PAYMENT
+  NOTE_EXTENSION
+  NOTE_CONVERSION
+  EQUITY_ASSIGNMENT
+  EQUITY_DISTRIBUTION
+  EQUITY_EXIT
+  EQUITY_PARTIAL_PAYMENT
 }
