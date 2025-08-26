@@ -147,6 +147,7 @@ components:
         - ANOTE
         - BNOTE
         - A1UNIT
+        - AUNITPREFERRED
       example: AUNIT
 
     DealStatus:

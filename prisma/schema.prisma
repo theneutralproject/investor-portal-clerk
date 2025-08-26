@@ -555,6 +555,7 @@ enum DealUnitType {
   ANOTE
   BNOTE
   A1UNIT
+  AUNITPREFERRED
 }
 
 enum DealStatus {

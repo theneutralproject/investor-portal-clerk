@@ -184,6 +184,7 @@ async function _createDeal(
   let newInvestmentStats = {
     amount: dealData.amount,
     financingType: dealData.financingType,
+    unitType: dealData?.unitType || undefined,
   } as DealInvestmentStats;
 
   const { investmentStats, ...projectData } = project;
@@ -258,8 +259,17 @@ export async function updateDeal(
   updateHubspot = false,
   allowMaintenanceOfCompletedDeals = false
 ) {
-  const { investmentStats: investmentStatsToUpdate, ...dealData } =
-    updateDealData;
+  const {
+    investmentStats: investmentStatsToUpdate,
+    unitType,
+    ...dealData
+  } = updateDealData;
+
+  // If unitType is provided at the top level, move it to investmentStats
+  const investmentStatsWithUnitType = investmentStatsToUpdate || {};
+  if (unitType !== undefined) {
+    investmentStatsWithUnitType.unitType = unitType;
+  }
   const existingDeal = await prisma.deal.findUnique({
     where: { hubspotId: dealData.hubspotId },
     include: {
@@ -294,10 +304,10 @@ export async function updateDeal(
       `Deal with id ${existingDeal.id} is already signed, and the investmentStats will not be updated, but the deal itself will be.`
     );
   } else {
-    if (investmentStatsToUpdate) {
-      // the only investment stats fields that can be updated  from outside this function are amount and financingType.
-      const { amount, financingType, ...ignoredInvestmentStats } =
-        investmentStatsToUpdate;
+    if (investmentStatsWithUnitType) {
+      // the only investment stats fields that can be updated  from outside this function are amount, unitType, and financingType.
+      const { amount, financingType, unitType, ...ignoredInvestmentStats } =
+        investmentStatsWithUnitType;
 
       for (const key in ignoredInvestmentStats) {
         console.warn(
@@ -319,10 +329,12 @@ export async function updateDeal(
       const dealFinancingType =
         financingType ?? existingDeal.investmentStats?.financingType;
       const dealAmount = amount ?? existingDeal.investmentStats?.amount;
+      const dealUnitType = unitType ?? existingDeal.investmentStats?.unitType;
 
       let newInvestmentStats = {
         amount: dealAmount,
         financingType: dealFinancingType,
+        unitType: dealUnitType,
         dealId: existingDeal.id,
       } as DealInvestmentStats;
 
@@ -450,7 +462,10 @@ export async function populateDealEquityStats(
     throw equityDetails;
   }
   const { unitType, numberAUnits, numberCUnits } = equityDetails;
-  stats.unitType = unitType;
+  // If already defined, keep explicitly defined unitType
+  if (!stats.unitType) {
+    stats.unitType = unitType;
+  }
   stats.numberAUnits = numberAUnits;
   stats.numberCUnits = numberCUnits;
   stats.equityTermMonths = project.investmentStats.equityTermMonths;
@@ -493,11 +508,14 @@ export function populateDealDebtStats(
     stats.amount,
     project.investmentStats
   );
-  stats.unitType = getDebtUnitType(
-    stats.amount,
-    project.investmentStats,
-    stats.financingType
-  );
+  //Calculated unitType only if not explicitly defined
+  if (!stats.unitType) {
+    stats.unitType = getDebtUnitType(
+      stats.amount,
+      project.investmentStats,
+      stats.financingType
+    );
+  }
 
   // set all equity related fields to null
   stats.equityTermMonths = 0;
