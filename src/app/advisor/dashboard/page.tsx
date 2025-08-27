@@ -64,7 +64,7 @@ const AdvisorDashboardPage = () => {
       <Grid
         container
         spacing={2}
-        sx={{ mt: 2, background: '#f5f5f5', borderRadius: '8px' }}
+        sx={{ mt: 2, background: '#fffff', borderRadius: '8px' }}
       >
         <Grid
           container
@@ -74,7 +74,7 @@ const AdvisorDashboardPage = () => {
             md: 12,
           }}
           display="flex"
-          sx={{ background: '#f5f5f5' }}
+          sx={{ background: '#fffff' }}
         >
           <Grid
             size={{
@@ -218,7 +218,7 @@ const AdvisorDashboardPage = () => {
           }}
           display="flex"
           justifyContent="center"
-          sx={{ background: '#f5f5f5' }}
+          sx={{ background: '#fffff' }}
         >
           <Box sx={{ width: '100%' }}>
             <Card sx={{ borderRadius: '8px', position: 'relative' }}>

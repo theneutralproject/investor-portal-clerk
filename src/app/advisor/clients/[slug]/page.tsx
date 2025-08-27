@@ -72,7 +72,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
       <Grid
         sx={{
           mt: 2,
-          background: '#f5f5f5',
+          background: '#fffff',
         }}
       >
         <IconButton
@@ -102,7 +102,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
         spacing={2}
         sx={{
           mt: 2,
-          background: '#f5f5f5',
+          background: '#ffffff',
           borderRadius: '8px',
           display: 'flex',
         }}
@@ -113,7 +113,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
             md: 8,
           }}
           justifyContent="center"
-          sx={{ background: '#f5f5f5' }}
+          sx={{ background: '#ffffff' }}
         >
           <Box sx={{ width: '100%', mb: 2 }}>
             <Card sx={{ borderRadius: '8px', position: 'relative' }}>
@@ -177,7 +177,7 @@ const AdvisorClientPage = ({ params }: NextClientPage) => {
           }}
           display="flex"
           justifyContent="center"
-          sx={{ background: '#f5f5f5' }}
+          sx={{ background: '#ffffff' }}
         >
           <Box sx={{ width: '100%' }}>
             <Card sx={{ borderRadius: '8px', position: 'relative' }}>
