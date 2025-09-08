@@ -43,7 +43,7 @@ const AdvisorResourceCenter = () => {
       <Grid
         sx={{
           mt: 2,
-          background: '#f5f5f5',
+          background: '#fffff',
         }}
       >
         <Typography
@@ -64,7 +64,7 @@ const AdvisorResourceCenter = () => {
         spacing={2}
         sx={{
           mt: 2,
-          background: '#f5f5f5',
+          background: '#fffff',
           borderRadius: '8px',
           display: 'flex',
         }}
@@ -122,7 +122,7 @@ const AdvisorResourceCenter = () => {
             md: 4,
           }}
           justifyContent="center"
-          sx={{ background: '#f5f5f5' }}
+          sx={{ background: '#fffff' }}
         >
           <Box sx={{ width: '100%', mb: 2 }}>
             <Card sx={{ borderRadius: '8px', position: 'relative' }}>
