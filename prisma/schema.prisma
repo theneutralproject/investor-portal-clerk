@@ -334,7 +334,7 @@ model DocumentEvent {
   type        DocumentEventType
   dateCreated DateTime?         @default(now())
   dateUpdated DateTime?         @updatedAt
-  document    ProjectDocument   @relation(fields: [documentId], references: [id])
+  document    ProjectDocument   @relation(fields: [documentId], references: [id], onDelete: Cascade)
   user        User              @relation(fields: [userId], references: [id])
 }
 
