@@ -24,14 +24,7 @@ export enum ReferralSource {
   REDDIT = 'reddit',
 
   // News / Media
-  CRE_DAILY = 'cre_daily',
-  MARKET_BRIEFS = 'market_briefs',
-  THESIS_DRIVEN_PODCAST = 'thesis_driven_podcast',
-  VINCENT = 'vincent',
-  ADVISOR_UPDATE = 'advisor_update',
-  BESTEVERCRE = 'bestevercre',
-  ISTHMUS = 'isthmus',
-  OTHER_MEDIA = 'other_media',
+  NEWS_MEDIA = 'news-media',
 
   // Online Ads
   ONLINE_ADS = 'advertisement_online',
@@ -94,43 +87,8 @@ export const REFERRAL_SOURCES: ReferralSourceItem[] = [
 
   // News / Media
   {
-    name: 'CRE Daily',
-    value: ReferralSource.CRE_DAILY,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'Market Briefs',
-    value: ReferralSource.MARKET_BRIEFS,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'Thesis Driven Podcast',
-    value: ReferralSource.THESIS_DRIVEN_PODCAST,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'Vincent',
-    value: ReferralSource.VINCENT,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'Advisor Update',
-    value: ReferralSource.ADVISOR_UPDATE,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'BestEverCRE',
-    value: ReferralSource.BESTEVERCRE,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'Isthmus',
-    value: ReferralSource.ISTHMUS,
-    category: ReferralCategory.NEWS_MEDIA,
-  },
-  {
-    name: 'Other Media',
-    value: ReferralSource.OTHER_MEDIA,
+    name: 'News / Media',
+    value: ReferralSource.NEWS_MEDIA,
     category: ReferralCategory.NEWS_MEDIA,
   },
 
