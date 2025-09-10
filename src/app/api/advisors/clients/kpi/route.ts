@@ -37,7 +37,7 @@ export async function GET(request: NextRequest): Promise<Response> {
     { number_of_clients: number; total_invested: number }[]
   >`SELECT
     CAST((
-      SELECT COUNT(*)
+      SELECT COUNT(DISTINCT "ownerId")
       FROM "Organization" o
       WHERE o."advisorFirmId" = ${advisorFirmEmployee.advisorFirmId}
     ) AS INTEGER) AS number_of_clients,

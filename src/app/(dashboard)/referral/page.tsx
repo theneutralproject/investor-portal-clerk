@@ -4,128 +4,23 @@ import {
   Card,
   CardContent,
   Typography,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
   Button,
   Box,
   Container,
   CircularProgress,
-  Collapse,
-  IconButton,
-  List,
-  ListItem,
+  Autocomplete,
+  TextField,
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import axios from 'axios';
 import { useUser } from '@clerk/nextjs';
-import {
-  ReferralSource,
-  ReferralCategory,
-  REFERRAL_SOURCES,
-  ReferralSourceItem,
-} from '@/libs/hubspot/utils.client';
+import { ReferralSource, REFERRAL_SOURCES } from '@/libs/hubspot/utils.client';
 import { useRedirect } from '@/app/context/RedirectContext';
 import { sendGTMEvent } from '@next/third-parties/google';
 
-interface CategoryOptionProps {
-  category: ReferralCategory;
-  isExpanded: boolean;
-  onToggle: () => void;
-  sources: ReferralSourceItem[];
-  selectedValue: string;
-  onChange: (value: string) => void;
-}
-
-const CategoryOption: React.FC<CategoryOptionProps> = ({
-  category,
-  isExpanded,
-  onToggle,
-  sources,
-  selectedValue,
-  onChange,
-}) => {
-  const formatCategoryTitle = (category: ReferralCategory): string => {
-    switch (category) {
-      case ReferralCategory.COMPANY_CHANNELS:
-        return 'Company Channels';
-      case ReferralCategory.NEWS_MEDIA:
-        return 'News/Media';
-      default:
-        return category;
-    }
-  };
-
-  return (
-    <Box>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          cursor: 'pointer',
-          py: 1,
-          px: 1,
-        }}
-        onClick={onToggle}
-      >
-        <IconButton
-          size="small"
-          edge="start"
-          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
-            e.stopPropagation();
-            onToggle();
-          }}
-        >
-          {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-        </IconButton>
-        <Typography sx={{ flexGrow: 1 }}>
-          {formatCategoryTitle(category)}
-        </Typography>
-      </Box>
-      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-        <List disablePadding sx={{ pl: 4 }}>
-          {sources.map(source => (
-            <ListItem
-              key={source.value}
-              disablePadding
-              disableGutters
-              sx={{ my: 0.5 }}
-            >
-              <FormControlLabel
-                value={source.value}
-                control={<Radio />}
-                label={source.name}
-                sx={{ ml: 0 }}
-                onChange={() => onChange(source.value)}
-                checked={selectedValue === source.value}
-              />
-            </ListItem>
-          ))}
-        </List>
-      </Collapse>
-    </Box>
-  );
-};
-
 function ReferralForm(): JSX.Element {
-  const [referralSource, setReferralSource] = useState<ReferralSource | ''>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [expandedCategories, setExpandedCategories] = useState<
-    Record<string, boolean>
-  >({
-    [ReferralCategory.COMPANY_CHANNELS]: false,
-    [ReferralCategory.NEWS_MEDIA]: false,
-  });
   const { user } = useUser();
   const { doRedirect } = useRedirect();
-
-  const toggleCategory = (category: ReferralCategory): void => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
-  };
 
   const updateUserAndHubspot = async (
     source: ReferralSource
@@ -167,7 +62,7 @@ function ReferralForm(): JSX.Element {
     if (!referralSource) return;
 
     setIsLoading(true);
-    await updateUserAndHubspot(referralSource as ReferralSource);
+    await updateUserAndHubspot(referralSource.value as ReferralSource);
   };
 
   const handleSkip = async (): Promise<void> => {
@@ -175,26 +70,15 @@ function ReferralForm(): JSX.Element {
     await updateUserAndHubspot(ReferralSource.OTHER);
   };
 
-  // Group sources by category
-  const categorizedSources = useMemo<
-    Record<ReferralCategory, ReferralSourceItem[]>
-  >(() => {
-    const grouped: Record<string, ReferralSourceItem[]> = {
-      [ReferralCategory.COMPANY_CHANNELS]: [],
-      [ReferralCategory.NEWS_MEDIA]: [],
-      [ReferralCategory.NONE]: [],
-    };
-    // Group sources
-    REFERRAL_SOURCES.forEach(source => {
-      if (source.category in grouped) {
-        (grouped[source.category] || []).push(source);
-      } else {
-        (grouped[ReferralCategory.NONE] || []).push(source);
-      }
-    });
-
-    return grouped as Record<ReferralCategory, ReferralSourceItem[]>;
+  // Format options for autocomplete
+  const autocompleteOptions = useMemo(() => {
+    return REFERRAL_SOURCES.sort((a, b) => a.name.localeCompare(b.name));
   }, []);
+
+  type AutocompleteOption = (typeof autocompleteOptions)[0];
+
+  const [referralSource, setReferralSource] =
+    useState<AutocompleteOption | null>(null);
 
   return (
     <Container sx={{ maxWidth: '500px !important' }}>
@@ -210,45 +94,24 @@ function ReferralForm(): JSX.Element {
       </Typography>
       <Card elevation={2}>
         <CardContent>
-          <RadioGroup
+          <Autocomplete<AutocompleteOption>
+            options={autocompleteOptions}
+            getOptionLabel={option => option.name}
             value={referralSource}
-            onChange={e => setReferralSource(e.target.value as ReferralSource)}
-          >
-            {/* Categorized sources with inline expansion */}
-            <CategoryOption
-              category={ReferralCategory.COMPANY_CHANNELS}
-              isExpanded={
-                expandedCategories[ReferralCategory.COMPANY_CHANNELS] || false
-              }
-              onToggle={() => toggleCategory(ReferralCategory.COMPANY_CHANNELS)}
-              sources={
-                categorizedSources[ReferralCategory.COMPANY_CHANNELS] || []
-              }
-              selectedValue={referralSource}
-              onChange={value => setReferralSource(value as ReferralSource)}
-            />
-
-            <CategoryOption
-              category={ReferralCategory.NEWS_MEDIA}
-              isExpanded={
-                expandedCategories[ReferralCategory.NEWS_MEDIA] || false
-              }
-              onToggle={() => toggleCategory(ReferralCategory.NEWS_MEDIA)}
-              sources={categorizedSources[ReferralCategory.NEWS_MEDIA] || []}
-              selectedValue={referralSource}
-              onChange={value => setReferralSource(value as ReferralSource)}
-            />
-
-            {categorizedSources[ReferralCategory.NONE].map(source => (
-              <FormControlLabel
-                key={source.value}
-                value={source.value}
-                control={<Radio color="primary" />}
-                label={source.name}
-                sx={{ mb: 1, ml: 0 }}
+            onChange={(_, newValue) => setReferralSource(newValue)}
+            isOptionEqualToValue={(option, value) =>
+              option.value === value.value
+            }
+            renderInput={params => (
+              <TextField
+                {...params}
+                label="Select referral source"
+                placeholder="Start typing to search..."
+                variant="outlined"
+                fullWidth
               />
-            ))}
-          </RadioGroup>
+            )}
+          />
         </CardContent>
       </Card>
       <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
