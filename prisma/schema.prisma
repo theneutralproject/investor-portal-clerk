@@ -27,6 +27,7 @@ model User {
   ssn                          String?                @unique
   userOrgId                    Int?                   @unique
   referralSource               String?
+  rampVendorId                 String?
   dateOfBirth                  DateTime?
   dateCreated                  DateTime?              @default(now())
   dateUpdated                  DateTime?              @updatedAt

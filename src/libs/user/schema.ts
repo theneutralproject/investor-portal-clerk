@@ -12,6 +12,7 @@ export const zUserUpdateSchema = z.object({
   lastName: z.string().max(50).optional(),
   ssn: z.string().max(200).optional().nullish(),
   referralSource: z.nativeEnum(ReferralSource).optional().nullish(),
+  rampVendorId: z.string().optional().nullish(),
   address: zAddressCreateSchema.optional(),
   dateOfBirth: z.coerce.date().nullish(),
   notifyUserOnCreate: z.boolean().nullish(), // used to determine if the user should be notified when created from the admin portal
