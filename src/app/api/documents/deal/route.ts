@@ -33,8 +33,16 @@ export async function GET(request: NextRequest) {
     );
 
     const dealsWithDocuments = await prisma.deal.findMany({
-      where: { organizationId: { in: organizationIds } },
-      include: { document: true, project: true },
+      where: {
+        organizationId: { in: organizationIds },
+        dealStage: {
+          gte: 5,
+        },
+      },
+      include: {
+        document: true,
+        project: true,
+      },
     });
 
     if (!dealsWithDocuments) {
