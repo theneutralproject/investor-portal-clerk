@@ -43,7 +43,7 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ data }) => {
 
       <Typography
         variant="subtitle2"
-        sx={{ mt: 2, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
+        sx={{ mt: 4, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
       >
         The financial projections on the Neutral Investor Portal are estimates
         based on current assumptions and are updated monthly for transparency.
