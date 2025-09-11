@@ -11,7 +11,8 @@ export const InvestmentCard = styled(Card)(({ theme }) => ({
   display: 'flex',
   flexDirection: 'column',
   borderRadius: theme.spacing(1),
-  boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+  boxShadow: 'none',
+  border: '1px solid rgba(0, 0, 0, 0.12)',
   overflow: 'hidden',
 }));
 

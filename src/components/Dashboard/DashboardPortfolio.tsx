@@ -16,7 +16,7 @@ const DashboardPortfolio: React.FC<{
     <div data-testid={`${DASHBOARD_POSTFOLIO_TEST_ID}`}>
       <Grid container spacing={4} sx={{ mb: 4 }}>
         {metrics.map((metric, index) => (
-          <Grid item xs={6} sm={6} md={3} key={index}>
+          <Grid item xs={6} sm={6} md={metric.colSize || 3} key={index}>
             <PortfolioMetric
               toDateValue={metric.toDateValue}
               projectedTotalValue={metric.projectedTotalValue}

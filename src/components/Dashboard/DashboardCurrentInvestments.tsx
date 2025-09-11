@@ -5,7 +5,6 @@ import {
   CardMedia,
   Typography,
   Grid,
-  Divider,
   Button,
 } from '@mui/material';
 import type {
@@ -42,13 +41,13 @@ const DashboardCurrentInvestments: React.FC<
       <Typography
         variant="body1"
         sx={{
-          fontSize: '20px',
+          fontSize: '16px',
+          fontWeight: '600',
           mb: 2,
         }}
       >
         Current Investments ({data.dealStats.length})
       </Typography>
-      <Divider sx={{ mb: 3 }} />
 
       <Grid container spacing={3}>
         {displayedDeals.map((deal: ReturnsDealStats) => {

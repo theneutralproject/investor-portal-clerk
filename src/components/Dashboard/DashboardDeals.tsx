@@ -3,7 +3,6 @@ import { CardContent, Typography } from '@mui/material';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import DashboardCurrentInvestments from './DashboardCurrentInvestments';
 import { StyledCard } from './DashboardComponents';
-import DashboardSummary from './DashboardSummary';
 
 interface DashboardDealsProps {
   loggedIn: boolean;
@@ -40,7 +39,6 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ data }) => {
   return (
     <>
       {/* Summary Table */}
-      <DashboardSummary data={data} />
       <DashboardCurrentInvestments data={data} />
 
       <Typography
