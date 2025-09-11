@@ -4,6 +4,7 @@ import {
   Deal,
   DealFinancingType,
   DealStatus,
+  DealUnitType,
   Project,
 } from '@prisma/client';
 import {
@@ -704,7 +705,7 @@ export function getHsDealPropsFromDeal(
 
   if ((investmentStats?.numberUnits ?? 0) > 0) {
     const unitTypeLabel =
-      investmentStats.unitType === 'CUNIT' ? 'C Unit' : 'A Unit';
+      investmentStats?.unitType === DealUnitType.CUNIT ? 'C Unit' : 'A Unit';
     hsReturnObject.properties.push({
       name: 'equity_unit',
       value: unitTypeLabel,
