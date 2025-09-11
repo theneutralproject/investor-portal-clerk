@@ -702,17 +702,12 @@ export function getHsDealPropsFromDeal(
       value: investmentStats?.financingType,
     });
 
-  if ((investmentStats?.numberAUnits ?? 0) > 0) {
+  if ((investmentStats?.numberUnits ?? 0) > 0) {
+    const unitTypeLabel =
+      investmentStats.unitType === 'CUNIT' ? 'C Unit' : 'A Unit';
     hsReturnObject.properties.push({
       name: 'equity_unit',
-      value: `A Unit`,
-    });
-  }
-
-  if ((investmentStats?.numberCUnits ?? 0) > 0) {
-    hsReturnObject.properties.push({
-      name: 'equity_unit',
-      value: `C Unit`,
+      value: unitTypeLabel,
     });
   }
 
