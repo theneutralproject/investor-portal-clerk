@@ -12,8 +12,7 @@ export const zDealInvestmentStatsUpdateSchema = z.object({
   ownershipType: z.nativeEnum(DealOwnershipType).optional(),
   financingType: z.nativeEnum(DealFinancingType).optional(),
   unitType: z.nativeEnum(DealUnitType).optional(),
-  numberAUnits: z.number().min(0).optional(),
-  numberCUnits: z.number().min(0).optional(),
+  numberUnits: z.number().min(0).optional(),
 });
 
 export type DealInvestmentStatsUpdateSchema = z.infer<
