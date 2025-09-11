@@ -117,13 +117,18 @@ const Footnotes: React.FC<FootnotesProps> = ({ investmentStats }) => (
       {`*${investmentStats.equityPaymentFreq} distribution shall commence upon stabilization, defined as 95% occupied.`}
     </Typography>
     <Typography variant="body2">
-      **Equity investors receive a 10% preferred return.
+      **Equity investors receive a {investmentStats.equityPreferredReturn * 100}
+      % preferred return.
     </Typography>
-    <Typography variant="body2">
-      {`***${investmentStats.interestRateMax} for investment amounts above $${
-        investmentStats.interestRateDollarThreshold / 1000
-      }k.`}
-    </Typography>
+
+    {/* if interestRateMin and interestRateMax are different, explain max is only over threshold */}
+    {investmentStats.interestRateMin !== investmentStats.interestRateMax && (
+      <Typography variant="body2">
+        {`***${investmentStats.interestRateMax} for investment amounts above $${
+          investmentStats.interestRateDollarThreshold / 1000
+        }k.`}
+      </Typography>
+    )}
   </Box>
 );
 
@@ -173,7 +178,10 @@ const InvestmentSummaryBox: React.FC<{ data: ProjectWithStats }> = ({
           <DebtSection
             investmentStats={data.investmentStats}
             project={data as ProjectWithAllNestedData}
-            showAsterisk
+            showAsterisk={
+              data.investmentStats.interestRateMin !==
+              data.investmentStats.interestRateMax
+            }
             data-testid={`${INVESTMENT_SUMMARY_TEST_ID}-debt-section`}
           />
         </Grid>
