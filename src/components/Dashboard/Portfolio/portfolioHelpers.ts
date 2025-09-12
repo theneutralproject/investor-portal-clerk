@@ -8,6 +8,7 @@ export interface MetricData {
   toDateValue: string;
   projectedTotalValue: string;
   color: string;
+  colSize?: number;
 }
 
 export interface QuarterData {
@@ -162,24 +163,21 @@ export const getMetrics = (
         toDateValue: '-',
         projectedTotalValue: '-',
         color: '#656565',
+        colSize: 3,
       },
       {
-        label: 'Equity Return Accrued to Date',
+        label: 'Interest Earned to Date',
         toDateValue: '-',
         projectedTotalValue: '-',
         color: '#5AAC6A',
+        colSize: 3,
       },
       {
-        label: 'Debt Earned to Date',
+        label: 'Equity Preferred Return Accrued to Date',
         toDateValue: '-',
         projectedTotalValue: '-',
         color: '#2196F3',
-      },
-      {
-        label: 'Current Portfolio Value',
-        toDateValue: '-',
-        projectedTotalValue: '-',
-        color: '#FFB800',
+        colSize: 5,
       },
     ];
   }
@@ -192,9 +190,10 @@ export const getMetrics = (
         data.portfolioStats.principalInvested
       ),
       color: '#656565',
+      colSize: 3,
     },
     {
-      label: 'Equity Return Accrued to Date',
+      label: 'Interest Earned to Date',
       toDateValue: formatCurrency(
         data.portfolioStats.equityAccruedPreferredReturn
       ),
@@ -202,22 +201,16 @@ export const getMetrics = (
         data.portfolioStats.equityAccruedPreferredReturn
       ),
       color: '#5AAC6A',
+      colSize: 3,
     },
     {
-      label: 'Debt Earned to Date',
+      label: 'Equity Preferred Return Accrued to Date',
       toDateValue: formatCurrency(data.portfolioStats.debtDistributionsToDate),
       projectedTotalValue: formatCurrency(
         data.portfolioStats.debtDistributionsToDate
       ),
       color: '#2196F3',
-    },
-    {
-      label: 'Current Portfolio Value',
-      toDateValue: formatCurrency(data.portfolioStats.newPortfolioValueToDate),
-      projectedTotalValue: formatCurrency(
-        data.portfolioStats.newPortfolioValueToDate
-      ),
-      color: '#FFB800',
+      colSize: 5,
     },
   ];
 };

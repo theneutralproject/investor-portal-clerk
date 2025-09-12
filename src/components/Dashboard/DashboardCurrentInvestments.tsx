@@ -5,7 +5,6 @@ import {
   CardMedia,
   Typography,
   Grid,
-  Divider,
   Button,
 } from '@mui/material';
 import type {
@@ -20,11 +19,57 @@ import {
   formatCurrency,
   formatPercentage,
 } from './DashboardComponents';
-import { format } from 'date-fns';
 
 interface DashboardCurrentInvestmentsProps {
   data: PortfolioReturnsResponse;
 }
+
+type CardDealStats = ReturnsDealStats & {
+  count: number;
+  interestRates: number[];
+};
+
+const getInterestRateRange = (interestRates: number[]) => {
+  const min = Math.min(...interestRates);
+  const max = Math.max(...interestRates);
+  return min === max ? `${max}%` : `${min}% - ${max}%`;
+};
+
+const groupDealsByProjectAndFinanceType = (dealStats: ReturnsDealStats[]) => {
+  const groupedDeals: {
+    [key: string]: ReturnsDealStats & {
+      count: number;
+      interestRates: number[];
+    };
+  } = {};
+
+  dealStats.map(deal => {
+    const key = `${deal.project.id}-${deal.financingType}`;
+
+    if (groupedDeals[key]) {
+      groupedDeals[key].committedAmount += deal.committedAmount || 0;
+      groupedDeals[key].distributionsToDate += deal.distributionsToDate || 0;
+      groupedDeals[key].equityAccruedPreferredReturn +=
+        deal.equityAccruedPreferredReturn || 0;
+      groupedDeals[key].count += 1;
+      groupedDeals[key].interestRates.push(
+        deal.debtInterestRatePercentage ||
+          deal.equityAccruedPreferredReturnPercentage
+      );
+    } else {
+      groupedDeals[key] = {
+        ...deal,
+        count: 1,
+        interestRates: [
+          deal.debtInterestRatePercentage ||
+            deal.equityAccruedPreferredReturnPercentage,
+        ],
+      };
+    }
+  });
+
+  return Object.values(groupedDeals);
+};
 
 const DashboardCurrentInvestments: React.FC<
   DashboardCurrentInvestmentsProps
@@ -32,26 +77,25 @@ const DashboardCurrentInvestments: React.FC<
   const [showAllDeals, setShowAllDeals] = useState(false);
 
   const cardsPerRow = 3;
-  const displayedDeals = showAllDeals
-    ? data.dealStats
-    : data.dealStats.slice(0, cardsPerRow);
-  const hasMoreDeals = data.dealStats.length > cardsPerRow;
+  const deals = groupDealsByProjectAndFinanceType(data.dealStats);
+  const displayedDeals = showAllDeals ? deals : deals.slice(0, cardsPerRow);
+  const hasMoreDeals = deals.length > cardsPerRow;
 
   return (
     <Box sx={{ mt: 3 }}>
       <Typography
         variant="body1"
         sx={{
-          fontSize: '20px',
+          fontSize: '16px',
+          fontWeight: '600',
           mb: 2,
         }}
       >
         Current Investments ({data.dealStats.length})
       </Typography>
-      <Divider sx={{ mb: 3 }} />
 
       <Grid container spacing={3}>
-        {displayedDeals.map((deal: ReturnsDealStats) => {
+        {displayedDeals.map((deal: CardDealStats) => {
           // Find card image
           const cardImage =
             deal.project.pictures?.find(pic => pic.type === 'CARD') ||
@@ -59,6 +103,8 @@ const DashboardCurrentInvestments: React.FC<
             (deal.project.pictures && deal.project.pictures.length > 0
               ? deal.project.pictures[0]
               : null);
+          const numberOfDealsText =
+            deal.financingType === 'debt' ? 'Deals' : 'Positions';
 
           return (
             <Grid item xs={12} sm={4} key={deal.dealId}>
@@ -71,13 +117,6 @@ const DashboardCurrentInvestments: React.FC<
                   />
                   <Typography variant="h6" component="h2" fontWeight="bold">
                     {deal.project.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 1 }}
-                  >
-                    Closed: {format(new Date(deal.closingDate), 'MMM d, yyyy')}
                   </Typography>
                 </Box>
 
@@ -102,24 +141,26 @@ const DashboardCurrentInvestments: React.FC<
                     </SummaryTableRow>
 
                     {deal.financingType === 'debt' ? (
-                      <SummaryTableRow className="deal-card">
-                        <SummaryTableCell className="left">
-                          Interest Rate:
-                        </SummaryTableCell>
-                        <SummaryTableCell className="right">
-                          {formatPercentage(deal.debtInterestRatePercentage)}
-                        </SummaryTableCell>
-                      </SummaryTableRow>
-                    ) : (
                       <>
                         <SummaryTableRow className="deal-card">
                           <SummaryTableCell className="left">
-                            Equity Multiple:
+                            Interest Rate:
                           </SummaryTableCell>
                           <SummaryTableCell className="right">
-                            {deal.project.targetEquityMultiple.toFixed(1)}x
+                            {getInterestRateRange(deal.interestRates)}
                           </SummaryTableCell>
                         </SummaryTableRow>
+                        <SummaryTableRow className="deal-card">
+                          <SummaryTableCell className="left">
+                            Interest Earned to Date:
+                          </SummaryTableCell>
+                          <SummaryTableCell className="right">
+                            {formatCurrency(deal.distributionsToDate)}
+                          </SummaryTableCell>
+                        </SummaryTableRow>
+                      </>
+                    ) : (
+                      <>
                         <SummaryTableRow className="deal-card">
                           <SummaryTableCell className="left">
                             Accrued Preferred Return:
@@ -143,33 +184,10 @@ const DashboardCurrentInvestments: React.FC<
 
                     <SummaryTableRow className="deal-card">
                       <SummaryTableCell className="left">
-                        Earned to Date:
+                        No. of {numberOfDealsText}:
                       </SummaryTableCell>
                       <SummaryTableCell className="right">
-                        {formatCurrency(deal.distributionsToDate)}
-                      </SummaryTableCell>
-                    </SummaryTableRow>
-
-                    <SummaryTableRow className="deal-card">
-                      <SummaryTableCell className="left">
-                        Projected Earnings:
-                      </SummaryTableCell>
-                      <SummaryTableCell className="right">
-                        {formatCurrency(
-                          deal.distributionsProjected - deal.committedAmount
-                        )}
-                      </SummaryTableCell>
-                    </SummaryTableRow>
-
-                    <SummaryTableRow className="deal-card">
-                      <SummaryTableCell className="left">
-                        Projected Return:
-                      </SummaryTableCell>
-                      <SummaryTableCell
-                        className="right"
-                        sx={{ fontWeight: 'bold' }}
-                      >
-                        {formatCurrency(deal.distributionsProjected)}
+                        {deal.count}
                       </SummaryTableCell>
                     </SummaryTableRow>
                   </Box>
