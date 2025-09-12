@@ -461,13 +461,12 @@ export async function populateDealEquityStats(
     console.error(equityDetails);
     throw equityDetails;
   }
-  const { unitType, numberAUnits, numberCUnits } = equityDetails;
+  const { unitType, numberUnits } = equityDetails;
   // If already defined, keep explicitly defined unitType
   if (!stats.unitType) {
     stats.unitType = unitType;
   }
-  stats.numberAUnits = numberAUnits;
-  stats.numberCUnits = numberCUnits;
+  stats.numberUnits = numberUnits;
   stats.equityTermMonths = project.investmentStats.equityTermMonths;
   stats.equityPreferredReturn = project.investmentStats.equityPreferredReturn;
 
@@ -519,8 +518,7 @@ export function populateDealDebtStats(
 
   // set all equity related fields to null
   stats.equityTermMonths = 0;
-  stats.numberAUnits = 0;
-  stats.numberCUnits = 0;
+  stats.numberUnits = 0;
 
   const minInvestmentAmount = project.investmentStats.debtMinInvestment;
   if (stats.amount < minInvestmentAmount) {

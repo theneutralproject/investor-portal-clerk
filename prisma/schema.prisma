@@ -84,6 +84,7 @@ model DealInvestmentStats {
   financingType         DealFinancingType @default(equity)
   unitType              DealUnitType      @default(AUNIT)
   ownershipType         DealOwnershipType @default(INDIVIDUAL)
+  numberUnits           Float             @default(0.0)
   numberAUnits          Float             @default(0.0)
   numberCUnits          Float             @default(0.0)
   debtInterestRatePerc  Float             @default(0.0)

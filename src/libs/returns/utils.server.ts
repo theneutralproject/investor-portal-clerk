@@ -92,8 +92,7 @@ export async function getEquityStatsFromProject(
   equityMilestonesData?: ProjectMilestoneType[]
 ) {
   let unitType: DealUnitType = DealUnitType.AUNIT;
-  let numberCUnits = 0;
-  let numberAUnits = 0;
+  let numberUnits = 0;
   let shareOfEquity = 0;
 
   const equityMilestones: ProjectMilestoneType[] | undefined =
@@ -109,17 +108,17 @@ export async function getEquityStatsFromProject(
 
     if (amount >= cUnitThresholdAmount) {
       unitType = DealUnitType.CUNIT;
-      numberCUnits = amount / 100000;
+      numberUnits = amount / 100000;
       shareOfEquity = -amount / firstMilestone.cUnitReturns;
     } else {
-      numberAUnits = amount / 100000;
+      unitType = DealUnitType.AUNIT;
+      numberUnits = amount / 100000;
       shareOfEquity = -amount / firstMilestone.aUnitReturns;
     }
 
     return {
       unitType,
-      numberCUnits,
-      numberAUnits,
+      numberUnits,
       shareOfEquity,
       equityMilestones,
     };

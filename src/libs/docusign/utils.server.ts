@@ -502,8 +502,13 @@ export function makeEnvelopeDefinition(
     .map(m => m.user as UserWithAddress);
   const accreditationVerifier = deal.accreditationVerification?.verifier;
 
-  const { amount, numberAUnits, numberCUnits, debtInterestRatePerc } =
+  const { amount, numberUnits, unitType, debtInterestRatePerc } =
     deal.investmentStats;
+
+  // Dynamically calculate values based on unitType
+  const numberAUnits = unitType === 'AUNIT' ? numberUnits : 0;
+  const numberCUnits = unitType === 'CUNIT' ? numberUnits : 0;
+
   const amountSpelledOut = toWords(amount);
   const interestSpelledOut = `${toWords(debtInterestRatePerc ?? 0)} Percent`;
   const investingEntityName = getInvestingEntityName(org, signer);

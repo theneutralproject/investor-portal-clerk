@@ -84,8 +84,7 @@ describe('utils.server', () => {
       );
       expect(result).toEqual({
         unitType: DealUnitType.AUNIT,
-        numberCUnits: 0,
-        numberAUnits: 2,
+        numberUnits: 2,
         shareOfEquity: -200000 / 1000,
         equityMilestones: expect.any(Array),
       });
@@ -103,8 +102,7 @@ describe('utils.server', () => {
       );
       expect(result).toEqual({
         unitType: DealUnitType.CUNIT,
-        numberCUnits: 4,
-        numberAUnits: 0,
+        numberUnits: 4,
         shareOfEquity: -400000 / 500,
         equityMilestones: expect.any(Array),
       });

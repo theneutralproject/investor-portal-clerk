@@ -45,10 +45,9 @@ test.describe('api/deals test', () => {
     const { investmentStats, ...deal } = body as DealWithInvestmentStats;
     expect(response.headers()['content-type']).toBe('application/json');
     expect(investmentStats.amount).toBe(edisonTestDealData.amount);
-    expect(investmentStats.numberAUnits).toBe(
+    expect(investmentStats.numberUnits).toBe(
       edisonTestDealData.amount! / 100000
     );
-    expect(investmentStats.numberCUnits).toBe(0);
     expect(investmentStats.unitType).toBe(DealUnitType.AUNIT);
     expect(deal.dealStage).toBe(edisonTestDealData.dealStage);
   });
@@ -69,8 +68,7 @@ test.describe('api/deals test', () => {
     expect(response.status()).toBe(201);
     expect(response.headers()['content-type']).toBe('application/json');
     expect(body.investmentStats.amount).toBe(secondDealData.amount);
-    expect(body.investmentStats.numberAUnits).toBe(0);
-    expect(body.investmentStats.numberCUnits).toBe(
+    expect(body.investmentStats.numberUnits).toBe(
       secondDealData.amount! / 100000
     );
   });
@@ -99,8 +97,7 @@ test.describe('api/deals test', () => {
     expect(response.status()).toBe(200);
     expect(response.headers()['content-type']).toBe('application/json');
     expect(body.investmentStats.amount).toBe(1000000);
-    expect(body.investmentStats.numberAUnits).toBe(0);
-    expect(body.investmentStats.numberCUnits).toBe(10);
+    expect(body.investmentStats.numberUnits).toBe(10);
     expect(body.investmentStats.unitType).toBe(DealUnitType.CUNIT);
     expect(body.dealStage).toBe(1);
   });

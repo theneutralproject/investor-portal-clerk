@@ -106,14 +106,10 @@ components:
           $ref: '#/components/schemas/DealFinancingType'
         unitType:
           $ref: '#/components/schemas/DealUnitType'
-        numberAUnits:
+        numberUnits:
           type: number
           minimum: 0
           example: 10
-        numberCUnits:
-          type: number
-          minimum: 0
-          example: 5
 
     DealFinancingType:
       type: string
