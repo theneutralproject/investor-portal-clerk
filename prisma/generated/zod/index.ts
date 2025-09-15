@@ -174,7 +174,7 @@ export const DealUnitTypeSchema = z.enum(['AUNIT','CUNIT','BUNIT','ANOTE','BNOTE
 
 export type DealUnitTypeType = `${z.infer<typeof DealUnitTypeSchema>}`
 
-export const DealStatusSchema = z.enum(['ACTIVE','PENDING','MATURED','LOST']);
+export const DealStatusSchema = z.enum(['ACTIVE','PENDING','MATURED','LOST','COMPLETED']);
 
 export type DealStatusType = `${z.infer<typeof DealStatusSchema>}`
 
