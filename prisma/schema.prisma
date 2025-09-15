@@ -566,6 +566,7 @@ enum DealStatus {
   PENDING
   MATURED
   LOST
+  COMPLETED
 }
 
 enum VerificationBasis {
