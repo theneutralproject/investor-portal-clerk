@@ -3,7 +3,6 @@ import { CardContent, Typography } from '@mui/material';
 import type { PortfolioReturnsResponse } from '@/libs/returns/schema';
 import DashboardCurrentInvestments from './DashboardCurrentInvestments';
 import { StyledCard } from './DashboardComponents';
-import DashboardSummary from './DashboardSummary';
 
 interface DashboardDealsProps {
   loggedIn: boolean;
@@ -40,12 +39,11 @@ const DashboardDeals: React.FC<DashboardDealsProps> = ({ data }) => {
   return (
     <>
       {/* Summary Table */}
-      <DashboardSummary data={data} />
       <DashboardCurrentInvestments data={data} />
 
       <Typography
         variant="subtitle2"
-        sx={{ mt: 2, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
+        sx={{ mt: 4, fontSize: '0.75rem', color: 'rgba(0, 0, 0, 0.5)' }}
       >
         The financial projections on the Neutral Investor Portal are estimates
         based on current assumptions and are updated monthly for transparency.
