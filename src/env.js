@@ -61,6 +61,9 @@ export const env = createEnv({
     DEBT_INTEREST_PERIOD_OVERRIDES: z.string().optional(),
     WEBFLOW_ACCESS_TOKEN: z.string(),
     WEBFLOW_RESOURCE_CENTER_COLLECTION: z.string(),
+    RAMP_CLIENT_ID: z.string(),
+    RAMP_CLIENT_SECRET: z.string(),
+    RAMP_TOKEN_SECRET: z.string(),
   },
 
   /**
@@ -156,6 +159,9 @@ export const env = createEnv({
     WEBFLOW_ACCESS_TOKEN: process.env.WEBFLOW_ACCESS_TOKEN,
     WEBFLOW_RESOURCE_CENTER_COLLECTION:
       process.env.WEBFLOW_RESOURCE_CENTER_COLLECTION,
+    RAMP_CLIENT_ID: process.env.RAMP_CLIENT_ID,
+    RAMP_CLIENT_SECRET: process.env.RAMP_CLIENT_SECRET,
+    RAMP_TOKEN_SECRET: process.env.RAMP_TOKEN_SECRET,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
