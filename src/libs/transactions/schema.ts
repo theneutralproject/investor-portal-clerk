@@ -1,3 +1,5 @@
+import { ReturnsDealStats } from '../returns/schema';
+
 /** Shared primitives */
 export type ISODateString = string; // e.g. "2025-07-14T00:00:00+00:00"
 
@@ -163,6 +165,7 @@ export interface Bill {
   payment_date: ISODateString | null;
   status: RampBillStatus;
   approvalStatus: RampApprovalStatus;
+  financingType: 'equity' | 'debt';
 }
 
 export type RampTokenClaims = {
@@ -170,3 +173,28 @@ export type RampTokenClaims = {
   token: string;
   sub?: string;
 };
+
+export type DealStatsPosition = Omit<ReturnsDealStats, 'project'>;
+
+export type PositionsByProject = {
+  [key: number]: { equity: DealStatsPosition[]; debt: DealStatsPosition[] };
+};
+
+type BillPayment = Omit<Bill, 'project'>;
+
+type ProjectFinanceBreakdown = {
+  project: { id: number; name: string };
+  debt: {
+    payments: BillPayment[];
+    positions: DealStatsPosition[];
+  };
+  equity: {
+    payments: BillPayment[];
+    positions: DealStatsPosition[];
+  };
+};
+
+export type ProjectFinanceBreakdownByProjectId = Record<
+  number,
+  ProjectFinanceBreakdown
+>;

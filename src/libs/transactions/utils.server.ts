@@ -23,9 +23,11 @@ export const mapRampBill = (bill: RampBill): Bill => {
       name: project?.name || '',
     },
     status: bill.status,
+    financingType: 'debt', // TODO: Determine when a ramp is equity, for now all should be 'debt'
   };
 };
 
-export const mapRampBills = (bills: RampBill[]) => bills.map(mapRampBill);
+export const mapRampBills = (bills: RampBill[]): Bill[] =>
+  bills.map(mapRampBill);
 
 export const RAMP_TOKEN_COOKIE = 'x-ramp-token';

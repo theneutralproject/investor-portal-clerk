@@ -83,7 +83,7 @@ export async function GET(request: NextRequest) {
 
     const bills = mapRampBills(billResponse.data.data);
 
-    return jsonResponse(bills, 200);
+    return jsonResponse({ data: bills }, 200);
   } catch (err: any) {
     return errorResponse(
       'An error occurred while fetching transaction history',

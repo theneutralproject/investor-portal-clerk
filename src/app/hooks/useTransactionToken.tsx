@@ -2,7 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-export function useTransactionToken(loadRequest = false) {
+export function useTransactionToken({ enabled = false }) {
   return useQuery<{ data: { token: string } }, Error>({
     queryKey: ['transactions', 'token'],
     queryFn: async () => {
@@ -16,6 +16,6 @@ export function useTransactionToken(loadRequest = false) {
     retry: 2,
     staleTime: 60 * 1000,
     gcTime: 5 * 60 * 1000,
-    enabled: loadRequest,
+    enabled,
   });
 }
