@@ -26,28 +26,33 @@ export const groupDealStatsByProjectAndFinanceType = (
   }, {} as PositionsByProject);
 
 export const buildProjectFinanceBreakdown = (
-  dealsPositions: PositionsByProject,
+  dealStats: ReturnsDealStats[],
   bills: Bill[]
 ) =>
-  bills.reduce((acc, bill) => {
-    const { project, ...payment } = bill;
+  dealStats.reduce((acc, stat) => {
+    const { project, ...dealStat } = stat;
     const key = project.id;
+    const financingType = stat.financingType;
 
     if (!acc[key]) {
       acc[key] = {
         project: project,
         debt: {
           payments: [],
-          positions: dealsPositions[key]?.debt || [],
+          positions: [],
         },
         equity: {
           payments: [],
-          positions: dealsPositions[key]?.equity || [],
+          positions: [],
         },
       };
     }
 
-    acc[key][payment.financingType].payments.push(payment);
+    acc[key][financingType].positions.push(dealStat);
+    const payments = bills.filter(
+      bill => bill.financingType === financingType && bill.project.id === key
+    );
+    acc[key][financingType].payments = payments;
 
     return acc;
   }, {} as ProjectFinanceBreakdownByProjectId);

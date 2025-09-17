@@ -1,5 +1,8 @@
 import { ReturnsDealStats } from '@/libs/returns/schema';
-import { ProjectFinanceBreakdownByProjectId } from '@/libs/transactions/schema';
+import {
+  FinanceBreakdown,
+  ProjectFinanceBreakdownByProjectId,
+} from '@/libs/transactions/schema';
 import React from 'react';
 import {
   FinanceTypeChip,
@@ -32,11 +35,18 @@ const InvestmentCardItem = React.memo(function InvestmentCardItem({
   deal,
   isLoading,
   error,
+  transactionHistoryByProject,
+  onViewTransactionHistory,
 }: {
   deal: CardDealStats;
   isLoading: boolean;
   transactionHistoryByProject: ProjectFinanceBreakdownByProjectId; // tailor the type
   error?: Error | null;
+  onViewTransactionHistory: (
+    financingType: 'equity' | 'debt',
+    data: FinanceBreakdown,
+    project: { id: number; name: string }
+  ) => void;
 }) {
   const cardImage =
     deal.project.pictures?.find(pic => pic.type === 'CARD') ||
@@ -45,6 +55,15 @@ const InvestmentCardItem = React.memo(function InvestmentCardItem({
 
   const numberOfDealsText =
     deal.financingType === 'debt' ? 'Deals' : 'Positions';
+
+  const handleViewClick = () => {
+    if (!deal || !deal.project || !deal.financingType) return;
+    const data =
+      transactionHistoryByProject[deal.project.id]?.[deal.financingType];
+    if (!data) return;
+
+    onViewTransactionHistory(deal.financingType, data, deal.project);
+  };
 
   return (
     <InvestmentCard>
@@ -140,6 +159,7 @@ const InvestmentCardItem = React.memo(function InvestmentCardItem({
               sx={{ height: '30px', mt: 1 }}
               loading={isLoading}
               data-testid={`${DASHBOARD_PROJECTS_TEST_ID}-current-investment-card-item-btn`}
+              onClick={handleViewClick}
             >
               VIEW
             </Button>

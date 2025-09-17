@@ -16,14 +16,14 @@ export const mapRampBill = (bill: RampBill): Bill => {
     currency: bill.amount?.currency_code,
     approvalStatus: bill.approval_status,
     memo: bill.memo || '',
-    payment_date: bill.payment?.payment_date,
+    paymentDate: bill.created_at || bill.due_at || bill.payment?.effective_date,
     paymentMethod: bill.payment?.payment_method,
     project: {
       id: parseInt(project?.external_id || '', 0),
       name: project?.name || '',
     },
     status: bill.status,
-    financingType: 'debt', // TODO: Determine when a ramp is equity, for now all should be 'debt'
+    financingType: 'debt', // TODO: Determine when a bill is a 'equity' financingType, for now all should be 'debt'
   };
 };
 

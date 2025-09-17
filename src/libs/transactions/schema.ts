@@ -91,65 +91,37 @@ export type RampPayment = {
   effective_date: ISODateString;
 };
 
-export type RampBillStatus = 'PAID' | 'PENDING' | 'APPROVED' | (string & {});
+export type RampBillStatus = 'PAID' | 'PENDING' | 'APPROVED' | string;
 
-/** Top-level Bill object (as returned by Ramp Bill Pay) */
 export type RampBill = {
-  /** Statuses seen in practice; keep open for future values */
   status: RampBillStatus;
   vendor_memo: string | null;
-
   line_items: RampLineItem[];
-
   created_at: ISODateString;
-  deep_link_url: string; // Ramp UI URL for the bill
-  approval_status: RampApprovalStatus; // leave open (e.g., "APPROVED", "PENDING")
-  sync_status: string; // e.g., "BILL_AND_PAYMENT_SYNCED"
-
+  deep_link_url: string;
+  approval_status: RampApprovalStatus;
+  sync_status: string;
   vendor: RampVendor;
-
-  /** Unknown/empty in your sample—leave as unknown[] until schema known */
   inventory_line_items: unknown[];
   invoice_urls: string[];
-
   invoice_number: string;
   paid_at: ISODateString | null;
   memo: string | null;
-
   accounting_date: ISODateString;
-
   payment: RampPayment;
-
   posting_date: ISODateString | null;
-
-  /**
-   * Ramp sometimes returns numeric things as strings (e.g., "1.0").
-   * Keep as string to avoid lossy parsing; coerce to number where needed.
-   */
   fx_conversion_rate: string;
-
   issued_at: ISODateString;
-
-  /**
-   * Root-level accounting field selections (may duplicate/augment line item-level)
-   * — important for cases where the Project only appears at root.
-   */
   accounting_field_selections: RampAccountingFieldSelection[];
-
   entity_id: string; // UUID for entity/business
   vendor_contact_id: string; // UUID
-
   amount: RampCurrencyAmount;
-
   archived_at: ISODateString | null;
   due_at: ISODateString;
-
   bill_owner: RampBillOwner;
-
   purchase_order_id: string | null;
-
   id: string; // Bill UUID
-  remote_id: string; // ERP/billing system id
+  remote_id: string;
 };
 
 export interface Bill {
@@ -162,7 +134,7 @@ export interface Bill {
   };
   amount: number;
   currency: string;
-  payment_date: ISODateString | null;
+  paymentDate: ISODateString | null;
   status: RampBillStatus;
   approvalStatus: RampApprovalStatus;
   financingType: 'equity' | 'debt';
@@ -180,18 +152,17 @@ export type PositionsByProject = {
   [key: number]: { equity: DealStatsPosition[]; debt: DealStatsPosition[] };
 };
 
-type BillPayment = Omit<Bill, 'project'>;
+export type BillPayment = Omit<Bill, 'project'>;
 
-type ProjectFinanceBreakdown = {
+export type FinanceBreakdown = {
+  payments: BillPayment[];
+  positions: DealStatsPosition[];
+};
+
+export type ProjectFinanceBreakdown = {
   project: { id: number; name: string };
-  debt: {
-    payments: BillPayment[];
-    positions: DealStatsPosition[];
-  };
-  equity: {
-    payments: BillPayment[];
-    positions: DealStatsPosition[];
-  };
+  debt: FinanceBreakdown;
+  equity: FinanceBreakdown;
 };
 
 export type ProjectFinanceBreakdownByProjectId = Record<

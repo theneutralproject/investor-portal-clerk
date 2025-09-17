@@ -6,23 +6,22 @@ import type {
 } from '@/libs/returns/schema';
 import { useTransactionToken } from '@/app/hooks/useTransactionToken';
 import { useTransactionHistory } from '@/app/hooks/useTransactionHistory';
-import {
-  groupDealStatsByProjectAndFinanceType,
-  buildProjectFinanceBreakdown,
-} from '@/libs/transactions/utils.client';
+import { buildProjectFinanceBreakdown } from '@/libs/transactions/utils.client';
 import InvestmentCardItem from './InvestmentCardItem';
+import TransactionHistoryModal from './Modal/TransactionHistoryModal';
+import { FinanceBreakdown } from '@/libs/transactions/schema';
 
 interface DashboardCurrentInvestmentsProps {
   data: PortfolioReturnsResponse;
 }
 
+type GroupedDeal = ReturnsDealStats & {
+  count: number;
+  interestRates: number[];
+};
+
 const groupDealsByProjectAndFinanceType = (dealStats: ReturnsDealStats[]) => {
-  const groupedDeals: {
-    [key: string]: ReturnsDealStats & {
-      count: number;
-      interestRates: number[];
-    };
-  } = {};
+  const groupedDeals: { [x: string]: GroupedDeal } = {};
 
   dealStats.map(deal => {
     const key = `${deal.project.id}-${deal.financingType}`;
@@ -58,14 +57,15 @@ const DashboardCurrentInvestments: React.FC<
   DashboardCurrentInvestmentsProps
 > = ({ data }) => {
   const [showAllDeals, setShowAllDeals] = useState(false);
+  const [selectedInvestment, setSelectedInvestment] = useState<{
+    financingType: 'equity' | 'debt';
+    data: FinanceBreakdown;
+    project: { id: number; name: string };
+  } | null>();
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
   const deals = useMemo(
     () => groupDealsByProjectAndFinanceType(data.dealStats),
-    [data.dealStats]
-  );
-
-  const dealsPositions = useMemo(
-    () => groupDealStatsByProjectAndFinanceType(data.dealStats),
     [data.dealStats]
   );
 
@@ -90,13 +90,31 @@ const DashboardCurrentInvestments: React.FC<
 
   const transactionHistoryByProject = useMemo(() => {
     return transactionHistory
-      ? buildProjectFinanceBreakdown(dealsPositions, transactionHistory.data)
+      ? buildProjectFinanceBreakdown(data.dealStats, transactionHistory.data)
       : {};
-  }, [transactionHistory, dealsPositions]);
+  }, [transactionHistory, data.dealStats]);
 
   const isLoadingTransactions =
     isLoadingTransactionToken || isLoadingTransactionHistory;
   const errorTransactions = tokenError || historyError;
+
+  const handleViewTransactionHistoryClick = (
+    financingType: 'equity' | 'debt',
+    data: FinanceBreakdown,
+    project: { id: number; name: string }
+  ) => {
+    setSelectedInvestment({
+      financingType,
+      data,
+      project,
+    });
+    setOpenTransactionModal(true);
+  };
+
+  const handleCloseTransactionModal = () => {
+    setOpenTransactionModal(false);
+    setSelectedInvestment(null);
+  };
 
   return (
     <Box sx={{ mt: 3 }}>
@@ -118,6 +136,7 @@ const DashboardCurrentInvestments: React.FC<
               isLoading={isLoadingTransactions}
               error={errorTransactions}
               transactionHistoryByProject={transactionHistoryByProject}
+              onViewTransactionHistory={handleViewTransactionHistoryClick}
             />
           </Grid>
         ))}
@@ -132,6 +151,15 @@ const DashboardCurrentInvestments: React.FC<
             {showAllDeals ? 'Show Less' : 'View All Investments'}
           </Button>
         </Box>
+      )}
+      {selectedInvestment && (
+        <TransactionHistoryModal
+          data={selectedInvestment?.data}
+          financingType={selectedInvestment?.financingType}
+          open={openTransactionModal}
+          onClose={handleCloseTransactionModal}
+          project={selectedInvestment.project}
+        />
       )}
     </Box>
   );
