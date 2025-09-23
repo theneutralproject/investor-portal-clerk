@@ -1,47 +1,27 @@
-import React, { useState } from 'react';
-import {
-  Box,
-  CardContent,
-  CardMedia,
-  Typography,
-  Grid,
-  Button,
-} from '@mui/material';
+import React, { useMemo, useState } from 'react';
+import { Box, Typography, Button, Grid2 as Grid } from '@mui/material';
 import type {
   PortfolioReturnsResponse,
   ReturnsDealStats,
 } from '@/libs/returns/schema';
-import {
-  InvestmentCard,
-  FinanceTypeChip,
-  SummaryTableRow,
-  SummaryTableCell,
-  formatCurrency,
-  formatPercentage,
-} from './DashboardComponents';
+import { useTransactionToken } from '@/app/hooks/useTransactionToken';
+import { useTransactionHistory } from '@/app/hooks/useTransactionHistory';
+import { buildProjectFinanceBreakdown } from '@/libs/transactions/utils.client';
+import InvestmentCardItem from './InvestmentCardItem';
+import TransactionHistoryModal from './Modal/TransactionHistoryModal';
+import { FinanceBreakdown } from '@/libs/transactions/schema';
 
 interface DashboardCurrentInvestmentsProps {
   data: PortfolioReturnsResponse;
 }
 
-type CardDealStats = ReturnsDealStats & {
+type GroupedDeal = ReturnsDealStats & {
   count: number;
   interestRates: number[];
 };
 
-const getInterestRateRange = (interestRates: number[]) => {
-  const min = Math.min(...interestRates);
-  const max = Math.max(...interestRates);
-  return min === max ? `${max}%` : `${min}% - ${max}%`;
-};
-
 const groupDealsByProjectAndFinanceType = (dealStats: ReturnsDealStats[]) => {
-  const groupedDeals: {
-    [key: string]: ReturnsDealStats & {
-      count: number;
-      interestRates: number[];
-    };
-  } = {};
+  const groupedDeals: { [x: string]: GroupedDeal } = {};
 
   dealStats.map(deal => {
     const key = `${deal.project.id}-${deal.financingType}`;
@@ -71,15 +51,70 @@ const groupDealsByProjectAndFinanceType = (dealStats: ReturnsDealStats[]) => {
   return Object.values(groupedDeals);
 };
 
+const CARDS_PER_ROW = 3;
+
 const DashboardCurrentInvestments: React.FC<
   DashboardCurrentInvestmentsProps
 > = ({ data }) => {
   const [showAllDeals, setShowAllDeals] = useState(false);
+  const [selectedInvestment, setSelectedInvestment] = useState<{
+    financingType: 'equity' | 'debt';
+    data: FinanceBreakdown;
+    project: { id: number; name: string };
+  } | null>();
+  const [openTransactionModal, setOpenTransactionModal] = useState(false);
 
-  const cardsPerRow = 3;
-  const deals = groupDealsByProjectAndFinanceType(data.dealStats);
-  const displayedDeals = showAllDeals ? deals : deals.slice(0, cardsPerRow);
-  const hasMoreDeals = deals.length > cardsPerRow;
+  const deals = useMemo(
+    () => groupDealsByProjectAndFinanceType(data.dealStats),
+    [data.dealStats]
+  );
+
+  const hasMoreDeals = deals.length > CARDS_PER_ROW;
+
+  const displayedDeals = useMemo(
+    () => (showAllDeals ? deals : deals.slice(0, CARDS_PER_ROW)),
+    [showAllDeals, deals]
+  );
+
+  const {
+    isLoading: isLoadingTransactionToken,
+    data: transactionToken,
+    error: tokenError,
+  } = useTransactionToken({ enabled: data?.dealStats?.length > 0 });
+
+  const {
+    isLoading: isLoadingTransactionHistory,
+    data: transactionHistory,
+    error: historyError,
+  } = useTransactionHistory({ enabled: Boolean(transactionToken) });
+
+  const transactionHistoryByProject = useMemo(() => {
+    return transactionHistory
+      ? buildProjectFinanceBreakdown(data.dealStats, transactionHistory.data)
+      : {};
+  }, [transactionHistory, data.dealStats]);
+
+  const isLoadingTransactions =
+    isLoadingTransactionToken || isLoadingTransactionHistory;
+  const errorTransactions = tokenError || historyError;
+
+  const handleViewTransactionHistoryClick = (
+    financingType: 'equity' | 'debt',
+    data: FinanceBreakdown,
+    project: { id: number; name: string }
+  ) => {
+    setSelectedInvestment({
+      financingType,
+      data,
+      project,
+    });
+    setOpenTransactionModal(true);
+  };
+
+  const handleCloseTransactionModal = () => {
+    setOpenTransactionModal(false);
+    setSelectedInvestment(null);
+  };
 
   return (
     <Box sx={{ mt: 3 }}>
@@ -93,109 +128,18 @@ const DashboardCurrentInvestments: React.FC<
       >
         Current Investments ({data.dealStats.length})
       </Typography>
-
       <Grid container spacing={3}>
-        {displayedDeals.map((deal: CardDealStats) => {
-          // Find card image
-          const cardImage =
-            deal.project.pictures?.find(pic => pic.type === 'CARD') ||
-            deal.project.pictures?.find(pic => pic.type === 'HEADER') ||
-            (deal.project.pictures && deal.project.pictures.length > 0
-              ? deal.project.pictures[0]
-              : null);
-          const numberOfDealsText =
-            deal.financingType === 'debt' ? 'Deals' : 'Positions';
-
-          return (
-            <Grid item xs={12} sm={4} key={deal.dealId}>
-              <InvestmentCard>
-                <Box sx={{ p: 2, pb: 0 }}>
-                  <FinanceTypeChip
-                    label={deal.financingType.toUpperCase()}
-                    financetype={deal.financingType}
-                    size="small"
-                  />
-                  <Typography variant="h6" component="h2" fontWeight="bold">
-                    {deal.project.name}
-                  </Typography>
-                </Box>
-
-                {cardImage && (
-                  <CardMedia
-                    component="img"
-                    height="160"
-                    image={cardImage.url}
-                    alt={deal.project.name}
-                  />
-                )}
-
-                <CardContent>
-                  <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <SummaryTableRow className="deal-card">
-                      <SummaryTableCell className="left">
-                        Principal Invested:
-                      </SummaryTableCell>
-                      <SummaryTableCell className="right">
-                        {formatCurrency(deal.committedAmount)}
-                      </SummaryTableCell>
-                    </SummaryTableRow>
-
-                    {deal.financingType === 'debt' ? (
-                      <>
-                        <SummaryTableRow className="deal-card">
-                          <SummaryTableCell className="left">
-                            Interest Rate:
-                          </SummaryTableCell>
-                          <SummaryTableCell className="right">
-                            {getInterestRateRange(deal.interestRates)}
-                          </SummaryTableCell>
-                        </SummaryTableRow>
-                        <SummaryTableRow className="deal-card">
-                          <SummaryTableCell className="left">
-                            Interest Earned to Date:
-                          </SummaryTableCell>
-                          <SummaryTableCell className="right">
-                            {formatCurrency(deal.distributionsToDate)}
-                          </SummaryTableCell>
-                        </SummaryTableRow>
-                      </>
-                    ) : (
-                      <>
-                        <SummaryTableRow className="deal-card">
-                          <SummaryTableCell className="left">
-                            Accrued Preferred Return:
-                          </SummaryTableCell>
-                          <SummaryTableCell className="right">
-                            {formatPercentage(
-                              deal.equityAccruedPreferredReturnPercentage
-                            )}
-                          </SummaryTableCell>
-                        </SummaryTableRow>
-                        <SummaryTableRow className="deal-card">
-                          <SummaryTableCell className="left">
-                            Accrued to Date:
-                          </SummaryTableCell>
-                          <SummaryTableCell className="right">
-                            {formatCurrency(deal.equityAccruedPreferredReturn)}
-                          </SummaryTableCell>
-                        </SummaryTableRow>
-                      </>
-                    )}
-
-                    <SummaryTableRow className="deal-card">
-                      <SummaryTableCell className="left">
-                        No. of {numberOfDealsText}:
-                      </SummaryTableCell>
-                      <SummaryTableCell className="right">
-                        {deal.count}
-                      </SummaryTableCell>
-                    </SummaryTableRow>
-                  </Box>
-                </CardContent>
-              </InvestmentCard>
-            </Grid>
-          );
-        })}
+        {displayedDeals.map(deal => (
+          <Grid size={{ xs: 12, sm: 4 }} key={deal.dealId}>
+            <InvestmentCardItem
+              deal={deal}
+              isLoading={isLoadingTransactions}
+              error={errorTransactions}
+              transactionHistoryByProject={transactionHistoryByProject}
+              onViewTransactionHistory={handleViewTransactionHistoryClick}
+            />
+          </Grid>
+        ))}
       </Grid>
 
       {hasMoreDeals && (
@@ -207,6 +151,15 @@ const DashboardCurrentInvestments: React.FC<
             {showAllDeals ? 'Show Less' : 'View All Investments'}
           </Button>
         </Box>
+      )}
+      {selectedInvestment && (
+        <TransactionHistoryModal
+          data={selectedInvestment?.data}
+          financingType={selectedInvestment?.financingType}
+          open={openTransactionModal}
+          onClose={handleCloseTransactionModal}
+          project={selectedInvestment.project}
+        />
       )}
     </Box>
   );
