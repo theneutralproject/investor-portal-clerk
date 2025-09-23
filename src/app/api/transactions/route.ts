@@ -31,6 +31,10 @@ export async function GET(request: NextRequest) {
 
   const user = await prisma.user.findUnique({
     where: { clerkId: clerkUserId },
+    select: {
+      id: true,
+      rampVendorId: true,
+    },
   });
 
   if (!user) {
@@ -44,6 +48,15 @@ export async function GET(request: NextRequest) {
         },
       }
     );
+  }
+
+  if (!user.rampVendorId) {
+    return errorResponse(`User has no ramp account associated`, 400, {
+      request,
+      extra: {
+        disableSentry: true,
+      },
+    });
   }
 
   const raw = (await cookies()).get(RAMP_TOKEN_COOKIE)?.value;
@@ -91,7 +104,7 @@ export async function GET(request: NextRequest) {
         'Content-Type': 'application/json',
       },
       params: {
-        vendor_id: process.env.RAMP_VENDOR_ID,
+        vendor_id: user.rampVendorId,
         page_size: 100,
       },
     });
