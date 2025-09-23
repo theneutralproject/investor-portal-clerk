@@ -50,11 +50,7 @@ const mdY = (iso: Date | string | null) =>
     : '';
 
 function StatusChip({ status }: { status: RampBillStatus }) {
-  const color = ['APPROVED', 'PAID'].includes(status)
-    ? 'success'
-    : ['PENDING', 'PAID'].includes(status)
-      ? 'warning'
-      : 'error';
+  const color = ['APPROVED', 'PAID'].includes(status) ? 'success' : 'warning';
   return (
     <Chip
       label={status}
@@ -202,7 +198,6 @@ const PositionsTable = ({
   }
   const returnRateColumnName =
     financingType === 'debt' ? 'Interest Rate' : 'Preferred Return Rate';
-  const termColumnName = financingType === 'debt' ? 'Term' : 'IRR';
 
   return (
     <TableContainer component={Paper} variant="outlined" sx={{ mb: 3 }}>
@@ -225,11 +220,6 @@ const PositionsTable = ({
                 {returnRateColumnName}
               </Typography>
             </TableCell>
-            <TableCell align="right">
-              <Typography variant="caption" fontWeight={700}>
-                {termColumnName}
-              </Typography>
-            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -249,7 +239,6 @@ const PositionsTable = ({
                   position.equityAccruedPreferredReturnPercentage}
                 %
               </TableCell>
-              <TableCell align="right">{48}mo</TableCell>
             </TableRow>
           ))}
         </TableBody>

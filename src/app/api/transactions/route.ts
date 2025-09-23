@@ -12,23 +12,38 @@ import {
   mapRampBills,
   RAMP_TOKEN_COOKIE,
 } from '@/libs/transactions/utils.server';
+import prisma from '@/libs/prisma.server';
 
 const RAMP_TOKEN_SECRET = process.env.RAMP_TOKEN_SECRET!;
 
 export async function GET(request: NextRequest) {
-  const { userId: clerkUserId, sessionClaims } = getAuth(request);
+  const { userId: clerkUserId } = getAuth(request);
   if (!clerkUserId) {
     Logger.warn('User not authenticated');
     return errorResponse('User not authenticated', 401);
   }
-
-  const userId = sessionClaims?.metadata?.investorPortalId;
-
-  if (!userId) {
+  if (!clerkUserId) {
     return errorResponse('User not found', 404, {
       request,
       extra: { method: 'sessionClaims?.metadata?.investorPortalId' },
     });
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { clerkId: clerkUserId },
+  });
+
+  if (!user) {
+    return errorResponse(
+      `User record with clerkid ${clerkUserId} not found in prisma (POST)`,
+      404,
+      {
+        request,
+        extra: {
+          disableSentry: true,
+        },
+      }
+    );
   }
 
   const raw = (await cookies()).get(RAMP_TOKEN_COOKIE)?.value;
