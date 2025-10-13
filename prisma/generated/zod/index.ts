@@ -190,7 +190,7 @@ export const PaymentMethodSchema = z.enum(['ACH','WIRE','CHECK']);
 
 export type PaymentMethodType = `${z.infer<typeof PaymentMethodSchema>}`
 
-export const DealTransactionTypeSchema = z.enum(['NOTE_MATURITY','NOTE_COMPLETION','NOTE_INTEREST_PAYMENT','NOTE_PRINCIPAL_PAYMENT','NOTE_EXTENSION','NOTE_CONVERSION','EQUITY_ASSIGNMENT','EQUITY_DISTRIBUTION','EQUITY_EXIT','EQUITY_PARTIAL_PAYMENT']);
+export const DealTransactionTypeSchema = z.enum(['NOTE_MATURITY','NOTE_COMPLETION','NOTE_INTEREST_PAYMENT','NOTE_PRINCIPAL_PAYMENT','NOTE_EXTENSION','NOTE_CONVERSION','EQUITY_ASSIGNMENT','EQUITY_DISTRIBUTION','EQUITY_EXIT','EQUITY_PARTIAL_PAYMENT','EQUITY_CAPITAL_CALL']);
 
 export type DealTransactionTypeType = `${z.infer<typeof DealTransactionTypeSchema>}`
 
