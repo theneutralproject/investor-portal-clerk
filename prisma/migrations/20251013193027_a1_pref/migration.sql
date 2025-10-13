@@ -1,0 +1,2 @@
+-- AlterEnum
+ALTER TYPE "DealUnitType" ADD VALUE 'A1UNITPREFERRED';

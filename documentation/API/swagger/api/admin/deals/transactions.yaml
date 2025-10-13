@@ -284,4 +284,5 @@ components:
         - EQUITY_DISTRIBUTION
         - EQUITY_EXIT
         - EQUITY_PARTIAL_PAYMENT
+        - EQUITY_CAPITAL_CALL
       example: NOTE_INTEREST_PAYMENT
